@@ -60,7 +60,8 @@ impl<'a> serde::Deserialize<'a> for OpaqueExtrinsic {
         D: serde::Deserializer<'a>,
     {
         let r = substrate_primitives::bytes::deserialize(de)?;
-        Decode::decode(&mut &r[..]).ok_or(DeError::custom("Invalid value passed into decode"))
+        Decode::decode(&mut &r[..])
+            .ok_or(DeError::custom("Invalid value passed into decode"))
     }
 }
 
@@ -88,7 +89,8 @@ pub struct Rpc<T: srml_system::Trait> {
         (),
         SignedBlock,
     >,
-    author: AuthorClient<<T as srml_system::Trait>::Hash, <T as srml_system::Trait>::Hash>,
+    author:
+        AuthorClient<<T as srml_system::Trait>::Hash, <T as srml_system::Trait>::Hash>,
 }
 
 /// Allows connecting to all inner interfaces on the same RpcChannel
@@ -124,7 +126,8 @@ impl<T: srml_system::Trait> Rpc<T> {
     /// Fetch the genesis hash
     fn fetch_genesis_hash(
         &self,
-    ) -> impl Future<Item = Option<<T as srml_system::Trait>::Hash>, Error = RpcError> {
+    ) -> impl Future<Item = Option<<T as srml_system::Trait>::Hash>, Error = RpcError>
+    {
         let block_zero = <T as srml_system::Trait>::BlockNumber::min_value();
         self.chain.block_hash(Some(NumberOrHex::Number(block_zero)))
     }
@@ -182,23 +185,22 @@ impl<T: srml_system::Trait> Rpc<T> {
         call: Call,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
-		P: Pair,
+        P: Pair,
         <P as Pair>::Public: Into<<T as srml_system::Trait>::AccountId>,
     {
         let account_nonce = self
             .fetch_nonce(&signer.public().into())
             .map_err(Into::into);
-        let genesis_hash = self
-            .fetch_genesis_hash()
-            .map_err(Into::into)
-            .and_then(|genesis_hash| {
-                future::result(genesis_hash.ok_or("Genesis hash not found".into()))
-            });
+        let genesis_hash =
+            self.fetch_genesis_hash()
+                .map_err(Into::into)
+                .and_then(|genesis_hash| {
+                    future::result(genesis_hash.ok_or("Genesis hash not found".into()))
+                });
         let events = self.subscribe_events().map_err(Into::into);
 
-        account_nonce
-            .join3(genesis_hash, events)
-            .and_then(move |(index, genesis_hash, events)| {
+        account_nonce.join3(genesis_hash, events).and_then(
+            move |(index, genesis_hash, events)| {
                 let extrinsic =
                     create_and_sign_extrinsic::<T, P>(index, call, genesis_hash, &signer);
                 let ext_hash = <T as srml_system::Trait>::Hashing::hash_of(&extrinsic);
@@ -227,7 +229,8 @@ impl<T: srml_system::Trait> Rpc<T> {
                         );
                         wait_for_block_events::<T>(ext_hash, &sb, bh, events)
                     })
-            })
+            },
+        )
     }
 }
 
