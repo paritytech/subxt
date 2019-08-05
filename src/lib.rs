@@ -20,7 +20,7 @@ use jsonrpc_core_client::transports::ws;
 
 use node_runtime::{Call, Runtime};
 
-use substrate_primitives::sr25519::Pair;
+use substrate_primitives::Pair;
 use url::Url;
 
 mod error;
@@ -31,18 +31,23 @@ type Event = <Runtime as srml_system::Trait>::Event;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess {
-    pub block: Hash,
-    pub extrinsic: Hash,
-    pub events: Vec<Event>,
+pub struct ExtrinsicSuccess<T: srml_system::Trait> {
+    pub block: <T as srml_system::Trait>::Hash,
+    pub extrinsic: <T as srml_system::Trait>::Hash,
+    pub events: Vec<<T as srml_system::Trait>::Event>,
 }
 
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit(url: &Url, signer: Pair, call: Call) -> Result<ExtrinsicSuccess> {
+pub fn submit<T, P>(url: &Url, signer: P, call: Call) -> Result<ExtrinsicSuccess<T>>
+where
+    T: srml_system::Trait,
+    P: Pair,
+    <P as Pair>::Public: Into<<T as srml_system::Trait>::AccountId>,
+{
     let submit = ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc| rpc.create_and_submit_extrinsic(signer, call));
+        .and_then(|rpc: rpc::Rpc<T>| rpc.create_and_submit_extrinsic(signer, call));
 
     let mut rt = tokio::runtime::Runtime::new()?;
     rt.block_on(submit)
