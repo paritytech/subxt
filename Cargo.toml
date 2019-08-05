@@ -1,0 +1,33 @@
+[package]
+name = "substrate-subxt"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2018"
+
+license = "GPL-3.0"
+readme = "README.md"
+
+description = "Submit extrinsics (transactions) to a substrate node via RPC"
+keywords = ["parity", "substrate", "blockchain"]
+
+include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
+
+[dependencies]
+derive_more = "0.14.0"
+env_logger = "0.6"
+log = "0.4"
+futures = "0.1.28"
+jsonrpc-core-client = { version = "12.1.0", features = ["ws"] }
+node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime", features = ["std"] }
+parity-codec = { version = "4.1", default-features = false, features = ["derive", "full"] }
+runtime_support = { git = "https://github.com/paritytech/substrate/", package = "srml-support" }
+runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
+serde = { version = "1.0", features = ["derive"] }
+srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances", default-features = false }
+srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system", default-features = false }
+substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc" }
+substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
+substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
+transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
+tokio = "0.1.21"
+url = "1.7"
