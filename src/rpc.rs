@@ -21,11 +21,10 @@ use futures::{
 };
 use jsonrpc_core_client::{RpcChannel, RpcError, TypedSubscriptionStream};
 use log;
-use node_runtime::{Call, UncheckedExtrinsic};
 use num_traits::bounds::Bounded;
 use parity_codec::{Decode, Encode};
 
-use runtime_primitives::{generic::Era, traits::Hash as _};
+use runtime_primitives::{generic::{Era, UncheckedExtrinsic}, traits::{Hash as _, SignedExtension}};
 use runtime_support::StorageMap;
 use serde::{self, de::Error as DeError, Deserialize};
 use substrate_primitives::{
@@ -38,6 +37,7 @@ use substrate_rpc::{
     chain::{number::NumberOrHex, ChainClient},
     state::StateClient,
 };
+use srml_indices::Address;
 use transaction_pool::txpool::watcher::Status;
 
 /// Copy of runtime_primitives::OpaqueExtrinsic to allow a local Deserialize impl
@@ -179,14 +179,15 @@ impl<T: srml_system::Trait> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic<P>(
+    pub fn create_and_submit_extrinsic<P, C>(
         self,
         signer: P,
-        call: Call,
+        call: C,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         P: Pair,
-        <P as Pair>::Public: Into<<T as srml_system::Trait>::AccountId>,
+        <P as Pair>::Public: Into<T::AccountId>,
+        C: Encode,
     {
         let account_nonce = self
             .fetch_nonce(&signer.public().into())
@@ -235,15 +236,19 @@ impl<T: srml_system::Trait> Rpc<T> {
 }
 
 /// Creates and signs an Extrinsic for the supplied `Call`
-fn create_and_sign_extrinsic<T, P>(
-    index: <T as srml_system::Trait>::Index,
-    function: Call,
-    genesis_hash: <T as srml_system::Trait>::Hash,
+fn create_and_sign_extrinsic<T, C, P, E, SE>(
+    index: T::Index,
+    function: C,
+    genesis_hash: T::Hash,
     signer: &P,
-) -> UncheckedExtrinsic
+	extra: E,
+) -> UncheckedExtrinsic<Address<T>, C, P::Signature, SE>
 where
     T: srml_system::Trait,
+    C: Encode,
     P: Pair,
+	E: Fn(T::Index, <T as srml_balances::Trait>::Balance) -> SE,
+	SE: SignedExtension,
 {
     log::info!(
         "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -280,10 +285,10 @@ where
 
 /// Waits for events for the block triggered by the extrinsic
 fn wait_for_block_events<T>(
-    ext_hash: <T as srml_system::Trait>::Hash,
+    ext_hash: T::Hash,
     signed_block: &SignedBlock,
-    block_hash: <T as srml_system::Trait>::Hash,
-    events: TypedSubscriptionStream<StorageChangeSet<<T as srml_system::Trait>::Hash>>,
+    block_hash: T::Hash,
+    events: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
 ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
 where
     T: srml_system::Trait,

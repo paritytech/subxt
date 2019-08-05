@@ -18,16 +18,12 @@ use crate::error::Result;
 use futures::future::Future;
 use jsonrpc_core_client::transports::ws;
 
-use node_runtime::{Call, Runtime};
-
+use runtime_primitives::traits::SignedExtension;
 use substrate_primitives::Pair;
 use url::Url;
 
 mod error;
 mod rpc;
-
-type Hash = <Runtime as srml_system::Trait>::Hash;
-type Event = <Runtime as srml_system::Trait>::Event;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
@@ -38,11 +34,14 @@ pub struct ExtrinsicSuccess<T: srml_system::Trait> {
 }
 
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit<T, P>(url: &Url, signer: P, call: Call) -> Result<ExtrinsicSuccess<T>>
+pub fn submit<T, P, C, I, E, SE>(url: &Url, signer: P, call: C, extra: E) -> Result<ExtrinsicSuccess<T>>
 where
-    T: srml_system::Trait,
+    T: srml_system::Trait + srml_balances::Trait,
     P: Pair,
-    <P as Pair>::Public: Into<<T as srml_system::Trait>::AccountId>,
+    <P as Pair>::Public: Into<T::AccountId>,
+    C: parity_codec::Encode,
+    E: Fn(I, <T as srml_balances::Trait>::Balance) -> SE,
+    SE: SignedExtension,
 {
     let submit = ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
