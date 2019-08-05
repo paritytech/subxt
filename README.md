@@ -1,6 +1,6 @@
-# subext 
+# subxt 
 
-A library to submit extrinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
+A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 **IMPORTANT NOTE:** WORK IN PROGRESS! Do not expect this to be working (or supported).
 
