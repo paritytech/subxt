@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::error::{Error, Result};
 use futures::{
     future::{
         self,
@@ -49,7 +50,6 @@ use serde::{
 use substrate_primitives::{
     blake2_256,
     sr25519::Pair,
-    crypto::SecretStringError,
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -66,25 +66,11 @@ use substrate_rpc::{
     },
     state::StateClient,
 };
-use std::io::Error as IoError;
 use transaction_pool::txpool::watcher::Status;
 use url::Url;
 
-#[derive(Debug, derive_more::From)]
-pub enum Error {
-    Io(IoError),
-    Rpc(RpcError),
-    SecretString(SecretStringError),
-    Other(String),
-}
-
-impl From<&str> for Error {
-    fn from(error: &str) -> Self {
-        Error::Other(error.into())
-    }
-}
-
-pub type Result<T> = std::result::Result<T, Error>;
+mod error;
+mod rpc;
 
 type AccountId = <Runtime as srml_system::Trait>::AccountId;
 type BlockNumber = <Runtime as srml_system::Trait>::BlockNumber;
