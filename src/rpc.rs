@@ -14,31 +14,60 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{error::Error, ExtrinsicSuccess};
+use crate::{
+    error::Error,
+    ExtrinsicSuccess,
+};
 use futures::{
-    future::{self, Future, IntoFuture},
+    future::{
+        self,
+        Future,
+        IntoFuture,
+    },
     stream::Stream,
 };
-use jsonrpc_core_client::{RpcChannel, RpcError, TypedSubscriptionStream};
+use jsonrpc_core_client::{
+    RpcChannel,
+    RpcError,
+    TypedSubscriptionStream,
+};
 use log;
 use num_traits::bounds::Bounded;
-use parity_codec::{Codec, Decode, Encode};
+use parity_codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
-    traits::{Hash as _, SignedExtension},
+    traits::{
+        Hash as _,
+        SignedExtension,
+    },
 };
 use runtime_support::StorageMap;
-use serde::{self, de::Error as DeError, Deserialize};
+use serde::{
+    self,
+    de::Error as DeError,
+    Deserialize,
+};
 use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
-    storage::{StorageChangeSet, StorageKey},
-    twox_128, Pair,
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    twox_128,
+    Pair,
 };
 use substrate_rpc::{
     author::AuthorClient,
-    chain::{number::NumberOrHex, ChainClient},
+    chain::{
+        number::NumberOrHex,
+        ChainClient,
+    },
     state::StateClient,
 };
 use transaction_pool::txpool::watcher::Status;
@@ -109,6 +138,25 @@ where
 impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
 where
     T: srml_system::Trait,
+{
+    /// Fetch a storage key
+    pub fn fetch<V: Decode>(
+        &self,
+        key: Vec<u8>,
+    ) -> impl Future<Item = Option<V>, Error = RpcError> {
+        let storage_key = StorageKey(blake2_256(&key).to_vec());
+        self.state
+            .storage(storage_key, None)
+            .map(|data| {
+                data.map(|d| Decode::decode(&mut &d.0[..]).expect("Valid storage key"))
+            })
+            .map_err(Into::into)
+    }
+}
+
+impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
+where
+    T: srml_system::Trait,
     C: Codec + Send,
     P: Pair,
     P::Signature: Codec,
@@ -122,16 +170,8 @@ where
         account: &T::AccountId,
     ) -> impl Future<Item = <T as srml_system::Trait>::Index, Error = RpcError> {
         let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
-        let storage_key = blake2_256(&account_nonce_key).to_vec();
-
-        self.state
-            .storage(StorageKey(storage_key), None)
-            .map(|data| {
-                data.map_or(Default::default(), |d| {
-                    Decode::decode(&mut &d.0[..]).expect("Account nonce is valid Index")
-                })
-            })
-            .map_err(Into::into)
+        self.fetch::<<T as srml_system::Trait>::Index>(account_nonce_key)
+            .map(|value| value.unwrap_or_default())
     }
 
     /// Fetch the genesis hash

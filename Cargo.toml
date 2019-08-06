@@ -14,7 +14,6 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 
 [dependencies]
 derive_more = "0.14.0"
-env_logger = "0.6"
 log = "0.4"
 futures = "0.1.28"
 jsonrpc-core-client = { version = "12.1.0", features = ["ws"] }
@@ -27,10 +26,11 @@ srml-system = { git = "https://github.com/paritytech/substrate/", package = "srm
 substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
 transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
-tokio = "0.1.21"
 url = "1.7"
 
 [dev-dependencies]
+env_logger = "0.6"
 node_runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
 srml_balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
+tokio = "0.1"
