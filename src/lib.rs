@@ -22,6 +22,7 @@ use parity_scale_codec::{
 };
 
 use runtime_primitives::traits::SignedExtension;
+use runtime_support::metadata::RuntimeMetadataPrefixed;
 use substrate_primitives::Pair;
 use url::Url;
 
@@ -91,6 +92,17 @@ pub fn fetch_or_default<T: srml_system::Trait, P, C, E, SE, V: Decode + Default>
     fetch::<T, P, C, E, SE, V>(url, key).map(|value| value.unwrap_or_default())
 }
 
+/// Fetches the metadata from a substrate node.
+pub fn metadata<T: srml_system::Trait, P, C, E, SE>(
+    url: &Url,
+) -> impl Future<Item = RuntimeMetadataPrefixed, Error = error::Error> {
+    ws::connect(url.as_str())
+        .expect("Url is a valid url; qed")
+        .map_err(Into::into)
+        .and_then(|rpc: rpc::Rpc<T, P, C, E, SE>| rpc.fetch_metadata())
+        .map_err(Into::into)
+}
+
 #[cfg(test)]
 pub mod tests {
     use node_runtime::Runtime;
@@ -141,6 +153,15 @@ pub mod tests {
         let key = <srml_balances::FreeBalance<Runtime>>::key_for(&account);
         type Balance = <Runtime as srml_balances::Trait>::Balance;
         let future = super::fetch::<Runtime, (), (), (), (), Balance>(&url, key);
+        run(future).unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn node_runtime_fetch_metadata() {
+        env_logger::try_init().ok();
+        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
+        let future = super::metadata::<Runtime, (), (), (), ()>(&url);
         run(future).unwrap();
     }
 }

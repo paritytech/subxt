@@ -30,7 +30,7 @@ url = "1.7"
 
 [dev-dependencies]
 env_logger = "0.6"
-node_runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
-srml_balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
+node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
+srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
 tokio = "0.1"

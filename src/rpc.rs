@@ -46,7 +46,10 @@ use runtime_primitives::{
         SignedExtension,
     },
 };
-use runtime_support::StorageMap;
+use runtime_support::{
+    metadata::RuntimeMetadataPrefixed,
+    StorageMap,
+};
 use serde::{
     self,
     de::Error as DeError,
@@ -153,6 +156,33 @@ where
             })
             .map_err(Into::into)
     }
+
+    /// Fetch the latest nonce for the given `AccountId`
+    pub fn fetch_nonce(
+        &self,
+        account: &T::AccountId,
+    ) -> impl Future<Item = T::Index, Error = RpcError> {
+        let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
+        self.fetch::<T::Index>(account_nonce_key)
+            .map(|value| value.unwrap_or_default())
+    }
+
+    /// Fetch the genesis hash
+    pub fn fetch_genesis_hash(
+        &self,
+    ) -> impl Future<Item = Option<T::Hash>, Error = RpcError> {
+        let block_zero = T::BlockNumber::min_value();
+        self.chain.block_hash(Some(NumberOrHex::Number(block_zero)))
+    }
+
+    /// Fetch the metadata
+    pub fn fetch_metadata(
+        &self,
+    ) -> impl Future<Item = RuntimeMetadataPrefixed, Error = RpcError> {
+        self.state
+            .metadata(None)
+            .map(|bytes| Decode::decode(&mut &bytes[..]).unwrap())
+    }
 }
 
 impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
@@ -165,24 +195,6 @@ where
     E: Fn(T::Index) -> SE + Send,
     SE: SignedExtension + Encode,
 {
-    /// Fetch the latest nonce for the given `AccountId`
-    fn fetch_nonce(
-        &self,
-        account: &T::AccountId,
-    ) -> impl Future<Item = T::Index, Error = RpcError> {
-        let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
-        self.fetch::<T::Index>(account_nonce_key)
-            .map(|value| value.unwrap_or_default())
-    }
-
-    /// Fetch the genesis hash
-    fn fetch_genesis_hash(
-        &self,
-    ) -> impl Future<Item = Option<T::Hash>, Error = RpcError> {
-        let block_zero = T::BlockNumber::min_value();
-        self.chain.block_hash(Some(NumberOrHex::Number(block_zero)))
-    }
-
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
