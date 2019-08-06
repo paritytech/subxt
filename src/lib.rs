@@ -42,10 +42,10 @@ pub fn submit<T, P, C, I, E, SE>(
     extra: E,
 ) -> Result<ExtrinsicSuccess<T>>
 where
-    T: srml_system::Trait + srml_indices::Trait,
+    T: srml_system::Trait,
     P: Pair,
     P::Signature: Codec,
-    <P as Pair>::Public: Into<T::AccountId>,
+    P::Public: Into<T::AccountId>,
     C: Codec + Send + 'static,
     E: Fn(T::Index) -> SE + Send + 'static,
     SE: SignedExtension + 'static,

@@ -23,9 +23,7 @@ parity-codec = { version = "4.1", default-features = false, features = ["derive"
 runtime_support = { git = "https://github.com/paritytech/substrate/", package = "srml-support" }
 runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
 serde = { version = "1.0", features = ["derive"] }
-srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system" }
-srml-indices = { git = "https://github.com/paritytech/substrate/", package = "srml-indices" }
 substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
