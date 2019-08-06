@@ -17,6 +17,7 @@
 use crate::error::Result;
 use futures::future::Future;
 use jsonrpc_core_client::transports::ws;
+use parity_codec::Codec;
 
 use runtime_primitives::traits::SignedExtension;
 use substrate_primitives::Pair;
@@ -36,17 +37,18 @@ pub struct ExtrinsicSuccess<T: srml_system::Trait> {
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
 pub fn submit<T, P, C, I, E, SE>(url: &Url, signer: P, call: C, extra: E) -> Result<ExtrinsicSuccess<T>>
 where
-    T: srml_system::Trait + srml_balances::Trait,
+    T: srml_system::Trait + srml_indices::Trait,
     P: Pair,
+    P::Signature: Codec,
     <P as Pair>::Public: Into<T::AccountId>,
-    C: parity_codec::Encode,
-    E: Fn(I, <T as srml_balances::Trait>::Balance) -> SE,
-    SE: SignedExtension,
+    C: Codec + Send + 'static,
+    E: Fn(T::Index) -> SE + Send + 'static,
+    SE: SignedExtension + 'static,
 {
     let submit = ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T>| rpc.create_and_submit_extrinsic(signer, call));
+        .and_then(|rpc: rpc::Rpc<T, C, P, E, SE>| rpc.create_and_submit_extrinsic(signer, call, extra));
 
     let mut rt = tokio::runtime::Runtime::new()?;
     rt.block_on(submit)
