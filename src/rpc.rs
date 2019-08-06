@@ -168,9 +168,9 @@ where
     fn fetch_nonce(
         &self,
         account: &T::AccountId,
-    ) -> impl Future<Item = <T as srml_system::Trait>::Index, Error = RpcError> {
+    ) -> impl Future<Item = T::Index, Error = RpcError> {
         let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
-        self.fetch::<<T as srml_system::Trait>::Index>(account_nonce_key)
+        self.fetch::<T::Index>(account_nonce_key)
             .map(|value| value.unwrap_or_default())
     }
 
