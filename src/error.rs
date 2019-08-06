@@ -20,16 +20,14 @@ use substrate_primitives::crypto::SecretStringError;
 
 #[derive(Debug, derive_more::From)]
 pub enum Error {
-	Io(IoError),
-	Rpc(RpcError),
-	SecretString(SecretStringError),
-	Other(String),
+    Io(IoError),
+    Rpc(RpcError),
+    SecretString(SecretStringError),
+    Other(String),
 }
 
 impl From<&str> for Error {
-	fn from(error: &str) -> Self {
-		Error::Other(error.into())
-	}
+    fn from(error: &str) -> Self {
+        Error::Other(error.into())
+    }
 }
-
-pub type Result<T> = std::result::Result<T, Error>;

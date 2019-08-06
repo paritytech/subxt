@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::error::Result;
 use futures::future::Future;
 use jsonrpc_core_client::transports::ws;
-use parity_codec::Codec;
+use parity_codec::{
+    Codec,
+    Decode,
+};
 
 use runtime_primitives::traits::SignedExtension;
 use substrate_primitives::Pair;
@@ -40,7 +42,7 @@ pub fn submit<T, P, C, E, SE>(
     signer: P,
     call: C,
     extra: E,
-) -> Result<ExtrinsicSuccess<T>>
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error>
 where
     T: srml_system::Trait,
     P: Pair,
@@ -50,26 +52,65 @@ where
     E: Fn(T::Index) -> SE + Send + 'static,
     SE: SignedExtension + 'static,
 {
-    let submit = ws::connect(url.as_str())
+    ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
         .and_then(|rpc: rpc::Rpc<T, C, P, E, SE>| {
             rpc.create_and_submit_extrinsic(signer, call, extra)
-        });
+        })
+}
 
-    let mut rt = tokio::runtime::Runtime::new()?;
-    rt.block_on(submit)
+/// Fetches a storage key from a substrate node.
+pub fn fetch<T: srml_system::Trait, P, C, E, SE, V: Decode>(
+    url: &Url,
+    key: Vec<u8>,
+) -> impl Future<Item = Option<V>, Error = error::Error> {
+    ws::connect(url.as_str())
+        .expect("Url is a valid url; qed")
+        .map_err(Into::into)
+        .and_then(|rpc: rpc::Rpc<T, P, C, E, SE>| rpc.fetch::<V>(key))
+        .map_err(Into::into)
+}
+
+/// Fetches a storage key from a substrate node
+pub fn fetch_or<T: srml_system::Trait, P, C, E, SE, V: Decode>(
+    url: &Url,
+    key: Vec<u8>,
+    default: V,
+) -> impl Future<Item = V, Error = error::Error> {
+    fetch::<T, P, C, E, SE, V>(url, key).map(|value| value.unwrap_or(default))
+}
+
+/// Fetches a storage key from a substrate node.
+pub fn fetch_or_default<T: srml_system::Trait, P, C, E, SE, V: Decode + Default>(
+    url: &Url,
+    key: Vec<u8>,
+) -> impl Future<Item = V, Error = error::Error> {
+    fetch::<T, P, C, E, SE, V>(url, key).map(|value| value.unwrap_or_default())
 }
 
 #[cfg(test)]
 pub mod tests {
     use node_runtime::Runtime;
     use runtime_primitives::generic::Era;
+    use runtime_support::StorageMap;
     use substrate_primitives::crypto::Pair as _;
 
-    #[test] #[ignore] // requires locally running substrate node
+    fn run<F>(f: F) -> Result<F::Item, F::Error>
+    where
+        F: futures::Future + Send + 'static,
+        F::Item: Send + 'static,
+        F::Error: Send + 'static,
+    {
+        let mut rt = tokio::runtime::Runtime::new().unwrap();
+        rt.block_on(f)
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
     fn node_runtime_balance_transfer() {
-        let url = url::Url::parse("ws://localhost:9944").unwrap();
+        env_logger::try_init().ok();
+        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
         let signer = substrate_keyring::AccountKeyring::Alice.pair();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
@@ -85,7 +126,19 @@ pub mod tests {
                 srml_balances::TakeFees::<Runtime>::from(0),
             )
         };
-        let result = super::submit::<Runtime, _, _, _, _>(&url, signer, call, extra);
-        assert!(result.is_ok())
+        let future = super::submit::<Runtime, _, _, _, _>(&url, signer, call, extra);
+        run(future).unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn node_runtime_fetch_account_balance() {
+        env_logger::try_init().ok();
+        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
+        let account = substrate_keyring::AccountKeyring::Alice.pair().public();
+        let key = <srml_balances::FreeBalance<Runtime>>::key_for(&account);
+        type Balance = <Runtime as srml_balances::Trait>::Balance;
+        let future = super::fetch::<Runtime, (), (), (), (), Balance>(&url, key);
+        run(future).unwrap();
     }
 }
