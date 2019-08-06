@@ -25,6 +25,8 @@ use runtime_primitives::traits::SignedExtension;
 use substrate_primitives::Pair;
 use url::Url;
 
+pub use error::Error;
+
 mod error;
 mod rpc;
 
