@@ -25,12 +25,11 @@ use num_traits::bounds::Bounded;
 use parity_codec::{Codec, Decode, Encode};
 
 use runtime_primitives::{
-    generic::{UncheckedExtrinsic},
+    generic::UncheckedExtrinsic,
     traits::{Hash as _, SignedExtension},
 };
 use runtime_support::StorageMap;
 use serde::{self, de::Error as DeError, Deserialize};
-use srml_indices::Address;
 use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
@@ -109,7 +108,7 @@ where
 
 impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
 where
-    T: srml_system::Trait + srml_indices::Trait,
+    T: srml_system::Trait,
     C: Codec + Send,
     P: Pair,
     P::Signature: Codec,
@@ -193,8 +192,7 @@ where
         signer: P,
         call: C,
         extra: E,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
-    {
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let account_nonce = self
             .fetch_nonce(&signer.public().into())
             .map_err(Into::into);
@@ -208,8 +206,13 @@ where
 
         account_nonce.join3(genesis_hash, events).and_then(
             move |(index, genesis_hash, events)| {
-                let extrinsic =
-                    Self::create_and_sign_extrinsic(index, call, genesis_hash, &signer, extra);
+                let extrinsic = Self::create_and_sign_extrinsic(
+                    index,
+                    call,
+                    genesis_hash,
+                    &signer,
+                    extra,
+                );
                 let ext_hash = T::Hashing::hash_of(&extrinsic);
 
                 log::info!("Submitting Extrinsic `{:?}`", ext_hash);
