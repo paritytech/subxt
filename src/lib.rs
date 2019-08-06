@@ -16,96 +16,97 @@
 
 use futures::future::Future;
 use jsonrpc_core_client::transports::ws;
+use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
 };
-
-use runtime_primitives::traits::SignedExtension;
-use runtime_support::metadata::RuntimeMetadataPrefixed;
+use std::convert::TryFrom;
 use substrate_primitives::Pair;
 use url::Url;
 
 pub use error::Error;
 
 mod error;
+mod metadata;
 mod rpc;
+
+pub use rpc::RpcTypes;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: srml_system::Trait> {
+pub struct ExtrinsicSuccess<T: RpcTypes> {
     pub block: T::Hash,
     pub extrinsic: T::Hash,
     pub events: Vec<T::Event>,
 }
 
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit<T, P, C, E, SE>(
+pub fn submit<T: rpc::RpcTypes, C: Codec + Send>(
     url: &Url,
-    signer: P,
+    signer: T::Pair,
     call: C,
-    extra: E,
+    extra: T::Extra,
 ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error>
 where
-    T: srml_system::Trait,
-    P: Pair,
-    P::Signature: Codec,
-    P::Public: Into<T::AccountId>,
-    C: Codec + Send + 'static,
-    E: Fn(T::Index) -> SE + Send + 'static,
-    SE: SignedExtension + 'static,
+    <T::Pair as Pair>::Public: Into<T::AccountId>,
+    <T::Pair as Pair>::Signature: Codec,
 {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T, C, P, E, SE>| {
-            rpc.create_and_submit_extrinsic(signer, call, extra)
-        })
+        .and_then(|rpc: rpc::Rpc<T>| rpc.create_and_submit_extrinsic(signer, call, extra))
 }
 
 /// Fetches a storage key from a substrate node.
-pub fn fetch<T: srml_system::Trait, P, C, E, SE, V: Decode>(
+pub fn fetch<T: RpcTypes, V: Decode>(
     url: &Url,
     key: Vec<u8>,
 ) -> impl Future<Item = Option<V>, Error = error::Error> {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T, P, C, E, SE>| rpc.fetch::<V>(key))
+        .and_then(|rpc: rpc::Rpc<T>| rpc.fetch::<V>(key))
         .map_err(Into::into)
 }
 
 /// Fetches a storage key from a substrate node
-pub fn fetch_or<T: srml_system::Trait, P, C, E, SE, V: Decode>(
+pub fn fetch_or<T: RpcTypes, V: Decode>(
     url: &Url,
     key: Vec<u8>,
     default: V,
 ) -> impl Future<Item = V, Error = error::Error> {
-    fetch::<T, P, C, E, SE, V>(url, key).map(|value| value.unwrap_or(default))
+    fetch::<T, V>(url, key).map(|value| value.unwrap_or(default))
 }
 
 /// Fetches a storage key from a substrate node.
-pub fn fetch_or_default<T: srml_system::Trait, P, C, E, SE, V: Decode + Default>(
+pub fn fetch_or_default<T: RpcTypes, V: Decode + Default>(
     url: &Url,
     key: Vec<u8>,
 ) -> impl Future<Item = V, Error = error::Error> {
-    fetch::<T, P, C, E, SE, V>(url, key).map(|value| value.unwrap_or_default())
+    fetch::<T, V>(url, key).map(|value| value.unwrap_or_default())
 }
 
 /// Fetches the metadata from a substrate node.
-pub fn metadata<T: srml_system::Trait, P, C, E, SE>(
+pub fn metadata<T: RpcTypes>(
     url: &Url,
-) -> impl Future<Item = RuntimeMetadataPrefixed, Error = error::Error> {
+) -> impl Future<Item = Metadata, Error = error::Error> {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T, P, C, E, SE>| rpc.fetch_metadata())
-        .map_err(Into::into)
+        .and_then(|rpc: rpc::Rpc<T>| {
+            rpc.fetch_metadata().map_err(Into::into).and_then(|meta| {
+                let result =
+                    TryFrom::try_from(meta).map_err(|err| format!("{:?}", err).into());
+                futures::future::result(result)
+            })
+        })
 }
 
 #[cfg(test)]
 pub mod tests {
     use node_runtime::Runtime;
+    use parity_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_primitives::crypto::Pair as _;
@@ -162,6 +163,14 @@ pub mod tests {
         env_logger::try_init().ok();
         let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
         let future = super::metadata::<Runtime, (), (), (), ()>(&url);
-        run(future).unwrap();
+        let metadata = run(future).unwrap();
+
+        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
+        let transfer = srml_balances::Call::transfer(dest.into(), 10_000);
+        let call = node_runtime::Call::Balances(transfer.clone())
+            .encode()
+            .to_vec();
+        let call2 = metadata.call("Balances", transfer).unwrap();
+        assert_eq!(call, call2);
     }
 }

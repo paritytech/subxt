@@ -19,6 +19,7 @@ futures = "0.1.28"
 jsonrpc-core-client = { version = "12.1.0", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
 parity-scale-codec = { version = "1.0", default-features = false, features = ["derive", "full"] }
+runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "srml-metadata" }
 runtime_support = { git = "https://github.com/paritytech/substrate/", package = "srml-support" }
 runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
 serde = { version = "1.0", features = ["derive"] }

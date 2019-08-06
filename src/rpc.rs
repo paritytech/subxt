@@ -52,11 +52,14 @@ use runtime_support::{
 };
 use serde::{
     self,
-    de::Error as DeError,
+    de::{
+        DeserializeOwned,
+        Error as DeError,
+    },
     Deserialize,
+    Serialize,
 };
 use srml_system::EventRecord;
-use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -116,33 +119,51 @@ pub struct SignedBlock {
     pub block: Block,
 }
 
+pub trait RpcTypes {
+    type AccountId: Codec;
+    type BlockNumber: Bounded + Clone + Serialize + Send + Sync + 'static;
+    type Event: Clone + Codec + std::fmt::Debug + Eq + Send + Sync + 'static;
+    type Hash: Codec
+        + Clone
+        + Copy
+        + Serialize
+        + DeserializeOwned
+        + std::fmt::Debug
+        + PartialEq
+        + Send
+        + Sync
+        + 'static
+        + std::hash::Hash
+        + Eq
+        + Default
+        + AsRef<[u8]>
+        + AsMut<[u8]>;
+    type Hashing: runtime_primitives::traits::Hash<Output = Self::Hash>;
+    type Index: Copy + Decode + Default + std::fmt::Debug;
+    type Pair: Pair;
+    type Extra: Fn(Self::Index) -> Self::SignedExtension;
+    type SignedExtension: SignedExtension + Encode + Send;
+}
+
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: srml_system::Trait, C, P, E, SE> {
+pub struct Rpc<T: RpcTypes> {
     state: StateClient<T::Hash>,
     chain: ChainClient<T::BlockNumber, T::Hash, (), SignedBlock>,
     author: AuthorClient<T::Hash, T::Hash>,
-    _phantom: PhantomData<(C, P, E, SE)>,
 }
 
 /// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T, C, P, E, SE> From<RpcChannel> for Rpc<T, C, P, E, SE>
-where
-    T: srml_system::Trait,
-{
-    fn from(channel: RpcChannel) -> Rpc<T, C, P, E, SE> {
+impl<T: RpcTypes> From<RpcChannel> for Rpc<T> {
+    fn from(channel: RpcChannel) -> Rpc<T> {
         Rpc {
             state: channel.clone().into(),
             chain: channel.clone().into(),
             author: channel.into(),
-            _phantom: PhantomData,
         }
     }
 }
 
-impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
-where
-    T: srml_system::Trait,
-{
+impl<T: RpcTypes> Rpc<T> {
     /// Fetch a storage key
     pub fn fetch<V: Decode>(
         &self,
@@ -162,7 +183,8 @@ where
         &self,
         account: &T::AccountId,
     ) -> impl Future<Item = T::Index, Error = RpcError> {
-        let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
+        // let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
+        let account_nonce_key = vec![];
         self.fetch::<T::Index>(account_nonce_key)
             .map(|value| value.unwrap_or_default())
     }
@@ -185,15 +207,10 @@ where
     }
 }
 
-impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
+impl<T: RpcTypes> Rpc<T>
 where
-    T: srml_system::Trait,
-    C: Codec + Send,
-    P: Pair,
-    P::Signature: Codec,
-    P::Public: Into<T::AccountId>,
-    E: Fn(T::Index) -> SE + Send,
-    SE: SignedExtension + Encode,
+    <T::Pair as Pair>::Public: Into<T::AccountId>,
+    <T::Pair as Pair>::Signature: Codec,
 {
     /// Subscribe to substrate System Events
     fn subscribe_events(
@@ -210,9 +227,14 @@ where
 
     /// Submit an extrinsic, waiting for it to be finalized.
     /// If successful, returns the block hash.
-    fn submit_and_watch(
+    fn submit_and_watch<C: Codec + Send>(
         self,
-        extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>,
+        extrinsic: UncheckedExtrinsic<
+            T::AccountId,
+            C,
+            <T::Pair as Pair>::Signature,
+            T::SignedExtension,
+        >,
     ) -> impl Future<Item = T::Hash, Error = Error> {
         self.author
             .watch_extrinsic(extrinsic.encode().into())
@@ -240,11 +262,11 @@ where
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic(
+    pub fn create_and_submit_extrinsic<C: Codec + Send>(
         self,
-        signer: P,
+        signer: T::Pair,
         call: C,
-        extra: E,
+        extra: T::Extra,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let account_nonce = self
             .fetch_nonce(&signer.public().into())
@@ -297,13 +319,18 @@ where
     }
 
     /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic(
+    fn create_and_sign_extrinsic<C: Encode + Send>(
         index: T::Index,
         function: C,
         genesis_hash: T::Hash,
-        signer: &P,
-        extra: E,
-    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, SE> {
+        signer: &T::Pair,
+        extra: T::Extra,
+    ) -> UncheckedExtrinsic<
+        T::AccountId,
+        C,
+        <T::Pair as Pair>::Signature,
+        T::SignedExtension,
+    > {
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
             genesis_hash,
@@ -329,15 +356,12 @@ where
 }
 
 /// Waits for events for the block triggered by the extrinsic
-fn wait_for_block_events<T>(
+fn wait_for_block_events<T: RpcTypes>(
     ext_hash: T::Hash,
     signed_block: &SignedBlock,
     block_hash: T::Hash,
     events_stream: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
-where
-    T: srml_system::Trait,
-{
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
     let ext_index = signed_block
         .block
         .extrinsics
