@@ -29,13 +29,13 @@ mod rpc;
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
 pub struct ExtrinsicSuccess<T: srml_system::Trait> {
-    pub block: <T as srml_system::Trait>::Hash,
-    pub extrinsic: <T as srml_system::Trait>::Hash,
-    pub events: Vec<<T as srml_system::Trait>::Event>,
+    pub block: T::Hash,
+    pub extrinsic: T::Hash,
+    pub events: Vec<T::Event>,
 }
 
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit<T, P, C, I, E, SE>(
+pub fn submit<T, P, C, E, SE>(
     url: &Url,
     signer: P,
     call: C,
@@ -59,4 +59,33 @@ where
 
     let mut rt = tokio::runtime::Runtime::new()?;
     rt.block_on(submit)
+}
+
+#[cfg(test)]
+pub mod tests {
+    use node_runtime::Runtime;
+    use runtime_primitives::generic::Era;
+    use substrate_primitives::crypto::Pair as _;
+
+    #[test] #[ignore] // requires locally running substrate node
+    fn node_runtime_balance_transfer() {
+        let url = url::Url::parse("ws://localhost:9944").unwrap();
+        let signer = substrate_keyring::AccountKeyring::Alice.pair();
+
+        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
+        let transfer = srml_balances::Call::transfer(dest.into(), 10_000);
+        let call = node_runtime::Call::Balances(transfer);
+
+        let extra = |nonce| {
+            (
+                srml_system::CheckGenesis::<Runtime>::new(),
+                srml_system::CheckEra::<Runtime>::from(Era::Immortal),
+                srml_system::CheckNonce::<Runtime>::from(nonce),
+                srml_system::CheckWeight::<Runtime>::new(),
+                srml_balances::TakeFees::<Runtime>::from(0),
+            )
+        };
+        let result = super::submit::<Runtime, _, _, _, _>(&url, signer, call, extra);
+        assert!(result.is_ok())
+    }
 }
