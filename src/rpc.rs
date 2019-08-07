@@ -346,16 +346,15 @@ where
             match change_set {
                 None => future::ok(Vec::new()),
                 Some(change_set) => {
-                    let events =
-                        change_set
-                            .changes
-                            .iter()
-                            .filter_map(|(_key, data)| {
-                                data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
-                            })
-                            .collect::<Result<Vec<Vec<EventRecord<T::Event, T::Hash>>>, _>>()
-                            .map(|events| events.into_iter().flat_map(|es| es).collect())
-                            .map_err(Into::into);
+                    let events = change_set
+                        .changes
+                        .iter()
+                        .filter_map(|(_key, data)| {
+                            data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
+                        })
+                        .collect::<Result<Vec<Vec<EventRecord<T::Event, T::Hash>>>, _>>()
+                        .map(|events| events.into_iter().flat_map(|es| es).collect())
+                        .map_err(Into::into);
                     future::result(events)
                 }
             }
