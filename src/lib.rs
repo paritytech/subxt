@@ -16,7 +16,7 @@
 
 use futures::future::Future;
 use jsonrpc_core_client::transports::ws;
-use parity_codec::{
+use parity_scale_codec::{
     Codec,
     Decode,
 };

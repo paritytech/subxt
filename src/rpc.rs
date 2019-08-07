@@ -33,7 +33,7 @@ use jsonrpc_core_client::{
 };
 use log;
 use num_traits::bounds::Bounded;
-use parity_codec::{
+use parity_scale_codec::{
     Codec,
     Decode,
     Encode,
@@ -52,6 +52,7 @@ use serde::{
     de::Error as DeError,
     Deserialize,
 };
+use srml_system::EventRecord;
 use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
@@ -93,7 +94,7 @@ impl<'a> serde::Deserialize<'a> for OpaqueExtrinsic {
     {
         let r = substrate_primitives::bytes::deserialize(de)?;
         Decode::decode(&mut &r[..])
-            .ok_or(DeError::custom("Invalid value passed into decode"))
+            .map_err(|e| DeError::custom(format!("Decode error: {}", e)))
     }
 }
 
@@ -320,7 +321,7 @@ fn wait_for_block_events<T>(
     ext_hash: T::Hash,
     signed_block: &SignedBlock,
     block_hash: T::Hash,
-    events: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
+    events_stream: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
 ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
 where
     T: srml_system::Trait,
@@ -337,33 +338,34 @@ where
         .into_future();
 
     let block_hash = block_hash.clone();
-    let block_events = events
-        .map(|event| {
-            let records = event
-                .changes
-                .iter()
-                .filter_map(|(_key, data)| {
-                    data.as_ref()
-                        .and_then(|data| Decode::decode(&mut &data.0[..]))
-                })
-                .flat_map(|events: Vec<srml_system::EventRecord<T::Event, T::Hash>>| {
-                    events
-                })
-                .collect::<Vec<_>>();
-            log::debug!("Block {:?}, Events {:?}", event.block, records.len());
-            (event.block, records)
-        })
-        .filter(move |(event_block, _)| *event_block == block_hash)
+    let block_events = events_stream
+        .filter(move |event| event.block == block_hash)
         .into_future()
         .map_err(|(e, _)| e.into())
-        .map(|(events, _)| events);
+        .and_then(|(change_set, _)| {
+            match change_set {
+                None => future::ok(Vec::new()),
+                Some(change_set) => {
+                    let events =
+                        change_set
+                            .changes
+                            .iter()
+                            .filter_map(|(_key, data)| {
+                                data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
+                            })
+                            .collect::<Result<Vec<Vec<EventRecord<T::Event, T::Hash>>>, _>>()
+                            .map(|events| events.into_iter().flat_map(|es| es).collect())
+                            .map_err(Into::into);
+                    future::result(events)
+                }
+            }
+        });
 
     block_events
         .join(ext_index)
         .map(move |(events, ext_index)| {
             let events: Vec<T::Event> = events
                 .iter()
-                .flat_map(|(_, events)| events)
                 .filter_map(|e| {
                     if let srml_system::Phase::ApplyExtrinsic(i) = e.phase {
                         if i as usize == ext_index {

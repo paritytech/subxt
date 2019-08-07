@@ -15,11 +15,13 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use jsonrpc_core_client::RpcError;
+use parity_scale_codec::Error as CodecError;
 use std::io::Error as IoError;
 use substrate_primitives::crypto::SecretStringError;
 
 #[derive(Debug, derive_more::From)]
 pub enum Error {
+    Codec(CodecError),
     Io(IoError),
     Rpc(RpcError),
     SecretString(SecretStringError),
