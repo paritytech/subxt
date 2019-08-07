@@ -140,9 +140,7 @@ pub trait RpcTypes {
         + AsMut<[u8]>;
     type Hashing: runtime_primitives::traits::Hash<Output = Self::Hash>;
     type Index: Copy + Decode + Default + std::fmt::Debug;
-    type Pair: Pair;
-    type Extra: Fn(Self::Index) -> Self::SignedExtension;
-    type SignedExtension: SignedExtension + Encode + Send;
+    type SignedExtension: SignedExtension;
 }
 
 /// Client for substrate rpc interfaces
@@ -207,11 +205,7 @@ impl<T: RpcTypes> Rpc<T> {
     }
 }
 
-impl<T: RpcTypes> Rpc<T>
-where
-    <T::Pair as Pair>::Public: Into<T::AccountId>,
-    <T::Pair as Pair>::Signature: Codec,
-{
+impl<T: RpcTypes> Rpc<T> {
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
@@ -227,15 +221,21 @@ where
 
     /// Submit an extrinsic, waiting for it to be finalized.
     /// If successful, returns the block hash.
-    fn submit_and_watch<C: Codec + Send>(
+    fn submit_and_watch<C, P>(
         self,
         extrinsic: UncheckedExtrinsic<
             T::AccountId,
             C,
-            <T::Pair as Pair>::Signature,
+            P::Signature,
             T::SignedExtension,
         >,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
+    ) -> impl Future<Item = T::Hash, Error = Error>
+    where
+        C: Codec + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+    {
         self.author
             .watch_extrinsic(extrinsic.encode().into())
             .map_err(Into::into)
@@ -262,12 +262,19 @@ where
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic<C: Codec + Send>(
+    pub fn create_and_submit_extrinsic<C, P, E>(
         self,
-        signer: T::Pair,
+        signer: P,
         call: C,
-        extra: T::Extra,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+        extra: E,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
+    where
+        C: Codec + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+        E: Fn(T::Index) -> T::SignedExtension,
+    {
         let account_nonce = self
             .fetch_nonce(&signer.public().into())
             .map_err(Into::into);
@@ -293,7 +300,7 @@ where
                 log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
                 let chain = self.chain.clone();
-                self.submit_and_watch(extrinsic)
+                self.submit_and_watch::<C, P>(extrinsic)
                     .and_then(move |bh| {
                         log::info!("Fetching block {:?}", bh);
                         chain
@@ -319,18 +326,25 @@ where
     }
 
     /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic<C: Encode + Send>(
+    fn create_and_sign_extrinsic<C, P, E>(
         index: T::Index,
         function: C,
         genesis_hash: T::Hash,
-        signer: &T::Pair,
-        extra: T::Extra,
+        signer: &P,
+        extra: E,
     ) -> UncheckedExtrinsic<
         T::AccountId,
         C,
-        <T::Pair as Pair>::Signature,
+        P::Signature,
         T::SignedExtension,
-    > {
+    >
+    where
+        C: Encode + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+        E: Fn(T::Index) -> T::SignedExtension,
+    {
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
             genesis_hash,

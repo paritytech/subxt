@@ -42,15 +42,18 @@ pub struct ExtrinsicSuccess<T: RpcTypes> {
 }
 
 /// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit<T: rpc::RpcTypes, C: Codec + Send>(
+pub fn submit<T: RpcTypes, C, P, E>(
     url: &Url,
-    signer: T::Pair,
+    signer: P,
     call: C,
-    extra: T::Extra,
+    extra: E,
 ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error>
 where
-    <T::Pair as Pair>::Public: Into<T::AccountId>,
-    <T::Pair as Pair>::Signature: Codec,
+    C: Codec + Send,
+    P: Pair,
+    P::Public: Into<T::AccountId>,
+    P::Signature: Codec,
+    E: Fn(T::Index) -> T::SignedExtension,
 {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
@@ -105,11 +108,21 @@ pub fn metadata<T: RpcTypes>(
 
 #[cfg(test)]
 pub mod tests {
-    use node_runtime::Runtime;
     use parity_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_primitives::crypto::Pair as _;
+
+    struct Runtime;
+    impl super::RpcTypes for Runtime {
+        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+        type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
+        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
+        type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
+        type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
+        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
+        type SignedExtension = node_runtime::SignedExtra;
+    }
 
     fn run<F>(f: F) -> Result<F::Item, F::Error>
     where
@@ -134,14 +147,14 @@ pub mod tests {
 
         let extra = |nonce| {
             (
-                srml_system::CheckGenesis::<Runtime>::new(),
-                srml_system::CheckEra::<Runtime>::from(Era::Immortal),
-                srml_system::CheckNonce::<Runtime>::from(nonce),
-                srml_system::CheckWeight::<Runtime>::new(),
-                srml_balances::TakeFees::<Runtime>::from(0),
+                srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
+                srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
+                srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
+                srml_system::CheckWeight::<node_runtime::Runtime>::new(),
+                srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
             )
         };
-        let future = super::submit::<Runtime, _, _, _, _>(&url, signer, call, extra);
+        let future = super::submit::<Runtime, _, _, _>(&url, signer, call, extra);
         run(future).unwrap();
     }
 
@@ -151,9 +164,9 @@ pub mod tests {
         env_logger::try_init().ok();
         let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
         let account = substrate_keyring::AccountKeyring::Alice.pair().public();
-        let key = <srml_balances::FreeBalance<Runtime>>::key_for(&account);
-        type Balance = <Runtime as srml_balances::Trait>::Balance;
-        let future = super::fetch::<Runtime, (), (), (), (), Balance>(&url, key);
+        let key = <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&account);
+        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
+        let future = super::fetch::<Runtime, Balance>(&url, key);
         run(future).unwrap();
     }
 
@@ -162,7 +175,7 @@ pub mod tests {
     fn node_runtime_fetch_metadata() {
         env_logger::try_init().ok();
         let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
-        let future = super::metadata::<Runtime, (), (), (), ()>(&url);
+        let future = super::metadata::<Runtime>(&url);
         let metadata = run(future).unwrap();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
