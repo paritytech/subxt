@@ -21,8 +21,10 @@ use parity_scale_codec::{
     Codec,
     Decode,
 };
-use std::convert::TryFrom;
-use substrate_primitives::Pair;
+use substrate_primitives::{
+    storage::StorageKey,
+    Pair,
+};
 use url::Url;
 
 pub use error::Error;
@@ -41,73 +43,152 @@ pub struct ExtrinsicSuccess<T: RpcTypes> {
     pub events: Vec<T::Event>,
 }
 
-/// Creates, signs and submits an Extrinsic with the given `Call` to a substrate node.
-pub fn submit<T: RpcTypes, C, P, E>(
+fn connect<T: RpcTypes>(
     url: &Url,
+) -> impl Future<Item = rpc::Rpc<T>, Error = error::Error> {
+    ws::connect(url.as_str())
+        .expect("Url is a valid url; qed")
+        .map_err(Into::into)
+}
+
+pub struct ClientBuilder<T: RpcTypes> {
+    _marker: std::marker::PhantomData<T>,
+    url: Option<Url>,
+}
+
+impl<T: RpcTypes> ClientBuilder<T> {
+    pub fn new() -> Self {
+        Self {
+            _marker: std::marker::PhantomData,
+            url: None,
+        }
+    }
+
+    pub fn set_url(mut self, url: Url) -> Self {
+        self.url = Some(url);
+        self
+    }
+
+    pub fn build(self) -> impl Future<Item = Client<T>, Error = error::Error> {
+        let url = self.url.unwrap_or_else(|| {
+            Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
+        });
+        connect::<T>(&url).and_then(|rpc| {
+            rpc.metadata()
+                .join(rpc.genesis_hash())
+                .map(|(metadata, genesis_hash)| {
+                    Client {
+                        url,
+                        genesis_hash,
+                        metadata,
+                    }
+                })
+        })
+    }
+}
+
+#[derive(Clone)]
+pub struct Client<T: RpcTypes> {
+    url: Url,
+    genesis_hash: T::Hash,
+    metadata: metadata::Metadata,
+}
+
+impl<T: RpcTypes> Client<T> {
+    fn connect(&self) -> impl Future<Item = rpc::Rpc<T>, Error = error::Error> {
+        connect(&self.url)
+    }
+
+    pub fn metadata(&self) -> &metadata::Metadata {
+        &self.metadata
+    }
+
+    pub fn fetch<V: Decode>(
+        &self,
+        key: StorageKey,
+    ) -> impl Future<Item = Option<V>, Error = error::Error> {
+        self.connect().and_then(|rpc| rpc.storage::<V>(key))
+    }
+
+    pub fn fetch_or<V: Decode>(
+        &self,
+        key: StorageKey,
+        default: V,
+    ) -> impl Future<Item = V, Error = error::Error> {
+        self.fetch(key).map(|value| value.unwrap_or(default))
+    }
+
+    pub fn fetch_or_default<V: Decode + Default>(
+        &self,
+        key: StorageKey,
+    ) -> impl Future<Item = V, Error = error::Error> {
+        self.fetch(key).map(|value| value.unwrap_or_default())
+    }
+
+    pub fn xt<P, E>(
+        &self,
+        signer: P,
+        extra: E,
+    ) -> impl Future<Item = XtBuilder<T, P, E>, Error = error::Error>
+    where
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+        E: Fn(T::Index) -> T::SignedExtension,
+    {
+        let account_id: T::AccountId = signer.public().into();
+        let account_nonce_key = self
+            .metadata
+            .module("System")
+            .expect("srml_system is present")
+            .storage("AccountNonce")
+            .expect("srml_system has account nonce")
+            .map()
+            .expect("account nonce is a map")
+            .key(&account_id);
+        let client = (*self).clone();
+        self.fetch_or_default(account_nonce_key).map(|nonce| {
+            XtBuilder {
+                client,
+                nonce,
+                signer,
+                extra,
+            }
+        })
+    }
+}
+
+pub struct XtBuilder<T: RpcTypes, P, E> {
+    client: Client<T>,
+    nonce: T::Index,
     signer: P,
-    call: C,
     extra: E,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error>
+}
+
+impl<T: RpcTypes, P, E> XtBuilder<T, P, E>
 where
-    C: Codec + Send,
     P: Pair,
     P::Public: Into<T::AccountId>,
     P::Signature: Codec,
     E: Fn(T::Index) -> T::SignedExtension,
 {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
-        .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T>| rpc.create_and_submit_extrinsic(signer, call, extra))
-}
-
-/// Fetches a storage key from a substrate node.
-pub fn fetch<T: RpcTypes, V: Decode>(
-    url: &Url,
-    key: Vec<u8>,
-) -> impl Future<Item = Option<V>, Error = error::Error> {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
-        .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T>| rpc.fetch::<V>(key))
-        .map_err(Into::into)
-}
-
-/// Fetches a storage key from a substrate node
-pub fn fetch_or<T: RpcTypes, V: Decode>(
-    url: &Url,
-    key: Vec<u8>,
-    default: V,
-) -> impl Future<Item = V, Error = error::Error> {
-    fetch::<T, V>(url, key).map(|value| value.unwrap_or(default))
-}
-
-/// Fetches a storage key from a substrate node.
-pub fn fetch_or_default<T: RpcTypes, V: Decode + Default>(
-    url: &Url,
-    key: Vec<u8>,
-) -> impl Future<Item = V, Error = error::Error> {
-    fetch::<T, V>(url, key).map(|value| value.unwrap_or_default())
-}
-
-/// Fetches the metadata from a substrate node.
-pub fn metadata<T: RpcTypes>(
-    url: &Url,
-) -> impl Future<Item = Metadata, Error = error::Error> {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
-        .map_err(Into::into)
-        .and_then(|rpc: rpc::Rpc<T>| {
-            rpc.fetch_metadata().map_err(Into::into).and_then(|meta| {
-                let result =
-                    TryFrom::try_from(meta).map_err(|err| format!("{:?}", err).into());
-                futures::future::result(result)
-            })
+    pub fn submit<C: Codec + Send>(
+        &self,
+        call: C,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error> {
+        let signer = self.signer.clone();
+        let nonce = self.nonce.clone();
+        let extra = (self.extra)(nonce.clone());
+        let genesis_hash = self.client.genesis_hash.clone();
+        self.client.connect().and_then(move |rpc| {
+            rpc.create_and_submit_extrinsic(signer, call, extra, nonce, genesis_hash)
         })
+    }
 }
 
 #[cfg(test)]
-pub mod tests {
+mod tests {
+    use super::*;
     use parity_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
@@ -117,6 +198,7 @@ pub mod tests {
         Pair,
     };
 
+    #[derive(Clone)]
     struct Runtime;
     impl super::RpcTypes for Runtime {
         type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
@@ -128,27 +210,16 @@ pub mod tests {
         type SignedExtension = node_runtime::SignedExtra;
     }
 
-    fn run<F>(f: F) -> Result<F::Item, F::Error>
-    where
-        F: futures::Future + Send + 'static,
-        F::Item: Send + 'static,
-        F::Error: Send + 'static,
-    {
-        let mut rt = tokio::runtime::Runtime::new().unwrap();
-        rt.block_on(f)
-    }
-
     #[test]
     #[ignore] // requires locally running substrate node
     fn node_runtime_balance_transfer() {
         env_logger::try_init().ok();
-        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
+        let mut rt = tokio::runtime::Runtime::new().unwrap();
+        let client = rt
+            .block_on(ClientBuilder::<Runtime>::new().build())
+            .unwrap();
+
         let signer = substrate_keyring::AccountKeyring::Alice.pair();
-
-        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
-        let transfer = srml_balances::Call::transfer(dest.into(), 10_000);
-        let call = node_runtime::Call::Balances(transfer);
-
         let extra = |nonce| {
             (
                 srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
@@ -158,30 +229,52 @@ pub mod tests {
                 srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
             )
         };
-        let future = super::submit::<Runtime, _, _, _>(&url, signer, call, extra);
-        run(future).unwrap();
+        let xt = rt.block_on(client.xt(signer, extra)).unwrap();
+
+        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
+        let transfer =
+            srml_balances::Call::transfer::<node_runtime::Runtime>(dest.into(), 10_000);
+        let call = client.metadata().module("Balances").unwrap().call(transfer);
+        rt.block_on(xt.submit(call)).unwrap();
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn node_runtime_fetch_account_balance() {
         env_logger::try_init().ok();
-        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
-        let account = substrate_keyring::AccountKeyring::Alice.pair().public();
-        let key = <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&account);
+        let mut rt = tokio::runtime::Runtime::new().unwrap();
+        let client = rt
+            .block_on(ClientBuilder::<Runtime>::new().build())
+            .unwrap();
+
+        let account: <Runtime as RpcTypes>::AccountId =
+            substrate_keyring::AccountKeyring::Alice
+                .pair()
+                .public()
+                .into();
+        let key = client
+            .metadata()
+            .module("Balances")
+            .unwrap()
+            .storage("FreeBalance")
+            .unwrap()
+            .map()
+            .unwrap()
+            .key(&account);
         type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
-        let future = super::fetch::<Runtime, Balance>(&url, key);
-        run(future).unwrap();
+        rt.block_on(client.fetch::<Balance>(key)).unwrap();
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn node_runtime_fetch_metadata() {
         env_logger::try_init().ok();
-        let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
-        let future = super::metadata::<Runtime>(&url);
-        let metadata = run(future).unwrap();
-        let balances = metadata.module("Balances").unwrap();
+        let mut rt = tokio::runtime::Runtime::new().unwrap();
+        let client = rt
+            .block_on(ClientBuilder::<Runtime>::new().build())
+            .unwrap();
+
+        let balances = client.metadata().module("Balances").unwrap();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
         let transfer = srml_balances::Call::transfer(dest.clone().into(), 10_000);
@@ -205,7 +298,8 @@ pub mod tests {
         let account_nonce =
             <srml_system::AccountNonce<node_runtime::Runtime>>::key_for(&dest);
         let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
-        let account_nonce_key2 = metadata
+        let account_nonce_key2 = client
+            .metadata()
             .module("System")
             .unwrap()
             .storage("AccountNonce")

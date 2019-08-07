@@ -14,7 +14,7 @@ use std::{
 };
 use substrate_primitives::storage::StorageKey;
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
 }
@@ -25,7 +25,7 @@ impl Metadata {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct ModuleMetadata {
     index: u8,
     storage: HashMap<String, StorageMetadata>,
@@ -44,7 +44,7 @@ impl ModuleMetadata {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct StorageMetadata {
     prefix: String,
     modifier: StorageEntryModifier,
@@ -65,7 +65,7 @@ impl StorageMetadata {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct StorageMap {
     prefix: Vec<u8>,
     hasher: StorageHasher,

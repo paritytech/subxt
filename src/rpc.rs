@@ -16,6 +16,7 @@
 
 use crate::{
     error::Error,
+    metadata::Metadata,
     ExtrinsicSuccess,
 };
 use futures::{
@@ -39,16 +40,13 @@ use parity_scale_codec::{
     Encode,
 };
 
+use runtime_metadata::RuntimeMetadataPrefixed;
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::{
         Hash as _,
         SignedExtension,
     },
-};
-use runtime_support::{
-    metadata::RuntimeMetadataPrefixed,
-    StorageMap,
 };
 use serde::{
     self,
@@ -60,6 +58,7 @@ use serde::{
     Serialize,
 };
 use srml_system::EventRecord;
+use std::convert::TryInto;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -119,7 +118,7 @@ pub struct SignedBlock {
     pub block: Block,
 }
 
-pub trait RpcTypes {
+pub trait RpcTypes: Clone {
     type AccountId: Codec;
     type BlockNumber: Bounded + Clone + Serialize + Send + Sync + 'static;
     type Event: Clone + Codec + std::fmt::Debug + Eq + Send + Sync + 'static;
@@ -163,45 +162,38 @@ impl<T: RpcTypes> From<RpcChannel> for Rpc<T> {
 
 impl<T: RpcTypes> Rpc<T> {
     /// Fetch a storage key
-    pub fn fetch<V: Decode>(
+    pub fn storage<V: Decode>(
         &self,
-        key: Vec<u8>,
-    ) -> impl Future<Item = Option<V>, Error = RpcError> {
-        let storage_key = StorageKey(blake2_256(&key).to_vec());
+        key: StorageKey,
+    ) -> impl Future<Item = Option<V>, Error = Error> {
         self.state
-            .storage(storage_key, None)
+            .storage(key, None)
             .map(|data| {
                 data.map(|d| Decode::decode(&mut &d.0[..]).expect("Valid storage key"))
             })
             .map_err(Into::into)
     }
 
-    /// Fetch the latest nonce for the given `AccountId`
-    pub fn fetch_nonce(
-        &self,
-        account: &T::AccountId,
-    ) -> impl Future<Item = T::Index, Error = RpcError> {
-        // let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
-        let account_nonce_key = vec![];
-        self.fetch::<T::Index>(account_nonce_key)
-            .map(|value| value.unwrap_or_default())
-    }
-
     /// Fetch the genesis hash
-    pub fn fetch_genesis_hash(
-        &self,
-    ) -> impl Future<Item = Option<T::Hash>, Error = RpcError> {
+    pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
         let block_zero = T::BlockNumber::min_value();
-        self.chain.block_hash(Some(NumberOrHex::Number(block_zero)))
+        self.chain
+            .block_hash(Some(NumberOrHex::Number(block_zero)))
+            .map_err(Into::into)
+            .and_then(|genesis_hash| {
+                future::result(genesis_hash.ok_or("Genesis hash not found".into()))
+            })
     }
 
     /// Fetch the metadata
-    pub fn fetch_metadata(
-        &self,
-    ) -> impl Future<Item = RuntimeMetadataPrefixed, Error = RpcError> {
+    pub fn metadata(&self) -> impl Future<Item = Metadata, Error = Error> {
         self.state
             .metadata(None)
             .map(|bytes| Decode::decode(&mut &bytes[..]).unwrap())
+            .map_err(Into::into)
+            .and_then(|meta: RuntimeMetadataPrefixed| {
+                future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
+            })
     }
 }
 
@@ -257,83 +249,71 @@ impl<T: RpcTypes> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic<C, P, E>(
+    pub fn create_and_submit_extrinsic<C, P>(
         self,
         signer: P,
         call: C,
-        extra: E,
+        extra: T::SignedExtension,
+        account_nonce: T::Index,
+        genesis_hash: T::Hash,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         C: Codec + Send,
         P: Pair,
         P::Public: Into<T::AccountId>,
         P::Signature: Codec,
-        E: Fn(T::Index) -> T::SignedExtension,
     {
-        let account_nonce = self
-            .fetch_nonce(&signer.public().into())
-            .map_err(Into::into);
-        let genesis_hash =
-            self.fetch_genesis_hash()
-                .map_err(Into::into)
-                .and_then(|genesis_hash| {
-                    future::result(genesis_hash.ok_or("Genesis hash not found".into()))
-                });
         let events = self.subscribe_events().map_err(Into::into);
+        events.and_then(move |events| {
+            let extrinsic = Self::create_and_sign_extrinsic(
+                account_nonce,
+                call,
+                genesis_hash,
+                &signer,
+                extra,
+            );
+            let ext_hash = T::Hashing::hash_of(&extrinsic);
 
-        account_nonce.join3(genesis_hash, events).and_then(
-            move |(index, genesis_hash, events)| {
-                let extrinsic = Self::create_and_sign_extrinsic(
-                    index,
-                    call,
-                    genesis_hash,
-                    &signer,
-                    extra,
-                );
-                let ext_hash = T::Hashing::hash_of(&extrinsic);
+            log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
-                log::info!("Submitting Extrinsic `{:?}`", ext_hash);
-
-                let chain = self.chain.clone();
-                self.submit_and_watch::<C, P>(extrinsic)
-                    .and_then(move |bh| {
-                        log::info!("Fetching block {:?}", bh);
-                        chain
-                            .block(Some(bh))
-                            .map(move |b| (bh, b))
-                            .map_err(Into::into)
-                    })
-                    .and_then(|(h, b)| {
-                        b.ok_or(format!("Failed to find block {:?}", h).into())
-                            .map(|b| (h, b))
-                            .into_future()
-                    })
-                    .and_then(move |(bh, sb)| {
-                        log::info!(
-                            "Found block {:?}, with {} extrinsics",
-                            bh,
-                            sb.block.extrinsics.len()
-                        );
-                        wait_for_block_events::<T>(ext_hash, &sb, bh, events)
-                    })
-            },
-        )
+            let chain = self.chain.clone();
+            self.submit_and_watch::<C, P>(extrinsic)
+                .and_then(move |bh| {
+                    log::info!("Fetching block {:?}", bh);
+                    chain
+                        .block(Some(bh))
+                        .map(move |b| (bh, b))
+                        .map_err(Into::into)
+                })
+                .and_then(|(h, b)| {
+                    b.ok_or(format!("Failed to find block {:?}", h).into())
+                        .map(|b| (h, b))
+                        .into_future()
+                })
+                .and_then(move |(bh, sb)| {
+                    log::info!(
+                        "Found block {:?}, with {} extrinsics",
+                        bh,
+                        sb.block.extrinsics.len()
+                    );
+                    wait_for_block_events::<T>(ext_hash, &sb, bh, events)
+                })
+        })
     }
 
     /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic<C, P, E>(
+    fn create_and_sign_extrinsic<C, P>(
         index: T::Index,
         function: C,
         genesis_hash: T::Hash,
         signer: &P,
-        extra: E,
+        extra: T::SignedExtension,
     ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, T::SignedExtension>
     where
         C: Encode + Send,
         P: Pair,
         P::Public: Into<T::AccountId>,
         P::Signature: Codec,
-        E: Fn(T::Index) -> T::SignedExtension,
     {
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -341,7 +321,7 @@ impl<T: RpcTypes> Rpc<T> {
             index
         );
 
-        let raw_payload = (function, extra(index), genesis_hash);
+        let raw_payload = (function, extra.clone(), genesis_hash);
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
@@ -354,7 +334,7 @@ impl<T: RpcTypes> Rpc<T> {
             raw_payload.0,
             signer.public().into(),
             signature.into(),
-            extra(index),
+            extra,
         )
     }
 }
