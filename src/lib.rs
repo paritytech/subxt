@@ -190,7 +190,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use parity_codec::Encode;
+    use parity_scale_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_primitives::{
@@ -203,6 +203,7 @@ mod tests {
     struct Runtime;
 
     impl srml_system::Trait for Runtime {
+        type Call = <node_runtime::Runtime as srml_system::Trait>::Call;
         type Origin = <node_runtime::Runtime as srml_system::Trait>::Origin;
         type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
         type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
