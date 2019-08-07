@@ -50,12 +50,8 @@ use runtime_primitives::{
 };
 use serde::{
     self,
-    de::{
-        DeserializeOwned,
-        Error as DeError,
-    },
+    de::Error as DeError,
     Deserialize,
-    Serialize,
 };
 use srml_system::EventRecord;
 use std::convert::TryInto;
@@ -118,41 +114,19 @@ pub struct SignedBlock {
     pub block: Block,
 }
 
-pub trait RpcTypes: Clone {
-    type AccountId: Codec;
-    type BlockNumber: Bounded + Clone + Serialize + Send + Sync + 'static;
-    type Event: Clone + Codec + std::fmt::Debug + Eq + Send + Sync + 'static;
-    type Hash: Codec
-        + Clone
-        + Copy
-        + Serialize
-        + DeserializeOwned
-        + std::fmt::Debug
-        + PartialEq
-        + Send
-        + Sync
-        + 'static
-        + std::hash::Hash
-        + Eq
-        + Default
-        + AsRef<[u8]>
-        + AsMut<[u8]>;
-    type Hashing: runtime_primitives::traits::Hash<Output = Self::Hash>;
-    type Index: Copy + Decode + Default + std::fmt::Debug;
-    type SignedExtension: SignedExtension;
-}
-
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: RpcTypes> {
+pub struct Rpc<T: srml_system::Trait, SE: SignedExtension> {
+    _marker: std::marker::PhantomData<SE>,
     state: StateClient<T::Hash>,
     chain: ChainClient<T::BlockNumber, T::Hash, (), SignedBlock>,
     author: AuthorClient<T::Hash, T::Hash>,
 }
 
 /// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T: RpcTypes> From<RpcChannel> for Rpc<T> {
-    fn from(channel: RpcChannel) -> Rpc<T> {
-        Rpc {
+impl<T: srml_system::Trait, SE: SignedExtension> From<RpcChannel> for Rpc<T, SE> {
+    fn from(channel: RpcChannel) -> Self {
+        Self {
+            _marker: std::marker::PhantomData,
             state: channel.clone().into(),
             chain: channel.clone().into(),
             author: channel.into(),
@@ -160,7 +134,7 @@ impl<T: RpcTypes> From<RpcChannel> for Rpc<T> {
     }
 }
 
-impl<T: RpcTypes> Rpc<T> {
+impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     /// Fetch a storage key
     pub fn storage<V: Decode>(
         &self,
@@ -197,7 +171,7 @@ impl<T: RpcTypes> Rpc<T> {
     }
 }
 
-impl<T: RpcTypes> Rpc<T> {
+impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
@@ -215,7 +189,7 @@ impl<T: RpcTypes> Rpc<T> {
     /// If successful, returns the block hash.
     fn submit_and_watch<C, P>(
         self,
-        extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, T::SignedExtension>,
+        extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>,
     ) -> impl Future<Item = T::Hash, Error = Error>
     where
         C: Codec + Send,
@@ -253,7 +227,7 @@ impl<T: RpcTypes> Rpc<T> {
         self,
         signer: P,
         call: C,
-        extra: T::SignedExtension,
+        extra: SE,
         account_nonce: T::Index,
         genesis_hash: T::Hash,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
@@ -307,8 +281,8 @@ impl<T: RpcTypes> Rpc<T> {
         function: C,
         genesis_hash: T::Hash,
         signer: &P,
-        extra: T::SignedExtension,
-    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, T::SignedExtension>
+        extra: SE,
+    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>
     where
         C: Encode + Send,
         P: Pair,
@@ -340,7 +314,7 @@ impl<T: RpcTypes> Rpc<T> {
 }
 
 /// Waits for events for the block triggered by the extrinsic
-fn wait_for_block_events<T: RpcTypes>(
+fn wait_for_block_events<T: srml_system::Trait>(
     ext_hash: T::Hash,
     signed_block: &SignedBlock,
     block_hash: T::Hash,

@@ -21,6 +21,7 @@ use parity_scale_codec::{
     Codec,
     Decode,
 };
+use runtime_primitives::traits::SignedExtension;
 use substrate_primitives::{
     storage::StorageKey,
     Pair,
@@ -33,30 +34,30 @@ mod error;
 mod metadata;
 mod rpc;
 
-pub use rpc::RpcTypes;
+pub use error::Error;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: RpcTypes> {
+pub struct ExtrinsicSuccess<T: srml_system::Trait> {
     pub block: T::Hash,
     pub extrinsic: T::Hash,
     pub events: Vec<T::Event>,
 }
 
-fn connect<T: RpcTypes>(
+fn connect<T: srml_system::Trait, SE: SignedExtension>(
     url: &Url,
-) -> impl Future<Item = rpc::Rpc<T>, Error = error::Error> {
+) -> impl Future<Item = rpc::Rpc<T, SE>, Error = error::Error> {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
 }
 
-pub struct ClientBuilder<T: RpcTypes> {
-    _marker: std::marker::PhantomData<T>,
+pub struct ClientBuilder<T: srml_system::Trait, SE: SignedExtension> {
+    _marker: std::marker::PhantomData<(T, SE)>,
     url: Option<Url>,
 }
 
-impl<T: RpcTypes> ClientBuilder<T> {
+impl<T: srml_system::Trait, SE: SignedExtension> ClientBuilder<T, SE> {
     pub fn new() -> Self {
         Self {
             _marker: std::marker::PhantomData,
@@ -69,15 +70,16 @@ impl<T: RpcTypes> ClientBuilder<T> {
         self
     }
 
-    pub fn build(self) -> impl Future<Item = Client<T>, Error = error::Error> {
+    pub fn build(self) -> impl Future<Item = Client<T, SE>, Error = error::Error> {
         let url = self.url.unwrap_or_else(|| {
             Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
         });
-        connect::<T>(&url).and_then(|rpc| {
+        connect::<T, SE>(&url).and_then(|rpc| {
             rpc.metadata()
                 .join(rpc.genesis_hash())
                 .map(|(metadata, genesis_hash)| {
                     Client {
+                        _marker: std::marker::PhantomData,
                         url,
                         genesis_hash,
                         metadata,
@@ -88,14 +90,15 @@ impl<T: RpcTypes> ClientBuilder<T> {
 }
 
 #[derive(Clone)]
-pub struct Client<T: RpcTypes> {
+pub struct Client<T: srml_system::Trait, SE: SignedExtension> {
+    _marker: std::marker::PhantomData<SE>,
     url: Url,
     genesis_hash: T::Hash,
     metadata: metadata::Metadata,
 }
 
-impl<T: RpcTypes> Client<T> {
-    fn connect(&self) -> impl Future<Item = rpc::Rpc<T>, Error = error::Error> {
+impl<T: srml_system::Trait, SE: SignedExtension> Client<T, SE> {
+    fn connect(&self) -> impl Future<Item = rpc::Rpc<T, SE>, Error = error::Error> {
         connect(&self.url)
     }
 
@@ -129,12 +132,12 @@ impl<T: RpcTypes> Client<T> {
         &self,
         signer: P,
         extra: E,
-    ) -> impl Future<Item = XtBuilder<T, P, E>, Error = error::Error>
+    ) -> impl Future<Item = XtBuilder<T, SE, P, E>, Error = error::Error>
     where
         P: Pair,
         P::Public: Into<T::AccountId>,
         P::Signature: Codec,
-        E: Fn(T::Index) -> T::SignedExtension,
+        E: Fn(T::Index) -> SE,
     {
         let account_id: T::AccountId = signer.public().into();
         let account_nonce_key = self
@@ -158,19 +161,19 @@ impl<T: RpcTypes> Client<T> {
     }
 }
 
-pub struct XtBuilder<T: RpcTypes, P, E> {
-    client: Client<T>,
+pub struct XtBuilder<T: srml_system::Trait, SE: SignedExtension, P, E> {
+    client: Client<T, SE>,
     nonce: T::Index,
     signer: P,
     extra: E,
 }
 
-impl<T: RpcTypes, P, E> XtBuilder<T, P, E>
+impl<T: srml_system::Trait, SE: SignedExtension, P, E> XtBuilder<T, SE, P, E>
 where
     P: Pair,
     P::Public: Into<T::AccountId>,
     P::Signature: Codec,
-    E: Fn(T::Index) -> T::SignedExtension,
+    E: Fn(T::Index) -> SE,
 {
     pub fn submit<C: Codec + Send>(
         &self,
@@ -198,17 +201,49 @@ mod tests {
         Pair,
     };
 
-    #[derive(Clone)]
+    #[derive(Clone, PartialEq, Eq)]
     struct Runtime;
-    impl super::RpcTypes for Runtime {
-        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+
+    impl srml_system::Trait for Runtime {
+        type Origin = <node_runtime::Runtime as srml_system::Trait>::Origin;
+        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
         type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
         type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
         type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-        type SignedExtension = node_runtime::SignedExtra;
+        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+        type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
+        type WeightMultiplierUpdate = <node_runtime::Runtime as srml_system::Trait>::WeightMultiplierUpdate;
+        type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
+        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
+        type BlockHashCount = <node_runtime::Runtime as srml_system::Trait>::BlockHashCount;
+        type MaximumBlockWeight = <node_runtime::Runtime as srml_system::Trait>::MaximumBlockWeight;
+        type MaximumBlockLength = <node_runtime::Runtime as srml_system::Trait>::MaximumBlockLength;
+        type AvailableBlockRatio = <node_runtime::Runtime as srml_system::Trait>::AvailableBlockRatio;
     }
+
+    impl srml_balances::Trait for Runtime {
+        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
+        type OnFreeBalanceZero = ();
+        type OnNewAccount = ();
+        type TransactionPayment = ();
+        type TransferPayment = <node_runtime::Runtime as srml_balances::Trait>::TransferPayment;
+        type DustRemoval = <node_runtime::Runtime as srml_balances::Trait>::DustRemoval;
+        type Event = <node_runtime::Runtime as srml_balances::Trait>::Event;
+        type ExistentialDeposit = <node_runtime::Runtime as srml_balances::Trait>::ExistentialDeposit;
+        type TransferFee = <node_runtime::Runtime as srml_balances::Trait>::TransferFee;
+        type CreationFee = <node_runtime::Runtime as srml_balances::Trait>::CreationFee;
+        type TransactionBaseFee = <node_runtime::Runtime as srml_balances::Trait>::TransactionBaseFee;
+        type TransactionByteFee = <node_runtime::Runtime as srml_balances::Trait>::TransactionByteFee;
+        type WeightToFee = <node_runtime::Runtime as srml_balances::Trait>::WeightToFee;
+    }
+
+    type SignedExtra = (
+        srml_system::CheckGenesis<Runtime>,
+        srml_system::CheckEra<Runtime>,
+        srml_system::CheckNonce<Runtime>,
+        srml_system::CheckWeight<Runtime>,
+        srml_balances::TakeFees<Runtime>
+    );
 
     #[test]
     #[ignore] // requires locally running substrate node
@@ -216,24 +251,24 @@ mod tests {
         env_logger::try_init().ok();
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         let client = rt
-            .block_on(ClientBuilder::<Runtime>::new().build())
+            .block_on(ClientBuilder::<Runtime, SignedExtra>::new().build())
             .unwrap();
 
         let signer = substrate_keyring::AccountKeyring::Alice.pair();
         let extra = |nonce| {
             (
-                srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
+                srml_system::CheckGenesis::<Runtime>::new(),
+                srml_system::CheckEra::<Runtime>::from(Era::Immortal),
+                srml_system::CheckNonce::<Runtime>::from(nonce),
+                srml_system::CheckWeight::<Runtime>::new(),
+                srml_balances::TakeFees::<Runtime>::from(0),
             )
         };
         let xt = rt.block_on(client.xt(signer, extra)).unwrap();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
         let transfer =
-            srml_balances::Call::transfer::<node_runtime::Runtime>(dest.into(), 10_000);
+            srml_balances::Call::transfer::<Runtime>(dest.into(), 10_000);
         let call = client.metadata().module("Balances").unwrap().call(transfer);
         rt.block_on(xt.submit(call)).unwrap();
     }
@@ -244,10 +279,10 @@ mod tests {
         env_logger::try_init().ok();
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         let client = rt
-            .block_on(ClientBuilder::<Runtime>::new().build())
+            .block_on(ClientBuilder::<Runtime, SignedExtra>::new().build())
             .unwrap();
 
-        let account: <Runtime as RpcTypes>::AccountId =
+        let account: <Runtime as srml_system::Trait>::AccountId =
             substrate_keyring::AccountKeyring::Alice
                 .pair()
                 .public()
@@ -261,7 +296,7 @@ mod tests {
             .map()
             .unwrap()
             .key(&account);
-        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
+        type Balance = <Runtime as srml_balances::Trait>::Balance;
         rt.block_on(client.fetch::<Balance>(key)).unwrap();
     }
 
@@ -271,7 +306,7 @@ mod tests {
         env_logger::try_init().ok();
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         let client = rt
-            .block_on(ClientBuilder::<Runtime>::new().build())
+            .block_on(ClientBuilder::<Runtime, SignedExtra>::new().build())
             .unwrap();
 
         let balances = client.metadata().module("Balances").unwrap();
@@ -285,7 +320,7 @@ mod tests {
         assert_eq!(call, call2);
 
         let free_balance =
-            <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&dest);
+            <srml_balances::FreeBalance<Runtime>>::key_for(&dest);
         let free_balance_key = StorageKey(blake2_256(&free_balance).to_vec());
         let free_balance_key2 = balances
             .storage("FreeBalance")
@@ -296,7 +331,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <srml_system::AccountNonce<node_runtime::Runtime>>::key_for(&dest);
+            <srml_system::AccountNonce<Runtime>>::key_for(&dest);
         let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
         let account_nonce_key2 = client
             .metadata()
