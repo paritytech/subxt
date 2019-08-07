@@ -210,13 +210,18 @@ mod tests {
         type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
         type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
         type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-        type WeightMultiplierUpdate = <node_runtime::Runtime as srml_system::Trait>::WeightMultiplierUpdate;
+        type WeightMultiplierUpdate =
+            <node_runtime::Runtime as srml_system::Trait>::WeightMultiplierUpdate;
         type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
         type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
-        type BlockHashCount = <node_runtime::Runtime as srml_system::Trait>::BlockHashCount;
-        type MaximumBlockWeight = <node_runtime::Runtime as srml_system::Trait>::MaximumBlockWeight;
-        type MaximumBlockLength = <node_runtime::Runtime as srml_system::Trait>::MaximumBlockLength;
-        type AvailableBlockRatio = <node_runtime::Runtime as srml_system::Trait>::AvailableBlockRatio;
+        type BlockHashCount =
+            <node_runtime::Runtime as srml_system::Trait>::BlockHashCount;
+        type MaximumBlockWeight =
+            <node_runtime::Runtime as srml_system::Trait>::MaximumBlockWeight;
+        type MaximumBlockLength =
+            <node_runtime::Runtime as srml_system::Trait>::MaximumBlockLength;
+        type AvailableBlockRatio =
+            <node_runtime::Runtime as srml_system::Trait>::AvailableBlockRatio;
     }
 
     impl srml_balances::Trait for Runtime {
@@ -224,14 +229,18 @@ mod tests {
         type OnFreeBalanceZero = ();
         type OnNewAccount = ();
         type TransactionPayment = ();
-        type TransferPayment = <node_runtime::Runtime as srml_balances::Trait>::TransferPayment;
+        type TransferPayment =
+            <node_runtime::Runtime as srml_balances::Trait>::TransferPayment;
         type DustRemoval = <node_runtime::Runtime as srml_balances::Trait>::DustRemoval;
         type Event = <node_runtime::Runtime as srml_balances::Trait>::Event;
-        type ExistentialDeposit = <node_runtime::Runtime as srml_balances::Trait>::ExistentialDeposit;
+        type ExistentialDeposit =
+            <node_runtime::Runtime as srml_balances::Trait>::ExistentialDeposit;
         type TransferFee = <node_runtime::Runtime as srml_balances::Trait>::TransferFee;
         type CreationFee = <node_runtime::Runtime as srml_balances::Trait>::CreationFee;
-        type TransactionBaseFee = <node_runtime::Runtime as srml_balances::Trait>::TransactionBaseFee;
-        type TransactionByteFee = <node_runtime::Runtime as srml_balances::Trait>::TransactionByteFee;
+        type TransactionBaseFee =
+            <node_runtime::Runtime as srml_balances::Trait>::TransactionBaseFee;
+        type TransactionByteFee =
+            <node_runtime::Runtime as srml_balances::Trait>::TransactionByteFee;
         type WeightToFee = <node_runtime::Runtime as srml_balances::Trait>::WeightToFee;
     }
 
@@ -240,7 +249,7 @@ mod tests {
         srml_system::CheckEra<Runtime>,
         srml_system::CheckNonce<Runtime>,
         srml_system::CheckWeight<Runtime>,
-        srml_balances::TakeFees<Runtime>
+        srml_balances::TakeFees<Runtime>,
     );
 
     #[test]
@@ -265,8 +274,7 @@ mod tests {
         let xt = rt.block_on(client.xt(signer, extra)).unwrap();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
-        let transfer =
-            srml_balances::Call::transfer::<Runtime>(dest.into(), 10_000);
+        let transfer = srml_balances::Call::transfer::<Runtime>(dest.into(), 10_000);
         let call = client.metadata().module("Balances").unwrap().call(transfer);
         rt.block_on(xt.submit(call)).unwrap();
     }
@@ -317,8 +325,7 @@ mod tests {
         let call2 = balances.call(transfer);
         assert_eq!(call, call2);
 
-        let free_balance =
-            <srml_balances::FreeBalance<Runtime>>::key_for(&dest);
+        let free_balance = <srml_balances::FreeBalance<Runtime>>::key_for(&dest);
         let free_balance_key = StorageKey(blake2_256(&free_balance).to_vec());
         let free_balance_key2 = balances
             .storage("FreeBalance")
@@ -328,8 +335,7 @@ mod tests {
             .key(&dest);
         assert_eq!(free_balance_key, free_balance_key2);
 
-        let account_nonce =
-            <srml_system::AccountNonce<Runtime>>::key_for(&dest);
+        let account_nonce = <srml_system::AccountNonce<Runtime>>::key_for(&dest);
         let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
         let account_nonce_key2 = client
             .metadata()
