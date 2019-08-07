@@ -1,4 +1,4 @@
-use parity_codec::Encode;
+use parity_scale_codec::Encode;
 use runtime_metadata::{
     DecodeDifferent,
     RuntimeMetadata,

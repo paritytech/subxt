@@ -34,8 +34,6 @@ mod error;
 mod metadata;
 mod rpc;
 
-pub use error::Error;
-
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
 pub struct ExtrinsicSuccess<T: srml_system::Trait> {
@@ -94,7 +92,7 @@ pub struct Client<T: srml_system::Trait, SE: SignedExtension> {
     _marker: std::marker::PhantomData<SE>,
     url: Url,
     genesis_hash: T::Hash,
-    metadata: metadata::Metadata,
+    metadata: Metadata,
 }
 
 impl<T: srml_system::Trait, SE: SignedExtension> Client<T, SE> {
