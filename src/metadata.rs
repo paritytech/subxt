@@ -3,36 +3,91 @@ use runtime_metadata::{
     DecodeDifferent,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
+    StorageEntryModifier,
+    StorageEntryType,
+    StorageHasher,
     META_RESERVED,
 };
-use std::convert::TryFrom;
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+};
+use substrate_primitives::storage::StorageKey;
 
 #[derive(Debug)]
 pub struct Metadata {
-    modules: Vec<ModuleMetadata>,
+    modules: HashMap<String, ModuleMetadata>,
 }
 
 impl Metadata {
-    pub fn module_index(&self, name: &str) -> Option<usize> {
-        self.modules
-            .iter()
-            .enumerate()
-            .find(|(_, m)| &m.name == name)
-            .map(|(i, _)| i)
-    }
-
-    pub fn call<T: Encode>(&self, module: &str, call: T) -> Option<Vec<u8>> {
-        self.module_index(module).map(|i| {
-            let mut bytes = vec![i as u8];
-            bytes.extend(call.encode());
-            bytes
-        })
+    pub fn module(&self, name: &str) -> Option<&ModuleMetadata> {
+        self.modules.get(name)
     }
 }
 
 #[derive(Debug)]
 pub struct ModuleMetadata {
-    pub name: String,
+    index: u8,
+    storage: HashMap<String, StorageMetadata>,
+    // calls, event, constants
+}
+
+impl ModuleMetadata {
+    pub fn call<T: Encode>(&self, call: T) -> Vec<u8> {
+        let mut bytes = vec![self.index];
+        bytes.extend(call.encode());
+        bytes
+    }
+
+    pub fn storage(&self, key: &str) -> Option<&StorageMetadata> {
+        self.storage.get(key)
+    }
+}
+
+#[derive(Debug)]
+pub struct StorageMetadata {
+    prefix: String,
+    modifier: StorageEntryModifier,
+    ty: StorageEntryType,
+    default: Vec<u8>,
+}
+
+impl StorageMetadata {
+    pub fn map(&self) -> Option<StorageMap> {
+        match &self.ty {
+            StorageEntryType::Map { hasher, .. } => {
+                let prefix = self.prefix.as_bytes().to_vec();
+                let hasher = hasher.to_owned();
+                Some(StorageMap { prefix, hasher })
+            }
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug)]
+pub struct StorageMap {
+    prefix: Vec<u8>,
+    hasher: StorageHasher,
+}
+
+impl StorageMap {
+    pub fn key<K: Encode>(&self, key: K) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(key.encode());
+        let hash = match self.hasher {
+            StorageHasher::Blake2_128 => {
+                substrate_primitives::blake2_128(&bytes).to_vec()
+            }
+            StorageHasher::Blake2_256 => {
+                substrate_primitives::blake2_256(&bytes).to_vec()
+            }
+            StorageHasher::Twox128 => substrate_primitives::twox_128(&bytes).to_vec(),
+            StorageHasher::Twox256 => substrate_primitives::twox_256(&bytes).to_vec(),
+            StorageHasher::Twox64Concat => substrate_primitives::twox_64(&bytes).to_vec(),
+        };
+        StorageKey(hash)
+    }
 }
 
 #[derive(Debug)]
@@ -53,12 +108,14 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             RuntimeMetadata::V7(meta) => meta,
             _ => Err(Error::InvalidVersion)?,
         };
-        Ok(Metadata {
-            modules: convert(meta.modules)?
-                .into_iter()
-                .map(TryFrom::try_from)
-                .collect::<Result<Vec<_>, _>>()?,
-        })
+        let mut modules = HashMap::new();
+        for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
+            modules.insert(
+                convert(module.name.clone())?,
+                convert_module(i as u8, module)?,
+            );
+        }
+        Ok(Metadata { modules })
     }
 }
 
@@ -69,12 +126,37 @@ fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error
     }
 }
 
-impl TryFrom<runtime_metadata::ModuleMetadata> for ModuleMetadata {
-    type Error = Error;
-
-    fn try_from(module: runtime_metadata::ModuleMetadata) -> Result<Self, Self::Error> {
-        Ok(ModuleMetadata {
-            name: convert(module.name)?,
-        })
+fn convert_module(
+    index: u8,
+    module: runtime_metadata::ModuleMetadata,
+) -> Result<ModuleMetadata, Error> {
+    let mut entries = HashMap::new();
+    if let Some(storage) = module.storage {
+        let storage = convert(storage)?;
+        let prefix = convert(storage.prefix)?;
+        for entry in convert(storage.entries)?.into_iter() {
+            let entry_name = convert(entry.name.clone())?;
+            let entry_prefix = format!("{} {}", prefix, entry_name);
+            let entry = convert_entry(entry_prefix, entry)?;
+            entries.insert(entry_name, entry);
+        }
     }
+
+    Ok(ModuleMetadata {
+        index,
+        storage: entries,
+    })
+}
+
+fn convert_entry(
+    prefix: String,
+    entry: runtime_metadata::StorageEntryMetadata,
+) -> Result<StorageMetadata, Error> {
+    let default = convert(entry.default)?;
+    Ok(StorageMetadata {
+        prefix,
+        modifier: entry.modifier,
+        ty: entry.ty,
+        default,
+    })
 }

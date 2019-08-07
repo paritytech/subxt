@@ -111,7 +111,11 @@ pub mod tests {
     use parity_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
-    use substrate_primitives::crypto::Pair as _;
+    use substrate_primitives::{
+        blake2_256,
+        storage::StorageKey,
+        Pair,
+    };
 
     struct Runtime;
     impl super::RpcTypes for Runtime {
@@ -177,13 +181,38 @@ pub mod tests {
         let url = url::Url::parse("ws://127.0.0.1:9944").unwrap();
         let future = super::metadata::<Runtime>(&url);
         let metadata = run(future).unwrap();
+        let balances = metadata.module("Balances").unwrap();
 
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
-        let transfer = srml_balances::Call::transfer(dest.into(), 10_000);
+        let transfer = srml_balances::Call::transfer(dest.clone().into(), 10_000);
         let call = node_runtime::Call::Balances(transfer.clone())
             .encode()
             .to_vec();
-        let call2 = metadata.call("Balances", transfer).unwrap();
+        let call2 = balances.call(transfer);
         assert_eq!(call, call2);
+
+        let free_balance =
+            <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&dest);
+        let free_balance_key = StorageKey(blake2_256(&free_balance).to_vec());
+        let free_balance_key2 = balances
+            .storage("FreeBalance")
+            .unwrap()
+            .map()
+            .unwrap()
+            .key(&dest);
+        assert_eq!(free_balance_key, free_balance_key2);
+
+        let account_nonce =
+            <srml_system::AccountNonce<node_runtime::Runtime>>::key_for(&dest);
+        let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
+        let account_nonce_key2 = metadata
+            .module("System")
+            .unwrap()
+            .storage("AccountNonce")
+            .unwrap()
+            .map()
+            .unwrap()
+            .key(&dest);
+        assert_eq!(account_nonce_key, account_nonce_key2);
     }
 }

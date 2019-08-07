@@ -223,12 +223,7 @@ impl<T: RpcTypes> Rpc<T> {
     /// If successful, returns the block hash.
     fn submit_and_watch<C, P>(
         self,
-        extrinsic: UncheckedExtrinsic<
-            T::AccountId,
-            C,
-            P::Signature,
-            T::SignedExtension,
-        >,
+        extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, T::SignedExtension>,
     ) -> impl Future<Item = T::Hash, Error = Error>
     where
         C: Codec + Send,
@@ -332,12 +327,7 @@ impl<T: RpcTypes> Rpc<T> {
         genesis_hash: T::Hash,
         signer: &P,
         extra: E,
-    ) -> UncheckedExtrinsic<
-        T::AccountId,
-        C,
-        P::Signature,
-        T::SignedExtension,
-    >
+    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, T::SignedExtension>
     where
         C: Encode + Send,
         P: Pair,
