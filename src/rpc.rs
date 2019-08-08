@@ -17,21 +17,12 @@
 use crate::{
     error::Error,
     metadata::Metadata,
-    ExtrinsicSuccess,
 };
-use futures::{
-    future::{
-        self,
-        Future,
-        IntoFuture,
-    },
-    stream::Stream,
+use futures::future::{
+    self,
+    Future,
 };
-use jsonrpc_core_client::{
-    RpcChannel,
-    RpcError,
-    TypedSubscriptionStream,
-};
+use jsonrpc_core_client::RpcChannel;
 use log;
 use num_traits::bounds::Bounded;
 use parity_scale_codec::{
@@ -44,8 +35,8 @@ use runtime_metadata::RuntimeMetadataPrefixed;
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::{
-        Hash as _,
         SignedExtension,
+        StaticLookup,
     },
 };
 use serde::{
@@ -53,15 +44,10 @@ use serde::{
     de::Error as DeError,
     Deserialize,
 };
-use srml_system::EventRecord;
 use std::convert::TryInto;
 use substrate_primitives::{
     blake2_256,
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    twox_128,
+    storage::StorageKey,
     Pair,
 };
 use substrate_rpc::{
@@ -72,7 +58,6 @@ use substrate_rpc::{
     },
     state::StateClient,
 };
-use transaction_pool::txpool::watcher::Status;
 
 /// Copy of runtime_primitives::OpaqueExtrinsic to allow a local Deserialize impl
 #[derive(PartialEq, Eq, Clone, Default, Encode, Decode)]
@@ -172,10 +157,91 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
 }
 
 impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub fn create_and_submit_extrinsic<C, P>(
+        self,
+        signer: P,
+        call: C,
+        extra: SE,
+        account_nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> impl Future<Item = T::Hash, Error = Error>
+    where
+        C: Encode + Send,
+        P: Pair,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
+    {
+        let extrinsic = Self::create_and_sign_extrinsic(
+            &signer,
+            call,
+            extra,
+            account_nonce,
+            genesis_hash,
+        );
+
+        self.author
+            .submit_extrinsic(extrinsic.encode().into())
+            .map_err(Into::into)
+    }
+
+    /// Creates and signs an Extrinsic for the supplied `Call`
+    fn create_and_sign_extrinsic<C, P>(
+        signer: &P,
+        call: C,
+        extra: SE,
+        account_nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> UncheckedExtrinsic<<T::Lookup as StaticLookup>::Source, C, P::Signature, SE>
+    where
+        C: Encode + Send,
+        P: Pair,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
+    {
+        log::info!(
+            "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
+            genesis_hash,
+            account_nonce
+        );
+
+        let raw_payload = (call, extra.clone(), (&genesis_hash, &genesis_hash));
+        let signature = raw_payload.using_encoded(|payload| {
+            if payload.len() > 256 {
+                signer.sign(&blake2_256(payload)[..])
+            } else {
+                signer.sign(payload)
+            }
+        });
+
+        UncheckedExtrinsic::new_signed(
+            raw_payload.0,
+            signer.public().into(),
+            signature.into(),
+            extra,
+        )
+    }
+}
+
+use crate::ExtrinsicSuccess;
+use futures::{
+    future::IntoFuture,
+    stream::Stream,
+};
+use jsonrpc_core_client::TypedSubscriptionStream;
+use runtime_primitives::traits::Hash;
+use srml_system::EventRecord;
+use substrate_primitives::{
+    storage::StorageChangeSet,
+    twox_128,
+};
+use transaction_pool::txpool::watcher::Status;
+
+impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
-    ) -> impl Future<Item = TypedSubscriptionStream<StorageChangeSet<T::Hash>>, Error = RpcError>
+    ) -> impl Future<Item = TypedSubscriptionStream<StorageChangeSet<T::Hash>>, Error = Error>
     {
         let events_key = b"System Events";
         let storage_key = twox_128(events_key);
@@ -183,18 +249,24 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
 
         self.state
             .subscribe_storage(Some(vec![StorageKey(storage_key.to_vec())]))
+            .map_err(Into::into)
     }
 
     /// Submit an extrinsic, waiting for it to be finalized.
     /// If successful, returns the block hash.
     fn submit_and_watch<C, P>(
         self,
-        extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>,
+        extrinsic: UncheckedExtrinsic<
+            <T::Lookup as StaticLookup>::Source,
+            C,
+            P::Signature,
+            SE,
+        >,
     ) -> impl Future<Item = T::Hash, Error = Error>
     where
-        C: Codec + Send,
+        C: Encode + Send,
         P: Pair,
-        P::Public: Into<T::AccountId>,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
         P::Signature: Codec,
     {
         self.author
@@ -204,7 +276,8 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
                 stream
                     .filter_map(|status| {
                         match status {
-                            Status::Future | Status::Ready | Status::Broadcast(_) => None, // ignore in progress extrinsic for now
+                            // ignore in progress extrinsic for now
+                            Status::Future | Status::Ready | Status::Broadcast(_) => None,
                             Status::Finalized(block_hash) => Some(Ok(block_hash)),
                             Status::Usurped(_) => Some(Err("Extrinsic Usurped".into())),
                             Status::Dropped => Some(Err("Extrinsic Dropped".into())),
@@ -223,7 +296,8 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic<C, P>(
+    #[allow(unused)]
+    pub fn create_and_watch_extrinsic<C, P>(
         self,
         signer: P,
         call: C,
@@ -232,22 +306,21 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
         genesis_hash: T::Hash,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
-        C: Codec + Send,
+        C: Encode + Send,
         P: Pair,
-        P::Public: Into<T::AccountId>,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
         P::Signature: Codec,
     {
         let events = self.subscribe_events().map_err(Into::into);
         events.and_then(move |events| {
             let extrinsic = Self::create_and_sign_extrinsic(
-                account_nonce,
-                call,
-                genesis_hash,
                 &signer,
+                call,
                 extra,
+                account_nonce,
+                genesis_hash,
             );
             let ext_hash = T::Hashing::hash_of(&extrinsic);
-
             log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
             let chain = self.chain.clone();
@@ -273,43 +346,6 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
                     wait_for_block_events::<T>(ext_hash, &sb, bh, events)
                 })
         })
-    }
-
-    /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic<C, P>(
-        index: T::Index,
-        function: C,
-        genesis_hash: T::Hash,
-        signer: &P,
-        extra: SE,
-    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>
-    where
-        C: Encode + Send,
-        P: Pair,
-        P::Public: Into<T::AccountId>,
-        P::Signature: Codec,
-    {
-        log::info!(
-            "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
-            genesis_hash,
-            index
-        );
-
-        let raw_payload = (function, extra.clone(), genesis_hash);
-        let signature = raw_payload.using_encoded(|payload| {
-            if payload.len() > 256 {
-                signer.sign(&blake2_256(payload)[..])
-            } else {
-                signer.sign(payload)
-            }
-        });
-
-        UncheckedExtrinsic::new_signed(
-            raw_payload.0,
-            signer.public().into(),
-            signature.into(),
-            extra,
-        )
     }
 }
 

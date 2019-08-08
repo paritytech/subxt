@@ -14,6 +14,14 @@ use std::{
 };
 use substrate_primitives::storage::StorageKey;
 
+pub struct Encoded(pub Vec<u8>);
+
+impl Encode for Encoded {
+    fn encode(&self) -> Vec<u8> {
+        self.0.to_owned()
+    }
+}
+
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
@@ -33,10 +41,10 @@ pub struct ModuleMetadata {
 }
 
 impl ModuleMetadata {
-    pub fn call<T: Encode>(&self, call: T) -> Vec<u8> {
+    pub fn call<T: Encode>(&self, call: T) -> Encoded {
         let mut bytes = vec![self.index];
         bytes.extend(call.encode());
-        bytes
+        Encoded(bytes)
     }
 
     pub fn storage(&self, key: &str) -> Option<&StorageMetadata> {
