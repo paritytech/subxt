@@ -1,12 +1,12 @@
-// Copyright 2018-2019 Parity Technologies (UK) Ltd.
+// Copyright 2019 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
-// ink! is free software: you can redistribute it and/or modify
+// subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// ink! is distributed in the hope that it will be useful,
+// subxt is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -16,6 +16,7 @@
 
 use crate::{
     error::Error,
+    metadata::Metadata,
     ExtrinsicSuccess,
 };
 use futures::{
@@ -33,12 +34,13 @@ use jsonrpc_core_client::{
 };
 use log;
 use num_traits::bounds::Bounded;
-use parity_codec::{
+use parity_scale_codec::{
     Codec,
     Decode,
     Encode,
 };
 
+use runtime_metadata::RuntimeMetadataPrefixed;
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::{
@@ -46,13 +48,13 @@ use runtime_primitives::{
         SignedExtension,
     },
 };
-use runtime_support::StorageMap;
 use serde::{
     self,
     de::Error as DeError,
     Deserialize,
 };
-use std::marker::PhantomData;
+use srml_system::EventRecord;
+use std::convert::TryInto;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -93,7 +95,7 @@ impl<'a> serde::Deserialize<'a> for OpaqueExtrinsic {
     {
         let r = substrate_primitives::bytes::deserialize(de)?;
         Decode::decode(&mut &r[..])
-            .ok_or(DeError::custom("Invalid value passed into decode"))
+            .map_err(|e| DeError::custom(format!("Decode error: {}", e)))
     }
 }
 
@@ -113,75 +115,63 @@ pub struct SignedBlock {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: srml_system::Trait, C, P, E, SE> {
+pub struct Rpc<T: srml_system::Trait, SE: SignedExtension> {
+    _marker: std::marker::PhantomData<SE>,
     state: StateClient<T::Hash>,
     chain: ChainClient<T::BlockNumber, T::Hash, (), SignedBlock>,
     author: AuthorClient<T::Hash, T::Hash>,
-    _phantom: PhantomData<(C, P, E, SE)>,
 }
 
 /// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T, C, P, E, SE> From<RpcChannel> for Rpc<T, C, P, E, SE>
-where
-    T: srml_system::Trait,
-{
-    fn from(channel: RpcChannel) -> Rpc<T, C, P, E, SE> {
-        Rpc {
+impl<T: srml_system::Trait, SE: SignedExtension> From<RpcChannel> for Rpc<T, SE> {
+    fn from(channel: RpcChannel) -> Self {
+        Self {
+            _marker: std::marker::PhantomData,
             state: channel.clone().into(),
             chain: channel.clone().into(),
             author: channel.into(),
-            _phantom: PhantomData,
         }
     }
 }
 
-impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
-where
-    T: srml_system::Trait,
-{
+impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     /// Fetch a storage key
-    pub fn fetch<V: Decode>(
+    pub fn storage<V: Decode>(
         &self,
-        key: Vec<u8>,
-    ) -> impl Future<Item = Option<V>, Error = RpcError> {
-        let storage_key = StorageKey(blake2_256(&key).to_vec());
+        key: StorageKey,
+    ) -> impl Future<Item = Option<V>, Error = Error> {
         self.state
-            .storage(storage_key, None)
+            .storage(key, None)
             .map(|data| {
                 data.map(|d| Decode::decode(&mut &d.0[..]).expect("Valid storage key"))
             })
             .map_err(Into::into)
     }
-}
-
-impl<T, C, P, E, SE> Rpc<T, C, P, E, SE>
-where
-    T: srml_system::Trait,
-    C: Codec + Send,
-    P: Pair,
-    P::Signature: Codec,
-    P::Public: Into<T::AccountId>,
-    E: Fn(T::Index) -> SE + Send,
-    SE: SignedExtension + Encode,
-{
-    /// Fetch the latest nonce for the given `AccountId`
-    fn fetch_nonce(
-        &self,
-        account: &T::AccountId,
-    ) -> impl Future<Item = <T as srml_system::Trait>::Index, Error = RpcError> {
-        let account_nonce_key = <srml_system::AccountNonce<T>>::key_for(account);
-        self.fetch::<<T as srml_system::Trait>::Index>(account_nonce_key)
-            .map(|value| value.unwrap_or_default())
-    }
 
     /// Fetch the genesis hash
-    fn fetch_genesis_hash(
-        &self,
-    ) -> impl Future<Item = Option<T::Hash>, Error = RpcError> {
+    pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
         let block_zero = T::BlockNumber::min_value();
-        self.chain.block_hash(Some(NumberOrHex::Number(block_zero)))
+        self.chain
+            .block_hash(Some(NumberOrHex::Number(block_zero)))
+            .map_err(Into::into)
+            .and_then(|genesis_hash| {
+                future::result(genesis_hash.ok_or("Genesis hash not found".into()))
+            })
     }
 
+    /// Fetch the metadata
+    pub fn metadata(&self) -> impl Future<Item = Metadata, Error = Error> {
+        self.state
+            .metadata(None)
+            .map(|bytes| Decode::decode(&mut &bytes[..]).unwrap())
+            .map_err(Into::into)
+            .and_then(|meta: RuntimeMetadataPrefixed| {
+                future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
+            })
+    }
+}
+
+impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
@@ -197,10 +187,16 @@ where
 
     /// Submit an extrinsic, waiting for it to be finalized.
     /// If successful, returns the block hash.
-    fn submit_and_watch(
+    fn submit_and_watch<C, P>(
         self,
         extrinsic: UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
+    ) -> impl Future<Item = T::Hash, Error = Error>
+    where
+        C: Codec + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+    {
         self.author
             .watch_extrinsic(extrinsic.encode().into())
             .map_err(Into::into)
@@ -227,77 +223,79 @@ where
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn create_and_submit_extrinsic(
+    pub fn create_and_submit_extrinsic<C, P>(
         self,
         signer: P,
         call: C,
-        extra: E,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
-        let account_nonce = self
-            .fetch_nonce(&signer.public().into())
-            .map_err(Into::into);
-        let genesis_hash =
-            self.fetch_genesis_hash()
-                .map_err(Into::into)
-                .and_then(|genesis_hash| {
-                    future::result(genesis_hash.ok_or("Genesis hash not found".into()))
-                });
+        extra: SE,
+        account_nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
+    where
+        C: Codec + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+    {
         let events = self.subscribe_events().map_err(Into::into);
+        events.and_then(move |events| {
+            let extrinsic = Self::create_and_sign_extrinsic(
+                account_nonce,
+                call,
+                genesis_hash,
+                &signer,
+                extra,
+            );
+            let ext_hash = T::Hashing::hash_of(&extrinsic);
 
-        account_nonce.join3(genesis_hash, events).and_then(
-            move |(index, genesis_hash, events)| {
-                let extrinsic = Self::create_and_sign_extrinsic(
-                    index,
-                    call,
-                    genesis_hash,
-                    &signer,
-                    extra,
-                );
-                let ext_hash = T::Hashing::hash_of(&extrinsic);
+            log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
-                log::info!("Submitting Extrinsic `{:?}`", ext_hash);
-
-                let chain = self.chain.clone();
-                self.submit_and_watch(extrinsic)
-                    .and_then(move |bh| {
-                        log::info!("Fetching block {:?}", bh);
-                        chain
-                            .block(Some(bh))
-                            .map(move |b| (bh, b))
-                            .map_err(Into::into)
-                    })
-                    .and_then(|(h, b)| {
-                        b.ok_or(format!("Failed to find block {:?}", h).into())
-                            .map(|b| (h, b))
-                            .into_future()
-                    })
-                    .and_then(move |(bh, sb)| {
-                        log::info!(
-                            "Found block {:?}, with {} extrinsics",
-                            bh,
-                            sb.block.extrinsics.len()
-                        );
-                        wait_for_block_events::<T>(ext_hash, &sb, bh, events)
-                    })
-            },
-        )
+            let chain = self.chain.clone();
+            self.submit_and_watch::<C, P>(extrinsic)
+                .and_then(move |bh| {
+                    log::info!("Fetching block {:?}", bh);
+                    chain
+                        .block(Some(bh))
+                        .map(move |b| (bh, b))
+                        .map_err(Into::into)
+                })
+                .and_then(|(h, b)| {
+                    b.ok_or(format!("Failed to find block {:?}", h).into())
+                        .map(|b| (h, b))
+                        .into_future()
+                })
+                .and_then(move |(bh, sb)| {
+                    log::info!(
+                        "Found block {:?}, with {} extrinsics",
+                        bh,
+                        sb.block.extrinsics.len()
+                    );
+                    wait_for_block_events::<T>(ext_hash, &sb, bh, events)
+                })
+        })
     }
 
     /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic(
+    fn create_and_sign_extrinsic<C, P>(
         index: T::Index,
         function: C,
         genesis_hash: T::Hash,
         signer: &P,
-        extra: E,
-    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, SE> {
+        extra: SE,
+    ) -> UncheckedExtrinsic<T::AccountId, C, P::Signature, SE>
+    where
+        C: Encode + Send,
+        P: Pair,
+        P::Public: Into<T::AccountId>,
+        P::Signature: Codec,
+    {
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
             genesis_hash,
             index
         );
 
-        let raw_payload = (function, extra(index), genesis_hash);
+        let raw_payload = (function, extra.clone(), genesis_hash);
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
@@ -310,21 +308,18 @@ where
             raw_payload.0,
             signer.public().into(),
             signature.into(),
-            extra(index),
+            extra,
         )
     }
 }
 
 /// Waits for events for the block triggered by the extrinsic
-fn wait_for_block_events<T>(
+fn wait_for_block_events<T: srml_system::Trait>(
     ext_hash: T::Hash,
     signed_block: &SignedBlock,
     block_hash: T::Hash,
-    events: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
-where
-    T: srml_system::Trait,
-{
+    events_stream: TypedSubscriptionStream<StorageChangeSet<T::Hash>>,
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
     let ext_index = signed_block
         .block
         .extrinsics
@@ -337,33 +332,33 @@ where
         .into_future();
 
     let block_hash = block_hash.clone();
-    let block_events = events
-        .map(|event| {
-            let records = event
-                .changes
-                .iter()
-                .filter_map(|(_key, data)| {
-                    data.as_ref()
-                        .and_then(|data| Decode::decode(&mut &data.0[..]))
-                })
-                .flat_map(|events: Vec<srml_system::EventRecord<T::Event, T::Hash>>| {
-                    events
-                })
-                .collect::<Vec<_>>();
-            log::debug!("Block {:?}, Events {:?}", event.block, records.len());
-            (event.block, records)
-        })
-        .filter(move |(event_block, _)| *event_block == block_hash)
+    let block_events = events_stream
+        .filter(move |event| event.block == block_hash)
         .into_future()
         .map_err(|(e, _)| e.into())
-        .map(|(events, _)| events);
+        .and_then(|(change_set, _)| {
+            match change_set {
+                None => future::ok(Vec::new()),
+                Some(change_set) => {
+                    let events = change_set
+                        .changes
+                        .iter()
+                        .filter_map(|(_key, data)| {
+                            data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
+                        })
+                        .collect::<Result<Vec<Vec<EventRecord<T::Event, T::Hash>>>, _>>()
+                        .map(|events| events.into_iter().flat_map(|es| es).collect())
+                        .map_err(Into::into);
+                    future::result(events)
+                }
+            }
+        });
 
     block_events
         .join(ext_index)
         .map(move |(events, ext_index)| {
             let events: Vec<T::Event> = events
                 .iter()
-                .flat_map(|(_, events)| events)
                 .filter_map(|e| {
                     if let srml_system::Phase::ApplyExtrinsic(i) = e.phase {
                         if i as usize == ext_index {
