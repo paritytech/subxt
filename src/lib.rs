@@ -20,8 +20,12 @@ use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
+    Encode,
 };
-use runtime_primitives::traits::SignedExtension;
+use runtime_primitives::traits::{
+    SignedExtension,
+    StaticLookup,
+};
 use substrate_primitives::{
     storage::StorageKey,
     Pair,
@@ -133,11 +137,11 @@ impl<T: srml_system::Trait, SE: SignedExtension> Client<T, SE> {
     ) -> impl Future<Item = XtBuilder<T, SE, P, E>, Error = error::Error>
     where
         P: Pair,
-        P::Public: Into<T::AccountId>,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
         P::Signature: Codec,
         E: Fn(T::Index) -> SE,
     {
-        let account_id: T::AccountId = signer.public().into();
+        let account_id: <T::Lookup as StaticLookup>::Source = signer.public().into();
         let account_nonce_key = self
             .metadata
             .module("System")
@@ -169,14 +173,14 @@ pub struct XtBuilder<T: srml_system::Trait, SE: SignedExtension, P, E> {
 impl<T: srml_system::Trait, SE: SignedExtension, P, E> XtBuilder<T, SE, P, E>
 where
     P: Pair,
-    P::Public: Into<T::AccountId>,
+    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
     E: Fn(T::Index) -> SE,
 {
-    pub fn submit<C: Codec + Send>(
+    pub fn submit<C: Encode + Send>(
         &self,
         call: C,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = error::Error> {
+    ) -> impl Future<Item = T::Hash, Error = error::Error> {
         let signer = self.signer.clone();
         let nonce = self.nonce.clone();
         let extra = (self.extra)(nonce.clone());
@@ -323,7 +327,7 @@ mod tests {
         let call = node_runtime::Call::Balances(transfer.clone())
             .encode()
             .to_vec();
-        let call2 = balances.call(transfer);
+        let call2 = balances.call(transfer).0;
         assert_eq!(call, call2);
 
         let free_balance = <srml_balances::FreeBalance<Runtime>>::key_for(&dest);
