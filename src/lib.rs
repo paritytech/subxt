@@ -177,14 +177,19 @@ where
     P::Signature: Codec,
     E: Fn(T::Index) -> SE,
 {
+    pub fn set_nonce(&mut self, nonce: T::Index) {
+        self.nonce = nonce;
+    }
+
     pub fn submit<C: Encode + Send>(
-        &self,
+        &mut self,
         call: C,
     ) -> impl Future<Item = T::Hash, Error = error::Error> {
         let signer = self.signer.clone();
         let nonce = self.nonce.clone();
         let extra = (self.extra)(nonce.clone());
         let genesis_hash = self.client.genesis_hash.clone();
+        self.set_nonce(nonce + 1.into());
         self.client.connect().and_then(move |rpc| {
             rpc.create_and_submit_extrinsic(signer, call, extra, nonce, genesis_hash)
         })
