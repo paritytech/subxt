@@ -1,3 +1,4 @@
+//! Implements support for the srml_system module.
 use crate::{
     error::Error,
     Client,
@@ -78,14 +79,19 @@ pub trait System {
     /// The aggregated event type of the runtime.
     type Event: Parameter + Member + From<Event>;
 
+    /// The `SignedExtension` to the basic transaction logic.
     type SignedExtra: SignedExtension;
 
+    /// Creates the `SignedExtra` from the account nonce.
     fn extra(nonce: Self::Index) -> Self::SignedExtra;
 }
 
+/// The System extension trait for the Client.
 pub trait SystemStore {
+    /// System type.
     type System: System;
 
+    /// Returns the account nonce for an account_id.
     fn account_nonce(
         &self,
         account_id: <Self::System as System>::AccountId,

@@ -20,13 +20,20 @@ use parity_scale_codec::Error as CodecError;
 use std::io::Error as IoError;
 use substrate_primitives::crypto::SecretStringError;
 
+/// Error enum.
 #[derive(Debug, derive_more::From)]
 pub enum Error {
+    /// Codec error.
     Codec(CodecError),
+    /// Io error.
     Io(IoError),
+    /// Rpc error.
     Rpc(RpcError),
+    /// Secret string error.
     SecretString(SecretStringError),
+    /// Metadata error.
     Metadata(MetadataError),
+    /// Other error.
     Other(String),
 }
 

@@ -1,9 +1,5 @@
-pub mod balances;
-pub mod system;
+//! Implements support for built-in runtime modules.
 
-#[derive(Debug)]
-pub enum ModuleError {
-    ModuleNotFound(&'static str),
-    StorageNotFound(&'static str),
-    StorageTypeError(&'static str),
-}
+pub mod balances;
+pub mod contracts;
+pub mod system;

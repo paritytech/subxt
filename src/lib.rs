@@ -14,6 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! A library to **sub**mit e**xt**rinsics to a
+//! [substrate](https://github.com/paritytech/substrate) node via RPC.
+
+#![deny(missing_docs)]
+#![deny(warnings)]
+
 use futures::future::{
     self,
     Either,
@@ -48,8 +54,11 @@ pub mod srml;
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
 pub struct ExtrinsicSuccess<T: System> {
+    /// Block hash.
     pub block: T::Hash,
+    /// Extinsic hash.
     pub extrinsic: T::Hash,
+    /// List of events.
     pub events: Vec<T::Event>,
 }
 
@@ -59,12 +68,14 @@ fn connect<T: System>(url: &Url) -> impl Future<Item = rpc::Rpc<T>, Error = Erro
         .map_err(Into::into)
 }
 
+/// ClientBuilder for constructing a Client.
 pub struct ClientBuilder<T: System> {
     _marker: std::marker::PhantomData<T>,
     url: Option<Url>,
 }
 
 impl<T: System> ClientBuilder<T> {
+    /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
             _marker: std::marker::PhantomData,
@@ -72,11 +83,13 @@ impl<T: System> ClientBuilder<T> {
         }
     }
 
+    /// Set the substrate rpc address.
     pub fn set_url(mut self, url: Url) -> Self {
         self.url = Some(url);
         self
     }
 
+    /// Creates a new Client.
     pub fn build(self) -> impl Future<Item = Client<T>, Error = Error> {
         let url = self.url.unwrap_or_else(|| {
             Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
@@ -95,6 +108,7 @@ impl<T: System> ClientBuilder<T> {
     }
 }
 
+/// Client to interface with a substrate node.
 pub struct Client<T: System> {
     url: Url,
     genesis_hash: T::Hash,
@@ -116,10 +130,12 @@ impl<T: System + 'static> Client<T> {
         connect(&self.url)
     }
 
+    /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
     }
 
+    /// Fetch a StorageKey.
     pub fn fetch<V: Decode>(
         &self,
         key: StorageKey,
@@ -127,6 +143,7 @@ impl<T: System + 'static> Client<T> {
         self.connect().and_then(|rpc| rpc.storage::<V>(key))
     }
 
+    /// Fetch a StorageKey or return the default.
     pub fn fetch_or<V: Decode>(
         &self,
         key: StorageKey,
@@ -135,6 +152,7 @@ impl<T: System + 'static> Client<T> {
         self.fetch(key).map(|value| value.unwrap_or(default))
     }
 
+    /// Fetch a StorageKey or return the default.
     pub fn fetch_or_default<V: Decode + Default>(
         &self,
         key: StorageKey,
@@ -142,6 +160,7 @@ impl<T: System + 'static> Client<T> {
         self.fetch(key).map(|value| value.unwrap_or_default())
     }
 
+    /// Create a transaction builder for a private key.
     pub fn xt<P>(
         &self,
         signer: P,
@@ -167,6 +186,7 @@ impl<T: System + 'static> Client<T> {
     }
 }
 
+/// Transaction builder.
 pub struct XtBuilder<T: System, P> {
     client: Client<T>,
     nonce: T::Index,
@@ -179,18 +199,22 @@ where
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
 {
+    /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         self.client.metadata()
     }
 
+    /// Returns the nonce.
     pub fn nonce(&self) -> T::Index {
         self.nonce.clone()
     }
 
+    /// Sets the nonce to a new value.
     pub fn set_nonce(&mut self, nonce: T::Index) {
         self.nonce = nonce;
     }
 
+    /// Submits a transaction to the chain.
     pub fn submit<C: Encode + Send>(
         &mut self,
         call: C,
