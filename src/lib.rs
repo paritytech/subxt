@@ -14,7 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use futures::future::Future;
+use futures::future::{
+    self,
+    Either,
+    Future,
+};
 use jsonrpc_core_client::transports::ws;
 use metadata::Metadata;
 use parity_scale_codec::{
@@ -150,10 +154,8 @@ impl<T: System + 'static> Client<T> {
     {
         let client = self.clone();
         match nonce {
-            Some(nonce) => futures::future::Either::A(futures::future::ok(nonce)),
-            None => {
-                futures::future::Either::B(self.account_nonce(signer.public().into()))
-            }
+            Some(nonce) => Either::A(future::ok(nonce)),
+            None => Either::B(self.account_nonce(signer.public().into())),
         }
         .map(|nonce| {
             XtBuilder {
@@ -179,6 +181,10 @@ where
 {
     pub fn metadata(&self) -> &Metadata {
         self.client.metadata()
+    }
+
+    pub fn nonce(&self) -> T::Index {
+        self.nonce.clone()
     }
 
     pub fn set_nonce(&mut self, nonce: T::Index) {
@@ -272,6 +278,10 @@ mod tests {
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
         let dest = AccountKeyring::Bob.pair().public();
+        rt.block_on(xt.transfer(dest.clone().into(), 10_000))
+            .unwrap();
+
+        // check that nonce is handled correctly
         rt.block_on(xt.transfer(dest.into(), 10_000)).unwrap();
     }
 
