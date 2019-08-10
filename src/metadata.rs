@@ -1,4 +1,8 @@
-use parity_scale_codec::Encode;
+use crate::codec::Encoded;
+use parity_scale_codec::{
+    Decode,
+    Encode,
+};
 use runtime_metadata::{
     DecodeDifferent,
     RuntimeMetadata,
@@ -11,15 +15,17 @@ use runtime_metadata::{
 use std::{
     collections::HashMap,
     convert::TryFrom,
+    marker::PhantomData,
 };
 use substrate_primitives::storage::StorageKey;
 
-pub struct Encoded(pub Vec<u8>);
-
-impl Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
-    }
+#[derive(Debug)]
+pub enum MetadataError {
+    ModuleNotFound(&'static str),
+    CallNotFound(&'static str),
+    StorageNotFound(&'static str),
+    StorageTypeError,
+    MapValueTypeError,
 }
 
 #[derive(Clone, Debug)]
@@ -28,27 +34,41 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    pub fn module(&self, name: &str) -> Option<&ModuleMetadata> {
-        self.modules.get(name)
+    pub fn module(&self, name: &'static str) -> Result<&ModuleMetadata, MetadataError> {
+        self.modules
+            .get(name)
+            .ok_or(MetadataError::ModuleNotFound(name))
     }
 }
 
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
-    index: u8,
+    index: Vec<u8>,
     storage: HashMap<String, StorageMetadata>,
-    // calls, event, constants
+    calls: HashMap<String, Vec<u8>>,
+    // event, constants
 }
 
 impl ModuleMetadata {
-    pub fn call<T: Encode>(&self, call: T) -> Encoded {
-        let mut bytes = vec![self.index];
-        bytes.extend(call.encode());
-        Encoded(bytes)
+    pub fn call<T: Encode>(
+        &self,
+        function: &'static str,
+        params: T,
+    ) -> Result<Encoded, MetadataError> {
+        let fn_bytes = self
+            .calls
+            .get(function)
+            .ok_or(MetadataError::CallNotFound(function))?;
+        let mut bytes = self.index.clone();
+        bytes.extend(fn_bytes);
+        bytes.extend(params.encode());
+        Ok(Encoded(bytes))
     }
 
-    pub fn storage(&self, key: &str) -> Option<&StorageMetadata> {
-        self.storage.get(key)
+    pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
+        self.storage
+            .get(key)
+            .ok_or(MetadataError::StorageNotFound(key))
     }
 }
 
@@ -61,26 +81,38 @@ pub struct StorageMetadata {
 }
 
 impl StorageMetadata {
-    pub fn map(&self) -> Option<StorageMap> {
+    pub fn get_map<K: Encode, V: Decode + Clone>(
+        &self,
+    ) -> Result<StorageMap<K, V>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
                 let prefix = self.prefix.as_bytes().to_vec();
                 let hasher = hasher.to_owned();
-                Some(StorageMap { prefix, hasher })
+                let default = Decode::decode(&mut &self.default[..])
+                    .map_err(|_| MetadataError::MapValueTypeError)?;
+                Some(StorageMap {
+                    _marker: PhantomData,
+                    prefix,
+                    hasher,
+                    default,
+                })
             }
             _ => None,
         }
+        .ok_or(MetadataError::StorageTypeError)
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct StorageMap {
+pub struct StorageMap<K, V> {
+    _marker: PhantomData<K>,
     prefix: Vec<u8>,
     hasher: StorageHasher,
+    default: V,
 }
 
-impl StorageMap {
-    pub fn key<K: Encode>(&self, key: K) -> StorageKey {
+impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
+    pub fn key(&self, key: K) -> StorageKey {
         let mut bytes = self.prefix.clone();
         bytes.extend(key.encode());
         let hash = match self.hasher {
@@ -95,6 +127,10 @@ impl StorageMap {
             StorageHasher::Twox64Concat => substrate_primitives::twox_64(&bytes).to_vec(),
         };
         StorageKey(hash)
+    }
+
+    pub fn default(&self) -> V {
+        self.default.clone()
     }
 }
 
@@ -118,10 +154,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         };
         let mut modules = HashMap::new();
         for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
-            modules.insert(
-                convert(module.name.clone())?,
-                convert_module(i as u8, module)?,
-            );
+            modules.insert(convert(module.name.clone())?, convert_module(i, module)?);
         }
         Ok(Metadata { modules })
     }
@@ -135,7 +168,7 @@ fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error
 }
 
 fn convert_module(
-    index: u8,
+    index: usize,
     module: runtime_metadata::ModuleMetadata,
 ) -> Result<ModuleMetadata, Error> {
     let mut entries = HashMap::new();
@@ -149,10 +182,17 @@ fn convert_module(
             entries.insert(entry_name, entry);
         }
     }
-
+    let mut functions = HashMap::new();
+    if let Some(calls) = module.calls {
+        for (index, call) in convert(calls)?.into_iter().enumerate() {
+            let name = convert(call.name)?;
+            functions.insert(name, vec![index as u8]);
+        }
+    }
     Ok(ModuleMetadata {
-        index,
+        index: vec![index as u8],
         storage: entries,
+        calls: functions,
     })
 }
 

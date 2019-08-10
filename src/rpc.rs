@@ -17,6 +17,7 @@
 use crate::{
     error::Error,
     metadata::Metadata,
+    srml::system::System,
 };
 use futures::future::{
     self,
@@ -34,10 +35,7 @@ use parity_scale_codec::{
 use runtime_metadata::RuntimeMetadataPrefixed;
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
-    traits::{
-        SignedExtension,
-        StaticLookup,
-    },
+    traits::StaticLookup,
 };
 use serde::{
     self,
@@ -100,18 +98,16 @@ pub struct SignedBlock {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: srml_system::Trait, SE: SignedExtension> {
-    _marker: std::marker::PhantomData<SE>,
+pub struct Rpc<T: System> {
     state: StateClient<T::Hash>,
     chain: ChainClient<T::BlockNumber, T::Hash, (), SignedBlock>,
     author: AuthorClient<T::Hash, T::Hash>,
 }
 
 /// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T: srml_system::Trait, SE: SignedExtension> From<RpcChannel> for Rpc<T, SE> {
+impl<T: System> From<RpcChannel> for Rpc<T> {
     fn from(channel: RpcChannel) -> Self {
         Self {
-            _marker: std::marker::PhantomData,
             state: channel.clone().into(),
             chain: channel.clone().into(),
             author: channel.into(),
@@ -119,7 +115,7 @@ impl<T: srml_system::Trait, SE: SignedExtension> From<RpcChannel> for Rpc<T, SE>
     }
 }
 
-impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
+impl<T: System> Rpc<T> {
     /// Fetch a storage key
     pub fn storage<V: Decode>(
         &self,
@@ -156,13 +152,12 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     }
 }
 
-impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
+impl<T: System> Rpc<T> {
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub fn create_and_submit_extrinsic<C, P>(
         self,
         signer: P,
         call: C,
-        extra: SE,
         account_nonce: T::Index,
         genesis_hash: T::Hash,
     ) -> impl Future<Item = T::Hash, Error = Error>
@@ -172,13 +167,8 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
         P::Public: Into<<T::Lookup as StaticLookup>::Source>,
         P::Signature: Codec,
     {
-        let extrinsic = Self::create_and_sign_extrinsic(
-            &signer,
-            call,
-            extra,
-            account_nonce,
-            genesis_hash,
-        );
+        let extrinsic =
+            Self::create_and_sign_extrinsic(&signer, call, account_nonce, genesis_hash);
 
         self.author
             .submit_extrinsic(extrinsic.encode().into())
@@ -189,10 +179,14 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
     fn create_and_sign_extrinsic<C, P>(
         signer: &P,
         call: C,
-        extra: SE,
         account_nonce: T::Index,
         genesis_hash: T::Hash,
-    ) -> UncheckedExtrinsic<<T::Lookup as StaticLookup>::Source, C, P::Signature, SE>
+    ) -> UncheckedExtrinsic<
+        <T::Lookup as StaticLookup>::Source,
+        C,
+        P::Signature,
+        T::SignedExtra,
+    >
     where
         C: Encode + Send,
         P: Pair,
@@ -205,6 +199,7 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
             account_nonce
         );
 
+        let extra = T::extra(account_nonce);
         let raw_payload = (call, extra.clone(), (&genesis_hash, &genesis_hash));
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
@@ -237,7 +232,7 @@ use substrate_primitives::{
 };
 use transaction_pool::txpool::watcher::Status;
 
-impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
+impl<T: System> Rpc<T> {
     /// Subscribe to substrate System Events
     fn subscribe_events(
         &self,
@@ -260,7 +255,7 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
             <T::Lookup as StaticLookup>::Source,
             C,
             P::Signature,
-            SE,
+            T::SignedExtra,
         >,
     ) -> impl Future<Item = T::Hash, Error = Error>
     where
@@ -301,7 +296,6 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
         self,
         signer: P,
         call: C,
-        extra: SE,
         account_nonce: T::Index,
         genesis_hash: T::Hash,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
@@ -316,7 +310,6 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
             let extrinsic = Self::create_and_sign_extrinsic(
                 &signer,
                 call,
-                extra,
                 account_nonce,
                 genesis_hash,
             );
@@ -350,7 +343,7 @@ impl<T: srml_system::Trait, SE: SignedExtension> Rpc<T, SE> {
 }
 
 /// Waits for events for the block triggered by the extrinsic
-fn wait_for_block_events<T: srml_system::Trait>(
+fn wait_for_block_events<T: System>(
     ext_hash: T::Hash,
     signed_block: &SignedBlock,
     block_hash: T::Hash,

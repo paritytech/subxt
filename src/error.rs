@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::metadata::MetadataError;
 use jsonrpc_core_client::RpcError;
 use parity_scale_codec::Error as CodecError;
 use std::io::Error as IoError;
@@ -25,6 +26,7 @@ pub enum Error {
     Io(IoError),
     Rpc(RpcError),
     SecretString(SecretStringError),
+    Metadata(MetadataError),
     Other(String),
 }
 
