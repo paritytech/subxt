@@ -39,6 +39,30 @@ impl Metadata {
             .get(name)
             .ok_or(MetadataError::ModuleNotFound(name))
     }
+
+    pub fn pretty(&self) -> String {
+        let mut string = String::new();
+        for (name, module) in &self.modules {
+            string.push_str(name.as_str());
+            string.push('\n');
+            for (storage, _) in &module.storage {
+                string.push_str(" s  ");
+                string.push_str(storage.as_str());
+                string.push('\n');
+            }
+            for (call, _) in &module.calls {
+                string.push_str(" c  ");
+                string.push_str(call.as_str());
+                string.push('\n');
+            }
+            for (event, _) in &module.events {
+                string.push_str(" e  ");
+                string.push_str(event.as_str());
+                string.push('\n');
+            }
+        }
+        string
+    }
 }
 
 #[derive(Clone, Debug)]

@@ -324,7 +324,6 @@ mod tests {
         let (_, client) = test_setup();
 
         let balances = client.metadata().module("Balances").unwrap();
-
         let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
