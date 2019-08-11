@@ -2,8 +2,13 @@
 use crate::{
     error::Error,
     Client,
+    XtBuilder,
 };
-use futures::future::Future;
+use futures::future::{
+    self,
+    Future,
+};
+use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
@@ -19,6 +24,7 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use srml_system::Event;
+use substrate_primitives::Pair;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
 pub trait System {
@@ -115,8 +121,43 @@ impl<T: System + 'static> SystemStore for Client<T> {
         };
         let map = match account_nonce_map() {
             Ok(map) => map,
-            Err(err) => return Box::new(futures::future::err(err)),
+            Err(err) => return Box::new(future::err(err)),
         };
         Box::new(self.fetch_or(map.key(account_id), map.default()))
+    }
+}
+
+/// The System extension trait for the XtBuilder.
+pub trait SystemCalls {
+    /// System type.
+    type System: System;
+
+    /// Sets the new code.
+    fn set_code(
+        &mut self,
+        code: Vec<u8>,
+    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>;
+}
+
+impl<T: System + 'static, P> SystemCalls for XtBuilder<T, P>
+where
+    P: Pair,
+    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
+{
+    type System = T;
+
+    fn set_code(
+        &mut self,
+        code: Vec<u8>,
+    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>
+    {
+        let set_code_call =
+            || Ok(self.metadata().module("System")?.call("set_code", code)?);
+        let call = match set_code_call() {
+            Ok(call) => call,
+            Err(err) => return Box::new(future::err(err)),
+        };
+        Box::new(self.submit(call))
     }
 }

@@ -6,7 +6,10 @@ use crate::{
     Client,
     XtBuilder,
 };
-use futures::future::Future;
+use futures::future::{
+    self,
+    Future,
+};
 use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     MaybeSerializeDebug,
@@ -54,24 +57,6 @@ pub trait BalancesStore {
     ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>;
 }
 
-/// The Balances extension trait for the XtBuilder.
-pub trait BalancesCalls {
-    /// Balances type.
-    type Balances: Balances;
-
-    /// Transfer some liquid free balance to another account.
-    ///
-    /// `transfer` will set the `FreeBalance` of the sender and receiver.
-    /// It will decrease the total issuance of the system by the `TransferFee`.
-    /// If the sender's account is below the existential deposit as a result
-    /// of the transfer, the account will be reaped.
-    fn transfer(
-        &mut self,
-        to: <<Self::Balances as System>::Lookup as StaticLookup>::Source,
-        amount: <Self::Balances as Balances>::Balance,
-    ) -> Box<dyn Future<Item = <Self::Balances as System>::Hash, Error = Error> + Send>;
-}
-
 impl<T: Balances + 'static> BalancesStore for Client<T> {
     type Balances = T;
 
@@ -91,10 +76,28 @@ impl<T: Balances + 'static> BalancesStore for Client<T> {
         };
         let map = match free_balance_map() {
             Ok(map) => map,
-            Err(err) => return Box::new(futures::future::err(err)),
+            Err(err) => return Box::new(future::err(err)),
         };
         Box::new(self.fetch_or(map.key(account_id), map.default()))
     }
+}
+
+/// The Balances extension trait for the XtBuilder.
+pub trait BalancesCalls {
+    /// Balances type.
+    type Balances: Balances;
+
+    /// Transfer some liquid free balance to another account.
+    ///
+    /// `transfer` will set the `FreeBalance` of the sender and receiver.
+    /// It will decrease the total issuance of the system by the `TransferFee`.
+    /// If the sender's account is below the existential deposit as a result
+    /// of the transfer, the account will be reaped.
+    fn transfer(
+        &mut self,
+        to: <<Self::Balances as System>::Lookup as StaticLookup>::Source,
+        amount: <Self::Balances as Balances>::Balance,
+    ) -> Box<dyn Future<Item = <Self::Balances as System>::Hash, Error = Error> + Send>;
 }
 
 impl<T: Balances + 'static, P> BalancesCalls for XtBuilder<T, P>
@@ -119,7 +122,7 @@ where
         };
         let call = match transfer_call() {
             Ok(call) => call,
-            Err(err) => return Box::new(futures::future::err(err)),
+            Err(err) => return Box::new(future::err(err)),
         };
         Box::new(self.submit(call))
     }
