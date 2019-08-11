@@ -46,7 +46,8 @@ pub struct ModuleMetadata {
     index: Vec<u8>,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
-    // event, constants
+    events: HashMap<String, Vec<u8>>,
+    // constants
 }
 
 impl ModuleMetadata {
@@ -171,7 +172,7 @@ fn convert_module(
     index: usize,
     module: runtime_metadata::ModuleMetadata,
 ) -> Result<ModuleMetadata, Error> {
-    let mut entries = HashMap::new();
+    let mut storage_map = HashMap::new();
     if let Some(storage) = module.storage {
         let storage = convert(storage)?;
         let prefix = convert(storage.prefix)?;
@@ -179,20 +180,28 @@ fn convert_module(
             let entry_name = convert(entry.name.clone())?;
             let entry_prefix = format!("{} {}", prefix, entry_name);
             let entry = convert_entry(entry_prefix, entry)?;
-            entries.insert(entry_name, entry);
+            storage_map.insert(entry_name, entry);
         }
     }
-    let mut functions = HashMap::new();
+    let mut call_map = HashMap::new();
     if let Some(calls) = module.calls {
         for (index, call) in convert(calls)?.into_iter().enumerate() {
             let name = convert(call.name)?;
-            functions.insert(name, vec![index as u8]);
+            call_map.insert(name, vec![index as u8]);
+        }
+    }
+    let mut event_map = HashMap::new();
+    if let Some(events) = module.event {
+        for (index, event) in convert(events)?.into_iter().enumerate() {
+            let name = convert(event.name)?;
+            event_map.insert(name, vec![index as u8]);
         }
     }
     Ok(ModuleMetadata {
         index: vec![index as u8],
-        storage: entries,
-        calls: functions,
+        storage: storage_map,
+        calls: call_map,
+        events: event_map,
     })
 }
 
