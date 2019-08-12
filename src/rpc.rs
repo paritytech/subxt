@@ -116,7 +116,7 @@ impl<T: System> Rpc<T> {
 
 impl<T: System> Rpc<T> {
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub fn create_and_submit_extrinsic<C, P>(
+    pub fn submit_extrinsic<C, P>(
         self,
         signer: P,
         call: C,
@@ -294,8 +294,7 @@ impl<T: System> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    #[allow(unused)]
-    pub fn create_and_watch_extrinsic<C, P>(
+    pub fn submit_and_watch_extrinsic<C, P>(
         self,
         signer: P,
         call: C,

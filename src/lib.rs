@@ -255,10 +255,23 @@ where
         let genesis_hash = self.client.genesis_hash.clone();
         self.set_nonce(nonce + 1.into());
         self.client.connect().and_then(move |rpc| {
-            rpc.create_and_submit_extrinsic(signer, call, nonce, genesis_hash)
+            rpc.submit_extrinsic(signer, call, nonce, genesis_hash)
         })
     }
-}
+
+    /// Submits transaction to the chain and watch for events.
+    pub fn submit_and_watch<C: Encode + Send>(
+        &mut self,
+        call: C,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+        let signer = self.signer.clone();
+        let nonce = self.nonce.clone();
+        let genesis_hash = self.client.genesis_hash.clone();
+        self.set_nonce(nonce + 1.into());
+        self.client.connect().and_then(move |rpc| {
+            rpc.submit_and_watch_extrinsic(signer, call, nonce, genesis_hash)
+        })
+    }}
 
 #[cfg(test)]
 mod tests {
