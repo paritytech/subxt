@@ -254,9 +254,9 @@ where
         let nonce = self.nonce.clone();
         let genesis_hash = self.client.genesis_hash.clone();
         self.set_nonce(nonce + 1.into());
-        self.client.connect().and_then(move |rpc| {
-            rpc.submit_extrinsic(signer, call, nonce, genesis_hash)
-        })
+        self.client
+            .connect()
+            .and_then(move |rpc| rpc.submit_extrinsic(signer, call, nonce, genesis_hash))
     }
 
     /// Submits transaction to the chain and watch for events.
@@ -271,7 +271,8 @@ where
         self.client.connect().and_then(move |rpc| {
             rpc.submit_and_watch_extrinsic(signer, call, nonce, genesis_hash)
         })
-    }}
+    }
+}
 
 #[cfg(test)]
 mod tests {

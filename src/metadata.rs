@@ -115,16 +115,15 @@ impl StorageMetadata {
                 let hasher = hasher.to_owned();
                 let default = Decode::decode(&mut &self.default[..])
                     .map_err(|_| MetadataError::MapValueTypeError)?;
-                Some(StorageMap {
+                Ok(StorageMap {
                     _marker: PhantomData,
                     prefix,
                     hasher,
                     default,
                 })
             }
-            _ => None,
+            _ => Err(MetadataError::StorageTypeError),
         }
-        .ok_or(MetadataError::StorageTypeError)
     }
 }
 
