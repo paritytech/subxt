@@ -34,16 +34,25 @@ use parity_scale_codec::{
 };
 use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::{
-    storage::StorageKey,
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
     Pair,
 };
 use url::Url;
 
-pub use error::Error;
-use srml::system::{
-    System,
-    SystemStore,
+use crate::{
+    rpc::{
+        MapStream,
+        Rpc,
+    },
+    srml::system::{
+        System,
+        SystemStore,
+    },
 };
+pub use error::Error;
 
 mod codec;
 mod error;
@@ -62,7 +71,7 @@ pub struct ExtrinsicSuccess<T: System> {
     pub events: Vec<T::Event>,
 }
 
-fn connect<T: System>(url: &Url) -> impl Future<Item = rpc::Rpc<T>, Error = Error> {
+fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url.as_str())
         .expect("Url is a valid url; qed")
         .map_err(Into::into)
@@ -126,7 +135,7 @@ impl<T: System> Clone for Client<T> {
 }
 
 impl<T: System + 'static> Client<T> {
-    fn connect(&self) -> impl Future<Item = rpc::Rpc<T>, Error = Error> {
+    fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
 
@@ -158,6 +167,28 @@ impl<T: System + 'static> Client<T> {
         key: StorageKey,
     ) -> impl Future<Item = V, Error = Error> {
         self.fetch(key).map(|value| value.unwrap_or_default())
+    }
+
+    /// Subscribe to events.
+    pub fn subscribe_events(
+        &self,
+    ) -> impl Future<Item = MapStream<StorageChangeSet<T::Hash>>, Error = Error> {
+        self.connect().and_then(|rpc| rpc.subscribe_events())
+    }
+
+    /// Subscribe to new blocks.
+    pub fn subscribe_blocks(
+        &self,
+    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
+        self.connect().and_then(|rpc| rpc.subscribe_blocks())
+    }
+
+    /// Subscribe to finalized blocks.
+    pub fn subscribe_finalized_blocks(
+        &self,
+    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
+        self.connect()
+            .and_then(|rpc| rpc.subscribe_finalized_blocks())
     }
 
     /// Create a transaction builder for a private key.
@@ -237,6 +268,7 @@ mod tests {
         BalancesCalls,
         BalancesStore,
     };
+    use futures::stream::Stream;
     use parity_scale_codec::Encode;
     use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
@@ -256,6 +288,7 @@ mod tests {
         type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
         type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
         type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
+        type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
         type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
 
         type SignedExtra = (
@@ -295,7 +328,7 @@ mod tests {
 
     #[test]
     #[ignore] // requires locally running substrate node
-    fn node_runtime_balance_transfer() {
+    fn test_tx_transfer_balance() {
         let (mut rt, client) = test_setup();
 
         let signer = AccountKeyring::Alice.pair();
@@ -311,7 +344,7 @@ mod tests {
 
     #[test]
     #[ignore] // requires locally running substrate node
-    fn node_runtime_fetch_account_balance() {
+    fn test_state_read_free_balance() {
         let (mut rt, client) = test_setup();
 
         let account = AccountKeyring::Alice.pair().public();
@@ -320,7 +353,29 @@ mod tests {
 
     #[test]
     #[ignore] // requires locally running substrate node
-    fn node_runtime_fetch_metadata() {
+    fn test_chain_subscribe_blocks() {
+        let (mut rt, client) = test_setup();
+
+        let stream = rt.block_on(client.subscribe_blocks()).unwrap();
+        let (_header, _) = rt
+            .block_on(stream.into_future().map_err(|(e, _)| e))
+            .unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_chain_subscribe_finalized_blocks() {
+        let (mut rt, client) = test_setup();
+
+        let stream = rt.block_on(client.subscribe_finalized_blocks()).unwrap();
+        let (_header, _) = rt
+            .block_on(stream.into_future().map_err(|(e, _)| e))
+            .unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_chain_read_metadata() {
         let (_, client) = test_setup();
 
         let balances = client.metadata().module("Balances").unwrap();

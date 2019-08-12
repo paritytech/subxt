@@ -13,6 +13,7 @@ use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
     Hash,
+    Header,
     MaybeDisplay,
     MaybeSerializeDebug,
     MaybeSerializeDebugButNotDeserialize,
@@ -23,6 +24,7 @@ use runtime_primitives::traits::{
     StaticLookup,
 };
 use runtime_support::Parameter;
+use serde::de::DeserializeOwned;
 use srml_system::Event;
 use substrate_primitives::Pair;
 
@@ -81,6 +83,11 @@ pub trait System {
     /// modules (e.g. Indices module) may provide more functional/efficient
     /// alternatives.
     type Lookup: StaticLookup<Target = Self::AccountId>;
+
+    /// The block header.
+    type Header: Parameter
+        + Header<Number = Self::BlockNumber, Hash = Self::Hash>
+        + DeserializeOwned;
 
     /// The aggregated event type of the runtime.
     type Event: Parameter + Member + From<Event>;
