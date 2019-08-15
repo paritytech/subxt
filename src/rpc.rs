@@ -27,7 +27,6 @@ use jsonrpc_core_client::RpcChannel;
 use log;
 use num_traits::bounds::Bounded;
 use parity_scale_codec::{
-    Codec,
     Decode,
     Encode,
 };
@@ -37,16 +36,12 @@ use runtime_primitives::{
     generic::{
         Block,
         SignedBlock,
-        UncheckedExtrinsic,
     },
-    traits::StaticLookup,
     OpaqueExtrinsic,
 };
 use std::convert::TryInto;
 use substrate_primitives::{
-    blake2_256,
     storage::StorageKey,
-    Pair,
 };
 use substrate_rpc::{
     author::AuthorClient,
@@ -111,72 +106,6 @@ impl<T: System> Rpc<T> {
             .and_then(|meta: RuntimeMetadataPrefixed| {
                 future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
             })
-    }
-}
-
-impl<T: System> Rpc<T> {
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub fn submit_extrinsic<C, P>(
-        self,
-        signer: P,
-        call: C,
-        account_nonce: T::Index,
-        genesis_hash: T::Hash,
-    ) -> impl Future<Item = T::Hash, Error = Error>
-    where
-        C: Encode + Send,
-        P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
-    {
-        let extrinsic =
-            Self::create_and_sign_extrinsic(&signer, call, account_nonce, genesis_hash);
-
-        self.author
-            .submit_extrinsic(extrinsic.encode().into())
-            .map_err(Into::into)
-    }
-
-    /// Creates and signs an Extrinsic for the supplied `Call`
-    fn create_and_sign_extrinsic<C, P>(
-        signer: &P,
-        call: C,
-        account_nonce: T::Index,
-        genesis_hash: T::Hash,
-    ) -> UncheckedExtrinsic<
-        <T::Lookup as StaticLookup>::Source,
-        C,
-        P::Signature,
-        T::SignedExtra,
-    >
-    where
-        C: Encode + Send,
-        P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
-    {
-        log::info!(
-            "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
-            genesis_hash,
-            account_nonce
-        );
-
-        let extra = T::extra(account_nonce);
-        let raw_payload = (call, extra.clone(), (&genesis_hash, &genesis_hash));
-        let signature = raw_payload.using_encoded(|payload| {
-            if payload.len() > 256 {
-                signer.sign(&blake2_256(payload)[..])
-            } else {
-                signer.sign(payload)
-            }
-        });
-
-        UncheckedExtrinsic::new_signed(
-            raw_payload.0,
-            signer.public().into(),
-            signature.into(),
-            extra,
-        )
     }
 }
 
@@ -249,77 +178,58 @@ impl<T: System> Rpc<T> {
             .map_err(Into::into)
     }
 
-    /// Submit an extrinsic, waiting for it to be finalized.
-    /// If successful, returns the block hash.
-    fn submit_and_watch<C, P>(
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub fn submit_extrinsic<E>(
         self,
-        extrinsic: UncheckedExtrinsic<
-            <T::Lookup as StaticLookup>::Source,
-            C,
-            P::Signature,
-            T::SignedExtra,
-        >,
+        extrinsic: E,
     ) -> impl Future<Item = T::Hash, Error = Error>
-    where
-        C: Encode + Send,
-        P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+        where
+            E: Encode,
     {
         self.author
-            .watch_extrinsic(extrinsic.encode().into())
+            .submit_extrinsic(extrinsic.encode().into())
             .map_err(Into::into)
-            .and_then(|stream| {
-                stream
-                    .filter_map(|status| {
-                        log::info!("received status {:?}", status);
-                        match status {
-                            // ignore in progress extrinsic for now
-                            Status::Future | Status::Ready | Status::Broadcast(_) => None,
-                            Status::Finalized(block_hash) => Some(Ok(block_hash)),
-                            Status::Usurped(_) => Some(Err("Extrinsic Usurped".into())),
-                            Status::Dropped => Some(Err("Extrinsic Dropped".into())),
-                            Status::Invalid => Some(Err("Extrinsic Invalid".into())),
-                        }
-                    })
-                    .into_future()
-                    .map_err(|(e, _)| e.into())
-                    .and_then(|(result, _)| {
-                        result
-                            .ok_or(Error::from("Stream terminated"))
-                            .and_then(|r| r)
-                            .into_future()
-                    })
-            })
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn submit_and_watch_extrinsic<C, P>(
+    pub fn submit_and_watch_extrinsic<E>(
         self,
-        signer: P,
-        call: C,
-        account_nonce: T::Index,
-        genesis_hash: T::Hash,
+        extrinsic: E,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
-        C: Encode + Send,
-        P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+        E: Encode,
     {
         let events = self.subscribe_events().map_err(Into::into);
         events.and_then(move |events| {
-            let extrinsic = Self::create_and_sign_extrinsic(
-                &signer,
-                call,
-                account_nonce,
-                genesis_hash,
-            );
             let ext_hash = T::Hashing::hash_of(&extrinsic);
             log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
             let chain = self.chain.clone();
-            self.submit_and_watch::<C, P>(extrinsic)
+            self.author
+                .watch_extrinsic(extrinsic.encode().into())
+                .map_err(Into::into)
+                .and_then(|stream| {
+                    stream
+                        .filter_map(|status| {
+                            log::info!("received status {:?}", status);
+                            match status {
+                                // ignore in progress extrinsic for now
+                                Status::Future | Status::Ready | Status::Broadcast(_) => None,
+                                Status::Finalized(block_hash) => Some(Ok(block_hash)),
+                                Status::Usurped(_) => Some(Err("Extrinsic Usurped".into())),
+                                Status::Dropped => Some(Err("Extrinsic Dropped".into())),
+                                Status::Invalid => Some(Err("Extrinsic Invalid".into())),
+                            }
+                        })
+                        .into_future()
+                        .map_err(|(e, _)| e.into())
+                        .and_then(|(result, _)| {
+                            result
+                                .ok_or(Error::from("Stream terminated"))
+                                .and_then(|r| r)
+                                .into_future()
+                        })
+                })
                 .and_then(move |bh| {
                     log::info!("Fetching block {:?}", bh);
                     chain

@@ -100,7 +100,7 @@ pub trait BalancesCalls {
     ) -> Box<dyn Future<Item = <Self::Balances as System>::Hash, Error = Error> + Send>;
 }
 
-impl<T: Balances + 'static, P> BalancesCalls for XtBuilder<T, P>
+impl<T: Balances + 'static, P, V> BalancesCalls for XtBuilder<T, P, V>
 where
     P: Pair,
     P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
@@ -120,10 +120,12 @@ where
                 .module("Balances")?
                 .call("transfer", (to, compact(amount)))?)
         };
-        let call = match transfer_call() {
+        let _call = match transfer_call() {
             Ok(call) => call,
             Err(err) => return Box::new(future::err(err)),
         };
-        Box::new(self.submit(call))
+        // todo: [AJ] update to new builder style
+        unreachable!()
+//        Box::new(self.submit(call))
     }
 }

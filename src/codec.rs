@@ -4,6 +4,7 @@ use parity_scale_codec::{
     HasCompact,
 };
 
+#[derive(Clone)]
 pub struct Encoded(pub Vec<u8>);
 
 impl Encode for Encoded {
