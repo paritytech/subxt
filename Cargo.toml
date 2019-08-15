@@ -35,3 +35,4 @@ node-runtime = { git = "https://github.com/paritytech/substrate/", package = "no
 srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
 tokio = "0.1"
+wabt = "0.9.0"

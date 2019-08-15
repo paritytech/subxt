@@ -474,10 +474,16 @@ mod tests {
         let signer = AccountKeyring::Alice.pair();
         let xt = rt.block_on(client.xt(signer, None)).unwrap();
 
-        const CONTRACT_WASM: &[u8] = b""; // todo
+        const CONTRACT: &str = r#"
+(module
+    (func (export "call"))
+    (func (export "deploy"))
+)
+"#;
+        let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
         let put_code = xt
-            .contracts(|call| call.put_code(500_000, CONTRACT_WASM.to_vec()))
+            .contracts(|call| call.put_code(500_000, wasm))
             .unwrap()
             .submit_and_watch();
 
