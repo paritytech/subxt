@@ -1,9 +1,5 @@
 //! Implements support for the srml_system module.
-use crate::{
-    error::Error,
-    Client,
-    XtBuilder,
-};
+use crate::{error::Error, Client, XtBuilder, Valid};
 use futures::future::{
     self,
     Future,
@@ -27,6 +23,9 @@ use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use srml_system::Event;
 use substrate_primitives::Pair;
+use crate::metadata::MetadataError;
+use crate::srml::ModuleCalls;
+use crate::codec::Encoded;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
 pub trait System {
@@ -135,38 +134,49 @@ impl<T: System + 'static> SystemStore for Client<T> {
 }
 
 /// The System extension trait for the XtBuilder.
-pub trait SystemCalls {
+pub trait SystemXt {
     /// System type.
     type System: System;
+    /// Keypair type
+    type Pair: Pair;
 
-    /// Sets the new code.
-    fn set_code(
-        &mut self,
-        code: Vec<u8>,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>;
+    /// Create a call for the srml system module
+    fn system<F>(&self, f: F) -> Result<XtBuilder<Self::System, Self::Pair, Valid>, MetadataError>
+        where
+            F: FnOnce(ModuleCalls<Self::System, Self::Pair>) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + 'static, P, V> SystemCalls for XtBuilder<T, P, V>
+impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
+    where
+        P: Pair,
+        P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
+{
+    type System = T;
+    type Pair = P;
+
+    fn system<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+        where
+            F: FnOnce(ModuleCalls<Self::System, Self::Pair>) -> Result<Encoded, MetadataError>
+    {
+        let module = self.metadata().module("System")?;
+        let call = f(ModuleCalls::new(module))?;
+        Ok(self.set_call(call))
+    }
+}
+
+impl<T: System + 'static, P>  ModuleCalls<T, P>
 where
     P: Pair,
     P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
 {
-    type System = T;
-
-    fn set_code(
-        &mut self,
+    /// Sets the new code.
+    pub fn set_code(
+        &self,
         code: Vec<u8>,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>
+    ) -> Result<Encoded, MetadataError>
     {
-        let set_code_call =
-            || Ok(self.metadata().module("System")?.call("set_code", code)?);
-        let _call = match set_code_call() {
-            Ok(call) => call,
-            Err(err) => return Box::new(future::err(err)),
-        };
-        // todo: [AJ] update to new builder style
-        unreachable!()
-//        Box::new(self.submit(call))
+        self.module.call("set_code", code)
     }
 }
