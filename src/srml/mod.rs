@@ -14,7 +14,8 @@ pub struct ModuleCalls<T, P> {
 }
 
 impl<T, P> ModuleCalls<T, P> {
-    fn new(module: &ModuleMetadata) -> Self {
+    /// Create new module calls
+    pub fn new(module: &ModuleMetadata) -> Self {
         ModuleCalls::<T, P> {
             module: module.clone(),
             marker: PhantomData,

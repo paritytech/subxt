@@ -43,9 +43,7 @@ impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
     where
         F: FnOnce(ModuleCalls<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>,
     {
-        let module = self.metadata().module("Contracts")?;
-        let call = f(ModuleCalls::new(module))?;
-        Ok(self.set_call(call))
+        self.set_call("Contracts", f)
     }
 }
 

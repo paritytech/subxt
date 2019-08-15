@@ -159,9 +159,7 @@ impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
         where
             F: FnOnce(ModuleCalls<Self::System, Self::Pair>) -> Result<Encoded, MetadataError>
     {
-        let module = self.metadata().module("System")?;
-        let call = f(ModuleCalls::new(module))?;
-        Ok(self.set_call(call))
+        self.set_call("System", f)
     }
 }
 

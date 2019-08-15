@@ -59,6 +59,8 @@ use crate::{
 };
 pub use error::Error;
 use crate::codec::Encoded;
+use crate::srml::ModuleCalls;
+use crate::metadata::MetadataError;
 
 mod codec;
 mod error;
@@ -271,15 +273,21 @@ where
     }
 
     /// Sets the module call to a new value
-    pub fn set_call(&self, call: Encoded) -> XtBuilder<T, P, Valid> {
-        XtBuilder {
+    pub fn set_call<F>(&self, module: &'static str, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+    where
+        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>
+    {
+        let module = self.metadata().module(module)?;
+        let call = f(ModuleCalls::new(module))?;
+
+        Ok(XtBuilder {
             client: self.client.clone(),
             nonce: self.nonce.clone(),
             genesis_hash: self.genesis_hash.clone(),
             signer: self.signer.clone(),
             call: Some(call),
             marker: PhantomData,
-        }
+        })
     }
 }
 

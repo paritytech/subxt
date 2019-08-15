@@ -105,9 +105,8 @@ impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
         where
             F: FnOnce(ModuleCalls<Self::Balances, Self::Pair>) -> Result<Encoded, MetadataError>,
     {
-        let module = self.metadata().module("Balances")?;
-        let call = f(ModuleCalls::new(module))?;
-        Ok(self.set_call(call))
+        self.set_call("Balances", f)
+
     }
 }
 
