@@ -1,6 +1,5 @@
 //! Implements support for the srml_contracts module.
 use crate::{codec::{compact, Encoded}, metadata::{
-    ModuleMetadata,
     MetadataError,
 }, srml::{
     balances::Balances,
@@ -9,7 +8,7 @@ use crate::{codec::{compact, Encoded}, metadata::{
 use parity_scale_codec::{Codec};
 use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::Pair;
-use std::marker::PhantomData;
+use crate::srml::ModuleCalls;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
 /// instructions can operate on them efficiently.
@@ -19,7 +18,7 @@ pub type Gas = u64;
 pub trait Contracts: System + Balances {}
 
 /// The Contracts extension trait for the XtBuilder.
-pub trait ContractsModule {
+pub trait ContractsXt {
     /// Contracts type.
     type Contracts: Contracts;
     /// Key Pair Type
@@ -28,10 +27,10 @@ pub trait ContractsModule {
     /// Create a call for the srml contracts module
     fn contracts<F>(&self, f: F) -> Result<XtBuilder<Self::Contracts, Self::Pair, Valid>, MetadataError>
     where
-        F: FnOnce(ContractsCall<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>;
+        F: FnOnce(ModuleCalls<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Contracts + 'static, P, V> ContractsModule for XtBuilder<T, P, V>
+impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
     where
         P: Pair,
         P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
@@ -42,32 +41,21 @@ impl<T: Contracts + 'static, P, V> ContractsModule for XtBuilder<T, P, V>
 
     fn contracts<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
     where
-        F: FnOnce(ContractsCall<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>,
+        F: FnOnce(ModuleCalls<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>,
     {
         let module = self.metadata().module("Contracts")?;
-        let call = f(ContractsCall::new(module))?;
+        let call = f(ModuleCalls::new(module))?;
         Ok(self.set_call(call))
     }
 }
 
-/// Creates contract module calls
-pub struct ContractsCall<T, P> {
-    module: ModuleMetadata,
-    marker: PhantomData<fn() -> (T, P)>,
-}
-
-impl<T: Contracts + 'static, P> ContractsCall<T, P>
+impl<T: Contracts + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
     P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
 {
-    fn new(module: &ModuleMetadata) -> Self {
-        ContractsCall::<T, P> {
-            module: module.clone(),
-            marker: PhantomData,
-        }
-    }
+
 
     /// Stores the given binary Wasm code into the chain's storage and returns
     /// its `codehash`.
@@ -114,7 +102,7 @@ where
     /// `existential_deposit`, a regular account will be created and any value
     ///  will be transferred.
     pub fn call(
-        &mut self,
+        &self,
         dest: <<T as System>::Lookup as StaticLookup>::Source,
         value: <T as Balances>::Balance,
         gas_limit: Gas,

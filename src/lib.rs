@@ -264,6 +264,12 @@ where
         self
     }
 
+    /// Increment the nonce
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, V> {
+        self.set_nonce(self.nonce() + 1.into());
+        self
+    }
+
     /// Sets the module call to a new value
     pub fn set_call(&self, call: Encoded) -> XtBuilder<T, P, Valid> {
         XtBuilder {
@@ -349,12 +355,12 @@ mod tests {
     use crate::srml::{
         balances::{
             Balances,
-            BalancesCalls,
+            BalancesXt,
             BalancesStore,
         },
         contracts::{
             Contracts,
-            ContractsModule,
+            ContractsXt,
         },
     };
     use futures::stream::Stream;
@@ -428,11 +434,23 @@ mod tests {
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
         let dest = AccountKeyring::Bob.pair().public();
-        rt.block_on(xt.transfer(dest.clone().into(), 10_000))
-            .unwrap();
+        let transfer = xt
+            .balances(|calls|
+                calls.transfer(dest.clone().into(), 10_000)
+            )
+            .unwrap()
+            .submit();
+        rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
-        rt.block_on(xt.transfer(dest.into(), 10_000)).unwrap();
+        let transfer = xt
+            .increment_nonce()
+            .balances(|calls|
+                calls.transfer(dest.clone().into(), 10_000)
+            )
+            .unwrap()
+            .submit();
+        rt.block_on(transfer).unwrap();
     }
 
     #[test]

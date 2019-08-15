@@ -224,6 +224,8 @@ impl<T: System> Rpc<T> {
                         .into_future()
                         .map_err(|(e, _)| e.into())
                         .and_then(|(result, _)| {
+                            log::info!("received result {:?}", result);
+
                             result
                                 .ok_or(Error::from("Stream terminated"))
                                 .and_then(|r| r)

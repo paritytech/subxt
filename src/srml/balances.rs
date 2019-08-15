@@ -1,11 +1,5 @@
 //! Implements support for the srml_balances module.
-use crate::{
-    codec::compact,
-    error::Error,
-    srml::system::System,
-    Client,
-    XtBuilder,
-};
+use crate::{codec::compact, error::Error, srml::system::System, Client, XtBuilder, Valid};
 use futures::future::{
     self,
     Future,
@@ -19,6 +13,9 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
+use crate::metadata::{MetadataError};
+use crate::codec::Encoded;
+use crate::srml::ModuleCalls;
 
 /// The subset of the `srml_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -83,49 +80,55 @@ impl<T: Balances + 'static> BalancesStore for Client<T> {
 }
 
 /// The Balances extension trait for the XtBuilder.
-pub trait BalancesCalls {
+pub trait BalancesXt {
     /// Balances type.
     type Balances: Balances;
+    /// Keypair type
+    type Pair: Pair;
 
+    /// Create a call for the srml balances module
+    fn balances<F>(&self, f: F) -> Result<XtBuilder<Self::Balances, Self::Pair, Valid>, MetadataError>
+        where
+            F: FnOnce(ModuleCalls<Self::Balances, Self::Pair>) -> Result<Encoded, MetadataError>;
+}
+
+impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
+    where
+        P: Pair,
+        P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
+{
+    type Balances = T;
+    type Pair = P;
+
+    fn balances<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+        where
+            F: FnOnce(ModuleCalls<Self::Balances, Self::Pair>) -> Result<Encoded, MetadataError>,
+    {
+        let module = self.metadata().module("Balances")?;
+        let call = f(ModuleCalls::new(module))?;
+        Ok(self.set_call(call))
+    }
+}
+
+impl<T: Balances + 'static, P> ModuleCalls<T, P>
+where
+    P: Pair,
+    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
+{
     /// Transfer some liquid free balance to another account.
     ///
     /// `transfer` will set the `FreeBalance` of the sender and receiver.
     /// It will decrease the total issuance of the system by the `TransferFee`.
     /// If the sender's account is below the existential deposit as a result
     /// of the transfer, the account will be reaped.
-    fn transfer(
-        &mut self,
-        to: <<Self::Balances as System>::Lookup as StaticLookup>::Source,
-        amount: <Self::Balances as Balances>::Balance,
-    ) -> Box<dyn Future<Item = <Self::Balances as System>::Hash, Error = Error> + Send>;
-}
-
-impl<T: Balances + 'static, P, V> BalancesCalls for XtBuilder<T, P, V>
-where
-    P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
-{
-    type Balances = T;
-
-    fn transfer(
-        &mut self,
-        to: <<Self::Balances as System>::Lookup as StaticLookup>::Source,
-        amount: <Self::Balances as Balances>::Balance,
-    ) -> Box<dyn Future<Item = <Self::Balances as System>::Hash, Error = Error> + Send>
+    pub fn transfer(
+        self,
+        to: <<T as System>::Lookup as StaticLookup>::Source,
+        amount: <T as Balances>::Balance,
+    ) -> Result<Encoded, MetadataError>
     {
-        let transfer_call = || {
-            Ok(self
-                .metadata()
-                .module("Balances")?
-                .call("transfer", (to, compact(amount)))?)
-        };
-        let _call = match transfer_call() {
-            Ok(call) => call,
-            Err(err) => return Box::new(future::err(err)),
-        };
-        // todo: [AJ] update to new builder style
-        unreachable!()
-//        Box::new(self.submit(call))
+        self.module.call("transfer", (to, compact(amount)))
     }
 }
