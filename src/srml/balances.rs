@@ -1,5 +1,19 @@
 //! Implements support for the srml_balances module.
-use crate::{codec::compact, error::Error, srml::system::System, Client, XtBuilder, Valid};
+use crate::{
+    codec::{
+        compact,
+        Encoded,
+    },
+    error::Error,
+    metadata::MetadataError,
+    srml::{
+        system::System,
+        ModuleCalls,
+    },
+    Client,
+    Valid,
+    XtBuilder,
+};
 use futures::future::{
     self,
     Future,
@@ -13,9 +27,6 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
-use crate::metadata::{MetadataError};
-use crate::codec::Encoded;
-use crate::srml::ModuleCalls;
 
 /// The subset of the `srml_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -87,26 +98,32 @@ pub trait BalancesXt {
     type Pair: Pair;
 
     /// Create a call for the srml balances module
-    fn balances<F>(&self, f: F) -> Result<XtBuilder<Self::Balances, Self::Pair, Valid>, MetadataError>
-        where
-            F: FnOnce(ModuleCalls<Self::Balances, Self::Pair>) -> Result<Encoded, MetadataError>;
+    fn balances<F>(
+        &self,
+        f: F,
+    ) -> Result<XtBuilder<Self::Balances, Self::Pair, Valid>, MetadataError>
+    where
+        F: FnOnce(
+            ModuleCalls<Self::Balances, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>;
 }
 
 impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
-    where
-        P: Pair,
-        P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+where
+    P: Pair,
+    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
 {
     type Balances = T;
     type Pair = P;
 
     fn balances<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
-        where
-            F: FnOnce(ModuleCalls<Self::Balances, Self::Pair>) -> Result<Encoded, MetadataError>,
+    where
+        F: FnOnce(
+            ModuleCalls<Self::Balances, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>,
     {
         self.set_call("Balances", f)
-
     }
 }
 
@@ -126,8 +143,7 @@ where
         self,
         to: <<T as System>::Lookup as StaticLookup>::Source,
         amount: <T as Balances>::Balance,
-    ) -> Result<Encoded, MetadataError>
-    {
+    ) -> Result<Encoded, MetadataError> {
         self.module.call("transfer", (to, compact(amount)))
     }
 }

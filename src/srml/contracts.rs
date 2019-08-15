@@ -1,14 +1,21 @@
 //! Implements support for the srml_contracts module.
-use crate::{codec::{compact, Encoded}, metadata::{
-    MetadataError,
-}, srml::{
-    balances::Balances,
-    system::System,
-}, XtBuilder, Valid};
-use parity_scale_codec::{Codec};
+use crate::{
+    codec::{
+        compact,
+        Encoded,
+    },
+    metadata::MetadataError,
+    srml::{
+        balances::Balances,
+        system::System,
+        ModuleCalls,
+    },
+    Valid,
+    XtBuilder,
+};
+use parity_scale_codec::Codec;
 use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::Pair;
-use crate::srml::ModuleCalls;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
 /// instructions can operate on them efficiently.
@@ -25,23 +32,30 @@ pub trait ContractsXt {
     type Pair: Pair;
 
     /// Create a call for the srml contracts module
-    fn contracts<F>(&self, f: F) -> Result<XtBuilder<Self::Contracts, Self::Pair, Valid>, MetadataError>
+    fn contracts<F>(
+        &self,
+        f: F,
+    ) -> Result<XtBuilder<Self::Contracts, Self::Pair, Valid>, MetadataError>
     where
-        F: FnOnce(ModuleCalls<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>;
+        F: FnOnce(
+            ModuleCalls<Self::Contracts, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>;
 }
 
 impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
-    where
-        P: Pair,
-        P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+where
+    P: Pair,
+    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
 {
     type Contracts = T;
     type Pair = P;
 
     fn contracts<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
     where
-        F: FnOnce(ModuleCalls<Self::Contracts, Self::Pair>) -> Result<Encoded, MetadataError>,
+        F: FnOnce(
+            ModuleCalls<Self::Contracts, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>,
     {
         self.set_call("Contracts", f)
     }
@@ -53,8 +67,6 @@ where
     P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
 {
-
-
     /// Stores the given binary Wasm code into the chain's storage and returns
     /// its `codehash`.
     /// You can instantiate contracts only with stored code.
@@ -62,8 +74,7 @@ where
         &self,
         gas_limit: Gas,
         code: Vec<u8>,
-    ) -> Result<Encoded, MetadataError>
-    {
+    ) -> Result<Encoded, MetadataError> {
         self.module.call("put_code", (compact(gas_limit), code))
     }
 
@@ -86,9 +97,11 @@ where
         gas_limit: Gas,
         code_hash: <T as System>::Hash,
         data: Vec<u8>,
-    ) -> Result<Encoded, MetadataError>
-    {
-        self.module.call("create", (compact(endowment), compact(gas_limit), code_hash, data))
+    ) -> Result<Encoded, MetadataError> {
+        self.module.call(
+            "create",
+            (compact(endowment), compact(gas_limit), code_hash, data),
+        )
     }
 
     /// Makes a call to an account, optionally transferring some balance.
@@ -105,8 +118,8 @@ where
         value: <T as Balances>::Balance,
         gas_limit: Gas,
         data: Vec<u8>,
-    ) -> Result<Encoded, MetadataError>
-    {
-        self.module.call("call", (dest, compact(value), compact(gas_limit), data))
+    ) -> Result<Encoded, MetadataError> {
+        self.module
+            .call("call", (dest, compact(value), compact(gas_limit), data))
     }
 }

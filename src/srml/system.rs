@@ -1,5 +1,13 @@
 //! Implements support for the srml_system module.
-use crate::{error::Error, Client, XtBuilder, Valid};
+use crate::{
+    codec::Encoded,
+    error::Error,
+    metadata::MetadataError,
+    srml::ModuleCalls,
+    Client,
+    Valid,
+    XtBuilder,
+};
 use futures::future::{
     self,
     Future,
@@ -23,9 +31,6 @@ use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use srml_system::Event;
 use substrate_primitives::Pair;
-use crate::metadata::MetadataError;
-use crate::srml::ModuleCalls;
-use crate::codec::Encoded;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
 pub trait System {
@@ -141,40 +146,43 @@ pub trait SystemXt {
     type Pair: Pair;
 
     /// Create a call for the srml system module
-    fn system<F>(&self, f: F) -> Result<XtBuilder<Self::System, Self::Pair, Valid>, MetadataError>
-        where
-            F: FnOnce(ModuleCalls<Self::System, Self::Pair>) -> Result<Encoded, MetadataError>;
+    fn system<F>(
+        &self,
+        f: F,
+    ) -> Result<XtBuilder<Self::System, Self::Pair, Valid>, MetadataError>
+    where
+        F: FnOnce(
+            ModuleCalls<Self::System, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>;
 }
 
 impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
-    where
-        P: Pair,
-        P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+where
+    P: Pair,
+    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
 {
     type System = T;
     type Pair = P;
 
     fn system<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
-        where
-            F: FnOnce(ModuleCalls<Self::System, Self::Pair>) -> Result<Encoded, MetadataError>
+    where
+        F: FnOnce(
+            ModuleCalls<Self::System, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>,
     {
         self.set_call("System", f)
     }
 }
 
-impl<T: System + 'static, P>  ModuleCalls<T, P>
+impl<T: System + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
     P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
 {
     /// Sets the new code.
-    pub fn set_code(
-        &self,
-        code: Vec<u8>,
-    ) -> Result<Encoded, MetadataError>
-    {
+    pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
         self.module.call("set_code", code)
     }
 }

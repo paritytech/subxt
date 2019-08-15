@@ -40,9 +40,7 @@ use runtime_primitives::{
     OpaqueExtrinsic,
 };
 use std::convert::TryInto;
-use substrate_primitives::{
-    storage::StorageKey,
-};
+use substrate_primitives::storage::StorageKey;
 use substrate_rpc::{
     author::AuthorClient,
     chain::{
@@ -183,8 +181,8 @@ impl<T: System> Rpc<T> {
         self,
         extrinsic: E,
     ) -> impl Future<Item = T::Hash, Error = Error>
-        where
-            E: Encode,
+    where
+        E: Encode,
     {
         self.author
             .submit_extrinsic(extrinsic.encode().into())
@@ -214,9 +212,13 @@ impl<T: System> Rpc<T> {
                             log::info!("received status {:?}", status);
                             match status {
                                 // ignore in progress extrinsic for now
-                                Status::Future | Status::Ready | Status::Broadcast(_) => None,
+                                Status::Future | Status::Ready | Status::Broadcast(_) => {
+                                    None
+                                }
                                 Status::Finalized(block_hash) => Some(Ok(block_hash)),
-                                Status::Usurped(_) => Some(Err("Extrinsic Usurped".into())),
+                                Status::Usurped(_) => {
+                                    Some(Err("Extrinsic Usurped".into()))
+                                }
                                 Status::Dropped => Some(Err("Extrinsic Dropped".into())),
                                 Status::Invalid => Some(Err("Extrinsic Invalid".into())),
                             }

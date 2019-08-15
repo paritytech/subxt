@@ -36,6 +36,7 @@ use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::StaticLookup,
 };
+use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -44,23 +45,24 @@ use substrate_primitives::{
     },
     Pair,
 };
-use std::marker::PhantomData;
 use url::Url;
 
 use crate::{
+    codec::Encoded,
+    metadata::MetadataError,
     rpc::{
         MapStream,
         Rpc,
     },
-    srml::system::{
-        System,
-        SystemStore,
+    srml::{
+        system::{
+            System,
+            SystemStore,
+        },
+        ModuleCalls,
     },
 };
 pub use error::Error;
-use crate::codec::Encoded;
-use crate::srml::ModuleCalls;
-use crate::metadata::MetadataError;
 
 mod codec;
 mod error;
@@ -273,9 +275,13 @@ where
     }
 
     /// Sets the module call to a new value
-    pub fn set_call<F>(&self, module: &'static str, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+    pub fn set_call<F>(
+        &self,
+        module: &'static str,
+        f: F,
+    ) -> Result<XtBuilder<T, P, Valid>, MetadataError>
     where
-        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>
+        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
     {
         let module = self.metadata().module(module)?;
         let call = f(ModuleCalls::new(module))?;
@@ -292,27 +298,32 @@ where
 }
 
 impl<T: System + 'static, P> XtBuilder<T, P, Valid>
-    where
-        P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-        P::Signature: Codec,
+where
+    P: Pair,
+    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
-    pub fn create_and_sign(&self) -> UncheckedExtrinsic<
+    pub fn create_and_sign(
+        &self,
+    ) -> UncheckedExtrinsic<
         <T::Lookup as StaticLookup>::Source,
         Encoded,
         P::Signature,
         T::SignedExtra,
     >
-        where
-            P: Pair,
-            P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-            P::Signature: Codec,
+    where
+        P: Pair,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
         let genesis_hash = self.genesis_hash.clone();
-        let call = self.call.clone().expect("A Valid extrinisic builder has a call; qed");
+        let call = self
+            .call
+            .clone()
+            .expect("A Valid extrinisic builder has a call; qed");
 
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -339,9 +350,7 @@ impl<T: System + 'static, P> XtBuilder<T, P, Valid>
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit(
-        &self,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn submit(&self) -> impl Future<Item = T::Hash, Error = Error> {
         let extrinsic = self.create_and_sign();
         self.client
             .connect()
@@ -349,11 +358,13 @@ impl<T: System + 'static, P> XtBuilder<T, P, Valid>
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit_and_watch(&self) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+    pub fn submit_and_watch(
+        &self,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let extrinsic = self.create_and_sign();
-        self.client.connect().and_then(move |rpc| {
-            rpc.submit_and_watch_extrinsic(extrinsic)
-        })
+        self.client
+            .connect()
+            .and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
     }
 }
 
@@ -363,8 +374,8 @@ mod tests {
     use crate::srml::{
         balances::{
             Balances,
-            BalancesXt,
             BalancesStore,
+            BalancesXt,
         },
         contracts::{
             Contracts,
@@ -416,9 +427,7 @@ mod tests {
         type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
     }
 
-    impl Contracts for Runtime {
-
-    }
+    impl Contracts for Runtime {}
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
@@ -443,9 +452,7 @@ mod tests {
 
         let dest = AccountKeyring::Bob.pair().public();
         let transfer = xt
-            .balances(|calls|
-                calls.transfer(dest.clone().into(), 10_000)
-            )
+            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
             .unwrap()
             .submit();
         rt.block_on(transfer).unwrap();
@@ -453,9 +460,7 @@ mod tests {
         // check that nonce is handled correctly
         let transfer = xt
             .increment_nonce()
-            .balances(|calls|
-                calls.transfer(dest.clone().into(), 10_000)
-            )
+            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
             .unwrap()
             .submit();
         rt.block_on(transfer).unwrap();
@@ -472,13 +477,12 @@ mod tests {
         const CONTRACT_WASM: &[u8] = b""; // todo
 
         let put_code = xt
-            .contracts(|call|
-                call.put_code(500_000, CONTRACT_WASM.to_vec())
-            )
+            .contracts(|call| call.put_code(500_000, CONTRACT_WASM.to_vec()))
             .unwrap()
             .submit_and_watch();
 
-        rt.block_on(put_code).expect("Extrinsic should be included in a block");
+        rt.block_on(put_code)
+            .expect("Extrinsic should be included in a block");
     }
 
     #[test]
