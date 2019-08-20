@@ -149,7 +149,7 @@ pub trait SystemXt {
     fn system<F>(
         &self,
         f: F,
-    ) -> Result<XtBuilder<Self::System, Self::Pair, Valid>, MetadataError>
+    ) -> XtBuilder<Self::System, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,
@@ -165,7 +165,7 @@ where
     type System = T;
     type Pair = P;
 
-    fn system<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+    fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,

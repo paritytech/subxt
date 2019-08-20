@@ -23,6 +23,7 @@
 use futures::future::{
     self,
     Either,
+    IntoFuture,
     Future,
 };
 use jsonrpc_core_client::transports::ws;
@@ -242,7 +243,7 @@ pub struct XtBuilder<T: System, P, V = Invalid> {
     nonce: T::Index,
     genesis_hash: T::Hash,
     signer: P,
-    call: Option<Encoded>,
+    call: Option<Result<Encoded, MetadataError>>,
     marker: PhantomData<fn() -> V>,
 }
 
@@ -279,21 +280,20 @@ where
         &self,
         module: &'static str,
         f: F,
-    ) -> Result<XtBuilder<T, P, Valid>, MetadataError>
-    where
-        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
+    ) -> XtBuilder<T, P, Valid>
+        where F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
     {
-        let module = self.metadata().module(module)?;
-        let call = f(ModuleCalls::new(module))?;
+        let call =
+            self.metadata().module(module).and_then(|module| f(ModuleCalls::new(module)));
 
-        Ok(XtBuilder {
+        XtBuilder {
             client: self.client.clone(),
             nonce: self.nonce.clone(),
             genesis_hash: self.genesis_hash.clone(),
             signer: self.signer.clone(),
             call: Some(call),
             marker: PhantomData,
-        })
+        }
     }
 }
 
@@ -306,12 +306,12 @@ where
     /// Creates and signs an Extrinsic for the supplied `Call`
     pub fn create_and_sign(
         &self,
-    ) -> UncheckedExtrinsic<
+    ) -> Result<UncheckedExtrinsic<
         <T::Lookup as StaticLookup>::Source,
         Encoded,
         P::Signature,
         T::SignedExtra,
-    >
+    >, MetadataError>
     where
         P: Pair,
         P::Public: Into<<T::Lookup as StaticLookup>::Source>,
@@ -323,7 +323,7 @@ where
         let call = self
             .call
             .clone()
-            .expect("A Valid extrinisic builder has a call; qed");
+            .expect("A Valid extrinisic builder has a call; qed")?;
 
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -332,7 +332,7 @@ where
         );
 
         let extra = T::extra(account_nonce);
-        let raw_payload = (call, extra.clone(), (&genesis_hash, &genesis_hash));
+        let raw_payload = (call.clone(), extra.clone(), (&genesis_hash, &genesis_hash));
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
@@ -341,30 +341,36 @@ where
             }
         });
 
-        UncheckedExtrinsic::new_signed(
+        Ok(UncheckedExtrinsic::new_signed(
             raw_payload.0,
             signer.public().into(),
             signature.into(),
             extra,
-        )
+        ))
     }
 
     /// Submits a transaction to the chain.
     pub fn submit(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        let extrinsic = self.create_and_sign();
-        self.client
-            .connect()
-            .and_then(move |rpc| rpc.submit_extrinsic(extrinsic))
+        let cli = self.client.connect();
+        self.create_and_sign()
+            .into_future()
+            .map_err(Into::into)
+            .and_then(move |extrinsic| {
+                cli.and_then(move |rpc| rpc.submit_extrinsic(extrinsic))
+            })
     }
 
     /// Submits transaction to the chain and watch for events.
     pub fn submit_and_watch(
         &self,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
-        let extrinsic = self.create_and_sign();
-        self.client
-            .connect()
-            .and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
+        let cli = self.client.connect();
+        self.create_and_sign()
+            .into_future()
+            .map_err(Into::into)
+            .and_then(move |extrinsic| {
+                cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
+            })
     }
 }
 
@@ -453,7 +459,6 @@ mod tests {
         let dest = AccountKeyring::Bob.pair().public();
         let transfer = xt
             .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
-            .unwrap()
             .submit();
         rt.block_on(transfer).unwrap();
 
@@ -461,7 +466,6 @@ mod tests {
         let transfer = xt
             .increment_nonce()
             .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
-            .unwrap()
             .submit();
         rt.block_on(transfer).unwrap();
     }
@@ -484,7 +488,6 @@ mod tests {
 
         let put_code = xt
             .contracts(|call| call.put_code(500_000, wasm))
-            .unwrap()
             .submit_and_watch();
 
         rt.block_on(put_code)

@@ -35,7 +35,7 @@ pub trait ContractsXt {
     fn contracts<F>(
         &self,
         f: F,
-    ) -> Result<XtBuilder<Self::Contracts, Self::Pair, Valid>, MetadataError>
+    ) -> XtBuilder<Self::Contracts, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,
@@ -51,7 +51,7 @@ where
     type Contracts = T;
     type Pair = P;
 
-    fn contracts<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+    fn contracts<F>(&self, f: F) -> XtBuilder<T, P, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,

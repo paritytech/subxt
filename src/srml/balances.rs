@@ -101,7 +101,7 @@ pub trait BalancesXt {
     fn balances<F>(
         &self,
         f: F,
-    ) -> Result<XtBuilder<Self::Balances, Self::Pair, Valid>, MetadataError>
+    ) -> XtBuilder<Self::Balances, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
@@ -117,7 +117,7 @@ where
     type Balances = T;
     type Pair = P;
 
-    fn balances<F>(&self, f: F) -> Result<XtBuilder<T, P, Valid>, MetadataError>
+    fn balances<F>(&self, f: F) -> XtBuilder<T, P, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
