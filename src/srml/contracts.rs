@@ -32,10 +32,7 @@ pub trait ContractsXt {
     type Pair: Pair;
 
     /// Create a call for the srml contracts module
-    fn contracts<F>(
-        &self,
-        f: F,
-    ) -> XtBuilder<Self::Contracts, Self::Pair, Valid>
+    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,

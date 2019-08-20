@@ -23,8 +23,8 @@
 use futures::future::{
     self,
     Either,
-    IntoFuture,
     Future,
+    IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
 use metadata::Metadata;
@@ -276,15 +276,15 @@ where
     }
 
     /// Sets the module call to a new value
-    pub fn set_call<F>(
-        &self,
-        module: &'static str,
-        f: F,
-    ) -> XtBuilder<T, P, Valid>
-        where F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
+    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, Valid>
+    where
+        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
     {
-        let call =
-            self.metadata().module(module).and_then(|module| f(ModuleCalls::new(module)));
+        let call = self
+            .metadata()
+            .module(module)
+            .and_then(|module| f(ModuleCalls::new(module)))
+            .map_err(Into::into);
 
         XtBuilder {
             client: self.client.clone(),
@@ -306,12 +306,15 @@ where
     /// Creates and signs an Extrinsic for the supplied `Call`
     pub fn create_and_sign(
         &self,
-    ) -> Result<UncheckedExtrinsic<
-        <T::Lookup as StaticLookup>::Source,
-        Encoded,
-        P::Signature,
-        T::SignedExtra,
-    >, MetadataError>
+    ) -> Result<
+        UncheckedExtrinsic<
+            <T::Lookup as StaticLookup>::Source,
+            Encoded,
+            P::Signature,
+            T::SignedExtra,
+        >,
+        MetadataError,
+    >
     where
         P: Pair,
         P::Public: Into<<T::Lookup as StaticLookup>::Source>,

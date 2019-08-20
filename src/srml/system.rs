@@ -146,10 +146,7 @@ pub trait SystemXt {
     type Pair: Pair;
 
     /// Create a call for the srml system module
-    fn system<F>(
-        &self,
-        f: F,
-    ) -> XtBuilder<Self::System, Self::Pair, Valid>
+    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,

@@ -98,10 +98,7 @@ pub trait BalancesXt {
     type Pair: Pair;
 
     /// Create a call for the srml balances module
-    fn balances<F>(
-        &self,
-        f: F,
-    ) -> XtBuilder<Self::Balances, Self::Pair, Valid>
+    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
