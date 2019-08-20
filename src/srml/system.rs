@@ -12,7 +12,6 @@ use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
@@ -156,8 +155,6 @@ pub trait SystemXt {
 impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     type System = T;
     type Pair = P;
@@ -175,8 +172,6 @@ where
 impl<T: System + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     /// Sets the new code.
     pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {

@@ -250,8 +250,6 @@ pub struct XtBuilder<T: System, P, V = Invalid> {
 impl<T: System + 'static, P, V> XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {

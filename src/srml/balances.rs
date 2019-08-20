@@ -108,8 +108,6 @@ pub trait BalancesXt {
 impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     type Balances = T;
     type Pair = P;
@@ -127,8 +125,6 @@ where
 impl<T: Balances + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     /// Transfer some liquid free balance to another account.
     ///

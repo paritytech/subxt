@@ -13,7 +13,6 @@ use crate::{
     Valid,
     XtBuilder,
 };
-use parity_scale_codec::Codec;
 use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::Pair;
 
@@ -42,8 +41,6 @@ pub trait ContractsXt {
 impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     type Contracts = T;
     type Pair = P;
@@ -61,8 +58,6 @@ where
 impl<T: Contracts + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     /// Stores the given binary Wasm code into the chain's storage and returns
     /// its `codehash`.
