@@ -24,6 +24,7 @@ use futures::future::{
     self,
     Either,
     Future,
+    IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
 use metadata::Metadata;
@@ -32,8 +33,13 @@ use parity_scale_codec::{
     Decode,
     Encode,
 };
-use runtime_primitives::traits::StaticLookup;
+use runtime_primitives::{
+    generic::UncheckedExtrinsic,
+    traits::StaticLookup,
+};
+use std::marker::PhantomData;
 use substrate_primitives::{
+    blake2_256,
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -43,13 +49,18 @@ use substrate_primitives::{
 use url::Url;
 
 use crate::{
+    codec::Encoded,
+    metadata::MetadataError,
     rpc::{
         MapStream,
         Rpc,
     },
-    srml::system::{
-        System,
-        SystemStore,
+    srml::{
+        system::{
+            System,
+            SystemStore,
+        },
+        ModuleCalls,
     },
 };
 pub use error::Error;
@@ -208,27 +219,37 @@ impl<T: System + 'static> Client<T> {
             None => Either::B(self.account_nonce(signer.public().into())),
         }
         .map(|nonce| {
+            let genesis_hash = client.genesis_hash.clone();
             XtBuilder {
                 client,
                 nonce,
+                genesis_hash,
                 signer,
+                call: None,
+                marker: PhantomData,
             }
         })
     }
 }
 
+/// The extrinsic builder is ready to finalize construction.
+pub enum Valid {}
+/// The extrinsic builder is not ready to finalize construction.
+pub enum Invalid {}
+
 /// Transaction builder.
-pub struct XtBuilder<T: System, P> {
+pub struct XtBuilder<T: System, P, V = Invalid> {
     client: Client<T>,
     nonce: T::Index,
+    genesis_hash: T::Hash,
     signer: P,
+    call: Option<Result<Encoded, MetadataError>>,
+    marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + 'static, P> XtBuilder<T, P>
+impl<T: System + 'static, P, V> XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
@@ -241,46 +262,132 @@ where
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) {
+    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, V> {
         self.nonce = nonce;
+        self
+    }
+
+    /// Increment the nonce
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, V> {
+        self.set_nonce(self.nonce() + 1.into());
+        self
+    }
+
+    /// Sets the module call to a new value
+    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, Valid>
+    where
+        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
+    {
+        let call = self
+            .metadata()
+            .module(module)
+            .and_then(|module| f(ModuleCalls::new(module)))
+            .map_err(Into::into);
+
+        XtBuilder {
+            client: self.client.clone(),
+            nonce: self.nonce.clone(),
+            genesis_hash: self.genesis_hash.clone(),
+            signer: self.signer.clone(),
+            call: Some(call),
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T: System + 'static, P> XtBuilder<T, P, Valid>
+where
+    P: Pair,
+    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+    P::Signature: Codec,
+{
+    /// Creates and signs an Extrinsic for the supplied `Call`
+    pub fn create_and_sign(
+        &self,
+    ) -> Result<
+        UncheckedExtrinsic<
+            <T::Lookup as StaticLookup>::Source,
+            Encoded,
+            P::Signature,
+            T::SignedExtra,
+        >,
+        MetadataError,
+    >
+    where
+        P: Pair,
+        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Signature: Codec,
+    {
+        let signer = self.signer.clone();
+        let account_nonce = self.nonce.clone();
+        let genesis_hash = self.genesis_hash.clone();
+        let call = self
+            .call
+            .clone()
+            .expect("A Valid extrinisic builder has a call; qed")?;
+
+        log::info!(
+            "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
+            genesis_hash,
+            account_nonce
+        );
+
+        let extra = T::extra(account_nonce);
+        let raw_payload = (call.clone(), extra.clone(), (&genesis_hash, &genesis_hash));
+        let signature = raw_payload.using_encoded(|payload| {
+            if payload.len() > 256 {
+                signer.sign(&blake2_256(payload)[..])
+            } else {
+                signer.sign(payload)
+            }
+        });
+
+        Ok(UncheckedExtrinsic::new_signed(
+            raw_payload.0,
+            signer.public().into(),
+            signature.into(),
+            extra,
+        ))
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit<C: Encode + Send>(
-        &mut self,
-        call: C,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
-        let signer = self.signer.clone();
-        let nonce = self.nonce.clone();
-        let genesis_hash = self.client.genesis_hash.clone();
-        self.set_nonce(nonce + 1.into());
-        self.client
-            .connect()
-            .and_then(move |rpc| rpc.submit_extrinsic(signer, call, nonce, genesis_hash))
+    pub fn submit(&self) -> impl Future<Item = T::Hash, Error = Error> {
+        let cli = self.client.connect();
+        self.create_and_sign()
+            .into_future()
+            .map_err(Into::into)
+            .and_then(move |extrinsic| {
+                cli.and_then(move |rpc| rpc.submit_extrinsic(extrinsic))
+            })
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit_and_watch<C: Encode + Send>(
-        &mut self,
-        call: C,
+    pub fn submit_and_watch(
+        &self,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
-        let signer = self.signer.clone();
-        let nonce = self.nonce.clone();
-        let genesis_hash = self.client.genesis_hash.clone();
-        self.set_nonce(nonce + 1.into());
-        self.client.connect().and_then(move |rpc| {
-            rpc.submit_and_watch_extrinsic(signer, call, nonce, genesis_hash)
-        })
+        let cli = self.client.connect();
+        self.create_and_sign()
+            .into_future()
+            .map_err(Into::into)
+            .and_then(move |extrinsic| {
+                cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
+            })
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::srml::balances::{
-        Balances,
-        BalancesCalls,
-        BalancesStore,
+    use crate::srml::{
+        balances::{
+            Balances,
+            BalancesStore,
+            BalancesXt,
+        },
+        contracts::{
+            Contracts,
+            ContractsXt,
+        },
     };
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
@@ -327,6 +434,8 @@ mod tests {
         type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
     }
 
+    impl Contracts for Runtime {}
+
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
     type Address = <<Runtime as System>::Lookup as StaticLookup>::Source;
@@ -349,11 +458,41 @@ mod tests {
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
         let dest = AccountKeyring::Bob.pair().public();
-        rt.block_on(xt.transfer(dest.clone().into(), 10_000))
-            .unwrap();
+        let transfer = xt
+            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
+            .submit();
+        rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
-        rt.block_on(xt.transfer(dest.into(), 10_000)).unwrap();
+        let transfer = xt
+            .increment_nonce()
+            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
+            .submit();
+        rt.block_on(transfer).unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_tx_contract_put_code() {
+        let (mut rt, client) = test_setup();
+
+        let signer = AccountKeyring::Alice.pair();
+        let xt = rt.block_on(client.xt(signer, None)).unwrap();
+
+        const CONTRACT: &str = r#"
+(module
+    (func (export "call"))
+    (func (export "deploy"))
+)
+"#;
+        let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+        let put_code = xt
+            .contracts(|call| call.put_code(500_000, wasm))
+            .submit_and_watch();
+
+        rt.block_on(put_code)
+            .expect("Extrinsic should be included in a block");
     }
 
     #[test]

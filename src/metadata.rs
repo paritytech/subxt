@@ -19,7 +19,7 @@ use std::{
 };
 use substrate_primitives::storage::StorageKey;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub enum MetadataError {
     ModuleNotFound(&'static str),
     CallNotFound(&'static str),

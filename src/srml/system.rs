@@ -1,14 +1,17 @@
 //! Implements support for the srml_system module.
 use crate::{
+    codec::Encoded,
     error::Error,
+    metadata::MetadataError,
+    srml::ModuleCalls,
     Client,
+    Valid,
     XtBuilder,
 };
 use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
@@ -135,36 +138,43 @@ impl<T: System + 'static> SystemStore for Client<T> {
 }
 
 /// The System extension trait for the XtBuilder.
-pub trait SystemCalls {
+pub trait SystemXt {
     /// System type.
     type System: System;
+    /// Keypair type
+    type Pair: Pair;
 
-    /// Sets the new code.
-    fn set_code(
-        &mut self,
-        code: Vec<u8>,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>;
+    /// Create a call for the srml system module
+    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
+    where
+        F: FnOnce(
+            ModuleCalls<Self::System, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + 'static, P> SystemCalls for XtBuilder<T, P>
+impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
 where
     P: Pair,
-    P::Public: Into<<<T as System>::Lookup as StaticLookup>::Source>,
-    P::Signature: Codec,
 {
     type System = T;
+    type Pair = P;
 
-    fn set_code(
-        &mut self,
-        code: Vec<u8>,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Hash, Error = Error> + Send>
+    fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    where
+        F: FnOnce(
+            ModuleCalls<Self::System, Self::Pair>,
+        ) -> Result<Encoded, MetadataError>,
     {
-        let set_code_call =
-            || Ok(self.metadata().module("System")?.call("set_code", code)?);
-        let call = match set_code_call() {
-            Ok(call) => call,
-            Err(err) => return Box::new(future::err(err)),
-        };
-        Box::new(self.submit(call))
+        self.set_call("System", f)
+    }
+}
+
+impl<T: System + 'static, P> ModuleCalls<T, P>
+where
+    P: Pair,
+{
+    /// Sets the new code.
+    pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
+        self.module.call("set_code", code)
     }
 }
