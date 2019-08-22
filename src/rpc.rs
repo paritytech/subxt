@@ -14,11 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    error::Error,
-    metadata::Metadata,
-    srml::system::System,
-};
+use crate::{error::Error, metadata::Metadata, srml::system::System, OpaqueEvent};
 use futures::future::{
     self,
     Future,
@@ -291,7 +287,7 @@ fn wait_for_block_events<T: System>(
                         .filter_map(|(_key, data)| {
                             data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
                         })
-                        .collect::<Result<Vec<Vec<EventRecord<T::Event, T::Hash>>>, _>>()
+                        .collect::<Result<Vec<Vec<EventRecord<OpaqueEvent, T::Hash>>>, _>>()
                         .map(|events| events.into_iter().flat_map(|es| es).collect())
                         .map_err(Into::into);
                     future::result(events)
@@ -302,7 +298,7 @@ fn wait_for_block_events<T: System>(
     block_events
         .join(ext_index)
         .map(move |(events, ext_index)| {
-            let events: Vec<T::Event> = events
+            let events: Vec<OpaqueEvent> = events
                 .iter()
                 .filter_map(|e| {
                     if let srml_system::Phase::ApplyExtrinsic(i) = e.phase {
@@ -315,7 +311,7 @@ fn wait_for_block_events<T: System>(
                         None
                     }
                 })
-                .collect::<Vec<T::Event>>();
+                .collect::<Vec<OpaqueEvent>>();
             ExtrinsicSuccess {
                 block: block_hash,
                 extrinsic: ext_hash,

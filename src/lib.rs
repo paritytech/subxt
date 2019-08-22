@@ -71,6 +71,10 @@ mod metadata;
 mod rpc;
 pub mod srml;
 
+/// Raw runtime event bytes
+#[derive(Clone, Debug, PartialEq, Eq, Encode, Decode)]
+pub struct OpaqueEvent(Vec<u8>);
+
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
 pub struct ExtrinsicSuccess<T: System> {
@@ -79,7 +83,7 @@ pub struct ExtrinsicSuccess<T: System> {
     /// Extinsic hash.
     pub extrinsic: T::Hash,
     /// List of events.
-    pub events: Vec<T::Event>,
+    pub events: Vec<OpaqueEvent>,
 }
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
