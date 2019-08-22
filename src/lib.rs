@@ -413,6 +413,7 @@ mod tests {
         type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
 
         type SignedExtra = (
+            srml_system::CheckVersion<node_runtime::Runtime>,
             srml_system::CheckGenesis<node_runtime::Runtime>,
             srml_system::CheckEra<node_runtime::Runtime>,
             srml_system::CheckNonce<node_runtime::Runtime>,
@@ -421,6 +422,7 @@ mod tests {
         );
         fn extra(nonce: Self::Index) -> Self::SignedExtra {
             (
+                srml_system::CheckVersion::<node_runtime::Runtime>::new(),
                 srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
                 srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
                 srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
