@@ -35,6 +35,7 @@ use runtime_primitives::{
     },
     OpaqueExtrinsic,
 };
+use sr_version::RuntimeVersion;
 use std::convert::TryInto;
 use substrate_primitives::storage::StorageKey;
 use substrate_rpc::{
@@ -100,6 +101,11 @@ impl<T: System> Rpc<T> {
             .and_then(|meta: RuntimeMetadataPrefixed| {
                 future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
             })
+    }
+
+    /// Fetch the runtime version
+    pub fn runtime_version(&self, at: Option<T::Hash>) -> impl Future<Item = RuntimeVersion, Error = Error> {
+        self.state.runtime_version(at).map_err(Into::into)
     }
 }
 
