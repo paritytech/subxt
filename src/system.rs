@@ -2,8 +2,11 @@
 use crate::{
     codec::Encoded,
     error::Error,
-    metadata::MetadataError,
-    srml::ModuleCalls,
+    metadata::{
+        MetadataError,
+        ModuleMetadata,
+    },
+    //srml::ModuleCalls,
     Client,
     Valid,
     XtBuilder,
@@ -148,7 +151,7 @@ pub trait SystemXt {
     fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
     where
         F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
+            &ModuleMetadata,
         ) -> Result<Encoded, MetadataError>;
 }
 
@@ -162,13 +165,14 @@ where
     fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
     where
         F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
+            &ModuleMetadata,
         ) -> Result<Encoded, MetadataError>,
     {
         self.set_call("System", f)
     }
 }
 
+/*
 impl<T: System + 'static, P> ModuleCalls<T, P>
 where
     P: Pair,
@@ -178,3 +182,4 @@ where
         self.module.call("set_code", code)
     }
 }
+*/

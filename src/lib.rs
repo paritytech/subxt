@@ -18,7 +18,7 @@
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 #![deny(missing_docs)]
-#![deny(warnings)]
+//#![deny(warnings)]
 
 use futures::future::{
     self,
@@ -27,7 +27,10 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use metadata::Metadata;
+use metadata::{
+    Metadata,
+    ModuleMetadata
+};
 use parity_scale_codec::{
     Codec,
     Decode,
@@ -55,6 +58,11 @@ use crate::{
         MapStream,
         Rpc,
     },
+    system::{
+        System,
+        SystemStore
+    },
+    /*
     srml::{
         system::{
             System,
@@ -62,14 +70,16 @@ use crate::{
         },
         ModuleCalls,
     },
+    */
 };
 pub use error::Error;
 
 mod codec;
 mod error;
 mod metadata;
+pub mod system;
 mod rpc;
-pub mod srml;
+//pub mod srml;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
@@ -276,12 +286,13 @@ where
     /// Sets the module call to a new value
     pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, Valid>
     where
-        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
+        //F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
+        F: FnOnce(&ModuleMetadata) -> Result<Encoded, MetadataError>,
     {
         let call = self
             .metadata()
             .module(module)
-            .and_then(|module| f(ModuleCalls::new(module)))
+            .and_then(|module| f(module))
             .map_err(Into::into);
 
         XtBuilder {
