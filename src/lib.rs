@@ -386,6 +386,86 @@ where
     }
 }
 
+/// Impl System for user defined Runtime type.
+#[macro_export]
+macro_rules! impl_system_for {
+    ($runtime:ty) => ({
+        impl System for $runtime {
+            type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
+            type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
+            type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
+            type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
+            type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+            type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
+            type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
+            type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
+
+            type SignedExtra = (
+                srml_system::CheckVersion<node_runtime::Runtime>,
+                srml_system::CheckGenesis<node_runtime::Runtime>,
+                srml_system::CheckEra<node_runtime::Runtime>,
+                srml_system::CheckNonce<node_runtime::Runtime>,
+                srml_system::CheckWeight<node_runtime::Runtime>,
+                srml_balances::TakeFees<node_runtime::Runtime>,
+                );
+
+            fn extra(nonce: Self::Index) -> Self::SignedExtra {
+                (
+                    srml_system::CheckVersion::<node_runtime::Runtime>::new(),
+                    srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
+                    srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
+                    srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
+                    srml_system::CheckWeight::<node_runtime::Runtime>::new(),
+                    srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
+                    )
+            }
+        }
+    })
+}
+
+/// A trait for default init action for Runtime
+pub trait DefaultSystem<T> {
+
+    /// Must use this initializing function
+    fn init() {
+        
+        impl<T> System for T {
+            type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
+            type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
+            type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
+            type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
+            type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+            type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
+            type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
+            type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
+
+            type SignedExtra = (
+                srml_system::CheckVersion<node_runtime::Runtime>,
+                srml_system::CheckGenesis<node_runtime::Runtime>,
+                srml_system::CheckEra<node_runtime::Runtime>,
+                srml_system::CheckNonce<node_runtime::Runtime>,
+                srml_system::CheckWeight<node_runtime::Runtime>,
+                srml_balances::TakeFees<node_runtime::Runtime>,
+                );
+
+            fn extra(nonce: Self::Index) -> Self::SignedExtra {
+                use runtime_primitives::generic::Era;
+                (
+                    srml_system::CheckVersion::<node_runtime::Runtime>::new(),
+                    srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
+                    srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
+                    srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
+                    srml_system::CheckWeight::<node_runtime::Runtime>::new(),
+                    srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
+                )
+            }
+        }
+
+    }
+}
+
+
+
 #[cfg(test)]
 mod tests {
     use super::*;

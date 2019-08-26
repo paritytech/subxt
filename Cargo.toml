@@ -28,11 +28,11 @@ substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "s
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
 transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
 url = "1.7"
+node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
+srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 
 [dev-dependencies]
 env_logger = "0.6"
-node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
-srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
 tokio = "0.1"
 wabt = "0.9.0"
