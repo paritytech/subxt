@@ -428,7 +428,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_tx_transfer_balance() {
         let (mut rt, client) = test_setup();
 
@@ -450,7 +450,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_tx_contract_put_code() {
         let (mut rt, client) = test_setup();
 
@@ -474,7 +474,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_state_read_free_balance() {
         let (mut rt, client) = test_setup();
 
@@ -483,7 +483,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_chain_subscribe_blocks() {
         let (mut rt, client) = test_setup();
 
@@ -494,7 +494,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_chain_subscribe_finalized_blocks() {
         let (mut rt, client) = test_setup();
 
@@ -505,7 +505,7 @@ mod tests {
     }
 
     #[test]
-    #[ignore] // requires locally running substrate node
+    //#[ignore] // requires locally running substrate node
     fn test_chain_read_metadata() {
         let (_, client) = test_setup();
 
