@@ -19,20 +19,36 @@ futures = "0.1.28"
 jsonrpc-core-client = { version = "13.0", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
 parity-scale-codec = { version = "1.0", default-features = false, features = ["derive", "full"] }
-runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "srml-metadata" }
-runtime_support = { git = "https://github.com/paritytech/substrate/", package = "srml-support" }
-runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
 serde = { version = "1.0", features = ["derive"] }
-srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system" }
-substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc" }
-substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
-transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
+
+#runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "srml-metadata" }
+#runtime_support = { git = "https://github.com/paritytech/substrate/", package = "srml-support" }
+#runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
+#sr-version = { git = "https://github.com/paritytech/substrate/", package = "sr-version" }
+#srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system" }
+#substrate-rpc = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc" }
+#substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
+#transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
+
+runtime_metadata = { path = "../substrate/srml/metadata", package = "srml-metadata" }
+runtime_support = { path = "../substrate/srml/support", package = "srml-support" }
+runtime_primitives = { path = "../substrate/core/sr-primitives", package = "sr-primitives" }
+sr-version = { path = "../substrate/core/sr-version", package = "sr-version" }
+srml-system = { path = "../substrate/srml/system", package = "srml-system" }
+substrate-rpc = { path = "../substrate/core/rpc", package = "substrate-rpc" }
+substrate-primitives = { path = "../substrate/core/primitives", package = "substrate-primitives" }
+transaction_pool = { path = "../substrate/core/transaction-pool", package = "substrate-transaction-pool" }
+node-runtime = { path = "../substrate/node/runtime/", package = "node-runtime" }
+srml-balances = { path = "../substrate/srml/balances", package = "srml-balances" }
+
 url = "1.7"
-node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
-srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
 
 [dev-dependencies]
 env_logger = "0.6"
-substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
+#node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
+#srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
+#substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
+
+substrate-keyring = { path = "../substrate/core/keyring", package = "substrate-keyring" }
 tokio = "0.1"
 wabt = "0.9.0"

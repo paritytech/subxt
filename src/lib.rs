@@ -41,6 +41,7 @@ use runtime_primitives::{
     traits::StaticLookup,
 };
 use std::marker::PhantomData;
+use sr_version::RuntimeVersion;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -118,12 +119,13 @@ impl<T: System> ClientBuilder<T> {
         });
         connect::<T>(&url).and_then(|rpc| {
             rpc.metadata()
-                .join(rpc.genesis_hash())
-                .map(|(metadata, genesis_hash)| {
+                .join3(rpc.genesis_hash(), rpc.runtime_version(None))
+                .map(|(metadata, genesis_hash, runtime_version)| {
                     Client {
                         url,
                         genesis_hash,
                         metadata,
+                        runtime_version,
                     }
                 })
         })
@@ -135,6 +137,7 @@ pub struct Client<T: System> {
     url: Url,
     genesis_hash: T::Hash,
     metadata: Metadata,
+    runtime_version: RuntimeVersion,
 }
 
 impl<T: System> Clone for Client<T> {
@@ -143,6 +146,7 @@ impl<T: System> Clone for Client<T> {
             url: self.url.clone(),
             genesis_hash: self.genesis_hash.clone(),
             metadata: self.metadata.clone(),
+            runtime_version: self.runtime_version.clone(),
         }
     }
 }
@@ -222,9 +226,11 @@ impl<T: System + 'static> Client<T> {
         }
         .map(|nonce| {
             let genesis_hash = client.genesis_hash.clone();
+            let runtime_version = client.runtime_version.clone();
             XtBuilder {
                 client,
                 nonce,
+                runtime_version,
                 genesis_hash,
                 signer,
                 call: None,
@@ -243,6 +249,7 @@ pub enum Invalid {}
 pub struct XtBuilder<T: System, P, V = Invalid> {
     client: Client<T>,
     nonce: T::Index,
+    runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
     signer: P,
     call: Option<Result<Encoded, MetadataError>>,
@@ -290,6 +297,7 @@ where
         XtBuilder {
             client: self.client.clone(),
             nonce: self.nonce.clone(),
+            runtime_version: self.runtime_version.clone(),
             genesis_hash: self.genesis_hash.clone(),
             signer: self.signer.clone(),
             call: Some(call),
@@ -323,6 +331,7 @@ where
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
+        let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash.clone();
         let call = self
             .call
@@ -336,7 +345,7 @@ where
         );
 
         let extra = T::extra(account_nonce);
-        let raw_payload = (call.clone(), extra.clone(), (&genesis_hash, &genesis_hash));
+        let raw_payload = (call.clone(), extra.clone(), version, (&genesis_hash, &genesis_hash));
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
