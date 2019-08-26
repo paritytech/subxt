@@ -62,15 +62,6 @@ use crate::{
         System,
         SystemStore
     },
-    /*
-    srml::{
-        system::{
-            System,
-            SystemStore,
-        },
-        ModuleCalls,
-    },
-    */
 };
 pub use error::Error;
 
@@ -79,7 +70,8 @@ mod error;
 mod metadata;
 pub mod system;
 mod rpc;
-//pub mod srml;
+mod balances;
+mod contracts;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
@@ -386,103 +378,28 @@ where
     }
 }
 
-/// Impl System for user defined Runtime type.
-#[macro_export]
-macro_rules! impl_system_for {
-    ($runtime:ty) => ({
-        impl System for $runtime {
-            type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-            type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-            type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
-            type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-            type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
-            type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-            type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-            type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
-
-            type SignedExtra = (
-                srml_system::CheckVersion<node_runtime::Runtime>,
-                srml_system::CheckGenesis<node_runtime::Runtime>,
-                srml_system::CheckEra<node_runtime::Runtime>,
-                srml_system::CheckNonce<node_runtime::Runtime>,
-                srml_system::CheckWeight<node_runtime::Runtime>,
-                srml_balances::TakeFees<node_runtime::Runtime>,
-                );
-
-            fn extra(nonce: Self::Index) -> Self::SignedExtra {
-                (
-                    srml_system::CheckVersion::<node_runtime::Runtime>::new(),
-                    srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                    srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                    srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                    srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                    srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
-                    )
-            }
-        }
-    })
-}
-
-/// A trait for default init action for Runtime
-pub trait DefaultSystem<T> {
-
-    /// Must use this initializing function
-    fn init() {
-        
-        impl<T> System for T {
-            type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-            type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-            type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
-            type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-            type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
-            type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-            type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-            type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
-
-            type SignedExtra = (
-                srml_system::CheckVersion<node_runtime::Runtime>,
-                srml_system::CheckGenesis<node_runtime::Runtime>,
-                srml_system::CheckEra<node_runtime::Runtime>,
-                srml_system::CheckNonce<node_runtime::Runtime>,
-                srml_system::CheckWeight<node_runtime::Runtime>,
-                srml_balances::TakeFees<node_runtime::Runtime>,
-                );
-
-            fn extra(nonce: Self::Index) -> Self::SignedExtra {
-                use runtime_primitives::generic::Era;
-                (
-                    srml_system::CheckVersion::<node_runtime::Runtime>::new(),
-                    srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                    srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                    srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                    srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                    srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
-                )
-            }
-        }
-
-    }
-}
-
-
 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::srml::{
+    use crate::{
+        system::BasicSystem,
         balances::{
+            self,
             Balances,
             BalancesStore,
             BalancesXt,
+            BasicBalances,
         },
         contracts::{
+            self,
             Contracts,
             ContractsXt,
+            BasicContracts,
         },
     };
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
-    use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
@@ -493,41 +410,9 @@ mod tests {
 
     struct Runtime;
 
-    impl System for Runtime {
-        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-        type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-        type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
-        type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
-        type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-        type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
-
-        type SignedExtra = (
-            srml_system::CheckVersion<node_runtime::Runtime>,
-            srml_system::CheckGenesis<node_runtime::Runtime>,
-            srml_system::CheckEra<node_runtime::Runtime>,
-            srml_system::CheckNonce<node_runtime::Runtime>,
-            srml_system::CheckWeight<node_runtime::Runtime>,
-            srml_balances::TakeFees<node_runtime::Runtime>,
-        );
-        fn extra(nonce: Self::Index) -> Self::SignedExtra {
-            (
-                srml_system::CheckVersion::<node_runtime::Runtime>::new(),
-                srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
-            )
-        }
-    }
-
-    impl Balances for Runtime {
-        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
-    }
-
-    impl Contracts for Runtime {}
+    impl BasicSystem for Runtime {}
+    impl BasicBalances for Runtime {}
+    impl BasicContracts for Runtime {}
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
@@ -552,14 +437,14 @@ mod tests {
 
         let dest = AccountKeyring::Bob.pair().public();
         let transfer = xt
-            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
+            .balances(|calls| balances::transfer::<Runtime>(calls, dest.clone().into(), 10_000))
             .submit();
         rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
         let transfer = xt
             .increment_nonce()
-            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
+            .balances(|calls| balances::transfer::<Runtime>(calls, dest.clone().into(), 10_000))
             .submit();
         rt.block_on(transfer).unwrap();
     }
@@ -581,7 +466,7 @@ mod tests {
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
         let put_code = xt
-            .contracts(|call| call.put_code(500_000, wasm))
+            .contracts(|calls| contracts::put_code(calls, 500_000, wasm))
             .submit_and_watch();
 
         rt.block_on(put_code)

@@ -5,11 +5,11 @@ use crate::{
         Encoded,
     },
     error::Error,
-    metadata::MetadataError,
-    srml::{
-        system::System,
-        ModuleCalls,
+    metadata::{
+        ModuleMetadata,
+        MetadataError,
     },
+    system::System,
     Client,
     Valid,
     XtBuilder,
@@ -101,7 +101,7 @@ pub trait BalancesXt {
     fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Valid>
     where
         F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
+            &ModuleMetadata,
         ) -> Result<Encoded, MetadataError>;
 }
 
@@ -115,28 +115,34 @@ where
     fn balances<F>(&self, f: F) -> XtBuilder<T, P, Valid>
     where
         F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
+            &ModuleMetadata,
         ) -> Result<Encoded, MetadataError>,
     {
         self.set_call("Balances", f)
     }
 }
 
-impl<T: Balances + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Transfer some liquid free balance to another account.
-    ///
-    /// `transfer` will set the `FreeBalance` of the sender and receiver.
-    /// It will decrease the total issuance of the system by the `TransferFee`.
-    /// If the sender's account is below the existential deposit as a result
-    /// of the transfer, the account will be reaped.
-    pub fn transfer(
-        self,
-        to: <<T as System>::Lookup as StaticLookup>::Source,
-        amount: <T as Balances>::Balance,
+/// Transfer some liquid free balance to another account.
+///
+/// `transfer` will set the `FreeBalance` of the sender and receiver.
+/// It will decrease the total issuance of the system by the `TransferFee`.
+/// If the sender's account is below the existential deposit as a result
+/// of the transfer, the account will be reaped.
+pub fn transfer<T: Balances + 'static>(
+    m: &ModuleMetadata,
+    to: <<T as System>::Lookup as StaticLookup>::Source,
+    amount: <T as Balances>::Balance,
     ) -> Result<Encoded, MetadataError> {
-        self.module.call("transfer", (to, compact(amount)))
-    }
+
+    m.call("transfer", (to, compact(amount)))
 }
+
+pub trait BasicBalances {}
+
+impl<T: BasicBalances + System> Balances for T
+    // XXX: according the compiler prompt, add the following line
+    where u128: std::convert::From<<T as System>::BlockNumber>
+{
+    type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
+}
+

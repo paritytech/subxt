@@ -172,14 +172,44 @@ where
     }
 }
 
-/*
-impl<T: System + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Sets the new code.
-    pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
-        self.module.call("set_code", code)
+/// Sets the new code.
+pub fn set_code(m: &ModuleMetadata, code: Vec<u8>) -> Result<Encoded, MetadataError> {
+    m.call("set_code", code)
+}
+
+/// A basic trait for default init action for Runtime
+pub trait BasicSystem {}
+
+/// impl basic system for any type T: BasicSystem
+impl<T: BasicSystem> System for T {
+    type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
+    type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
+    type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
+    type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
+    type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
+    type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
+    type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
+    type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
+
+    type SignedExtra = (
+        srml_system::CheckVersion<node_runtime::Runtime>,
+        srml_system::CheckGenesis<node_runtime::Runtime>,
+        srml_system::CheckEra<node_runtime::Runtime>,
+        srml_system::CheckNonce<node_runtime::Runtime>,
+        srml_system::CheckWeight<node_runtime::Runtime>,
+        srml_balances::TakeFees<node_runtime::Runtime>,
+        );
+
+    fn extra(nonce: Self::Index) -> Self::SignedExtra {
+        use runtime_primitives::generic::Era;
+        (
+            srml_system::CheckVersion::<node_runtime::Runtime>::new(),
+            srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
+            srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
+            srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
+            srml_system::CheckWeight::<node_runtime::Runtime>::new(),
+            srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
+        )
     }
 }
-*/
+
