@@ -71,8 +71,8 @@ mod error;
 mod metadata;
 pub mod system;
 mod rpc;
-mod balances;
-mod contracts;
+pub mod balances;
+pub mod contracts;
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]

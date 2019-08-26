@@ -137,6 +137,7 @@ pub fn transfer<T: Balances + 'static>(
     m.call("transfer", (to, compact(amount)))
 }
 
+/// Exported trait for external Runtime
 pub trait BasicBalances {}
 
 impl<T: BasicBalances + System> Balances for T

@@ -110,6 +110,7 @@ pub fn call<T: Contracts + 'static>(
     m.call("call", (dest, compact(value), compact(gas_limit), data))
 }
 
+/// Exported trait for external Runtime
 pub trait BasicContracts {}
 
 impl<T: BasicContracts + Balances + System> Contracts for T {}
