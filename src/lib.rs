@@ -344,6 +344,7 @@ where
         let extra = T::extra(account_nonce);
         let raw_payload = (call.clone(), extra.clone(), version, (&genesis_hash, &genesis_hash));
         let signature = raw_payload.using_encoded(|payload| {
+            println!("payload: {:?}", payload);
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
             } else {
