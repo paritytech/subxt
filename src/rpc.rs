@@ -163,7 +163,7 @@ impl<T: System> Rpc<T> {
             event
         });
         self.chain
-            .subscribe_new_head()
+            .subscribe_new_heads()
             .map(|stream| stream.map(closure))
             .map_err(Into::into)
     }
