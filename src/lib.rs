@@ -86,8 +86,8 @@ pub struct ExtrinsicSuccess<T: System> {
 }
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
+    ws::connect(url)
+        //.expect("Url is a valid url; qed")
         .map_err(Into::into)
 }
 
