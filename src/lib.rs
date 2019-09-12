@@ -55,6 +55,7 @@ use crate::{
     rpc::{
         MapStream,
         Rpc,
+        ChainBlock,
     },
     srml::{
         system::{
@@ -181,6 +182,13 @@ impl<T: System + 'static> Client<T> {
         key: StorageKey,
     ) -> impl Future<Item = V, Error = Error> {
         self.fetch(key).map(|value| value.unwrap_or_default())
+    }
+
+    /// Fetch a block
+    pub fn block<H>(&self, hash: Option<H>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+        where H: Into<T::Hash> + 'static
+    {
+        self.connect().and_then(|rpc| rpc.block(hash.map(|h| h.into())))
     }
 
     /// Subscribe to events.
