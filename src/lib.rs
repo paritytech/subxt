@@ -84,8 +84,7 @@ pub struct ExtrinsicSuccess<T: System> {
 }
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
+    ws::connect(url)
         .map_err(Into::into)
 }
 
@@ -404,7 +403,6 @@ mod tests {
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
-        blake2_256,
         storage::StorageKey,
         Pair,
     };
@@ -555,8 +553,8 @@ mod tests {
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
-            <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&dest);
-        let free_balance_key = StorageKey(blake2_256(&free_balance).to_vec());
+            <srml_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
+        let free_balance_key = StorageKey(free_balance);
         let free_balance_key2 = balances
             .storage("FreeBalance")
             .unwrap()
@@ -566,8 +564,8 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <srml_system::AccountNonce<node_runtime::Runtime>>::key_for(&dest);
-        let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
+            <srml_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+        let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()
             .module("System")

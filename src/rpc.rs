@@ -42,7 +42,7 @@ use runtime_primitives::{
 use sr_version::RuntimeVersion;
 use std::convert::TryInto;
 use substrate_primitives::storage::StorageKey;
-use substrate_rpc::{
+use substrate_rpc_api::{
     author::AuthorClient,
     chain::{
         number::NumberOrHex,
@@ -163,7 +163,7 @@ impl<T: System> Rpc<T> {
             event
         });
         self.chain
-            .subscribe_new_head()
+            .subscribe_new_heads()
             .map(|stream| stream.map(closure))
             .map_err(Into::into)
     }
