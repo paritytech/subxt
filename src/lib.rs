@@ -185,8 +185,6 @@ impl<T: System + 'static> Client<T> {
         self.fetch(key).map(|value| value.unwrap_or_default())
     }
 
-
-    // pub fn block_hash(&self, hash: Option<NumberOrHex<T::BlockNumber>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
     /// Get a block hash. By default returns the latest block hash
     pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
         self.connect().and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
@@ -519,15 +517,22 @@ mod tests {
         rt.block_on(put_code)
             .expect("Extrinsic should be included in a block");
     }
-/*
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_getting_hash() {
+        let (mut rt, client) = test_setup();
+        rt.block_on(client.block_hash(None)).unwrap();
+    }
+
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_getting_block() {
         let (mut rt, client) = test_setup();
-        let stream = rt.block_on(client.subscribe_finalized_blocks()).unwrap();
-        let (_header, _) = rt.block_on(stream.into_future().map_err(|(e, _)| e).unwrap();
+        rt.block_on(client.block_hash(None).and_then(move |h| {
+            client.block(h)
+        })).unwrap();
     }
-*/
 
     #[test]
     #[ignore] // requires locally running substrate node
