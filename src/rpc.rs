@@ -52,6 +52,7 @@ use substrate_rpc_api::{
 };
 
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
+pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: System> {
@@ -107,7 +108,12 @@ impl<T: System> Rpc<T> {
             })
     }
 
-    /// Fetch a Block
+    /// Get a block hash, returns hash of latest block by default
+    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.chain.block_hash(hash).map_err(Into::into)
+    }
+
+    /// Get a Block
     pub fn block(&self, hash: Option<T::Hash>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
         self.chain.block(hash).map_err(Into::into)
     }

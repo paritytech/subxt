@@ -56,6 +56,7 @@ use crate::{
         MapStream,
         Rpc,
         ChainBlock,
+        BlockNumber
     },
     srml::{
         system::{
@@ -184,7 +185,14 @@ impl<T: System + 'static> Client<T> {
         self.fetch(key).map(|value| value.unwrap_or_default())
     }
 
-    /// Fetch a block
+
+    // pub fn block_hash(&self, hash: Option<NumberOrHex<T::BlockNumber>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+    /// Get a block hash. By default returns the latest block hash
+    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.connect().and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+    }
+
+    /// Get a block
     pub fn block<H>(&self, hash: Option<H>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
         where H: Into<T::Hash> + 'static
     {
@@ -511,6 +519,15 @@ mod tests {
         rt.block_on(put_code)
             .expect("Extrinsic should be included in a block");
     }
+/*
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_getting_block() {
+        let (mut rt, client) = test_setup();
+        let stream = rt.block_on(client.subscribe_finalized_blocks()).unwrap();
+        let (_header, _) = rt.block_on(stream.into_future().map_err(|(e, _)| e).unwrap();
+    }
+*/
 
     #[test]
     #[ignore] // requires locally running substrate node
