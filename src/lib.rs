@@ -55,6 +55,8 @@ use crate::{
     rpc::{
         MapStream,
         Rpc,
+        ChainBlock,
+        BlockNumber
     },
     srml::{
         system::{
@@ -88,8 +90,7 @@ pub struct ExtrinsicSuccess<T: System> {
 }
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url.as_str())
-        .expect("Url is a valid url; qed")
+    ws::connect(url)
         .map_err(Into::into)
 }
 
@@ -186,6 +187,18 @@ impl<T: System + 'static> Client<T> {
         key: StorageKey,
     ) -> impl Future<Item = V, Error = Error> {
         self.fetch(key).map(|value| value.unwrap_or_default())
+    }
+
+    /// Get a block hash. By default returns the latest block hash
+    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.connect().and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+    }
+
+    /// Get a block
+    pub fn block<H>(&self, hash: Option<H>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+        where H: Into<T::Hash> + 'static
+    {
+        self.connect().and_then(|rpc| rpc.block(hash.map(|h| h.into())))
     }
 
     /// Subscribe to events.
@@ -408,7 +421,6 @@ mod tests {
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
-        blake2_256,
         storage::StorageKey,
         Pair,
     };
@@ -512,6 +524,22 @@ mod tests {
 
     #[test]
     #[ignore] // requires locally running substrate node
+    fn test_getting_hash() {
+        let (mut rt, client) = test_setup();
+        rt.block_on(client.block_hash(None)).unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_getting_block() {
+        let (mut rt, client) = test_setup();
+        rt.block_on(client.block_hash(None).and_then(move |h| {
+            client.block(h)
+        })).unwrap();
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
     fn test_state_read_free_balance() {
         let (mut rt, client) = test_setup();
 
@@ -559,8 +587,8 @@ mod tests {
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
-            <srml_balances::FreeBalance<node_runtime::Runtime>>::key_for(&dest);
-        let free_balance_key = StorageKey(blake2_256(&free_balance).to_vec());
+            <srml_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
+        let free_balance_key = StorageKey(free_balance);
         let free_balance_key2 = balances
             .storage("FreeBalance")
             .unwrap()
@@ -570,8 +598,8 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <srml_system::AccountNonce<node_runtime::Runtime>>::key_for(&dest);
-        let account_nonce_key = StorageKey(blake2_256(&account_nonce).to_vec());
+            <srml_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+        let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()
             .module("System")

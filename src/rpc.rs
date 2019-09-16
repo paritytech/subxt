@@ -38,16 +38,15 @@ use runtime_primitives::{
 use sr_version::RuntimeVersion;
 use std::convert::TryInto;
 use substrate_primitives::storage::StorageKey;
-use substrate_rpc::{
+use substrate_rpc_api::{
     author::AuthorClient,
-    chain::{
-        number::NumberOrHex,
-        ChainClient,
-    },
+    chain::ChainClient,
     state::StateClient,
 };
+use substrate_rpc_primitives::number::NumberOrHex;
 
-type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
+pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
+pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: System> {
@@ -101,6 +100,16 @@ impl<T: System> Rpc<T> {
             .and_then(|meta: RuntimeMetadataPrefixed| {
                 future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
             })
+    }
+
+    /// Get a block hash, returns hash of latest block by default
+    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.chain.block_hash(hash).map_err(Into::into)
+    }
+
+    /// Get a Block
+    pub fn block(&self, hash: Option<T::Hash>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
+        self.chain.block(hash).map_err(Into::into)
     }
 
     /// Fetch the runtime version
@@ -159,7 +168,7 @@ impl<T: System> Rpc<T> {
             event
         });
         self.chain
-            .subscribe_new_head()
+            .subscribe_new_heads()
             .map(|stream| stream.map(closure))
             .map_err(Into::into)
     }
