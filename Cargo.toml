@@ -26,6 +26,7 @@ serde = { version = "1.0", features = ["derive"] }
 sr-version = { git = "https://github.com/paritytech/substrate/", package = "sr-version" }
 srml-system = { git = "https://github.com/paritytech/substrate/", package = "srml-system" }
 substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-api" }
+substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-primitives" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
 transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
 url = "1.7"

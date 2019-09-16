@@ -44,12 +44,10 @@ use std::convert::TryInto;
 use substrate_primitives::storage::StorageKey;
 use substrate_rpc_api::{
     author::AuthorClient,
-    chain::{
-        number::NumberOrHex,
-        ChainClient,
-    },
+    chain::ChainClient,
     state::StateClient,
 };
+use substrate_rpc_primitives::number::NumberOrHex;
 
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
