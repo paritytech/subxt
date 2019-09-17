@@ -134,6 +134,7 @@ use substrate_primitives::{
     twox_128,
 };
 use transaction_pool::txpool::watcher::Status;
+use std::collections::HashMap;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -204,7 +205,7 @@ impl<T: System> Rpc<T> {
     pub fn submit_and_watch_extrinsic<E>(
         self,
         extrinsic: E,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
+    ) -> impl Future<Item = ExtrinsicSuccess<T, u8>, Error = Error>
     where
         E: Encode,
     {
@@ -263,6 +264,7 @@ impl<T: System> Rpc<T> {
                         bh,
                         sb.block.extrinsics.len()
                     );
+
                     wait_for_block_events::<T>(ext_hash, &sb, bh, events)
                 })
         })
@@ -275,7 +277,7 @@ fn wait_for_block_events<T: System>(
     signed_block: &ChainBlock<T>,
     block_hash: T::Hash,
     events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+) -> impl Future<Item = ExtrinsicSuccess<T, u8>, Error = Error> {
     let ext_index = signed_block
         .block
         .extrinsics
@@ -312,25 +314,21 @@ fn wait_for_block_events<T: System>(
 
     block_events
         .join(ext_index)
-        .map(move |(events, ext_index)| {
-            let events: Vec<OpaqueEvent> = events
-                .iter()
-                .filter_map(|e| {
-                    if let srml_system::Phase::ApplyExtrinsic(i) = e.phase {
-                        if i as usize == ext_index {
-                            Some(e.event.clone())
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
+        .map(move |(event_records, ext_index)| {
+            let mut events = HashMap::new();
+            for er in event_records {
+                if let srml_system::Phase::ApplyExtrinsic(i) = er.phase {
+                    if i as usize == ext_index {
+                        let key = (er.event.runtime_variant, er.event.module_variant);
+                        let mut events = events.entry(key).or_insert(Vec::new());
+                        events.push(er.event.clone())
                     }
-                })
-                .collect::<Vec<OpaqueEvent>>();
+                }
+            }
             ExtrinsicSuccess {
                 block: block_hash,
                 extrinsic: ext_hash,
-                events,
+                raw_events: events,
             }
         })
 }

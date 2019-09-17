@@ -23,6 +23,7 @@ use substrate_primitives::storage::StorageKey;
 pub enum MetadataError {
     ModuleNotFound(&'static str),
     CallNotFound(&'static str),
+    EventNotFound(u8, u8),
     StorageNotFound(&'static str),
     StorageTypeError,
     MapValueTypeError,
@@ -31,6 +32,7 @@ pub enum MetadataError {
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
+    events_by_index: HashMap<(u8, u8), (String, String)>,
 }
 
 impl Metadata {
@@ -38,6 +40,12 @@ impl Metadata {
         self.modules
             .get(name)
             .ok_or(MetadataError::ModuleNotFound(name))
+    }
+
+    pub fn event_key(&self, module_index: u8, variant_index: u8) -> Result<&(String, String), MetadataError> {
+        self.events_by_index
+            .get(&(module_index, variant_index))
+            .ok_or(MetadataError::EventNotFound(module_index, variant_index))
     }
 
     pub fn pretty(&self) -> String {
@@ -67,10 +75,10 @@ impl Metadata {
 
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
-    index: Vec<u8>,
+    index: u8,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
-    events: HashMap<String, Vec<u8>>,
+    events: HashMap<String, u8>,
     // constants
 }
 
@@ -84,7 +92,7 @@ impl ModuleMetadata {
             .calls
             .get(function)
             .ok_or(MetadataError::CallNotFound(function))?;
-        let mut bytes = self.index.clone();
+        let mut bytes = vec![self.index];
         bytes.extend(fn_bytes);
         bytes.extend(params.encode());
         Ok(Encoded(bytes))
@@ -217,11 +225,11 @@ fn convert_module(
     if let Some(events) = module.event {
         for (index, event) in convert(events)?.into_iter().enumerate() {
             let name = convert(event.name)?;
-            event_map.insert(name, vec![index as u8]);
+            event_map.insert(name, index as u8);
         }
     }
     Ok(ModuleMetadata {
-        index: vec![index as u8],
+        index: index as u8,
         storage: storage_map,
         calls: call_map,
         events: event_map,
