@@ -84,8 +84,6 @@ pub mod srml;
 pub struct OpaqueEvent {
     /// The index of the module event on the top level runtime event enum
     pub runtime_variant: u8,
-    /// The index of the variant on the module event
-    pub module_variant: u8,
     /// The raw event data
     event_data: Vec<u8>,
 }
@@ -104,11 +102,11 @@ pub struct ExtrinsicSuccess<T: System, K: Eq + Hash> {
     /// Extrinsic hash.
     pub extrinsic: T::Hash,
     /// Raw events by module and variant.
-    pub raw_events: HashMap<(K, K), Vec<OpaqueEvent>>,
+    pub raw_events: HashMap<K, Vec<OpaqueEvent>>,
 }
 
 impl<T: System, K: Eq + Hash> ExtrinsicSuccess<T, K> {
-    pub fn new(block: T::Hash, extrinsic: T::Hash, raw_events: HashMap<(K, K), Vec<OpaqueEvent>>) -> Self {
+    pub fn new(block: T::Hash, extrinsic: T::Hash, raw_events: HashMap<K, Vec<OpaqueEvent>>) -> Self {
         Self {
             block,
             extrinsic,
@@ -118,9 +116,9 @@ impl<T: System, K: Eq + Hash> ExtrinsicSuccess<T, K> {
 }
 
 impl<T: System> ExtrinsicSuccess<T, String> {
-    pub fn events<E, I>(&self, module: &str, variant: &str) -> Result<I, Error> where E: Decode, I: IntoIterator<Item = E> {
+    pub fn events<E, I>(&self, module: &str) -> Result<I, Error> where E: Decode, I: IntoIterator<Item = E> {
         self.raw_events
-            .get(&(module.to_string(), variant.to_string()))
+            .get(&module.to_string())
             .map(|events| {
                 events
                     .into_iter()
@@ -443,9 +441,9 @@ where
                     .and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
                     .and_then(|success| {
                         let mut events_by_name = HashMap::new();
-                        for ((runtime, module), events) in success.raw_events {
-                            let event_key = metadata.event_key(runtime, module);
-                            match event_key {
+                        for (module_index, events) in success.raw_events {
+                            let module_name = metadata.module_name(module_index);
+                            match module_name {
                                 Ok(key) => events_by_name.insert(key.clone(), events),
                                 Err(err) => return future::err(err.into()),
                             };
@@ -461,6 +459,7 @@ mod tests {
     use super::*;
     use crate::srml::{
         balances::{
+            self,
             Balances,
             BalancesStore,
             BalancesXt,
@@ -577,9 +576,9 @@ mod tests {
             .expect("Extrinsic should be included in a block");
 
         let code_hash = success
-            .events::<<Runtime as Contracts>::Event>("Contracts") // todo: could be .contract_events extension
+            .events::<srml_contracts::Event>("Contracts") // todo: could be .contract_events extension
             .find_map(|event| {
-                if let Event::contracts(ContractsEvent::CodeStored(hash)) = event {
+                if let srml_contracts::Event::CodeStored(hash) = event {
                     Some(hash.clone())
                 } else {
                     None

@@ -23,7 +23,7 @@ use substrate_primitives::storage::StorageKey;
 pub enum MetadataError {
     ModuleNotFound(&'static str),
     CallNotFound(&'static str),
-    EventNotFound(u8, u8),
+    EventNotFound(u8),
     StorageNotFound(&'static str),
     StorageTypeError,
     MapValueTypeError,
@@ -32,7 +32,7 @@ pub enum MetadataError {
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
-    events_by_index: HashMap<(u8, u8), (String, String)>,
+    modules_by_index: HashMap<u8, String>,
 }
 
 impl Metadata {
@@ -42,10 +42,11 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn event_key(&self, module_index: u8, variant_index: u8) -> Result<&(String, String), MetadataError> {
-        self.events_by_index
-            .get(&(module_index, variant_index))
-            .ok_or(MetadataError::EventNotFound(module_index, variant_index))
+    pub fn module_name(&self, module_index: u8) -> Result<String, MetadataError> {
+        self.modules_by_index
+            .get(&module_index)
+            .cloned()
+            .ok_or(MetadataError::EventNotFound(module_index))
     }
 
     pub fn pretty(&self) -> String {
@@ -185,10 +186,13 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => Err(Error::InvalidVersion)?,
         };
         let mut modules = HashMap::new();
+        let mut modules_by_index = HashMap::new();
         for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
-            modules.insert(convert(module.name.clone())?, convert_module(i, module)?);
+            let module_name = convert(module.name.clone())?;
+            modules.insert(module_name.clone(), convert_module(i, module)?);
+            modules_by_index.insert(i as u8, module_name);
         }
-        Ok(Metadata { modules })
+        Ok(Metadata { modules, modules_by_index })
     }
 }
 

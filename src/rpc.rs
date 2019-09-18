@@ -319,7 +319,7 @@ fn wait_for_block_events<T: System>(
             for er in event_records {
                 if let srml_system::Phase::ApplyExtrinsic(i) = er.phase {
                     if i as usize == ext_index {
-                        let key = (er.event.runtime_variant, er.event.module_variant);
+                        let key = er.event.runtime_variant;
                         let mut events = events.entry(key).or_insert(Vec::new());
                         events.push(er.event.clone())
                     }
