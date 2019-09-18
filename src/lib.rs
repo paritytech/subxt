@@ -106,7 +106,7 @@ pub struct ExtrinsicSuccess<T: System, K: Eq + Hash> {
 }
 
 impl<T: System, K: Eq + Hash> ExtrinsicSuccess<T, K> {
-    pub fn new(block: T::Hash, extrinsic: T::Hash, raw_events: HashMap<K, Vec<OpaqueEvent>>) -> Self {
+    fn new(block: T::Hash, extrinsic: T::Hash, raw_events: HashMap<K, Vec<OpaqueEvent>>) -> Self {
         Self {
             block,
             extrinsic,
@@ -116,14 +116,16 @@ impl<T: System, K: Eq + Hash> ExtrinsicSuccess<T, K> {
 }
 
 impl<T: System> ExtrinsicSuccess<T, String> {
-    pub fn events<E, I>(&self, module: &str) -> Result<I, Error> where E: Decode, I: IntoIterator<Item = E> {
+    /// Get all events for a module, attempting to decode them.
+    /// Returns an empty iterator if no events for that module.
+    /// Returns an error if any of the events fail to decode.
+    pub fn module_events<E>(&self, module: &str) -> Result<Vec<E>, CodecError> where E: Decode {
         self.raw_events
             .get(&module.to_string())
-            .map(|events| {
+            .map_or(Ok(Vec::new()), |events| {
                 events
                     .into_iter()
                     .map(OpaqueEvent::decode_event)
-//                    .map_err(Into::into)
                     .collect::<Result<Vec<E>, _>>()
             })
     }
@@ -439,7 +441,7 @@ where
             .and_then(move |extrinsic| {
                 cli
                     .and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
-                    .and_then(|success| {
+                    .and_then(move |success| {
                         let mut events_by_name = HashMap::new();
                         for (module_index, events) in success.raw_events {
                             let module_name = metadata.module_name(module_index);
@@ -459,7 +461,6 @@ mod tests {
     use super::*;
     use crate::srml::{
         balances::{
-            self,
             Balances,
             BalancesStore,
             BalancesXt,
@@ -576,15 +577,17 @@ mod tests {
             .expect("Extrinsic should be included in a block");
 
         let code_hash = success
-            .events::<srml_contracts::Event>("Contracts") // todo: could be .contract_events extension
+            .module_events::<srml_contracts::Event<node_runtime::Runtime>>("Contracts")
+            .expect("Contract events should decode successfully")
+            .iter()
             .find_map(|event| {
-                if let srml_contracts::Event::CodeStored(hash) = event {
+                if let srml_contracts::Event::<node_runtime::Runtime>::CodeStored(hash) = event {
                     Some(hash.clone())
                 } else {
                     None
                 }
             });
-        assert!(code_hash.is_ok());
+        assert!(code_hash.is_some());
     }
 
     #[test]

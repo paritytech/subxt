@@ -35,6 +35,7 @@ url = "1.7"
 env_logger = "0.6"
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
 srml-balances = { git = "https://github.com/paritytech/substrate/", package = "srml-balances" }
+srml-contracts = { git = "https://github.com/paritytech/substrate/", package = "srml-contracts" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
 tokio = "0.1"
 wabt = "0.9.0"
