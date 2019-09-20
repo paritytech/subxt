@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{error::Error, metadata::Metadata, srml::system::System, OpaqueEvent};
+use crate::{error::Error, metadata::Metadata, srml::system::System};
 use futures::future::{
     self,
     Future,
@@ -128,18 +128,17 @@ use futures::{
 };
 use jsonrpc_core_client::TypedSubscriptionStream;
 use runtime_primitives::traits::Hash;
-use srml_system::EventRecord;
 use substrate_primitives::{
     storage::StorageChangeSet,
     twox_128,
 };
 use transaction_pool::txpool::watcher::Status;
-use std::collections::HashMap;
+use crate::events::EventListener;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
 
-impl<T: System> Rpc<T> {
+impl<T: System + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
     pub fn subscribe_events(
         &self,
@@ -202,10 +201,11 @@ impl<T: System> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn submit_and_watch_extrinsic<E>(
+    pub fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
-    ) -> impl Future<Item = ExtrinsicSuccess<T, u8>, Error = Error>
+        listener: EventListener,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         E: Encode,
     {
@@ -265,70 +265,8 @@ impl<T: System> Rpc<T> {
                         sb.block.extrinsics.len()
                     );
 
-                    wait_for_block_events::<T>(ext_hash, &sb, bh, events)
+                    listener.wait_for_block_events::<T>(ext_hash, sb, bh, events)
                 })
         })
     }
-}
-
-/// Waits for events for the block triggered by the extrinsic
-fn wait_for_block_events<T: System>(
-    ext_hash: T::Hash,
-    signed_block: &ChainBlock<T>,
-    block_hash: T::Hash,
-    events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T, u8>, Error = Error> {
-    let ext_index = signed_block
-        .block
-        .extrinsics
-        .iter()
-        .position(|ext| {
-            let hash = T::Hashing::hash_of(ext);
-            hash == ext_hash
-        })
-        .ok_or(format!("Failed to find Extrinsic with hash {:?}", ext_hash).into())
-        .into_future();
-
-    let block_hash = block_hash.clone();
-    let block_events = events_stream
-        .filter(move |event| event.block == block_hash)
-        .into_future()
-        .map_err(|(e, _)| e.into())
-        .and_then(|(change_set, _)| {
-            match change_set {
-                None => future::ok(Vec::new()),
-                Some(change_set) => {
-                    let events = change_set
-                        .changes
-                        .iter()
-                        .filter_map(|(_key, data)| {
-                            data.as_ref().map(|data| Decode::decode(&mut &data.0[..]))
-                        })
-                        .collect::<Result<Vec<Vec<EventRecord<OpaqueEvent, T::Hash>>>, _>>()
-                        .map(|events| events.into_iter().flat_map(|es| es).collect())
-                        .map_err(Into::into);
-                    future::result(events)
-                }
-            }
-        });
-
-    block_events
-        .join(ext_index)
-        .map(move |(event_records, ext_index)| {
-            let mut events = HashMap::new();
-            for er in event_records {
-                if let srml_system::Phase::ApplyExtrinsic(i) = er.phase {
-                    if i as usize == ext_index {
-                        let key = er.event.runtime_variant;
-                        let events = events.entry(key).or_insert(Vec::new());
-                        events.push(er.event.clone())
-                    }
-                }
-            }
-            ExtrinsicSuccess {
-                block: block_hash,
-                extrinsic: ext_hash,
-                raw_events: events,
-            }
-        })
 }

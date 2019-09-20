@@ -32,15 +32,12 @@ use parity_scale_codec::{
     Codec,
     Decode,
     Encode,
-    Error as CodecError,
 };
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::StaticLookup,
 };
 use std::{
-    collections::HashMap,
-    hash::Hash,
     marker::PhantomData,
 };
 use sr_version::RuntimeVersion;
@@ -72,64 +69,14 @@ use crate::{
     },
 };
 pub use error::Error;
+use crate::events::{ExtrinsicSuccess, EventListener};
 
 mod codec;
 mod error;
+mod events;
 mod metadata;
 mod rpc;
 pub mod srml;
-
-/// Raw runtime event bytes
-#[derive(Clone, Debug, PartialEq, Eq, Encode, Decode)]
-pub struct OpaqueEvent {
-    /// The index of the module event on the top level runtime event enum
-    pub runtime_variant: u8,
-    /// The raw event data
-    event_data: Vec<u8>,
-}
-
-impl OpaqueEvent {
-    fn decode_event<T: Decode>(&self) -> Result<T, CodecError> {
-        Decode::decode(&mut &self.event_data[..])
-    }
-}
-
-/// Captures data for when an extrinsic is successfully included in a block
-#[derive(Debug)]
-pub struct ExtrinsicSuccess<T: System, K: Eq + Hash> {
-    /// Block hash.
-    pub block: T::Hash,
-    /// Extrinsic hash.
-    pub extrinsic: T::Hash,
-    /// Raw events by module and variant.
-    pub raw_events: HashMap<K, Vec<OpaqueEvent>>,
-}
-
-impl<T: System, K: Eq + Hash> ExtrinsicSuccess<T, K> {
-    fn new(block: T::Hash, extrinsic: T::Hash, raw_events: HashMap<K, Vec<OpaqueEvent>>) -> Self {
-        Self {
-            block,
-            extrinsic,
-            raw_events,
-        }
-    }
-}
-
-impl<T: System> ExtrinsicSuccess<T, String> {
-    /// Get all events for a module, attempting to decode them.
-    /// Returns an empty iterator if no events for that module.
-    /// Returns an error if any of the events fail to decode.
-    pub fn module_events<E>(&self, module: &str) -> Result<Vec<E>, CodecError> where E: Decode {
-        self.raw_events
-            .get(&module.to_string())
-            .map_or(Ok(Vec::new()), |events| {
-                events
-                    .into_iter()
-                    .map(OpaqueEvent::decode_event)
-                    .collect::<Result<Vec<E>, _>>()
-            })
-    }
-}
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url)
@@ -432,26 +379,19 @@ where
     /// Submits transaction to the chain and watch for events.
     pub fn submit_and_watch(
         &self,
-    ) -> impl Future<Item = ExtrinsicSuccess<T, String>, Error = Error> {
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
+
+        // todo [AJ]: move this somewhere
+        let mut listener = EventListener::new(metadata);
+        listener.register_module_event_decoder::<crate::srml::contracts::Event<T>>("Contracts");
+
         self.create_and_sign()
             .into_future()
             .map_err(Into::into)
             .and_then(move |extrinsic| {
-                cli
-                    .and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
-                    .and_then(move |success| {
-                        let mut events_by_name = HashMap::new();
-                        for (module_index, events) in success.raw_events {
-                            let module_name = metadata.module_name(module_index);
-                            match module_name {
-                                Ok(key) => events_by_name.insert(key.clone(), events),
-                                Err(err) => return future::err(err.into()),
-                            };
-                        }
-                        future::ok(ExtrinsicSuccess::new(success.block, success.extrinsic, events_by_name))
-                    })
+                cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic, listener))
             })
     }
 }

@@ -115,3 +115,10 @@ where
             .call("call", (dest, compact(value), compact(gas_limit), data))
     }
 }
+
+/// Contracts Events
+#[derive(parity_scale_codec::Decode)]
+pub enum Event<T: System> {
+    /// Contract code stored
+    CodeStored(T::Hash),
+}
