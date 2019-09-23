@@ -386,6 +386,7 @@ where
         // todo [AJ]: move this somewhere
         let mut listener = EventListener::new(metadata);
         listener.register_module_event_decoder::<crate::srml::contracts::Event<T>>("Contracts");
+        listener.register_module_event_decoder::<crate::srml::system::SystemEvent>("System");
 
         self.create_and_sign()
             .into_future()
@@ -515,6 +516,10 @@ mod tests {
 
         let success = rt.block_on(put_code)
             .expect("Extrinsic should be included in a block");
+
+        let system_events = success
+            .module_events::<srml::system::SystemEvent>("System");
+        println!("System events {:?}", system_events);
 
         let code_hash = success
             .module_events::<srml_contracts::Event<node_runtime::Runtime>>("Contracts")

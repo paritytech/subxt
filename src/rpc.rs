@@ -204,7 +204,7 @@ impl<T: System + 'static> Rpc<T> {
     pub fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
-        listener: EventListener,
+        listener: EventListener<T>,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         E: Encode,
@@ -265,7 +265,7 @@ impl<T: System + 'static> Rpc<T> {
                         sb.block.extrinsics.len()
                     );
 
-                    listener.wait_for_block_events::<T>(ext_hash, sb, bh, events)
+                    listener.wait_for_block_events(ext_hash, sb, bh, events)
                 })
         })
     }

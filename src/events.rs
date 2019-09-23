@@ -35,7 +35,7 @@ use futures::future::{
 use futures::stream::Stream;
 use srml_system::{Phase};
 use std::any::Any;
-use std::marker::Send;
+use std::marker::{Send, PhantomData};
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
@@ -68,14 +68,15 @@ impl<T: System> ExtrinsicSuccess<T> {
     }
 }
 
-pub struct EventListener {
+pub struct EventListener<T> {
     metadata: Metadata, // todo: borrow?
     decoders: HashMap<String, fn(&mut &[u8]) -> Result<Box<dyn Any + Send + 'static>, CodecError>>,
+    marker: PhantomData<fn() -> T>,
 }
 
-impl EventListener {
+impl<T: System + 'static> EventListener<T> {
     pub fn new(metadata: Metadata) -> Self {
-        Self { metadata, decoders: HashMap::new(), }
+        Self { metadata, decoders: HashMap::new(), marker: PhantomData }
     }
 
     pub fn register_module_event_decoder<Event>(&mut self, module: &str) where Event: Decode + Send + 'static {
@@ -84,6 +85,7 @@ impl EventListener {
         });
     }
 
+    /// Dynamically decode `Vec<EventRecord<T>>` by resolving a decoder for the module Event variant
     fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, String, Box<dyn Any + Send + 'static>)>, Error> {
         <Compact<u32>>::decode(input)
             .map_err(Into::into)
@@ -94,9 +96,11 @@ impl EventListener {
                     let phase = Phase::decode(input)?;
                     let module_variant = u8::decode(input)?;
                     let module = self.metadata.module_name(module_variant)?;
+                    println!("phase {:?}, variant {:?}, module {:?}", phase, module_variant, module);
                     let event_decoder = self.decoders.get(&module).unwrap(); // todo: [AJ]
 //                        .ok_or(format!("No Event Decoder registered for '{}'", module).into())?;
-                    let event = event_decoder(input)?;
+                    let event = event_decoder(input).unwrap();
+                    let _topics = Vec::<T::Hash>::decode(input)?;
                     r.push((phase, module, event));
                 }
                 Ok(r)
@@ -104,7 +108,7 @@ impl EventListener {
     }
 
     /// Waits for events for the block triggered by the extrinsic
-    pub fn wait_for_block_events<T: System + 'static>(
+    pub fn wait_for_block_events(
         self,
         ext_hash: T::Hash,
         signed_block: ChainBlock<T>,

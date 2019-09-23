@@ -178,3 +178,12 @@ where
         self.module.call("set_code", code)
     }
 }
+
+/// Event for the System module.
+#[derive(Clone, Debug, parity_scale_codec::Decode)]
+pub enum SystemEvent {
+    /// An extrinsic completed successfully.
+    ExtrinsicSuccess,
+    /// An extrinsic failed.
+    ExtrinsicFailed(runtime_primitives::DispatchError),
+}
