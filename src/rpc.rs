@@ -133,7 +133,7 @@ use substrate_primitives::{
     twox_128,
 };
 use transaction_pool::txpool::watcher::Status;
-use crate::events::EventsDecoder;
+
 use srml_system::Phase;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
