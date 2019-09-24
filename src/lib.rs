@@ -69,7 +69,7 @@ use crate::{
     },
 };
 pub use error::Error;
-use crate::events::{ExtrinsicSuccess, EventListener};
+use crate::events::{ExtrinsicSuccess, EventsDecoder};
 
 mod codec;
 mod error;
@@ -382,16 +382,13 @@ where
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
-
-        // todo [AJ]: move this somewhere
-        let mut listener = EventListener::new(metadata);
-        listener.register_module_event_decoder::<crate::srml::contracts::Event<T>>("Contracts");
-        listener.register_module_event_decoder::<crate::srml::system::SystemEvent>("System");
+        let event_listener = EventsDecoder::try_from(metadata).into_future();
 
         self.create_and_sign()
             .into_future()
+            .join(listener)
             .map_err(Into::into)
-            .and_then(move |extrinsic| {
+            .and_then(move |(extrinsic, listener)| {
                 cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic, listener))
             })
     }

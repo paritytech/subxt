@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{error::Error, metadata::Metadata, srml::system::System};
+use crate::{error::Error, events::{EventsDecoder, RawEvent}, metadata::Metadata, srml::system::System};
 use futures::future::{
     self,
     Future,
@@ -133,7 +133,8 @@ use substrate_primitives::{
     twox_128,
 };
 use transaction_pool::txpool::watcher::Status;
-use crate::events::EventListener;
+use crate::events::EventsDecoder;
+use srml_system::Phase;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -204,7 +205,7 @@ impl<T: System + 'static> Rpc<T> {
     pub fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
-        listener: EventListener<T>,
+        decoder: EventsDecoder<T>,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         E: Encode,
@@ -265,8 +266,74 @@ impl<T: System + 'static> Rpc<T> {
                         sb.block.extrinsics.len()
                     );
 
-                    listener.wait_for_block_events(ext_hash, sb, bh, events)
+                    wait_for_block_events(decoder, ext_hash, sb, bh, events)
                 })
         })
     }
+}
+
+/// Captures data for when an extrinsic is successfully included in a block
+#[derive(Debug)]
+pub struct ExtrinsicSuccess<T: System> {
+    /// Block hash.
+    pub block: T::Hash,
+    /// Extrinsic hash.
+    pub extrinsic: T::Hash,
+    /// Raw runtime events, can be decoded by the caller.
+    pub events: Vec<RawEvent>,
+}
+
+/// Waits for events for the block triggered by the extrinsic
+pub fn wait_for_block_events<T: System + 'static>(
+    decoder: &EventsDecoder<T>,
+    ext_hash: T::Hash,
+    signed_block: ChainBlock<T>,
+    block_hash: T::Hash,
+    events_stream: MapStream<StorageChangeSet<T::Hash>>,
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+    let ext_index = signed_block
+        .block
+        .extrinsics
+        .iter()
+        .position(|ext| {
+            let hash = T::Hashing::hash_of(ext);
+            hash == ext_hash
+        })
+        .ok_or(format!("Failed to find Extrinsic with hash {:?}", ext_hash).into())
+        .into_future();
+
+    let block_hash = block_hash.clone();
+    events_stream
+        .filter(move |event| event.block == block_hash)
+        .into_future()
+        .map_err(|(e, _)| e.into())
+        .join(ext_index)
+        .and_then(move |((change_set, _), ext_index)| {
+            let events =
+                match change_set {
+                    None => Vec::new(),
+                    Some(change_set) => {
+                        let mut events = Vec::new();
+                        for (_key, data) in change_set.changes {
+                            if let Some(data) = data {
+                                if let Ok(raw_events) = decoder.decode_events(&mut &data.0[..]) {
+                                    for (phase, event) in raw_events {
+                                        if let Phase::ApplyExtrinsic(i) = phase {
+                                            if i as usize == ext_index {
+                                                events.push(event)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        events
+                    }
+                };
+            future::ok(ExtrinsicSuccess {
+                block: block_hash,
+                extrinsic: ext_hash,
+                events,
+            })
+        })
 }

@@ -4,6 +4,7 @@ use parity_scale_codec::{
     Encode,
 };
 use runtime_metadata::{
+    EventMetadata,
     DecodeDifferent,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
@@ -18,6 +19,7 @@ use std::{
     marker::PhantomData,
 };
 use substrate_primitives::storage::StorageKey;
+use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub enum MetadataError {
@@ -64,9 +66,9 @@ impl Metadata {
                 string.push_str(call.as_str());
                 string.push('\n');
             }
-            for (event, _) in &module.events {
+            for (_, event) in &module.events {
                 string.push_str(" e  ");
-                string.push_str(event.as_str());
+                string.push_str(event.name.as_str());
                 string.push('\n');
             }
         }
@@ -79,7 +81,7 @@ pub struct ModuleMetadata {
     index: u8,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
-    events: HashMap<String, u8>,
+    events: HashMap<u8, EventMetadata>,
     // constants
 }
 
@@ -103,6 +105,12 @@ impl ModuleMetadata {
         self.storage
             .get(key)
             .ok_or(MetadataError::StorageNotFound(key))
+    }
+
+    pub fn event(&self, index: u8) -> Result<EventMetadata, MetadataError> {
+        self.events
+            .get(&index)
+            .ok_or(MetadataError::EventNotFound(index))
     }
 }
 
@@ -167,11 +175,56 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct EventMetadata {
+    pub name: String,
+    pub arguments: Vec<EventArg>,
+}
+
+/// Naive representation of event argument types, supports current set of substrate EventArg types.
+/// If and when Substrate uses `type-metadata`, this can be replaced.
+///
+/// Used to calculate the size of a instance of an event variant without having the concrete type,
+/// so the raw bytes can be extracted from a `Vec<EventRecord>`.
+pub enum EventArg {
+    Primitive(String),
+    Vec(Box<EventArg>),
+    Tuple(Vec<EventArg>),
+}
+
+impl FromStr for EventArg {
+    type Err = Error;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        if let Some(start) = s.find("Vec<") {
+            if let Some(end) = s.rfind(">") {
+                Ok(EventArg::Vec(Box::new(s[start..end].parse()?)))
+            } else {
+                Err(Error::InvalidEventArg(s.to_string(), "Expected closing `<` for `Vec`"))
+            }
+        } else if let Some(start) = s.find("(") {
+            if let Some(end) = s.rfind(")") {
+                let mut args = Vec::new();
+                for arg in s[start..end].split(',') {
+                    let arg = arg.trim().parse()?;
+                    args.push(arg)
+                }
+                Ok(EventArg::Tuple(args))
+            } else {
+                Err(Error::InvalidEventArg(s.to_string(), "Expecting closing `)` for tuple"))
+            }
+        } else {
+            Ok(EventArg::Primitive(s.to_string()))
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Error {
     InvalidPrefix,
     InvalidVersion,
     ExpectedDecoded,
+    InvalidEventArg(String, &'static str),
 }
 
 impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
@@ -228,8 +281,7 @@ fn convert_module(
     let mut event_map = HashMap::new();
     if let Some(events) = module.event {
         for (index, event) in convert(events)?.into_iter().enumerate() {
-            let name = convert(event.name)?;
-            event_map.insert(name, index as u8);
+            event_map.insert(index as u8, convert_event(event)?);
         }
     }
     Ok(ModuleMetadata {
@@ -237,6 +289,19 @@ fn convert_module(
         storage: storage_map,
         calls: call_map,
         events: event_map,
+    })
+}
+
+fn convert_event(event: runtime_metadata::EventMetadata) -> Result<EventMetadata, Error> {
+    let name = convert(event.name)?;
+    let mut arguments = Vec::new();
+    for arg in event.arguments {
+        let arg = convert_arg(arg)?.parse::<EventArg>()?;
+        arguments.push(arg);
+    }
+    Ok(EventMetadata {
+        name,
+        arguments,
     })
 }
 
