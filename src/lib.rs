@@ -37,10 +37,8 @@ use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::StaticLookup,
 };
-use std::{
-    marker::PhantomData,
-};
 use sr_version::RuntimeVersion;
+use std::marker::PhantomData;
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -53,12 +51,16 @@ use url::Url;
 
 use crate::{
     codec::Encoded,
+    events::{
+        EventsDecoder,
+        ExtrinsicSuccess,
+    },
     metadata::MetadataError,
     rpc::{
+        BlockNumber,
+        ChainBlock,
         MapStream,
         Rpc,
-        ChainBlock,
-        BlockNumber
     },
     srml::{
         system::{
@@ -69,7 +71,6 @@ use crate::{
     },
 };
 pub use error::Error;
-use crate::events::{ExtrinsicSuccess, EventsDecoder};
 
 mod codec;
 mod error;
@@ -79,8 +80,7 @@ mod rpc;
 pub mod srml;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url)
-        .map_err(Into::into)
+    ws::connect(url).map_err(Into::into)
 }
 
 /// ClientBuilder for constructing a Client.
@@ -179,15 +179,24 @@ impl<T: System + 'static> Client<T> {
     }
 
     /// Get a block hash. By default returns the latest block hash
-    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+    pub fn block_hash(
+        &self,
+        hash: Option<BlockNumber<T>>,
+    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.connect()
+            .and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
     }
 
     /// Get a block
-    pub fn block<H>(&self, hash: Option<H>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
-        where H: Into<T::Hash> + 'static
+    pub fn block<H>(
+        &self,
+        hash: Option<H>,
+    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+    where
+        H: Into<T::Hash> + 'static,
     {
-        self.connect().and_then(|rpc| rpc.block(hash.map(|h| h.into())))
+        self.connect()
+            .and_then(|rpc| rpc.block(hash.map(|h| h.into())))
     }
 
     /// Subscribe to events.
@@ -348,7 +357,12 @@ where
         );
 
         let extra = T::extra(account_nonce);
-        let raw_payload = (call.clone(), extra.clone(), version, (&genesis_hash, &genesis_hash));
+        let raw_payload = (
+            call.clone(),
+            extra.clone(),
+            version,
+            (&genesis_hash, &genesis_hash),
+        );
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
@@ -389,7 +403,9 @@ where
             .join(listener)
             .map_err(Into::into)
             .and_then(move |(extrinsic, listener)| {
-                cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic, listener))
+                cli.and_then(move |rpc| {
+                    rpc.submit_and_watch_extrinsic(extrinsic, listener)
+                })
             })
     }
 }
@@ -511,11 +527,11 @@ mod tests {
             .contracts(|call| call.put_code(500_000, wasm))
             .submit_and_watch();
 
-        let success = rt.block_on(put_code)
+        let success = rt
+            .block_on(put_code)
             .expect("Extrinsic should be included in a block");
 
-        let system_events = success
-            .module_events::<srml::system::SystemEvent>("System");
+        let system_events = success.module_events::<srml::system::SystemEvent>("System");
         println!("System events {:?}", system_events);
 
         let code_hash = success
@@ -523,7 +539,9 @@ mod tests {
             .expect("Contract events should decode successfully")
             .iter()
             .find_map(|event| {
-                if let srml_contracts::Event::<node_runtime::Runtime>::CodeStored(hash) = event {
+                if let srml_contracts::Event::<node_runtime::Runtime>::CodeStored(hash) =
+                    event
+                {
                     Some(hash.clone())
                 } else {
                     None
@@ -543,9 +561,8 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn test_getting_block() {
         let (mut rt, client) = test_setup();
-        rt.block_on(client.block_hash(None).and_then(move |h| {
-            client.block(h)
-        })).unwrap();
+        rt.block_on(client.block_hash(None).and_then(move |h| client.block(h)))
+            .unwrap();
     }
 
     #[test]

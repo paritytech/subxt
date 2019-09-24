@@ -14,22 +14,40 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use parity_scale_codec::{Codec, Decode, Compact, Error as CodecError, Input, Output, Encode};
-use crate::{System, Error, metadata::{Metadata, EventArg}};
-
-
+use crate::{
+    metadata::{
+        EventArg,
+        Metadata,
+    },
+    Error,
+    System,
+};
+use parity_scale_codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+    Output,
+};
 
 use std::collections::HashMap;
 
+use srml_system::Phase;
 
-
-use srml_system::{Phase};
-
-use std::marker::{Send, PhantomData};
-use std::fs::metadata;
-use crate::metadata::{MetadataError};
-use crate::srml::balances::Balances;
-use std::convert::TryFrom;
+use crate::{
+    metadata::MetadataError,
+    srml::balances::Balances,
+};
+use std::{
+    convert::TryFrom,
+    fs::metadata,
+    marker::{
+        PhantomData,
+        Send,
+    },
+};
 
 pub struct RawEvent {
     module: String,
@@ -55,7 +73,11 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
     type Error = EventError;
 
     fn try_from(value: Metadata) -> Result<Self, Self::Error> {
-        let mut listener = Self { metadata, type_sizes: HashMap::new(), marker: PhantomData };
+        let mut listener = Self {
+            metadata,
+            type_sizes: HashMap::new(),
+            marker: PhantomData,
+        };
         listener.register_type_size::<T::Hash>("Hash")?;
         listener.register_type_size::<<T as Balances>::Balance>("Balance")?;
         listener.check_all_event_types()?;
@@ -64,7 +86,10 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System + Balances + 'static> EventsDecoder<T> {
-    pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventError> where U: Default + Codec + Send + 'static {
+    pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventError>
+    where
+        U: Default + Codec + Send + 'static,
+    {
         let size = U::default().size_hint();
         if size > 0 {
             self.type_sizes.insert(name.to_string(), size);
@@ -74,7 +99,12 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
-    fn decode_raw_bytes<I: Input, W: Output>(&self, args: &[EventArg], input: &mut I, output: &mut W) -> Result<(), EventError> {
+    fn decode_raw_bytes<I: Input, W: Output>(
+        &self,
+        args: &[EventArg],
+        input: &mut I,
+        output: &mut W,
+    ) -> Result<(), EventError> {
         for arg in args {
             match arg {
                 EventArg::Vec(arg) => {
@@ -83,12 +113,12 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     for _ in 0..len {
                         self.decode_raw_bytes(arg, input, output)?
                     }
-                },
+                }
                 EventArg::Tuple(args) => {
                     for arg in args {
                         self.decode_raw_bytes(arg, input, output)?
                     }
-                },
+                }
                 EventArg::Primitive(name) => {
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = [0u8; size];
@@ -103,7 +133,10 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         Ok(())
     }
 
-    pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    pub fn decode_events(
+        &self,
+        input: &mut &[u8],
+    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = len.0 as usize;
 
@@ -127,7 +160,10 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 data: event_data,
             };
 
-            println!("phase {:?}, module {:?}, event {:?}", phase, module_name, event_metadata.name);
+            println!(
+                "phase {:?}, module {:?}, event {:?}",
+                phase, module_name, event_metadata.name
+            );
             r.push((phase, raw_event));
         }
         Ok(r)

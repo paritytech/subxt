@@ -14,7 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{error::Error, events::{EventsDecoder, RawEvent}, metadata::Metadata, srml::system::System};
+use crate::{
+    error::Error,
+    events::{
+        EventsDecoder,
+        RawEvent,
+    },
+    metadata::Metadata,
+    srml::system::System,
+};
 use futures::future::{
     self,
     Future,
@@ -103,17 +111,26 @@ impl<T: System> Rpc<T> {
     }
 
     /// Get a block hash, returns hash of latest block by default
-    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+    pub fn block_hash(
+        &self,
+        hash: Option<BlockNumber<T>>,
+    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
         self.chain.block_hash(hash).map_err(Into::into)
     }
 
     /// Get a Block
-    pub fn block(&self, hash: Option<T::Hash>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
+    pub fn block(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
         self.chain.block(hash).map_err(Into::into)
     }
 
     /// Fetch the runtime version
-    pub fn runtime_version(&self, at: Option<T::Hash>) -> impl Future<Item = RuntimeVersion, Error = Error> {
+    pub fn runtime_version(
+        &self,
+        at: Option<T::Hash>,
+    ) -> impl Future<Item = RuntimeVersion, Error = Error> {
         self.state.runtime_version(at).map_err(Into::into)
     }
 }
@@ -309,27 +326,28 @@ pub fn wait_for_block_events<T: System + 'static>(
         .map_err(|(e, _)| e.into())
         .join(ext_index)
         .and_then(move |((change_set, _), ext_index)| {
-            let events =
-                match change_set {
-                    None => Vec::new(),
-                    Some(change_set) => {
-                        let mut events = Vec::new();
-                        for (_key, data) in change_set.changes {
-                            if let Some(data) = data {
-                                if let Ok(raw_events) = decoder.decode_events(&mut &data.0[..]) {
-                                    for (phase, event) in raw_events {
-                                        if let Phase::ApplyExtrinsic(i) = phase {
-                                            if i as usize == ext_index {
-                                                events.push(event)
-                                            }
+            let events = match change_set {
+                None => Vec::new(),
+                Some(change_set) => {
+                    let mut events = Vec::new();
+                    for (_key, data) in change_set.changes {
+                        if let Some(data) = data {
+                            if let Ok(raw_events) =
+                                decoder.decode_events(&mut &data.0[..])
+                            {
+                                for (phase, event) in raw_events {
+                                    if let Phase::ApplyExtrinsic(i) = phase {
+                                        if i as usize == ext_index {
+                                            events.push(event)
                                         }
                                     }
                                 }
                             }
                         }
-                        events
                     }
-                };
+                    events
+                }
+            };
             future::ok(ExtrinsicSuccess {
                 block: block_hash,
                 extrinsic: ext_hash,

@@ -4,8 +4,8 @@ use parity_scale_codec::{
     Encode,
 };
 use runtime_metadata::{
-    EventMetadata,
     DecodeDifferent,
+    EventMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
     StorageEntryModifier,
@@ -17,9 +17,9 @@ use std::{
     collections::HashMap,
     convert::TryFrom,
     marker::PhantomData,
+    str::FromStr,
 };
 use substrate_primitives::storage::StorageKey;
-use std::str::FromStr;
 
 #[derive(Debug, Clone)]
 pub enum MetadataError {
@@ -200,7 +200,10 @@ impl FromStr for EventArg {
             if let Some(end) = s.rfind(">") {
                 Ok(EventArg::Vec(Box::new(s[start..end].parse()?)))
             } else {
-                Err(Error::InvalidEventArg(s.to_string(), "Expected closing `<` for `Vec`"))
+                Err(Error::InvalidEventArg(
+                    s.to_string(),
+                    "Expected closing `<` for `Vec`",
+                ))
             }
         } else if let Some(start) = s.find("(") {
             if let Some(end) = s.rfind(")") {
@@ -211,7 +214,10 @@ impl FromStr for EventArg {
                 }
                 Ok(EventArg::Tuple(args))
             } else {
-                Err(Error::InvalidEventArg(s.to_string(), "Expecting closing `)` for tuple"))
+                Err(Error::InvalidEventArg(
+                    s.to_string(),
+                    "Expecting closing `)` for tuple",
+                ))
             }
         } else {
             Ok(EventArg::Primitive(s.to_string()))
@@ -245,7 +251,10 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             modules.insert(module_name.clone(), convert_module(i, module)?);
             modules_by_index.insert(i as u8, module_name);
         }
-        Ok(Metadata { modules, modules_by_index })
+        Ok(Metadata {
+            modules,
+            modules_by_index,
+        })
     }
 }
 
@@ -299,10 +308,7 @@ fn convert_event(event: runtime_metadata::EventMetadata) -> Result<EventMetadata
         let arg = convert_arg(arg)?.parse::<EventArg>()?;
         arguments.push(arg);
     }
-    Ok(EventMetadata {
-        name,
-        arguments,
-    })
+    Ok(EventMetadata { name, arguments })
 }
 
 fn convert_entry(
