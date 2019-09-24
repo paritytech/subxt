@@ -5,7 +5,6 @@ use parity_scale_codec::{
 };
 use runtime_metadata::{
     DecodeDifferent,
-    EventMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
     StorageEntryModifier,
@@ -81,7 +80,7 @@ pub struct ModuleMetadata {
     index: u8,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
-    events: HashMap<u8, EventMetadata>,
+    events: HashMap<u8, ModuleEventMetadata>,
     // constants
 }
 
@@ -107,7 +106,7 @@ impl ModuleMetadata {
             .ok_or(MetadataError::StorageNotFound(key))
     }
 
-    pub fn event(&self, index: u8) -> Result<EventMetadata, MetadataError> {
+    pub fn event(&self, index: u8) -> Result<&ModuleEventMetadata, MetadataError> {
         self.events
             .get(&index)
             .ok_or(MetadataError::EventNotFound(index))
@@ -176,7 +175,7 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
 }
 
 #[derive(Clone, Debug)]
-pub struct EventMetadata {
+pub struct ModuleEventMetadata {
     pub name: String,
     pub arguments: Vec<EventArg>,
 }
@@ -186,6 +185,7 @@ pub struct EventMetadata {
 ///
 /// Used to calculate the size of a instance of an event variant without having the concrete type,
 /// so the raw bytes can be extracted from a `Vec<EventRecord>`.
+#[derive(Clone, Debug)]
 pub enum EventArg {
     Primitive(String),
     Vec(Box<EventArg>),
@@ -301,14 +301,14 @@ fn convert_module(
     })
 }
 
-fn convert_event(event: runtime_metadata::EventMetadata) -> Result<EventMetadata, Error> {
+fn convert_event(event: runtime_metadata::EventMetadata) -> Result<ModuleEventMetadata, Error> {
     let name = convert(event.name)?;
     let mut arguments = Vec::new();
-    for arg in event.arguments {
-        let arg = convert_arg(arg)?.parse::<EventArg>()?;
+    for arg in convert(event.arguments)? {
+        let arg = arg.parse::<EventArg>()?;
         arguments.push(arg);
     }
-    Ok(EventMetadata { name, arguments })
+    Ok(ModuleEventMetadata { name, arguments })
 }
 
 fn convert_entry(

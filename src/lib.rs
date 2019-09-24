@@ -51,10 +51,7 @@ use url::Url;
 
 use crate::{
     codec::Encoded,
-    events::{
-        EventsDecoder,
-        ExtrinsicSuccess,
-    },
+    events::EventsDecoder,
     metadata::MetadataError,
     rpc::{
         BlockNumber,
@@ -63,6 +60,7 @@ use crate::{
         Rpc,
     },
     srml::{
+        balances::Balances,
         system::{
             System,
             SystemStore,
@@ -71,6 +69,8 @@ use crate::{
     },
 };
 pub use error::Error;
+use crate::rpc::ExtrinsicSuccess;
+use std::convert::TryFrom;
 
 mod codec;
 mod error;
@@ -143,7 +143,7 @@ impl<T: System> Clone for Client<T> {
     }
 }
 
-impl<T: System + 'static> Client<T> {
+impl<T: System + Balances + 'static> Client<T> {
     fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
@@ -269,7 +269,7 @@ pub struct XtBuilder<T: System, P, V = Invalid> {
     marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + 'static, P, V> XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, V> XtBuilder<T, P, V>
 where
     P: Pair,
 {
@@ -318,7 +318,7 @@ where
     }
 }
 
-impl<T: System + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + 'static, P> XtBuilder<T, P, Valid>
 where
     P: Pair,
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
@@ -396,15 +396,17 @@ where
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
-        let event_listener = EventsDecoder::try_from(metadata).into_future();
+        let decoder = EventsDecoder::try_from(metadata)
+            .into_future()
+            .map_err(Into::into);
 
         self.create_and_sign()
             .into_future()
-            .join(listener)
             .map_err(Into::into)
-            .and_then(move |(extrinsic, listener)| {
+            .join(decoder)
+            .and_then(move |(extrinsic, decoder)| {
                 cli.and_then(move |rpc| {
-                    rpc.submit_and_watch_extrinsic(extrinsic, listener)
+                    rpc.submit_and_watch_extrinsic(extrinsic, &decoder)
                 })
             })
     }
@@ -531,23 +533,13 @@ mod tests {
             .block_on(put_code)
             .expect("Extrinsic should be included in a block");
 
-        let system_events = success.module_events::<srml::system::SystemEvent>("System");
-        println!("System events {:?}", system_events);
+        println!("Events {:?}", success.events);
 
         let code_hash = success
-            .module_events::<srml_contracts::Event<node_runtime::Runtime>>("Contracts")
-            .expect("Contract events should decode successfully")
-            .iter()
-            .find_map(|event| {
-                if let srml_contracts::Event::<node_runtime::Runtime>::CodeStored(hash) =
-                    event
-                {
-                    Some(hash.clone())
-                } else {
-                    None
-                }
-            });
-        assert!(code_hash.is_some());
+            .find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
+
+        assert!(code_hash.is_some(), "Contracts CodeStored event should be present");
+        assert!(code_hash.unwrap().is_ok(), "CodeStored Hash should decode successfully");
     }
 
     #[test]

@@ -18,8 +18,9 @@ use crate::{
     metadata::{
         EventArg,
         Metadata,
+        MetadataError,
     },
-    Error,
+    srml::balances::Balances,
     System,
 };
 use parity_scale_codec::{
@@ -31,28 +32,29 @@ use parity_scale_codec::{
     Input,
     Output,
 };
-
-use std::collections::HashMap;
-
 use srml_system::Phase;
-
-use crate::{
-    metadata::MetadataError,
-    srml::balances::Balances,
-};
 use std::{
     convert::TryFrom,
-    fs::metadata,
+    collections::HashMap,
     marker::{
         PhantomData,
         Send,
     },
 };
 
+#[derive(Debug)]
 pub struct RawEvent {
-    module: String,
-    variant: String,
-    data: Vec<u8>,
+    pub module: String,
+    pub variant: String,
+    pub data: Vec<u8>,
+}
+
+#[derive(Debug, derive_more::From)]
+pub enum EventsError {
+    CodecError(CodecError),
+    Metadata(MetadataError),
+    TypeSizesMissing(String, String),
+    TypeSizeUnavailable(String),
 }
 
 pub struct EventsDecoder<T> {
@@ -61,18 +63,10 @@ pub struct EventsDecoder<T> {
     marker: PhantomData<fn() -> T>,
 }
 
-#[derive(Debug, derive_more::From)]
-pub enum EventError {
-    CodecError(CodecError),
-    Metadata(MetadataError),
-    TypeSizesMissing(String, String),
-    TypeSizeUnavailable(String),
-}
-
 impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
-    type Error = EventError;
+    type Error = EventsError;
 
-    fn try_from(value: Metadata) -> Result<Self, Self::Error> {
+    fn try_from(metadata: Metadata) -> Result<Self, Self::Error> {
         let mut listener = Self {
             metadata,
             type_sizes: HashMap::new(),
@@ -86,7 +80,7 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System + Balances + 'static> EventsDecoder<T> {
-    pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventError>
+    pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
         U: Default + Codec + Send + 'static,
     {
@@ -95,7 +89,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             self.type_sizes.insert(name.to_string(), size);
             Ok(size)
         } else {
-            Err(EventError::TypeSizeUnavailable(name.to_owned()))
+            Err(EventsError::TypeSizeUnavailable(name.to_owned()))
         }
     }
 
@@ -104,7 +98,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         args: &[EventArg],
         input: &mut I,
         output: &mut W,
-    ) -> Result<(), EventError> {
+    ) -> Result<(), EventsError> {
         for arg in args {
             match arg {
                 EventArg::Vec(arg) => {
@@ -121,11 +115,11 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 }
                 EventArg::Primitive(name) => {
                     if let Some(size) = self.type_sizes.get(name) {
-                        let mut buf = [0u8; size];
+                        let mut buf = Vec::with_capacity(size);
                         input.read(&mut buf[..])?;
                         buf.encode_to(output)
                     } else {
-                        Err(EventError::TypeSizeUnavailable(name.to_owned()))
+                        Err(EventsError::TypeSizeUnavailable(name.to_owned()))
                     }
                 }
             }
@@ -136,9 +130,9 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    ) -> Result<Vec<(Phase, RawEvent)>, EventsError> {
         let compact_len = <Compact<u32>>::decode(input)?;
-        let len = len.0 as usize;
+        let len = compact_len.0 as usize;
 
         let mut r = Vec::new();
         for _ in 0..len {

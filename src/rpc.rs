@@ -21,7 +21,10 @@ use crate::{
         RawEvent,
     },
     metadata::Metadata,
-    srml::system::System,
+    srml::{
+        balances::Balances,
+        system::System
+    },
 };
 use futures::future::{
     self,
@@ -33,6 +36,7 @@ use num_traits::bounds::Bounded;
 use parity_scale_codec::{
     Decode,
     Encode,
+    Error as CodecError,
 };
 
 use runtime_metadata::RuntimeMetadataPrefixed;
@@ -134,8 +138,6 @@ impl<T: System> Rpc<T> {
         self.state.runtime_version(at).map_err(Into::into)
     }
 }
-
-use crate::ExtrinsicSuccess;
 use futures::{
     future::IntoFuture,
     stream::{
@@ -156,7 +158,7 @@ use srml_system::Phase;
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
 
-impl<T: System + 'static> Rpc<T> {
+impl<T: System + Balances + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
     pub fn subscribe_events(
         &self,
@@ -222,8 +224,8 @@ impl<T: System + 'static> Rpc<T> {
     pub fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
-        decoder: EventsDecoder<T>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
+        decoder: &EventsDecoder<T>,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> + '_
     where
         E: Encode,
     {
@@ -300,14 +302,32 @@ pub struct ExtrinsicSuccess<T: System> {
     pub events: Vec<RawEvent>,
 }
 
+impl<T: System> ExtrinsicSuccess<T> {
+    /// Find the Event for the given module/variant, with raw encoded event data.
+    /// Returns `None` if the Event is not found.
+    pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
+        self.events
+            .iter()
+            .find(|evt| evt.module == module && evt.variant == variant)
+    }
+
+    /// Find the Event for the given module/variant, attempting to decode the event data.
+    /// Returns `None` if the Event is not found.
+    /// Returns `Err` if the data fails to decode into the supplied type
+    pub fn find_event<E: Decode>(&self, module: &str, variant: &str) -> Option<Result<&RawEvent, CodecError>> {
+        self.find_event_raw(module, variant)
+            .map(|evt| Decode::<E>::decode(&mut &evt.data[..]))
+    }
+}
+
 /// Waits for events for the block triggered by the extrinsic
-pub fn wait_for_block_events<T: System + 'static>(
+pub fn wait_for_block_events<T: System + Balances + 'static>(
     decoder: &EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,
     block_hash: T::Hash,
     events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> + '_ {
     let ext_index = signed_block
         .block
         .extrinsics
