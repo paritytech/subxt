@@ -59,7 +59,7 @@ pub enum EventsError {
 }
 
 pub struct EventsDecoder<T> {
-    metadata: Metadata, // todo: borrow?
+    metadata: Metadata, // todo: [AJ] borrow?
     type_sizes: HashMap<String, usize>,
     marker: PhantomData<fn() -> T>,
 }
@@ -73,6 +73,7 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
             type_sizes: HashMap::new(),
             marker: PhantomData,
         };
+        // todo: [AJ] register and verify all required types have sizes
         decoder.register_type_size::<T::Hash>("Hash")?;
         decoder.register_type_size::<<T as Balances>::Balance>("Balance")?;
         Ok(decoder)
@@ -131,8 +132,6 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
     ) -> Result<Vec<(Phase, RawEvent)>, EventsError> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
-
-        use substrate_primitives::hexdisplay::HexDisplay;
 
         let mut r = Vec::new();
         for _ in 0..len {
