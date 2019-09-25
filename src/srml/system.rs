@@ -3,7 +3,7 @@ use crate::{
     codec::Encoded,
     error::Error,
     metadata::MetadataError,
-    srml::ModuleCalls,
+    srml::{balances::Balances, ModuleCalls},
     Client,
     Valid,
     XtBuilder,
@@ -114,7 +114,7 @@ pub trait SystemStore {
     ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>;
 }
 
-impl<T: System + 'static> SystemStore for Client<T> {
+impl<T: System + Balances + 'static> SystemStore for Client<T> {
     type System = T;
 
     fn account_nonce(
@@ -152,7 +152,7 @@ pub trait SystemXt {
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, V> SystemXt for XtBuilder<T, P, V>
 where
     P: Pair,
 {

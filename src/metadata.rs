@@ -19,10 +19,11 @@ use std::{
     str::FromStr,
 };
 use substrate_primitives::storage::StorageKey;
+use std::collections::HashSet;
 
 #[derive(Debug, Clone)]
 pub enum MetadataError {
-    ModuleNotFound(&'static str),
+    ModuleNotFound(String),
     CallNotFound(&'static str),
     EventNotFound(u8),
     StorageNotFound(&'static str),
@@ -33,18 +34,19 @@ pub enum MetadataError {
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
-    modules_by_index: HashMap<u8, String>,
+    modules_by_event_index: HashMap<u8, String>,
 }
 
 impl Metadata {
-    pub fn module(&self, name: &'static str) -> Result<&ModuleMetadata, MetadataError> {
+    pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError> where S: ToString {
+        let name = name.to_string();
         self.modules
-            .get(name)
+            .get(&name)
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
     pub fn module_name(&self, module_index: u8) -> Result<String, MetadataError> {
-        self.modules_by_index
+        self.modules_by_event_index
             .get(&module_index)
             .cloned()
             .ok_or(MetadataError::EventNotFound(module_index))
@@ -177,15 +179,21 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
 #[derive(Clone, Debug)]
 pub struct ModuleEventMetadata {
     pub name: String,
-    pub arguments: Vec<EventArg>,
+    arguments: HashSet<EventArg>,
+}
+
+impl ModuleEventMetadata {
+    pub fn arguments(&self) -> Vec<EventArg> {
+        self.arguments.iter().cloned().collect()
+    }
 }
 
 /// Naive representation of event argument types, supports current set of substrate EventArg types.
 /// If and when Substrate uses `type-metadata`, this can be replaced.
 ///
 /// Used to calculate the size of a instance of an event variant without having the concrete type,
-/// so the raw bytes can be extracted from a `Vec<EventRecord>`.
-#[derive(Clone, Debug)]
+/// so the raw bytes can be extracted from the encoded `Vec<EventRecord<E>>` (without `E` defined).
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub enum EventArg {
     Primitive(String),
     Vec(Box<EventArg>),
@@ -196,19 +204,19 @@ impl FromStr for EventArg {
     type Err = Error;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
-        if let Some(start) = s.find("Vec<") {
-            if let Some(end) = s.rfind(">") {
-                Ok(EventArg::Vec(Box::new(s[start..end].parse()?)))
+        if s.starts_with("Vec<") {
+            if s.ends_with('>') {
+                Ok(EventArg::Vec(Box::new(s[4..s.len() - 1].parse()?)))
             } else {
                 Err(Error::InvalidEventArg(
                     s.to_string(),
-                    "Expected closing `<` for `Vec`",
+                    "Expected closing `>` for `Vec`",
                 ))
             }
-        } else if let Some(start) = s.find("(") {
-            if let Some(end) = s.rfind(")") {
+        } else if s.starts_with("(") {
+            if s.ends_with(")") {
                 let mut args = Vec::new();
-                for arg in s[start..end].split(',') {
+                for arg in s[1..s.len() - 1].split(',') {
                     let arg = arg.trim().parse()?;
                     args.push(arg)
                 }
@@ -245,15 +253,21 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => Err(Error::InvalidVersion)?,
         };
         let mut modules = HashMap::new();
-        let mut modules_by_index = HashMap::new();
+        let mut modules_by_event_index = HashMap::new();
+        let mut event_index = 0;
         for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
             let module_name = convert(module.name.clone())?;
-            modules.insert(module_name.clone(), convert_module(i, module)?);
-            modules_by_index.insert(i as u8, module_name);
+            let module_metadata = convert_module(i, module)?;
+            // modules with no events have no corresponding definition in the top level enum
+            if !module_metadata.events.is_empty() {
+                modules_by_event_index.insert(event_index, module_name.clone());
+                event_index = event_index + 1;
+            }
+            modules.insert(module_name, module_metadata);
         }
         Ok(Metadata {
             modules,
-            modules_by_index,
+            modules_by_event_index,
         })
     }
 }
@@ -303,10 +317,10 @@ fn convert_module(
 
 fn convert_event(event: runtime_metadata::EventMetadata) -> Result<ModuleEventMetadata, Error> {
     let name = convert(event.name)?;
-    let mut arguments = Vec::new();
+    let mut arguments = HashSet::new();
     for arg in convert(event.arguments)? {
         let arg = arg.parse::<EventArg>()?;
-        arguments.push(arg);
+        arguments.insert(arg);
     }
     Ok(ModuleEventMetadata { name, arguments })
 }

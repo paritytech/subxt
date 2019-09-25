@@ -406,7 +406,7 @@ where
             .join(decoder)
             .and_then(move |(extrinsic, decoder)| {
                 cli.and_then(move |rpc| {
-                    rpc.submit_and_watch_extrinsic(extrinsic, &decoder)
+                    rpc.submit_and_watch_extrinsic(extrinsic, decoder)
                 })
             })
     }
@@ -524,6 +524,9 @@ mod tests {
 )
 "#;
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+        let code_stored = node_runtime::Event::contracts(srml_contracts::RawEvent::CodeStored(Default::default()));
+        println!("TEST: {}", substrate_primitives::hexdisplay::HexDisplay::from(&code_stored.encode()));
 
         let put_code = xt
             .contracts(|call| call.put_code(500_000, wasm))

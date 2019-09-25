@@ -67,15 +67,14 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
     type Error = EventsError;
 
     fn try_from(metadata: Metadata) -> Result<Self, Self::Error> {
-        let mut listener = Self {
+        let mut decoder = Self {
             metadata,
             type_sizes: HashMap::new(),
             marker: PhantomData,
         };
-        listener.register_type_size::<T::Hash>("Hash")?;
-        listener.register_type_size::<<T as Balances>::Balance>("Balance")?;
-        listener.check_all_event_types()?;
-        listener
+        decoder.register_type_size::<T::Hash>("Hash")?;
+        decoder.register_type_size::<<T as Balances>::Balance>("Balance")?;
+        Ok(decoder)
     }
 }
 
@@ -84,7 +83,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
     where
         U: Default + Codec + Send + 'static,
     {
-        let size = U::default().size_hint();
+        let size = U::default().encode().len();
         if size > 0 {
             self.type_sizes.insert(name.to_string(), size);
             Ok(size)
@@ -104,22 +103,22 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 EventArg::Vec(arg) => {
                     let len = <Compact<u32>>::decode(input)?;
                     len.encode_to(output);
-                    for _ in 0..len {
-                        self.decode_raw_bytes(arg, input, output)?
+                    for _ in 0..len.0 {
+                        self.decode_raw_bytes(&[*arg.clone()], input, output)?
                     }
                 }
                 EventArg::Tuple(args) => {
-                    for arg in args {
-                        self.decode_raw_bytes(arg, input, output)?
-                    }
+                    self.decode_raw_bytes(args, input, output)?
                 }
                 EventArg::Primitive(name) => {
                     if let Some(size) = self.type_sizes.get(name) {
-                        let mut buf = Vec::with_capacity(size);
-                        input.read(&mut buf[..])?;
-                        buf.encode_to(output)
+                        println!("SIZE {}: {}, remaining_len {}", name, size, input.remaining_len().unwrap().unwrap());
+                        let mut buf = vec![0; *size];
+                        input.read(&mut buf)?;
+                        println!("BUF: len {}, contents: `{}`", buf.len(), substrate_primitives::hexdisplay::HexDisplay::from(&buf));
+                        buf.encode_to(output);
                     } else {
-                        Err(EventsError::TypeSizeUnavailable(name.to_owned()))
+                        return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
                     }
                 }
             }
@@ -134,29 +133,40 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
 
+        use substrate_primitives::hexdisplay::HexDisplay;
+
         let mut r = Vec::new();
         for _ in 0..len {
             // decode EventRecord
+            println!("input 1 {}", HexDisplay::from(input));
             let phase = Phase::decode(input)?;
-            let module_variant = u8::decode(input)?;
-            let event_variant = u8::decode(input)?;
-            let _topics = Vec::<T::Hash>::decode(input)?;
+            println!("input 2 {}, phase {:?}", HexDisplay::from(input), phase);
+            let module_variant = input.read_byte()? as u8;
+            println!("input 3 {}: module_variant {}", HexDisplay::from(input), module_variant);
+            let event_variant = input.read_byte()? as u8;
+            println!("input 4 {}: event_variant {}", HexDisplay::from(input), event_variant);
 
             let module_name = self.metadata.module_name(module_variant)?;
             let module = self.metadata.module(&module_name)?;
             let event_metadata = module.event(event_variant)?;
+            println!("decoding {} {}", module_name, event_metadata.name);
 
             let mut event_data = Vec::<u8>::new();
-            self.decode_raw_bytes(&event_metadata.arguments, input, event_data)?;
+            self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
+            println!("input 5 {}, event_data {}", HexDisplay::from(input), HexDisplay::from(&event_data));
+            // topics come after the event data in EventRecord
+            let _topics = Vec::<T::Hash>::decode(input)?;
+            println!("input 6 {}", HexDisplay::from(input));
+
             let raw_event = RawEvent {
-                module: module_name,
-                variant: event_metadata.name,
+                module: module_name.clone(),
+                variant: event_metadata.name.clone(),
                 data: event_data,
             };
 
             println!(
-                "phase {:?}, module {:?}, event {:?}",
-                phase, module_name, event_metadata.name
+                "phase {:?}, event {:?}",
+                phase, raw_event
             );
             r.push((phase, raw_event));
         }

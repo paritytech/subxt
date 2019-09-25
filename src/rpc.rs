@@ -224,8 +224,8 @@ impl<T: System + Balances + 'static> Rpc<T> {
     pub fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
-        decoder: &EventsDecoder<T>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> + '_
+        decoder: EventsDecoder<T>,
+    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
     where
         E: Encode,
     {
@@ -314,20 +314,20 @@ impl<T: System> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
     /// Returns `Err` if the data fails to decode into the supplied type
-    pub fn find_event<E: Decode>(&self, module: &str, variant: &str) -> Option<Result<&RawEvent, CodecError>> {
+    pub fn find_event<E: Decode>(&self, module: &str, variant: &str) -> Option<Result<E, CodecError>> {
         self.find_event_raw(module, variant)
-            .map(|evt| Decode::<E>::decode(&mut &evt.data[..]))
+            .map(|evt| E::decode(&mut &evt.data[..]))
     }
 }
 
 /// Waits for events for the block triggered by the extrinsic
 pub fn wait_for_block_events<T: System + Balances + 'static>(
-    decoder: &EventsDecoder<T>,
+    decoder: EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,
     block_hash: T::Hash,
     events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> + '_ {
+) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
     let ext_index = signed_block
         .block
         .extrinsics
@@ -352,16 +352,18 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
                     let mut events = Vec::new();
                     for (_key, data) in change_set.changes {
                         if let Some(data) = data {
-                            if let Ok(raw_events) =
-                                decoder.decode_events(&mut &data.0[..])
-                            {
-                                for (phase, event) in raw_events {
-                                    if let Phase::ApplyExtrinsic(i) = phase {
-                                        if i as usize == ext_index {
-                                            events.push(event)
+                            println!("Block {:?}, DATA {}", block_hash, substrate_primitives::hexdisplay::HexDisplay::from(&data.0));
+                            match decoder.decode_events(&mut &data.0[..]) {
+                                Ok(raw_events) => {
+                                    for (phase, event) in raw_events {
+                                        if let Phase::ApplyExtrinsic(i) = phase {
+                                            if i as usize == ext_index {
+                                                events.push(event)
+                                            }
                                         }
                                     }
-                                }
+                                },
+                                Err(err) => return future::err(err.into())
                             }
                         }
                     }
