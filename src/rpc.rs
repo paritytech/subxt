@@ -352,7 +352,6 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
                     let mut events = Vec::new();
                     for (_key, data) in change_set.changes {
                         if let Some(data) = data {
-                            println!("Block {:?}, DATA {}", block_hash, substrate_primitives::hexdisplay::HexDisplay::from(&data.0));
                             match decoder.decode_events(&mut &data.0[..]) {
                                 Ok(raw_events) => {
                                     for (phase, event) in raw_events {

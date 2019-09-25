@@ -525,9 +525,6 @@ mod tests {
 "#;
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let code_stored = node_runtime::Event::contracts(srml_contracts::RawEvent::CodeStored(Default::default()));
-        println!("TEST: {}", substrate_primitives::hexdisplay::HexDisplay::from(&code_stored.encode()));
-
         let put_code = xt
             .contracts(|call| call.put_code(500_000, wasm))
             .submit_and_watch();
@@ -535,8 +532,6 @@ mod tests {
         let success = rt
             .block_on(put_code)
             .expect("Extrinsic should be included in a block");
-
-        println!("Events {:?}", success.events);
 
         let code_hash = success
             .find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");

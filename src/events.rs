@@ -32,6 +32,7 @@ use parity_scale_codec::{
     Input,
     Output,
 };
+use log;
 use srml_system::Phase;
 use std::{
     convert::TryFrom,
@@ -112,10 +113,8 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 }
                 EventArg::Primitive(name) => {
                     if let Some(size) = self.type_sizes.get(name) {
-                        println!("SIZE {}: {}, remaining_len {}", name, size, input.remaining_len().unwrap().unwrap());
                         let mut buf = vec![0; *size];
                         input.read(&mut buf)?;
-                        println!("BUF: len {}, contents: `{}`", buf.len(), substrate_primitives::hexdisplay::HexDisplay::from(&buf));
                         buf.encode_to(output);
                     } else {
                         return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
@@ -138,36 +137,25 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         let mut r = Vec::new();
         for _ in 0..len {
             // decode EventRecord
-            println!("input 1 {}", HexDisplay::from(input));
             let phase = Phase::decode(input)?;
-            println!("input 2 {}, phase {:?}", HexDisplay::from(input), phase);
             let module_variant = input.read_byte()? as u8;
-            println!("input 3 {}: module_variant {}", HexDisplay::from(input), module_variant);
             let event_variant = input.read_byte()? as u8;
-            println!("input 4 {}: event_variant {}", HexDisplay::from(input), event_variant);
 
             let module_name = self.metadata.module_name(module_variant)?;
             let module = self.metadata.module(&module_name)?;
             let event_metadata = module.event(event_variant)?;
-            println!("decoding {} {}", module_name, event_metadata.name);
+            log::debug!("decoding event '{}::{}'", module_name, event_metadata.name);
 
             let mut event_data = Vec::<u8>::new();
             self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
-            println!("input 5 {}, event_data {}", HexDisplay::from(input), HexDisplay::from(&event_data));
             // topics come after the event data in EventRecord
             let _topics = Vec::<T::Hash>::decode(input)?;
-            println!("input 6 {}", HexDisplay::from(input));
 
             let raw_event = RawEvent {
                 module: module_name.clone(),
                 variant: event_metadata.name.clone(),
                 data: event_data,
             };
-
-            println!(
-                "phase {:?}, event {:?}",
-                phase, raw_event
-            );
             r.push((phase, raw_event));
         }
         Ok(r)
