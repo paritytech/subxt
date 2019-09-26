@@ -38,6 +38,10 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    pub fn modules(&self) -> impl Iterator<Item = &ModuleMetadata> {
+        self.modules.values()
+    }
+
     pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError> where S: ToString {
         let name = name.to_string();
         self.modules
@@ -80,6 +84,7 @@ impl Metadata {
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
     index: u8,
+    name: String,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
     events: HashMap<u8, ModuleEventMetadata>,
@@ -87,6 +92,10 @@ pub struct ModuleMetadata {
 }
 
 impl ModuleMetadata {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     pub fn call<T: Encode>(
         &self,
         function: &'static str,
@@ -106,6 +115,10 @@ impl ModuleMetadata {
         self.storage
             .get(key)
             .ok_or(MetadataError::StorageNotFound(key))
+    }
+
+    pub fn events(&self) -> impl Iterator<Item = &ModuleEventMetadata> {
+        self.events.values()
     }
 
     pub fn event(&self, index: u8) -> Result<&ModuleEventMetadata, MetadataError> {
@@ -233,6 +246,23 @@ impl FromStr for EventArg {
     }
 }
 
+impl EventArg {
+    /// Returns all primitive types for this EventArg
+    pub fn primitives(&self) -> Vec<String> {
+        match self {
+            EventArg::Primitive(p) => vec![p.clone()],
+            EventArg::Vec(arg) => arg.primitives(),
+            EventArg::Tuple(args) => {
+                let mut primitives = Vec::new();
+                for arg in args {
+                    primitives.extend(arg.primitives())
+                }
+                primitives
+            }
+        }
+    }
+}
+
 #[derive(Debug)]
 pub enum Error {
     InvalidPrefix,
@@ -309,6 +339,7 @@ fn convert_module(
     }
     Ok(ModuleMetadata {
         index: index as u8,
+        name: convert(module.name)?,
         storage: storage_map,
         calls: call_map,
         events: event_map,

@@ -54,7 +54,7 @@ pub struct RawEvent {
 pub enum EventsError {
     CodecError(CodecError),
     Metadata(MetadataError),
-    TypeSizesMissing(String, String),
+    TypeSizesMissing(Vec<(String, String, String)>),
     TypeSizeUnavailable(String),
 }
 
@@ -76,6 +76,7 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         // todo: [AJ] register and verify all required types have sizes
         decoder.register_type_size::<T::Hash>("Hash")?;
         decoder.register_type_size::<<T as Balances>::Balance>("Balance")?;
+        decoder.check_missing_type_sizes()?;
         Ok(decoder)
     }
 }
@@ -91,6 +92,26 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             Ok(size)
         } else {
             Err(EventsError::TypeSizeUnavailable(name.to_owned()))
+        }
+    }
+
+    fn check_missing_type_sizes(&self) -> Result<(), Vec<(String, String, String)>> {
+        let mut missing = Vec::new();
+        for module in self.metadata.modules() {
+            for event in module.events() {
+                for arg in event.arguments() {
+                    for primitive in arg.primitives() {
+                        if !self.type_sizes.contains_key(&primitive) {
+                            missing.push((module.name().to_owned(), event.name.clone(), primitive))
+                        }
+                    }
+                }
+            }
+        }
+        if missing.is_empty() {
+            Ok(())
+        } else {
+            Err(missing)
         }
     }
 
