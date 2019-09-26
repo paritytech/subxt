@@ -55,7 +55,6 @@ use url::Url;
 use crate::{
     codec::Encoded,
     events::EventsDecoder,
-    error::Error,
     metadata::MetadataError,
     rpc::{
         BlockNumber,
@@ -83,6 +82,7 @@ mod srml;
 
 pub use srml::*;
 pub use rpc::ExtrinsicSuccess;
+pub use error::Error;
 pub use events::{RawEvent};
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
