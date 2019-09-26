@@ -60,7 +60,6 @@ use crate::{
     rpc::{
         BlockNumber,
         ChainBlock,
-        ExtrinsicSuccess,
         MapStream,
         Rpc,
     },
@@ -80,7 +79,11 @@ mod error;
 mod events;
 mod metadata;
 mod rpc;
-pub mod srml;
+mod srml;
+
+pub use srml::*;
+pub use rpc::ExtrinsicSuccess;
+pub use events::{RawEvent};
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
