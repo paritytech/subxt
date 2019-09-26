@@ -38,7 +38,10 @@ use runtime_primitives::{
     traits::StaticLookup,
 };
 use sr_version::RuntimeVersion;
-use std::marker::PhantomData;
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -52,10 +55,12 @@ use url::Url;
 use crate::{
     codec::Encoded,
     events::EventsDecoder,
+    error::Error,
     metadata::MetadataError,
     rpc::{
         BlockNumber,
         ChainBlock,
+        ExtrinsicSuccess,
         MapStream,
         Rpc,
     },
@@ -69,9 +74,6 @@ use crate::{
         ModuleCalls,
     },
 };
-pub use error::Error;
-use crate::rpc::ExtrinsicSuccess;
-use std::convert::TryFrom;
 
 mod codec;
 mod error;
