@@ -64,6 +64,7 @@ use crate::{
         system::{
             System,
             SystemStore,
+            SystemEvent,
         },
         ModuleCalls,
     },

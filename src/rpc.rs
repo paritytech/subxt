@@ -18,7 +18,7 @@ use crate::{
     error::Error,
     events::{
         EventsDecoder,
-        RawEvent,
+        RuntimeEvent,
     },
     metadata::Metadata,
     srml::{
@@ -154,6 +154,8 @@ use substrate_primitives::{
 use transaction_pool::txpool::watcher::Status;
 
 use srml_system::Phase;
+use crate::srml::system::SystemEvent;
+use crate::events::RawEvent;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -299,7 +301,7 @@ pub struct ExtrinsicSuccess<T: System> {
     /// Extrinsic hash.
     pub extrinsic: T::Hash,
     /// Raw runtime events, can be decoded by the caller.
-    pub events: Vec<RawEvent>,
+    pub events: Vec<RuntimeEvent>,
 }
 
 impl<T: System> ExtrinsicSuccess<T> {
@@ -308,7 +310,26 @@ impl<T: System> ExtrinsicSuccess<T> {
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
         self.events
             .iter()
-            .find(|evt| evt.module == module && evt.variant == variant)
+            .find_map(|evt| {
+                match evt {
+                    RuntimeEvent::Raw(ref raw) if raw.module == module && raw.variant == variant => {
+                        Some(raw)
+                    },
+                    _ => None,
+                }
+            })
+    }
+
+    pub fn system_events(&self) -> Vec<&SystemEvent> {
+        self.events
+            .iter()
+            .filter_map(|evt| {
+                match evt {
+                    RuntimeEvent::System(evt) => Some(evt),
+                    _ => None,
+                }
+            })
+            .collect()
     }
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
