@@ -63,10 +63,11 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, derive_more::Display)]
 pub enum EventsError {
     CodecError(CodecError),
     Metadata(MetadataError),
+    #[display(fmt = "Type Sizes Missing: {:?}", _0)]
     TypeSizesMissing(Vec<String>),
     TypeSizeUnavailable(String),
 }

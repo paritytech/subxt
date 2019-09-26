@@ -24,7 +24,7 @@ use std::io::Error as IoError;
 use substrate_primitives::crypto::SecretStringError;
 
 /// Error enum.
-#[derive(Debug, derive_more::From)]
+#[derive(Debug, derive_more::From, derive_more::Display)]
 pub enum Error {
     /// Codec error.
     Codec(CodecError),
@@ -35,6 +35,7 @@ pub enum Error {
     /// Rpc error.
     Rpc(RpcError),
     /// Secret string error.
+    #[display(fmt = "Secret String Error")]
     SecretString(SecretStringError),
     /// Metadata error.
     Metadata(MetadataError),

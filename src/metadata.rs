@@ -21,7 +21,7 @@ use std::{
 use substrate_primitives::storage::StorageKey;
 use std::collections::HashSet;
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, derive_more::Display)]
 pub enum MetadataError {
     ModuleNotFound(String),
     CallNotFound(&'static str),
