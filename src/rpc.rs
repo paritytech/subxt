@@ -320,6 +320,7 @@ impl<T: System> ExtrinsicSuccess<T> {
             })
     }
 
+    /// Returns all System Events
     pub fn system_events(&self) -> Vec<&SystemEvent> {
         self.events
             .iter()

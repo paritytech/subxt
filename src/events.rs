@@ -45,16 +45,21 @@ use std::{
 };
 use std::collections::HashSet;
 
+/// Top level Event that can be produced by a substrate runtime
 #[derive(Debug)]
 pub enum RuntimeEvent {
     System(SystemEvent),
     Raw(RawEvent),
 }
 
+/// Raw bytes for an Event
 #[derive(Debug)]
 pub struct RawEvent {
+    /// The name of the module from whence the Event originated
     pub module: String,
+    /// The name of the Event
     pub variant: String,
+    /// The raw Event data
     pub data: Vec<u8>,
 }
 
