@@ -42,6 +42,7 @@ use std::{
         Send,
     },
 };
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct RawEvent {
@@ -54,7 +55,7 @@ pub struct RawEvent {
 pub enum EventsError {
     CodecError(CodecError),
     Metadata(MetadataError),
-    TypeSizesMissing(Vec<(String, String, String)>),
+    TypeSizesMissing(Vec<String>),
     TypeSizeUnavailable(String),
 }
 
@@ -73,10 +74,33 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
             type_sizes: HashMap::new(),
             marker: PhantomData,
         };
-        // todo: [AJ] register and verify all required types have sizes
+        // register default event arg type sizes for dynamic decoding of events
+        decoder.register_type_size::<bool>("bool")?;
+        decoder.register_type_size::<u32>("ReferendumIndex")?;
+        decoder.register_type_size::<[u8; 16]>("Kind")?;
+        decoder.register_type_size::<[u8; 32]>("AuthorityId")?;
+        decoder.register_type_size::<u8>("u8")?;
+        decoder.register_type_size::<u32>("u32")?;
+        decoder.register_type_size::<u32>("AccountIndex")?;
+        decoder.register_type_size::<u32>("SessionIndex")?;
+        decoder.register_type_size::<u32>("PropIndex")?;
+        decoder.register_type_size::<u32>("ProposalIndex")?;
+        decoder.register_type_size::<u32>("AuthorityIndex")?;
+        decoder.register_type_size::<u64>("AuthorityWeight")?;
+        decoder.register_type_size::<u32>("MemberCount")?;
+        decoder.register_type_size::<T::AccountId>("AccountId")?;
+        decoder.register_type_size::<T::BlockNumber>("BlockNumber")?;
         decoder.register_type_size::<T::Hash>("Hash")?;
         decoder.register_type_size::<<T as Balances>::Balance>("Balance")?;
-        decoder.check_missing_type_sizes()?;
+        // VoteThreshold enum index
+        decoder.register_type_size::<u8>("VoteThreshold")?;
+
+        // Ignore these unregistered types, which are not fixed size primitives
+        decoder.check_missing_type_sizes(vec![
+            "DispatchError",
+            "OpaqueTimeSlot",
+            "rstd::marker::PhantomData<(AccountId, Event)>"
+        ])?;
         Ok(decoder)
     }
 }
@@ -95,14 +119,16 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
-    fn check_missing_type_sizes(&self) -> Result<(), Vec<(String, String, String)>> {
-        let mut missing = Vec::new();
+    fn check_missing_type_sizes<I: IntoIterator<Item = &'static str>>(&self, ignore: I) -> Result<(), Vec<String>> {
+        let mut missing = HashSet::new();
+        let mut ignore_set = HashSet::new();
+        ignore_set.extend(ignore);
         for module in self.metadata.modules() {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if !self.type_sizes.contains_key(&primitive) {
-                            missing.push((module.name().to_owned(), event.name.clone(), primitive))
+                        if !self.type_sizes.contains_key(&primitive) && !ignore_set.contains(primitive.as_str()) {
+                            missing.insert(primitive);
                         }
                     }
                 }
@@ -111,7 +137,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         if missing.is_empty() {
             Ok(())
         } else {
-            Err(missing)
+            Err(missing.into_iter().collect())
         }
     }
 
