@@ -3,7 +3,10 @@ use crate::{
     codec::Encoded,
     error::Error,
     metadata::MetadataError,
-    srml::ModuleCalls,
+    srml::{
+        balances::Balances,
+        ModuleCalls,
+    },
     Client,
     Valid,
     XtBuilder,
@@ -114,7 +117,7 @@ pub trait SystemStore {
     ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>;
 }
 
-impl<T: System + 'static> SystemStore for Client<T> {
+impl<T: System + Balances + 'static> SystemStore for Client<T> {
     type System = T;
 
     fn account_nonce(
@@ -152,7 +155,7 @@ pub trait SystemXt {
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + 'static, P, V> SystemXt for XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, V> SystemXt for XtBuilder<T, P, V>
 where
     P: Pair,
 {
@@ -177,4 +180,13 @@ where
     pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
         self.module.call("set_code", code)
     }
+}
+
+/// Event for the System module.
+#[derive(Clone, Debug, parity_scale_codec::Decode)]
+pub enum SystemEvent {
+    /// An extrinsic completed successfully.
+    ExtrinsicSuccess,
+    /// An extrinsic failed.
+    ExtrinsicFailed(runtime_primitives::DispatchError),
 }

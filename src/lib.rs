@@ -37,8 +37,11 @@ use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::StaticLookup,
 };
-use std::marker::PhantomData;
 use sr_version::RuntimeVersion;
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
 use substrate_primitives::{
     blake2_256,
     storage::{
@@ -51,43 +54,39 @@ use url::Url;
 
 use crate::{
     codec::Encoded,
+    events::EventsDecoder,
     metadata::MetadataError,
     rpc::{
+        BlockNumber,
+        ChainBlock,
         MapStream,
         Rpc,
-        ChainBlock,
-        BlockNumber
     },
     srml::{
+        balances::Balances,
         system::{
             System,
+            SystemEvent,
             SystemStore,
         },
         ModuleCalls,
     },
 };
-pub use error::Error;
 
 mod codec;
 mod error;
+mod events;
 mod metadata;
 mod rpc;
-pub mod srml;
+mod srml;
 
-/// Captures data for when an extrinsic is successfully included in a block
-#[derive(Debug)]
-pub struct ExtrinsicSuccess<T: System> {
-    /// Block hash.
-    pub block: T::Hash,
-    /// Extinsic hash.
-    pub extrinsic: T::Hash,
-    /// List of events.
-    pub events: Vec<T::Event>,
-}
+pub use error::Error;
+pub use events::RawEvent;
+pub use rpc::ExtrinsicSuccess;
+pub use srml::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url)
-        .map_err(Into::into)
+    ws::connect(url).map_err(Into::into)
 }
 
 /// ClientBuilder for constructing a Client.
@@ -150,7 +149,7 @@ impl<T: System> Clone for Client<T> {
     }
 }
 
-impl<T: System + 'static> Client<T> {
+impl<T: System + Balances + 'static> Client<T> {
     fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
@@ -186,15 +185,24 @@ impl<T: System + 'static> Client<T> {
     }
 
     /// Get a block hash. By default returns the latest block hash
-    pub fn block_hash(&self, hash: Option<BlockNumber<T>>) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+    pub fn block_hash(
+        &self,
+        hash: Option<BlockNumber<T>>,
+    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
+        self.connect()
+            .and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
     }
 
     /// Get a block
-    pub fn block<H>(&self, hash: Option<H>) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
-        where H: Into<T::Hash> + 'static
+    pub fn block<H>(
+        &self,
+        hash: Option<H>,
+    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+    where
+        H: Into<T::Hash> + 'static,
     {
-        self.connect().and_then(|rpc| rpc.block(hash.map(|h| h.into())))
+        self.connect()
+            .and_then(|rpc| rpc.block(hash.map(|h| h.into())))
     }
 
     /// Subscribe to events.
@@ -267,7 +275,7 @@ pub struct XtBuilder<T: System, P, V = Invalid> {
     marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + 'static, P, V> XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, V> XtBuilder<T, P, V>
 where
     P: Pair,
 {
@@ -316,7 +324,7 @@ where
     }
 }
 
-impl<T: System + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + 'static, P> XtBuilder<T, P, Valid>
 where
     P: Pair,
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
@@ -355,7 +363,12 @@ where
         );
 
         let extra = T::extra(account_nonce);
-        let raw_payload = (call.clone(), extra.clone(), version, (&genesis_hash, &genesis_hash));
+        let raw_payload = (
+            call.clone(),
+            extra.clone(),
+            version,
+            (&genesis_hash, &genesis_hash),
+        );
         let signature = raw_payload.using_encoded(|payload| {
             if payload.len() > 256 {
                 signer.sign(&blake2_256(payload)[..])
@@ -388,11 +401,19 @@ where
         &self,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
+        let metadata = self.client.metadata().clone();
+        let decoder = EventsDecoder::try_from(metadata)
+            .into_future()
+            .map_err(Into::into);
+
         self.create_and_sign()
             .into_future()
             .map_err(Into::into)
-            .and_then(move |extrinsic| {
-                cli.and_then(move |rpc| rpc.submit_and_watch_extrinsic(extrinsic))
+            .join(decoder)
+            .and_then(move |(extrinsic, decoder)| {
+                cli.and_then(move |rpc| {
+                    rpc.submit_and_watch_extrinsic(extrinsic, decoder)
+                })
             })
     }
 }
@@ -514,8 +535,21 @@ mod tests {
             .contracts(|call| call.put_code(500_000, wasm))
             .submit_and_watch();
 
-        rt.block_on(put_code)
+        let success = rt
+            .block_on(put_code)
             .expect("Extrinsic should be included in a block");
+
+        let code_hash =
+            success.find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
+
+        assert!(
+            code_hash.is_some(),
+            "Contracts CodeStored event should be present"
+        );
+        assert!(
+            code_hash.unwrap().is_ok(),
+            "CodeStored Hash should decode successfully"
+        );
     }
 
     #[test]
@@ -529,9 +563,8 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn test_getting_block() {
         let (mut rt, client) = test_setup();
-        rt.block_on(client.block_hash(None).and_then(move |h| {
-            client.block(h)
-        })).unwrap();
+        rt.block_on(client.block_hash(None).and_then(move |h| client.block(h)))
+            .unwrap();
     }
 
     #[test]
