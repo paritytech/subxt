@@ -66,8 +66,8 @@ use crate::{
         balances::Balances,
         system::{
             System,
-            SystemStore,
             SystemEvent,
+            SystemStore,
         },
         ModuleCalls,
     },
@@ -80,10 +80,10 @@ mod metadata;
 mod rpc;
 mod srml;
 
-pub use srml::*;
-pub use rpc::ExtrinsicSuccess;
 pub use error::Error;
-pub use events::{RawEvent};
+pub use events::RawEvent;
+pub use rpc::ExtrinsicSuccess;
+pub use srml::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
@@ -539,11 +539,17 @@ mod tests {
             .block_on(put_code)
             .expect("Extrinsic should be included in a block");
 
-        let code_hash = success
-            .find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
+        let code_hash =
+            success.find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
 
-        assert!(code_hash.is_some(), "Contracts CodeStored event should be present");
-        assert!(code_hash.unwrap().is_ok(), "CodeStored Hash should decode successfully");
+        assert!(
+            code_hash.is_some(),
+            "Contracts CodeStored event should be present"
+        );
+        assert!(
+            code_hash.unwrap().is_ok(),
+            "CodeStored Hash should decode successfully"
+        );
     }
 
     #[test]

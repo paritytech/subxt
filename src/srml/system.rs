@@ -3,7 +3,10 @@ use crate::{
     codec::Encoded,
     error::Error,
     metadata::MetadataError,
-    srml::{balances::Balances, ModuleCalls},
+    srml::{
+        balances::Balances,
+        ModuleCalls,
+    },
     Client,
     Valid,
     XtBuilder,

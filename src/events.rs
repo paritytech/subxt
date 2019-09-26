@@ -24,6 +24,7 @@ use crate::{
     System,
     SystemEvent,
 };
+use log;
 use parity_scale_codec::{
     Codec,
     Compact,
@@ -33,17 +34,18 @@ use parity_scale_codec::{
     Input,
     Output,
 };
-use log;
 use srml_system::Phase;
 use std::{
+    collections::{
+        HashMap,
+        HashSet,
+    },
     convert::TryFrom,
-    collections::HashMap,
     marker::{
         PhantomData,
         Send,
     },
 };
-use std::collections::HashSet;
 
 /// Top level Event that can be produced by a substrate runtime
 #[derive(Debug)]
@@ -112,7 +114,7 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         decoder.check_missing_type_sizes(vec![
             "DispatchError",
             "OpaqueTimeSlot",
-            "rstd::marker::PhantomData<(AccountId, Event)>"
+            "rstd::marker::PhantomData<(AccountId, Event)>",
         ])?;
         Ok(decoder)
     }
@@ -132,7 +134,10 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
-    fn check_missing_type_sizes<I: IntoIterator<Item = &'static str>>(&self, ignore: I) -> Result<(), Vec<String>> {
+    fn check_missing_type_sizes<I: IntoIterator<Item = &'static str>>(
+        &self,
+        ignore: I,
+    ) -> Result<(), Vec<String>> {
         let mut missing = HashSet::new();
         let mut ignore_set = HashSet::new();
         ignore_set.extend(ignore);
@@ -140,7 +145,9 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if !self.type_sizes.contains_key(&primitive) && !ignore_set.contains(primitive.as_str()) {
+                        if !self.type_sizes.contains_key(&primitive)
+                            && !ignore_set.contains(primitive.as_str())
+                        {
                             missing.insert(primitive);
                         }
                     }
@@ -169,9 +176,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                         self.decode_raw_bytes(&[*arg.clone()], input, output)?
                     }
                 }
-                EventArg::Tuple(args) => {
-                    self.decode_raw_bytes(args, input, output)?
-                }
+                EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
@@ -200,24 +205,27 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             let module_variant = input.read_byte()? as u8;
 
             let module_name = self.metadata.module_name(module_variant)?;
-            let event =
-                if module_name == "System" {
-                    let system_event = SystemEvent::decode(input)?;
-                    RuntimeEvent::System(system_event)
-                } else {
-                    let event_variant = input.read_byte()? as u8;
-                    let module = self.metadata.module(&module_name)?;
-                    let event_metadata = module.event(event_variant)?;
-                    log::debug!("decoding event '{}::{}'", module_name, event_metadata.name);
+            let event = if module_name == "System" {
+                let system_event = SystemEvent::decode(input)?;
+                RuntimeEvent::System(system_event)
+            } else {
+                let event_variant = input.read_byte()? as u8;
+                let module = self.metadata.module(&module_name)?;
+                let event_metadata = module.event(event_variant)?;
+                log::debug!("decoding event '{}::{}'", module_name, event_metadata.name);
 
-                    let mut event_data = Vec::<u8>::new();
-                    self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
-                    RuntimeEvent::Raw(RawEvent {
-                        module: module_name.clone(),
-                        variant: event_metadata.name.clone(),
-                        data: event_data,
-                    })
-                };
+                let mut event_data = Vec::<u8>::new();
+                self.decode_raw_bytes(
+                    &event_metadata.arguments(),
+                    input,
+                    &mut event_data,
+                )?;
+                RuntimeEvent::Raw(RawEvent {
+                    module: module_name.clone(),
+                    variant: event_metadata.name.clone(),
+                    data: event_data,
+                })
+            };
 
             // topics come after the event data in EventRecord
             let _topics = Vec::<T::Hash>::decode(input)?;

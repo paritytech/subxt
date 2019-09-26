@@ -23,7 +23,7 @@ use crate::{
     metadata::Metadata,
     srml::{
         balances::Balances,
-        system::System
+        system::System,
     },
 };
 use futures::future::{
@@ -153,9 +153,11 @@ use substrate_primitives::{
 };
 use transaction_pool::txpool::watcher::Status;
 
+use crate::{
+    events::RawEvent,
+    srml::system::SystemEvent,
+};
 use srml_system::Phase;
-use crate::srml::system::SystemEvent;
-use crate::events::RawEvent;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -308,16 +310,16 @@ impl<T: System> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
-        self.events
-            .iter()
-            .find_map(|evt| {
-                match evt {
-                    RuntimeEvent::Raw(ref raw) if raw.module == module && raw.variant == variant => {
-                        Some(raw)
-                    },
-                    _ => None,
+        self.events.iter().find_map(|evt| {
+            match evt {
+                RuntimeEvent::Raw(ref raw)
+                    if raw.module == module && raw.variant == variant =>
+                {
+                    Some(raw)
                 }
-            })
+                _ => None,
+            }
+        })
     }
 
     /// Returns all System Events
@@ -336,7 +338,11 @@ impl<T: System> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
     /// Returns `Err` if the data fails to decode into the supplied type
-    pub fn find_event<E: Decode>(&self, module: &str, variant: &str) -> Option<Result<E, CodecError>> {
+    pub fn find_event<E: Decode>(
+        &self,
+        module: &str,
+        variant: &str,
+    ) -> Option<Result<E, CodecError>> {
         self.find_event_raw(module, variant)
             .map(|evt| E::decode(&mut &evt.data[..]))
     }
@@ -383,8 +389,8 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
                                             }
                                         }
                                     }
-                                },
-                                Err(err) => return future::err(err.into())
+                                }
+                                Err(err) => return future::err(err.into()),
                             }
                         }
                     }

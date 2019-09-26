@@ -13,13 +13,15 @@ use runtime_metadata::{
     META_RESERVED,
 };
 use std::{
-    collections::HashMap,
+    collections::{
+        HashMap,
+        HashSet,
+    },
     convert::TryFrom,
     marker::PhantomData,
     str::FromStr,
 };
 use substrate_primitives::storage::StorageKey;
-use std::collections::HashSet;
 
 #[derive(Debug, Clone, derive_more::Display)]
 pub enum MetadataError {
@@ -42,7 +44,10 @@ impl Metadata {
         self.modules.values()
     }
 
-    pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError> where S: ToString {
+    pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError>
+    where
+        S: ToString,
+    {
         let name = name.to_string();
         self.modules
             .get(&name)
@@ -346,7 +351,9 @@ fn convert_module(
     })
 }
 
-fn convert_event(event: runtime_metadata::EventMetadata) -> Result<ModuleEventMetadata, Error> {
+fn convert_event(
+    event: runtime_metadata::EventMetadata,
+) -> Result<ModuleEventMetadata, Error> {
     let name = convert(event.name)?;
     let mut arguments = HashSet::new();
     for arg in convert(event.arguments)? {
