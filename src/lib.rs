@@ -452,7 +452,6 @@ mod tests {
         type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
         type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
         type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
 
         type SignedExtra = (
             srml_system::CheckVersion<node_runtime::Runtime>,

@@ -31,7 +31,6 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
-use srml_system::Event;
 use substrate_primitives::Pair;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
@@ -94,9 +93,6 @@ pub trait System {
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
-
-    /// The aggregated event type of the runtime.
-    type Event: Parameter + Member + From<Event>;
 
     /// The `SignedExtension` to the basic transaction logic.
     type SignedExtra: SignedExtension;
