@@ -93,12 +93,17 @@ pub trait System {
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
+}
 
-    /// The `SignedExtension` to the basic transaction logic.
-    type SignedExtra: SignedExtension;
-
-    /// Creates the `SignedExtra` from the account nonce.
-    fn extra(nonce: Self::Index) -> Self::SignedExtra;
+/// Blanket impl for using existing runtime types
+impl<T: srml_system::Trait> System for T {
+    type Index = T::Index;
+    type BlockNumber = T::BlockNumber;
+    type Hash = T::Hash;
+    type Hashing = T::Hashing;
+    type AccountId = T::AccountId;
+    type Lookup = T::Lookup;
+    type Header = T::Header;
 }
 
 /// The System extension trait for the Client.

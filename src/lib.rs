@@ -452,25 +452,6 @@ mod tests {
         type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
         type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
         type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-
-        type SignedExtra = (
-            srml_system::CheckVersion<node_runtime::Runtime>,
-            srml_system::CheckGenesis<node_runtime::Runtime>,
-            srml_system::CheckEra<node_runtime::Runtime>,
-            srml_system::CheckNonce<node_runtime::Runtime>,
-            srml_system::CheckWeight<node_runtime::Runtime>,
-            srml_balances::TakeFees<node_runtime::Runtime>,
-        );
-        fn extra(nonce: Self::Index) -> Self::SignedExtra {
-            (
-                srml_system::CheckVersion::<node_runtime::Runtime>::new(),
-                srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
-            )
-        }
     }
 
     impl Balances for Runtime {
