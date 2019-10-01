@@ -24,7 +24,6 @@ use runtime_primitives::traits::{
     MaybeSerializeDebug,
     MaybeSerializeDebugButNotDeserialize,
     Member,
-    SignedExtension,
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,

@@ -31,7 +31,6 @@ use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
-    Encode,
 };
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
@@ -43,7 +42,6 @@ use std::{
     marker::PhantomData,
 };
 use substrate_primitives::{
-    blake2_256,
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -76,6 +74,7 @@ use crate::{
 mod codec;
 mod error;
 mod events;
+mod extrinsic;
 mod metadata;
 mod rpc;
 mod srml;
@@ -338,7 +337,7 @@ where
             <T::Lookup as StaticLookup>::Source,
             Encoded,
             P::Signature,
-            T::SignedExtra,
+            extrinsic::DefaultExtra<T>,
         >,
         MetadataError,
     >
@@ -362,27 +361,7 @@ where
             account_nonce
         );
 
-        let extra = T::extra(account_nonce);
-        let raw_payload = (
-            call.clone(),
-            extra.clone(),
-            version,
-            (&genesis_hash, &genesis_hash),
-        );
-        let signature = raw_payload.using_encoded(|payload| {
-            if payload.len() > 256 {
-                signer.sign(&blake2_256(payload)[..])
-            } else {
-                signer.sign(payload)
-            }
-        });
-
-        Ok(UncheckedExtrinsic::new_signed(
-            raw_payload.0,
-            signer.public().into(),
-            signature.into(),
-            extra,
-        ))
+        extrinsic::create_and_sign(call, version, account_nonce, genesis_hash)
     }
 
     /// Submits a transaction to the chain.
@@ -434,7 +413,6 @@ mod tests {
     };
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
-    use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
