@@ -339,7 +339,7 @@ where
             P::Signature,
             extrinsic::DefaultExtra<T>,
         >,
-        MetadataError,
+        Error,
     >
     where
         P: Pair,
@@ -361,7 +361,8 @@ where
             account_nonce
         );
 
-        extrinsic::create_and_sign(call, version, account_nonce, genesis_hash)
+        let xt = extrinsic::create_and_sign(signer, call, version, account_nonce, genesis_hash)?;
+        Ok(xt)
     }
 
     /// Submits a transaction to the chain.

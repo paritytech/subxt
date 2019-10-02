@@ -15,7 +15,6 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    codec::Encoded,
     srml::{balances::Balances, system::System},
 };
 use parity_scale_codec::{Encode, Decode, Codec};
@@ -46,7 +45,7 @@ macro_rules! impl_signed_extensions {
 
             impl<T> std::fmt::Debug for $name<T> where T: $mod + Send + Sync {
                 fn fmt(&$self, $f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                    Ok(())
+                    $fmt
                 }
             }
         )*
@@ -54,11 +53,11 @@ macro_rules! impl_signed_extensions {
 }
 
 impl_signed_extensions!(
-    (CheckVersion, System, (), self, f, self.1, self.1.fmt(f)),
-    (CheckGenesis, System, (), self, f, self.1, self.1.fmt(f)),
-    (CheckEra, System, (), self, f, self.1, self.1.fmt(f)),
+    (CheckVersion, System, u32, self, f, self.1, self.1.fmt(f)),
+    (CheckGenesis, System, T::Hash, self, f, self.1, self.1.fmt(f)),
+    (CheckEra, System, T::Hash, self, f, self.1, self.1.fmt(f)),
     (CheckNonce, System, (), self, f, (), self.0.fmt(f)),
-    (CheckWeight, System, (), self, f, (), Ok(())),
+    (CheckWeight, System, (), self, _f, (), Ok(())),
     (TakeFees, Balances, (), self, f, (), self.0.fmt(f))
 );
 
@@ -164,7 +163,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
 impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type AccountId = T::AccountId;
     type Call = ();
-    type AdditionalSigned = <Self as SignedExtra<T>>::Extra;
+    type AdditionalSigned = <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
     type Pre = ();
 
     fn additional_signed(
@@ -183,7 +182,7 @@ pub fn create_and_sign<T: System + Balances + Send + Sync, C, P>(
 ) -> Result<
     UncheckedExtrinsic<
         <T::Lookup as StaticLookup>::Source,
-        Encoded,
+        C,
         P::Signature,
         DefaultExtra<T>,
     >,
@@ -193,6 +192,7 @@ where
     P: Pair,
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
+    C: Encode,
 {
     let extra = DefaultExtra::new(version, nonce, genesis_hash);
     let raw_payload = SignedPayload::new(call, extra)?;
