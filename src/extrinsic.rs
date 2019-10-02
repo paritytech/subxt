@@ -14,18 +14,29 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    srml::{balances::Balances, system::System},
+use crate::srml::{
+    balances::Balances,
+    system::System,
 };
-use parity_scale_codec::{Encode, Decode, Codec};
+use parity_scale_codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use runtime_primitives::{
-    generic::{Era, UncheckedExtrinsic, SignedPayload},
-    traits::{StaticLookup, SignedExtension},
+    generic::{
+        Era,
+        SignedPayload,
+        UncheckedExtrinsic,
+    },
+    traits::{
+        SignedExtension,
+        StaticLookup,
+    },
     transaction_validity::TransactionValidityError,
-
 };
-use substrate_primitives::Pair;
 use std::marker::PhantomData;
+use substrate_primitives::Pair;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `srml_system::Trait`
@@ -54,7 +65,15 @@ macro_rules! impl_signed_extensions {
 
 impl_signed_extensions!(
     (CheckVersion, System, u32, self, f, self.1, self.1.fmt(f)),
-    (CheckGenesis, System, T::Hash, self, f, self.1, self.1.fmt(f)),
+    (
+        CheckGenesis,
+        System,
+        T::Hash,
+        self,
+        f,
+        self.1,
+        self.1.fmt(f)
+    ),
     (CheckEra, System, T::Hash, self, f, self.1, self.1.fmt(f)),
     (CheckNonce, System, (), self, f, (), self.0.fmt(f)),
     (CheckWeight, System, (), self, _f, (), Ok(())),
@@ -71,7 +90,8 @@ impl_signed_extensions!(
 pub struct CheckVersion<T: System + Send + Sync>(
     PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
-    #[codec(skip)] u32,
+    #[codec(skip)]
+    u32,
 );
 
 /// Check genesis hash
@@ -84,7 +104,8 @@ pub struct CheckVersion<T: System + Send + Sync>(
 pub struct CheckGenesis<T: System + Send + Sync>(
     PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
-    #[codec(skip)] T::Hash,
+    #[codec(skip)]
+    T::Hash,
 );
 
 /// Check for transaction mortality.
@@ -99,7 +120,8 @@ pub struct CheckEra<T: System + Send + Sync>(
     /// The default structure for the Extra encoding
     (Era, PhantomData<T>),
     /// Local genesis hash to be used for `AdditionalSigned`
-    #[codec(skip)] T::Hash,
+    #[codec(skip)]
+    T::Hash,
 );
 
 /// Nonce check and increment to give replay protection for transactions.
@@ -163,7 +185,8 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
 impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type AccountId = T::AccountId;
     type Call = ();
-    type AdditionalSigned = <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
+    type AdditionalSigned =
+        <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
     type Pre = ();
 
     fn additional_signed(

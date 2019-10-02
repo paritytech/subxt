@@ -95,7 +95,10 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + std::fmt::Debug> System for T where <T as srml_system::Trait>::Header: serde::de::DeserializeOwned {
+impl<T: srml_system::Trait + std::fmt::Debug> System for T
+where
+    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+{
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;

@@ -42,7 +42,10 @@ pub trait Balances: System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + srml_balances::Trait + std::fmt::Debug> Balances for T where <T as srml_system::Trait>::Header: serde::de::DeserializeOwned {
+impl<T: srml_system::Trait + srml_balances::Trait + std::fmt::Debug> Balances for T
+where
+    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+{
     type Balance = T::Balance;
 }
 

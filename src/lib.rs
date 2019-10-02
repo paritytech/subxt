@@ -361,7 +361,13 @@ where
             account_nonce
         );
 
-        let xt = extrinsic::create_and_sign(signer, call, version, account_nonce, genesis_hash)?;
+        let xt = extrinsic::create_and_sign(
+            signer,
+            call,
+            version,
+            account_nonce,
+            genesis_hash,
+        )?;
         Ok(xt)
     }
 
