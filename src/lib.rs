@@ -323,7 +323,7 @@ where
     }
 }
 
-impl<T: System + Balances + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P, Valid>
 where
     P: Pair,
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
@@ -420,6 +420,7 @@ mod tests {
         Pair,
     };
 
+    #[derive(Eq, PartialEq, Clone, Debug)]
     struct Runtime;
 
     impl System for Runtime {

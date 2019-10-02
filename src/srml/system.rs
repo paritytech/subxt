@@ -33,7 +33,7 @@ use serde::de::DeserializeOwned;
 use substrate_primitives::Pair;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
-pub trait System {
+pub trait System: 'static + Eq + Clone + std::fmt::Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
@@ -95,7 +95,7 @@ pub trait System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait> System for T {
+impl<T: srml_system::Trait + std::fmt::Debug> System for T where <T as srml_system::Trait>::Header: serde::de::DeserializeOwned {
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;

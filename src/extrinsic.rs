@@ -29,27 +29,87 @@ use substrate_primitives::Pair;
 use std::marker::PhantomData;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
-/// substrate's `srml_system::Trait`, and allow additional signed data to be pass
+/// substrate's `srml_system::Trait`
+
+macro_rules! impl_signed_extensions {
+    ( $( ($name:ident, $mod:ident, $ty:ty, $self:ident, $f:ident, $res:expr, $fmt:expr) ),* ) => {
+        $(
+            impl<T> SignedExtension for $name<T> where T: $mod + Send + Sync {
+                type AccountId = u64;
+                type AdditionalSigned = $ty;
+                type Call = ();
+                type Pre = ();
+                fn additional_signed(&$self) -> Result<$ty, TransactionValidityError> {
+                    Ok($res)
+                }
+            }
+
+            impl<T> std::fmt::Debug for $name<T> where T: $mod + Send + Sync {
+                fn fmt(&$self, $f: &mut std::fmt::Formatter) -> std::fmt::Result {
+                    Ok(())
+                }
+            }
+        )*
+    }
+}
+
+impl_signed_extensions!(
+    (CheckVersion, System, (), self, f, self.1, self.1.fmt(f)),
+    (CheckGenesis, System, (), self, f, self.1, self.1.fmt(f)),
+    (CheckEra, System, (), self, f, self.1, self.1.fmt(f)),
+    (CheckNonce, System, (), self, f, (), self.0.fmt(f)),
+    (CheckWeight, System, (), self, f, (), Ok(())),
+    (TakeFees, Balances, (), self, f, (), self.0.fmt(f))
+);
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
+///
+/// # Note
+///
+/// This is modified from the substrate version to allow passing in of the version, which is
+/// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct CheckVersion<T: System>(PhantomData<T>);
+pub struct CheckVersion<T: System + Send + Sync>(
+    PhantomData<T>,
+    /// Local version to be used for `AdditionalSigned`
+    #[codec(skip)] u32,
+);
 
-/// Nonce check and increment to give replay protection for transactions.
+/// Check genesis hash
+///
+/// # Note
+///
+/// This is modified from the substrate version to allow passing in of the genesis hash, which is
+/// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct CheckGenesis<T: System>(PhantomData<T>);
+pub struct CheckGenesis<T: System + Send + Sync>(
+    PhantomData<T>,
+    /// Local genesis hash to be used for `AdditionalSigned`
+    #[codec(skip)] T::Hash,
+);
 
 /// Check for transaction mortality.
+///
+/// # Note
+///
+/// This is modified from the substrate version to allow passing in of the genesis hash, which is
+/// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
+/// valid forever)
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct CheckEra<T: System>((Era, PhantomData<T>));
+pub struct CheckEra<T: System + Send + Sync>(
+    /// The default structure for the Extra encoding
+    (Era, PhantomData<T>),
+    /// Local genesis hash to be used for `AdditionalSigned`
+    #[codec(skip)] T::Hash,
+);
 
 /// Nonce check and increment to give replay protection for transactions.
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct CheckNonce<T: System>(#[codec(compact)] T::Index);
+pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] T::Index);
 
 /// Resource limit check.
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
-pub struct CheckWeight<T: System>(PhantomData<T>);
+pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
@@ -62,14 +122,14 @@ pub trait SignedExtra<T> {
     fn extra(&self) -> Self::Extra;
 }
 
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct DefaultExtra<T: System> {
     version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
-    //        marker:PhantomData<fn() -> T>
 }
 
-impl<T: System + Balances> DefaultExtra<T> {
+impl<T: System + Balances + Send + Sync> DefaultExtra<T> {
     pub fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
         DefaultExtra {
             version,
@@ -79,7 +139,7 @@ impl<T: System + Balances> DefaultExtra<T> {
     }
 }
 
-impl<T: System + Balances> SignedExtra<T> for DefaultExtra<T> {
+impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
     type Extra = (
         CheckVersion<T>,
         CheckGenesis<T>,
@@ -91,9 +151,9 @@ impl<T: System + Balances> SignedExtra<T> for DefaultExtra<T> {
 
     fn extra(&self) -> Self::Extra {
         (
-            CheckVersion(PhantomData),
-            CheckGenesis(PhantomData),
-            CheckEra((Era::Immortal, PhantomData)),
+            CheckVersion(PhantomData, self.version),
+            CheckGenesis(PhantomData, self.genesis_hash),
+            CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             TakeFees(<T as Balances>::Balance::default()),
@@ -101,34 +161,20 @@ impl<T: System + Balances> SignedExtra<T> for DefaultExtra<T> {
     }
 }
 
-impl<T: System + Balances> SignedExtension for DefaultExtra<T> {
+impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type AccountId = T::AccountId;
     type Call = ();
-    type AdditionalSigned = (
-        u32,     // CheckVersion
-        T::Hash, // CheckGenesis
-        T::Hash, // CheckEra(Era::Immortal)
-        (),      // CheckNonce
-        (),      // CheckWeight
-        (),      // Take Fees
-    );
+    type AdditionalSigned = <Self as SignedExtra<T>>::Extra;
     type Pre = ();
 
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-        Ok((
-            self.version,
-            self.genesis_hash,
-            self.genesis_hash,
-            (),
-            (),
-            (),
-        ))
+        self.extra().additional_signed()
     }
 }
 
-pub fn create_and_sign<T: System + Balances, C, P>(
+pub fn create_and_sign<T: System + Balances + Send + Sync, C, P>(
     signer: P,
     call: C,
     version: u32,
