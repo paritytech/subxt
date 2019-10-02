@@ -23,6 +23,10 @@ pub type Gas = u64;
 /// The subset of the `srml_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
 
+/// Blanket impl for using existing runtime types
+impl<T: srml_contracts::Trait + srml_system::Trait + srml_balances::Trait + std::fmt::Debug> Contracts for T where <T as srml_system::Trait>::Header: serde::de::DeserializeOwned {
+}
+
 /// The Contracts extension trait for the XtBuilder.
 pub trait ContractsXt {
     /// Contracts type.

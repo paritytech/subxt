@@ -407,12 +407,10 @@ mod tests {
             BalancesStore,
             BalancesXt,
         },
-        contracts::{
-            Contracts,
-            ContractsXt,
-        },
+        contracts::ContractsXt,
     };
     use futures::stream::Stream;
+    use node_runtime::Runtime;
     use parity_scale_codec::Encode;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
@@ -420,25 +418,6 @@ mod tests {
         storage::StorageKey,
         Pair,
     };
-
-    #[derive(Eq, PartialEq, Clone, Debug)]
-    struct Runtime;
-
-    impl System for Runtime {
-        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-        type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-        type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
-        type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
-        type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-        type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-    }
-
-    impl Balances for Runtime {
-        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
-    }
-
-    impl Contracts for Runtime {}
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;

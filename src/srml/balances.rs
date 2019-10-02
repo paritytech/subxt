@@ -41,6 +41,11 @@ pub trait Balances: System {
         + From<<Self as System>::BlockNumber>;
 }
 
+/// Blanket impl for using existing runtime types
+impl<T: srml_system::Trait + srml_balances::Trait + std::fmt::Debug> Balances for T where <T as srml_system::Trait>::Header: serde::de::DeserializeOwned {
+    type Balance = T::Balance;
+}
+
 /// The Balances extension trait for the Client.
 pub trait BalancesStore {
     /// Balances type.
