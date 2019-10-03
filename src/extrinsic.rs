@@ -77,7 +77,8 @@ impl_signed_extensions!(
     (CheckEra, System, T::Hash, self, f, self.1, self.1.fmt(f)),
     (CheckNonce, System, (), self, f, (), self.0.fmt(f)),
     (CheckWeight, System, (), self, _f, (), Ok(())),
-    (TakeFees, Balances, (), self, f, (), self.0.fmt(f))
+    (TakeFees, Balances, (), self, f, (), self.0.fmt(f)),
+    (CheckBlockGasLimit, System, (), self, _f, (), Ok(()))
 );
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
@@ -137,6 +138,10 @@ pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
 #[derive(Encode, Decode, Clone, Eq, PartialEq)]
 pub struct TakeFees<T: Balances>(#[codec(compact)] T::Balance);
 
+/// Checks if a transaction would exhausts the block gas limit.
+#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
+
 pub trait SignedExtra<T> {
     type Extra: SignedExtension;
 
@@ -168,6 +173,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
         CheckNonce<T>,
         CheckWeight<T>,
         TakeFees<T>,
+        CheckBlockGasLimit<T>,
     );
 
     fn extra(&self) -> Self::Extra {
@@ -178,6 +184,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             TakeFees(<T as Balances>::Balance::default()),
+            CheckBlockGasLimit(PhantomData),
         )
     }
 }
