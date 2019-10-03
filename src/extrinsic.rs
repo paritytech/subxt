@@ -42,7 +42,7 @@ use substrate_primitives::Pair;
 /// substrate's `srml_system::Trait`
 
 macro_rules! impl_signed_extensions {
-    ( $( ($name:ident, $mod:ident, $ty:ty, $self:ident, $f:ident, $res:expr, $fmt:expr) ),* ) => {
+    ( $( ($name:ident, $mod:ident, $ty:ty, $self:ident, $res:expr) ),* ) => {
         $(
             impl<T> SignedExtension for $name<T> where T: $mod + Send + Sync {
                 type AccountId = u64;
@@ -53,32 +53,20 @@ macro_rules! impl_signed_extensions {
                     Ok($res)
                 }
             }
-
-            impl<T> std::fmt::Debug for $name<T> where T: $mod + Send + Sync {
-                fn fmt(&$self, $f: &mut std::fmt::Formatter) -> std::fmt::Result {
-                    $fmt
-                }
-            }
         )*
     }
 }
 
+// CheckVersion<T: System> { fn additional_signed(&self) -> u32 { self.1 } }
+
 impl_signed_extensions!(
-    (CheckVersion, System, u32, self, f, self.1, self.1.fmt(f)),
-    (
-        CheckGenesis,
-        System,
-        T::Hash,
-        self,
-        f,
-        self.1,
-        self.1.fmt(f)
-    ),
-    (CheckEra, System, T::Hash, self, f, self.1, self.1.fmt(f)),
-    (CheckNonce, System, (), self, f, (), self.0.fmt(f)),
-    (CheckWeight, System, (), self, _f, (), Ok(())),
-    (TakeFees, Balances, (), self, f, (), self.0.fmt(f)),
-    (CheckBlockGasLimit, System, (), self, _f, (), Ok(()))
+    (CheckVersion, System, u32, self, self.1),
+    (CheckGenesis, System, T::Hash, self, self.1),
+    (CheckEra, System, T::Hash, self, self.1),
+    (CheckNonce, System, (), self, ()),
+    (CheckWeight, System, (), self, ()),
+    (TakeFees, Balances, (), self, ()),
+    (CheckBlockGasLimit, System, (), self, ())
 );
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
@@ -87,7 +75,7 @@ impl_signed_extensions!(
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckVersion<T: System + Send + Sync>(
     PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
@@ -101,7 +89,7 @@ pub struct CheckVersion<T: System + Send + Sync>(
 ///
 /// This is modified from the substrate version to allow passing in of the genesis hash, which is
 /// returned via `additional_signed()`.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckGenesis<T: System + Send + Sync>(
     PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
@@ -116,7 +104,7 @@ pub struct CheckGenesis<T: System + Send + Sync>(
 /// This is modified from the substrate version to allow passing in of the genesis hash, which is
 /// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
 /// valid forever)
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckEra<T: System + Send + Sync>(
     /// The default structure for the Extra encoding
     (Era, PhantomData<T>),
@@ -126,20 +114,20 @@ pub struct CheckEra<T: System + Send + Sync>(
 );
 
 /// Nonce check and increment to give replay protection for transactions.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] T::Index);
 
 /// Resource limit check.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct TakeFees<T: Balances>(#[codec(compact)] T::Balance);
 
 /// Checks if a transaction would exhausts the block gas limit.
-#[derive(Encode, Decode, Clone, Eq, PartialEq)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
 
 pub trait SignedExtra<T> {
