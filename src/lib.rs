@@ -53,6 +53,10 @@ use url::Url;
 use crate::{
     codec::Encoded,
     events::EventsDecoder,
+    extrinsic::{
+        DefaultExtra,
+        SignedExtra,
+    },
     metadata::MetadataError,
     rpc::{
         BlockNumber,
@@ -337,7 +341,7 @@ where
             <T::Lookup as StaticLookup>::Source,
             Encoded,
             P::Signature,
-            extrinsic::DefaultExtra<T>,
+            <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
         Error,
     >
@@ -361,13 +365,8 @@ where
             account_nonce
         );
 
-        let xt = extrinsic::create_and_sign(
-            signer,
-            call,
-            version,
-            account_nonce,
-            genesis_hash,
-        )?;
+        let extra = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let xt = extrinsic::create_and_sign(signer, call, extra)?;
         Ok(xt)
     }
 

@@ -203,18 +203,16 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     }
 }
 
-pub fn create_and_sign<T: System + Balances + Send + Sync, C, P>(
+pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
     signer: P,
     call: C,
-    version: u32,
-    nonce: T::Index,
-    genesis_hash: T::Hash,
+    extra: E,
 ) -> Result<
     UncheckedExtrinsic<
         <T::Lookup as StaticLookup>::Source,
         C,
         P::Signature,
-        DefaultExtra<T>,
+        <E as SignedExtra<T>>::Extra,
     >,
     TransactionValidityError,
 >
@@ -223,9 +221,9 @@ where
     P::Public: Into<<T::Lookup as StaticLookup>::Source>,
     P::Signature: Codec,
     C: Encode,
+    E: SignedExtra<T> + SignedExtension,
 {
-    let extra = DefaultExtra::new(version, nonce, genesis_hash);
-    let raw_payload = SignedPayload::new(call, extra)?;
+    let raw_payload = SignedPayload::new(call, extra.extra())?;
     let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
     let (call, extra, _) = raw_payload.deconstruct();
 
