@@ -23,7 +23,6 @@ use runtime_primitives::traits::{
     MaybeSerializeDebug,
     Member,
     SimpleArithmetic,
-    StaticLookup,
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
@@ -142,7 +141,7 @@ where
     /// of the transfer, the account will be reaped.
     pub fn transfer(
         self,
-        to: <<T as System>::Lookup as StaticLookup>::Source,
+        to: <T as System>::Address,
         amount: <T as Balances>::Balance,
     ) -> Result<Encoded, MetadataError> {
         self.module.call("transfer", (to, compact(amount)))

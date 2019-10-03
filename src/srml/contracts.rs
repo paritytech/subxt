@@ -13,7 +13,6 @@ use crate::{
     Valid,
     XtBuilder,
 };
-use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::Pair;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
@@ -118,7 +117,7 @@ where
     ///  will be transferred.
     pub fn call(
         &self,
-        dest: <<T as System>::Lookup as StaticLookup>::Source,
+        dest: <T as System>::Address,
         value: <T as Balances>::Balance,
         gas_limit: Gas,
         data: Vec<u8>,

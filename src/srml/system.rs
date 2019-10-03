@@ -15,11 +15,13 @@ use futures::future::{
     self,
     Future,
 };
+use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
     Hash,
     Header,
+    MaybeDebug,
     MaybeDisplay,
     MaybeSerializeDebug,
     MaybeSerializeDebugButNotDeserialize,
@@ -79,14 +81,8 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
         + Ord
         + Default;
 
-    /// Converting trait to take a source type and convert to `AccountId`.
-    ///
-    /// Used to define the type and conversion mechanism for referencing
-    /// accounts in transactions. It's perfectly reasonable for this to be an
-    /// identity conversion (with the source type being `AccountId`), but other
-    /// modules (e.g. Indices module) may provide more functional/efficient
-    /// alternatives.
-    type Lookup: StaticLookup<Target = Self::AccountId>;
+    /// The address type. This instead of `<srml_system::Trait::Lookup as StaticLookup>::Source`.
+    type Address: Codec + Clone + PartialEq + MaybeDebug;
 
     /// The block header.
     type Header: Parameter
@@ -104,7 +100,7 @@ where
     type Hash = T::Hash;
     type Hashing = T::Hashing;
     type AccountId = T::AccountId;
-    type Lookup = T::Lookup;
+    type Address = <T::Lookup as StaticLookup>::Source;
     type Header = T::Header;
 }
 

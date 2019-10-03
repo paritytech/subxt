@@ -29,10 +29,7 @@ use runtime_primitives::{
         SignedPayload,
         UncheckedExtrinsic,
     },
-    traits::{
-        SignedExtension,
-        StaticLookup,
-    },
+    traits::SignedExtension,
     transaction_validity::TransactionValidityError,
 };
 use std::marker::PhantomData;
@@ -239,7 +236,7 @@ pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
     extra: E,
 ) -> Result<
     UncheckedExtrinsic<
-        <T::Lookup as StaticLookup>::Source,
+        T::Address,
         C,
         P::Signature,
         <E as SignedExtra<T>>::Extra,
@@ -248,7 +245,7 @@ pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
 >
 where
     P: Pair,
-    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+    P::Public: Into<T::Address>,
     P::Signature: Codec,
     C: Encode,
     E: SignedExtra<T> + SignedExtension,

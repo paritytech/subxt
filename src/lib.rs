@@ -32,10 +32,7 @@ use parity_scale_codec::{
     Codec,
     Decode,
 };
-use runtime_primitives::{
-    generic::UncheckedExtrinsic,
-    traits::StaticLookup,
-};
+use runtime_primitives::generic::UncheckedExtrinsic;
 use sr_version::RuntimeVersion;
 use std::{
     convert::TryFrom,
@@ -238,7 +235,7 @@ impl<T: System + Balances + 'static> Client<T> {
     ) -> impl Future<Item = XtBuilder<T, P>, Error = Error>
     where
         P: Pair,
-        P::Public: Into<T::AccountId> + Into<<T::Lookup as StaticLookup>::Source>,
+        P::Public: Into<T::AccountId> + Into<T::Address>,
         P::Signature: Codec,
     {
         let client = self.clone();
@@ -330,7 +327,7 @@ where
 impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P, Valid>
 where
     P: Pair,
-    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+    P::Public: Into<T::Address>,
     P::Signature: Codec,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
@@ -338,7 +335,7 @@ where
         &self,
     ) -> Result<
         UncheckedExtrinsic<
-            <T::Lookup as StaticLookup>::Source,
+            T::Address,
             Encoded,
             P::Signature,
             <DefaultExtra<T> as SignedExtra<T>>::Extra,
@@ -347,7 +344,7 @@ where
     >
     where
         P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Public: Into<T::Address>,
         P::Signature: Codec,
     {
         let signer = self.signer.clone();
@@ -426,7 +423,7 @@ mod tests {
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
-    type Address = <<Runtime as System>::Lookup as StaticLookup>::Source;
+    type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
 
     fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
