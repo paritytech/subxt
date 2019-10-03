@@ -41,34 +41,6 @@ use substrate_primitives::Pair;
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `srml_system::Trait`
 
-macro_rules! impl_signed_extensions {
-    ( $( ($name:ident, $mod:ident, $ty:ty, $self:ident, $res:expr) ),* ) => {
-        $(
-            impl<T> SignedExtension for $name<T> where T: $mod + Send + Sync {
-                type AccountId = u64;
-                type AdditionalSigned = $ty;
-                type Call = ();
-                type Pre = ();
-                fn additional_signed(&$self) -> Result<$ty, TransactionValidityError> {
-                    Ok($res)
-                }
-            }
-        )*
-    }
-}
-
-// CheckVersion<T: System> { fn additional_signed(&self) -> u32 { self.1 } }
-
-impl_signed_extensions!(
-    (CheckVersion, System, u32, self, self.1),
-    (CheckGenesis, System, T::Hash, self, self.1),
-    (CheckEra, System, T::Hash, self, self.1),
-    (CheckNonce, System, (), self, ()),
-    (CheckWeight, System, (), self, ()),
-    (TakeFees, Balances, (), self, ()),
-    (CheckBlockGasLimit, System, (), self, ())
-);
-
 /// Ensure the runtime version registered in the transaction is the same as at present.
 ///
 /// # Note
@@ -83,6 +55,16 @@ pub struct CheckVersion<T: System + Send + Sync>(
     u32,
 );
 
+impl<T> SignedExtension for CheckVersion<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = u32;
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(self.1)
+    }
+}
+
 /// Check genesis hash
 ///
 /// # Note
@@ -96,6 +78,16 @@ pub struct CheckGenesis<T: System + Send + Sync>(
     #[codec(skip)]
     T::Hash,
 );
+
+impl<T> SignedExtension for CheckGenesis<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = T::Hash;
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(self.1)
+    }
+}
 
 /// Check for transaction mortality.
 ///
@@ -113,22 +105,72 @@ pub struct CheckEra<T: System + Send + Sync>(
     T::Hash,
 );
 
+impl<T> SignedExtension for CheckEra<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = T::Hash;
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(self.1)
+    }
+}
+
 /// Nonce check and increment to give replay protection for transactions.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] T::Index);
 
+impl<T> SignedExtension for CheckNonce<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = ();
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+}
+
 /// Resource limit check.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
+
+impl<T> SignedExtension for CheckWeight<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = ();
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+}
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct TakeFees<T: Balances>(#[codec(compact)] T::Balance);
 
+impl<T> SignedExtension for TakeFees<T> where T: Balances + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = ();
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+}
+
 /// Checks if a transaction would exhausts the block gas limit.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
+
+impl<T> SignedExtension for CheckBlockGasLimit<T> where T: System + Send + Sync {
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = ();
+    type Pre = ();
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+}
 
 pub trait SignedExtra<T> {
     type Extra: SignedExtension;
