@@ -31,19 +31,14 @@ use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
-    Encode,
 };
-use runtime_primitives::{
-    generic::UncheckedExtrinsic,
-    traits::StaticLookup,
-};
+use runtime_primitives::generic::UncheckedExtrinsic;
 use sr_version::RuntimeVersion;
 use std::{
     convert::TryFrom,
     marker::PhantomData,
 };
 use substrate_primitives::{
-    blake2_256,
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -55,6 +50,10 @@ use url::Url;
 use crate::{
     codec::Encoded,
     events::EventsDecoder,
+    extrinsic::{
+        DefaultExtra,
+        SignedExtra,
+    },
     metadata::MetadataError,
     rpc::{
         BlockNumber,
@@ -76,6 +75,7 @@ use crate::{
 mod codec;
 mod error;
 mod events;
+mod extrinsic;
 mod metadata;
 mod rpc;
 mod srml;
@@ -235,7 +235,7 @@ impl<T: System + Balances + 'static> Client<T> {
     ) -> impl Future<Item = XtBuilder<T, P>, Error = Error>
     where
         P: Pair,
-        P::Public: Into<T::AccountId> + Into<<T::Lookup as StaticLookup>::Source>,
+        P::Public: Into<T::AccountId> + Into<T::Address>,
         P::Signature: Codec,
     {
         let client = self.clone();
@@ -324,10 +324,10 @@ where
     }
 }
 
-impl<T: System + Balances + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P, Valid>
 where
     P: Pair,
-    P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+    P::Public: Into<T::Address>,
     P::Signature: Codec,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
@@ -335,16 +335,16 @@ where
         &self,
     ) -> Result<
         UncheckedExtrinsic<
-            <T::Lookup as StaticLookup>::Source,
+            T::Address,
             Encoded,
             P::Signature,
-            T::SignedExtra,
+            <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
-        MetadataError,
+        Error,
     >
     where
         P: Pair,
-        P::Public: Into<<T::Lookup as StaticLookup>::Source>,
+        P::Public: Into<T::Address>,
         P::Signature: Codec,
     {
         let signer = self.signer.clone();
@@ -362,27 +362,9 @@ where
             account_nonce
         );
 
-        let extra = T::extra(account_nonce);
-        let raw_payload = (
-            call.clone(),
-            extra.clone(),
-            version,
-            (&genesis_hash, &genesis_hash),
-        );
-        let signature = raw_payload.using_encoded(|payload| {
-            if payload.len() > 256 {
-                signer.sign(&blake2_256(payload)[..])
-            } else {
-                signer.sign(payload)
-            }
-        });
-
-        Ok(UncheckedExtrinsic::new_signed(
-            raw_payload.0,
-            signer.public().into(),
-            signature.into(),
-            extra,
-        ))
+        let extra = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let xt = extrinsic::create_and_sign(signer, call, extra)?;
+        Ok(xt)
     }
 
     /// Submits a transaction to the chain.
@@ -427,14 +409,11 @@ mod tests {
             BalancesStore,
             BalancesXt,
         },
-        contracts::{
-            Contracts,
-            ContractsXt,
-        },
+        contracts::ContractsXt,
     };
     use futures::stream::Stream;
+    use node_runtime::Runtime;
     use parity_scale_codec::Encode;
-    use runtime_primitives::generic::Era;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
@@ -442,47 +421,9 @@ mod tests {
         Pair,
     };
 
-    struct Runtime;
-
-    impl System for Runtime {
-        type Index = <node_runtime::Runtime as srml_system::Trait>::Index;
-        type BlockNumber = <node_runtime::Runtime as srml_system::Trait>::BlockNumber;
-        type Hash = <node_runtime::Runtime as srml_system::Trait>::Hash;
-        type Hashing = <node_runtime::Runtime as srml_system::Trait>::Hashing;
-        type AccountId = <node_runtime::Runtime as srml_system::Trait>::AccountId;
-        type Lookup = <node_runtime::Runtime as srml_system::Trait>::Lookup;
-        type Header = <node_runtime::Runtime as srml_system::Trait>::Header;
-        type Event = <node_runtime::Runtime as srml_system::Trait>::Event;
-
-        type SignedExtra = (
-            srml_system::CheckVersion<node_runtime::Runtime>,
-            srml_system::CheckGenesis<node_runtime::Runtime>,
-            srml_system::CheckEra<node_runtime::Runtime>,
-            srml_system::CheckNonce<node_runtime::Runtime>,
-            srml_system::CheckWeight<node_runtime::Runtime>,
-            srml_balances::TakeFees<node_runtime::Runtime>,
-        );
-        fn extra(nonce: Self::Index) -> Self::SignedExtra {
-            (
-                srml_system::CheckVersion::<node_runtime::Runtime>::new(),
-                srml_system::CheckGenesis::<node_runtime::Runtime>::new(),
-                srml_system::CheckEra::<node_runtime::Runtime>::from(Era::Immortal),
-                srml_system::CheckNonce::<node_runtime::Runtime>::from(nonce),
-                srml_system::CheckWeight::<node_runtime::Runtime>::new(),
-                srml_balances::TakeFees::<node_runtime::Runtime>::from(0),
-            )
-        }
-    }
-
-    impl Balances for Runtime {
-        type Balance = <node_runtime::Runtime as srml_balances::Trait>::Balance;
-    }
-
-    impl Contracts for Runtime {}
-
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
-    type Address = <<Runtime as System>::Lookup as StaticLookup>::Source;
+    type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
 
     fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {

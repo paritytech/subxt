@@ -15,27 +15,27 @@ use futures::future::{
     self,
     Future,
 };
+use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
     Bounded,
     CheckEqual,
     Hash,
     Header,
+    MaybeDebug,
     MaybeDisplay,
     MaybeSerializeDebug,
     MaybeSerializeDebugButNotDeserialize,
     Member,
-    SignedExtension,
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
-use srml_system::Event;
 use substrate_primitives::Pair;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
-pub trait System {
+pub trait System: 'static + Eq + Clone + std::fmt::Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
@@ -81,28 +81,27 @@ pub trait System {
         + Ord
         + Default;
 
-    /// Converting trait to take a source type and convert to `AccountId`.
-    ///
-    /// Used to define the type and conversion mechanism for referencing
-    /// accounts in transactions. It's perfectly reasonable for this to be an
-    /// identity conversion (with the source type being `AccountId`), but other
-    /// modules (e.g. Indices module) may provide more functional/efficient
-    /// alternatives.
-    type Lookup: StaticLookup<Target = Self::AccountId>;
+    /// The address type. This instead of `<srml_system::Trait::Lookup as StaticLookup>::Source`.
+    type Address: Codec + Clone + PartialEq + MaybeDebug;
 
     /// The block header.
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
+}
 
-    /// The aggregated event type of the runtime.
-    type Event: Parameter + Member + From<Event>;
-
-    /// The `SignedExtension` to the basic transaction logic.
-    type SignedExtra: SignedExtension;
-
-    /// Creates the `SignedExtra` from the account nonce.
-    fn extra(nonce: Self::Index) -> Self::SignedExtra;
+/// Blanket impl for using existing runtime types
+impl<T: srml_system::Trait + std::fmt::Debug> System for T
+where
+    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+{
+    type Index = T::Index;
+    type BlockNumber = T::BlockNumber;
+    type Hash = T::Hash;
+    type Hashing = T::Hashing;
+    type AccountId = T::AccountId;
+    type Address = <T::Lookup as StaticLookup>::Source;
+    type Header = T::Header;
 }
 
 /// The System extension trait for the Client.

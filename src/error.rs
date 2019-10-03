@@ -20,6 +20,7 @@ use crate::{
 };
 use jsonrpc_core_client::RpcError;
 use parity_scale_codec::Error as CodecError;
+use runtime_primitives::transaction_validity::TransactionValidityError;
 use std::io::Error as IoError;
 use substrate_primitives::crypto::SecretStringError;
 
@@ -39,6 +40,9 @@ pub enum Error {
     SecretString(SecretStringError),
     /// Metadata error.
     Metadata(MetadataError),
+    /// Extrinsic validity error
+    #[display(fmt = "Transaction Validity Error: {:?}", _0)]
+    Invalid(TransactionValidityError),
     /// Other error.
     Other(String),
 }

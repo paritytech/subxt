@@ -23,7 +23,6 @@ use runtime_primitives::traits::{
     MaybeSerializeDebug,
     Member,
     SimpleArithmetic,
-    StaticLookup,
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
@@ -39,6 +38,14 @@ pub trait Balances: System {
         + Copy
         + MaybeSerializeDebug
         + From<<Self as System>::BlockNumber>;
+}
+
+/// Blanket impl for using existing runtime types
+impl<T: srml_system::Trait + srml_balances::Trait + std::fmt::Debug> Balances for T
+where
+    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+{
+    type Balance = T::Balance;
 }
 
 /// The Balances extension trait for the Client.
@@ -134,7 +141,7 @@ where
     /// of the transfer, the account will be reaped.
     pub fn transfer(
         self,
-        to: <<T as System>::Lookup as StaticLookup>::Source,
+        to: <T as System>::Address,
         amount: <T as Balances>::Balance,
     ) -> Result<Encoded, MetadataError> {
         self.module.call("transfer", (to, compact(amount)))

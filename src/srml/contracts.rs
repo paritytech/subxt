@@ -13,7 +13,6 @@ use crate::{
     Valid,
     XtBuilder,
 };
-use runtime_primitives::traits::StaticLookup;
 use substrate_primitives::Pair;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
@@ -22,6 +21,18 @@ pub type Gas = u64;
 
 /// The subset of the `srml_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
+
+/// Blanket impl for using existing runtime types
+impl<
+        T: srml_contracts::Trait
+            + srml_system::Trait
+            + srml_balances::Trait
+            + std::fmt::Debug,
+    > Contracts for T
+where
+    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+{
+}
 
 /// The Contracts extension trait for the XtBuilder.
 pub trait ContractsXt {
@@ -106,7 +117,7 @@ where
     ///  will be transferred.
     pub fn call(
         &self,
-        dest: <<T as System>::Lookup as StaticLookup>::Source,
+        dest: <T as System>::Address,
         value: <T as Balances>::Balance,
         gas_limit: Gas,
         data: Vec<u8>,
