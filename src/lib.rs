@@ -78,11 +78,13 @@ mod events;
 mod extrinsic;
 mod metadata;
 mod rpc;
+mod runtimes;
 mod srml;
 
 pub use error::Error;
 pub use events::RawEvent;
 pub use rpc::ExtrinsicSuccess;
+pub use runtimes::*;
 pub use srml::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
