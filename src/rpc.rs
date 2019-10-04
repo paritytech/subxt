@@ -151,7 +151,7 @@ use substrate_primitives::{
     storage::StorageChangeSet,
     twox_128,
 };
-use transaction_pool::txpool::watcher::Status;
+use txpool::watcher::Status;
 
 use crate::{
     events::RawEvent,
