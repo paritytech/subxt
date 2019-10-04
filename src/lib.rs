@@ -78,12 +78,14 @@ mod events;
 mod extrinsic;
 mod metadata;
 mod rpc;
+mod runtimes;
 mod srml;
 
 pub use error::Error;
 pub use events::RawEvent;
 pub use rpc::ExtrinsicSuccess;
 pub use srml::*;
+pub use runtimes::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
