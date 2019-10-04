@@ -30,7 +30,7 @@ srml-contracts = { git = "https://github.com/paritytech/substrate/", package = "
 substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-api" }
 substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-primitives" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
-transaction_pool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-pool" }
+txpool = {  git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-graph" }
 url = "1.7"
 
 [dev-dependencies]
