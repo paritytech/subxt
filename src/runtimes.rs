@@ -15,13 +15,16 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::srml::{
-    system::System,
     balances::Balances,
     contracts::Contracts,
+    system::System,
 };
 use runtime_primitives::{
     generic::Header,
-    traits::{Verify, BlakeTwo256},
+    traits::{
+        BlakeTwo256,
+        Verify,
+    },
     AnySignature,
 };
 

@@ -52,12 +52,17 @@ pub struct CheckVersion<T: System + Send + Sync>(
     u32,
 );
 
-impl<T> SignedExtension for CheckVersion<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckVersion<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -76,12 +81,17 @@ pub struct CheckGenesis<T: System + Send + Sync>(
     T::Hash,
 );
 
-impl<T> SignedExtension for CheckGenesis<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckGenesis<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -102,12 +112,17 @@ pub struct CheckEra<T: System + Send + Sync>(
     T::Hash,
 );
 
-impl<T> SignedExtension for CheckEra<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckEra<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -116,12 +131,17 @@ impl<T> SignedExtension for CheckEra<T> where T: System + Send + Sync {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] T::Index);
 
-impl<T> SignedExtension for CheckNonce<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckNonce<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -130,12 +150,17 @@ impl<T> SignedExtension for CheckNonce<T> where T: System + Send + Sync {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
 
-impl<T> SignedExtension for CheckWeight<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckWeight<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -145,12 +170,17 @@ impl<T> SignedExtension for CheckWeight<T> where T: System + Send + Sync {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct TakeFees<T: Balances>(#[codec(compact)] T::Balance);
 
-impl<T> SignedExtension for TakeFees<T> where T: Balances + Send + Sync {
+impl<T> SignedExtension for TakeFees<T>
+where
+    T: Balances + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -159,12 +189,17 @@ impl<T> SignedExtension for TakeFees<T> where T: Balances + Send + Sync {
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
 
-impl<T> SignedExtension for CheckBlockGasLimit<T> where T: System + Send + Sync {
+impl<T> SignedExtension for CheckBlockGasLimit<T>
+where
+    T: System + Send + Sync,
+{
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -235,12 +270,7 @@ pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
     call: C,
     extra: E,
 ) -> Result<
-    UncheckedExtrinsic<
-        T::Address,
-        C,
-        P::Signature,
-        <E as SignedExtra<T>>::Extra,
-    >,
+    UncheckedExtrinsic<T::Address, C, P::Signature, <E as SignedExtra<T>>::Extra>,
     TransactionValidityError,
 >
 where
