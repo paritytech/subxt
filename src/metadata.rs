@@ -284,7 +284,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             Err(Error::InvalidPrefix)?;
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V7(meta) => meta,
+            RuntimeMetadata::V8(meta) => meta,
             _ => Err(Error::InvalidVersion)?,
         };
         let mut modules = HashMap::new();
