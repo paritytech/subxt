@@ -1,31 +1,23 @@
 //! Implements support for the srml_balances module.
 use crate::{
-    codec::{
-        compact,
-        Encoded,
-    },
     error::Error,
-    metadata::MetadataError,
     srml::{
+        Call,
         system::System,
-        ModuleCalls,
     },
     Client,
-    Valid,
-    XtBuilder,
 };
 use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
+use parity_scale_codec::{Encode, Codec};
 use runtime_primitives::traits::{
     MaybeSerializeDebug,
     Member,
     SimpleArithmetic,
 };
 use runtime_support::Parameter;
-use substrate_primitives::Pair;
 
 /// The subset of the `srml_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -97,53 +89,25 @@ impl<T: Balances + 'static> BalancesStore for Client<T> {
     }
 }
 
-/// The Balances extension trait for the XtBuilder.
-pub trait BalancesXt {
-    /// Balances type.
-    type Balances: Balances;
-    /// Keypair type
-    type Pair: Pair;
+const MODULE: &str = "Balances";
+const TRANSFER: &str = "transfer";
 
-    /// Create a call for the srml balances module
-    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>;
+#[derive(Encode)]
+pub struct TransferArgs<T: Balances> {
+    to: <T as System>::Address,
+    #[codec(compact)]
+    amount: <T as Balances>::Balance
 }
 
-impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
-where
-    P: Pair,
-{
-    type Balances = T;
-    type Pair = P;
-
-    fn balances<F>(&self, f: F) -> XtBuilder<T, P, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>,
-    {
-        self.set_call("Balances", f)
-    }
-}
-
-impl<T: Balances + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Transfer some liquid free balance to another account.
-    ///
-    /// `transfer` will set the `FreeBalance` of the sender and receiver.
-    /// It will decrease the total issuance of the system by the `TransferFee`.
-    /// If the sender's account is below the existential deposit as a result
-    /// of the transfer, the account will be reaped.
-    pub fn transfer(
-        self,
-        to: <T as System>::Address,
-        amount: <T as Balances>::Balance,
-    ) -> Result<Encoded, MetadataError> {
-        self.module.call("transfer", (to, compact(amount)))
-    }
+/// Transfer some liquid free balance to another account.
+///
+/// `transfer` will set the `FreeBalance` of the sender and receiver.
+/// It will decrease the total issuance of the system by the `TransferFee`.
+/// If the sender's account is below the existential deposit as a result
+/// of the transfer, the account will be reaped.
+pub fn transfer<T: Balances>(
+    to: <T as System>::Address,
+    amount: <T as Balances>::Balance,
+) -> Call<TransferArgs<T>> {
+    Call::new(MODULE, TRANSFER, TransferArgs { to, amount })
 }

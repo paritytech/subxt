@@ -1,15 +1,11 @@
 //! Implements support for the srml_system module.
 use crate::{
-    codec::Encoded,
     error::Error,
-    metadata::MetadataError,
     srml::{
+        Call,
         balances::Balances,
-        ModuleCalls,
     },
     Client,
-    Valid,
-    XtBuilder,
 };
 use futures::future::{
     self,
@@ -32,7 +28,6 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
-use substrate_primitives::Pair;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + std::fmt::Debug {
@@ -93,7 +88,7 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
 /// Blanket impl for using existing runtime types
 impl<T: srml_system::Trait + std::fmt::Debug> System for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as srml_system::Trait>::Header: DeserializeOwned,
 {
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
@@ -139,46 +134,14 @@ impl<T: System + Balances + 'static> SystemStore for Client<T> {
     }
 }
 
-/// The System extension trait for the XtBuilder.
-pub trait SystemXt {
-    /// System type.
-    type System: System;
-    /// Keypair type
-    type Pair: Pair;
+const MODULE: &str = "System";
+const SET_CODE: &str = "set_code";
 
-    /// Create a call for the srml system module
-    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>;
-}
+pub type SetCode = Vec<u8>;
 
-impl<T: System + Balances + 'static, P, V> SystemXt for XtBuilder<T, P, V>
-where
-    P: Pair,
-{
-    type System = T;
-    type Pair = P;
-
-    fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>,
-    {
-        self.set_call("System", f)
-    }
-}
-
-impl<T: System + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Sets the new code.
-    pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
-        self.module.call("set_code", code)
-    }
+/// Sets the new code.
+pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
+    Call::new(MODULE, SET_CODE, code)
 }
 
 /// Event for the System module.

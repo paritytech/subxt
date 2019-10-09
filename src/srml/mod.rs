@@ -1,24 +1,20 @@
 //! Implements support for built-in runtime modules.
 
-use crate::metadata::ModuleMetadata;
-use std::marker::PhantomData;
+use parity_scale_codec::Encode;
 
 pub mod balances;
 pub mod contracts;
 pub mod system;
 
 /// Creates module calls
-pub struct ModuleCalls<T, P> {
-    module: ModuleMetadata,
-    marker: PhantomData<fn() -> (T, P)>,
+pub struct Call<T: Encode> {
+    pub module: &'static str,
+    pub function: &'static str,
+    pub args: T,
 }
 
-impl<T, P> ModuleCalls<T, P> {
-    /// Create new module calls
-    pub fn new(module: &ModuleMetadata) -> Self {
-        ModuleCalls::<T, P> {
-            module: module.clone(),
-            marker: PhantomData,
-        }
+impl<T: Encode> Call<T> {
+    pub fn new(module: &'static str, function: &'static str, args: T) -> Self {
+        Call { module, function, args }
     }
 }
