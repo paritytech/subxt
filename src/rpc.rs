@@ -86,10 +86,16 @@ impl<T: System> Rpc<T> {
     ) -> impl Future<Item = Option<V>, Error = Error> {
         self.state
             .storage(key, None)
-            .map(|data| {
-                data.map(|d| Decode::decode(&mut &d.0[..]).expect("Valid storage key"))
-            })
             .map_err(Into::into)
+            .and_then(|data| {
+                match data {
+                    Some(data) => {
+                        let value = Decode::decode(&mut &data.0[..])?;
+                        Ok(Some(value))
+                    }
+                    None => Ok(None),
+                }
+            })
     }
 
     /// Fetch the genesis hash
