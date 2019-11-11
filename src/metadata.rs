@@ -13,10 +13,7 @@ use runtime_metadata::{
     META_RESERVED,
 };
 use std::{
-    collections::{
-        HashMap,
-        HashSet,
-    },
+    collections::HashMap,
     convert::TryFrom,
     marker::PhantomData,
     str::FromStr,
@@ -197,7 +194,7 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
 #[derive(Clone, Debug)]
 pub struct ModuleEventMetadata {
     pub name: String,
-    arguments: HashSet<EventArg>,
+    arguments: Vec<EventArg>,
 }
 
 impl ModuleEventMetadata {
@@ -284,7 +281,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             Err(Error::InvalidPrefix)?;
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V7(meta) => meta,
+            RuntimeMetadata::V8(meta) => meta,
             _ => Err(Error::InvalidVersion)?,
         };
         let mut modules = HashMap::new();
@@ -355,10 +352,10 @@ fn convert_event(
     event: runtime_metadata::EventMetadata,
 ) -> Result<ModuleEventMetadata, Error> {
     let name = convert(event.name)?;
-    let mut arguments = HashSet::new();
+    let mut arguments = Vec::new();
     for arg in convert(event.arguments)? {
         let arg = arg.parse::<EventArg>()?;
-        arguments.insert(arg);
+        arguments.push(arg);
     }
     Ok(ModuleEventMetadata { name, arguments })
 }

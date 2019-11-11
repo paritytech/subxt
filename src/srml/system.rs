@@ -17,10 +17,9 @@ use runtime_primitives::traits::{
     CheckEqual,
     Hash,
     Header,
-    MaybeDebug,
     MaybeDisplay,
-    MaybeSerializeDebug,
-    MaybeSerializeDebugButNotDeserialize,
+    MaybeSerialize,
+    MaybeSerializeDeserialize,
     Member,
     SimpleArithmetic,
     SimpleBitOps,
@@ -28,14 +27,16 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
+use std::fmt::Debug;
 
 /// The subset of the `srml_system::Trait` that a client must implement.
-pub trait System: 'static + Eq + Clone + std::fmt::Debug {
+pub trait System: 'static + Eq + Clone + Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
         + Member
-        + MaybeSerializeDebugButNotDeserialize
+        + MaybeSerialize
+        + Debug
         + Default
         + MaybeDisplay
         + SimpleArithmetic
@@ -44,7 +45,8 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
     /// The block number type used by the runtime.
     type BlockNumber: Parameter
         + Member
-        + MaybeSerializeDebug
+        + MaybeSerializeDeserialize
+        + Debug
         + MaybeDisplay
         + SimpleArithmetic
         + Default
@@ -55,7 +57,8 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
     /// The output of the `Hashing` function.
     type Hash: Parameter
         + Member
-        + MaybeSerializeDebug
+        + MaybeSerializeDeserialize
+        + Debug
         + MaybeDisplay
         + SimpleBitOps
         + Default
@@ -71,13 +74,14 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
     /// The user account identifier type for the runtime.
     type AccountId: Parameter
         + Member
-        + MaybeSerializeDebug
+        + MaybeSerialize
+        + Debug
         + MaybeDisplay
         + Ord
         + Default;
 
     /// The address type. This instead of `<srml_system::Trait::Lookup as StaticLookup>::Source`.
-    type Address: Codec + Clone + PartialEq + MaybeDebug;
+    type Address: Codec + Clone + PartialEq + Debug;
 
     /// The block header.
     type Header: Parameter
@@ -86,7 +90,7 @@ pub trait System: 'static + Eq + Clone + std::fmt::Debug {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + std::fmt::Debug> System for T
+impl<T: srml_system::Trait + Debug> System for T
 where
     <T as srml_system::Trait>::Header: DeserializeOwned,
 {
