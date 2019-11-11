@@ -122,7 +122,7 @@ pub trait SystemStore {
     ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>;
 }
 
-impl<T: System + Balances + 'static> SystemStore for Client<T> {
+impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
     type System = T;
 
     fn account_nonce(
@@ -162,7 +162,7 @@ pub trait SystemXt {
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + Balances + 'static, P, S, V> SystemXt for XtBuilder<T, P, S, V>
+impl<T: System + Balances + 'static, P, S: 'static, V> SystemXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
     S: Verify,

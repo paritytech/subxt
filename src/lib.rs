@@ -38,6 +38,7 @@ use runtime_primitives::{
         Verify,
         IdentifyAccount,
     },
+    MultiSignature,
 };
 use sr_version::RuntimeVersion;
 use std::{
@@ -98,12 +99,12 @@ fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
 }
 
 /// ClientBuilder for constructing a Client.
-pub struct ClientBuilder<T: System> {
-    _marker: std::marker::PhantomData<T>,
+pub struct ClientBuilder<T: System, S = MultiSignature> {
+    _marker: std::marker::PhantomData<(T, S)>,
     url: Option<Url>,
 }
 
-impl<T: System> ClientBuilder<T> {
+impl<T: System, S> ClientBuilder<T, S> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
@@ -119,7 +120,7 @@ impl<T: System> ClientBuilder<T> {
     }
 
     /// Creates a new Client.
-    pub fn build(self) -> impl Future<Item = Client<T>, Error = Error> {
+    pub fn build(self) -> impl Future<Item = Client<T, S>, Error = Error> {
         let url = self.url.unwrap_or_else(|| {
             Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
         });
@@ -132,6 +133,7 @@ impl<T: System> ClientBuilder<T> {
                         genesis_hash,
                         metadata,
                         runtime_version,
+                        _marker: PhantomData,
                     }
                 })
         })
@@ -139,25 +141,28 @@ impl<T: System> ClientBuilder<T> {
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: System> {
+pub struct Client<T: System, S = MultiSignature> {
     url: Url,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
+    _marker: PhantomData<fn() -> S>,
 }
 
-impl<T: System> Clone for Client<T> {
+impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
             url: self.url.clone(),
             genesis_hash: self.genesis_hash.clone(),
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
+            _marker:PhantomData,
         }
     }
 }
 
-impl<T: System + Balances + 'static> Client<T> {
+impl<T: System + Balances + 'static, S: 'static> Client<T, S>
+{
     fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
@@ -236,7 +241,7 @@ impl<T: System + Balances + 'static> Client<T> {
     }
 
     /// Create a transaction builder for a private key.
-    pub fn xt<P, S>(
+    pub fn xt<P>(
         &self,
         signer: P,
         nonce: Option<T::Index>,
@@ -276,16 +281,16 @@ pub enum Invalid {}
 
 /// Transaction builder.
 pub struct XtBuilder<T: System, P, S, V = Invalid> {
-    client: Client<T>,
+    client: Client<T, S>,
     nonce: T::Index,
     runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
     signer: P,
     call: Option<Result<Encoded, MetadataError>>,
-    marker: PhantomData<fn() -> (S, V)>,
+    marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + Balances + 'static, P, S, V> XtBuilder<T, P, S, V>
+impl<T: System + Balances + 'static, P, S: 'static, V> XtBuilder<T, P, S, V>
 where
     P: Pair,
 {
@@ -334,7 +339,7 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S> XtBuilder<T, P, S, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S, Valid>
 where
     P: Pair,
     S: Verify,

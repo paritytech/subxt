@@ -55,7 +55,7 @@ pub trait ContractsXt {
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Contracts + 'static, P, S, V> ContractsXt for XtBuilder<T, P, S, V>
+impl<T: Contracts + 'static, P, S: 'static, V> ContractsXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
     S: Verify,

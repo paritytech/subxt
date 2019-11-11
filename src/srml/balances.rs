@@ -76,7 +76,7 @@ pub trait BalancesStore {
     ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>;
 }
 
-impl<T: Balances + 'static> BalancesStore for Client<T> {
+impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
     type Balances = T;
 
     fn free_balance(
@@ -118,7 +118,7 @@ pub trait BalancesXt {
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Balances + 'static, P, S, V> BalancesXt for XtBuilder<T, P, S, V>
+impl<T: Balances + 'static, P, S: 'static, V> BalancesXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
     S: Verify,
