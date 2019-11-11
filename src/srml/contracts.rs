@@ -13,6 +13,10 @@ use crate::{
     Valid,
     XtBuilder,
 };
+use runtime_primitives::traits::{
+    IdentifyAccount,
+    Verify,
+};
 use substrate_primitives::Pair;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
@@ -40,23 +44,28 @@ pub trait ContractsXt {
     type Contracts: Contracts;
     /// Key Pair Type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
     /// Create a call for the srml contracts module
-    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Valid>
+    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
+impl<T: Contracts + 'static, P, S, V> ContractsXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type Contracts = T;
     type Pair = P;
+    type Signature = S;
 
-    fn contracts<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn contracts<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,

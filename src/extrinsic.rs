@@ -29,7 +29,11 @@ use runtime_primitives::{
         SignedPayload,
         UncheckedExtrinsic,
     },
-    traits::SignedExtension,
+    traits::{
+        Verify,
+        IdentifyAccount,
+        SignedExtension,
+    },
     transaction_validity::TransactionValidityError,
 };
 use std::marker::PhantomData;
@@ -265,7 +269,7 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     }
 }
 
-pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
+pub fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
     signer: P,
     call: C,
     extra: E,
@@ -275,18 +279,21 @@ pub fn create_and_sign<T: System + Send + Sync, C, P, E>(
 >
 where
     P: Pair,
-    P::Public: Into<T::Address>,
     P::Signature: Codec,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     C: Encode,
     E: SignedExtra<T> + SignedExtension,
+    T::Address: From<T::AccountId>,
 {
     let raw_payload = SignedPayload::new(call, extra.extra())?;
     let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
     let (call, extra, _) = raw_payload.deconstruct();
+    let account_id = S::Signer::from(signer.public()).into_account();
 
     Ok(UncheckedExtrinsic::new_signed(
         call,
-        signer.public().into(),
+        account_id.into(),
         signature.into(),
         extra,
     ))

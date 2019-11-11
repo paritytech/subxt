@@ -32,7 +32,13 @@ use parity_scale_codec::{
     Codec,
     Decode,
 };
-use runtime_primitives::generic::UncheckedExtrinsic;
+use runtime_primitives::{
+    generic::UncheckedExtrinsic,
+    traits::{
+        Verify,
+        IdentifyAccount,
+    },
+};
 use sr_version::RuntimeVersion;
 use std::{
     convert::TryFrom,
@@ -230,20 +236,22 @@ impl<T: System + Balances + 'static> Client<T> {
     }
 
     /// Create a transaction builder for a private key.
-    pub fn xt<P>(
+    pub fn xt<P, S>(
         &self,
         signer: P,
         nonce: Option<T::Index>,
-    ) -> impl Future<Item = XtBuilder<T, P>, Error = Error>
+    ) -> impl Future<Item = XtBuilder<T, P, S>, Error = Error>
     where
         P: Pair,
-        P::Public: Into<T::AccountId> + Into<T::Address>,
         P::Signature: Codec,
+        S: Verify,
+        S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
         let client = self.clone();
+        let account_id = S::Signer::from(signer.public()).into_account();
         match nonce {
             Some(nonce) => Either::A(future::ok(nonce)),
-            None => Either::B(self.account_nonce(signer.public().into())),
+            None => Either::B(self.account_nonce(account_id)),
         }
         .map(|nonce| {
             let genesis_hash = client.genesis_hash.clone();
@@ -267,17 +275,17 @@ pub enum Valid {}
 pub enum Invalid {}
 
 /// Transaction builder.
-pub struct XtBuilder<T: System, P, V = Invalid> {
+pub struct XtBuilder<T: System, P, S, V = Invalid> {
     client: Client<T>,
     nonce: T::Index,
     runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
     signer: P,
     call: Option<Result<Encoded, MetadataError>>,
-    marker: PhantomData<fn() -> V>,
+    marker: PhantomData<fn() -> (S, V)>,
 }
 
-impl<T: System + Balances + 'static, P, V> XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, S, V> XtBuilder<T, P, S, V>
 where
     P: Pair,
 {
@@ -292,19 +300,19 @@ where
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, V> {
+    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S, V> {
         self.nonce = nonce;
         self
     }
 
     /// Increment the nonce
-    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, V> {
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S, V> {
         self.set_nonce(self.nonce() + 1.into());
         self
     }
 
     /// Sets the module call to a new value
-    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, Valid>
+    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
     {
@@ -326,11 +334,13 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P, S> XtBuilder<T, P, S, Valid>
 where
     P: Pair,
-    P::Public: Into<T::Address>,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P::Signature: Codec,
+    T::Address: From<T::AccountId>,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
     pub fn create_and_sign(
@@ -344,10 +354,6 @@ where
         >,
         Error,
     >
-    where
-        P: Pair,
-        P::Public: Into<T::Address>,
-        P::Signature: Codec,
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
@@ -365,7 +371,7 @@ where
         );
 
         let extra = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
-        let xt = extrinsic::create_and_sign(signer, call, extra)?;
+        let xt = extrinsic::create_and_sign::<_, _, _, S, _>(signer, call, extra)?;
         Ok(xt)
     }
 
@@ -420,7 +426,6 @@ mod tests {
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
         storage::StorageKey,
-        Pair,
     };
 
     type Index = <Runtime as System>::Index;
@@ -444,7 +449,7 @@ mod tests {
         let signer = AccountKeyring::Alice.pair();
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
-        let dest = AccountKeyring::Bob.pair().public();
+        let dest = AccountKeyring::Bob.to_account_id();
         let transfer = xt
             .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
             .submit();
@@ -515,7 +520,7 @@ mod tests {
     fn test_state_read_free_balance() {
         let (mut rt, client) = test_setup();
 
-        let account = AccountKeyring::Alice.pair().public();
+        let account = AccountKeyring::Alice.to_account_id();
         rt.block_on(client.free_balance(account.into())).unwrap();
     }
 
@@ -547,7 +552,7 @@ mod tests {
         let (_, client) = test_setup();
 
         let balances = client.metadata().module("Balances").unwrap();
-        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
+        let dest = substrate_keyring::AccountKeyring::Bob.to_account_id();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 

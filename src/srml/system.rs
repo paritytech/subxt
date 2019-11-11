@@ -21,6 +21,7 @@ use runtime_primitives::traits::{
     CheckEqual,
     Hash,
     Header,
+    IdentifyAccount,
     MaybeDisplay,
     MaybeSerialize,
     MaybeSerializeDeserialize,
@@ -28,6 +29,7 @@ use runtime_primitives::traits::{
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,
+    Verify,
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
@@ -149,23 +151,28 @@ pub trait SystemXt {
     type System: System;
     /// Keypair type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
     /// Create a call for the srml system module
-    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
+    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + Balances + 'static, P, V> SystemXt for XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, S, V> SystemXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type System = T;
     type Pair = P;
+    type Signature = S;
 
-    fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn system<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,

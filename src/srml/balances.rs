@@ -23,6 +23,8 @@ use runtime_primitives::traits::{
     MaybeSerialize,
     Member,
     SimpleArithmetic,
+    Verify,
+    IdentifyAccount,
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
@@ -105,23 +107,28 @@ pub trait BalancesXt {
     type Balances: Balances;
     /// Keypair type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
     /// Create a call for the srml balances module
-    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Valid>
+    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
+impl<T: Balances + 'static, P, S, V> BalancesXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type Balances = T;
     type Pair = P;
+    type Signature = S;
 
-    fn balances<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn balances<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
