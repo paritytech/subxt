@@ -172,9 +172,9 @@ where
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct TakeFees<T: Balances>(#[codec(compact)] T::Balance);
+pub struct ChargeTransactionPayment<T: Balances>(#[codec(compact)] T::Balance);
 
-impl<T> SignedExtension for TakeFees<T>
+impl<T> SignedExtension for ChargeTransactionPayment<T>
 where
     T: Balances + Send + Sync,
 {
@@ -238,7 +238,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
         CheckEra<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        TakeFees<T>,
+        ChargeTransactionPayment<T>,
         CheckBlockGasLimit<T>,
     );
 
@@ -249,7 +249,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
             CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            TakeFees(<T as Balances>::Balance::default()),
+            ChargeTransactionPayment(<T as Balances>::Balance::default()),
             CheckBlockGasLimit(PhantomData),
         )
     }
