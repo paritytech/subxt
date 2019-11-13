@@ -116,9 +116,9 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
             "Result<(), DispatchError>",
             "OpaqueTimeSlot",
             "rstd::marker::PhantomData<(AccountId, Event)>",
-            // FIXME: determine type size for this if necessary/possible
-            // from staking/im-online - we may receive these events and fail.
-            "IdentificationTuple"
+            // FIXME: determine type size for the following if necessary/possible
+            "IdentificationTuple",
+            "AuthorityList",
         ])?;
         Ok(decoder)
     }
