@@ -274,13 +274,12 @@ pub fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
     call: C,
     extra: E,
 ) -> Result<
-    UncheckedExtrinsic<T::Address, C, P::Signature, <E as SignedExtra<T>>::Extra>,
+    UncheckedExtrinsic<T::Address, C, S, <E as SignedExtra<T>>::Extra>,
     TransactionValidityError,
 >
 where
     P: Pair,
-    P::Signature: Codec,
-    S: Verify,
+    S: Verify + Codec + From<P::Signature>,
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     C: Encode,
     E: SignedExtra<T> + SignedExtension,

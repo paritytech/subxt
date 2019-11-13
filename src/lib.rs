@@ -342,9 +342,8 @@ where
 impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S, Valid>
 where
     P: Pair,
-    S: Verify,
+    S: Verify + Codec + From<P::Signature>,
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    P::Signature: Codec,
     T::Address: From<T::AccountId>,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
@@ -354,7 +353,7 @@ where
         UncheckedExtrinsic<
             T::Address,
             Encoded,
-            P::Signature,
+            S,
             <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
         Error,
