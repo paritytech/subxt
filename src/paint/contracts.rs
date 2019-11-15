@@ -1,11 +1,11 @@
-//! Implements support for the srml_contracts module.
+//! Implements support for the paint_contracts module.
 use crate::{
     codec::{
         compact,
         Encoded,
     },
     metadata::MetadataError,
-    srml::{
+    paint::{
         balances::Balances,
         system::System,
         ModuleCalls,
@@ -23,18 +23,18 @@ use substrate_primitives::Pair;
 /// instructions can operate on them efficiently.
 pub type Gas = u64;
 
-/// The subset of the `srml_contracts::Trait` that a client must implement.
+/// The subset of the `paint_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
 
 /// Blanket impl for using existing runtime types
 impl<
-        T: srml_contracts::Trait
-            + srml_system::Trait
-            + srml_balances::Trait
+        T: paint_contracts::Trait
+            + paint_system::Trait
+            + paint_balances::Trait
             + std::fmt::Debug,
     > Contracts for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
 }
 
@@ -47,7 +47,7 @@ pub trait ContractsXt {
     /// Signature type
     type Signature: Verify;
 
-    /// Create a call for the srml contracts module
+    /// Create a call for the paint contracts module
     fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(

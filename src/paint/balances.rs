@@ -1,4 +1,4 @@
-//! Implements support for the srml_balances module.
+//! Implements support for the paint_balances module.
 use crate::{
     codec::{
         compact,
@@ -6,7 +6,7 @@ use crate::{
     },
     error::Error,
     metadata::MetadataError,
-    srml::{
+    paint::{
         system::System,
         ModuleCalls,
     },
@@ -30,7 +30,7 @@ use runtime_support::Parameter;
 use substrate_primitives::Pair;
 use std::fmt::Debug;
 
-/// The subset of the `srml_balances::Trait` that a client must implement.
+/// The subset of the `paint_balances::Trait` that a client must implement.
 pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
@@ -45,9 +45,9 @@ pub trait Balances: System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + srml_balances::Trait + Debug> Balances for T
+impl<T: paint_system::Trait + paint_balances::Trait + Debug> Balances for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Balance = T::Balance;
 }
@@ -110,7 +110,7 @@ pub trait BalancesXt {
     /// Signature type
     type Signature: Verify;
 
-    /// Create a call for the srml balances module
+    /// Create a call for the paint balances module
     fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
