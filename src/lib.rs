@@ -35,8 +35,8 @@ use parity_scale_codec::{
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
     traits::{
-        Verify,
         IdentifyAccount,
+        Verify,
     },
     MultiSignature,
 };
@@ -62,12 +62,6 @@ use crate::{
         SignedExtra,
     },
     metadata::MetadataError,
-    rpc::{
-        BlockNumber,
-        ChainBlock,
-        MapStream,
-        Rpc,
-    },
     paint::{
         balances::Balances,
         system::{
@@ -77,6 +71,12 @@ use crate::{
         },
         ModuleCalls,
     },
+    rpc::{
+        BlockNumber,
+        ChainBlock,
+        MapStream,
+        Rpc,
+    },
 };
 
 mod codec;
@@ -84,15 +84,15 @@ mod error;
 mod events;
 mod extrinsic;
 mod metadata;
+mod paint;
 mod rpc;
 mod runtimes;
-mod paint;
 
 pub use error::Error;
 pub use events::RawEvent;
+pub use paint::*;
 pub use rpc::ExtrinsicSuccess;
 pub use runtimes::*;
-pub use paint::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
@@ -156,13 +156,12 @@ impl<T: System, S> Clone for Client<T, S> {
             genesis_hash: self.genesis_hash.clone(),
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
-            _marker:PhantomData,
+            _marker: PhantomData,
         }
     }
 }
 
-impl<T: System + Balances + 'static, S: 'static> Client<T, S>
-{
+impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
@@ -339,7 +338,8 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
+    XtBuilder<T, P, S, Valid>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -357,8 +357,7 @@ where
             <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
         Error,
-    >
-    {
+    > {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
         let version = self.runtime_version.spec_version;
@@ -415,22 +414,22 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::paint::{
-        balances::{
-            Balances,
-            BalancesStore,
-            BalancesXt,
+    use crate::{
+        paint::{
+            balances::{
+                Balances,
+                BalancesStore,
+                BalancesXt,
+            },
+            contracts::ContractsXt,
         },
-        contracts::ContractsXt,
+        DefaultNodeRuntime as Runtime,
     };
-    use crate::DefaultNodeRuntime as Runtime;
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
-    use substrate_primitives::{
-        storage::StorageKey,
-    };
+    use substrate_primitives::storage::StorageKey;
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
