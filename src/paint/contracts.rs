@@ -1,11 +1,11 @@
-//! Implements support for the srml_contracts module.
+//! Implements support for the paint_contracts module.
 use crate::{
     codec::{
         compact,
         Encoded,
     },
     metadata::MetadataError,
-    srml::{
+    paint::{
         balances::Balances,
         system::System,
         ModuleCalls,
@@ -13,24 +13,28 @@ use crate::{
     Valid,
     XtBuilder,
 };
+use runtime_primitives::traits::{
+    IdentifyAccount,
+    Verify,
+};
 use substrate_primitives::Pair;
 
 /// Gas units are chosen to be represented by u64 so that gas metering
 /// instructions can operate on them efficiently.
 pub type Gas = u64;
 
-/// The subset of the `srml_contracts::Trait` that a client must implement.
+/// The subset of the `paint_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
 
 /// Blanket impl for using existing runtime types
 impl<
-        T: srml_contracts::Trait
-            + srml_system::Trait
-            + srml_balances::Trait
+        T: paint_contracts::Trait
+            + paint_system::Trait
+            + paint_balances::Trait
             + std::fmt::Debug,
     > Contracts for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
 }
 
@@ -40,23 +44,28 @@ pub trait ContractsXt {
     type Contracts: Contracts;
     /// Key Pair Type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
-    /// Create a call for the srml contracts module
-    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Valid>
+    /// Create a call for the paint contracts module
+    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Contracts + 'static, P, V> ContractsXt for XtBuilder<T, P, V>
+impl<T: Contracts + 'static, P, S: 'static, V> ContractsXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type Contracts = T;
     type Pair = P;
+    type Signature = S;
 
-    fn contracts<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn contracts<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,

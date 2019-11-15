@@ -20,7 +20,7 @@ use crate::{
         Metadata,
         MetadataError,
     },
-    srml::balances::Balances,
+    paint::balances::Balances,
     System,
     SystemEvent,
 };
@@ -34,7 +34,7 @@ use parity_scale_codec::{
     Input,
     Output,
 };
-use srml_system::Phase;
+use paint_system::Phase;
 use std::{
     collections::{
         HashMap,
@@ -113,8 +113,12 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         // Ignore these unregistered types, which are not fixed size primitives
         decoder.check_missing_type_sizes(vec![
             "DispatchError",
+            "Result<(), DispatchError>",
             "OpaqueTimeSlot",
             "rstd::marker::PhantomData<(AccountId, Event)>",
+            // FIXME: determine type size for the following if necessary/possible
+            "IdentificationTuple",
+            "AuthorityList",
         ])?;
         Ok(decoder)
     }

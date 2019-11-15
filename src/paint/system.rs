@@ -1,9 +1,9 @@
-//! Implements support for the srml_system module.
+//! Implements support for the paint_system module.
 use crate::{
     codec::Encoded,
     error::Error,
     metadata::MetadataError,
-    srml::{
+    paint::{
         balances::Balances,
         ModuleCalls,
     },
@@ -21,6 +21,7 @@ use runtime_primitives::traits::{
     CheckEqual,
     Hash,
     Header,
+    IdentifyAccount,
     MaybeDisplay,
     MaybeSerialize,
     MaybeSerializeDeserialize,
@@ -28,13 +29,14 @@ use runtime_primitives::traits::{
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,
+    Verify,
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use substrate_primitives::Pair;
 use std::fmt::Debug;
 
-/// The subset of the `srml_system::Trait` that a client must implement.
+/// The subset of the `paint::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
@@ -85,7 +87,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Ord
         + Default;
 
-    /// The address type. This instead of `<srml_system::Trait::Lookup as StaticLookup>::Source`.
+    /// The address type. This instead of `<paint_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq + Debug;
 
     /// The block header.
@@ -95,9 +97,9 @@ pub trait System: 'static + Eq + Clone + Debug {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + Debug> System for T
+impl<T: paint_system::Trait + Debug> System for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
@@ -120,7 +122,7 @@ pub trait SystemStore {
     ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>;
 }
 
-impl<T: System + Balances + 'static> SystemStore for Client<T> {
+impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
     type System = T;
 
     fn account_nonce(
@@ -149,23 +151,28 @@ pub trait SystemXt {
     type System: System;
     /// Keypair type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
-    /// Create a call for the srml system module
-    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Valid>
+    /// Create a call for the paint system module
+    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: System + Balances + 'static, P, V> SystemXt for XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, S: 'static, V> SystemXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type System = T;
     type Pair = P;
+    type Signature = S;
 
-    fn system<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn system<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,

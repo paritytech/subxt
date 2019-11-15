@@ -32,7 +32,14 @@ use parity_scale_codec::{
     Codec,
     Decode,
 };
-use runtime_primitives::generic::UncheckedExtrinsic;
+use runtime_primitives::{
+    generic::UncheckedExtrinsic,
+    traits::{
+        Verify,
+        IdentifyAccount,
+    },
+    MultiSignature,
+};
 use sr_version::RuntimeVersion;
 use std::{
     convert::TryFrom,
@@ -61,7 +68,7 @@ use crate::{
         MapStream,
         Rpc,
     },
-    srml::{
+    paint::{
         balances::Balances,
         system::{
             System,
@@ -79,25 +86,25 @@ mod extrinsic;
 mod metadata;
 mod rpc;
 mod runtimes;
-mod srml;
+mod paint;
 
 pub use error::Error;
 pub use events::RawEvent;
 pub use rpc::ExtrinsicSuccess;
 pub use runtimes::*;
-pub use srml::*;
+pub use paint::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
 }
 
 /// ClientBuilder for constructing a Client.
-pub struct ClientBuilder<T: System> {
-    _marker: std::marker::PhantomData<T>,
+pub struct ClientBuilder<T: System, S = MultiSignature> {
+    _marker: std::marker::PhantomData<(T, S)>,
     url: Option<Url>,
 }
 
-impl<T: System> ClientBuilder<T> {
+impl<T: System, S> ClientBuilder<T, S> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
@@ -113,7 +120,7 @@ impl<T: System> ClientBuilder<T> {
     }
 
     /// Creates a new Client.
-    pub fn build(self) -> impl Future<Item = Client<T>, Error = Error> {
+    pub fn build(self) -> impl Future<Item = Client<T, S>, Error = Error> {
         let url = self.url.unwrap_or_else(|| {
             Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
         });
@@ -126,6 +133,7 @@ impl<T: System> ClientBuilder<T> {
                         genesis_hash,
                         metadata,
                         runtime_version,
+                        _marker: PhantomData,
                     }
                 })
         })
@@ -133,25 +141,28 @@ impl<T: System> ClientBuilder<T> {
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: System> {
+pub struct Client<T: System, S = MultiSignature> {
     url: Url,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
+    _marker: PhantomData<fn() -> S>,
 }
 
-impl<T: System> Clone for Client<T> {
+impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
             url: self.url.clone(),
             genesis_hash: self.genesis_hash.clone(),
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
+            _marker:PhantomData,
         }
     }
 }
 
-impl<T: System + Balances + 'static> Client<T> {
+impl<T: System + Balances + 'static, S: 'static> Client<T, S>
+{
     fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
         connect(&self.url)
     }
@@ -234,16 +245,18 @@ impl<T: System + Balances + 'static> Client<T> {
         &self,
         signer: P,
         nonce: Option<T::Index>,
-    ) -> impl Future<Item = XtBuilder<T, P>, Error = Error>
+    ) -> impl Future<Item = XtBuilder<T, P, S>, Error = Error>
     where
         P: Pair,
-        P::Public: Into<T::AccountId> + Into<T::Address>,
         P::Signature: Codec,
+        S: Verify,
+        S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
         let client = self.clone();
+        let account_id = S::Signer::from(signer.public()).into_account();
         match nonce {
             Some(nonce) => Either::A(future::ok(nonce)),
-            None => Either::B(self.account_nonce(signer.public().into())),
+            None => Either::B(self.account_nonce(account_id)),
         }
         .map(|nonce| {
             let genesis_hash = client.genesis_hash.clone();
@@ -267,8 +280,8 @@ pub enum Valid {}
 pub enum Invalid {}
 
 /// Transaction builder.
-pub struct XtBuilder<T: System, P, V = Invalid> {
-    client: Client<T>,
+pub struct XtBuilder<T: System, P, S, V = Invalid> {
+    client: Client<T, S>,
     nonce: T::Index,
     runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
@@ -277,7 +290,7 @@ pub struct XtBuilder<T: System, P, V = Invalid> {
     marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + Balances + 'static, P, V> XtBuilder<T, P, V>
+impl<T: System + Balances + 'static, P, S: 'static, V> XtBuilder<T, P, S, V>
 where
     P: Pair,
 {
@@ -292,19 +305,19 @@ where
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, V> {
+    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S, V> {
         self.nonce = nonce;
         self
     }
 
     /// Increment the nonce
-    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, V> {
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S, V> {
         self.set_nonce(self.nonce() + 1.into());
         self
     }
 
     /// Sets the module call to a new value
-    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, Valid>
+    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
     {
@@ -326,11 +339,12 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S, Valid>
 where
     P: Pair,
-    P::Public: Into<T::Address>,
-    P::Signature: Codec,
+    S: Verify + Codec + From<P::Signature>,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
+    T::Address: From<T::AccountId>,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
     pub fn create_and_sign(
@@ -339,15 +353,11 @@ where
         UncheckedExtrinsic<
             T::Address,
             Encoded,
-            P::Signature,
+            S,
             <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
         Error,
     >
-    where
-        P: Pair,
-        P::Public: Into<T::Address>,
-        P::Signature: Codec,
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
@@ -365,7 +375,7 @@ where
         );
 
         let extra = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
-        let xt = extrinsic::create_and_sign(signer, call, extra)?;
+        let xt = extrinsic::create_and_sign::<_, _, _, S, _>(signer, call, extra)?;
         Ok(xt)
     }
 
@@ -405,7 +415,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::srml::{
+    use crate::paint::{
         balances::{
             Balances,
             BalancesStore,
@@ -420,7 +430,6 @@ mod tests {
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::{
         storage::StorageKey,
-        Pair,
     };
 
     type Index = <Runtime as System>::Index;
@@ -444,7 +453,7 @@ mod tests {
         let signer = AccountKeyring::Alice.pair();
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
-        let dest = AccountKeyring::Bob.pair().public();
+        let dest = AccountKeyring::Bob.to_account_id();
         let transfer = xt
             .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
             .submit();
@@ -515,7 +524,7 @@ mod tests {
     fn test_state_read_free_balance() {
         let (mut rt, client) = test_setup();
 
-        let account = AccountKeyring::Alice.pair().public();
+        let account = AccountKeyring::Alice.to_account_id();
         rt.block_on(client.free_balance(account.into())).unwrap();
     }
 
@@ -547,11 +556,11 @@ mod tests {
         let (_, client) = test_setup();
 
         let balances = client.metadata().module("Balances").unwrap();
-        let dest = substrate_keyring::AccountKeyring::Bob.pair().public();
+        let dest = substrate_keyring::AccountKeyring::Bob.to_account_id();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 
-        let transfer = srml_balances::Call::transfer(address.clone(), amount);
+        let transfer = paint_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
         let call2 = balances
             .call("transfer", (address, codec::compact(amount)))
@@ -559,7 +568,7 @@ mod tests {
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
-            <srml_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <paint_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
         let free_balance_key = StorageKey(free_balance);
         let free_balance_key2 = balances
             .storage("FreeBalance")
@@ -570,7 +579,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <srml_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <paint_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
         let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()

@@ -1,4 +1,4 @@
-//! Implements support for the srml_balances module.
+//! Implements support for the paint_balances module.
 use crate::{
     codec::{
         compact,
@@ -6,7 +6,7 @@ use crate::{
     },
     error::Error,
     metadata::MetadataError,
-    srml::{
+    paint::{
         system::System,
         ModuleCalls,
     },
@@ -23,12 +23,14 @@ use runtime_primitives::traits::{
     MaybeSerialize,
     Member,
     SimpleArithmetic,
+    Verify,
+    IdentifyAccount,
 };
 use runtime_support::Parameter;
 use substrate_primitives::Pair;
 use std::fmt::Debug;
 
-/// The subset of the `srml_balances::Trait` that a client must implement.
+/// The subset of the `paint_balances::Trait` that a client must implement.
 pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
@@ -43,9 +45,9 @@ pub trait Balances: System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + srml_balances::Trait + Debug> Balances for T
+impl<T: paint_system::Trait + paint_balances::Trait + Debug> Balances for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Balance = T::Balance;
 }
@@ -74,7 +76,7 @@ pub trait BalancesStore {
     ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>;
 }
 
-impl<T: Balances + 'static> BalancesStore for Client<T> {
+impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
     type Balances = T;
 
     fn free_balance(
@@ -105,23 +107,28 @@ pub trait BalancesXt {
     type Balances: Balances;
     /// Keypair type
     type Pair: Pair;
+    /// Signature type
+    type Signature: Verify;
 
-    /// Create a call for the srml balances module
-    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Valid>
+    /// Create a call for the paint balances module
+    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
         ) -> Result<Encoded, MetadataError>;
 }
 
-impl<T: Balances + 'static, P, V> BalancesXt for XtBuilder<T, P, V>
+impl<T: Balances + 'static, P, S: 'static, V> BalancesXt for XtBuilder<T, P, S, V>
 where
     P: Pair,
+    S: Verify,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
 {
     type Balances = T;
     type Pair = P;
+    type Signature = S;
 
-    fn balances<F>(&self, f: F) -> XtBuilder<T, P, Valid>
+    fn balances<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,
