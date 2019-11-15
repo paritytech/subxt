@@ -20,7 +20,7 @@ use crate::{
         Metadata,
         MetadataError,
     },
-    srml::balances::Balances,
+    paint::balances::Balances,
     System,
     SystemEvent,
 };
@@ -34,7 +34,7 @@ use parity_scale_codec::{
     Input,
     Output,
 };
-use srml_system::Phase;
+use paint_system::Phase;
 use std::{
     collections::{
         HashMap,

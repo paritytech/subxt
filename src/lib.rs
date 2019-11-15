@@ -68,7 +68,7 @@ use crate::{
         MapStream,
         Rpc,
     },
-    srml::{
+    paint::{
         balances::Balances,
         system::{
             System,
@@ -86,13 +86,13 @@ mod extrinsic;
 mod metadata;
 mod rpc;
 mod runtimes;
-mod srml;
+mod paint;
 
 pub use error::Error;
 pub use events::RawEvent;
 pub use rpc::ExtrinsicSuccess;
 pub use runtimes::*;
-pub use srml::*;
+pub use paint::*;
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
@@ -415,7 +415,7 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::srml::{
+    use crate::paint::{
         balances::{
             Balances,
             BalancesStore,
@@ -560,7 +560,7 @@ mod tests {
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 
-        let transfer = srml_balances::Call::transfer(address.clone(), amount);
+        let transfer = paint_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
         let call2 = balances
             .call("transfer", (address, codec::compact(amount)))
@@ -568,7 +568,7 @@ mod tests {
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
-            <srml_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <paint_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
         let free_balance_key = StorageKey(free_balance);
         let free_balance_key2 = balances
             .storage("FreeBalance")
@@ -579,7 +579,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <srml_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <paint_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
         let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()

@@ -1,9 +1,9 @@
-//! Implements support for the srml_system module.
+//! Implements support for the paint_system module.
 use crate::{
     codec::Encoded,
     error::Error,
     metadata::MetadataError,
-    srml::{
+    paint::{
         balances::Balances,
         ModuleCalls,
     },
@@ -36,7 +36,7 @@ use serde::de::DeserializeOwned;
 use substrate_primitives::Pair;
 use std::fmt::Debug;
 
-/// The subset of the `srml_system::Trait` that a client must implement.
+/// The subset of the `paint::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
@@ -87,7 +87,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Ord
         + Default;
 
-    /// The address type. This instead of `<srml_system::Trait::Lookup as StaticLookup>::Source`.
+    /// The address type. This instead of `<paint_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq + Debug;
 
     /// The block header.
@@ -97,9 +97,9 @@ pub trait System: 'static + Eq + Clone + Debug {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + Debug> System for T
+impl<T: paint_system::Trait + Debug> System for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as paint_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
@@ -154,7 +154,7 @@ pub trait SystemXt {
     /// Signature type
     type Signature: Verify;
 
-    /// Create a call for the srml system module
+    /// Create a call for the paint system module
     fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(

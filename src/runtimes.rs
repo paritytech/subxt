@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::srml::{
+use crate::paint::{
     balances::Balances,
     contracts::Contracts,
     system::System,
@@ -43,7 +43,7 @@ impl System for DefaultNodeRuntime {
     type Hash = substrate_primitives::H256;
     type Hashing = BlakeTwo256;
     type AccountId = <AnySignature as Verify>::Signer;
-    type Address = srml_indices::address::Address<Self::AccountId, u32>;
+    type Address = paint_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
 }
 
