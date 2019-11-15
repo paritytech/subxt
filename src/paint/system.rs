@@ -33,8 +33,8 @@ use runtime_primitives::traits::{
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
-use substrate_primitives::Pair;
 use std::fmt::Debug;
+use substrate_primitives::Pair;
 
 /// The subset of the `paint::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
@@ -155,7 +155,10 @@ pub trait SystemXt {
     type Signature: Verify;
 
     /// Create a call for the paint system module
-    fn system<F>(&self, f: F) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
+    fn system<F>(
+        &self,
+        f: F,
+    ) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::System, Self::Pair>,

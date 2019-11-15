@@ -20,15 +20,15 @@ use futures::future::{
 };
 use parity_scale_codec::Codec;
 use runtime_primitives::traits::{
+    IdentifyAccount,
     MaybeSerialize,
     Member,
     SimpleArithmetic,
     Verify,
-    IdentifyAccount,
 };
 use runtime_support::Parameter;
-use substrate_primitives::Pair;
 use std::fmt::Debug;
+use substrate_primitives::Pair;
 
 /// The subset of the `paint_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -111,7 +111,10 @@ pub trait BalancesXt {
     type Signature: Verify;
 
     /// Create a call for the paint balances module
-    fn balances<F>(&self, f: F) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
+    fn balances<F>(
+        &self,
+        f: F,
+    ) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Balances, Self::Pair>,

@@ -30,9 +30,9 @@ use runtime_primitives::{
         UncheckedExtrinsic,
     },
     traits::{
-        Verify,
         IdentifyAccount,
         SignedExtension,
+        Verify,
     },
     transaction_validity::TransactionValidityError,
 };

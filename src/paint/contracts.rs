@@ -48,7 +48,10 @@ pub trait ContractsXt {
     type Signature: Verify;
 
     /// Create a call for the paint contracts module
-    fn contracts<F>(&self, f: F) -> XtBuilder<Self::Contracts, Self::Pair, Self::Signature, Valid>
+    fn contracts<F>(
+        &self,
+        f: F,
+    ) -> XtBuilder<Self::Contracts, Self::Pair, Self::Signature, Valid>
     where
         F: FnOnce(
             ModuleCalls<Self::Contracts, Self::Pair>,

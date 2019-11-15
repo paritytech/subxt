@@ -25,6 +25,7 @@ use crate::{
     SystemEvent,
 };
 use log;
+use paint_system::Phase;
 use parity_scale_codec::{
     Codec,
     Compact,
@@ -34,7 +35,6 @@ use parity_scale_codec::{
     Input,
     Output,
 };
-use paint_system::Phase;
 use std::{
     collections::{
         HashMap,
