@@ -23,9 +23,10 @@ use runtime_primitives::{
     generic::Header,
     traits::{
         BlakeTwo256,
+        IdentifyAccount,
         Verify,
     },
-    AnySignature,
+    MultiSignature,
 };
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
@@ -42,13 +43,13 @@ impl System for DefaultNodeRuntime {
     type BlockNumber = u32;
     type Hash = substrate_primitives::H256;
     type Hashing = BlakeTwo256;
-    type AccountId = <AnySignature as Verify>::Signer;
+    type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
     type Address = paint_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
 }
 
 impl Balances for DefaultNodeRuntime {
-    type Balance = u64;
+    type Balance = u128;
 }
 
 impl Contracts for DefaultNodeRuntime {}

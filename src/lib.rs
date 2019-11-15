@@ -423,8 +423,8 @@ mod tests {
         },
         contracts::ContractsXt,
     };
+    use crate::DefaultNodeRuntime as Runtime;
     use futures::stream::Stream;
-    use node_runtime::Runtime;
     use parity_scale_codec::Encode;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
