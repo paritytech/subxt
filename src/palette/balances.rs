@@ -94,6 +94,7 @@ impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
 const MODULE: &str = "Balances";
 const TRANSFER: &str = "transfer";
 
+/// Arguments for transferring a balance
 #[derive(Encode)]
 pub struct TransferArgs<T: Balances> {
     to: <T as System>::Address,

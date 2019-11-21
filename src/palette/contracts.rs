@@ -20,6 +20,7 @@ pub type Gas = u64;
 /// The subset of the `pallet_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
 
+/// Arguments for uploading contract code to the chain
 #[derive(Encode)]
 pub struct PutCodeArgs {
     #[codec(compact)]
@@ -27,6 +28,7 @@ pub struct PutCodeArgs {
     code: Vec<u8>,
 }
 
+/// Arguments for creating an instance of a contract
 #[derive(Encode)]
 pub struct CreateArgs<T: Contracts> {
     endowment: <T as Balances>::Balance,
@@ -36,6 +38,7 @@ pub struct CreateArgs<T: Contracts> {
     data: Vec<u8>,
 }
 
+/// Arguments for calling a contract
 #[derive(Encode)]
 pub struct CallArgs<T: Contracts> {
     dest: <T as System>::Address,
