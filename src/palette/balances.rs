@@ -1,7 +1,6 @@
 //! Implements support for the pallet_balances module.
 use crate::{
     error::Error,
-    metadata::MetadataError,
     palette::{
         Call,
         system::System,
@@ -14,15 +13,12 @@ use futures::future::{
 };
 use parity_scale_codec::{Encode, Codec};
 use runtime_primitives::traits::{
-    IdentifyAccount,
     MaybeSerialize,
     Member,
     SimpleArithmetic,
-    Verify,
 };
 use runtime_support::Parameter;
 use std::fmt::Debug;
-use substrate_primitives::Pair;
 
 /// The subset of the `pallet_balances::Trait` that a client must implement.
 pub trait Balances: System {

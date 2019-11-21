@@ -17,7 +17,6 @@ use runtime_primitives::traits::{
     CheckEqual,
     Hash,
     Header,
-    IdentifyAccount,
     MaybeDisplay,
     MaybeSerialize,
     MaybeSerializeDeserialize,
@@ -25,12 +24,10 @@ use runtime_primitives::traits::{
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,
-    Verify,
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use std::fmt::Debug;
-use substrate_primitives::Pair;
 
 /// The subset of the `palette::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {

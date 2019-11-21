@@ -42,7 +42,10 @@ use runtime_primitives::{
     MultiSignature,
 };
 use sr_version::RuntimeVersion;
-use std::convert::TryFrom;
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
 use substrate_primitives::{
     storage::{
         StorageChangeSet,
@@ -58,12 +61,6 @@ use crate::{
     extrinsic::{
         DefaultExtra,
         SignedExtra,
-    },
-    rpc::{
-        BlockNumber,
-        ChainBlock,
-        MapStream,
-        Rpc,
     },
     palette::{
         Call,
@@ -310,7 +307,7 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P> XtBuilder<T, P>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -331,9 +328,6 @@ where
         Error,
     >
     where
-        P: Pair,
-        P::Public: Into<T::Address>,
-        P::Signature: Codec,
         C: parity_scale_codec::Encode,
     {
         let signer = self.signer.clone();
@@ -393,11 +387,14 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::palette::{
-        balances::{
-            Balances,
-            BalancesStore,
+    use crate::{
+        palette::{
+            balances::{
+                Balances,
+                BalancesStore,
+            },
         },
+        DefaultNodeRuntime as Runtime,
     };
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
