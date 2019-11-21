@@ -20,12 +20,12 @@ use crate::{
         Metadata,
         MetadataError,
     },
-    paint::balances::Balances,
+    palette::balances::Balances,
     System,
     SystemEvent,
 };
 use log;
-use paint_system::Phase;
+use palette_system::Phase;
 use parity_scale_codec::{
     Codec,
     Compact,

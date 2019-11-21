@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::paint::{
+use crate::palette::{
     balances::Balances,
     contracts::Contracts,
     system::System,
@@ -44,7 +44,7 @@ impl System for DefaultNodeRuntime {
     type Hash = substrate_primitives::H256;
     type Hashing = BlakeTwo256;
     type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
-    type Address = paint_indices::address::Address<Self::AccountId, u32>;
+    type Address = pallet_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
 }
 

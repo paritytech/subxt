@@ -21,7 +21,7 @@ use crate::{
         RuntimeEvent,
     },
     metadata::Metadata,
-    paint::{
+    palette::{
         balances::Balances,
         system::System,
     },
@@ -161,9 +161,9 @@ use txpool::watcher::Status;
 
 use crate::{
     events::RawEvent,
-    paint::system::SystemEvent,
+    palette::system::SystemEvent,
 };
-use paint_system::Phase;
+use palette_system::Phase;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
