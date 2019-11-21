@@ -1,6 +1,6 @@
-//! Implements support for the srml_contracts module.
+//! Implements support for the pallet_contracts module.
 use crate::{
-    srml::{
+    palette::{
         Call,
         balances::Balances,
         system::System,
@@ -17,7 +17,7 @@ const CALL: &str = "call";
 /// instructions can operate on them efficiently.
 pub type Gas = u64;
 
-/// The subset of the `srml_contracts::Trait` that a client must implement.
+/// The subset of the `pallet_contracts::Trait` that a client must implement.
 pub trait Contracts: System + Balances {}
 
 #[derive(Encode)]

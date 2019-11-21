@@ -1,7 +1,8 @@
-//! Implements support for the srml_balances module.
+//! Implements support for the pallet_balances module.
 use crate::{
     error::Error,
-    srml::{
+    metadata::MetadataError,
+    palette::{
         Call,
         system::System,
     },
@@ -13,14 +14,17 @@ use futures::future::{
 };
 use parity_scale_codec::{Encode, Codec};
 use runtime_primitives::traits::{
+    IdentifyAccount,
     MaybeSerialize,
     Member,
     SimpleArithmetic,
+    Verify,
 };
 use runtime_support::Parameter;
 use std::fmt::Debug;
+use substrate_primitives::Pair;
 
-/// The subset of the `srml_balances::Trait` that a client must implement.
+/// The subset of the `pallet_balances::Trait` that a client must implement.
 pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
@@ -35,9 +39,9 @@ pub trait Balances: System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: srml_system::Trait + srml_balances::Trait + Debug> Balances for T
+impl<T: palette_system::Trait + pallet_balances::Trait + Debug> Balances for T
 where
-    <T as srml_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as palette_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Balance = T::Balance;
 }
@@ -66,7 +70,7 @@ pub trait BalancesStore {
     ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>;
 }
 
-impl<T: Balances + 'static> BalancesStore for Client<T> {
+impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
     type Balances = T;
 
     fn free_balance(
