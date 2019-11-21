@@ -1,15 +1,11 @@
 //! Implements support for the palette_system module.
 use crate::{
-    codec::Encoded,
     error::Error,
-    metadata::MetadataError,
     palette::{
+        Call,
         balances::Balances,
-        ModuleCalls,
     },
     Client,
-    Valid,
-    XtBuilder,
 };
 use futures::future::{
     self,
@@ -21,7 +17,6 @@ use runtime_primitives::traits::{
     CheckEqual,
     Hash,
     Header,
-    IdentifyAccount,
     MaybeDisplay,
     MaybeSerialize,
     MaybeSerializeDeserialize,
@@ -29,12 +24,10 @@ use runtime_primitives::traits::{
     SimpleArithmetic,
     SimpleBitOps,
     StaticLookup,
-    Verify,
 };
 use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use std::fmt::Debug;
-use substrate_primitives::Pair;
 
 /// The subset of the `palette::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
@@ -145,54 +138,15 @@ impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
     }
 }
 
-/// The System extension trait for the XtBuilder.
-pub trait SystemXt {
-    /// System type.
-    type System: System;
-    /// Keypair type
-    type Pair: Pair;
-    /// Signature type
-    type Signature: Verify;
+const MODULE: &str = "System";
+const SET_CODE: &str = "set_code";
 
-    /// Create a call for the pallet system module
-    fn system<F>(
-        &self,
-        f: F,
-    ) -> XtBuilder<Self::System, Self::Pair, Self::Signature, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>;
-}
+/// Arguments for updating the runtime code
+pub type SetCode = Vec<u8>;
 
-impl<T: System + Balances + 'static, P, S: 'static, V> SystemXt for XtBuilder<T, P, S, V>
-where
-    P: Pair,
-    S: Verify,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-{
-    type System = T;
-    type Pair = P;
-    type Signature = S;
-
-    fn system<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::System, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>,
-    {
-        self.set_call("System", f)
-    }
-}
-
-impl<T: System + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Sets the new code.
-    pub fn set_code(&self, code: Vec<u8>) -> Result<Encoded, MetadataError> {
-        self.module.call("set_code", code)
-    }
+/// Sets the new code.
+pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
+    Call::new(MODULE, SET_CODE, code)
 }
 
 /// Event for the System module.

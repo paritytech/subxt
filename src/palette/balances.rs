@@ -1,34 +1,24 @@
 //! Implements support for the pallet_balances module.
 use crate::{
-    codec::{
-        compact,
-        Encoded,
-    },
     error::Error,
-    metadata::MetadataError,
     palette::{
+        Call,
         system::System,
-        ModuleCalls,
     },
     Client,
-    Valid,
-    XtBuilder,
 };
 use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
+use parity_scale_codec::{Encode, Codec};
 use runtime_primitives::traits::{
-    IdentifyAccount,
     MaybeSerialize,
     Member,
     SimpleArithmetic,
-    Verify,
 };
 use runtime_support::Parameter;
 use std::fmt::Debug;
-use substrate_primitives::Pair;
 
 /// The subset of the `pallet_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -101,61 +91,26 @@ impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
     }
 }
 
-/// The Balances extension trait for the XtBuilder.
-pub trait BalancesXt {
-    /// Balances type.
-    type Balances: Balances;
-    /// Keypair type
-    type Pair: Pair;
-    /// Signature type
-    type Signature: Verify;
+const MODULE: &str = "Balances";
+const TRANSFER: &str = "transfer";
 
-    /// Create a call for the pallet balances module
-    fn balances<F>(
-        &self,
-        f: F,
-    ) -> XtBuilder<Self::Balances, Self::Pair, Self::Signature, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>;
+/// Arguments for transferring a balance
+#[derive(Encode)]
+pub struct TransferArgs<T: Balances> {
+    to: <T as System>::Address,
+    #[codec(compact)]
+    amount: <T as Balances>::Balance
 }
 
-impl<T: Balances + 'static, P, S: 'static, V> BalancesXt for XtBuilder<T, P, S, V>
-where
-    P: Pair,
-    S: Verify,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-{
-    type Balances = T;
-    type Pair = P;
-    type Signature = S;
-
-    fn balances<F>(&self, f: F) -> XtBuilder<T, P, S, Valid>
-    where
-        F: FnOnce(
-            ModuleCalls<Self::Balances, Self::Pair>,
-        ) -> Result<Encoded, MetadataError>,
-    {
-        self.set_call("Balances", f)
-    }
-}
-
-impl<T: Balances + 'static, P> ModuleCalls<T, P>
-where
-    P: Pair,
-{
-    /// Transfer some liquid free balance to another account.
-    ///
-    /// `transfer` will set the `FreeBalance` of the sender and receiver.
-    /// It will decrease the total issuance of the system by the `TransferFee`.
-    /// If the sender's account is below the existential deposit as a result
-    /// of the transfer, the account will be reaped.
-    pub fn transfer(
-        self,
-        to: <T as System>::Address,
-        amount: <T as Balances>::Balance,
-    ) -> Result<Encoded, MetadataError> {
-        self.module.call("transfer", (to, compact(amount)))
-    }
+/// Transfer some liquid free balance to another account.
+///
+/// `transfer` will set the `FreeBalance` of the sender and receiver.
+/// It will decrease the total issuance of the system by the `TransferFee`.
+/// If the sender's account is below the existential deposit as a result
+/// of the transfer, the account will be reaped.
+pub fn transfer<T: Balances>(
+    to: <T as System>::Address,
+    amount: <T as Balances>::Balance,
+) -> Call<TransferArgs<T>> {
+    Call::new(MODULE, TRANSFER, TransferArgs { to, amount })
 }

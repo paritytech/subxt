@@ -31,6 +31,7 @@ use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
+    Encode,
 };
 use runtime_primitives::{
     generic::UncheckedExtrinsic,
@@ -61,15 +62,14 @@ use crate::{
         DefaultExtra,
         SignedExtra,
     },
-    metadata::MetadataError,
     palette::{
+        Call,
         balances::Balances,
         system::{
             System,
             SystemEvent,
             SystemStore,
         },
-        ModuleCalls,
     },
     rpc::{
         BlockNumber,
@@ -266,30 +266,21 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
                 runtime_version,
                 genesis_hash,
                 signer,
-                call: None,
-                marker: PhantomData,
             }
         })
     }
 }
 
-/// The extrinsic builder is ready to finalize construction.
-pub enum Valid {}
-/// The extrinsic builder is not ready to finalize construction.
-pub enum Invalid {}
-
 /// Transaction builder.
-pub struct XtBuilder<T: System, P, S, V = Invalid> {
+pub struct XtBuilder<T: System, P, S> {
     client: Client<T, S>,
     nonce: T::Index,
     runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
     signer: P,
-    call: Option<Result<Encoded, MetadataError>>,
-    marker: PhantomData<fn() -> V>,
 }
 
-impl<T: System + Balances + 'static, P, S: 'static, V> XtBuilder<T, P, S, V>
+impl<T: System + Balances + 'static, P, S: 'static> XtBuilder<T, P, S>
 where
     P: Pair,
 {
@@ -304,42 +295,19 @@ where
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S, V> {
+    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S> {
         self.nonce = nonce;
         self
     }
 
     /// Increment the nonce
-    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S, V> {
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S> {
         self.set_nonce(self.nonce() + 1.into());
         self
     }
-
-    /// Sets the module call to a new value
-    pub fn set_call<F>(&self, module: &'static str, f: F) -> XtBuilder<T, P, S, Valid>
-    where
-        F: FnOnce(ModuleCalls<T, P>) -> Result<Encoded, MetadataError>,
-    {
-        let call = self
-            .metadata()
-            .module(module)
-            .and_then(|module| f(ModuleCalls::new(module)))
-            .map_err(Into::into);
-
-        XtBuilder {
-            client: self.client.clone(),
-            nonce: self.nonce.clone(),
-            runtime_version: self.runtime_version.clone(),
-            genesis_hash: self.genesis_hash.clone(),
-            signer: self.signer.clone(),
-            call: Some(call),
-            marker: PhantomData,
-        }
-    }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
-    XtBuilder<T, P, S, Valid>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -347,8 +315,9 @@ where
     T::Address: From<T::AccountId>,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
-    pub fn create_and_sign(
+    pub fn create_and_sign<C>(
         &self,
+        call: Call<C>,
     ) -> Result<
         UncheckedExtrinsic<
             T::Address,
@@ -357,15 +326,18 @@ where
             <DefaultExtra<T> as SignedExtra<T>>::Extra,
         >,
         Error,
-    > {
+    >
+    where
+        C: parity_scale_codec::Encode,
+    {
         let signer = self.signer.clone();
         let account_nonce = self.nonce.clone();
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash.clone();
         let call = self
-            .call
-            .clone()
-            .expect("A Valid extrinisic builder has a call; qed")?;
+            .metadata()
+            .module(&call.module)
+            .and_then(|module| module.call(&call.function, call.args))?;
 
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -379,9 +351,9 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit(&self) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn submit<C: Encode>(&self, call: Call<C>) -> impl Future<Item = T::Hash, Error = Error> {
         let cli = self.client.connect();
-        self.create_and_sign()
+        self.create_and_sign(call)
             .into_future()
             .map_err(Into::into)
             .and_then(move |extrinsic| {
@@ -390,8 +362,9 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit_and_watch(
+    pub fn submit_and_watch<C: Encode>(
         &self,
+        call: Call<C>
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
@@ -399,7 +372,7 @@ where
             .into_future()
             .map_err(Into::into);
 
-        self.create_and_sign()
+        self.create_and_sign(call)
             .into_future()
             .map_err(Into::into)
             .join(decoder)
@@ -419,9 +392,7 @@ mod tests {
             balances::{
                 Balances,
                 BalancesStore,
-                BalancesXt,
             },
-            contracts::ContractsXt,
         },
         DefaultNodeRuntime as Runtime,
     };
@@ -454,15 +425,14 @@ mod tests {
 
         let dest = AccountKeyring::Bob.to_account_id();
         let transfer = xt
-            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
-            .submit();
+            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
         rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
         let transfer = xt
             .increment_nonce()
-            .balances(|calls| calls.transfer(dest.clone().into(), 10_000))
-            .submit();
+            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
+
         rt.block_on(transfer).unwrap();
     }
 
@@ -483,8 +453,7 @@ mod tests {
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
         let put_code = xt
-            .contracts(|call| call.put_code(500_000, wasm))
-            .submit_and_watch();
+            .submit_and_watch(contracts::put_code(500_000, wasm));
 
         let success = rt
             .block_on(put_code)
@@ -561,8 +530,9 @@ mod tests {
 
         let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
+        let subxt_transfer = crate::palette::balances::transfer::<Runtime>(address, amount);
         let call2 = balances
-            .call("transfer", (address, codec::compact(amount)))
+            .call("transfer", subxt_transfer.args)
             .unwrap();
         assert_eq!(call.encode().to_vec(), call2.0);
 
