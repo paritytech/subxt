@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::paint::{
+use crate::palette::{
     balances::Balances,
     system::System,
 };
@@ -40,7 +40,7 @@ use std::marker::PhantomData;
 use substrate_primitives::Pair;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
-/// substrate's `paint_system::Trait`
+/// substrate's `palette_system::Trait`
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
 ///

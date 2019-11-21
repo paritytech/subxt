@@ -62,7 +62,7 @@ use crate::{
         SignedExtra,
     },
     metadata::MetadataError,
-    paint::{
+    palette::{
         balances::Balances,
         system::{
             System,
@@ -84,13 +84,13 @@ mod error;
 mod events;
 mod extrinsic;
 mod metadata;
-mod paint;
+mod palette;
 mod rpc;
 mod runtimes;
 
 pub use error::Error;
 pub use events::RawEvent;
-pub use paint::*;
+pub use palette::*;
 pub use rpc::ExtrinsicSuccess;
 pub use runtimes::*;
 
@@ -415,7 +415,7 @@ where
 mod tests {
     use super::*;
     use crate::{
-        paint::{
+        palette::{
             balances::{
                 Balances,
                 BalancesStore,
@@ -559,7 +559,7 @@ mod tests {
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 
-        let transfer = paint_balances::Call::transfer(address.clone(), amount);
+        let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
         let call2 = balances
             .call("transfer", (address, codec::compact(amount)))
@@ -567,7 +567,7 @@ mod tests {
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
-            <paint_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <pallet_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
         let free_balance_key = StorageKey(free_balance);
         let free_balance_key2 = balances
             .storage("FreeBalance")
@@ -578,7 +578,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <paint_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <palette_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
         let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()
