@@ -141,6 +141,7 @@ impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
 const MODULE: &str = "System";
 const SET_CODE: &str = "set_code";
 
+/// Arguments for updating the runtime code
 pub type SetCode = Vec<u8>;
 
 /// Sets the new code.

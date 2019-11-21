@@ -530,8 +530,9 @@ mod tests {
 
         let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
+        let subxt_transfer = crate::palette::balances::transfer::<Runtime>(address, amount);
         let call2 = balances
-            .call("transfer", (address, codec::compact(amount)))
+            .call("transfer", subxt_transfer.args)
             .unwrap();
         assert_eq!(call.encode().to_vec(), call2.0);
 
