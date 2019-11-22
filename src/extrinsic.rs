@@ -63,6 +63,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -92,6 +93,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -123,6 +125,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -142,6 +145,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -161,6 +165,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -181,6 +186,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -200,6 +206,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -260,6 +267,7 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type Call = ();
     type AdditionalSigned =
         <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
+    type DispatchInfo = ();
     type Pre = ();
 
     fn additional_signed(
