@@ -60,6 +60,10 @@ use substrate_rpc_primitives::number::NumberOrHex;
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
+jsonrpsee::rpc_client! {
+
+}
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: System> {
     state: StateClient<T::Hash>,

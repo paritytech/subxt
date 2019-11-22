@@ -15,8 +15,8 @@ include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
 [dependencies]
 derive_more = "0.14.0"
 log = "0.4"
-futures = "0.1.28"
-jsonrpc-core-client = { version = "14.0", features = ["ws"] }
+futures-preview = { version = "0.3.0-alpha.19", features = ["async-await"] }
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee/" }
 num-traits = { version = "0.2", default-features = false }
 parity-scale-codec = { version = "1.0", default-features = false, features = ["derive", "full"] }
 runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "palette-metadata" }
