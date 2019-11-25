@@ -14,7 +14,7 @@
 
 //! Implements support for the pallet_contracts module.
 use crate::{
-    palette::{
+    frame::{
         Call,
         balances::Balances,
         system::System,

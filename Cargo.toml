@@ -1,6 +1,6 @@
 [package]
 name = "substrate-subxt"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
@@ -19,12 +19,12 @@ futures = "0.1.28"
 jsonrpc-core-client = { version = "14.0", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
 parity-scale-codec = { version = "1.0", default-features = false, features = ["derive", "full"] }
-runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "palette-metadata" }
-runtime_support = { git = "https://github.com/paritytech/substrate/", package = "palette-support" }
+runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "frame-metadata" }
+runtime_support = { git = "https://github.com/paritytech/substrate/", package = "frame-support" }
 runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
 serde = { version = "1.0", features = ["derive"] }
 sr-version = { git = "https://github.com/paritytech/substrate/", package = "sr-version" }
-palette-system = { git = "https://github.com/paritytech/substrate/", package = "palette-system" }
+frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system" }
 pallet-balances = { git = "https://github.com/paritytech/substrate/", package = "pallet-balances" }
 pallet-contracts = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts" }
 pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices" }

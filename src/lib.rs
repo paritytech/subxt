@@ -60,7 +60,7 @@ use crate::{
         DefaultExtra,
         SignedExtra,
     },
-    palette::{
+    frame::{
         Call,
         balances::Balances,
         system::{
@@ -82,13 +82,13 @@ mod error;
 mod events;
 mod extrinsic;
 mod metadata;
-mod palette;
+mod frame;
 mod rpc;
 mod runtimes;
 
 pub use error::Error;
 pub use events::RawEvent;
-pub use palette::*;
+pub use frame::*;
 pub use rpc::ExtrinsicSuccess;
 pub use runtimes::*;
 
@@ -386,7 +386,7 @@ where
 mod tests {
     use super::*;
     use crate::{
-        palette::{
+        frame::{
             balances::{
                 Balances,
                 BalancesStore,
@@ -528,7 +528,7 @@ mod tests {
 
         let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
-        let subxt_transfer = crate::palette::balances::transfer::<Runtime>(address, amount);
+        let subxt_transfer = crate::frame::balances::transfer::<Runtime>(address, amount);
         let call2 = balances
             .call("transfer", subxt_transfer.args)
             .unwrap();
@@ -546,7 +546,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <palette_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <frame_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
         let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()

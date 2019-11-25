@@ -12,10 +12,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! Implements support for the palette_system module.
+//! Implements support for the frame_system module.
 use crate::{
     error::Error,
-    palette::{
+    frame::{
         Call,
         balances::Balances,
     },
@@ -43,7 +43,7 @@ use runtime_support::Parameter;
 use serde::de::DeserializeOwned;
 use std::fmt::Debug;
 
-/// The subset of the `palette::Trait` that a client must implement.
+/// The subset of the `frame::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
@@ -94,7 +94,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Ord
         + Default;
 
-    /// The address type. This instead of `<palette_system::Trait::Lookup as StaticLookup>::Source`.
+    /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq + Debug;
 
     /// The block header.
@@ -104,9 +104,9 @@ pub trait System: 'static + Eq + Clone + Debug {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: palette_system::Trait + Debug> System for T
+impl<T: frame_system::Trait + Debug> System for T
 where
-    <T as palette_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as frame_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;

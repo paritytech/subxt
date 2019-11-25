@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::palette::{
+use crate::frame::{
     balances::Balances,
     system::System,
 };
@@ -38,7 +38,7 @@ use std::marker::PhantomData;
 use substrate_primitives::Pair;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
-/// substrate's `palette_system::Trait`
+/// substrate's `frame_system::Trait`
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
 ///
@@ -61,6 +61,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -90,6 +91,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -121,6 +123,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -140,6 +143,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -159,6 +163,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -179,6 +184,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -198,6 +204,7 @@ where
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
+    type DispatchInfo = ();
     type Pre = ();
     fn additional_signed(
         &self,
@@ -258,6 +265,7 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type Call = ();
     type AdditionalSigned =
         <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
+    type DispatchInfo = ();
     type Pre = ();
 
     fn additional_signed(

@@ -15,7 +15,7 @@
 //! Implements support for the pallet_balances module.
 use crate::{
     error::Error,
-    palette::{
+    frame::{
         Call,
         system::System,
     },
@@ -49,9 +49,9 @@ pub trait Balances: System {
 }
 
 /// Blanket impl for using existing runtime types
-impl<T: palette_system::Trait + pallet_balances::Trait + Debug> Balances for T
+impl<T: frame_system::Trait + pallet_balances::Trait + Debug> Balances for T
 where
-    <T as palette_system::Trait>::Header: serde::de::DeserializeOwned,
+    <T as frame_system::Trait>::Header: serde::de::DeserializeOwned,
 {
     type Balance = T::Balance;
 }
