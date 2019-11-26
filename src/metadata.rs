@@ -53,12 +53,13 @@ pub enum MetadataError {
     StorageTypeError,
     #[error("Map value type error")]
     MapValueTypeError,
+    #[error("Index not found")]
+    IndexNotFound(String),
 }
 
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
-    modules_by_event_index: HashMap<u8, String>,
 }
 
 impl Metadata {
@@ -76,10 +77,13 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn module_name(&self, module_index: u8) -> Result<String, MetadataError> {
-        self.modules_by_event_index
-            .get(&module_index)
-            .cloned()
+    pub fn module_name(
+        &self,
+        module_index: u8,
+    ) -> Result<&ModuleMetadata, MetadataError> {
+        self.modules
+            .values()
+            .find(|&module| module.index_for_events == Some(module_index))
             .ok_or(MetadataError::EventNotFound(module_index))
     }
 
@@ -110,7 +114,8 @@ impl Metadata {
 
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
-    index: u8,
+    index_for_calls: Option<u8>,
+    index_for_events: Option<u8>,
     name: String,
     storage: HashMap<String, StorageMetadata>,
     calls: HashMap<String, Vec<u8>>,
@@ -128,11 +133,14 @@ impl ModuleMetadata {
         function: &'static str,
         params: T,
     ) -> Result<Encoded, MetadataError> {
+        let index = self
+            .index_for_calls
+            .ok_or(MetadataError::IndexNotFound(self.name.clone()))?;
         let fn_bytes = self
             .calls
             .get(function)
             .ok_or(MetadataError::CallNotFound(function))?;
-        let mut bytes = vec![self.index];
+        let mut bytes = vec![index];
         bytes.extend(fn_bytes);
         bytes.extend(params.encode());
         Ok(Encoded(bytes))
@@ -310,22 +318,25 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => return Err(Error::InvalidVersion),
         };
         let mut modules = HashMap::new();
-        let mut modules_by_event_index = HashMap::new();
+        let mut call_index = 0;
         let mut event_index = 0;
-        for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
+        for module in convert(meta.modules)?.into_iter() {
             let module_name = convert(module.name.clone())?;
-            let module_metadata = convert_module(i, module)?;
-            // modules with no events have no corresponding definition in the top level enum
-            if !module_metadata.events.is_empty() {
-                modules_by_event_index.insert(event_index, module_name.clone());
+            let mut index_for_calls = None;
+            let mut index_for_events = None;
+            if module.calls.is_some() {
+                index_for_calls = Some(call_index);
+                call_index += 1;
+            }
+            if module.event.is_some() {
+                index_for_events = Some(event_index);
                 event_index += 1;
             }
+            let module_metadata =
+                convert_module(index_for_calls, index_for_events, module)?;
             modules.insert(module_name, module_metadata);
         }
-        Ok(Metadata {
-            modules,
-            modules_by_event_index,
-        })
+        Ok(Metadata { modules })
     }
 }
 
@@ -337,7 +348,8 @@ fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error
 }
 
 fn convert_module(
-    index: usize,
+    index_for_calls: Option<u8>,
+    index_for_events: Option<u8>,
     module: runtime_metadata::ModuleMetadata,
 ) -> Result<ModuleMetadata, Error> {
     let mut storage_map = HashMap::new();
@@ -365,7 +377,8 @@ fn convert_module(
         }
     }
     Ok(ModuleMetadata {
-        index: index as u8,
+        index_for_calls: index_for_calls,
+        index_for_events: index_for_events,
         name: convert(module.name)?,
         storage: storage_map,
         calls: call_map,

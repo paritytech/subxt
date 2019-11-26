@@ -220,15 +220,14 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             let phase = Phase::decode(input)?;
             let module_variant = input.read_byte()? as u8;
 
-            let module_name = self.metadata.module_name(module_variant)?;
-            let event = if module_name == "System" {
+            let module = self.metadata.module_name(module_variant)?;
+            let event = if module.name() == "System" {
                 let system_event = SystemEvent::decode(input)?;
                 RuntimeEvent::System(system_event)
             } else {
                 let event_variant = input.read_byte()? as u8;
-                let module = self.metadata.module(&module_name)?;
                 let event_metadata = module.event(event_variant)?;
-                log::debug!("decoding event '{}::{}'", module_name, event_metadata.name);
+                log::debug!("decoding event '{}::{}'", module.name(), event_metadata.name);
 
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(
@@ -237,7 +236,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     &mut event_data,
                 )?;
                 RuntimeEvent::Raw(RawEvent {
-                    module: module_name.clone(),
+                    module: module.name().to_string(),
                     variant: event_metadata.name.clone(),
                     data: event_data,
                 })
