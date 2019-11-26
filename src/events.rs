@@ -112,6 +112,7 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
 
         // Ignore these unregistered types, which are not fixed size primitives
         decoder.check_missing_type_sizes(vec![
+            "DispatchInfo",
             "DispatchError",
             "Result<(), DispatchError>",
             "OpaqueTimeSlot",
