@@ -14,11 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::frame::{
-    balances::Balances,
-    contracts::Contracts,
-    system::System,
-};
 use runtime_primitives::{
     generic::Header,
     traits::{
@@ -27,6 +22,12 @@ use runtime_primitives::{
         Verify,
     },
     MultiSignature,
+};
+
+use crate::frame::{
+    balances::Balances,
+    contracts::Contracts,
+    system::System,
 };
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`

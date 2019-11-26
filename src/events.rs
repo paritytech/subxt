@@ -14,27 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    metadata::{
-        EventArg,
-        Metadata,
-        MetadataError,
-    },
-    frame::balances::Balances,
-    System,
-    SystemEvent,
-};
-use log;
-use frame_system::Phase;
-use parity_scale_codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-    Output,
-};
 use std::{
     collections::{
         HashMap,
@@ -45,6 +24,29 @@ use std::{
         PhantomData,
         Send,
     },
+};
+
+use parity_scale_codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+    Output,
+};
+
+use frame_system::Phase;
+
+use crate::{
+    frame::balances::Balances,
+    metadata::{
+        EventArg,
+        Metadata,
+        MetadataError,
+    },
+    System,
+    SystemEvent,
 };
 
 /// Top level Event that can be produced by a substrate runtime
@@ -65,13 +67,22 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug, derive_more::From, derive_more::Display)]
+#[derive(Debug, thiserror::Error)]
 pub enum EventsError {
-    CodecError(CodecError),
-    Metadata(MetadataError),
-    #[display(fmt = "Type Sizes Missing: {:?}", _0)]
+    #[error("Scale codec error: {0:?}")]
+    CodecError(#[from] CodecError),
+    #[error("Metadata error: {0:?}")]
+    Metadata(#[from] MetadataError),
+    #[error("Type Sizes Missing: {0:?}")]
     TypeSizesMissing(Vec<String>),
+    #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
+}
+
+impl From<Vec<String>> for EventsError {
+    fn from(error: Vec<String>) -> Self {
+        EventsError::TypeSizesMissing(error)
+    }
 }
 
 pub struct EventsDecoder<T> {

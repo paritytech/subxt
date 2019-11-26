@@ -1,8 +1,31 @@
-use crate::codec::Encoded;
+// Copyright 2019 Parity Technologies (UK) Ltd.
+// This file is part of substrate-subxt.
+//
+// subxt is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// subxt is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    marker::PhantomData,
+    str::FromStr,
+};
+
 use parity_scale_codec::{
     Decode,
     Encode,
 };
+
 use runtime_metadata::{
     DecodeDifferent,
     RuntimeMetadata,
@@ -12,21 +35,23 @@ use runtime_metadata::{
     StorageHasher,
     META_RESERVED,
 };
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    marker::PhantomData,
-    str::FromStr,
-};
 use substrate_primitives::storage::StorageKey;
 
-#[derive(Debug, Clone, derive_more::Display)]
+use crate::codec::Encoded;
+
+#[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
+    #[error("Module not found")]
     ModuleNotFound(String),
+    #[error("Call not found")]
     CallNotFound(&'static str),
+    #[error("Event not found")]
     EventNotFound(u8),
+    #[error("Storage not found")]
     StorageNotFound(&'static str),
+    #[error("Storage type error")]
     StorageTypeError,
+    #[error("Map value type error")]
     MapValueTypeError,
 }
 
@@ -63,17 +88,17 @@ impl Metadata {
         for (name, module) in &self.modules {
             string.push_str(name.as_str());
             string.push('\n');
-            for (storage, _) in &module.storage {
+            for storage in module.storage.keys() {
                 string.push_str(" s  ");
                 string.push_str(storage.as_str());
                 string.push('\n');
             }
-            for (call, _) in &module.calls {
+            for call in module.calls.keys() {
                 string.push_str(" c  ");
                 string.push_str(call.as_str());
                 string.push('\n');
             }
-            for (_, event) in &module.events {
+            for event in module.events.values() {
                 string.push_str(" e  ");
                 string.push_str(event.name.as_str());
                 string.push('\n');
@@ -199,7 +224,7 @@ pub struct ModuleEventMetadata {
 
 impl ModuleEventMetadata {
     pub fn arguments(&self) -> Vec<EventArg> {
-        self.arguments.iter().cloned().collect()
+        self.arguments.to_vec()
     }
 }
 
@@ -228,8 +253,8 @@ impl FromStr for EventArg {
                     "Expected closing `>` for `Vec`",
                 ))
             }
-        } else if s.starts_with("(") {
-            if s.ends_with(")") {
+        } else if s.starts_with('(') {
+            if s.ends_with(')') {
                 let mut args = Vec::new();
                 for arg in s[1..s.len() - 1].split(',') {
                     let arg = arg.trim().parse()?;
@@ -278,11 +303,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            Err(Error::InvalidPrefix)?;
+            return Err(Error::InvalidPrefix)
         }
         let meta = match metadata.1 {
             RuntimeMetadata::V8(meta) => meta,
-            _ => Err(Error::InvalidVersion)?,
+            _ => return Err(Error::InvalidVersion),
         };
         let mut modules = HashMap::new();
         let mut modules_by_event_index = HashMap::new();
@@ -293,7 +318,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             // modules with no events have no corresponding definition in the top level enum
             if !module_metadata.events.is_empty() {
                 modules_by_event_index.insert(event_index, module_name.clone());
-                event_index = event_index + 1;
+                event_index += 1;
             }
             modules.insert(module_name, module_metadata);
         }
