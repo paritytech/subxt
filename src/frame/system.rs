@@ -173,7 +173,7 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
 #[derive(Clone, Debug, parity_scale_codec::Decode)]
 pub enum SystemEvent {
     /// An extrinsic completed successfully.
-    ExtrinsicSuccess,
+    ExtrinsicSuccess(runtime_support::weights::DispatchInfo),
     /// An extrinsic failed.
     ExtrinsicFailed(runtime_primitives::DispatchError),
 }
