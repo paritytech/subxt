@@ -6,23 +6,23 @@ edition = "2018"
 
 license = "GPL-3.0"
 readme = "README.md"
-
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
-
-include = ["/Cargo.toml", "src/**/*.rs", "/README.md", "/LICENSE"]
+include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
 [dependencies]
-derive_more = "0.14.0"
 log = "0.4"
-futures = "0.1.28"
+thiserror = "1.0"
+futures = "0.1"
 jsonrpc-core-client = { version = "14.0", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
-parity-scale-codec = { version = "1.0", default-features = false, features = ["derive", "full"] }
+serde = { version = "1.0", features = ["derive"] }
+url = "1.7"
+parity-scale-codec = { version = "1.1", default-features = false, features = ["derive", "full"] }
+
 runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "frame-metadata" }
 runtime_support = { git = "https://github.com/paritytech/substrate/", package = "frame-support" }
 runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
-serde = { version = "1.0", features = ["derive"] }
 sr-version = { git = "https://github.com/paritytech/substrate/", package = "sr-version" }
 frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system" }
 pallet-balances = { git = "https://github.com/paritytech/substrate/", package = "pallet-balances" }
@@ -31,12 +31,11 @@ pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "
 substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-api" }
 substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-primitives" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
-txpool = {  git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-graph" }
-url = "1.7"
+txpool = { git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-graph" }
 
 [dev-dependencies]
-env_logger = "0.6"
+env_logger = "0.7"
+tokio = "0.1"
+wabt = "0.9"
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
 substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
-tokio = "0.1"
-wabt = "0.9.0"

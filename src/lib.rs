@@ -19,6 +19,12 @@
 
 #![deny(missing_docs)]
 #![deny(warnings)]
+#![allow(clippy::type_complexity)]
+
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
 
 use futures::future::{
     self,
@@ -27,7 +33,6 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use metadata::Metadata;
 use parity_scale_codec::{
     Codec,
     Decode,
@@ -42,10 +47,6 @@ use runtime_primitives::{
     MultiSignature,
 };
 use sr_version::RuntimeVersion;
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
 use substrate_primitives::{
     storage::{
         StorageChangeSet,
@@ -55,7 +56,16 @@ use substrate_primitives::{
 };
 use url::Url;
 
-use crate::{
+mod codec;
+mod error;
+mod events;
+mod extrinsic;
+mod frame;
+mod metadata;
+mod rpc;
+mod runtimes;
+
+use self::{
     codec::Encoded,
     events::EventsDecoder,
     extrinsic::{
@@ -63,7 +73,6 @@ use crate::{
         SignedExtra,
     },
     frame::{
-        Call,
         balances::Balances,
         system::{
             System,
@@ -71,6 +80,7 @@ use crate::{
             SystemStore,
         },
     },
+    metadata::Metadata,
     rpc::{
         BlockNumber,
         ChainBlock,
@@ -78,27 +88,20 @@ use crate::{
         Rpc,
     },
 };
-
-mod codec;
-mod error;
-mod events;
-mod extrinsic;
-mod metadata;
-mod frame;
-mod rpc;
-mod runtimes;
-
-pub use error::Error;
-pub use events::RawEvent;
-pub use frame::*;
-pub use rpc::ExtrinsicSuccess;
-pub use runtimes::*;
+pub use self::{
+    error::Error,
+    events::RawEvent,
+    frame::*,
+    rpc::ExtrinsicSuccess,
+    runtimes::*,
+};
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
 }
 
 /// ClientBuilder for constructing a Client.
+#[derive(Default)]
 pub struct ClientBuilder<T: System, S = MultiSignature> {
     _marker: std::marker::PhantomData<(T, S)>,
     url: Option<Url>,
@@ -153,7 +156,7 @@ impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
             url: self.url.clone(),
-            genesis_hash: self.genesis_hash.clone(),
+            genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
@@ -258,7 +261,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
             None => Either::B(self.account_nonce(account_id)),
         }
         .map(|nonce| {
-            let genesis_hash = client.genesis_hash.clone();
+            let genesis_hash = client.genesis_hash;
             let runtime_version = client.runtime_version.clone();
             XtBuilder {
                 client,
@@ -291,7 +294,7 @@ where
 
     /// Returns the nonce.
     pub fn nonce(&self) -> T::Index {
-        self.nonce.clone()
+        self.nonce
     }
 
     /// Sets the nonce to a new value.
@@ -331,9 +334,9 @@ where
         C: parity_scale_codec::Encode,
     {
         let signer = self.signer.clone();
-        let account_nonce = self.nonce.clone();
+        let account_nonce = self.nonce;
         let version = self.runtime_version.spec_version;
-        let genesis_hash = self.genesis_hash.clone();
+        let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
             .module(&call.module)
@@ -351,7 +354,10 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit<C: Encode>(&self, call: Call<C>) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn submit<C: Encode>(
+        &self,
+        call: Call<C>,
+    ) -> impl Future<Item = T::Hash, Error = Error> {
         let cli = self.client.connect();
         self.create_and_sign(call)
             .into_future()
@@ -364,7 +370,7 @@ where
     /// Submits transaction to the chain and watch for events.
     pub fn submit_and_watch<C: Encode>(
         &self,
-        call: Call<C>
+        call: Call<C>,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
@@ -386,21 +392,20 @@ where
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-    use crate::{
-        frame::{
-            balances::{
-                Balances,
-                BalancesStore,
-            },
-        },
-        DefaultNodeRuntime as Runtime,
-    };
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
     use runtime_support::StorageMap;
     use substrate_keyring::AccountKeyring;
     use substrate_primitives::storage::StorageKey;
+
+    use super::*;
+    use crate::{
+        frame::balances::{
+            Balances,
+            BalancesStore,
+        },
+        DefaultNodeRuntime as Runtime,
+    };
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
@@ -424,8 +429,8 @@ mod tests {
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
         let dest = AccountKeyring::Bob.to_account_id();
-        let transfer = xt
-            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
+        let transfer =
+            xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
         rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
@@ -452,8 +457,7 @@ mod tests {
 "#;
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let put_code = xt
-            .submit_and_watch(contracts::put_code(500_000, wasm));
+        let put_code = xt.submit_and_watch(contracts::put_code(500_000, wasm));
 
         let success = rt
             .block_on(put_code)
@@ -531,9 +535,7 @@ mod tests {
         let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
         let subxt_transfer = crate::frame::balances::transfer::<Runtime>(address, amount);
-        let call2 = balances
-            .call("transfer", subxt_transfer.args)
-            .unwrap();
+        let call2 = balances.call("transfer", subxt_transfer.args).unwrap();
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =

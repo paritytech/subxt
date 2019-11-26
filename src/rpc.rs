@@ -14,24 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    error::Error,
-    events::{
-        EventsDecoder,
-        RuntimeEvent,
+use std::convert::TryInto;
+
+use futures::{
+    future::{
+        self,
+        Future,
+        IntoFuture,
     },
-    metadata::Metadata,
-    frame::{
-        balances::Balances,
-        system::System,
+    stream::{
+        self,
+        Stream,
     },
 };
-use futures::future::{
-    self,
-    Future,
+use jsonrpc_core_client::{
+    RpcChannel,
+    TypedSubscriptionStream,
 };
-use jsonrpc_core_client::RpcChannel;
-use log;
 use num_traits::bounds::Bounded;
 use parity_scale_codec::{
     Decode,
@@ -39,23 +38,48 @@ use parity_scale_codec::{
     Error as CodecError,
 };
 
+use frame_system::Phase;
 use runtime_metadata::RuntimeMetadataPrefixed;
 use runtime_primitives::{
     generic::{
         Block,
         SignedBlock,
     },
+    traits::Hash,
     OpaqueExtrinsic,
 };
 use sr_version::RuntimeVersion;
-use std::convert::TryInto;
-use substrate_primitives::storage::StorageKey;
+use substrate_primitives::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    twox_128,
+};
 use substrate_rpc_api::{
     author::AuthorClient,
     chain::ChainClient,
     state::StateClient,
 };
 use substrate_rpc_primitives::number::NumberOrHex;
+use txpool::watcher::Status;
+
+use crate::{
+    error::Error,
+    events::{
+        EventsDecoder,
+        RawEvent,
+        RuntimeEvent,
+    },
+    frame::{
+        balances::Balances,
+        system::{
+            System,
+            SystemEvent,
+        },
+    },
+    metadata::Metadata,
+};
 
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
@@ -105,7 +129,9 @@ impl<T: System> Rpc<T> {
             .block_hash(Some(NumberOrHex::Number(block_zero)))
             .map_err(Into::into)
             .and_then(|genesis_hash| {
-                future::result(genesis_hash.ok_or("Genesis hash not found".into()))
+                future::result(
+                    genesis_hash.ok_or_else(|| "Genesis hash not found".into()),
+                )
             })
     }
 
@@ -144,26 +170,6 @@ impl<T: System> Rpc<T> {
         self.state.runtime_version(at).map_err(Into::into)
     }
 }
-use futures::{
-    future::IntoFuture,
-    stream::{
-        self,
-        Stream,
-    },
-};
-use jsonrpc_core_client::TypedSubscriptionStream;
-use runtime_primitives::traits::Hash;
-use substrate_primitives::{
-    storage::StorageChangeSet,
-    twox_128,
-};
-use txpool::watcher::Status;
-
-use crate::{
-    events::RawEvent,
-    frame::system::SystemEvent,
-};
-use frame_system::Phase;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -271,7 +277,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             log::info!("received result {:?}", result);
 
                             result
-                                .ok_or(Error::from("Stream terminated"))
+                                .ok_or_else(|| Error::from("Stream terminated"))
                                 .and_then(|r| r)
                                 .into_future()
                         })
@@ -284,7 +290,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                         .map_err(Into::into)
                 })
                 .and_then(|(h, b)| {
-                    b.ok_or(format!("Failed to find block {:?}", h).into())
+                    b.ok_or_else(|| format!("Failed to find block {:?}", h).into())
                         .map(|b| (h, b))
                         .into_future()
                 })
@@ -370,10 +376,11 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
             let hash = T::Hashing::hash_of(ext);
             hash == ext_hash
         })
-        .ok_or(format!("Failed to find Extrinsic with hash {:?}", ext_hash).into())
+        .ok_or_else(|| {
+            format!("Failed to find Extrinsic with hash {:?}", ext_hash).into()
+        })
         .into_future();
 
-    let block_hash = block_hash.clone();
     events_stream
         .filter(move |event| event.block == block_hash)
         .into_future()

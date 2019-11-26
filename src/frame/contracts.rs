@@ -1,12 +1,28 @@
+// Copyright 2019 Parity Technologies (UK) Ltd.
+// This file is part of substrate-subxt.
+//
+// subxt is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// subxt is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+
 //! Implements support for the pallet_contracts module.
-use crate::{
-    frame::{
-        Call,
-        balances::Balances,
-        system::System,
-    },
-};
+
 use parity_scale_codec::Encode;
+
+use crate::frame::{
+    balances::Balances,
+    system::System,
+    Call,
+};
 
 const MODULE: &str = "Contracts";
 const PUT_CODE: &str = "put_code";
@@ -74,7 +90,16 @@ pub fn create<T: Contracts>(
     code_hash: <T as System>::Hash,
     data: Vec<u8>,
 ) -> Call<CreateArgs<T>> {
-    Call::new(MODULE, CREATE, CreateArgs { endowment, gas_limit, code_hash, data })
+    Call::new(
+        MODULE,
+        CREATE,
+        CreateArgs {
+            endowment,
+            gas_limit,
+            code_hash,
+            data,
+        },
+    )
 }
 
 /// Makes a call to an account, optionally transferring some balance.
@@ -91,5 +116,14 @@ pub fn call<T: Contracts>(
     gas_limit: Gas,
     data: Vec<u8>,
 ) -> Call<CallArgs<T>> {
-    Call::new(MODULE, CALL, CallArgs { dest, value, gas_limit, data })
+    Call::new(
+        MODULE,
+        CALL,
+        CallArgs {
+            dest,
+            value,
+            gas_limit,
+            data,
+        },
+    )
 }
