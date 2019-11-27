@@ -61,7 +61,10 @@ use substrate_rpc_api::{
     chain::ChainClient,
     state::StateClient,
 };
-use substrate_rpc_primitives::number::NumberOrHex;
+use substrate_rpc_primitives::{
+    list::ListOrValue,
+    number::NumberOrHex,
+};
 use txpool::watcher::Status;
 
 use crate::{
@@ -126,11 +129,14 @@ impl<T: System> Rpc<T> {
     pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
         let block_zero = T::BlockNumber::min_value();
         self.chain
-            .block_hash(Some(NumberOrHex::Number(block_zero)))
+            .block_hash(Some(ListOrValue::Value(NumberOrHex::Number(block_zero))))
             .map_err(Into::into)
-            .and_then(|genesis_hash| {
+            .and_then(|list_or_value| {
                 future::result(
-                    genesis_hash.ok_or_else(|| "Genesis hash not found".into()),
+                    match list_or_value {
+                        ListOrValue::Value(genesis_hash) => genesis_hash.ok_or_else(|| "Genesis hash not found".into()),
+                        ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                    }
                 )
             })
     }
@@ -149,9 +155,17 @@ impl<T: System> Rpc<T> {
     /// Get a block hash, returns hash of latest block by default
     pub fn block_hash(
         &self,
-        hash: Option<BlockNumber<T>>,
+        block_number: Option<BlockNumber<T>>,
     ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.chain.block_hash(hash).map_err(Into::into)
+        self.chain
+            .block_hash(block_number.map(|bn| ListOrValue::Value(bn)))
+            .map_err(Into::into)
+            .and_then(|list_or_value| {
+                match list_or_value {
+                    ListOrValue::Value(hash) => Ok(hash),
+                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                }
+            })
     }
 
     /// Get a Block
