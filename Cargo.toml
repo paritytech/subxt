@@ -28,10 +28,10 @@ frame-system = { git = "https://github.com/paritytech/substrate/", package = "fr
 pallet-balances = { git = "https://github.com/paritytech/substrate/", package = "pallet-balances" }
 pallet-contracts = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts" }
 pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices" }
-substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-api" }
+substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "sc-rpc-api" }
 substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-primitives" }
 substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
-txpool = {  git = "https://github.com/paritytech/substrate/", package = "substrate-transaction-graph" }
+txpool = { git = "https://github.com/paritytech/substrate/", package = "sc-transaction-graph" }
 url = "1.7"
 
 [dev-dependencies]
