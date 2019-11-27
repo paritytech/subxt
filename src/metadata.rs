@@ -43,6 +43,8 @@ use crate::codec::Encoded;
 pub enum MetadataError {
     #[error("Module not found")]
     ModuleNotFound(String),
+    #[error("Module with events not found")]
+    ModuleWithEventsNotFound(u8),
     #[error("Call not found")]
     CallNotFound(&'static str),
     #[error("Event not found")]
@@ -58,14 +60,11 @@ pub enum MetadataError {
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
-    modules_by_event_index: HashMap<u8, String>,
+    modules_with_calls: HashMap<String, ModuleWithCalls>,
+    modules_with_events: HashMap<String, ModuleWithEvents>,
 }
 
 impl Metadata {
-    pub fn modules(&self) -> impl Iterator<Item = &ModuleMetadata> {
-        self.modules.values()
-    }
-
     pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError>
     where
         S: ToString,
@@ -76,11 +75,28 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn module_name(&self, module_index: u8) -> Result<String, MetadataError> {
-        self.modules_by_event_index
-            .get(&module_index)
-            .cloned()
-            .ok_or(MetadataError::EventNotFound(module_index))
+    pub fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
+    where
+        S: ToString,
+    {
+        let name = name.to_string();
+        self.modules_with_calls
+            .get(&name)
+            .ok_or(MetadataError::ModuleNotFound(name))
+    }
+
+    pub fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
+        self.modules_with_events.values()
+    }
+
+    pub fn module_with_events(
+        &self,
+        module_index: u8,
+    ) -> Result<&ModuleWithEvents, MetadataError> {
+        self.modules_with_events
+            .values()
+            .find(|&module| module.index == module_index)
+            .ok_or(MetadataError::ModuleWithEventsNotFound(module_index))
     }
 
     pub fn pretty(&self) -> String {
@@ -93,15 +109,19 @@ impl Metadata {
                 string.push_str(storage.as_str());
                 string.push('\n');
             }
-            for call in module.calls.keys() {
-                string.push_str(" c  ");
-                string.push_str(call.as_str());
-                string.push('\n');
+            if let Some(module) = self.modules_with_calls.get(name) {
+                for call in module.calls.keys() {
+                    string.push_str(" c  ");
+                    string.push_str(call.as_str());
+                    string.push('\n');
+                }
             }
-            for event in module.events.values() {
-                string.push_str(" e  ");
-                string.push_str(event.name.as_str());
-                string.push('\n');
+            if let Some(module) = self.modules_with_events.get(name) {
+                for event in module.events.values() {
+                    string.push_str(" e  ");
+                    string.push_str(event.name.as_str());
+                    string.push('\n');
+                }
             }
         }
         string
@@ -110,38 +130,51 @@ impl Metadata {
 
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
-    index: u8,
     name: String,
     storage: HashMap<String, StorageMetadata>,
-    calls: HashMap<String, Vec<u8>>,
-    events: HashMap<u8, ModuleEventMetadata>,
     // constants
 }
 
 impl ModuleMetadata {
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
+        self.storage
+            .get(key)
+            .ok_or(MetadataError::StorageNotFound(key))
     }
+}
 
+#[derive(Clone, Debug)]
+pub struct ModuleWithCalls {
+    index: u8,
+    calls: HashMap<String, u8>,
+}
+
+impl ModuleWithCalls {
     pub fn call<T: Encode>(
         &self,
         function: &'static str,
         params: T,
     ) -> Result<Encoded, MetadataError> {
-        let fn_bytes = self
+        let fn_index = self
             .calls
             .get(function)
             .ok_or(MetadataError::CallNotFound(function))?;
-        let mut bytes = vec![self.index];
-        bytes.extend(fn_bytes);
+        let mut bytes = vec![self.index, *fn_index];
         bytes.extend(params.encode());
         Ok(Encoded(bytes))
     }
+}
 
-    pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
-        self.storage
-            .get(key)
-            .ok_or(MetadataError::StorageNotFound(key))
+#[derive(Clone, Debug)]
+pub struct ModuleWithEvents {
+    index: u8,
+    name: String,
+    events: HashMap<u8, ModuleEventMetadata>,
+}
+
+impl ModuleWithEvents {
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     pub fn events(&self) -> impl Iterator<Item = &ModuleEventMetadata> {
@@ -310,21 +343,63 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             _ => return Err(Error::InvalidVersion),
         };
         let mut modules = HashMap::new();
-        let mut modules_by_event_index = HashMap::new();
-        let mut event_index = 0;
-        for (i, module) in convert(meta.modules)?.into_iter().enumerate() {
+        let mut modules_with_calls = HashMap::new();
+        let mut modules_with_events = HashMap::new();
+        for module in convert(meta.modules)?.into_iter() {
             let module_name = convert(module.name.clone())?;
-            let module_metadata = convert_module(i, module)?;
-            // modules with no events have no corresponding definition in the top level enum
-            if !module_metadata.events.is_empty() {
-                modules_by_event_index.insert(event_index, module_name.clone());
-                event_index += 1;
+
+            let mut storage_map = HashMap::new();
+            if let Some(storage) = module.storage {
+                let storage = convert(storage)?;
+                let prefix = convert(storage.prefix)?;
+                for entry in convert(storage.entries)?.into_iter() {
+                    let entry_name = convert(entry.name.clone())?;
+                    let entry_prefix = format!("{} {}", prefix, entry_name);
+                    let entry = convert_entry(entry_prefix, entry)?;
+                    storage_map.insert(entry_name, entry);
+                }
             }
-            modules.insert(module_name, module_metadata);
+            modules.insert(
+                module_name.clone(),
+                ModuleMetadata {
+                    name: module_name.clone(),
+                    storage: storage_map,
+                },
+            );
+
+            if let Some(calls) = module.calls {
+                let mut call_map = HashMap::new();
+                for (index, call) in convert(calls)?.into_iter().enumerate() {
+                    let name = convert(call.name)?;
+                    call_map.insert(name, index as u8);
+                }
+                modules_with_calls.insert(
+                    module_name.clone(),
+                    ModuleWithCalls {
+                        index: modules_with_calls.len() as u8,
+                        calls: call_map,
+                    },
+                );
+            }
+            if let Some(events) = module.event {
+                let mut event_map = HashMap::new();
+                for (index, event) in convert(events)?.into_iter().enumerate() {
+                    event_map.insert(index as u8, convert_event(event)?);
+                }
+                modules_with_events.insert(
+                    module_name.clone(),
+                    ModuleWithEvents {
+                        index: modules_with_events.len() as u8,
+                        name: module_name.clone(),
+                        events: event_map,
+                    },
+                );
+            }
         }
         Ok(Metadata {
             modules,
-            modules_by_event_index,
+            modules_with_calls,
+            modules_with_events,
         })
     }
 }
@@ -334,43 +409,6 @@ fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error
         DecodeDifferent::Decoded(value) => Ok(value),
         _ => Err(Error::ExpectedDecoded),
     }
-}
-
-fn convert_module(
-    index: usize,
-    module: runtime_metadata::ModuleMetadata,
-) -> Result<ModuleMetadata, Error> {
-    let mut storage_map = HashMap::new();
-    if let Some(storage) = module.storage {
-        let storage = convert(storage)?;
-        let prefix = convert(storage.prefix)?;
-        for entry in convert(storage.entries)?.into_iter() {
-            let entry_name = convert(entry.name.clone())?;
-            let entry_prefix = format!("{} {}", prefix, entry_name);
-            let entry = convert_entry(entry_prefix, entry)?;
-            storage_map.insert(entry_name, entry);
-        }
-    }
-    let mut call_map = HashMap::new();
-    if let Some(calls) = module.calls {
-        for (index, call) in convert(calls)?.into_iter().enumerate() {
-            let name = convert(call.name)?;
-            call_map.insert(name, vec![index as u8]);
-        }
-    }
-    let mut event_map = HashMap::new();
-    if let Some(events) = module.event {
-        for (index, event) in convert(events)?.into_iter().enumerate() {
-            event_map.insert(index as u8, convert_event(event)?);
-        }
-    }
-    Ok(ModuleMetadata {
-        index: index as u8,
-        name: convert(module.name)?,
-        storage: storage_map,
-        calls: call_map,
-        events: event_map,
-    })
 }
 
 fn convert_event(
