@@ -190,7 +190,8 @@ impl ModuleWithEvents {
 
 #[derive(Clone, Debug)]
 pub struct StorageMetadata {
-    prefix: String,
+    module_prefix: String,
+    storage_prefix: String,
     modifier: StorageEntryModifier,
     ty: StorageEntryType,
     default: Vec<u8>,
@@ -202,13 +203,15 @@ impl StorageMetadata {
     ) -> Result<StorageMap<K, V>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
-                let prefix = self.prefix.as_bytes().to_vec();
+                let module_prefix = self.module_prefix.as_bytes().to_vec();
+                let storage_prefix = self.storage_prefix.as_bytes().to_vec();
                 let hasher = hasher.to_owned();
                 let default = Decode::decode(&mut &self.default[..])
                     .map_err(|_| MetadataError::MapValueTypeError)?;
                 Ok(StorageMap {
                     _marker: PhantomData,
-                    prefix,
+                    module_prefix,
+                    storage_prefix,
                     hasher,
                     default,
                 })
@@ -221,27 +224,30 @@ impl StorageMetadata {
 #[derive(Clone, Debug)]
 pub struct StorageMap<K, V> {
     _marker: PhantomData<K>,
-    prefix: Vec<u8>,
+    module_prefix: Vec<u8>,
+    storage_prefix: Vec<u8>,
     hasher: StorageHasher,
     default: V,
 }
 
 impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
     pub fn key(&self, key: K) -> StorageKey {
-        let mut bytes = self.prefix.clone();
-        bytes.extend(key.encode());
+        let mut bytes = substrate_primitives::twox_128(&self.module_prefix).to_vec();
+        bytes.extend(&substrate_primitives::twox_128(&self.storage_prefix)[..]);
+        let encoded_key = key.encode();
         let hash = match self.hasher {
             StorageHasher::Blake2_128 => {
-                substrate_primitives::blake2_128(&bytes).to_vec()
+                substrate_primitives::blake2_128(&encoded_key).to_vec()
             }
             StorageHasher::Blake2_256 => {
-                substrate_primitives::blake2_256(&bytes).to_vec()
+                substrate_primitives::blake2_256(&encoded_key).to_vec()
             }
-            StorageHasher::Twox128 => substrate_primitives::twox_128(&bytes).to_vec(),
-            StorageHasher::Twox256 => substrate_primitives::twox_256(&bytes).to_vec(),
-            StorageHasher::Twox64Concat => substrate_primitives::twox_64(&bytes).to_vec(),
+            StorageHasher::Twox128 => substrate_primitives::twox_128(&encoded_key).to_vec(),
+            StorageHasher::Twox256 => substrate_primitives::twox_256(&encoded_key).to_vec(),
+            StorageHasher::Twox64Concat => substrate_primitives::twox_64(&encoded_key).to_vec(),
         };
-        StorageKey(hash)
+        bytes.extend(hash);
+        StorageKey(bytes)
     }
 
     pub fn default(&self) -> V {
@@ -339,7 +345,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(Error::InvalidPrefix)
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V8(meta) => meta,
+            RuntimeMetadata::V9(meta) => meta,
             _ => return Err(Error::InvalidVersion),
         };
         let mut modules = HashMap::new();
@@ -351,12 +357,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             let mut storage_map = HashMap::new();
             if let Some(storage) = module.storage {
                 let storage = convert(storage)?;
-                let prefix = convert(storage.prefix)?;
+                let module_prefix = convert(storage.prefix)?;
                 for entry in convert(storage.entries)?.into_iter() {
-                    let entry_name = convert(entry.name.clone())?;
-                    let entry_prefix = format!("{} {}", prefix, entry_name);
-                    let entry = convert_entry(entry_prefix, entry)?;
-                    storage_map.insert(entry_name, entry);
+                    let storage_prefix = convert(entry.name.clone())?;
+                    let entry = convert_entry(module_prefix.clone(), storage_prefix.clone(), entry)?;
+                    storage_map.insert(storage_prefix, entry);
                 }
             }
             modules.insert(
@@ -424,12 +429,14 @@ fn convert_event(
 }
 
 fn convert_entry(
-    prefix: String,
+    module_prefix: String,
+    storage_prefix: String,
     entry: runtime_metadata::StorageEntryMetadata,
 ) -> Result<StorageMetadata, Error> {
     let default = convert(entry.default)?;
     Ok(StorageMetadata {
-        prefix,
+        module_prefix,
+        storage_prefix,
         modifier: entry.modifier,
         ty: entry.ty,
         default,

@@ -65,7 +65,7 @@ use substrate_rpc_primitives::{
     list::ListOrValue,
     number::NumberOrHex,
 };
-use txpool::watcher::Status;
+use txpool_api::TransactionStatus;
 
 use crate::{
     error::Error,
@@ -194,8 +194,8 @@ impl<T: System + Balances + 'static> Rpc<T> {
         &self,
     ) -> impl Future<Item = MapStream<StorageChangeSet<<T as System>::Hash>>, Error = Error>
     {
-        let events_key = b"System Events";
-        let storage_key = twox_128(events_key);
+        let mut storage_key = twox_128(b"System").to_vec();
+        storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", storage_key);
 
         let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
@@ -204,7 +204,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                 event
             });
         self.state
-            .subscribe_storage(Some(vec![StorageKey(storage_key.to_vec())]))
+            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
             .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
             .map_err(Into::into)
     }
@@ -274,15 +274,15 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             log::info!("received status {:?}", status);
                             match status {
                                 // ignore in progress extrinsic for now
-                                Status::Future | Status::Ready | Status::Broadcast(_) => {
+                                TransactionStatus::Future | TransactionStatus::Ready | TransactionStatus::Broadcast(_) => {
                                     None
                                 }
-                                Status::Finalized(block_hash) => Some(Ok(block_hash)),
-                                Status::Usurped(_) => {
+                                TransactionStatus::Finalized(block_hash) => Some(Ok(block_hash)),
+                                TransactionStatus::Usurped(_) => {
                                     Some(Err("Extrinsic Usurped".into()))
                                 }
-                                Status::Dropped => Some(Err("Extrinsic Dropped".into())),
-                                Status::Invalid => Some(Err("Extrinsic Invalid".into())),
+                                TransactionStatus::Dropped => Some(Err("Extrinsic Dropped".into())),
+                                TransactionStatus::Invalid => Some(Err("Extrinsic Invalid".into())),
                             }
                         })
                         .into_future()
