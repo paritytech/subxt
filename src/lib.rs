@@ -339,7 +339,7 @@ where
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
-            .module(&call.module)
+            .module_with_calls(&call.module)
             .and_then(|module| module.call(&call.function, call.args))?;
 
         log::info!(
@@ -527,7 +527,7 @@ mod tests {
     fn test_chain_read_metadata() {
         let (_, client) = test_setup();
 
-        let balances = client.metadata().module("Balances").unwrap();
+        let balances = client.metadata().module_with_calls("Balances").unwrap();
         let dest = substrate_keyring::AccountKeyring::Bob.to_account_id();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
@@ -541,7 +541,10 @@ mod tests {
         let free_balance =
             <pallet_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
         let free_balance_key = StorageKey(free_balance);
-        let free_balance_key2 = balances
+        let free_balance_key2 = client
+            .metadata()
+            .module("Balances")
+            .unwrap()
             .storage("FreeBalance")
             .unwrap()
             .get_map::<AccountId, Balance>()
