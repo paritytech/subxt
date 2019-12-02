@@ -38,7 +38,7 @@ use parity_scale_codec::{
     Decode,
     Encode,
 };
-use runtime_primitives::{
+use sp_runtime::{
     generic::UncheckedExtrinsic,
     traits::{
         IdentifyAccount,
@@ -46,8 +46,8 @@ use runtime_primitives::{
     },
     MultiSignature,
 };
-use sr_version::RuntimeVersion;
-use substrate_primitives::{
+use sp_version::RuntimeVersion;
+use sp_core::{
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -394,9 +394,9 @@ where
 mod tests {
     use futures::stream::Stream;
     use parity_scale_codec::Encode;
-    use runtime_support::StorageMap;
-    use substrate_keyring::AccountKeyring;
-    use substrate_primitives::storage::StorageKey;
+    use frame_support::StorageMap;
+    use sp_keyring::AccountKeyring;
+    use sp_core::storage::StorageKey;
 
     use super::*;
     use crate::{
@@ -528,7 +528,7 @@ mod tests {
         let (_, client) = test_setup();
 
         let balances = client.metadata().module_with_calls("Balances").unwrap();
-        let dest = substrate_keyring::AccountKeyring::Bob.to_account_id();
+        let dest = sp_keyring::AccountKeyring::Bob.to_account_id();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 

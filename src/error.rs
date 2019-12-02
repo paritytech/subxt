@@ -15,8 +15,8 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use jsonrpc_core_client::RpcError;
-use runtime_primitives::transaction_validity::TransactionValidityError;
-use substrate_primitives::crypto::SecretStringError;
+use sp_runtime::transaction_validity::TransactionValidityError;
+use sp_core::crypto::SecretStringError;
 
 use crate::{
     events::EventsError,

@@ -22,7 +22,7 @@ use parity_scale_codec::{
     Encode,
 };
 
-use runtime_primitives::{
+use sp_runtime::{
     generic::{
         Era,
         SignedPayload,
@@ -35,7 +35,7 @@ use runtime_primitives::{
     },
     transaction_validity::TransactionValidityError,
 };
-use substrate_primitives::Pair;
+use sp_core::Pair;
 
 use crate::frame::{
     balances::Balances,

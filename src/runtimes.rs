@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use runtime_primitives::{
+use sp_runtime::{
     generic::Header,
     traits::{
         BlakeTwo256,
@@ -42,7 +42,7 @@ pub struct DefaultNodeRuntime;
 impl System for DefaultNodeRuntime {
     type Index = u32;
     type BlockNumber = u32;
-    type Hash = substrate_primitives::H256;
+    type Hash = sp_core::H256;
     type Hashing = BlakeTwo256;
     type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
     type Address = pallet_indices::address::Address<Self::AccountId, u32>;

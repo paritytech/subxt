@@ -26,7 +26,7 @@ use parity_scale_codec::{
     Encode,
 };
 
-use runtime_metadata::{
+use frame_metadata::{
     DecodeDifferent,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
@@ -35,7 +35,7 @@ use runtime_metadata::{
     StorageHasher,
     META_RESERVED,
 };
-use substrate_primitives::storage::StorageKey;
+use sp_core::storage::StorageKey;
 
 use crate::codec::Encoded;
 
@@ -232,19 +232,19 @@ pub struct StorageMap<K, V> {
 
 impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
     pub fn key(&self, key: K) -> StorageKey {
-        let mut bytes = substrate_primitives::twox_128(&self.module_prefix).to_vec();
-        bytes.extend(&substrate_primitives::twox_128(&self.storage_prefix)[..]);
+        let mut bytes = sp_core::twox_128(&self.module_prefix).to_vec();
+        bytes.extend(&sp_core::twox_128(&self.storage_prefix)[..]);
         let encoded_key = key.encode();
         let hash = match self.hasher {
             StorageHasher::Blake2_128 => {
-                substrate_primitives::blake2_128(&encoded_key).to_vec()
+                sp_core::blake2_128(&encoded_key).to_vec()
             }
             StorageHasher::Blake2_256 => {
-                substrate_primitives::blake2_256(&encoded_key).to_vec()
+                sp_core::blake2_256(&encoded_key).to_vec()
             }
-            StorageHasher::Twox128 => substrate_primitives::twox_128(&encoded_key).to_vec(),
-            StorageHasher::Twox256 => substrate_primitives::twox_256(&encoded_key).to_vec(),
-            StorageHasher::Twox64Concat => substrate_primitives::twox_64(&encoded_key).to_vec(),
+            StorageHasher::Twox128 => sp_core::twox_128(&encoded_key).to_vec(),
+            StorageHasher::Twox256 => sp_core::twox_256(&encoded_key).to_vec(),
+            StorageHasher::Twox64Concat => sp_core::twox_64(&encoded_key).to_vec(),
         };
         bytes.extend(hash);
         StorageKey(bytes)
@@ -417,7 +417,7 @@ fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error
 }
 
 fn convert_event(
-    event: runtime_metadata::EventMetadata,
+    event: frame_metadata::EventMetadata,
 ) -> Result<ModuleEventMetadata, Error> {
     let name = convert(event.name)?;
     let mut arguments = Vec::new();
@@ -431,7 +431,7 @@ fn convert_event(
 fn convert_entry(
     module_prefix: String,
     storage_prefix: String,
-    entry: runtime_metadata::StorageEntryMetadata,
+    entry: frame_metadata::StorageEntryMetadata,
 ) -> Result<StorageMetadata, Error> {
     let default = convert(entry.default)?;
     Ok(StorageMetadata {
