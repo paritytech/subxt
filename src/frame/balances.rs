@@ -27,12 +27,12 @@ use parity_scale_codec::{
     Encode,
 };
 
-use runtime_primitives::traits::{
+use sp_runtime::traits::{
     MaybeSerialize,
     Member,
     SimpleArithmetic,
 };
-use runtime_support::Parameter;
+use frame_support::Parameter;
 
 use crate::{
     error::Error,

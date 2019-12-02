@@ -25,7 +25,7 @@ use futures::future::{
 use parity_scale_codec::Codec;
 use serde::de::DeserializeOwned;
 
-use runtime_primitives::traits::{
+use sp_runtime::traits::{
     Bounded,
     CheckEqual,
     Hash,
@@ -38,7 +38,7 @@ use runtime_primitives::traits::{
     SimpleBitOps,
     StaticLookup,
 };
-use runtime_support::Parameter;
+use frame_support::Parameter;
 
 use crate::{
     error::Error,
@@ -173,7 +173,7 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
 #[derive(Clone, Debug, parity_scale_codec::Decode)]
 pub enum SystemEvent {
     /// An extrinsic completed successfully.
-    ExtrinsicSuccess(runtime_support::weights::DispatchInfo),
+    ExtrinsicSuccess(frame_support::weights::DispatchInfo),
     /// An extrinsic failed.
-    ExtrinsicFailed(runtime_primitives::DispatchError),
+    ExtrinsicFailed(sp_runtime::DispatchError),
 }

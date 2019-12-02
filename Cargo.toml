@@ -20,17 +20,17 @@ serde = { version = "1.0", features = ["derive"] }
 url = "1.7"
 parity-scale-codec = { version = "1.1", default-features = false, features = ["derive", "full"] }
 
-runtime_metadata = { git = "https://github.com/paritytech/substrate/", package = "frame-metadata" }
-runtime_support = { git = "https://github.com/paritytech/substrate/", package = "frame-support" }
-runtime_primitives = { git = "https://github.com/paritytech/substrate/", package = "sr-primitives" }
-sr-version = { git = "https://github.com/paritytech/substrate/", package = "sr-version" }
+frame-metadata = { git = "https://github.com/paritytech/substrate/", package = "frame-metadata" }
+frame-support = { git = "https://github.com/paritytech/substrate/", package = "frame-support" }
+sp-runtime = { git = "https://github.com/paritytech/substrate/", package = "sp-runtime" }
+sp-version = { git = "https://github.com/paritytech/substrate/", package = "sp-version" }
 frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system" }
 pallet-balances = { git = "https://github.com/paritytech/substrate/", package = "pallet-balances" }
 pallet-contracts = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts" }
 pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices" }
 substrate-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "sc-rpc-api" }
-substrate-rpc-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-rpc-primitives" }
-substrate-primitives = { git = "https://github.com/paritytech/substrate/", package = "substrate-primitives" }
+sp-rpc = { git = "https://github.com/paritytech/substrate/", package = "sp-rpc" }
+sp-core = { git = "https://github.com/paritytech/substrate/", package = "sp-core" }
 txpool-api = { git = "https://github.com/paritytech/substrate/", package = "sp-transaction-pool-api" }
 
 [dev-dependencies]
@@ -38,4 +38,4 @@ env_logger = "0.7"
 tokio = "0.1"
 wabt = "0.9"
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
-substrate-keyring = { git = "https://github.com/paritytech/substrate/", package = "substrate-keyring" }
+sp-keyring = { git = "https://github.com/paritytech/substrate/", package = "sp-keyring" }

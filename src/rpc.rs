@@ -39,8 +39,8 @@ use parity_scale_codec::{
 };
 
 use frame_system::Phase;
-use runtime_metadata::RuntimeMetadataPrefixed;
-use runtime_primitives::{
+use frame_metadata::RuntimeMetadataPrefixed;
+use sp_runtime::{
     generic::{
         Block,
         SignedBlock,
@@ -48,8 +48,8 @@ use runtime_primitives::{
     traits::Hash,
     OpaqueExtrinsic,
 };
-use sr_version::RuntimeVersion;
-use substrate_primitives::{
+use sp_version::RuntimeVersion;
+use sp_core::{
     storage::{
         StorageChangeSet,
         StorageKey,
@@ -61,7 +61,7 @@ use substrate_rpc_api::{
     chain::ChainClient,
     state::StateClient,
 };
-use substrate_rpc_primitives::{
+use sp_rpc::{
     list::ListOrValue,
     number::NumberOrHex,
 };
