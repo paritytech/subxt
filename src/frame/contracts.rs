@@ -56,6 +56,7 @@ pub struct PutCodeArgs {
 /// Arguments for creating an instance of a contract
 #[derive(Encode)]
 pub struct InstantiateArgs<T: Contracts> {
+    #[codec(compact)]
     endowment: <T as Balances>::Balance,
     #[codec(compact)]
     gas_limit: Gas,
