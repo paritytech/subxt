@@ -159,7 +159,10 @@ mod tests {
         Client,
         Error,
         System,
+        DefaultNodeRuntime as Runtime,
     };
+
+    type AccountId = <Runtime as System>::AccountId;
 
     fn put_code<T, P, S>(
         client: &Client<T, S>,
@@ -213,18 +216,26 @@ mod tests {
 
         let signer = AccountKeyring::Alice.pair();
         let code_hash = rt
-            .block_on(put_code(&client, signer))
+            .block_on(put_code(&client, signer.clone()))
             .unwrap()
             .unwrap()
             .unwrap();
 
+        let instantiate =
+            client.xt(signer, None).and_then(move |xt| {
+                xt.submit_and_watch(super::instantiate::<Runtime>(100_000, 500_000, code_hash, Vec::new()))
+                    .map(|result| result.find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED))
+            });
+
+        let result = rt.block_on(instantiate).unwrap();
+
         assert!(
-            code_hash.is_some(),
-            "Contracts CodeStored event should be present"
+            result.is_some(),
+            "Contracts Instantiated event should be present"
         );
         assert!(
-            code_hash.unwrap().is_ok(),
-            "CodeStored Hash should decode successfully"
+            result.unwrap().is_ok(),
+            "Instantiated Event should decode successfully"
         );
     }
 }
