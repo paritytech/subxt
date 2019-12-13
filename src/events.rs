@@ -127,7 +127,6 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
             "DispatchError",
             "Result<(), DispatchError>",
             "OpaqueTimeSlot",
-            "rstd::marker::PhantomData<(AccountId, Event)>",
             // FIXME: determine type size for the following if necessary/possible
             "IdentificationTuple",
             "AuthorityList",
@@ -163,6 +162,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     for primitive in arg.primitives() {
                         if !self.type_sizes.contains_key(&primitive)
                             && !ignore_set.contains(primitive.as_str())
+                            && !primitive.contains("PhantomData")
                         {
                             missing.insert(primitive);
                         }
@@ -194,6 +194,10 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 }
                 EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
+                    if name.contains("PhantomData") {
+                        // PhantomData is size 0
+                        return Ok(())
+                    }
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
                         input.read(&mut buf)?;
