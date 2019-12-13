@@ -222,9 +222,11 @@ mod tests {
             .unwrap()
             .unwrap();
 
+        println!("{:?}", code_hash);
+
         let instantiate =
             client.xt(signer, None).and_then(move |xt| {
-                xt.submit_and_watch(super::instantiate::<Runtime>(100_000, 500_000, code_hash, Vec::new()))
+                xt.submit_and_watch(super::instantiate::<Runtime>(100_000_000_000_000, 500_000, code_hash, Vec::new()))
                     .map(|result| result.find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED))
             });
 
