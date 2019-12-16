@@ -140,7 +140,7 @@ pub fn call<T: Contracts>(
 #[cfg(test)]
 mod tests {
     use futures::Future;
-    use parity_scale_codec::{
+    use codec::{
         Codec,
         Error as CodecError,
     };
