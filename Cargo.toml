@@ -28,6 +28,7 @@ frame-system = { git = "https://github.com/paritytech/substrate/", package = "fr
 pallet-balances = { git = "https://github.com/paritytech/substrate/", package = "pallet-balances" }
 pallet-contracts = { git = "https://github.com/paritytech/substrate/", package = "pallet-contracts" }
 pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices" }
+hex = "0.4.0"
 sc-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "sc-rpc-api" }
 sp-rpc = { git = "https://github.com/paritytech/substrate/", package = "sp-rpc" }
 sp-core = { git = "https://github.com/paritytech/substrate/", package = "sp-core" }
