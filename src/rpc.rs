@@ -56,7 +56,7 @@ use sp_core::{
     },
     twox_128,
 };
-use substrate_rpc_api::{
+use sc_rpc_api::{
     author::AuthorClient,
     chain::ChainClient,
     state::StateClient,
@@ -65,7 +65,7 @@ use sp_rpc::{
     list::ListOrValue,
     number::NumberOrHex,
 };
-use txpool_api::TransactionStatus;
+use sp_transaction_pool::TransactionStatus;
 
 use crate::{
     error::Error,
