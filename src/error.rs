@@ -31,7 +31,7 @@ pub enum Error {
     Io(#[from] std::io::Error),
     /// Codec error.
     #[error("Scale codec error: {0}")]
-    Codec(#[from] parity_scale_codec::Error),
+    Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
     Rpc(RpcError),

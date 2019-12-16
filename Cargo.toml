@@ -18,7 +18,7 @@ jsonrpc-core-client = { version = "14.0", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
 url = "1.7"
-parity-scale-codec = { version = "1.1", default-features = false, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive", "full"] }
 
 frame-metadata = { git = "https://github.com/paritytech/substrate/", package = "frame-metadata" }
 frame-support = { git = "https://github.com/paritytech/substrate/", package = "frame-support" }

@@ -33,7 +33,7 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use parity_scale_codec::{
+use codec::{
     Codec,
     Decode,
     Encode,
@@ -56,7 +56,6 @@ use sp_core::{
 };
 use url::Url;
 
-mod codec;
 mod error;
 mod events;
 mod extrinsic;
@@ -66,7 +65,6 @@ mod rpc;
 mod runtimes;
 
 use self::{
-    codec::Encoded,
     events::EventsDecoder,
     extrinsic::{
         DefaultExtra,
@@ -331,7 +329,7 @@ where
         Error,
     >
     where
-        C: parity_scale_codec::Encode,
+        C: codec::Encode,
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce;
@@ -390,10 +388,21 @@ where
     }
 }
 
+/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
+/// the transaction payload
+#[derive(Clone)]
+pub struct Encoded(pub Vec<u8>);
+
+impl codec::Encode for Encoded {
+    fn encode(&self) -> Vec<u8> {
+        self.0.to_owned()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use futures::stream::Stream;
-    use parity_scale_codec::Encode;
+    use codec::Encode;
     use frame_support::StorageMap;
     use sp_keyring::AccountKeyring;
     use sp_core::storage::StorageKey;

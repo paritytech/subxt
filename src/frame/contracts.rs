@@ -16,8 +16,7 @@
 
 //! Implements support for the pallet_contracts module.
 
-use parity_scale_codec::Encode;
-
+use codec::Encode;
 use crate::frame::{
     balances::Balances,
     system::System,

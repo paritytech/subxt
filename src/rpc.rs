@@ -32,7 +32,7 @@ use jsonrpc_core_client::{
     TypedSubscriptionStream,
 };
 use num_traits::bounds::Bounded;
-use parity_scale_codec::{
+use codec::{
     Decode,
     Encode,
     Error as CodecError,

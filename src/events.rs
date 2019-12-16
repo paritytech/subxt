@@ -26,7 +26,7 @@ use std::{
     },
 };
 
-use parity_scale_codec::{
+use codec::{
     Codec,
     Compact,
     Decode,

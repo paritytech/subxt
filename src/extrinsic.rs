@@ -16,7 +16,7 @@
 
 use std::marker::PhantomData;
 
-use parity_scale_codec::{
+use codec::{
     Codec,
     Decode,
     Encode,

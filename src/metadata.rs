@@ -21,7 +21,7 @@ use std::{
     str::FromStr,
 };
 
-use parity_scale_codec::{
+use codec::{
     Decode,
     Encode,
 };
@@ -37,7 +37,7 @@ use frame_metadata::{
 };
 use sp_core::storage::StorageKey;
 
-use crate::codec::Encoded;
+use crate::Encoded;
 
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
