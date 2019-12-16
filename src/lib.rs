@@ -26,6 +26,11 @@ use std::{
     marker::PhantomData,
 };
 
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use futures::future::{
     self,
     Either,
@@ -33,10 +38,12 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use codec::{
-    Codec,
-    Decode,
-    Encode,
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    Pair,
 };
 use sp_runtime::{
     generic::UncheckedExtrinsic,
@@ -47,13 +54,6 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    Pair,
-};
 use url::Url;
 
 mod error;
@@ -64,6 +64,13 @@ mod metadata;
 mod rpc;
 mod runtimes;
 
+pub use self::{
+    error::Error,
+    events::RawEvent,
+    frame::*,
+    rpc::ExtrinsicSuccess,
+    runtimes::*,
+};
 use self::{
     events::EventsDecoder,
     extrinsic::{
@@ -85,13 +92,6 @@ use self::{
         MapStream,
         Rpc,
     },
-};
-pub use self::{
-    error::Error,
-    events::RawEvent,
-    frame::*,
-    rpc::ExtrinsicSuccess,
-    runtimes::*,
 };
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
@@ -401,11 +401,11 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use futures::stream::Stream;
     use codec::Encode;
     use frame_support::StorageMap;
-    use sp_keyring::AccountKeyring;
+    use futures::stream::Stream;
     use sp_core::storage::StorageKey;
+    use sp_keyring::AccountKeyring;
 
     use super::*;
     use crate::{

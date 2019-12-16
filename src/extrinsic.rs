@@ -22,6 +22,7 @@ use codec::{
     Encode,
 };
 
+use sp_core::Pair;
 use sp_runtime::{
     generic::{
         Era,
@@ -35,7 +36,6 @@ use sp_runtime::{
     },
     transaction_validity::TransactionValidityError,
 };
-use sp_core::Pair;
 
 use crate::frame::{
     balances::Balances,

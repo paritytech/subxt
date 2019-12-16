@@ -23,12 +23,12 @@ use futures::future::{
     Future,
 };
 
+use frame_support::Parameter;
 use sp_runtime::traits::{
     MaybeSerialize,
     Member,
     SimpleArithmetic,
 };
-use frame_support::Parameter;
 
 use crate::{
     error::Error,

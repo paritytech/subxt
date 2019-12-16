@@ -236,12 +236,8 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
         bytes.extend(&sp_core::twox_128(&self.storage_prefix)[..]);
         let encoded_key = key.encode();
         let hash = match self.hasher {
-            StorageHasher::Blake2_128 => {
-                sp_core::blake2_128(&encoded_key).to_vec()
-            }
-            StorageHasher::Blake2_256 => {
-                sp_core::blake2_256(&encoded_key).to_vec()
-            }
+            StorageHasher::Blake2_128 => sp_core::blake2_128(&encoded_key).to_vec(),
+            StorageHasher::Blake2_256 => sp_core::blake2_256(&encoded_key).to_vec(),
             StorageHasher::Twox128 => sp_core::twox_128(&encoded_key).to_vec(),
             StorageHasher::Twox256 => sp_core::twox_256(&encoded_key).to_vec(),
             StorageHasher::Twox64Concat => sp_core::twox_64(&encoded_key).to_vec(),
@@ -360,7 +356,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let module_prefix = convert(storage.prefix)?;
                 for entry in convert(storage.entries)?.into_iter() {
                     let storage_prefix = convert(entry.name.clone())?;
-                    let entry = convert_entry(module_prefix.clone(), storage_prefix.clone(), entry)?;
+                    let entry = convert_entry(
+                        module_prefix.clone(),
+                        storage_prefix.clone(),
+                        entry,
+                    )?;
                     storage_map.insert(storage_prefix, entry);
                 }
             }

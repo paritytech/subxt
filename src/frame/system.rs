@@ -18,13 +18,14 @@
 
 use std::fmt::Debug;
 
+use codec::Codec;
 use futures::future::{
     self,
     Future,
 };
-use codec::Codec;
 use serde::de::DeserializeOwned;
 
+use frame_support::Parameter;
 use sp_runtime::traits::{
     Bounded,
     CheckEqual,
@@ -38,7 +39,6 @@ use sp_runtime::traits::{
     SimpleBitOps,
     StaticLookup,
 };
-use frame_support::Parameter;
 
 use crate::{
     error::Error,
