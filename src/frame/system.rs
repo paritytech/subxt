@@ -169,11 +169,13 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
     Call::new(MODULE, SET_CODE, code)
 }
 
+use frame_support::weights::DispatchInfo
+
 /// Event for the System module.
 #[derive(Clone, Debug, codec::Decode)]
 pub enum SystemEvent {
     /// An extrinsic completed successfully.
-    ExtrinsicSuccess(frame_support::weights::DispatchInfo),
+    ExtrinsicSuccess(DispatchInfo),
     /// An extrinsic failed.
-    ExtrinsicFailed(sp_runtime::DispatchError),
+    ExtrinsicFailed(sp_runtime::DispatchError, DispatchInfo),
 }
