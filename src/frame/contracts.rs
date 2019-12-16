@@ -16,13 +16,12 @@
 
 //! Implements support for the pallet_contracts module.
 
-use parity_scale_codec::Encode;
-
 use crate::frame::{
     balances::Balances,
     system::System,
     Call,
 };
+use codec::Encode;
 
 const MODULE: &str = "Contracts";
 

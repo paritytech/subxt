@@ -15,8 +15,8 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use jsonrpc_core_client::RpcError;
-use sp_runtime::transaction_validity::TransactionValidityError;
 use sp_core::crypto::SecretStringError;
+use sp_runtime::transaction_validity::TransactionValidityError;
 
 use crate::{
     events::EventsError,
@@ -31,7 +31,7 @@ pub enum Error {
     Io(#[from] std::io::Error),
     /// Codec error.
     #[error("Scale codec error: {0}")]
-    Codec(#[from] parity_scale_codec::Error),
+    Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
     Rpc(RpcError),

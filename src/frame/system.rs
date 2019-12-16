@@ -18,13 +18,14 @@
 
 use std::fmt::Debug;
 
+use codec::Codec;
 use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
 use serde::de::DeserializeOwned;
 
+use frame_support::Parameter;
 use sp_runtime::traits::{
     Bounded,
     CheckEqual,
@@ -38,7 +39,6 @@ use sp_runtime::traits::{
     SimpleBitOps,
     StaticLookup,
 };
-use frame_support::Parameter;
 
 use crate::{
     error::Error,
@@ -170,7 +170,7 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
 }
 
 /// Event for the System module.
-#[derive(Clone, Debug, parity_scale_codec::Decode)]
+#[derive(Clone, Debug, codec::Decode)]
 pub enum SystemEvent {
     /// An extrinsic completed successfully.
     ExtrinsicSuccess(frame_support::weights::DispatchInfo),
