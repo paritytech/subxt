@@ -169,7 +169,7 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
     Call::new(MODULE, SET_CODE, code)
 }
 
-use frame_support::weights::DispatchInfo
+use frame_support::weights::DispatchInfo;
 
 /// Event for the System module.
 #[derive(Clone, Debug, codec::Decode)]
