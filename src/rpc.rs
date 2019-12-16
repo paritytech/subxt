@@ -16,6 +16,11 @@
 
 use std::convert::TryInto;
 
+use codec::{
+    Decode,
+    Encode,
+    Error as CodecError,
+};
 use futures::{
     future::{
         self,
@@ -32,14 +37,25 @@ use jsonrpc_core_client::{
     TypedSubscriptionStream,
 };
 use num_traits::bounds::Bounded;
-use parity_scale_codec::{
-    Decode,
-    Encode,
-    Error as CodecError,
-};
 
-use frame_system::Phase;
 use frame_metadata::RuntimeMetadataPrefixed;
+use frame_system::Phase;
+use sc_rpc_api::{
+    author::AuthorClient,
+    chain::ChainClient,
+    state::StateClient,
+};
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    twox_128,
+};
+use sp_rpc::{
+    list::ListOrValue,
+    number::NumberOrHex,
+};
 use sp_runtime::{
     generic::{
         Block,
@@ -48,24 +64,8 @@ use sp_runtime::{
     traits::Hash,
     OpaqueExtrinsic,
 };
+use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    twox_128,
-};
-use substrate_rpc_api::{
-    author::AuthorClient,
-    chain::ChainClient,
-    state::StateClient,
-};
-use sp_rpc::{
-    list::ListOrValue,
-    number::NumberOrHex,
-};
-use txpool_api::TransactionStatus;
 
 use crate::{
     error::Error,
@@ -132,12 +132,12 @@ impl<T: System> Rpc<T> {
             .block_hash(Some(ListOrValue::Value(NumberOrHex::Number(block_zero))))
             .map_err(Into::into)
             .and_then(|list_or_value| {
-                future::result(
-                    match list_or_value {
-                        ListOrValue::Value(genesis_hash) => genesis_hash.ok_or_else(|| "Genesis hash not found".into()),
-                        ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                future::result(match list_or_value {
+                    ListOrValue::Value(genesis_hash) => {
+                        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
                     }
-                )
+                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                })
             })
     }
 
@@ -274,15 +274,21 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             log::info!("received status {:?}", status);
                             match status {
                                 // ignore in progress extrinsic for now
-                                TransactionStatus::Future | TransactionStatus::Ready | TransactionStatus::Broadcast(_) => {
-                                    None
+                                TransactionStatus::Future
+                                | TransactionStatus::Ready
+                                | TransactionStatus::Broadcast(_) => None,
+                                TransactionStatus::Finalized(block_hash) => {
+                                    Some(Ok(block_hash))
                                 }
-                                TransactionStatus::Finalized(block_hash) => Some(Ok(block_hash)),
                                 TransactionStatus::Usurped(_) => {
                                     Some(Err("Extrinsic Usurped".into()))
                                 }
-                                TransactionStatus::Dropped => Some(Err("Extrinsic Dropped".into())),
-                                TransactionStatus::Invalid => Some(Err("Extrinsic Invalid".into())),
+                                TransactionStatus::Dropped => {
+                                    Some(Err("Extrinsic Dropped".into()))
+                                }
+                                TransactionStatus::Invalid => {
+                                    Some(Err("Extrinsic Invalid".into()))
+                                }
                             }
                         })
                         .into_future()

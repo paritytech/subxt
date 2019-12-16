@@ -26,6 +26,11 @@ use std::{
     marker::PhantomData,
 };
 
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use futures::future::{
     self,
     Either,
@@ -33,10 +38,12 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use parity_scale_codec::{
-    Codec,
-    Decode,
-    Encode,
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    Pair,
 };
 use sp_runtime::{
     generic::UncheckedExtrinsic,
@@ -47,16 +54,8 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    Pair,
-};
 use url::Url;
 
-mod codec;
 mod error;
 mod events;
 mod extrinsic;
@@ -65,8 +64,14 @@ mod metadata;
 mod rpc;
 mod runtimes;
 
+pub use self::{
+    error::Error,
+    events::RawEvent,
+    frame::*,
+    rpc::ExtrinsicSuccess,
+    runtimes::*,
+};
 use self::{
-    codec::Encoded,
     events::EventsDecoder,
     extrinsic::{
         DefaultExtra,
@@ -87,13 +92,6 @@ use self::{
         MapStream,
         Rpc,
     },
-};
-pub use self::{
-    error::Error,
-    events::RawEvent,
-    frame::*,
-    rpc::ExtrinsicSuccess,
-    runtimes::*,
 };
 
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
@@ -331,7 +329,7 @@ where
         Error,
     >
     where
-        C: parity_scale_codec::Encode,
+        C: codec::Encode,
     {
         let signer = self.signer.clone();
         let account_nonce = self.nonce;
@@ -390,13 +388,24 @@ where
     }
 }
 
+/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
+/// the transaction payload
+#[derive(Clone)]
+pub struct Encoded(pub Vec<u8>);
+
+impl codec::Encode for Encoded {
+    fn encode(&self) -> Vec<u8> {
+        self.0.to_owned()
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use futures::stream::Stream;
-    use parity_scale_codec::Encode;
+    use codec::Encode;
     use frame_support::StorageMap;
-    use sp_keyring::AccountKeyring;
+    use futures::stream::Stream;
     use sp_core::storage::StorageKey;
+    use sp_keyring::AccountKeyring;
 
     use super::*;
     use crate::{

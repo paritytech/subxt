@@ -26,7 +26,7 @@ use std::{
     },
 };
 
-use parity_scale_codec::{
+use codec::{
     Codec,
     Compact,
     Decode,
@@ -231,7 +231,11 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             } else {
                 let event_variant = input.read_byte()? as u8;
                 let event_metadata = module.event(event_variant)?;
-                log::debug!("decoding event '{}::{}'", module.name(), event_metadata.name);
+                log::debug!(
+                    "decoding event '{}::{}'",
+                    module.name(),
+                    event_metadata.name
+                );
 
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(

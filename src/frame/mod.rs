@@ -16,7 +16,7 @@
 
 //! Implements support for built-in runtime modules.
 
-use parity_scale_codec::Encode;
+use codec::Encode;
 
 pub mod balances;
 pub mod contracts;

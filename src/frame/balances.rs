@@ -22,17 +22,13 @@ use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::{
-    Codec,
-    Encode,
-};
 
+use frame_support::Parameter;
 use sp_runtime::traits::{
     MaybeSerialize,
     Member,
     SimpleArithmetic,
 };
-use frame_support::Parameter;
 
 use crate::{
     error::Error,
@@ -49,7 +45,7 @@ pub trait Balances: System {
     type Balance: Parameter
         + Member
         + SimpleArithmetic
-        + Codec
+        + codec::Codec
         + Default
         + Copy
         + MaybeSerialize
@@ -118,7 +114,7 @@ const MODULE: &str = "Balances";
 const TRANSFER: &str = "transfer";
 
 /// Arguments for transferring a balance
-#[derive(Encode)]
+#[derive(codec::Encode)]
 pub struct TransferArgs<T: Balances> {
     to: <T as System>::Address,
     #[codec(compact)]
