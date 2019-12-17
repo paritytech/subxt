@@ -37,7 +37,6 @@ use sp_runtime::traits::{
     Member,
     SimpleArithmetic,
     SimpleBitOps,
-    StaticLookup,
 };
 
 use crate::{
@@ -109,20 +108,6 @@ pub trait System: 'static + Eq + Clone + Debug {
         + DeserializeOwned;
 }
 
-/// Blanket impl for using existing runtime types
-impl<T: frame_system::Trait + Debug> System for T
-where
-    <T as frame_system::Trait>::Header: serde::de::DeserializeOwned,
-{
-    type Index = T::Index;
-    type BlockNumber = T::BlockNumber;
-    type Hash = T::Hash;
-    type Hashing = T::Hashing;
-    type AccountId = T::AccountId;
-    type Address = <T::Lookup as StaticLookup>::Source;
-    type Header = T::Header;
-}
-
 /// The System extension trait for the Client.
 pub trait SystemStore {
     /// System type.
@@ -178,4 +163,13 @@ pub enum SystemEvent {
     ExtrinsicSuccess(DispatchInfo),
     /// An extrinsic failed.
     ExtrinsicFailed(sp_runtime::DispatchError, DispatchInfo),
+}
+
+/// A phase of a block's execution.
+#[derive(codec::Decode)]
+pub enum Phase {
+    /// Applying an extrinsic.
+    ApplyExtrinsic(u32),
+    /// The end.
+    Finalization,
 }

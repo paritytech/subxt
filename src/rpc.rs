@@ -39,7 +39,6 @@ use jsonrpc_core_client::{
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
-use frame_system::Phase;
 use sc_rpc_api::{
     author::AuthorClient,
     chain::ChainClient,
@@ -77,6 +76,7 @@ use crate::{
     frame::{
         balances::Balances,
         system::{
+            Phase,
             System,
             SystemEvent,
         },
