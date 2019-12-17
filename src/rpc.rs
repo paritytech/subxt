@@ -200,16 +200,16 @@ impl<T: System + Balances + 'static> Rpc<T> {
 
         let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
             Box::new(|event| {
-                if log::log_enabled!(log::Level::Debug) {
-                    let changes = event.changes
+                log::debug!(
+                    "Event {:?}",
+                    event
+                        .changes
                         .iter()
                         .map(|(k, v)| {
-                            (hex::encode(&k.0),
-                             v.as_ref().map(|v| hex::encode(&v.0)))
+                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
                         })
-                        .collect::<Vec<_>>();
-                    log::debug!("Event {:?}", changes);
-                }
+                        .collect::<Vec<_>>()
+                );
                 event
             });
         self.state

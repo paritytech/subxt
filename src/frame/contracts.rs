@@ -139,11 +139,11 @@ pub fn call<T: Contracts>(
 
 #[cfg(test)]
 mod tests {
-    use futures::Future;
     use codec::{
         Codec,
         Error as CodecError,
     };
+    use futures::Future;
     use sp_core::Pair;
     use sp_keyring::AccountKeyring;
     use sp_runtime::traits::{
@@ -157,9 +157,9 @@ mod tests {
         tests::test_setup,
         Balances,
         Client,
+        DefaultNodeRuntime as Runtime,
         Error,
         System,
-        DefaultNodeRuntime as Runtime,
     };
 
     type AccountId = <Runtime as System>::AccountId;
@@ -223,11 +223,17 @@ mod tests {
 
         println!("{:?}", code_hash);
 
-        let instantiate =
-            client.xt(signer, None).and_then(move |xt| {
-                xt.submit_and_watch(super::instantiate::<Runtime>(100_000_000_000_000, 500_000, code_hash, Vec::new()))
-                    .map(|result| result.find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED))
-            });
+        let instantiate = client.xt(signer, None).and_then(move |xt| {
+            xt.submit_and_watch(super::instantiate::<Runtime>(
+                100_000_000_000_000,
+                500_000,
+                code_hash,
+                Vec::new(),
+            ))
+            .map(|result| {
+                result.find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED)
+            })
+        });
 
         let result = rt.block_on(instantiate).unwrap();
 
