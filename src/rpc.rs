@@ -196,11 +196,20 @@ impl<T: System + Balances + 'static> Rpc<T> {
     {
         let mut storage_key = twox_128(b"System").to_vec();
         storage_key.extend(twox_128(b"Events").to_vec());
-        log::debug!("Events storage key {:?}", storage_key);
+        log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
         let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
             Box::new(|event| {
-                log::info!("Event {:?}", event);
+                log::debug!(
+                    "Event {:?}",
+                    event
+                        .changes
+                        .iter()
+                        .map(|(k, v)| {
+                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
+                        })
+                        .collect::<Vec<_>>()
+                );
                 event
             });
         self.state

@@ -421,7 +421,7 @@ mod tests {
     type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
 
-    fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
+    pub(crate) fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
         env_logger::try_init().ok();
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         let client_future = ClientBuilder::<Runtime>::new().build();
@@ -448,41 +448,6 @@ mod tests {
             .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
 
         rt.block_on(transfer).unwrap();
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_tx_contract_put_code() {
-        let (mut rt, client) = test_setup();
-
-        let signer = AccountKeyring::Alice.pair();
-        let xt = rt.block_on(client.xt(signer, None)).unwrap();
-
-        const CONTRACT: &str = r#"
-(module
-    (func (export "call"))
-    (func (export "deploy"))
-)
-"#;
-        let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-
-        let put_code = xt.submit_and_watch(contracts::put_code(500_000, wasm));
-
-        let success = rt
-            .block_on(put_code)
-            .expect("Extrinsic should be included in a block");
-
-        let code_hash =
-            success.find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
-
-        assert!(
-            code_hash.is_some(),
-            "Contracts CodeStored event should be present"
-        );
-        assert!(
-            code_hash.unwrap().is_ok(),
-            "CodeStored Hash should decode successfully"
-        );
     }
 
     #[test]

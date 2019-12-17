@@ -201,7 +201,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
                         input.read(&mut buf)?;
-                        buf.encode_to(output);
+                        output.write(&buf);
                     } else {
                         return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
                     }
@@ -231,11 +231,6 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             } else {
                 let event_variant = input.read_byte()? as u8;
                 let event_metadata = module.event(event_variant)?;
-                log::debug!(
-                    "decoding event '{}::{}'",
-                    module.name(),
-                    event_metadata.name
-                );
 
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(
@@ -243,6 +238,14 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     input,
                     &mut event_data,
                 )?;
+
+                log::debug!(
+                    "received event '{}::{}', raw bytes: {}",
+                    module.name(),
+                    event_metadata.name,
+                    hex::encode(&event_data),
+                );
+
                 RuntimeEvent::Raw(RawEvent {
                     module: module.name().to_string(),
                     variant: event_metadata.name.clone(),
