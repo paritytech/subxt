@@ -36,8 +36,6 @@ use codec::{
     Output,
 };
 
-use frame_system::Phase;
-
 use crate::{
     frame::balances::Balances,
     metadata::{
@@ -47,6 +45,7 @@ use crate::{
     },
     System,
     SystemEvent,
+    Phase,
 };
 
 /// Top level Event that can be produced by a substrate runtime
