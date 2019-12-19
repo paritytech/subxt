@@ -168,6 +168,13 @@ impl<T: System> Rpc<T> {
             })
     }
 
+    /// Get a block hash of the latest finalized block
+    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
+        self.chain
+            .finalized_head()
+            .map_err(Into::into)
+    }
+
     /// Get a Block
     pub fn block(
         &self,
