@@ -286,7 +286,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                                 TransactionStatus::Future
                                 | TransactionStatus::Ready
                                 | TransactionStatus::Broadcast(_) => None,
-                                TransactionStatus::Finalized(block_hash) => {
+                                TransactionStatus::InBlock(block_hash) => {
                                     Some(Ok(block_hash))
                                 }
                                 TransactionStatus::Usurped(_) => {
