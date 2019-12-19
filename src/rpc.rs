@@ -14,48 +14,75 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    error::Error,
-    events::{
-        EventsDecoder,
-        RuntimeEvent,
-    },
-    metadata::Metadata,
-    palette::{
-        balances::Balances,
-        system::System,
-    },
-};
-use futures::future::{
-    self,
-    Future,
-};
-use jsonrpc_core_client::RpcChannel;
-use log;
-use num_traits::bounds::Bounded;
-use parity_scale_codec::{
+use std::convert::TryInto;
+
+use codec::{
     Decode,
     Encode,
     Error as CodecError,
 };
-
-use runtime_metadata::RuntimeMetadataPrefixed;
-use runtime_primitives::{
-    generic::{
-        Block,
-        SignedBlock,
+use futures::{
+    future::{
+        self,
+        Future,
+        IntoFuture,
     },
-    OpaqueExtrinsic,
+    stream::{
+        self,
+        Stream,
+    },
 };
-use sr_version::RuntimeVersion;
-use std::convert::TryInto;
-use substrate_primitives::storage::StorageKey;
-use substrate_rpc_api::{
+use jsonrpc_core_client::{
+    RpcChannel,
+    TypedSubscriptionStream,
+};
+use num_traits::bounds::Bounded;
+
+use frame_metadata::RuntimeMetadataPrefixed;
+use sc_rpc_api::{
     author::AuthorClient,
     chain::ChainClient,
     state::StateClient,
 };
-use substrate_rpc_primitives::number::NumberOrHex;
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    twox_128,
+};
+use sp_rpc::{
+    list::ListOrValue,
+    number::NumberOrHex,
+};
+use sp_runtime::{
+    generic::{
+        Block,
+        SignedBlock,
+    },
+    traits::Hash,
+    OpaqueExtrinsic,
+};
+use sp_transaction_pool::TransactionStatus;
+use sp_version::RuntimeVersion;
+
+use crate::{
+    error::Error,
+    events::{
+        EventsDecoder,
+        RawEvent,
+        RuntimeEvent,
+    },
+    frame::{
+        balances::Balances,
+        system::{
+            Phase,
+            System,
+            SystemEvent,
+        },
+    },
+    metadata::Metadata,
+};
 
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
@@ -106,10 +133,15 @@ impl<T: System> Rpc<T> {
     pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
         let block_zero = T::BlockNumber::min_value();
         self.chain
-            .block_hash(Some(NumberOrHex::Number(block_zero)))
+            .block_hash(Some(ListOrValue::Value(NumberOrHex::Number(block_zero))))
             .map_err(Into::into)
-            .and_then(|genesis_hash| {
-                future::result(genesis_hash.ok_or("Genesis hash not found".into()))
+            .and_then(|list_or_value| {
+                future::result(match list_or_value {
+                    ListOrValue::Value(genesis_hash) => {
+                        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
+                    }
+                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                })
             })
     }
 
@@ -127,9 +159,17 @@ impl<T: System> Rpc<T> {
     /// Get a block hash, returns hash of latest block by default
     pub fn block_hash(
         &self,
-        hash: Option<BlockNumber<T>>,
+        block_number: Option<BlockNumber<T>>,
     ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.chain.block_hash(hash).map_err(Into::into)
+        self.chain
+            .block_hash(block_number.map(|bn| ListOrValue::Value(bn)))
+            .map_err(Into::into)
+            .and_then(|list_or_value| {
+                match list_or_value {
+                    ListOrValue::Value(hash) => Ok(hash),
+                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+                }
+            })
     }
 
     /// Get a Block
@@ -148,26 +188,6 @@ impl<T: System> Rpc<T> {
         self.state.runtime_version(at).map_err(Into::into)
     }
 }
-use futures::{
-    future::IntoFuture,
-    stream::{
-        self,
-        Stream,
-    },
-};
-use jsonrpc_core_client::TypedSubscriptionStream;
-use runtime_primitives::traits::Hash;
-use substrate_primitives::{
-    storage::StorageChangeSet,
-    twox_128,
-};
-use txpool::watcher::Status;
-
-use crate::{
-    events::RawEvent,
-    palette::system::SystemEvent,
-};
-use palette_system::Phase;
 
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
@@ -178,17 +198,26 @@ impl<T: System + Balances + 'static> Rpc<T> {
         &self,
     ) -> impl Future<Item = MapStream<StorageChangeSet<<T as System>::Hash>>, Error = Error>
     {
-        let events_key = b"System Events";
-        let storage_key = twox_128(events_key);
-        log::debug!("Events storage key {:?}", storage_key);
+        let mut storage_key = twox_128(b"System").to_vec();
+        storage_key.extend(twox_128(b"Events").to_vec());
+        log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
         let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
             Box::new(|event| {
-                log::info!("Event {:?}", event);
+                log::debug!(
+                    "Event {:?}",
+                    event
+                        .changes
+                        .iter()
+                        .map(|(k, v)| {
+                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
+                        })
+                        .collect::<Vec<_>>()
+                );
                 event
             });
         self.state
-            .subscribe_storage(Some(vec![StorageKey(storage_key.to_vec())]))
+            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
             .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
             .map_err(Into::into)
     }
@@ -258,15 +287,21 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             log::info!("received status {:?}", status);
                             match status {
                                 // ignore in progress extrinsic for now
-                                Status::Future | Status::Ready | Status::Broadcast(_) => {
-                                    None
+                                TransactionStatus::Future
+                                | TransactionStatus::Ready
+                                | TransactionStatus::Broadcast(_) => None,
+                                TransactionStatus::Finalized(block_hash) => {
+                                    Some(Ok(block_hash))
                                 }
-                                Status::Finalized(block_hash) => Some(Ok(block_hash)),
-                                Status::Usurped(_) => {
+                                TransactionStatus::Usurped(_) => {
                                     Some(Err("Extrinsic Usurped".into()))
                                 }
-                                Status::Dropped => Some(Err("Extrinsic Dropped".into())),
-                                Status::Invalid => Some(Err("Extrinsic Invalid".into())),
+                                TransactionStatus::Dropped => {
+                                    Some(Err("Extrinsic Dropped".into()))
+                                }
+                                TransactionStatus::Invalid => {
+                                    Some(Err("Extrinsic Invalid".into()))
+                                }
                             }
                         })
                         .into_future()
@@ -275,7 +310,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             log::info!("received result {:?}", result);
 
                             result
-                                .ok_or(Error::from("Stream terminated"))
+                                .ok_or_else(|| Error::from("Stream terminated"))
                                 .and_then(|r| r)
                                 .into_future()
                         })
@@ -288,7 +323,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                         .map_err(Into::into)
                 })
                 .and_then(|(h, b)| {
-                    b.ok_or(format!("Failed to find block {:?}", h).into())
+                    b.ok_or_else(|| format!("Failed to find block {:?}", h).into())
                         .map(|b| (h, b))
                         .into_future()
                 })
@@ -374,10 +409,11 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
             let hash = T::Hashing::hash_of(ext);
             hash == ext_hash
         })
-        .ok_or(format!("Failed to find Extrinsic with hash {:?}", ext_hash).into())
+        .ok_or_else(|| {
+            format!("Failed to find Extrinsic with hash {:?}", ext_hash).into()
+        })
         .into_future();
 
-    let block_hash = block_hash.clone();
     events_stream
         .filter(move |event| event.block == block_hash)
         .into_future()

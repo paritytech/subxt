@@ -19,7 +19,18 @@
 
 #![deny(missing_docs)]
 #![deny(warnings)]
+#![allow(clippy::type_complexity)]
 
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
+
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use futures::future::{
     self,
     Either,
@@ -27,13 +38,14 @@ use futures::future::{
     IntoFuture,
 };
 use jsonrpc_core_client::transports::ws;
-use metadata::Metadata;
-use parity_scale_codec::{
-    Codec,
-    Decode,
-    Encode,
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    Pair,
 };
-use runtime_primitives::{
+use sp_runtime::{
     generic::UncheckedExtrinsic,
     traits::{
         IdentifyAccount,
@@ -41,36 +53,40 @@ use runtime_primitives::{
     },
     MultiSignature,
 };
-use sr_version::RuntimeVersion;
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
-use substrate_primitives::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    Pair,
-};
+use sp_version::RuntimeVersion;
 use url::Url;
 
-use crate::{
-    codec::Encoded,
+mod error;
+mod events;
+mod extrinsic;
+mod frame;
+mod metadata;
+mod rpc;
+mod runtimes;
+
+pub use self::{
+    error::Error,
+    events::RawEvent,
+    frame::*,
+    rpc::ExtrinsicSuccess,
+    runtimes::*,
+};
+use self::{
     events::EventsDecoder,
     extrinsic::{
         DefaultExtra,
         SignedExtra,
     },
-    palette::{
-        Call,
+    frame::{
         balances::Balances,
         system::{
             System,
             SystemEvent,
+            Phase,
             SystemStore,
         },
     },
+    metadata::Metadata,
     rpc::{
         BlockNumber,
         ChainBlock,
@@ -79,26 +95,12 @@ use crate::{
     },
 };
 
-mod codec;
-mod error;
-mod events;
-mod extrinsic;
-mod metadata;
-mod palette;
-mod rpc;
-mod runtimes;
-
-pub use error::Error;
-pub use events::RawEvent;
-pub use palette::*;
-pub use rpc::ExtrinsicSuccess;
-pub use runtimes::*;
-
 fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
     ws::connect(url).map_err(Into::into)
 }
 
 /// ClientBuilder for constructing a Client.
+#[derive(Default)]
 pub struct ClientBuilder<T: System, S = MultiSignature> {
     _marker: std::marker::PhantomData<(T, S)>,
     url: Option<Url>,
@@ -153,7 +155,7 @@ impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
             url: self.url.clone(),
-            genesis_hash: self.genesis_hash.clone(),
+            genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
@@ -258,7 +260,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
             None => Either::B(self.account_nonce(account_id)),
         }
         .map(|nonce| {
-            let genesis_hash = client.genesis_hash.clone();
+            let genesis_hash = client.genesis_hash;
             let runtime_version = client.runtime_version.clone();
             XtBuilder {
                 client,
@@ -291,7 +293,7 @@ where
 
     /// Returns the nonce.
     pub fn nonce(&self) -> T::Index {
-        self.nonce.clone()
+        self.nonce
     }
 
     /// Sets the nonce to a new value.
@@ -328,15 +330,15 @@ where
         Error,
     >
     where
-        C: parity_scale_codec::Encode,
+        C: codec::Encode,
     {
         let signer = self.signer.clone();
-        let account_nonce = self.nonce.clone();
+        let account_nonce = self.nonce;
         let version = self.runtime_version.spec_version;
-        let genesis_hash = self.genesis_hash.clone();
+        let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
-            .module(&call.module)
+            .module_with_calls(&call.module)
             .and_then(|module| module.call(&call.function, call.args))?;
 
         log::info!(
@@ -351,7 +353,10 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit<C: Encode>(&self, call: Call<C>) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn submit<C: Encode>(
+        &self,
+        call: Call<C>,
+    ) -> impl Future<Item = T::Hash, Error = Error> {
         let cli = self.client.connect();
         self.create_and_sign(call)
             .into_future()
@@ -364,7 +369,7 @@ where
     /// Submits transaction to the chain and watch for events.
     pub fn submit_and_watch<C: Encode>(
         &self,
-        call: Call<C>
+        call: Call<C>,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
         let metadata = self.client.metadata().clone();
@@ -384,30 +389,40 @@ where
     }
 }
 
+/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
+/// the transaction payload
+#[derive(Clone)]
+pub struct Encoded(pub Vec<u8>);
+
+impl codec::Encode for Encoded {
+    fn encode(&self) -> Vec<u8> {
+        self.0.to_owned()
+    }
+}
+
 #[cfg(test)]
 mod tests {
+    use codec::Encode;
+    use frame_support::StorageMap;
+    use futures::stream::Stream;
+    use sp_core::storage::StorageKey;
+    use sp_keyring::AccountKeyring;
+
     use super::*;
     use crate::{
-        palette::{
-            balances::{
-                Balances,
-                BalancesStore,
-            },
+        frame::balances::{
+            Balances,
+            BalancesStore,
         },
         DefaultNodeRuntime as Runtime,
     };
-    use futures::stream::Stream;
-    use parity_scale_codec::Encode;
-    use runtime_support::StorageMap;
-    use substrate_keyring::AccountKeyring;
-    use substrate_primitives::storage::StorageKey;
 
     type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
     type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
 
-    fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
+    pub(crate) fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
         env_logger::try_init().ok();
         let mut rt = tokio::runtime::Runtime::new().unwrap();
         let client_future = ClientBuilder::<Runtime>::new().build();
@@ -424,8 +439,8 @@ mod tests {
         let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
 
         let dest = AccountKeyring::Bob.to_account_id();
-        let transfer = xt
-            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
+        let transfer =
+            xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
         rt.block_on(transfer).unwrap();
 
         // check that nonce is handled correctly
@@ -434,42 +449,6 @@ mod tests {
             .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
 
         rt.block_on(transfer).unwrap();
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_tx_contract_put_code() {
-        let (mut rt, client) = test_setup();
-
-        let signer = AccountKeyring::Alice.pair();
-        let xt = rt.block_on(client.xt(signer, None)).unwrap();
-
-        const CONTRACT: &str = r#"
-(module
-    (func (export "call"))
-    (func (export "deploy"))
-)
-"#;
-        let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-
-        let put_code = xt
-            .submit_and_watch(contracts::put_code(500_000, wasm));
-
-        let success = rt
-            .block_on(put_code)
-            .expect("Extrinsic should be included in a block");
-
-        let code_hash =
-            success.find_event::<<Runtime as System>::Hash>("Contracts", "CodeStored");
-
-        assert!(
-            code_hash.is_some(),
-            "Contracts CodeStored event should be present"
-        );
-        assert!(
-            code_hash.unwrap().is_ok(),
-            "CodeStored Hash should decode successfully"
-        );
     }
 
     #[test]
@@ -523,23 +502,24 @@ mod tests {
     fn test_chain_read_metadata() {
         let (_, client) = test_setup();
 
-        let balances = client.metadata().module("Balances").unwrap();
-        let dest = substrate_keyring::AccountKeyring::Bob.to_account_id();
+        let balances = client.metadata().module_with_calls("Balances").unwrap();
+        let dest = sp_keyring::AccountKeyring::Bob.to_account_id();
         let address: Address = dest.clone().into();
         let amount: Balance = 10_000;
 
         let transfer = pallet_balances::Call::transfer(address.clone(), amount);
         let call = node_runtime::Call::Balances(transfer);
-        let subxt_transfer = crate::palette::balances::transfer::<Runtime>(address, amount);
-        let call2 = balances
-            .call("transfer", subxt_transfer.args)
-            .unwrap();
+        let subxt_transfer = crate::frame::balances::transfer::<Runtime>(address, amount);
+        let call2 = balances.call("transfer", subxt_transfer.args).unwrap();
         assert_eq!(call.encode().to_vec(), call2.0);
 
         let free_balance =
             <pallet_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
         let free_balance_key = StorageKey(free_balance);
-        let free_balance_key2 = balances
+        let free_balance_key2 = client
+            .metadata()
+            .module("Balances")
+            .unwrap()
             .storage("FreeBalance")
             .unwrap()
             .get_map::<AccountId, Balance>()
@@ -548,7 +528,7 @@ mod tests {
         assert_eq!(free_balance_key, free_balance_key2);
 
         let account_nonce =
-            <palette_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
+            <frame_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
         let account_nonce_key = StorageKey(account_nonce);
         let account_nonce_key2 = client
             .metadata()

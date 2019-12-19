@@ -14,27 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    metadata::{
-        EventArg,
-        Metadata,
-        MetadataError,
-    },
-    palette::balances::Balances,
-    System,
-    SystemEvent,
-};
-use log;
-use palette_system::Phase;
-use parity_scale_codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-    Output,
-};
 use std::{
     collections::{
         HashMap,
@@ -45,6 +24,28 @@ use std::{
         PhantomData,
         Send,
     },
+};
+
+use codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+    Output,
+};
+
+use crate::{
+    frame::balances::Balances,
+    metadata::{
+        EventArg,
+        Metadata,
+        MetadataError,
+    },
+    System,
+    SystemEvent,
+    Phase,
 };
 
 /// Top level Event that can be produced by a substrate runtime
@@ -65,13 +66,22 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug, derive_more::From, derive_more::Display)]
+#[derive(Debug, thiserror::Error)]
 pub enum EventsError {
-    CodecError(CodecError),
-    Metadata(MetadataError),
-    #[display(fmt = "Type Sizes Missing: {:?}", _0)]
+    #[error("Scale codec error: {0:?}")]
+    CodecError(#[from] CodecError),
+    #[error("Metadata error: {0:?}")]
+    Metadata(#[from] MetadataError),
+    #[error("Type Sizes Missing: {0:?}")]
     TypeSizesMissing(Vec<String>),
+    #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
+}
+
+impl From<Vec<String>> for EventsError {
+    fn from(error: Vec<String>) -> Self {
+        EventsError::TypeSizesMissing(error)
+    }
 }
 
 pub struct EventsDecoder<T> {
@@ -112,10 +122,10 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
 
         // Ignore these unregistered types, which are not fixed size primitives
         decoder.check_missing_type_sizes(vec![
+            "DispatchInfo",
             "DispatchError",
             "Result<(), DispatchError>",
             "OpaqueTimeSlot",
-            "rstd::marker::PhantomData<(AccountId, Event)>",
             // FIXME: determine type size for the following if necessary/possible
             "IdentificationTuple",
             "AuthorityList",
@@ -145,12 +155,13 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         let mut missing = HashSet::new();
         let mut ignore_set = HashSet::new();
         ignore_set.extend(ignore);
-        for module in self.metadata.modules() {
+        for module in self.metadata.modules_with_events() {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
                         if !self.type_sizes.contains_key(&primitive)
                             && !ignore_set.contains(primitive.as_str())
+                            && !primitive.contains("PhantomData")
                         {
                             missing.insert(primitive);
                         }
@@ -182,10 +193,14 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 }
                 EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
+                    if name.contains("PhantomData") {
+                        // PhantomData is size 0
+                        return Ok(())
+                    }
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
                         input.read(&mut buf)?;
-                        buf.encode_to(output);
+                        output.write(&buf);
                     } else {
                         return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
                     }
@@ -208,15 +223,13 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
             let phase = Phase::decode(input)?;
             let module_variant = input.read_byte()? as u8;
 
-            let module_name = self.metadata.module_name(module_variant)?;
-            let event = if module_name == "System" {
+            let module = self.metadata.module_with_events(module_variant)?;
+            let event = if module.name() == "System" {
                 let system_event = SystemEvent::decode(input)?;
                 RuntimeEvent::System(system_event)
             } else {
                 let event_variant = input.read_byte()? as u8;
-                let module = self.metadata.module(&module_name)?;
                 let event_metadata = module.event(event_variant)?;
-                log::debug!("decoding event '{}::{}'", module_name, event_metadata.name);
 
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(
@@ -224,8 +237,16 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                     input,
                     &mut event_data,
                 )?;
+
+                log::debug!(
+                    "received event '{}::{}', raw bytes: {}",
+                    module.name(),
+                    event_metadata.name,
+                    hex::encode(&event_data),
+                );
+
                 RuntimeEvent::Raw(RawEvent {
-                    module: module_name.clone(),
+                    module: module.name().to_string(),
                     variant: event_metadata.name.clone(),
                     data: event_data,
                 })

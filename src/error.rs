@@ -14,41 +14,70 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use jsonrpc_core_client::RpcError;
+use sp_core::crypto::SecretStringError;
+use sp_runtime::transaction_validity::TransactionValidityError;
+
 use crate::{
     events::EventsError,
     metadata::MetadataError,
 };
-use jsonrpc_core_client::RpcError;
-use parity_scale_codec::Error as CodecError;
-use runtime_primitives::transaction_validity::TransactionValidityError;
-use std::io::Error as IoError;
-use substrate_primitives::crypto::SecretStringError;
 
 /// Error enum.
-#[derive(Debug, derive_more::From, derive_more::Display)]
+#[derive(Debug, thiserror::Error)]
 pub enum Error {
-    /// Codec error.
-    Codec(CodecError),
-    /// Events error.
-    Events(EventsError),
     /// Io error.
-    Io(IoError),
+    #[error("Io error: {0}")]
+    Io(#[from] std::io::Error),
+    /// Codec error.
+    #[error("Scale codec error: {0}")]
+    Codec(#[from] codec::Error),
     /// Rpc error.
+    #[error("Rpc error: {0}")]
     Rpc(RpcError),
     /// Secret string error.
-    #[display(fmt = "Secret String Error")]
+    #[error("Secret String Error")]
     SecretString(SecretStringError),
-    /// Metadata error.
-    Metadata(MetadataError),
     /// Extrinsic validity error
-    #[display(fmt = "Transaction Validity Error: {:?}", _0)]
+    #[error("Transaction Validity Error: {0:?}")]
     Invalid(TransactionValidityError),
+    /// Events error.
+    #[error("Event error: {0}")]
+    Events(#[from] EventsError),
+    /// Metadata error.
+    #[error("Metadata error: {0}")]
+    Metadata(#[from] MetadataError),
     /// Other error.
+    #[error("Other error: {0}")]
     Other(String),
+}
+
+impl From<RpcError> for Error {
+    fn from(error: RpcError) -> Self {
+        Error::Rpc(error)
+    }
+}
+
+impl From<SecretStringError> for Error {
+    fn from(error: SecretStringError) -> Self {
+        Error::SecretString(error)
+    }
+}
+
+impl From<TransactionValidityError> for Error {
+    fn from(error: TransactionValidityError) -> Self {
+        Error::Invalid(error)
+    }
 }
 
 impl From<&str> for Error {
     fn from(error: &str) -> Self {
         Error::Other(error.into())
+    }
+}
+
+impl From<String> for Error {
+    fn from(error: String) -> Self {
+        Error::Other(error)
     }
 }

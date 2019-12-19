@@ -1,18 +1,32 @@
-//! Implements support for the palette_system module.
-use crate::{
-    error::Error,
-    palette::{
-        Call,
-        balances::Balances,
-    },
-    Client,
-};
+// Copyright 2019 Parity Technologies (UK) Ltd.
+// This file is part of substrate-subxt.
+//
+// subxt is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// subxt is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+
+//! Implements support for the frame_system module.
+
+use std::fmt::Debug;
+
+use codec::Codec;
 use futures::future::{
     self,
     Future,
 };
-use parity_scale_codec::Codec;
-use runtime_primitives::traits::{
+use serde::de::DeserializeOwned;
+
+use frame_support::Parameter;
+use sp_runtime::traits::{
     Bounded,
     CheckEqual,
     Hash,
@@ -23,13 +37,18 @@ use runtime_primitives::traits::{
     Member,
     SimpleArithmetic,
     SimpleBitOps,
-    StaticLookup,
 };
-use runtime_support::Parameter;
-use serde::de::DeserializeOwned;
-use std::fmt::Debug;
 
-/// The subset of the `palette::Trait` that a client must implement.
+use crate::{
+    error::Error,
+    frame::{
+        balances::Balances,
+        Call,
+    },
+    Client,
+};
+
+/// The subset of the `frame::Trait` that a client must implement.
 pub trait System: 'static + Eq + Clone + Debug {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
@@ -52,7 +71,8 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Default
         + Bounded
         + Copy
-        + std::hash::Hash;
+        + std::hash::Hash
+        + std::str::FromStr;
 
     /// The output of the `Hashing` function.
     type Hash: Parameter
@@ -80,27 +100,13 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Ord
         + Default;
 
-    /// The address type. This instead of `<palette_system::Trait::Lookup as StaticLookup>::Source`.
+    /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq + Debug;
 
     /// The block header.
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
-}
-
-/// Blanket impl for using existing runtime types
-impl<T: palette_system::Trait + Debug> System for T
-where
-    <T as palette_system::Trait>::Header: serde::de::DeserializeOwned,
-{
-    type Index = T::Index;
-    type BlockNumber = T::BlockNumber;
-    type Hash = T::Hash;
-    type Hashing = T::Hashing;
-    type AccountId = T::AccountId;
-    type Address = <T::Lookup as StaticLookup>::Source;
-    type Header = T::Header;
 }
 
 /// The System extension trait for the Client.
@@ -149,11 +155,22 @@ pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
     Call::new(MODULE, SET_CODE, code)
 }
 
+use frame_support::weights::DispatchInfo;
+
 /// Event for the System module.
-#[derive(Clone, Debug, parity_scale_codec::Decode)]
+#[derive(Clone, Debug, codec::Decode)]
 pub enum SystemEvent {
     /// An extrinsic completed successfully.
-    ExtrinsicSuccess,
+    ExtrinsicSuccess(DispatchInfo),
     /// An extrinsic failed.
-    ExtrinsicFailed(runtime_primitives::DispatchError),
+    ExtrinsicFailed(sp_runtime::DispatchError, DispatchInfo),
+}
+
+/// A phase of a block's execution.
+#[derive(codec::Decode)]
+pub enum Phase {
+    /// Applying an extrinsic.
+    ApplyExtrinsic(u32),
+    /// The end.
+    Finalization,
 }
