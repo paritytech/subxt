@@ -37,7 +37,6 @@ use futures::future::{
     Future,
     IntoFuture,
 };
-use jsonrpc_core_client::transports::ws;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -94,10 +93,6 @@ use self::{
         Rpc,
     },
 };
-
-fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url).map_err(Into::into)
-}
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]

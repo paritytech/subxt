@@ -32,10 +32,7 @@ use futures::{
         Stream,
     },
 };
-use jsonrpc_core_client::{
-    RpcChannel,
-    TypedSubscriptionStream,
-};
+use jsonrpsee::core::client::{Client, ClientError};
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
@@ -48,8 +45,11 @@ use sp_core::{
     storage::{
         StorageChangeSet,
         StorageKey,
+        StorageData,
     },
     twox_128,
+    H256,
+    Bytes,
 };
 use sp_rpc::{
     list::ListOrValue,
@@ -87,62 +87,70 @@ use crate::{
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
-jsonrpsee::rpc_client! {
+jsonrpsee::rpc_api! {
+    pub SubstrateRPC<Number, Hash> {
+        /// Submit hex-encoded extrinsic for inclusion in block.
+        #[rpc(method = "author_submitExtrinsic")]
+        fn author_submit_extrinsic(extrinsic: Bytes) -> Hash;
 
+        /// Get hash of the n-th block in the canon chain.
+        ///
+        /// By default returns latest block hash.
+        #[rpc(method = "chain_getBlockHash")]
+        fn chain_block_hash(
+            hash: Option<ListOrValue<NumberOrHex<Number>>>,
+        ) -> ListOrValue<Option<Hash>>;
+
+        /// Returns a storage entry at a specific block's state.
+        #[rpc(method = "state_getStorage")]
+        fn state_storage(key: StorageKey, hash: Option<Hash>) -> Option<StorageData>;
+
+        /// Returns the runtime metadata as an opaque blob.
+        #[rpc(method = "state_getMetadata")]
+        fn state_metadata(hash: Option<Hash>) -> Bytes;
+
+        /// Get the runtime version.
+        #[rpc(method = "state_getRuntimeVersion")]
+        fn state_runtime_version(hash: Option<Hash>) -> RuntimeVersion;
+    }
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: System> {
-    state: StateClient<T::Hash>,
-    chain: ChainClient<T::BlockNumber, T::Hash, T::Header, ChainBlock<T>>,
-    author: AuthorClient<T::Hash, T::Hash>,
+pub struct Rpc<T: System, C> {
+    client: Client<C>,
+    marker: std::marker::PhantomData<T>,
 }
 
-/// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T: System> From<RpcChannel> for Rpc<T> {
-    fn from(channel: RpcChannel) -> Self {
-        Self {
-            state: channel.clone().into(),
-            chain: channel.clone().into(),
-            author: channel.into(),
-        }
-    }
-}
-
-impl<T: System> Rpc<T> {
+impl<T: System, C> Rpc<T, C> {
     /// Fetch a storage key
-    pub fn storage<V: Decode>(
-        &self,
+    pub async fn storage<V: Decode>(
+        &mut self,
         key: StorageKey,
-    ) -> impl Future<Item = Option<V>, Error = Error> {
-        self.state
-            .storage(key, None)
-            .map_err(Into::into)
-            .and_then(|data| {
-                match data {
-                    Some(data) => {
-                        let value = Decode::decode(&mut &data.0[..])?;
-                        Ok(Some(value))
-                    }
-                    None => Ok(None),
-                }
-            })
+    ) -> Result<Option<V>, Error> {
+        let data = SubstrateRPC::<T::Hash, T::BlockNumber>::state_storage(&mut self, key, None)
+            .await
+            .map_err(Into::into)?;
+        match data {
+            Some(data) => {
+                let value = Decode::decode(&mut &data.0[..])?;
+                Ok(Some(value))
+            }
+            None => Ok(None),
+        }
     }
 
     /// Fetch the genesis hash
-    pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        let block_zero = T::BlockNumber::min_value();
-        self.chain
-            .block_hash(Some(ListOrValue::Value(NumberOrHex::Number(block_zero))))
-            .map_err(Into::into)
-            .and_then(|list_or_value| {
-                future::result(match list_or_value {
-                    ListOrValue::Value(genesis_hash) => {
-                        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-                    }
-                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-                })
-            })
+    pub async fn genesis_hash(&mut self) -> Result<T::Hash, Error> {
+        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(T::BlockNumber::min_value())));
+        let list_or_value = SubstrateRPC::<T::Hash, T::BlockNumber>::chain_block_hash(&mut self, block_zero)
+            .await
+            .map_err(Into::into)?;
+        match list_or_value {
+            ListOrValue::Value(genesis_hash) => {
+                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
+            }
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+        }
     }
 
     /// Fetch the metadata
