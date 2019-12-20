@@ -149,19 +149,17 @@ impl<T: System, C> Rpc<T, C> {
             ListOrValue::Value(genesis_hash) => {
                 genesis_hash.ok_or_else(|| "Genesis hash not found".into())
             }
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into())
         }
     }
 
     /// Fetch the metadata
-    pub fn metadata(&self) -> impl Future<Item = Metadata, Error = Error> {
-        self.state
-            .metadata(None)
-            .map(|bytes| Decode::decode(&mut &bytes[..]).unwrap())
-            .map_err(Into::into)
-            .and_then(|meta: RuntimeMetadataPrefixed| {
-                future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
-            })
+    pub async fn metadata(&mut self) -> Result<Metadata, Error> {
+        let bytes = SubstrateRPC::<T::Hash, T::BlockNumber>::state_metadata(&mut self, None)
+            .await
+            .map_err(Into::into)?;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
+        meta.try_into().map_err(|err| format!("{:?}", err).into())
     }
 
     /// Get a block hash, returns hash of latest block by default
