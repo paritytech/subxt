@@ -163,19 +163,18 @@ impl<T: System, C> Rpc<T, C> {
     }
 
     /// Get a block hash, returns hash of latest block by default
-    pub fn block_hash(
-        &self,
+    pub async fn block_hash(
+        &mut self,
         block_number: Option<BlockNumber<T>>,
-    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.chain
-            .block_hash(block_number.map(|bn| ListOrValue::Value(bn)))
-            .map_err(Into::into)
-            .and_then(|list_or_value| {
-                match list_or_value {
-                    ListOrValue::Value(hash) => Ok(hash),
-                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-                }
-            })
+    ) -> Result<Option<T::Hash>, Error> {
+        let block_number = block_number.map(|bn| ListOrValue::Value(bn));
+        let list_or_value = SubstrateRPC::<T::Hash, T::BlockNumber>::chain_block_hash(&mut self, block_number)
+            .await
+            .map_err(Into::into)?;
+        match list_or_value {
+            ListOrValue::Value(hash) => Ok(hash),
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+        }
     }
 
     /// Get a Block
