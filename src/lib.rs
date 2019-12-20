@@ -202,6 +202,12 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
             .and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
     }
 
+    /// Get a block hash of the latest finalized block
+    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
+        self.connect()
+            .and_then(|rpc| rpc.finalized_head())
+    }
+
     /// Get a block
     pub fn block<H>(
         &self,
