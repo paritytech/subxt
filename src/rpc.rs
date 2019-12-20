@@ -178,26 +178,28 @@ impl<T: System, C> Rpc<T, C> {
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.chain
-            .finalized_head()
+    pub async fn finalized_head(&mut self) -> Result<T::Hash, Error> {
+        SubstrateRPC::<T::Hash, T::BlockNumber>::chain_finalized_head(&mut self)
+            .await
             .map_err(Into::into)
     }
 
     /// Get a Block
-    pub fn block(
-        &self,
+    pub async fn block(
+        &mut self,
         hash: Option<T::Hash>,
-    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
+    ) -> Result<Option<ChainBlock<T>>, Error> {
         self.chain.block(hash).map_err(Into::into)
     }
 
     /// Fetch the runtime version
-    pub fn runtime_version(
-        &self,
+    pub async fn runtime_version(
+        &mut self,
         at: Option<T::Hash>,
-    ) -> impl Future<Item = RuntimeVersion, Error = Error> {
-        self.state.runtime_version(at).map_err(Into::into)
+    ) -> Result<RuntimeVersion, Error> {
+        SubstrateRPC::<T::Hash, T::BlockNumber>::state_runtime_version(&mut self)
+            .await
+            .map_err(Into::into)
     }
 }
 
