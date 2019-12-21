@@ -25,22 +25,15 @@ use futures::{
     future::{
         self,
         Future,
-        IntoFuture,
     },
     stream::{
         self,
-        Stream,
     },
 };
-use jsonrpsee::core::client::{Client, ClientError};
+use jsonrpsee::core::client::Client;
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
-use sc_rpc_api::{
-    author::AuthorClient,
-    chain::ChainClient,
-    state::StateClient,
-};
 use sp_core::{
     storage::{
         StorageChangeSet,
