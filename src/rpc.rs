@@ -30,7 +30,7 @@ use futures::{
         self,
     },
 };
-use jsonrpsee::core::client::Client;
+use jsonrpsee::core::client::{Client, TransportClient};
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
@@ -94,6 +94,14 @@ jsonrpsee::rpc_api! {
             hash: Option<ListOrValue<NumberOrHex<Number>>>,
         ) -> ListOrValue<Option<Hash>>;
 
+        /// Get header and body of a relay chain block.
+        #[rpc(method = "chain_getBlock")]
+        fn chain_block(&self, hash: Option<Hash>) -> Option<SignedBlock>;
+
+        /// Get hash of the last finalized block in the canon chain.
+        #[rpc(method = "chain_getFinalizedHead")]
+        fn chain_finalized_head(&self) -> Hash;
+
         /// Returns a storage entry at a specific block's state.
         #[rpc(method = "state_getStorage")]
         fn state_storage(key: StorageKey, hash: Option<Hash>) -> Option<StorageData>;
@@ -114,13 +122,13 @@ pub struct Rpc<T: System, C> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T: System, C> Rpc<T, C> {
+impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
     /// Fetch a storage key
     pub async fn storage<V: Decode>(
         &mut self,
         key: StorageKey,
     ) -> Result<Option<V>, Error> {
-        let data = SubstrateRPC::<T::Hash, T::BlockNumber>::state_storage(&mut self, key, None)
+        let data = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_storage(&mut self.client, key, None)
             .await
             .map_err(Into::into)?;
         match data {
@@ -135,7 +143,7 @@ impl<T: System, C> Rpc<T, C> {
     /// Fetch the genesis hash
     pub async fn genesis_hash(&mut self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(T::BlockNumber::min_value())));
-        let list_or_value = SubstrateRPC::<T::Hash, T::BlockNumber>::chain_block_hash(&mut self, block_zero)
+        let list_or_value = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block_hash(&mut self.client, block_zero)
             .await
             .map_err(Into::into)?;
         match list_or_value {
@@ -148,7 +156,7 @@ impl<T: System, C> Rpc<T, C> {
 
     /// Fetch the metadata
     pub async fn metadata(&mut self) -> Result<Metadata, Error> {
-        let bytes = SubstrateRPC::<T::Hash, T::BlockNumber>::state_metadata(&mut self, None)
+        let bytes = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_metadata(&mut self.client, None)
             .await
             .map_err(Into::into)?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
@@ -161,7 +169,7 @@ impl<T: System, C> Rpc<T, C> {
         block_number: Option<BlockNumber<T>>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(|bn| ListOrValue::Value(bn));
-        let list_or_value = SubstrateRPC::<T::Hash, T::BlockNumber>::chain_block_hash(&mut self, block_number)
+        let list_or_value = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block_hash(&mut self.client, block_number)
             .await
             .map_err(Into::into)?;
         match list_or_value {
@@ -172,7 +180,7 @@ impl<T: System, C> Rpc<T, C> {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&mut self) -> Result<T::Hash, Error> {
-        SubstrateRPC::<T::Hash, T::BlockNumber>::chain_finalized_head(&mut self)
+        SubstrateRPC::<T::BlockNumber, T::Hash,_, _>::chain_finalized_head(&mut self.client)
             .await
             .map_err(Into::into)
     }
@@ -182,7 +190,9 @@ impl<T: System, C> Rpc<T, C> {
         &mut self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        self.chain.block(hash).map_err(Into::into)
+        SubstrateRPC::<T::BlockNumber, T::Hash,_, _>::chain_block(&mut self.client)
+            .await
+            .map_err(Into::into)
     }
 
     /// Fetch the runtime version
@@ -190,7 +200,7 @@ impl<T: System, C> Rpc<T, C> {
         &mut self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
-        SubstrateRPC::<T::Hash, T::BlockNumber>::state_runtime_version(&mut self)
+        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_runtime_version(&mut self.client, at)
             .await
             .map_err(Into::into)
     }
@@ -199,7 +209,7 @@ impl<T: System, C> Rpc<T, C> {
 type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
 pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
 
-impl<T: System + Balances + 'static> Rpc<T> {
+impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     /// Subscribe to substrate System Events
     pub fn subscribe_events(
         &self,
