@@ -159,10 +159,6 @@ impl<T: System, S> Clone for Client<T, S> {
 }
 
 impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
-    fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
-        connect(&self.url)
-    }
-
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
