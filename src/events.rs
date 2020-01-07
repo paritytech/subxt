@@ -112,8 +112,6 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         // VoteThreshold enum index
         decoder.register_type_size::<u8>("VoteThreshold")?;
 
-        // Ignore these unregistered types, which are not fixed size primitives
-        decoder.check_missing_type_sizes();
         Ok(decoder)
     }
 }
@@ -132,16 +130,17 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
-    fn check_missing_type_sizes(&self) {
+    pub fn check_missing_type_sizes(&self) {
         let mut missing = HashSet::new();
         for module in self.metadata.modules_with_events() {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if !self.type_sizes.contains_key(&primitive)
+                        if module.name() != "System"
+                            && !self.type_sizes.contains_key(&primitive)
                             && !primitive.contains("PhantomData")
                         {
-                            missing.insert(format!("{}: {}", event.name, primitive));
+                            missing.insert(format!("{}::{}::{}", module.name(), event.name, primitive));
                         }
                     }
                 }

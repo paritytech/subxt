@@ -72,7 +72,7 @@ pub use self::{
     runtimes::*,
 };
 use self::{
-    events::EventsDecoder,
+    events::{EventsDecoder, EventsError},
     extrinsic::{
         DefaultExtra,
         SignedExtra,
@@ -388,7 +388,7 @@ where
 pub struct EventsSubscriber<T: System, P, S> {
     client: Client<T, S>,
     builder: XtBuilder<T, P, S>,
-    decoder: Result<EventsDecoder<T>, Error>,
+    decoder: Result<EventsDecoder<T>, EventsError>,
 }
 
 impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
@@ -399,11 +399,13 @@ where
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     T::Address: From<T::AccountId>,
 {
-    /// Access the events decoder, e.g. for registering custom type sizes
-    pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> ()>(self, f: F) -> Self {
+    /// Access the events decoder for registering custom type sizes
+    pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>>(self, f: F) -> Self {
         let mut this = self;
         if let Ok(ref mut decoder) = this.decoder {
-            f(decoder)
+            if let Err(err) = f(decoder) {
+                this.decoder = Err(err)
+            }
         }
         this
     }
@@ -422,6 +424,7 @@ where
             .map_err(Into::into)
             .join(decoder)
             .and_then(move |(extrinsic, decoder)| {
+                decoder.check_missing_type_sizes();
                 cli.and_then(move |rpc| {
                     rpc.submit_and_watch_extrinsic(extrinsic, decoder)
                 })
