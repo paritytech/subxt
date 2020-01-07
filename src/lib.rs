@@ -72,7 +72,7 @@ pub use self::{
     runtimes::*,
 };
 use self::{
-    events::EventsDecoder,
+    events::{EventsDecoder, EventsError},
     extrinsic::{
         DefaultExtra,
         SignedExtra,
@@ -80,9 +80,9 @@ use self::{
     frame::{
         balances::Balances,
         system::{
+            Phase,
             System,
             SystemEvent,
-            Phase,
             SystemStore,
         },
     },
@@ -209,8 +209,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Get a block hash of the latest finalized block
     pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.finalized_head())
+        self.connect().and_then(|rpc| rpc.finalized_head())
     }
 
     /// Get a block
@@ -280,6 +279,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 }
 
 /// Transaction builder.
+#[derive(Clone)]
 pub struct XtBuilder<T: System, P, S> {
     client: Client<T, S>,
     nonce: T::Index,
@@ -373,21 +373,58 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit_and_watch<C: Encode>(
-        &self,
+    pub fn watch(self) -> EventsSubscriber<T, P, S> {
+        let metadata = self.client.metadata().clone();
+        let decoder = EventsDecoder::try_from(metadata).map_err(Into::into);
+        EventsSubscriber {
+            client: self.client.clone(),
+            builder: self,
+            decoder,
+        }
+    }
+}
+
+/// Submits an extrinsic and subscribes to the triggered events
+pub struct EventsSubscriber<T: System, P, S> {
+    client: Client<T, S>,
+    builder: XtBuilder<T, P, S>,
+    decoder: Result<EventsDecoder<T>, EventsError>,
+}
+
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
+    EventsSubscriber<T, P, S>
+where
+    P: Pair,
+    S: Verify + Codec + From<P::Signature>,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
+    T::Address: From<T::AccountId>,
+{
+    /// Access the events decoder for registering custom type sizes
+    pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>>(self, f: F) -> Self {
+        let mut this = self;
+        if let Ok(ref mut decoder) = this.decoder {
+            if let Err(err) = f(decoder) {
+                this.decoder = Err(err)
+            }
+        }
+        this
+    }
+
+    /// Submits transaction to the chain and watch for events.
+    pub fn submit<C: Encode>(
+        self,
         call: Call<C>,
     ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
         let cli = self.client.connect();
-        let metadata = self.client.metadata().clone();
-        let decoder = EventsDecoder::try_from(metadata)
-            .into_future()
-            .map_err(Into::into);
+        let decoder = self.decoder.into_future().map_err(Into::into);
 
-        self.create_and_sign(call)
+        self.builder
+            .create_and_sign(call)
             .into_future()
             .map_err(Into::into)
             .join(decoder)
             .and_then(move |(extrinsic, decoder)| {
+                decoder.check_missing_type_sizes();
                 cli.and_then(move |rpc| {
                     rpc.submit_and_watch_extrinsic(extrinsic, decoder)
                 })
