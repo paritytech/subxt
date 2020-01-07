@@ -80,9 +80,9 @@ use self::{
     frame::{
         balances::Balances,
         system::{
+            Phase,
             System,
             SystemEvent,
-            Phase,
             SystemStore,
         },
     },
@@ -209,8 +209,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Get a block hash of the latest finalized block
     pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.finalized_head())
+        self.connect().and_then(|rpc| rpc.finalized_head())
     }
 
     /// Get a block
@@ -392,14 +391,14 @@ pub struct EventsSubscriber<T: System, P, S> {
     decoder: Result<EventsDecoder<T>, Error>,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> EventsSubscriber<T, P, S>
-    where
-        P: Pair,
-        S: Verify + Codec + From<P::Signature>,
-        S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-        T::Address: From<T::AccountId>,
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
+    EventsSubscriber<T, P, S>
+where
+    P: Pair,
+    S: Verify + Codec + From<P::Signature>,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
+    T::Address: From<T::AccountId>,
 {
-
     /// Access the events decoder, e.g. for registering custom type sizes
     pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> ()>(self, f: F) -> Self {
         let mut this = self;
@@ -417,7 +416,8 @@ impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> EventsSubscrib
         let cli = self.client.connect();
         let decoder = self.decoder.into_future().map_err(Into::into);
 
-        self.builder.create_and_sign(call)
+        self.builder
+            .create_and_sign(call)
             .into_future()
             .map_err(Into::into)
             .join(decoder)

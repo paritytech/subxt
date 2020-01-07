@@ -43,9 +43,9 @@ use crate::{
         Metadata,
         MetadataError,
     },
+    Phase,
     System,
     SystemEvent,
-    Phase,
 };
 
 /// Top level Event that can be produced by a substrate runtime
