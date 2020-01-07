@@ -186,7 +186,8 @@ mod tests {
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
         client.xt(signer, None).and_then(|xt| {
-            xt.submit_and_watch(super::put_code(500_000, wasm))
+            xt.watch()
+                .submit(super::put_code(500_000, wasm))
                 .map(|result| result.find_event::<T::Hash>(MODULE, events::CODE_STORED))
         })
     }
@@ -224,7 +225,9 @@ mod tests {
         println!("{:?}", code_hash);
 
         let instantiate = client.xt(signer, None).and_then(move |xt| {
-            xt.submit_and_watch(super::instantiate::<Runtime>(
+            xt
+                .watch()
+                .submit(super::instantiate::<Runtime>(
                 100_000_000_000_000,
                 500_000,
                 code_hash,
