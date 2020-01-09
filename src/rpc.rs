@@ -145,10 +145,13 @@ impl<T: System> Rpc<T> {
     pub fn metadata(&self) -> impl Future<Item = Metadata, Error = Error> {
         self.state
             .metadata(None)
-            .map(|bytes| Decode::decode(&mut &bytes[..]).unwrap())
             .map_err(Into::into)
-            .and_then(|meta: RuntimeMetadataPrefixed| {
-                future::result(meta.try_into().map_err(|err| format!("{:?}", err).into()))
+            .and_then(|bytes| {
+                let result =
+                    Decode::decode(&mut &bytes[..])
+                        .map_err(Into::into)
+                        .and_then(|meta: RuntimeMetadataPrefixed| meta.try_into().map_err(|err| format!("{:?}", err).into()));
+                future::result(result)
             })
     }
 
