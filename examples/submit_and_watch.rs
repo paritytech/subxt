@@ -15,8 +15,12 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future::Future;
-use substrate_subxt::{balances, system::System, DefaultNodeRuntime as Runtime};
 use sp_keyring::AccountKeyring;
+use substrate_subxt::{
+    balances,
+    system::System,
+    DefaultNodeRuntime as Runtime,
+};
 
 type AccountId = <Runtime as System>::AccountId;
 type Balance = <Runtime as balances::Balances>::Balance;
@@ -42,13 +46,17 @@ fn main() {
     let mut rt = tokio::runtime::Runtime::new().unwrap();
     match rt.block_on(fut) {
         Ok(extrinsic_success) => {
-            match extrinsic_success.find_event::<(AccountId, AccountId, Balance, Balance)>("Balances", "Transfer") {
-                Some(Ok((_from, _to, value, _fees))) =>
-                    println!("Balance transfer success: value: {:?}", value),
+            match extrinsic_success
+                .find_event::<(AccountId, AccountId, Balance, Balance)>(
+                    "Balances", "Transfer",
+                ) {
+                Some(Ok((_from, _to, value, _fees))) => {
+                    println!("Balance transfer success: value: {:?}", value)
+                }
                 Some(Err(err)) => println!("Failed to decode code hash: {}", err),
                 None => println!("Failed to find Contracts::CodeStored Event"),
             }
-        },
-        Err(err) => println!("Error: {}", err)
+        }
+        Err(err) => println!("Error: {}", err),
     }
 }

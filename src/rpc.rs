@@ -147,10 +147,11 @@ impl<T: System> Rpc<T> {
             .metadata(None)
             .map_err(Into::into)
             .and_then(|bytes| {
-                let result =
-                    Decode::decode(&mut &bytes[..])
-                        .map_err(Into::into)
-                        .and_then(|meta: RuntimeMetadataPrefixed| meta.try_into().map_err(|err| format!("{:?}", err).into()));
+                let result = Decode::decode(&mut &bytes[..])
+                    .map_err(Into::into)
+                    .and_then(|meta: RuntimeMetadataPrefixed| {
+                        meta.try_into().map_err(|err| format!("{:?}", err).into())
+                    });
                 future::result(result)
             })
     }
