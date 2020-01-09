@@ -140,7 +140,12 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                             && !self.type_sizes.contains_key(&primitive)
                             && !primitive.contains("PhantomData")
                         {
-                            missing.insert(format!("{}::{}::{}", module.name(), event.name, primitive));
+                            missing.insert(format!(
+                                "{}::{}::{}",
+                                module.name(),
+                                event.name,
+                                primitive
+                            ));
                         }
                     }
                 }

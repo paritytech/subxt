@@ -72,7 +72,10 @@ pub use self::{
     runtimes::*,
 };
 use self::{
-    events::{EventsDecoder, EventsError},
+    events::{
+        EventsDecoder,
+        EventsError,
+    },
     extrinsic::{
         DefaultExtra,
         SignedExtra,
@@ -400,7 +403,12 @@ where
     T::Address: From<T::AccountId>,
 {
     /// Access the events decoder for registering custom type sizes
-    pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>>(self, f: F) -> Self {
+    pub fn events_decoder<
+        F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>,
+    >(
+        self,
+        f: F,
+    ) -> Self {
         let mut this = self;
         if let Ok(ref mut decoder) = this.decoder {
             if let Err(err) = f(decoder) {
