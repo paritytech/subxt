@@ -80,6 +80,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + MaybeSerializeDeserialize
         + Debug
         + MaybeDisplay
+        + Ord
         + SimpleBitOps
         + Default
         + Copy
