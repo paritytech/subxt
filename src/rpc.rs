@@ -30,7 +30,14 @@ use futures::{
         self,
     },
 };
-use jsonrpsee::core::client::{Client, TransportClient};
+use jsonrpsee::{
+    core::{
+        common::Params,
+        TransportClient,
+    },
+    Client,
+};
+
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
@@ -96,11 +103,11 @@ jsonrpsee::rpc_api! {
 
         /// Get header and body of a relay chain block.
         #[rpc(method = "chain_getBlock")]
-        fn chain_block(&self, hash: Option<Hash>) -> Option<SignedBlock>;
+        fn chain_block(hash: Option<Hash>) -> Option<SignedBlock>;
 
         /// Get hash of the last finalized block in the canon chain.
         #[rpc(method = "chain_getFinalizedHead")]
-        fn chain_finalized_head(&self) -> Hash;
+        fn chain_finalized_head() -> Hash;
 
         /// Returns a storage entry at a specific block's state.
         #[rpc(method = "state_getStorage")]
@@ -206,43 +213,42 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
     }
 }
 
-type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
-pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
-
 impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     /// Subscribe to substrate System Events
-    pub fn subscribe_events(
+    pub async fn subscribe_events(
         &self,
-    ) -> impl Future<Item = MapStream<StorageChangeSet<<T as System>::Hash>>, Error = Error>
+    ) -> Result<Subscription<StorageChangeSet<<T as System>::Hash>>, Error>
     {
         let mut storage_key = twox_128(b"System").to_vec();
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
-            Box::new(|event| {
-                log::debug!(
-                    "Event {:?}",
-                    event
-                        .changes
-                        .iter()
-                        .map(|(k, v)| {
-                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
-                        })
-                        .collect::<Vec<_>>()
-                );
-                event
-            });
-        self.state
-            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
-            .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
-            .map_err(Into::into)
+        self.client.subscribe("state_subscribeStorage", Some(vec![StorageKey(storage_key)]), "state_unsubscribeStorage")
+
+//        let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
+//            Box::new(|event| {
+//                log::debug!(
+//                    "Event {:?}",
+//                    event
+//                        .changes
+//                        .iter()
+//                        .map(|(k, v)| {
+//                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
+//                        })
+//                        .collect::<Vec<_>>()
+//                );
+//                event
+//            });
+//        self.state
+//            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
+//            .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
+//            .map_err(Into::into)
     }
 
     /// Subscribe to blocks.
-    pub fn subscribe_blocks(
+    pub async fn subscribe_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
+    ) -> Result<Subscription<T::Header>, Error> {
         let closure: MapClosure<T::Header> = Box::new(|event| {
             log::info!("New block {:?}", event);
             event
@@ -254,9 +260,9 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     }
 
     /// Subscribe to finalized blocks.
-    pub fn subscribe_finalized_blocks(
+    pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
+    ) -> Result<Subscription<T::Header>, Error> {
         let closure: MapClosure<T::Header> = Box::new(|event| {
             log::info!("Finalized block {:?}", event);
             event
@@ -268,10 +274,10 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub fn submit_extrinsic<E>(
+    pub async fn submit_extrinsic<E>(
         self,
         extrinsic: E,
-    ) -> impl Future<Item = T::Hash, Error = Error>
+    ) -> Result<T::Hash, Error>
     where
         E: Encode,
     {
@@ -281,11 +287,11 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn submit_and_watch_extrinsic<E: 'static>(
+    pub async fn submit_and_watch_extrinsic<E: 'static>(
         self,
         extrinsic: E,
         decoder: EventsDecoder<T>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
+    ) -> Result<ExtrinsicSuccess<T>, Error>
     where
         E: Encode,
     {

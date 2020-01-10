@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::core::client::ClientError as RpcError;
+//use jsonrpsee::client::RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 
@@ -33,8 +33,8 @@ pub enum Error {
     #[error("Scale codec error: {0}")]
     Codec(#[from] codec::Error),
     /// Rpc error.
-    #[error("Rpc error: {0}")]
-    Rpc(RpcError),
+//    #[error("Rpc error: {0}")]
+//    Rpc(RpcError),
     /// Secret string error.
     #[error("Secret String Error")]
     SecretString(SecretStringError),
@@ -50,12 +50,6 @@ pub enum Error {
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-impl From<RpcError> for Error {
-    fn from(error: RpcError) -> Self {
-        Error::Rpc(error)
-    }
 }
 
 impl From<SecretStringError> for Error {

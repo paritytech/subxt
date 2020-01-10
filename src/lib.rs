@@ -92,7 +92,6 @@ use self::{
     rpc::{
         BlockNumber,
         ChainBlock,
-        MapStream,
         Rpc,
     },
 };
