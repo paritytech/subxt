@@ -237,6 +237,14 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
         let encoded_key = key.encode();
         let hash = match self.hasher {
             StorageHasher::Blake2_128 => sp_core::blake2_128(&encoded_key).to_vec(),
+            StorageHasher::Blake2_128Concat => {
+                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
+                sp_core::blake2_128(&encoded_key)
+                    .iter()
+                    .chain(&encoded_key)
+                    .cloned()
+                    .collect::<Vec<_>>()
+            }
             StorageHasher::Blake2_256 => sp_core::blake2_256(&encoded_key).to_vec(),
             StorageHasher::Twox128 => sp_core::twox_128(&encoded_key).to_vec(),
             StorageHasher::Twox256 => sp_core::twox_256(&encoded_key).to_vec(),
@@ -341,7 +349,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(Error::InvalidPrefix)
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V9(meta) => meta,
+            RuntimeMetadata::V10(meta) => meta,
             _ => return Err(Error::InvalidVersion),
         };
         let mut modules = HashMap::new();

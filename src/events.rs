@@ -43,9 +43,9 @@ use crate::{
         Metadata,
         MetadataError,
     },
+    Phase,
     System,
     SystemEvent,
-    Phase,
 };
 
 /// Top level Event that can be produced by a substrate runtime
@@ -72,16 +72,8 @@ pub enum EventsError {
     CodecError(#[from] CodecError),
     #[error("Metadata error: {0:?}")]
     Metadata(#[from] MetadataError),
-    #[error("Type Sizes Missing: {0:?}")]
-    TypeSizesMissing(Vec<String>),
     #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
-}
-
-impl From<Vec<String>> for EventsError {
-    fn from(error: Vec<String>) -> Self {
-        EventsError::TypeSizesMissing(error)
-    }
 }
 
 pub struct EventsDecoder<T> {
@@ -120,16 +112,6 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         // VoteThreshold enum index
         decoder.register_type_size::<u8>("VoteThreshold")?;
 
-        // Ignore these unregistered types, which are not fixed size primitives
-        decoder.check_missing_type_sizes(vec![
-            "DispatchInfo",
-            "DispatchError",
-            "Result<(), DispatchError>",
-            "OpaqueTimeSlot",
-            // FIXME: determine type size for the following if necessary/possible
-            "IdentificationTuple",
-            "AuthorityList",
-        ])?;
         Ok(decoder)
     }
 }
@@ -148,31 +130,33 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
-    fn check_missing_type_sizes<I: IntoIterator<Item = &'static str>>(
-        &self,
-        ignore: I,
-    ) -> Result<(), Vec<String>> {
+    pub fn check_missing_type_sizes(&self) {
         let mut missing = HashSet::new();
-        let mut ignore_set = HashSet::new();
-        ignore_set.extend(ignore);
         for module in self.metadata.modules_with_events() {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if !self.type_sizes.contains_key(&primitive)
-                            && !ignore_set.contains(primitive.as_str())
+                        if module.name() != "System"
+                            && !self.type_sizes.contains_key(&primitive)
                             && !primitive.contains("PhantomData")
                         {
-                            missing.insert(primitive);
+                            missing.insert(format!(
+                                "{}::{}::{}",
+                                module.name(),
+                                event.name,
+                                primitive
+                            ));
                         }
                     }
                 }
             }
         }
-        if missing.is_empty() {
-            Ok(())
-        } else {
-            Err(missing.into_iter().collect())
+        if missing.len() > 0 {
+            log::warn!(
+                "The following primitive types do not have registered sizes: {:?} \
+                If any of these events are received, an error will occur since we cannot decode them",
+                missing
+            );
         }
     }
 
