@@ -32,9 +32,14 @@ use futures::{
 };
 use jsonrpsee::{
     core::{
-        common::Params,
+        common::{
+            JsonMap,
+            Params,
+            to_value as to_json_value,
+        },
         TransportClient,
     },
+    client::Subscription,
     Client,
 };
 
@@ -223,26 +228,11 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        self.client.subscribe("state_subscribeStorage", Some(vec![StorageKey(storage_key)]), "state_unsubscribeStorage")
+        let mut params = JsonMap::with_capacity(1);
+        params.insert("keys".to_string(), to_json_value(StorageKey(storage_key)?));
 
-//        let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
-//            Box::new(|event| {
-//                log::debug!(
-//                    "Event {:?}",
-//                    event
-//                        .changes
-//                        .iter()
-//                        .map(|(k, v)| {
-//                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
-//                        })
-//                        .collect::<Vec<_>>()
-//                );
-//                event
-//            });
-//        self.state
-//            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
-//            .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
-//            .map_err(Into::into)
+        let subscription = self.client.subscribe("state_subscribeStorage", params, "state_unsubscribeStorage").await?;
+        Ok(subscription)
     }
 
     /// Subscribe to blocks.
