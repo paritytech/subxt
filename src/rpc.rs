@@ -192,7 +192,7 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&mut self) -> Result<T::Hash, Error> {
-        SubstrateRPC::<T::BlockNumber, T::Hash,_, _>::chain_finalized_head(&mut self.client)
+        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_finalized_head(&mut self.client)
             .await
             .map_err(Into::into)
     }
@@ -202,7 +202,7 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
         &mut self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        SubstrateRPC::<T::BlockNumber, T::Hash,_, _>::chain_block(&mut self.client)
+        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block(&mut self.client)
             .await
             .map_err(Into::into)
     }
@@ -231,7 +231,11 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
         let mut params = JsonMap::with_capacity(1);
         params.insert("keys".to_string(), to_json_value(StorageKey(storage_key)?));
 
-        let subscription = self.client.subscribe("state_subscribeStorage", params, "state_unsubscribeStorage").await?;
+        let subscription = self.client.subscribe(
+            "state_subscribeStorage",
+            params,
+            "state_unsubscribeStorage"
+        ).await?;
         Ok(subscription)
     }
 
@@ -239,40 +243,38 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     pub async fn subscribe_blocks(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
-        let closure: MapClosure<T::Header> = Box::new(|event| {
-            log::info!("New block {:?}", event);
-            event
-        });
-        self.chain
-            .subscribe_new_heads()
-            .map(|stream| stream.map(closure))
-            .map_err(Into::into)
+        let subscription = self.client.subscribe(
+            "chain_subscribeNewHeads",
+            Params::None,
+            "chain_subscribeNewHeads"
+        ).await?;
+
+        Ok(subscription)
     }
 
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
-        let closure: MapClosure<T::Header> = Box::new(|event| {
-            log::info!("Finalized block {:?}", event);
-            event
-        });
-        self.chain
-            .subscribe_finalized_heads()
-            .map(|stream| stream.map(closure))
-            .map_err(Into::into)
+        let subscription = self.client.subscribe(
+            "chain_subscribeFinalizedHeads",
+            Params::None,
+            "chain_subscribeFinalizedHeads"
+        ).await?;
+
+        Ok(subscription)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn submit_extrinsic<E>(
-        self,
+        &mut self,
         extrinsic: E,
     ) -> Result<T::Hash, Error>
     where
         E: Encode,
     {
-        self.author
-            .submit_extrinsic(extrinsic.encode().into())
+        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::author_submit_extrinsic(&mut self.client, extrinsic.encode().into())
+            .await
             .map_err(Into::into)
     }
 
@@ -407,13 +409,13 @@ impl<T: System> ExtrinsicSuccess<T> {
 }
 
 /// Waits for events for the block triggered by the extrinsic
-pub fn wait_for_block_events<T: System + Balances + 'static>(
+pub async fn wait_for_block_events<T: System + Balances + 'static>(
     decoder: EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,
     block_hash: T::Hash,
-    events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+    events_subscription: Subscription<StorageChangeSet<T::Hash>>,
+) -> Result<ExtrinsicSuccess<T>, Error> {
     let ext_index = signed_block
         .block
         .extrinsics
@@ -424,42 +426,42 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
         })
         .ok_or_else(|| {
             format!("Failed to find Extrinsic with hash {:?}", ext_hash).into()
-        })
-        .into_future();
+        })?;
 
-    events_stream
-        .filter(move |event| event.block == block_hash)
-        .into_future()
-        .map_err(|(e, _)| e.into())
-        .join(ext_index)
-        .and_then(move |((change_set, _), ext_index)| {
-            let events = match change_set {
-                None => Vec::new(),
-                Some(change_set) => {
-                    let mut events = Vec::new();
-                    for (_key, data) in change_set.changes {
-                        if let Some(data) = data {
-                            match decoder.decode_events(&mut &data.0[..]) {
-                                Ok(raw_events) => {
-                                    for (phase, event) in raw_events {
-                                        if let Phase::ApplyExtrinsic(i) = phase {
-                                            if i as usize == ext_index {
-                                                events.push(event)
-                                            }
+    let mut subscription = events_subscription;
+    while let change_set = subscription.next().await {
+        // only interested in events for the given block
+        if change_set.block != block_hash {
+            continue
+        }
+        let events = match change_set {
+            None => Vec::new(),
+            Some(change_set) => {
+                let mut events = Vec::new();
+                for (_key, data) in change_set.changes {
+                    if let Some(data) = data {
+                        match decoder.decode_events(&mut &data.0[..]) {
+                            Ok(raw_events) => {
+                                for (phase, event) in raw_events {
+                                    if let Phase::ApplyExtrinsic(i) = phase {
+                                        if i as usize == ext_index {
+                                            events.push(event)
                                         }
                                     }
                                 }
-                                Err(err) => return future::err(err.into()),
                             }
+                            Err(err) => return Err(err.into()),
                         }
                     }
-                    events
                 }
-            };
-            future::ok(ExtrinsicSuccess {
-                block: block_hash,
-                extrinsic: ext_hash,
-                events,
-            })
+                events
+            }
+        };
+        return Ok(ExtrinsicSuccess {
+            block: block_hash,
+            extrinsic: ext_hash,
+            events,
         })
+    }
+    return Err(format!("No events found for block {}", block_hash).into())
 }
