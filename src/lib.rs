@@ -164,7 +164,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Fetch a StorageKey.
     pub async fn fetch<V: Decode>(
-        &mut self,
+        &self,
         key: StorageKey,
     ) -> Result<Option<V>, Error> {
         self.rpc.storage::<V>(key).await
@@ -172,7 +172,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Fetch a StorageKey or return the default.
     pub async fn fetch_or<V: Decode>(
-        &mut self,
+        &self,
         key: StorageKey,
         default: V,
     ) -> Result<V, Error> {
@@ -182,7 +182,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Fetch a StorageKey or return the default.
     pub async fn fetch_or_default<V: Decode + Default>(
-        &mut self,
+        &self,
         key: StorageKey,
     ) -> Result<V, Error> {
         let result = self.fetch(key).await?;
@@ -191,7 +191,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
 
     /// Get a block hash. By default returns the latest block hash
     pub fn block_hash(
-        &mut self,
+        &self,
         hash: Option<BlockNumber<T>>,
     ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
         self.connect()
@@ -199,7 +199,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&mut self) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
         self.connect().and_then(|rpc| rpc.finalized_head())
     }
 

@@ -94,7 +94,7 @@ impl<T> Rpc<T> where T: System {
 
     /// Fetch a storage key
     pub async fn storage<V: Decode>(
-        &mut self,
+        &self,
         key: StorageKey,
     ) -> Result<Option<V>, Error> {
         // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
@@ -111,7 +111,7 @@ impl<T> Rpc<T> where T: System {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&mut self) -> Result<T::Hash, Error> {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(T::BlockNumber::min_value())));
         let params = Params::Array(vec![to_json_value(block_zero)?]);
         let list_or_value = self.client.request::<ListOrValue<Option<T::Hash>>>("chain_getBlockHash", params).await?;
@@ -124,7 +124,7 @@ impl<T> Rpc<T> where T: System {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&mut self) -> Result<Metadata, Error> {
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
         let bytes = self.client.request::<Bytes>("state_getMetadata", Params::None).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
@@ -133,7 +133,7 @@ impl<T> Rpc<T> where T: System {
 
     /// Get a block hash, returns hash of latest block by default
     pub async fn block_hash(
-        &mut self,
+        &self,
         block_number: Option<BlockNumber<T>>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(|bn| ListOrValue::Value(bn));
@@ -146,14 +146,14 @@ impl<T> Rpc<T> where T: System {
     }
 
     /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&mut self) -> Result<T::Hash, Error> {
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
         let hash = self.client.request::<T::Hash>("chain_getFinalizedHead", Params::None).await?;
         Ok(hash)
     }
 
     /// Get a Block
     pub async fn block(
-        &mut self,
+        &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
         let block = self.client.request::<Option<ChainBlock<T>>>("chain_getBlock", Params::None).await?;
@@ -162,7 +162,7 @@ impl<T> Rpc<T> where T: System {
 
     /// Fetch the runtime version
     pub async fn runtime_version(
-        &mut self,
+        &self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
         let params = Params::Array(vec![to_json_value(at)?]);
@@ -219,7 +219,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn submit_extrinsic<E>(
-        &mut self,
+        &self,
         extrinsic: E,
     ) -> Result<T::Hash, Error>
     where
