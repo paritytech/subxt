@@ -213,17 +213,14 @@ impl<T: System + Balances + 'static> Rpc<T> {
             Params::None,
             "chain_subscribeFinalizedHeads"
         ).await?;
-
         Ok(subscription)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<E>(
+    pub async fn submit_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
     ) -> Result<T::Hash, Error>
-    where
-        E: Encode,
     {
         let bytes: Bytes = extrinsic.encode().into();
         let params = Params::Array(vec![to_json_value(bytes)?]);
@@ -231,80 +228,67 @@ impl<T: System + Balances + 'static> Rpc<T> {
         Ok(xt_hash)
     }
 
+    pub async fn watch_extrinsic<E: Encode>(&self, extrinsic: E) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
+        let bytes: Bytes = extrinsic.encode().into();
+        let params = Params::Array(vec![to_json_value(bytes)?]);
+        let subscription = self.client.subscribe(
+            "author_submitAndWatchExtrinsic",
+                params,
+            "author_unwatchExtrinsic"
+        ).await?;
+        Ok(subscription)
+    }
+
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic<E: 'static>(
+    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
         self,
         extrinsic: E,
         decoder: EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error>
-    where
-        E: Encode,
     {
-        let events = self.subscribe_events().map_err(Into::into);
-        events.and_then(move |events| {
-            let ext_hash = T::Hashing::hash_of(&extrinsic);
-            log::info!("Submitting Extrinsic `{:?}`", ext_hash);
+        let ext_hash = T::Hashing::hash_of(&extrinsic);
+        log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
-            let chain = self.chain.clone();
-            self.author
-                .watch_extrinsic(extrinsic.encode().into())
-                .map_err(Into::into)
-                .and_then(|stream| {
-                    stream
-                        .filter_map(|status| {
-                            log::info!("received status {:?}", status);
-                            match status {
-                                // ignore in progress extrinsic for now
-                                TransactionStatus::Future
-                                | TransactionStatus::Ready
-                                | TransactionStatus::Broadcast(_) => None,
-                                TransactionStatus::InBlock(block_hash) => {
-                                    Some(Ok(block_hash))
-                                }
-                                TransactionStatus::Usurped(_) => {
-                                    Some(Err("Extrinsic Usurped".into()))
-                                }
-                                TransactionStatus::Dropped => {
-                                    Some(Err("Extrinsic Dropped".into()))
-                                }
-                                TransactionStatus::Invalid => {
-                                    Some(Err("Extrinsic Invalid".into()))
-                                }
-                            }
-                        })
-                        .into_future()
-                        .map_err(|(e, _)| e.into())
-                        .and_then(|(result, _)| {
-                            log::info!("received result {:?}", result);
+        let mut events_sub = self.subscribe_events().await?;
+        let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-                            result
-                                .ok_or_else(|| Error::from("Stream terminated"))
-                                .and_then(|r| r)
-                                .into_future()
-                        })
-                })
-                .and_then(move |bh| {
-                    log::info!("Fetching block {:?}", bh);
-                    chain
-                        .block(Some(bh))
-                        .map(move |b| (bh, b))
-                        .map_err(Into::into)
-                })
-                .and_then(|(h, b)| {
-                    b.ok_or_else(|| format!("Failed to find block {:?}", h).into())
-                        .map(|b| (h, b))
-                        .into_future()
-                })
-                .and_then(move |(bh, sb)| {
-                    log::info!(
-                        "Found block {:?}, with {} extrinsics",
-                        bh,
-                        sb.block.extrinsics.len()
-                    );
-
-                    wait_for_block_events(decoder, ext_hash, sb, bh, events)
-                })
-        })
+        let mut result: Result<ExtrinsicSuccess<T>, Error> = Err("No status received for extrinsic".into());
+        while let status = xt_sub.next().await {
+            log::info!("received status {:?}", status);
+            match status {
+                // ignore in progress extrinsic for now
+                TransactionStatus::Future
+                | TransactionStatus::Ready
+                | TransactionStatus::Broadcast(_) => continue,
+                TransactionStatus::InBlock(block_hash) => {
+                    log::info!("Fetching block {:?}", block_hash);
+                    let block = self.block(Some(block_hash)).await?;
+                    return match block {
+                        Some(signed_block) => {
+                            log::info!(
+                                "Found block {:?}, with {} extrinsics",
+                                block_hash,
+                                signed_block.block.extrinsics.len()
+                            );
+                            wait_for_block_events(decoder, ext_hash, signed_block, block_hash, events_sub).await
+                        },
+                        None => {
+                            Err(format!("Failed to find block {:?}", block_hash).into())
+                        }
+                    }
+                }
+                TransactionStatus::Usurped(_) => {
+                    return Err("Extrinsic Usurped".into())
+                }
+                TransactionStatus::Dropped => {
+                    return Err("Extrinsic Dropped".into())
+                }
+                TransactionStatus::Invalid => {
+                    return Err("Extrinsic Invalid".into())
+                }
+            }
+        }
+        return Err("No status received for extrinsic".into());
     }
 }
 
