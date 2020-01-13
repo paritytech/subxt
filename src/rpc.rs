@@ -21,23 +21,12 @@ use codec::{
     Encode,
     Error as CodecError,
 };
-use futures::{
-    future::{
-        self,
-        Future,
-    },
-    stream::{
-        self,
-    },
-};
 use jsonrpsee::{
     core::{
         common::{
-            JsonMap,
             Params,
             to_value as to_json_value,
         },
-        TransportClient,
     },
     client::Subscription,
     Client,
@@ -50,10 +39,8 @@ use sp_core::{
     storage::{
         StorageChangeSet,
         StorageKey,
-        StorageData,
     },
     twox_128,
-    H256,
     Bytes,
 };
 use sp_rpc::{
@@ -70,6 +57,7 @@ use sp_runtime::{
 };
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
+use std::marker::PhantomData;
 
 use crate::{
     error::Error,
@@ -92,57 +80,27 @@ use crate::{
 pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
-jsonrpsee::rpc_api! {
-    pub SubstrateRPC<Number, Hash> {
-        /// Submit hex-encoded extrinsic for inclusion in block.
-        #[rpc(method = "author_submitExtrinsic")]
-        fn author_submit_extrinsic(extrinsic: Bytes) -> Hash;
-
-        /// Get hash of the n-th block in the canon chain.
-        ///
-        /// By default returns latest block hash.
-        #[rpc(method = "chain_getBlockHash")]
-        fn chain_block_hash(
-            hash: Option<ListOrValue<NumberOrHex<Number>>>,
-        ) -> ListOrValue<Option<Hash>>;
-
-        /// Get header and body of a relay chain block.
-        #[rpc(method = "chain_getBlock")]
-        fn chain_block(hash: Option<Hash>) -> Option<SignedBlock>;
-
-        /// Get hash of the last finalized block in the canon chain.
-        #[rpc(method = "chain_getFinalizedHead")]
-        fn chain_finalized_head() -> Hash;
-
-        /// Returns a storage entry at a specific block's state.
-        #[rpc(method = "state_getStorage")]
-        fn state_storage(key: StorageKey, hash: Option<Hash>) -> Option<StorageData>;
-
-        /// Returns the runtime metadata as an opaque blob.
-        #[rpc(method = "state_getMetadata")]
-        fn state_metadata(hash: Option<Hash>) -> Bytes;
-
-        /// Get the runtime version.
-        #[rpc(method = "state_getRuntimeVersion")]
-        fn state_runtime_version(hash: Option<Hash>) -> RuntimeVersion;
-    }
-}
-
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: System, C> {
-    client: Client<C>,
+pub struct Rpc<T: System> {
+    client: Client,
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
+impl<T> Rpc<T> where T: System {
+    pub async fn connect_ws(url: &str) -> Result<Self, Error> {
+        let raw_client = jsonrpsee::ws::ws_raw_client(&url).await?;
+        Ok(Rpc { client: raw_client.into(), marker: PhantomData })
+    }
+
     /// Fetch a storage key
     pub async fn storage<V: Decode>(
         &mut self,
         key: StorageKey,
     ) -> Result<Option<V>, Error> {
-        let data = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_storage(&mut self.client, key, None)
-            .await
-            .map_err(Into::into)?;
+        // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
+        // until then we manually construct params here and in other methods
+        let params = Params::Array(vec![to_json_value(key)?]);
+        let data = self.client.request::<Option<V>>("state_getStorage", params).await?;
         match data {
             Some(data) => {
                 let value = Decode::decode(&mut &data.0[..])?;
@@ -155,9 +113,8 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
     /// Fetch the genesis hash
     pub async fn genesis_hash(&mut self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(T::BlockNumber::min_value())));
-        let list_or_value = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block_hash(&mut self.client, block_zero)
-            .await
-            .map_err(Into::into)?;
+        let params = Params::Array(vec![to_json_value(block_zero)?]);
+        let list_or_value = self.client.request::<ListOrValue<Option<T::Hash>>>("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(genesis_hash) => {
                 genesis_hash.ok_or_else(|| "Genesis hash not found".into())
@@ -168,11 +125,10 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
 
     /// Fetch the metadata
     pub async fn metadata(&mut self) -> Result<Metadata, Error> {
-        let bytes = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_metadata(&mut self.client, None)
-            .await
-            .map_err(Into::into)?;
+        let bytes = self.client.request::<Bytes>("state_getMetadata", Params::None).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
-        meta.try_into().map_err(|err| format!("{:?}", err).into())
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
     }
 
     /// Get a block hash, returns hash of latest block by default
@@ -181,9 +137,8 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
         block_number: Option<BlockNumber<T>>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(|bn| ListOrValue::Value(bn));
-        let list_or_value = SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block_hash(&mut self.client, block_number)
-            .await
-            .map_err(Into::into)?;
+        let params = Params::Array(vec![to_json_value(block_number)?]);
+        let list_or_value = self.client.request::<ListOrValue<Option<T::Hash>>>("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(hash) => Ok(hash),
             ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
@@ -192,9 +147,8 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&mut self) -> Result<T::Hash, Error> {
-        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_finalized_head(&mut self.client)
-            .await
-            .map_err(Into::into)
+        let hash = self.client.request::<T::Hash>("chain_getFinalizedHead", Params::None).await?;
+        Ok(hash)
     }
 
     /// Get a Block
@@ -202,9 +156,8 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
         &mut self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::chain_block(&mut self.client)
-            .await
-            .map_err(Into::into)
+        let block = self.client.request::<Option<ChainBlock<T>>>("chain_getBlock", Params::None).await?;
+        Ok(block)
     }
 
     /// Fetch the runtime version
@@ -212,13 +165,13 @@ impl<T, C> Rpc<T, C> where T: System, C: TransportClient {
         &mut self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
-        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::state_runtime_version(&mut self.client, at)
-            .await
-            .map_err(Into::into)
+        let params = Params::Array(vec![to_json_value(at)?]);
+        let version = self.client.request::<RuntimeVersion>("state_getRuntimeVersion", params).await?;
+        Ok(version)
     }
 }
 
-impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
+impl<T: System + Balances + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
     pub async fn subscribe_events(
         &self,
@@ -228,8 +181,7 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        let mut params = JsonMap::with_capacity(1);
-        params.insert("keys".to_string(), to_json_value(StorageKey(storage_key)?));
+        let params = Params::Array(vec![to_json_value(StorageKey(storage_key)?)]);
 
         let subscription = self.client.subscribe(
             "state_subscribeStorage",
@@ -273,9 +225,10 @@ impl<T: System + Balances + 'static, C: TransportClient> Rpc<T, C> {
     where
         E: Encode,
     {
-        SubstrateRPC::<T::BlockNumber, T::Hash, _, _>::author_submit_extrinsic(&mut self.client, extrinsic.encode().into())
-            .await
-            .map_err(Into::into)
+        let bytes: Bytes = extrinsic.encode().into();
+        let params = Params::Array(vec![to_json_value(bytes)?]);
+        let xt_hash = self.client.request::<T::Hash>("author_submitExtrinsic", params).await?;
+        Ok(xt_hash)
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful

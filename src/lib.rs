@@ -36,7 +36,6 @@ use futures::future::{
     Either,
     Future,
 };
-use jsonrpsee::core::TransportClient;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -138,7 +137,7 @@ impl<T: System, S> ClientBuilder<T, S> {
 
 /// Client to interface with a substrate node.
 pub struct Client<T: System, S = MultiSignature> {
-    url: Url,
+    rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
