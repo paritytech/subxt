@@ -35,8 +35,8 @@ use futures::future::{
     self,
     Either,
     Future,
-    IntoFuture,
 };
+use jsonrpsee::core::TransportClient;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -53,7 +53,6 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use url::Url;
 
 mod error;
 mod events;
@@ -100,7 +99,7 @@ use self::{
 #[derive(Default)]
 pub struct ClientBuilder<T: System, S = MultiSignature> {
     _marker: std::marker::PhantomData<(T, S)>,
-    url: Option<Url>,
+    url: Option<String>,
 }
 
 impl<T: System, S> ClientBuilder<T, S> {
@@ -113,29 +112,27 @@ impl<T: System, S> ClientBuilder<T, S> {
     }
 
     /// Set the substrate rpc address.
-    pub fn set_url(mut self, url: Url) -> Self {
-        self.url = Some(url);
+    pub fn set_url(mut self, url: &str) -> Self {
+        self.url = Some(url.to_string());
         self
     }
 
     /// Creates a new Client.
-    pub fn build(self) -> impl Future<Item = Client<T, S>, Error = Error> {
-        let url = self.url.unwrap_or_else(|| {
-            Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
-        });
-        connect::<T>(&url).and_then(|rpc| {
-            rpc.metadata()
-                .join3(rpc.genesis_hash(), rpc.runtime_version(None))
-                .map(|(metadata, genesis_hash, runtime_version)| {
-                    Client {
-                        url,
-                        genesis_hash,
-                        metadata,
-                        runtime_version,
-                        _marker: PhantomData,
-                    }
-                })
-        })
+    pub async fn build(self) -> Result<Client<T, S>, Error> {
+        let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
+        let rpc = Rpc::connect_ws(&url).await?;
+
+        rpc.metadata()
+            .join3(rpc.genesis_hash(), rpc.runtime_version(None))
+            .map(move |(metadata, genesis_hash, runtime_version)| {
+                Client {
+                    rpc,
+                    genesis_hash,
+                    metadata,
+                    runtime_version,
+                    _marker: PhantomData,
+                }
+            })
     }
 }
 
@@ -167,33 +164,35 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     }
 
     /// Fetch a StorageKey.
-    pub fn fetch<V: Decode>(
-        &self,
+    pub async fn fetch<V: Decode>(
+        &mut self,
         key: StorageKey,
-    ) -> impl Future<Item = Option<V>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.storage::<V>(key))
+    ) -> Result<Option<V>, Error> {
+        self.rpc.storage::<V>(key).await
     }
 
     /// Fetch a StorageKey or return the default.
-    pub fn fetch_or<V: Decode>(
-        &self,
+    pub async fn fetch_or<V: Decode>(
+        &mut self,
         key: StorageKey,
         default: V,
-    ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key).map(|value| value.unwrap_or(default))
+    ) -> Result<V, Error> {
+        let result = self.fetch(key).await?;
+        result.unwrap_or(default)
     }
 
     /// Fetch a StorageKey or return the default.
-    pub fn fetch_or_default<V: Decode + Default>(
-        &self,
+    pub async fn fetch_or_default<V: Decode + Default>(
+        &mut self,
         key: StorageKey,
-    ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key).map(|value| value.unwrap_or_default())
+    ) -> Result<V, Error> {
+        let result = self.fetch(key).await?;
+        result.unwrap_or_default()
     }
 
     /// Get a block hash. By default returns the latest block hash
     pub fn block_hash(
-        &self,
+        &mut self,
         hash: Option<BlockNumber<T>>,
     ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
         self.connect()
@@ -201,7 +200,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
+    pub fn finalized_head(&mut self) -> impl Future<Item = T::Hash, Error = Error> {
         self.connect().and_then(|rpc| rpc.finalized_head())
     }
 
