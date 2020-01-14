@@ -36,6 +36,7 @@ use futures::future::{
     Either,
     Future,
 };
+use jsonrpsee::client::Subscription;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -147,7 +148,7 @@ pub struct Client<T: System, S = MultiSignature> {
 impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
-            url: self.url.clone(),
+            rpc: self.rpc.clone(),
             genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
@@ -190,59 +191,56 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     }
 
     /// Get a block hash. By default returns the latest block hash
-    pub fn block_hash(
+    pub async fn block_hash(
         &self,
-        hash: Option<BlockNumber<T>>,
-    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+        block_number: Option<BlockNumber<T>>,
+    ) -> Result<Option<T::Hash>, Error> {
+        self.rpc.block_hash(block_number)
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.connect().and_then(|rpc| rpc.finalized_head())
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
+        self.rpc.finalized_head()
     }
 
     /// Get a block
-    pub fn block<H>(
+    pub async fn block<H>(
         &self,
         hash: Option<H>,
-    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+    ) -> Result<Option<ChainBlock<T>>, Error>
     where
         H: Into<T::Hash> + 'static,
     {
-        self.connect()
-            .and_then(|rpc| rpc.block(hash.map(|h| h.into())))
+        self.rpc.block(hash.map(|h| h.into()))
     }
 
     /// Subscribe to events.
-    pub fn subscribe_events(
+    pub async fn subscribe_events(
         &self,
-    ) -> impl Future<Item = MapStream<StorageChangeSet<T::Hash>>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.subscribe_events())
+    ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
+        self.rpc.subscribe_events()
     }
 
     /// Subscribe to new blocks.
-    pub fn subscribe_blocks(
+    pub async fn subscribe_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.subscribe_blocks())
+    ) -> Result<Subscription<T::Header>, Error> {
+        self.rpc.subscribe_blocks()
     }
 
     /// Subscribe to finalized blocks.
-    pub fn subscribe_finalized_blocks(
+    pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.subscribe_finalized_blocks())
+    ) -> Result<Subscription<T::Header>, Error> {
+        self.rpc.subscribe_finalized_blocks()
     }
 
     /// Create a transaction builder for a private key.
-    pub fn xt<P>(
+    pub async fn xt<P>(
         &self,
         signer: P,
         nonce: Option<T::Index>,
-    ) -> impl Future<Item = XtBuilder<T, P, S>, Error = Error>
+    ) -> Result<XtBuilder<T, P, S>, Error>
     where
         P: Pair,
         P::Signature: Codec,
