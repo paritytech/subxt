@@ -180,34 +180,37 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     pub fn fetch<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> impl Future<Item = Option<V>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.storage::<V>(key))
+        self.connect().and_then(move |rpc| rpc.storage::<V>(key, hash))
     }
 
     /// Fetch a StorageKey or return the default.
     pub fn fetch_or<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
         default: V,
     ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key).map(|value| value.unwrap_or(default))
+        self.fetch(key, hash).map(|value| value.unwrap_or(default))
     }
 
     /// Fetch a StorageKey or return the default.
     pub fn fetch_or_default<V: Decode + Default>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key).map(|value| value.unwrap_or_default())
+        self.fetch(key, hash).map(|value| value.unwrap_or_default())
     }
 
     /// Get a block hash. By default returns the latest block hash
     pub fn block_hash(
         &self,
-        hash: Option<BlockNumber<T>>,
+        height: Option<BlockNumber<T>>,
     ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
         self.connect()
-            .and_then(|rpc| rpc.block_hash(hash.map(|h| h)))
+            .and_then(|rpc| rpc.block_hash(height.map(|h| h)))
     }
 
     /// Get a block hash of the latest finalized block
