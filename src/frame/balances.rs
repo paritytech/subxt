@@ -98,7 +98,7 @@ impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
             Ok(map) => map,
             Err(err) => return Box::new(future::err(err)),
         };
-        Box::new(self.fetch_or(map.key(account_id), map.default()))
+        Box::new(self.fetch_or(map.key(account_id), None, map.default()))
     }
 }
 

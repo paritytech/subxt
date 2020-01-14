@@ -61,7 +61,6 @@ use sp_runtime::{
         SignedBlock,
     },
     traits::Hash,
-    OpaqueExtrinsic,
 };
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
@@ -84,7 +83,7 @@ use crate::{
     metadata::Metadata,
 };
 
-pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
+pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
@@ -110,9 +109,10 @@ impl<T: System> Rpc<T> {
     pub fn storage<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> impl Future<Item = Option<V>, Error = Error> {
         self.state
-            .storage(key, None)
+            .storage(key, hash)
             .map_err(Into::into)
             .and_then(|data| {
                 match data {
