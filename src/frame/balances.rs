@@ -16,7 +16,10 @@
 
 //! Implements support for the pallet_balances module.
 
-use std::fmt::Debug;
+use std::{
+    fmt::Debug,
+    pin::Pin,
+};
 
 use futures::future::{
     self,
@@ -74,7 +77,7 @@ pub trait BalancesStore {
     fn free_balance(
         &self,
         account_id: <Self::Balances as System>::AccountId,
-    ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>;
+    ) -> Pin<Box<dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>> + Send>>;
 }
 
 impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
@@ -83,7 +86,7 @@ impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
     fn free_balance(
         &self,
         account_id: <Self::Balances as System>::AccountId,
-    ) -> Box<dyn Future<Item = <Self::Balances as Balances>::Balance, Error = Error> + Send>
+    ) -> Pin<Box<dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>> + Send>>
     {
         let free_balance_map = || {
             Ok(self
@@ -96,9 +99,9 @@ impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
         };
         let map = match free_balance_map() {
             Ok(map) => map,
-            Err(err) => return Box::new(future::err(err)),
+            Err(err) => return Box::pin(future::err(err)),
         };
-        Box::new(self.fetch_or(map.key(account_id), map.default()))
+        Box::pin(self.fetch_or(map.key(account_id), map.default()))
     }
 }
 

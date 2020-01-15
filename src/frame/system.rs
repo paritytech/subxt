@@ -16,15 +16,16 @@
 
 //! Implements support for the frame_system module.
 
-use std::fmt::Debug;
-
+use std::{
+    fmt::Debug,
+    pin::Pin,
+};
 use codec::Codec;
 use futures::future::{
     self,
     Future,
 };
 use serde::de::DeserializeOwned;
-
 use frame_support::Parameter;
 use sp_runtime::traits::{
     Bounded,
@@ -118,7 +119,7 @@ pub trait SystemStore {
     fn account_nonce(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>;
+    ) -> Pin<Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>>;
 }
 
 impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
@@ -127,7 +128,7 @@ impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
     fn account_nonce(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Box<dyn Future<Item = <Self::System as System>::Index, Error = Error> + Send>
+    ) -> Pin<Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>>
     {
         let account_nonce_map = || {
             Ok(self
@@ -138,9 +139,9 @@ impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
         };
         let map = match account_nonce_map() {
             Ok(map) => map,
-            Err(err) => return Box::new(future::err(err)),
+            Err(err) => return Box::pin(future::err(err)),
         };
-        Box::new(self.fetch_or(map.key(account_id), map.default()))
+        Box::pin(self.fetch_or(map.key(account_id), map.default()))
     }
 }
 
