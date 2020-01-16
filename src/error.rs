@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::client::RequestError;
+use jsonrpsee::{
+    client::RequestError,
+    ws::WsNewDnsError,
+};
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 
@@ -35,6 +38,9 @@ pub enum Error {
     /// Rpc error.
     #[error("Rpc error: {0}")]
     Rpc(#[from] RequestError),
+    /// Error that can happen during the initial websocket handshake
+    #[error("Rpc error: {0}")]
+    WsHandshake(#[from] WsNewDnsError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),
