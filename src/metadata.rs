@@ -41,6 +41,8 @@ use crate::Encoded;
 
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
+    #[error("Error converting substrate metadata: {0}")]
+    Conversion(#[from] ConversionError),
     #[error("Module not found")]
     ModuleNotFound(String),
     #[error("Module with events not found")]
@@ -284,17 +286,17 @@ pub enum EventArg {
 }
 
 impl FromStr for EventArg {
-    type Err = Error;
+    type Err = MetadataError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.starts_with("Vec<") {
             if s.ends_with('>') {
                 Ok(EventArg::Vec(Box::new(s[4..s.len() - 1].parse()?)))
             } else {
-                Err(Error::InvalidEventArg(
+                Err(ConversionError::InvalidEventArg(
                     s.to_string(),
                     "Expected closing `>` for `Vec`",
-                ))
+                ).into())
             }
         } else if s.starts_with('(') {
             if s.ends_with(')') {
@@ -305,10 +307,10 @@ impl FromStr for EventArg {
                 }
                 Ok(EventArg::Tuple(args))
             } else {
-                Err(Error::InvalidEventArg(
+                Err(ConversionError::InvalidEventArg(
                     s.to_string(),
                     "Expecting closing `)` for tuple",
-                ))
+                ).into())
             }
         } else {
             Ok(EventArg::Primitive(s.to_string()))
@@ -333,8 +335,8 @@ impl EventArg {
     }
 }
 
-#[derive(Debug)]
-pub enum Error {
+#[derive(Debug, thiserror::Error)]
+pub enum ConversionError {
     InvalidPrefix,
     InvalidVersion,
     ExpectedDecoded,
@@ -342,15 +344,15 @@ pub enum Error {
 }
 
 impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
-    type Error = Error;
+    type Error = MetadataError;
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(Error::InvalidPrefix)
+            return Err(ConversionError::InvalidPrefix)
         }
         let meta = match metadata.1 {
             RuntimeMetadata::V10(meta) => meta,
-            _ => return Err(Error::InvalidVersion),
+            _ => return Err(ConversionError::InvalidVersion),
         };
         let mut modules = HashMap::new();
         let mut modules_with_calls = HashMap::new();
@@ -417,16 +419,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     }
 }
 
-fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, Error> {
+fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, ConversionError> {
     match dd {
         DecodeDifferent::Decoded(value) => Ok(value),
-        _ => Err(Error::ExpectedDecoded),
+        _ => Err(ConversionError::ExpectedDecoded),
     }
 }
 
 fn convert_event(
     event: frame_metadata::EventMetadata,
-) -> Result<ModuleEventMetadata, Error> {
+) -> Result<ModuleEventMetadata, ConversionError> {
     let name = convert(event.name)?;
     let mut arguments = Vec::new();
     for arg in convert(event.arguments)? {
@@ -440,7 +442,7 @@ fn convert_entry(
     module_prefix: String,
     storage_prefix: String,
     entry: frame_metadata::StorageEntryMetadata,
-) -> Result<StorageMetadata, Error> {
+) -> Result<StorageMetadata, ConversionError> {
     let default = convert(entry.default)?;
     Ok(StorageMetadata {
         module_prefix,
