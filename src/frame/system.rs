@@ -147,7 +147,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore for C
             Err(err) => return Box::pin(future::err(err)),
         };
         let client = self.clone();
-        Box::pin(client.fetch_or(map.key(account_id), None, map.default()))
+        Box::pin(async move { client.fetch_or(map.key(account_id), None, map.default()).await })
     }
 }
 

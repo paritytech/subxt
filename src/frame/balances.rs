@@ -102,7 +102,7 @@ impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T
             Err(err) => return Box::pin(future::err(err)),
         };
         let client = self.clone();
-        Box::pin(client.fetch_or(map.key(account_id), None, map.default()))
+        Box::pin(async move { client.fetch_or(map.key(account_id), None, map.default()).await })
     }
 }
 

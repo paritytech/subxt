@@ -161,7 +161,8 @@ impl<T> Rpc<T> where T: System {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        let block = self.client.request("chain_getBlock", Params::None).await?;
+        let params = Params::Array(vec![to_json_value(hash)?]);
+        let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
     }
 
@@ -254,10 +255,9 @@ impl<T: System + Balances + 'static> Rpc<T> {
         let ext_hash = T::Hashing::hash_of(&extrinsic);
         log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
-        let mut events_sub = self.subscribe_events().await?;
+        let events_sub = self.subscribe_events().await?;
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-        let mut result: Result<ExtrinsicSuccess<T>, Error> = Err("No status received for extrinsic".into());
         while let status = xt_sub.next().await {
             log::info!("received status {:?}", status);
             match status {
