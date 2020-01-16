@@ -163,17 +163,19 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     pub async fn fetch<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> Result<Option<V>, Error> {
-        self.rpc.storage::<V>(key).await
+        self.rpc.storage::<V>(key, hash).await
     }
 
     /// Fetch a StorageKey or return the default.
     pub async fn fetch_or<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
         default: V,
     ) -> Result<V, Error> {
-        let result = self.fetch(key).await?;
+        let result = self.fetch(key, hash).await?;
         Ok(result.unwrap_or(default))
     }
 
@@ -181,8 +183,9 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     pub async fn fetch_or_default<V: Decode + Default>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> Result<V, Error> {
-        let result = self.fetch(key).await?;
+        let result = self.fetch(key, hash).await?;
         Ok(result.unwrap_or_default())
     }
 

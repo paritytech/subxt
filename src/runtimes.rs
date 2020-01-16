@@ -22,6 +22,7 @@ use sp_runtime::{
         Verify,
     },
     MultiSignature,
+    OpaqueExtrinsic,
 };
 
 use crate::frame::{
@@ -47,6 +48,7 @@ impl System for DefaultNodeRuntime {
     type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
     type Address = pallet_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
+    type Extrinsic = OpaqueExtrinsic;
 }
 
 impl Balances for DefaultNodeRuntime {

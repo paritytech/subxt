@@ -54,7 +54,6 @@ use sp_runtime::{
         SignedBlock,
     },
     traits::Hash,
-    OpaqueExtrinsic,
 };
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
@@ -78,7 +77,7 @@ use crate::{
     metadata::Metadata,
 };
 
-pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, OpaqueExtrinsic>>;
+pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
@@ -97,10 +96,14 @@ impl<T> Rpc<T> where T: System {
     pub async fn storage<V: Decode>(
         &self,
         key: StorageKey,
+        hash: Option<T::Hash>,
     ) -> Result<Option<V>, Error> {
         // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
         // until then we manually construct params here and in other methods
-        let params = Params::Array(vec![to_json_value(key)?]);
+        let params = Params::Array(vec![
+            to_json_value(key)?,
+            to_json_value(hash)?,
+        ]);
         let data: Option<StorageData> = self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {

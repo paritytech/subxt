@@ -30,6 +30,7 @@ use frame_support::Parameter;
 use sp_runtime::traits::{
     Bounded,
     CheckEqual,
+    Extrinsic,
     Hash,
     Header,
     MaybeDisplay,
@@ -81,6 +82,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + MaybeSerializeDeserialize
         + Debug
         + MaybeDisplay
+        + Ord
         + SimpleBitOps
         + Default
         + Copy
@@ -108,6 +110,9 @@ pub trait System: 'static + Eq + Clone + Debug {
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
+
+    /// Extrinsic type within blocks.
+    type Extrinsic: Parameter + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
 }
 
 /// The System extension trait for the Client.
@@ -141,7 +146,7 @@ impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
             Ok(map) => map,
             Err(err) => return Box::pin(future::err(err)),
         };
-        Box::pin(self.fetch_or(map.key(account_id), map.default()))
+        Box::pin(self.fetch_or(map.key(account_id), None, map.default()))
     }
 }
 
