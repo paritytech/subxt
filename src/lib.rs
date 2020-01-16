@@ -122,17 +122,14 @@ impl<T: System, S> ClientBuilder<T, S> {
         let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
         let rpc = Rpc::connect_ws(&url).await?;
 
-        rpc.metadata()
-            .join3(rpc.genesis_hash(), rpc.runtime_version(None))
-            .map(move |(metadata, genesis_hash, runtime_version)| {
-                Client {
-                    rpc,
-                    genesis_hash,
-                    metadata,
-                    runtime_version,
-                    _marker: PhantomData,
-                }
-            })
+        let (metadata, genesis_hash, runtime_version) = future::join3(rpc.metadata(), rpc.genesis_hash(), rpc.runtime_version(None)).await;
+        Ok(Client {
+            rpc,
+            genesis_hash: genesis_hash?,
+            metadata: metadata?,
+            runtime_version: runtime_version?,
+            _marker: PhantomData,
+        })
     }
 }
 
