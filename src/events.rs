@@ -205,14 +205,14 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         for _ in 0..len {
             // decode EventRecord
             let phase = Phase::decode(input)?;
-            let module_variant = input.read_byte()? as u8;
+            let module_variant = input.read_byte()?;
 
             let module = self.metadata.module_with_events(module_variant)?;
             let event = if module.name() == "System" {
                 let system_event = SystemEvent::decode(input)?;
                 RuntimeEvent::System(system_event)
             } else {
-                let event_variant = input.read_byte()? as u8;
+                let event_variant = input.read_byte()?;
                 let event_metadata = module.event(event_variant)?;
 
                 let mut event_data = Vec::<u8>::new();
