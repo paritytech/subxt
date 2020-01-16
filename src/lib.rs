@@ -493,7 +493,7 @@ mod tests {
         (rt, client)
     }
 
-    pub(crate) async fn client() -> Client<Runtime> {
+    pub(crate) async fn test_client() -> Client<Runtime> {
         ClientBuilder::<Runtime>::new().build().await.expect("Error creating client")
     }
 
@@ -506,7 +506,7 @@ mod tests {
                 let signer = AccountKeyring::Alice.pair();
                 let dest = AccountKeyring::Bob.to_account_id();
 
-                let client = client().await;
+                let client = test_client().await;
                 let mut xt = client.xt(signer, None).await.unwrap();
                 let transfer =
                     xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await.unwrap();

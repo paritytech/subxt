@@ -144,17 +144,18 @@ mod tests {
         Error as CodecError,
     };
     use futures::Future;
-    use sp_core::Pair;
+    use sp_core::{Pair, H256};
     use sp_keyring::AccountKeyring;
     use sp_runtime::traits::{
         IdentifyAccount,
         Verify,
     };
+    use std::error::Error as StdError;
 
     use super::events;
     use crate::{
         frame::contracts::MODULE,
-        tests::test_setup,
+        tests::test_client,
         Balances,
         Client,
         DefaultNodeRuntime as Runtime,
@@ -164,10 +165,10 @@ mod tests {
 
     type AccountId = <Runtime as System>::AccountId;
 
-    fn put_code<T, P, S>(
+    async fn put_code<T, P, S>(
         client: &Client<T, S>,
         signer: P,
-    ) -> impl Future<Item = Option<Result<T::Hash, CodecError>>, Error = Error>
+    ) -> Result<Option<T::Hash>, Error>
     where
         T: System + Balances + Send + Sync,
         T::Address: From<T::AccountId>,
@@ -185,27 +186,34 @@ mod tests {
 "#;
         let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        client.xt(signer, None).and_then(|xt| {
-            xt.watch()
-                .submit(super::put_code(500_000, wasm))
-                .map(|result| result.find_event::<T::Hash>(MODULE, events::CODE_STORED))
-        })
+        let xt = client.xt(signer, None).await?;
+
+        let result = xt.watch()
+            .submit(super::put_code(500_000, wasm)).await?;
+        let code_hash = result
+            .find_event::<T::Hash>(MODULE, events::CODE_STORED)
+            .transpose()?;
+        Ok(code_hash)
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn tx_put_code() {
-        let (mut rt, client) = test_setup();
-
-        let signer = AccountKeyring::Alice.pair();
-        let code_hash = rt.block_on(put_code(&client, signer)).unwrap();
+        env_logger::try_init().ok();
+        let code_hash: Result<_, Box<dyn StdError + 'static>> =
+            async_std::task::block_on(async move {
+                let signer = AccountKeyring::Alice.pair();
+                let client = test_client().await;
+                let code_hash = put_code(&client, signer).await?;
+                Ok(code_hash)
+            });
 
         assert!(
-            code_hash.is_some(),
+            code_hash.is_ok(),
             "Contracts CodeStored event should be present"
         );
         assert!(
-            code_hash.unwrap().is_ok(),
+            code_hash.unwrap().is_some(),
             "CodeStored Hash should decode successfully"
         );
     }
@@ -213,41 +221,40 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn tx_instantiate() {
-        let (mut rt, client) = test_setup();
+        env_logger::try_init().ok();
+        let result: Result<_, Box<dyn StdError + 'static>> =
+            async_std::task::block_on(async move {
+                let signer = AccountKeyring::Alice.pair();
+                let client = test_client().await;
 
-        let signer = AccountKeyring::Alice.pair();
-        let code_hash = rt
-            .block_on(put_code(&client, signer.clone()))
-            .unwrap()
-            .unwrap()
-            .unwrap();
+                let code_hash = put_code(&client, signer.clone()).await
+                    .unwrap()
+                    .unwrap();
 
-        println!("{:?}", code_hash);
+                println!("{:?}", code_hash);
 
-        let instantiate = client.xt(signer, None).and_then(move |xt| {
-            xt.watch()
-                .submit(super::instantiate::<Runtime>(
-                    100_000_000_000_000,
-                    500_000,
-                    code_hash,
-                    Vec::new(),
-                ))
-                .map(|result| {
+                let xt = client.xt(signer, None).await?;
+                let result = xt.watch()
+                    .submit(super::instantiate::<Runtime>(
+                        100_000_000_000_000,
+                        500_000,
+                        code_hash,
+                        Vec::new(),
+                    )).await?;
+                let event =
                     result.find_event::<(AccountId, AccountId)>(
                         MODULE,
                         events::INSTANTIATED,
-                    )
-                })
-        });
-
-        let result = rt.block_on(instantiate).unwrap();
+                    ).transpose()?;
+                Ok(event)
+            });
 
         assert!(
-            result.is_some(),
+            result.is_ok(),
             "Contracts Instantiated event should be present"
         );
         assert!(
-            result.unwrap().is_ok(),
+            result.unwrap().is_some(),
             "Instantiated Event should decode successfully"
         );
     }
