@@ -38,6 +38,7 @@ use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::{
     storage::{
         StorageChangeSet,
+        StorageData,
         StorageKey,
     },
     twox_128,
@@ -100,7 +101,7 @@ impl<T> Rpc<T> where T: System {
         // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
         // until then we manually construct params here and in other methods
         let params = Params::Array(vec![to_json_value(key)?]);
-        let data: Option<V> = self.client.request("state_getStorage", params).await?;
+        let data: Option<StorageData> = self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {
                 let value = Decode::decode(&mut &data.0[..])?;

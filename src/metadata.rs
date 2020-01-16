@@ -337,9 +337,13 @@ impl EventArg {
 
 #[derive(Debug, thiserror::Error)]
 pub enum ConversionError {
+    #[error("Invalid prefix")]
     InvalidPrefix,
+    #[error("Invalid version")]
     InvalidVersion,
+    #[error("Expected DecodeDifferent::Decoded")]
     ExpectedDecoded,
+    #[error("Invalid event arg {0}")]
     InvalidEventArg(String, &'static str),
 }
 
