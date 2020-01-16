@@ -139,18 +139,13 @@ pub fn call<T: Contracts>(
 
 #[cfg(test)]
 mod tests {
-    use codec::{
-        Codec,
-        Error as CodecError,
-    };
-    use futures::Future;
-    use sp_core::{Pair, H256};
+    use codec::Codec;
+    use sp_core::Pair;
     use sp_keyring::AccountKeyring;
     use sp_runtime::traits::{
         IdentifyAccount,
         Verify,
     };
-    use std::error::Error as StdError;
 
     use super::events;
     use crate::{
@@ -174,8 +169,7 @@ mod tests {
         T::Address: From<T::AccountId>,
         P: Pair,
         P::Signature: Codec,
-        S: 'static,
-        S: Verify + Codec + From<P::Signature>,
+        S: Verify + Codec + From<P::Signature> + 'static,
         S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
         const CONTRACT: &str = r#"
@@ -200,7 +194,7 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn tx_put_code() {
         env_logger::try_init().ok();
-        let code_hash: Result<_, Box<dyn StdError + 'static>> =
+        let code_hash: Result<_, Error> =
             async_std::task::block_on(async move {
                 let signer = AccountKeyring::Alice.pair();
                 let client = test_client().await;
@@ -222,7 +216,7 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn tx_instantiate() {
         env_logger::try_init().ok();
-        let result: Result<_, Box<dyn StdError + 'static>> =
+        let result: Result<_, Error> =
             async_std::task::block_on(async move {
                 let signer = AccountKeyring::Alice.pair();
                 let client = test_client().await;
