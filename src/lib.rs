@@ -33,7 +33,6 @@ use codec::{
 };
 use futures::future::{
     self,
-    Either,
     Future,
 };
 use jsonrpsee::client::Subscription;
@@ -175,7 +174,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
         default: V,
     ) -> Result<V, Error> {
         let result = self.fetch(key).await?;
-        result.unwrap_or(default)
+        Ok(result.unwrap_or(default))
     }
 
     /// Fetch a StorageKey or return the default.
@@ -184,7 +183,7 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
         key: StorageKey,
     ) -> Result<V, Error> {
         let result = self.fetch(key).await?;
-        result.unwrap_or_default()
+        Ok(result.unwrap_or_default())
     }
 
     /// Get a block hash. By default returns the latest block hash
@@ -192,12 +191,14 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
         &self,
         block_number: Option<BlockNumber<T>>,
     ) -> Result<Option<T::Hash>, Error> {
-        self.rpc.block_hash(block_number)
+        let hash = self.rpc.block_hash(block_number).await?;
+        Ok(hash)
     }
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        self.rpc.finalized_head()
+        let head = self.rpc.finalized_head().await?;
+        Ok(head)
     }
 
     /// Get a block
@@ -208,28 +209,32 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     where
         H: Into<T::Hash> + 'static,
     {
-        self.rpc.block(hash.map(|h| h.into()))
+        let block = self.rpc.block(hash.map(|h| h.into())).await?;
+        Ok(block)
     }
 
     /// Subscribe to events.
     pub async fn subscribe_events(
         &self,
     ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
-        self.rpc.subscribe_events()
+        let events = self.rpc.subscribe_events().await?;
+        Ok(events)
     }
 
     /// Subscribe to new blocks.
     pub async fn subscribe_blocks(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
-        self.rpc.subscribe_blocks()
+        let headers = self.rpc.subscribe_blocks().await?;
+        Ok(headers)
     }
 
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
-        self.rpc.subscribe_finalized_blocks()
+        let headers = self.rpc.subscribe_finalized_blocks().await?;
+        Ok(headers)
     }
 
     /// Create a transaction builder for a private key.
@@ -246,20 +251,20 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     {
         let client = self.clone();
         let account_id = S::Signer::from(signer.public()).into_account();
-        match nonce {
-            Some(nonce) => Either::A(future::ok(nonce)),
-            None => Either::B(self.account_nonce(account_id)),
-        }
-        .map(|nonce| {
-            let genesis_hash = client.genesis_hash;
-            let runtime_version = client.runtime_version.clone();
-            XtBuilder {
-                client,
-                nonce,
-                runtime_version,
-                genesis_hash,
-                signer,
-            }
+        let nonce =
+            match nonce {
+                Some(nonce) => nonce,
+                None => self.account_nonce(account_id).await?,
+            };
+
+        let genesis_hash = client.genesis_hash;
+        let runtime_version = client.runtime_version.clone();
+        Ok(XtBuilder {
+            client,
+            nonce,
+            runtime_version,
+            genesis_hash,
+            signer,
         })
     }
 }
