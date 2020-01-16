@@ -468,7 +468,6 @@ impl codec::Encode for Encoded {
 mod tests {
     use codec::Encode;
     use frame_support::StorageMap;
-    use futures::stream::Stream;
     use sp_core::storage::StorageKey;
     use sp_keyring::AccountKeyring;
 
@@ -494,25 +493,31 @@ mod tests {
         (rt, client)
     }
 
+    pub(crate) async fn client() -> Client<Runtime> {
+        ClientBuilder::<Runtime>::new().build().await.expect("Error creating client")
+    }
+
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_tx_transfer_balance() {
-        let (mut rt, client) = test_setup();
-
-        let signer = AccountKeyring::Alice.pair();
-        let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
-
-        let dest = AccountKeyring::Bob.to_account_id();
+        env_logger::try_init().ok();
         let transfer =
-            xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
-        rt.block_on(transfer).unwrap();
+            async_std::task::block_on(async move {
+                let signer = AccountKeyring::Alice.pair();
+                let dest = AccountKeyring::Bob.to_account_id();
 
-        // check that nonce is handled correctly
-        let transfer = xt
-            .increment_nonce()
-            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
+                let client = client().await;
+                let mut xt = client.xt(signer, None).await.unwrap();
+                let transfer =
+                    xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await.unwrap();
 
-        rt.block_on(transfer).unwrap();
+                // check that nonce is handled correctly
+                xt
+                    .increment_nonce()
+                    .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await
+            });
+
+        assert!(transfer.is_ok())
     }
 
     #[test]
