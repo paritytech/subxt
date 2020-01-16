@@ -293,7 +293,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
                 }
             }
         }
-        return Err("No status received for extrinsic".into());
+        unreachable!()
     }
 }
 
@@ -393,11 +393,15 @@ pub async fn wait_for_block_events<T: System + Balances + 'static>(
                 }
             }
         }
-        return Ok(ExtrinsicSuccess {
-            block: block_hash,
-            extrinsic: ext_hash,
-            events,
-        })
+        return if events.len() > 0 {
+            Ok(ExtrinsicSuccess {
+                block: block_hash,
+                extrinsic: ext_hash,
+                events,
+            })
+        } else {
+            Err(format!("No events found for block {}", block_hash).into())
+        }
     }
-    return Err(format!("No events found for block {}", block_hash).into())
+    unreachable!()
 }
