@@ -286,7 +286,7 @@ pub enum EventArg {
 }
 
 impl FromStr for EventArg {
-    type Err = MetadataError;
+    type Err = ConversionError;
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         if s.starts_with("Vec<") {
@@ -296,7 +296,7 @@ impl FromStr for EventArg {
                 Err(ConversionError::InvalidEventArg(
                     s.to_string(),
                     "Expected closing `>` for `Vec`",
-                ).into())
+                ))
             }
         } else if s.starts_with('(') {
             if s.ends_with(')') {
@@ -310,7 +310,7 @@ impl FromStr for EventArg {
                 Err(ConversionError::InvalidEventArg(
                     s.to_string(),
                     "Expecting closing `)` for tuple",
-                ).into())
+                ))
             }
         } else {
             Ok(EventArg::Primitive(s.to_string()))
@@ -352,11 +352,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(ConversionError::InvalidPrefix)
+            return Err(ConversionError::InvalidPrefix.into())
         }
         let meta = match metadata.1 {
             RuntimeMetadata::V10(meta) => meta,
-            _ => return Err(ConversionError::InvalidVersion),
+            _ => return Err(ConversionError::InvalidVersion.into()),
         };
         let mut modules = HashMap::new();
         let mut modules_with_calls = HashMap::new();
