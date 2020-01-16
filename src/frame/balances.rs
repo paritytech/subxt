@@ -101,7 +101,8 @@ impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T
             Ok(map) => map,
             Err(err) => return Box::pin(future::err(err)),
         };
-        Box::pin(self.fetch_or(map.key(account_id), None, map.default()))
+        let client = self.clone();
+        Box::pin(client.fetch_or(map.key(account_id), None, map.default()))
     }
 }
 
