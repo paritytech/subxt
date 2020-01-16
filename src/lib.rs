@@ -150,7 +150,7 @@ impl<T: System, S> Clone for Client<T, S> {
     }
 }
 
-impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
+impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
@@ -270,7 +270,6 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
         S: Verify,
         S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
-        let client = self.clone();
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce =
             match nonce {
@@ -278,10 +277,10 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
                 None => self.account_nonce(account_id).await?,
             };
 
-        let genesis_hash = client.genesis_hash;
-        let runtime_version = client.runtime_version.clone();
+        let genesis_hash = self.genesis_hash;
+        let runtime_version = self.runtime_version.clone();
         Ok(XtBuilder {
-            client,
+            client: self.clone(),
             nonce,
             runtime_version,
             genesis_hash,
@@ -300,7 +299,7 @@ pub struct XtBuilder<T: System, P, S> {
     signer: P,
 }
 
-impl<T: System + Balances + 'static, P, S: 'static> XtBuilder<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
 where
     P: Pair,
 {

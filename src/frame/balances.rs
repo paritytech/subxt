@@ -80,7 +80,7 @@ pub trait BalancesStore {
     ) -> Pin<Box<dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>> + Send>>;
 }
 
-impl<T: Balances + 'static, S: 'static> BalancesStore for Client<T, S> {
+impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T, S> {
     type Balances = T;
 
     fn free_balance(

@@ -127,7 +127,7 @@ pub trait SystemStore {
     ) -> Pin<Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>>;
 }
 
-impl<T: System + Balances + 'static, S: 'static> SystemStore for Client<T, S> {
+impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore for Client<T, S> {
     type System = T;
 
     fn account_nonce(
