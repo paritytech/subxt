@@ -216,6 +216,16 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
         Ok(block)
     }
 
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub async fn submit_extrinsic<E: Encode>(
+        &self,
+        extrinsic: E,
+    ) -> Result<T::Hash, Error>
+    {
+        let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
+        Ok(xt_hash)
+    }
+
     /// Subscribe to events.
     pub async fn subscribe_events(
         &self,
@@ -353,17 +363,13 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit<C: Encode>(
+    pub async fn submit<C: Encode>(
         &self,
         call: Call<C>,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
-        let cli = self.client.connect();
-        self.create_and_sign(call)
-            .into_future()
-            .map_err(Into::into)
-            .and_then(move |extrinsic| {
-                cli.and_then(move |rpc| rpc.submit_extrinsic(extrinsic))
-            })
+    ) -> Result<T::Hash, Error> {
+        let extrinsic = self.create_and_sign(call)?;
+        let xt_hash = self.client.submit_extrinsic(extrinsic).await?;
+        Ok(xt_hash)
     }
 
     /// Submits transaction to the chain and watch for events.
