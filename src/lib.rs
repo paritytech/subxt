@@ -31,10 +31,7 @@ use codec::{
     Decode,
     Encode,
 };
-use futures::future::{
-    self,
-    Future,
-};
+use futures::future;
 use jsonrpsee::client::Subscription;
 use sp_core::{
     storage::{
@@ -224,6 +221,17 @@ impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
     {
         let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
+    }
+
+    /// Create and submit an extrinsic and return corresponding Event if successful
+    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
+        self,
+        extrinsic: E,
+        decoder: EventsDecoder<T>,
+    ) -> Result<ExtrinsicSuccess<T>, Error>
+    {
+        let success = self.rpc.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+        Ok(success)
     }
 
     /// Subscribe to events.
@@ -416,24 +424,14 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit<C: Encode>(
+    pub async fn submit<C: Encode>(
         self,
         call: Call<C>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
-        let cli = self.client.connect();
-        let decoder = self.decoder.into_future().map_err(Into::into);
-
-        self.builder
-            .create_and_sign(call)
-            .into_future()
-            .map_err(Into::into)
-            .join(decoder)
-            .and_then(move |(extrinsic, decoder)| {
-                decoder.check_missing_type_sizes();
-                cli.and_then(move |rpc| {
-                    rpc.submit_and_watch_extrinsic(extrinsic, decoder)
-                })
-            })
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let decoder = self.decoder?;
+        let extrinsic = self.builder.create_and_sign(call)?;
+        let xt_success = self.client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+        Ok(xt_success)
     }
 }
 

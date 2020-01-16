@@ -81,6 +81,7 @@ pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, <T as System>:
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
+#[derive(Clone)]
 pub struct Rpc<T: System> {
     client: Client,
     marker: std::marker::PhantomData<T>,
