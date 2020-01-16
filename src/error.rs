@@ -35,6 +35,9 @@ pub enum Error {
     /// Rpc error.
     #[error("Rpc error: {0}")]
     Rpc(#[from] RequestError),
+    /// Serde serialization error
+    #[error("Serde json error: {0}")]
+    Serialization(#[from] serde_json::error::Error),
     /// Secret string error.
     #[error("Secret String Error")]
     SecretString(SecretStringError),
