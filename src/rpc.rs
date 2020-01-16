@@ -100,7 +100,7 @@ impl<T> Rpc<T> where T: System {
         // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
         // until then we manually construct params here and in other methods
         let params = Params::Array(vec![to_json_value(key)?]);
-        let data = self.client.request::<Option<V>>("state_getStorage", params).await?;
+        let data: Option<V> = self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {
                 let value = Decode::decode(&mut &data.0[..])?;
@@ -114,7 +114,7 @@ impl<T> Rpc<T> where T: System {
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(T::BlockNumber::min_value())));
         let params = Params::Array(vec![to_json_value(block_zero)?]);
-        let list_or_value = self.client.request::<ListOrValue<Option<T::Hash>>>("chain_getBlockHash", params).await?;
+        let list_or_value: ListOrValue<Option<T::Hash>> = self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(genesis_hash) => {
                 genesis_hash.ok_or_else(|| "Genesis hash not found".into())
@@ -125,7 +125,7 @@ impl<T> Rpc<T> where T: System {
 
     /// Fetch the metadata
     pub async fn metadata(&self) -> Result<Metadata, Error> {
-        let bytes = self.client.request::<Bytes>("state_getMetadata", Params::None).await?;
+        let bytes: Bytes = self.client.request("state_getMetadata", Params::None).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
@@ -138,7 +138,7 @@ impl<T> Rpc<T> where T: System {
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(|bn| ListOrValue::Value(bn));
         let params = Params::Array(vec![to_json_value(block_number)?]);
-        let list_or_value = self.client.request::<ListOrValue<Option<T::Hash>>>("chain_getBlockHash", params).await?;
+        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(hash) => Ok(hash),
             ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
@@ -147,7 +147,7 @@ impl<T> Rpc<T> where T: System {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let hash = self.client.request::<T::Hash>("chain_getFinalizedHead", Params::None).await?;
+        let hash = self.client.request("chain_getFinalizedHead", Params::None).await?;
         Ok(hash)
     }
 
@@ -156,7 +156,7 @@ impl<T> Rpc<T> where T: System {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        let block = self.client.request::<Option<ChainBlock<T>>>("chain_getBlock", Params::None).await?;
+        let block = self.client.request("chain_getBlock", Params::None).await?;
         Ok(block)
     }
 
@@ -166,7 +166,7 @@ impl<T> Rpc<T> where T: System {
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
         let params = Params::Array(vec![to_json_value(at)?]);
-        let version = self.client.request::<RuntimeVersion>("state_getRuntimeVersion", params).await?;
+        let version = self.client.request("state_getRuntimeVersion", params).await?;
         Ok(version)
     }
 }
@@ -181,7 +181,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        let params = Params::Array(vec![to_json_value(StorageKey(storage_key)?)]);
+        let params = Params::Array(vec![to_json_value(StorageKey(storage_key))?]);
 
         let subscription = self.client.subscribe(
             "state_subscribeStorage",
@@ -224,7 +224,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
     {
         let bytes: Bytes = extrinsic.encode().into();
         let params = Params::Array(vec![to_json_value(bytes)?]);
-        let xt_hash = self.client.request::<T::Hash>("author_submitExtrinsic", params).await?;
+        let xt_hash = self.client.request("author_submitExtrinsic", params).await?;
         Ok(xt_hash)
     }
 
