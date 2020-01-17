@@ -201,7 +201,8 @@ impl<T: System + Balances + 'static> Rpc<T> {
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        let params = Params::Array(vec![to_json_value(StorageKey(storage_key))?]);
+        let keys = Some(vec![StorageKey(storage_key)]);
+        let params = Params::Array(vec![to_json_value(keys)?]);
 
         let subscription = self
             .client
