@@ -182,8 +182,7 @@ mod tests {
 
         let xt = client.xt(signer, None).await?;
 
-        let result = xt.watch()
-            .submit(super::put_code(500_000, wasm)).await?;
+        let result = xt.watch().submit(super::put_code(500_000, wasm)).await?;
         let code_hash = result
             .find_event::<T::Hash>(MODULE, events::CODE_STORED)
             .transpose()?;
@@ -194,13 +193,12 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn tx_put_code() {
         env_logger::try_init().ok();
-        let code_hash: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let signer = AccountKeyring::Alice.pair();
-                let client = test_client().await;
-                let code_hash = put_code(&client, signer).await?;
-                Ok(code_hash)
-            });
+        let code_hash: Result<_, Error> = async_std::task::block_on(async move {
+            let signer = AccountKeyring::Alice.pair();
+            let client = test_client().await;
+            let code_hash = put_code(&client, signer).await?;
+            Ok(code_hash)
+        });
 
         assert!(
             code_hash.is_ok(),
@@ -216,32 +214,29 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn tx_instantiate() {
         env_logger::try_init().ok();
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let signer = AccountKeyring::Alice.pair();
-                let client = test_client().await;
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let signer = AccountKeyring::Alice.pair();
+            let client = test_client().await;
 
-                let code_hash = put_code(&client, signer.clone()).await
-                    .unwrap()
-                    .unwrap();
+            let code_hash = put_code(&client, signer.clone()).await.unwrap().unwrap();
 
-                println!("{:?}", code_hash);
+            println!("{:?}", code_hash);
 
-                let xt = client.xt(signer, None).await?;
-                let result = xt.watch()
-                    .submit(super::instantiate::<Runtime>(
-                        100_000_000_000_000,
-                        500_000,
-                        code_hash,
-                        Vec::new(),
-                    )).await?;
-                let event =
-                    result.find_event::<(AccountId, AccountId)>(
-                        MODULE,
-                        events::INSTANTIATED,
-                    ).transpose()?;
-                Ok(event)
-            });
+            let xt = client.xt(signer, None).await?;
+            let result = xt
+                .watch()
+                .submit(super::instantiate::<Runtime>(
+                    100_000_000_000_000,
+                    500_000,
+                    code_hash,
+                    Vec::new(),
+                ))
+                .await?;
+            let event = result
+                .find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED)
+                .transpose()?;
+            Ok(event)
+        });
 
         assert!(
             result.is_ok(),

@@ -137,7 +137,12 @@ impl<T: System, S> ClientBuilder<T, S> {
         let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
         let rpc = Rpc::connect_ws(&url).await?;
 
-        let (metadata, genesis_hash, runtime_version) = future::join3(rpc.metadata(), rpc.genesis_hash(), rpc.runtime_version(None)).await;
+        let (metadata, genesis_hash, runtime_version) = future::join3(
+            rpc.metadata(),
+            rpc.genesis_hash(),
+            rpc.runtime_version(None),
+        )
+        .await;
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
@@ -221,10 +226,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Get a block
-    pub async fn block<H>(
-        &self,
-        hash: Option<H>,
-    ) -> Result<Option<ChainBlock<T>>, Error>
+    pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
     where
         H: Into<T::Hash> + 'static,
     {
@@ -236,8 +238,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     pub async fn submit_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
-    ) -> Result<T::Hash, Error>
-    {
+    ) -> Result<T::Hash, Error> {
         let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
     }
@@ -247,9 +248,11 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         self,
         extrinsic: E,
         decoder: EventsDecoder<T>,
-    ) -> Result<ExtrinsicSuccess<T>, Error>
-    {
-        let success = self.rpc.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let success = self
+            .rpc
+            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .await?;
         Ok(success)
     }
 
@@ -262,9 +265,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Subscribe to new blocks.
-    pub async fn subscribe_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let headers = self.rpc.subscribe_blocks().await?;
         Ok(headers)
     }
@@ -290,11 +291,10 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
         let account_id = S::Signer::from(signer.public()).into_account();
-        let nonce =
-            match nonce {
-                Some(nonce) => nonce,
-                None => self.account_nonce(account_id).await?,
-            };
+        let nonce = match nonce {
+            Some(nonce) => nonce,
+            None => self.account_nonce(account_id).await?,
+        };
 
         let genesis_hash = self.genesis_hash;
         let runtime_version = self.runtime_version.clone();
@@ -389,10 +389,7 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub async fn submit<C: Encode>(
-        &self,
-        call: Call<C>,
-    ) -> Result<T::Hash, Error> {
+    pub async fn submit<C: Encode>(&self, call: Call<C>) -> Result<T::Hash, Error> {
         let extrinsic = self.create_and_sign(call)?;
         let xt_hash = self.client.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
@@ -448,7 +445,10 @@ where
     ) -> Result<ExtrinsicSuccess<T>, Error> {
         let decoder = self.decoder?;
         let extrinsic = self.builder.create_and_sign(call)?;
-        let xt_success = self.client.submit_and_watch_extrinsic(extrinsic, decoder).await?;
+        let xt_success = self
+            .client
+            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .await?;
         Ok(xt_success)
     }
 }
@@ -487,28 +487,31 @@ mod tests {
     type Balance = <Runtime as Balances>::Balance;
 
     pub(crate) async fn test_client() -> Client<Runtime> {
-        ClientBuilder::<Runtime>::new().build().await.expect("Error creating client")
+        ClientBuilder::<Runtime>::new()
+            .build()
+            .await
+            .expect("Error creating client")
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_tx_transfer_balance() {
         env_logger::try_init().ok();
-        let transfer =
-            async_std::task::block_on(async move {
-                let signer = AccountKeyring::Alice.pair();
-                let dest = AccountKeyring::Bob.to_account_id();
+        let transfer = async_std::task::block_on(async move {
+            let signer = AccountKeyring::Alice.pair();
+            let dest = AccountKeyring::Bob.to_account_id();
 
-                let client = test_client().await;
-                let mut xt = client.xt(signer, None).await?;
-                let _ =
-                    xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
+            let client = test_client().await;
+            let mut xt = client.xt(signer, None).await?;
+            let _ = xt
+                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .await?;
 
-                // check that nonce is handled correctly
-                xt
-                    .increment_nonce()
-                    .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await
-            });
+            // check that nonce is handled correctly
+            xt.increment_nonce()
+                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .await
+        });
 
         assert!(transfer.is_ok())
     }
@@ -516,12 +519,11 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_getting_hash() {
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let client = test_client().await;
-                let block_hash = client.block_hash(None).await?;
-                Ok(block_hash)
-            });
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let block_hash = client.block_hash(None).await?;
+            Ok(block_hash)
+        });
 
         assert!(result.is_ok())
     }
@@ -529,13 +531,12 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_getting_block() {
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let client = test_client().await;
-                let block_hash = client.block_hash(None).await?;
-                let block = client.block(block_hash).await?;
-                Ok(block)
-            });
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let block_hash = client.block_hash(None).await?;
+            let block = client.block(block_hash).await?;
+            Ok(block)
+        });
 
         assert!(result.is_ok())
     }
@@ -543,13 +544,12 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_state_read_free_balance() {
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let account = AccountKeyring::Alice.to_account_id();
-                let client = test_client().await;
-                let balance = client.free_balance(account.into()).await?;
-                Ok(balance)
-            });
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let account = AccountKeyring::Alice.to_account_id();
+            let client = test_client().await;
+            let balance = client.free_balance(account.into()).await?;
+            Ok(balance)
+        });
 
         assert!(result.is_ok())
     }
@@ -557,13 +557,12 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_chain_subscribe_blocks() {
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let client = test_client().await;
-                let mut blocks = client.subscribe_blocks().await?;
-                let block = blocks.next().await;
-                Ok(block)
-            });
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let mut blocks = client.subscribe_blocks().await?;
+            let block = blocks.next().await;
+            Ok(block)
+        });
 
         assert!(result.is_ok())
     }
@@ -571,13 +570,12 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_chain_subscribe_finalized_blocks() {
-        let result: Result<_, Error> =
-            async_std::task::block_on(async move {
-                let client = test_client().await;
-                let mut blocks = client.subscribe_finalized_blocks().await?;
-                let block = blocks.next().await;
-                Ok(block)
-            });
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let mut blocks = client.subscribe_finalized_blocks().await?;
+            let block = blocks.next().await;
+            Ok(block)
+        });
 
         assert!(result.is_ok())
     }

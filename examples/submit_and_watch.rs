@@ -15,7 +15,12 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{balances, system::System, DefaultNodeRuntime as Runtime, ExtrinsicSuccess};
+use substrate_subxt::{
+    balances,
+    system::System,
+    DefaultNodeRuntime as Runtime,
+    ExtrinsicSuccess,
+};
 
 type AccountId = <Runtime as System>::AccountId;
 type Balance = <Runtime as balances::Balances>::Balance;
@@ -30,14 +35,17 @@ fn main() {
             let dest = AccountKeyring::Bob.to_account_id();
 
             let cli = substrate_subxt::ClientBuilder::<Runtime>::new()
-                .build().await?;
+                .build()
+                .await?;
             let xt = cli.xt(signer, None).await?;
-            let xt_result = xt.watch()
+            let xt_result = xt
+                .watch()
                 .events_decoder(|decoder| {
                     // for any primitive event with no type size registered
                     decoder.register_type_size::<(u64, u64)>("IdentificationTuple")
                 })
-                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
+                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .await?;
             Ok(xt_result)
         });
     match result {

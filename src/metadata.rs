@@ -423,7 +423,9 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     }
 }
 
-fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, ConversionError> {
+fn convert<B: 'static, O: 'static>(
+    dd: DecodeDifferent<B, O>,
+) -> Result<O, ConversionError> {
     match dd {
         DecodeDifferent::Decoded(value) => Ok(value),
         _ => Err(ConversionError::ExpectedDecoded),

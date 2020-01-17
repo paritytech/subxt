@@ -77,7 +77,12 @@ pub trait BalancesStore {
     fn free_balance(
         &self,
         account_id: <Self::Balances as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>> + Send>>;
+    ) -> Pin<
+        Box<
+            dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>>
+                + Send,
+        >,
+    >;
 }
 
 impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T, S> {
@@ -86,8 +91,12 @@ impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T
     fn free_balance(
         &self,
         account_id: <Self::Balances as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>> + Send>>
-    {
+    ) -> Pin<
+        Box<
+            dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>>
+                + Send,
+        >,
+    > {
         let free_balance_map = || {
             Ok(self
                 .metadata()
@@ -102,7 +111,11 @@ impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T
             Err(err) => return Box::pin(future::err(err)),
         };
         let client = self.clone();
-        Box::pin(async move { client.fetch_or(map.key(account_id), None, map.default()).await })
+        Box::pin(async move {
+            client
+                .fetch_or(map.key(account_id), None, map.default())
+                .await
+        })
     }
 }
 

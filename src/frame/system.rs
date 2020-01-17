@@ -16,17 +16,13 @@
 
 //! Implements support for the frame_system module.
 
-use std::{
-    fmt::Debug,
-    pin::Pin,
-};
 use codec::Codec;
+use frame_support::Parameter;
 use futures::future::{
     self,
     Future,
 };
 use serde::de::DeserializeOwned;
-use frame_support::Parameter;
 use sp_runtime::traits::{
     Bounded,
     CheckEqual,
@@ -39,6 +35,10 @@ use sp_runtime::traits::{
     Member,
     SimpleArithmetic,
     SimpleBitOps,
+};
+use std::{
+    fmt::Debug,
+    pin::Pin,
 };
 
 use crate::{
@@ -124,17 +124,22 @@ pub trait SystemStore {
     fn account_nonce(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>>;
+    ) -> Pin<
+        Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>,
+    >;
 }
 
-impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore for Client<T, S> {
+impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
+    for Client<T, S>
+{
     type System = T;
 
     fn account_nonce(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>>
-    {
+    ) -> Pin<
+        Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>,
+    > {
         let account_nonce_map = || {
             Ok(self
                 .metadata
@@ -147,7 +152,11 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore for C
             Err(err) => return Box::pin(future::err(err)),
         };
         let client = self.clone();
-        Box::pin(async move { client.fetch_or(map.key(account_id), None, map.default()).await })
+        Box::pin(async move {
+            client
+                .fetch_or(map.key(account_id), None, map.default())
+                .await
+        })
     }
 }
 
