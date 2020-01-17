@@ -163,7 +163,7 @@ mod tests {
     async fn put_code<T, P, S>(
         client: &Client<T, S>,
         signer: P,
-    ) -> Result<Option<T::Hash>, Error>
+    ) -> Result<T::Hash, Error>
     where
         T: System + Balances + Send + Sync,
         T::Address: From<T::AccountId>,
@@ -185,7 +185,8 @@ mod tests {
         let result = xt.watch().submit(super::put_code(500_000, wasm)).await?;
         let code_hash = result
             .find_event::<T::Hash>(MODULE, events::CODE_STORED)
-            .transpose()?;
+            .ok_or(Error::Other("Failed to find CodeStored event".into()))??;
+
         Ok(code_hash)
     }
 
@@ -202,11 +203,7 @@ mod tests {
 
         assert!(
             code_hash.is_ok(),
-            "Contracts CodeStored event should be present"
-        );
-        assert!(
-            code_hash.unwrap().is_some(),
-            "CodeStored Hash should decode successfully"
+            "Contracts CodeStored event should be received and decoded"
         );
     }
 
@@ -218,7 +215,7 @@ mod tests {
             let signer = AccountKeyring::Alice.pair();
             let client = test_client().await;
 
-            let code_hash = put_code(&client, signer.clone()).await.unwrap().unwrap();
+            let code_hash = put_code(&client, signer.clone()).await?;
 
             println!("{:?}", code_hash);
 
@@ -234,17 +231,13 @@ mod tests {
                 .await?;
             let event = result
                 .find_event::<(AccountId, AccountId)>(MODULE, events::INSTANTIATED)
-                .transpose()?;
+                .ok_or(Error::Other("Failed to find Instantiated event".into()))??;
             Ok(event)
         });
 
         assert!(
             result.is_ok(),
-            "Contracts Instantiated event should be present"
-        );
-        assert!(
-            result.unwrap().is_some(),
-            "Instantiated Event should decode successfully"
+            "Contracts CodeStored event should be received and decoded"
         );
     }
 }
