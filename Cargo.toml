@@ -13,10 +13,11 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 [dependencies]
 log = "0.4"
 thiserror = "1.0"
-futures = "0.1"
-jsonrpc-core-client = { version = "14.0", features = ["ws"] }
+futures = "0.3"
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee/", features = ["ws"] }
 num-traits = { version = "0.2", default-features = false }
 serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
 url = "1.7"
 codec = { package = "parity-scale-codec", version = "1.1", default-features = false, features = ["derive", "full"] }
 
@@ -26,14 +27,13 @@ sp-runtime = { git = "https://github.com/paritytech/substrate/", package = "sp-r
 sp-version = { git = "https://github.com/paritytech/substrate/", package = "sp-version" }
 pallet-indices = { git = "https://github.com/paritytech/substrate/", package = "pallet-indices" }
 hex = "0.4.0"
-sc-rpc-api = { git = "https://github.com/paritytech/substrate/", package = "sc-rpc-api" }
 sp-rpc = { git = "https://github.com/paritytech/substrate/", package = "sp-rpc" }
 sp-core = { git = "https://github.com/paritytech/substrate/", package = "sp-core" }
 sp-transaction-pool = { git = "https://github.com/paritytech/substrate/", package = "sp-transaction-pool" }
 
 [dev-dependencies]
+async-std = "1.2.0"
 env_logger = "0.7"
-tokio = "0.1"
 wabt = "0.9"
 frame-system = { git = "https://github.com/paritytech/substrate/", package = "frame-system" }
 node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }

@@ -17,8 +17,27 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-#![deny(missing_docs)]
-#![deny(warnings)]
+#![deny(
+    bad_style,
+    const_err,
+    improper_ctypes,
+    missing_docs,
+    non_shorthand_field_patterns,
+    no_mangle_generic_items,
+    overflowing_literals,
+    path_statements,
+    patterns_in_fns_without_body,
+    plugin_as_library,
+    private_in_public,
+    unconditional_recursion,
+    unused_allocation,
+    unused_comparisons,
+    unused_parens,
+    while_true,
+    trivial_casts,
+    trivial_numeric_casts,
+    unused_extern_crates
+)]
 #![allow(clippy::type_complexity)]
 
 use std::{
@@ -31,13 +50,8 @@ use codec::{
     Decode,
     Encode,
 };
-use futures::future::{
-    self,
-    Either,
-    Future,
-    IntoFuture,
-};
-use jsonrpc_core_client::transports::ws;
+use futures::future;
+use jsonrpsee::client::Subscription;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -54,7 +68,6 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use url::Url;
 
 mod error;
 mod events;
@@ -93,20 +106,15 @@ use self::{
     rpc::{
         BlockNumber,
         ChainBlock,
-        MapStream,
         Rpc,
     },
 };
-
-fn connect<T: System>(url: &Url) -> impl Future<Item = Rpc<T>, Error = Error> {
-    ws::connect(url).map_err(Into::into)
-}
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
 pub struct ClientBuilder<T: System, S = MultiSignature> {
     _marker: std::marker::PhantomData<(T, S)>,
-    url: Option<Url>,
+    url: Option<String>,
 }
 
 impl<T: System, S> ClientBuilder<T, S> {
@@ -119,35 +127,35 @@ impl<T: System, S> ClientBuilder<T, S> {
     }
 
     /// Set the substrate rpc address.
-    pub fn set_url(mut self, url: Url) -> Self {
-        self.url = Some(url);
+    pub fn set_url(mut self, url: &str) -> Self {
+        self.url = Some(url.to_string());
         self
     }
 
     /// Creates a new Client.
-    pub fn build(self) -> impl Future<Item = Client<T, S>, Error = Error> {
-        let url = self.url.unwrap_or_else(|| {
-            Url::parse("ws://127.0.0.1:9944").expect("Is valid url; qed")
-        });
-        connect::<T>(&url).and_then(|rpc| {
-            rpc.metadata()
-                .join3(rpc.genesis_hash(), rpc.runtime_version(None))
-                .map(|(metadata, genesis_hash, runtime_version)| {
-                    Client {
-                        url,
-                        genesis_hash,
-                        metadata,
-                        runtime_version,
-                        _marker: PhantomData,
-                    }
-                })
+    pub async fn build(self) -> Result<Client<T, S>, Error> {
+        let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
+        let rpc = Rpc::connect_ws(&url).await?;
+
+        let (metadata, genesis_hash, runtime_version) = future::join3(
+            rpc.metadata(),
+            rpc.genesis_hash(),
+            rpc.runtime_version(None),
+        )
+        .await;
+        Ok(Client {
+            rpc,
+            genesis_hash: genesis_hash?,
+            metadata: metadata?,
+            runtime_version: runtime_version?,
+            _marker: PhantomData,
         })
     }
 }
 
 /// Client to interface with a substrate node.
 pub struct Client<T: System, S = MultiSignature> {
-    url: Url,
+    rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
@@ -157,7 +165,7 @@ pub struct Client<T: System, S = MultiSignature> {
 impl<T: System, S> Clone for Client<T, S> {
     fn clone(&self) -> Self {
         Self {
-            url: self.url.clone(),
+            rpc: self.rpc.clone(),
             genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
@@ -166,120 +174,136 @@ impl<T: System, S> Clone for Client<T, S> {
     }
 }
 
-impl<T: System + Balances + 'static, S: 'static> Client<T, S> {
-    fn connect(&self) -> impl Future<Item = Rpc<T>, Error = Error> {
-        connect(&self.url)
-    }
-
+impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
     }
 
     /// Fetch a StorageKey.
-    pub fn fetch<V: Decode>(
+    pub async fn fetch<V: Decode>(
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> impl Future<Item = Option<V>, Error = Error> {
-        self.connect().and_then(move |rpc| rpc.storage::<V>(key, hash))
+    ) -> Result<Option<V>, Error> {
+        self.rpc.storage::<V>(key, hash).await
     }
 
     /// Fetch a StorageKey or return the default.
-    pub fn fetch_or<V: Decode>(
+    pub async fn fetch_or<V: Decode>(
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
         default: V,
-    ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key, hash).map(|value| value.unwrap_or(default))
+    ) -> Result<V, Error> {
+        let result = self.fetch(key, hash).await?;
+        Ok(result.unwrap_or(default))
     }
 
     /// Fetch a StorageKey or return the default.
-    pub fn fetch_or_default<V: Decode + Default>(
+    pub async fn fetch_or_default<V: Decode + Default>(
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> impl Future<Item = V, Error = Error> {
-        self.fetch(key, hash).map(|value| value.unwrap_or_default())
+    ) -> Result<V, Error> {
+        let result = self.fetch(key, hash).await?;
+        Ok(result.unwrap_or_default())
     }
 
     /// Get a block hash. By default returns the latest block hash
-    pub fn block_hash(
+    pub async fn block_hash(
         &self,
-        height: Option<BlockNumber<T>>,
-    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.block_hash(height.map(|h| h)))
+        block_number: Option<BlockNumber<T>>,
+    ) -> Result<Option<T::Hash>, Error> {
+        let hash = self.rpc.block_hash(block_number).await?;
+        Ok(hash)
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.connect().and_then(|rpc| rpc.finalized_head())
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
+        let head = self.rpc.finalized_head().await?;
+        Ok(head)
     }
 
     /// Get a block
-    pub fn block<H>(
-        &self,
-        hash: Option<H>,
-    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error>
+    pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
     where
         H: Into<T::Hash> + 'static,
     {
-        self.connect()
-            .and_then(|rpc| rpc.block(hash.map(|h| h.into())))
+        let block = self.rpc.block(hash.map(|h| h.into())).await?;
+        Ok(block)
+    }
+
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub async fn submit_extrinsic<E: Encode>(
+        &self,
+        extrinsic: E,
+    ) -> Result<T::Hash, Error> {
+        let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
+        Ok(xt_hash)
+    }
+
+    /// Create and submit an extrinsic and return corresponding Event if successful
+    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
+        self,
+        extrinsic: E,
+        decoder: EventsDecoder<T>,
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let success = self
+            .rpc
+            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .await?;
+        Ok(success)
     }
 
     /// Subscribe to events.
-    pub fn subscribe_events(
+    pub async fn subscribe_events(
         &self,
-    ) -> impl Future<Item = MapStream<StorageChangeSet<T::Hash>>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.subscribe_events())
+    ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
+        let events = self.rpc.subscribe_events().await?;
+        Ok(events)
     }
 
     /// Subscribe to new blocks.
-    pub fn subscribe_blocks(
-        &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        self.connect().and_then(|rpc| rpc.subscribe_blocks())
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+        let headers = self.rpc.subscribe_blocks().await?;
+        Ok(headers)
     }
 
     /// Subscribe to finalized blocks.
-    pub fn subscribe_finalized_blocks(
+    pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        self.connect()
-            .and_then(|rpc| rpc.subscribe_finalized_blocks())
+    ) -> Result<Subscription<T::Header>, Error> {
+        let headers = self.rpc.subscribe_finalized_blocks().await?;
+        Ok(headers)
     }
 
     /// Create a transaction builder for a private key.
-    pub fn xt<P>(
+    pub async fn xt<P>(
         &self,
         signer: P,
         nonce: Option<T::Index>,
-    ) -> impl Future<Item = XtBuilder<T, P, S>, Error = Error>
+    ) -> Result<XtBuilder<T, P, S>, Error>
     where
         P: Pair,
         P::Signature: Codec,
         S: Verify,
         S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     {
-        let client = self.clone();
         let account_id = S::Signer::from(signer.public()).into_account();
-        match nonce {
-            Some(nonce) => Either::A(future::ok(nonce)),
-            None => Either::B(self.account_nonce(account_id)),
-        }
-        .map(|nonce| {
-            let genesis_hash = client.genesis_hash;
-            let runtime_version = client.runtime_version.clone();
-            XtBuilder {
-                client,
-                nonce,
-                runtime_version,
-                genesis_hash,
-                signer,
-            }
+        let nonce = match nonce {
+            Some(nonce) => nonce,
+            None => self.account_nonce(account_id).await?,
+        };
+
+        let genesis_hash = self.genesis_hash;
+        let runtime_version = self.runtime_version.clone();
+        Ok(XtBuilder {
+            client: self.clone(),
+            nonce,
+            runtime_version,
+            genesis_hash,
+            signer,
         })
     }
 }
@@ -294,7 +318,7 @@ pub struct XtBuilder<T: System, P, S> {
     signer: P,
 }
 
-impl<T: System + Balances + 'static, P, S: 'static> XtBuilder<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
 where
     P: Pair,
 {
@@ -365,17 +389,10 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub fn submit<C: Encode>(
-        &self,
-        call: Call<C>,
-    ) -> impl Future<Item = T::Hash, Error = Error> {
-        let cli = self.client.connect();
-        self.create_and_sign(call)
-            .into_future()
-            .map_err(Into::into)
-            .and_then(move |extrinsic| {
-                cli.and_then(move |rpc| rpc.submit_extrinsic(extrinsic))
-            })
+    pub async fn submit<C: Encode>(&self, call: Call<C>) -> Result<T::Hash, Error> {
+        let extrinsic = self.create_and_sign(call)?;
+        let xt_hash = self.client.submit_extrinsic(extrinsic).await?;
+        Ok(xt_hash)
     }
 
     /// Submits transaction to the chain and watch for events.
@@ -422,24 +439,17 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn submit<C: Encode>(
+    pub async fn submit<C: Encode>(
         self,
         call: Call<C>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
-        let cli = self.client.connect();
-        let decoder = self.decoder.into_future().map_err(Into::into);
-
-        self.builder
-            .create_and_sign(call)
-            .into_future()
-            .map_err(Into::into)
-            .join(decoder)
-            .and_then(move |(extrinsic, decoder)| {
-                decoder.check_missing_type_sizes();
-                cli.and_then(move |rpc| {
-                    rpc.submit_and_watch_extrinsic(extrinsic, decoder)
-                })
-            })
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let decoder = self.decoder?;
+        let extrinsic = self.builder.create_and_sign(call)?;
+        let xt_success = self
+            .client
+            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .await?;
+        Ok(xt_success)
     }
 }
 
@@ -458,7 +468,6 @@ impl codec::Encode for Encoded {
 mod tests {
     use codec::Encode;
     use frame_support::StorageMap;
-    use futures::stream::Stream;
     use sp_core::storage::StorageKey;
     use sp_keyring::AccountKeyring;
 
@@ -469,6 +478,7 @@ mod tests {
             BalancesStore,
         },
         DefaultNodeRuntime as Runtime,
+        Error,
     };
 
     type Index = <Runtime as System>::Index;
@@ -476,85 +486,104 @@ mod tests {
     type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
 
-    pub(crate) fn test_setup() -> (tokio::runtime::Runtime, Client<Runtime>) {
-        env_logger::try_init().ok();
-        let mut rt = tokio::runtime::Runtime::new().unwrap();
-        let client_future = ClientBuilder::<Runtime>::new().build();
-        let client = rt.block_on(client_future).unwrap();
-        (rt, client)
+    pub(crate) async fn test_client() -> Client<Runtime> {
+        ClientBuilder::<Runtime>::new()
+            .build()
+            .await
+            .expect("Error creating client")
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_tx_transfer_balance() {
-        let (mut rt, client) = test_setup();
+        env_logger::try_init().ok();
+        let transfer = async_std::task::block_on(async move {
+            let signer = AccountKeyring::Alice.pair();
+            let dest = AccountKeyring::Bob.to_account_id();
 
-        let signer = AccountKeyring::Alice.pair();
-        let mut xt = rt.block_on(client.xt(signer, None)).unwrap();
+            let client = test_client().await;
+            let mut xt = client.xt(signer, None).await?;
+            let _ = xt
+                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .await?;
 
-        let dest = AccountKeyring::Bob.to_account_id();
-        let transfer =
-            xt.submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
-        rt.block_on(transfer).unwrap();
+            // check that nonce is handled correctly
+            xt.increment_nonce()
+                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .await
+        });
 
-        // check that nonce is handled correctly
-        let transfer = xt
-            .increment_nonce()
-            .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000));
-
-        rt.block_on(transfer).unwrap();
+        assert!(transfer.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_getting_hash() {
-        let (mut rt, client) = test_setup();
-        rt.block_on(client.block_hash(None)).unwrap();
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let block_hash = client.block_hash(None).await?;
+            Ok(block_hash)
+        });
+
+        assert!(result.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_getting_block() {
-        let (mut rt, client) = test_setup();
-        rt.block_on(client.block_hash(None).and_then(move |h| client.block(h)))
-            .unwrap();
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let block_hash = client.block_hash(None).await?;
+            let block = client.block(block_hash).await?;
+            Ok(block)
+        });
+
+        assert!(result.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_state_read_free_balance() {
-        let (mut rt, client) = test_setup();
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let account = AccountKeyring::Alice.to_account_id();
+            let client = test_client().await;
+            let balance = client.free_balance(account.into()).await?;
+            Ok(balance)
+        });
 
-        let account = AccountKeyring::Alice.to_account_id();
-        rt.block_on(client.free_balance(account.into())).unwrap();
+        assert!(result.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_chain_subscribe_blocks() {
-        let (mut rt, client) = test_setup();
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let mut blocks = client.subscribe_blocks().await?;
+            let block = blocks.next().await;
+            Ok(block)
+        });
 
-        let stream = rt.block_on(client.subscribe_blocks()).unwrap();
-        let (_header, _) = rt
-            .block_on(stream.into_future().map_err(|(e, _)| e))
-            .unwrap();
+        assert!(result.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_chain_subscribe_finalized_blocks() {
-        let (mut rt, client) = test_setup();
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let client = test_client().await;
+            let mut blocks = client.subscribe_finalized_blocks().await?;
+            let block = blocks.next().await;
+            Ok(block)
+        });
 
-        let stream = rt.block_on(client.subscribe_finalized_blocks()).unwrap();
-        let (_header, _) = rt
-            .block_on(stream.into_future().map_err(|(e, _)| e))
-            .unwrap();
+        assert!(result.is_ok())
     }
 
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_chain_read_metadata() {
-        let (_, client) = test_setup();
+        let client = async_std::task::block_on(test_client());
 
         let balances = client.metadata().module_with_calls("Balances").unwrap();
         let dest = sp_keyring::AccountKeyring::Bob.to_account_id();

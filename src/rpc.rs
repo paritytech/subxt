@@ -21,35 +21,26 @@ use codec::{
     Encode,
     Error as CodecError,
 };
-use futures::{
-    future::{
-        self,
-        Future,
-        IntoFuture,
+use jsonrpsee::{
+    client::Subscription,
+    core::common::{
+        to_value as to_json_value,
+        Params,
     },
-    stream::{
-        self,
-        Stream,
-    },
+    Client,
 };
-use jsonrpc_core_client::{
-    RpcChannel,
-    TypedSubscriptionStream,
-};
+
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
-use sc_rpc_api::{
-    author::AuthorClient,
-    chain::ChainClient,
-    state::StateClient,
-};
 use sp_core::{
     storage::{
         StorageChangeSet,
+        StorageData,
         StorageKey,
     },
     twox_128,
+    Bytes,
 };
 use sp_rpc::{
     list::ListOrValue,
@@ -64,6 +55,7 @@ use sp_runtime::{
 };
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
+use std::marker::PhantomData;
 
 use crate::{
     error::Error,
@@ -83,265 +75,251 @@ use crate::{
     metadata::Metadata,
 };
 
-pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
+pub type ChainBlock<T> =
+    SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
+#[derive(Clone)]
 pub struct Rpc<T: System> {
-    state: StateClient<T::Hash>,
-    chain: ChainClient<T::BlockNumber, T::Hash, T::Header, ChainBlock<T>>,
-    author: AuthorClient<T::Hash, T::Hash>,
+    client: Client,
+    marker: std::marker::PhantomData<T>,
 }
 
-/// Allows connecting to all inner interfaces on the same RpcChannel
-impl<T: System> From<RpcChannel> for Rpc<T> {
-    fn from(channel: RpcChannel) -> Self {
-        Self {
-            state: channel.clone().into(),
-            chain: channel.clone().into(),
-            author: channel.into(),
-        }
+impl<T> Rpc<T>
+where
+    T: System,
+{
+    pub async fn connect_ws(url: &str) -> Result<Self, Error> {
+        let raw_client = jsonrpsee::ws::ws_raw_client(&url).await?;
+        Ok(Rpc {
+            client: raw_client.into(),
+            marker: PhantomData,
+        })
     }
-}
 
-impl<T: System> Rpc<T> {
     /// Fetch a storage key
-    pub fn storage<V: Decode>(
+    pub async fn storage<V: Decode>(
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> impl Future<Item = Option<V>, Error = Error> {
-        self.state
-            .storage(key, hash)
-            .map_err(Into::into)
-            .and_then(|data| {
-                match data {
-                    Some(data) => {
-                        let value = Decode::decode(&mut &data.0[..])?;
-                        Ok(Some(value))
-                    }
-                    None => Ok(None),
-                }
-            })
+    ) -> Result<Option<V>, Error> {
+        // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
+        // until then we manually construct params here and in other methods
+        let params = Params::Array(vec![to_json_value(key)?, to_json_value(hash)?]);
+        let data: Option<StorageData> =
+            self.client.request("state_getStorage", params).await?;
+        match data {
+            Some(data) => {
+                let value = Decode::decode(&mut &data.0[..])?;
+                Ok(Some(value))
+            }
+            None => Ok(None),
+        }
     }
 
     /// Fetch the genesis hash
-    pub fn genesis_hash(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        let block_zero = T::BlockNumber::min_value();
-        self.chain
-            .block_hash(Some(ListOrValue::Value(NumberOrHex::Number(block_zero))))
-            .map_err(Into::into)
-            .and_then(|list_or_value| {
-                future::result(match list_or_value {
-                    ListOrValue::Value(genesis_hash) => {
-                        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-                    }
-                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-                })
-            })
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
+        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(
+            T::BlockNumber::min_value(),
+        )));
+        let params = Params::Array(vec![to_json_value(block_zero)?]);
+        let list_or_value: ListOrValue<Option<T::Hash>> =
+            self.client.request("chain_getBlockHash", params).await?;
+        match list_or_value {
+            ListOrValue::Value(genesis_hash) => {
+                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
+            }
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+        }
     }
 
     /// Fetch the metadata
-    pub fn metadata(&self) -> impl Future<Item = Metadata, Error = Error> {
-        self.state
-            .metadata(None)
-            .map_err(Into::into)
-            .and_then(|bytes| {
-                let result = Decode::decode(&mut &bytes[..])
-                    .map_err(Into::into)
-                    .and_then(|meta: RuntimeMetadataPrefixed| {
-                        meta.try_into().map_err(|err| format!("{:?}", err).into())
-                    });
-                future::result(result)
-            })
+    pub async fn metadata(&self) -> Result<Metadata, Error> {
+        let bytes: Bytes = self
+            .client
+            .request("state_getMetadata", Params::None)
+            .await?;
+        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
+        let metadata: Metadata = meta.try_into()?;
+        Ok(metadata)
     }
 
     /// Get a block hash, returns hash of latest block by default
-    pub fn block_hash(
+    pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber<T>>,
-    ) -> impl Future<Item = Option<T::Hash>, Error = Error> {
-        self.chain
-            .block_hash(block_number.map(|bn| ListOrValue::Value(bn)))
-            .map_err(Into::into)
-            .and_then(|list_or_value| {
-                match list_or_value {
-                    ListOrValue::Value(hash) => Ok(hash),
-                    ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-                }
-            })
+    ) -> Result<Option<T::Hash>, Error> {
+        let block_number = block_number.map(|bn| ListOrValue::Value(bn));
+        let params = Params::Array(vec![to_json_value(block_number)?]);
+        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
+        match list_or_value {
+            ListOrValue::Value(hash) => Ok(hash),
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+        }
     }
 
     /// Get a block hash of the latest finalized block
-    pub fn finalized_head(&self) -> impl Future<Item = T::Hash, Error = Error> {
-        self.chain.finalized_head().map_err(Into::into)
+    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
+        let hash = self
+            .client
+            .request("chain_getFinalizedHead", Params::None)
+            .await?;
+        Ok(hash)
     }
 
     /// Get a Block
-    pub fn block(
+    pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> impl Future<Item = Option<ChainBlock<T>>, Error = Error> {
-        self.chain.block(hash).map_err(Into::into)
+    ) -> Result<Option<ChainBlock<T>>, Error> {
+        let params = Params::Array(vec![to_json_value(hash)?]);
+        let block = self.client.request("chain_getBlock", params).await?;
+        Ok(block)
     }
 
     /// Fetch the runtime version
-    pub fn runtime_version(
+    pub async fn runtime_version(
         &self,
         at: Option<T::Hash>,
-    ) -> impl Future<Item = RuntimeVersion, Error = Error> {
-        self.state.runtime_version(at).map_err(Into::into)
+    ) -> Result<RuntimeVersion, Error> {
+        let params = Params::Array(vec![to_json_value(at)?]);
+        let version = self
+            .client
+            .request("state_getRuntimeVersion", params)
+            .await?;
+        Ok(version)
     }
 }
 
-type MapClosure<T> = Box<dyn Fn(T) -> T + Send>;
-pub type MapStream<T> = stream::Map<TypedSubscriptionStream<T>, MapClosure<T>>;
-
 impl<T: System + Balances + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
-    pub fn subscribe_events(
+    pub async fn subscribe_events(
         &self,
-    ) -> impl Future<Item = MapStream<StorageChangeSet<<T as System>::Hash>>, Error = Error>
-    {
+    ) -> Result<Subscription<StorageChangeSet<<T as System>::Hash>>, Error> {
         let mut storage_key = twox_128(b"System").to_vec();
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
 
-        let closure: MapClosure<StorageChangeSet<<T as System>::Hash>> =
-            Box::new(|event| {
-                log::debug!(
-                    "Event {:?}",
-                    event
-                        .changes
-                        .iter()
-                        .map(|(k, v)| {
-                            (hex::encode(&k.0), v.as_ref().map(|v| hex::encode(&v.0)))
-                        })
-                        .collect::<Vec<_>>()
-                );
-                event
-            });
-        self.state
-            .subscribe_storage(Some(vec![StorageKey(storage_key)]))
-            .map(|stream: TypedSubscriptionStream<_>| stream.map(closure))
-            .map_err(Into::into)
+        let keys = Some(vec![StorageKey(storage_key)]);
+        let params = Params::Array(vec![to_json_value(keys)?]);
+
+        let subscription = self
+            .client
+            .subscribe("state_subscribeStorage", params, "state_unsubscribeStorage")
+            .await?;
+        Ok(subscription)
     }
 
     /// Subscribe to blocks.
-    pub fn subscribe_blocks(
-        &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        let closure: MapClosure<T::Header> = Box::new(|event| {
-            log::info!("New block {:?}", event);
-            event
-        });
-        self.chain
-            .subscribe_new_heads()
-            .map(|stream| stream.map(closure))
-            .map_err(Into::into)
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chain_subscribeNewHeads",
+                Params::None,
+                "chain_subscribeNewHeads",
+            )
+            .await?;
+
+        Ok(subscription)
     }
 
     /// Subscribe to finalized blocks.
-    pub fn subscribe_finalized_blocks(
+    pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> impl Future<Item = MapStream<T::Header>, Error = Error> {
-        let closure: MapClosure<T::Header> = Box::new(|event| {
-            log::info!("Finalized block {:?}", event);
-            event
-        });
-        self.chain
-            .subscribe_finalized_heads()
-            .map(|stream| stream.map(closure))
-            .map_err(Into::into)
+    ) -> Result<Subscription<T::Header>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "chain_subscribeFinalizedHeads",
+                Params::None,
+                "chain_subscribeFinalizedHeads",
+            )
+            .await?;
+        Ok(subscription)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub fn submit_extrinsic<E>(
-        self,
+    pub async fn submit_extrinsic<E: Encode>(
+        &self,
         extrinsic: E,
-    ) -> impl Future<Item = T::Hash, Error = Error>
-    where
-        E: Encode,
-    {
-        self.author
-            .submit_extrinsic(extrinsic.encode().into())
-            .map_err(Into::into)
+    ) -> Result<T::Hash, Error> {
+        let bytes: Bytes = extrinsic.encode().into();
+        let params = Params::Array(vec![to_json_value(bytes)?]);
+        let xt_hash = self
+            .client
+            .request("author_submitExtrinsic", params)
+            .await?;
+        Ok(xt_hash)
+    }
+
+    pub async fn watch_extrinsic<E: Encode>(
+        &self,
+        extrinsic: E,
+    ) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
+        let bytes: Bytes = extrinsic.encode().into();
+        let params = Params::Array(vec![to_json_value(bytes)?]);
+        let subscription = self
+            .client
+            .subscribe(
+                "author_submitAndWatchExtrinsic",
+                params,
+                "author_unwatchExtrinsic",
+            )
+            .await?;
+        Ok(subscription)
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub fn submit_and_watch_extrinsic<E: 'static>(
+    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
         self,
         extrinsic: E,
         decoder: EventsDecoder<T>,
-    ) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error>
-    where
-        E: Encode,
-    {
-        let events = self.subscribe_events().map_err(Into::into);
-        events.and_then(move |events| {
-            let ext_hash = T::Hashing::hash_of(&extrinsic);
-            log::info!("Submitting Extrinsic `{:?}`", ext_hash);
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let ext_hash = T::Hashing::hash_of(&extrinsic);
+        log::info!("Submitting Extrinsic `{:?}`", ext_hash);
 
-            let chain = self.chain.clone();
-            self.author
-                .watch_extrinsic(extrinsic.encode().into())
-                .map_err(Into::into)
-                .and_then(|stream| {
-                    stream
-                        .filter_map(|status| {
-                            log::info!("received status {:?}", status);
-                            match status {
-                                // ignore in progress extrinsic for now
-                                TransactionStatus::Future
-                                | TransactionStatus::Ready
-                                | TransactionStatus::Broadcast(_) => None,
-                                TransactionStatus::InBlock(block_hash) => {
-                                    Some(Ok(block_hash))
-                                }
-                                TransactionStatus::Usurped(_) => {
-                                    Some(Err("Extrinsic Usurped".into()))
-                                }
-                                TransactionStatus::Dropped => {
-                                    Some(Err("Extrinsic Dropped".into()))
-                                }
-                                TransactionStatus::Invalid => {
-                                    Some(Err("Extrinsic Invalid".into()))
-                                }
-                            }
-                        })
-                        .into_future()
-                        .map_err(|(e, _)| e.into())
-                        .and_then(|(result, _)| {
-                            log::info!("received result {:?}", result);
+        let events_sub = self.subscribe_events().await?;
+        let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-                            result
-                                .ok_or_else(|| Error::from("Stream terminated"))
-                                .and_then(|r| r)
-                                .into_future()
-                        })
-                })
-                .and_then(move |bh| {
-                    log::info!("Fetching block {:?}", bh);
-                    chain
-                        .block(Some(bh))
-                        .map(move |b| (bh, b))
-                        .map_err(Into::into)
-                })
-                .and_then(|(h, b)| {
-                    b.ok_or_else(|| format!("Failed to find block {:?}", h).into())
-                        .map(|b| (h, b))
-                        .into_future()
-                })
-                .and_then(move |(bh, sb)| {
-                    log::info!(
-                        "Found block {:?}, with {} extrinsics",
-                        bh,
-                        sb.block.extrinsics.len()
-                    );
-
-                    wait_for_block_events(decoder, ext_hash, sb, bh, events)
-                })
-        })
+        while let status = xt_sub.next().await {
+            log::info!("received status {:?}", status);
+            match status {
+                // ignore in progress extrinsic for now
+                TransactionStatus::Future
+                | TransactionStatus::Ready
+                | TransactionStatus::Broadcast(_) => continue,
+                TransactionStatus::InBlock(block_hash) => {
+                    log::info!("Fetching block {:?}", block_hash);
+                    let block = self.block(Some(block_hash)).await?;
+                    return match block {
+                        Some(signed_block) => {
+                            log::info!(
+                                "Found block {:?}, with {} extrinsics",
+                                block_hash,
+                                signed_block.block.extrinsics.len()
+                            );
+                            wait_for_block_events(
+                                decoder,
+                                ext_hash,
+                                signed_block,
+                                block_hash,
+                                events_sub,
+                            )
+                            .await
+                        }
+                        None => {
+                            Err(format!("Failed to find block {:?}", block_hash).into())
+                        }
+                    }
+                }
+                TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
+                TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
+                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
+            }
+        }
+        unreachable!()
     }
 }
 
@@ -399,13 +377,13 @@ impl<T: System> ExtrinsicSuccess<T> {
 }
 
 /// Waits for events for the block triggered by the extrinsic
-pub fn wait_for_block_events<T: System + Balances + 'static>(
+pub async fn wait_for_block_events<T: System + Balances + 'static>(
     decoder: EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,
     block_hash: T::Hash,
-    events_stream: MapStream<StorageChangeSet<T::Hash>>,
-) -> impl Future<Item = ExtrinsicSuccess<T>, Error = Error> {
+    events_subscription: Subscription<StorageChangeSet<T::Hash>>,
+) -> Result<ExtrinsicSuccess<T>, Error> {
     let ext_index = signed_block
         .block
         .extrinsics
@@ -415,43 +393,41 @@ pub fn wait_for_block_events<T: System + Balances + 'static>(
             hash == ext_hash
         })
         .ok_or_else(|| {
-            format!("Failed to find Extrinsic with hash {:?}", ext_hash).into()
-        })
-        .into_future();
+            Error::Other(format!("Failed to find Extrinsic with hash {:?}", ext_hash))
+        })?;
 
-    events_stream
-        .filter(move |event| event.block == block_hash)
-        .into_future()
-        .map_err(|(e, _)| e.into())
-        .join(ext_index)
-        .and_then(move |((change_set, _), ext_index)| {
-            let events = match change_set {
-                None => Vec::new(),
-                Some(change_set) => {
-                    let mut events = Vec::new();
-                    for (_key, data) in change_set.changes {
-                        if let Some(data) = data {
-                            match decoder.decode_events(&mut &data.0[..]) {
-                                Ok(raw_events) => {
-                                    for (phase, event) in raw_events {
-                                        if let Phase::ApplyExtrinsic(i) = phase {
-                                            if i as usize == ext_index {
-                                                events.push(event)
-                                            }
-                                        }
-                                    }
+    let mut subscription = events_subscription;
+    while let change_set = subscription.next().await {
+        // only interested in events for the given block
+        if change_set.block != block_hash {
+            continue
+        }
+        let mut events = Vec::new();
+        for (_key, data) in change_set.changes {
+            if let Some(data) = data {
+                match decoder.decode_events(&mut &data.0[..]) {
+                    Ok(raw_events) => {
+                        for (phase, event) in raw_events {
+                            if let Phase::ApplyExtrinsic(i) = phase {
+                                if i as usize == ext_index {
+                                    events.push(event)
                                 }
-                                Err(err) => return future::err(err.into()),
                             }
                         }
                     }
-                    events
+                    Err(err) => return Err(err.into()),
                 }
-            };
-            future::ok(ExtrinsicSuccess {
+            }
+        }
+        return if events.len() > 0 {
+            Ok(ExtrinsicSuccess {
                 block: block_hash,
                 extrinsic: ext_hash,
                 events,
             })
-        })
+        } else {
+            Err(format!("No events found for block {}", block_hash).into())
+        }
+    }
+    unreachable!()
 }

@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpc_core_client::RpcError;
+use jsonrpsee::{
+    client::RequestError,
+    ws::WsNewDnsError,
+};
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 
@@ -34,7 +37,13 @@ pub enum Error {
     Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
-    Rpc(RpcError),
+    Rpc(#[from] RequestError),
+    /// Error that can happen during the initial websocket handshake
+    #[error("Rpc error: {0}")]
+    WsHandshake(#[from] WsNewDnsError),
+    /// Serde serialization error
+    #[error("Serde json error: {0}")]
+    Serialization(#[from] serde_json::error::Error),
     /// Secret string error.
     #[error("Secret String Error")]
     SecretString(SecretStringError),
@@ -50,12 +59,6 @@ pub enum Error {
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
-}
-
-impl From<RpcError> for Error {
-    fn from(error: RpcError) -> Self {
-        Error::Rpc(error)
-    }
 }
 
 impl From<SecretStringError> for Error {
