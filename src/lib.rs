@@ -210,6 +210,25 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         Ok(result.unwrap_or_default())
     }
 
+    /// Query historical storage entries
+    pub async fn query_storage(
+        &self,
+        keys: Vec<StorageKey>,
+        from: T::Hash,
+        to: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+        self.rpc.query_storage(keys, from, to).await
+    }
+
+    /// Get a header
+    pub async fn header<H>(&self, hash: Option<H>) -> Result<Option<T::Header>, Error>
+    where
+        H: Into<T::Hash> + 'static,
+    {
+        let header = self.rpc.header(hash.map(|h| h.into())).await?;
+        Ok(header)
+    }
+
     /// Get a block hash. By default returns the latest block hash
     pub async fn block_hash(
         &self,

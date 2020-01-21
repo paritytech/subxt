@@ -118,6 +118,17 @@ where
         }
     }
 
+    /// Query historical storage entries
+    pub async fn query_storage(
+        &self,
+        keys: Vec<StorageKey>,
+        from: T::Hash,
+        to: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(from)?, to_json_value(to)?]);
+        self.client.request("state_queryStorage", params).await.map_err(Into::into)
+    }
+
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(
@@ -143,6 +154,16 @@ where
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
+    }
+
+    /// Get a header
+    pub async fn header(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<T::Header>, Error> {
+        let params = Params::Array(vec![to_json_value(hash)?]);
+        let header = self.client.request("chain_getHeader", params).await?;
+        Ok(header)
     }
 
     /// Get a block hash, returns hash of latest block by default
