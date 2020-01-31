@@ -14,6 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+// jsonrpsee subscriptions are interminable.
+// Allows `while let status = subscription.next().await {}`
+// Related: https://github.com/paritytech/substrate-subxt/issues/66
+#![allow(irrefutable_let_patterns)]
+
 use std::convert::TryInto;
 
 use codec::{
