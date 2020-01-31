@@ -63,6 +63,7 @@ impl<T> SignedExtension for CheckVersion<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckVersion";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
@@ -93,6 +94,7 @@ impl<T> SignedExtension for CheckGenesis<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckGenesis";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
@@ -125,6 +127,7 @@ impl<T> SignedExtension for CheckEra<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckEra";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
@@ -145,6 +148,7 @@ impl<T> SignedExtension for CheckNonce<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckNonce";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -165,6 +169,7 @@ impl<T> SignedExtension for CheckWeight<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckWeight";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -186,6 +191,7 @@ impl<T> SignedExtension for ChargeTransactionPayment<T>
 where
     T: Balances + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -206,6 +212,7 @@ impl<T> SignedExtension for CheckBlockGasLimit<T>
 where
     T: System + Send + Sync,
 {
+    const IDENTIFIER: &'static str = "CheckBlockGasLimit";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -266,6 +273,7 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
 }
 
 impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
+    const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned =
