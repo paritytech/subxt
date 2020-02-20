@@ -340,9 +340,13 @@ impl<T: System + Balances + 'static> Rpc<T> {
                         }
                     }
                 }
+                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
                 TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
                 TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
-                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
+                TransactionStatus::Retracted(_) => return Err("Extrinsic Retracted".into()),
+                // should have made it `InBlock` before either of these
+                TransactionStatus::Finalized(_) => return Err("Extrinsic Finalized".into()),
+                TransactionStatus::FinalityTimeout(_) => return Err("Extrinsic FinalityTimeout".into()),
             }
         }
         unreachable!()

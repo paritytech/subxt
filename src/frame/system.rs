@@ -30,10 +30,11 @@ use sp_runtime::traits::{
     Hash,
     Header,
     MaybeDisplay,
+    MaybeMallocSizeOf,
     MaybeSerialize,
     MaybeSerializeDeserialize,
     Member,
-    SimpleArithmetic,
+    AtLeast32Bit,
     SimpleBitOps,
 };
 use std::{
@@ -60,16 +61,17 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Debug
         + Default
         + MaybeDisplay
-        + SimpleArithmetic
+        + AtLeast32Bit
         + Copy;
 
     /// The block number type used by the runtime.
     type BlockNumber: Parameter
         + Member
+        + MaybeMallocSizeOf
         + MaybeSerializeDeserialize
         + Debug
         + MaybeDisplay
-        + SimpleArithmetic
+        + AtLeast32Bit
         + Default
         + Bounded
         + Copy
@@ -79,6 +81,7 @@ pub trait System: 'static + Eq + Clone + Debug {
     /// The output of the `Hashing` function.
     type Hash: Parameter
         + Member
+        + MaybeMallocSizeOf
         + MaybeSerializeDeserialize
         + Debug
         + MaybeDisplay

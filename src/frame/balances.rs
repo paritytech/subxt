@@ -30,7 +30,7 @@ use frame_support::Parameter;
 use sp_runtime::traits::{
     MaybeSerialize,
     Member,
-    SimpleArithmetic,
+    AtLeast32Bit,
 };
 
 use crate::{
@@ -47,7 +47,7 @@ pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
         + Member
-        + SimpleArithmetic
+        + AtLeast32Bit
         + codec::Codec
         + Default
         + Copy
