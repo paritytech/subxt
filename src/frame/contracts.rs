@@ -212,12 +212,12 @@ mod tests {
     fn tx_instantiate() {
         env_logger::try_init().ok();
         let result: Result<_, Error> = async_std::task::block_on(async move {
-            let signer = AccountKeyring::Alice.pair();
+            let signer = AccountKeyring::Bob.pair();
             let client = test_client().await;
 
             let code_hash = put_code(&client, signer.clone()).await?;
 
-            println!("{:?}", code_hash);
+            log::info!("Code hash: {:?}", code_hash);
 
             let xt = client.xt(signer, None).await?;
             let result = xt
@@ -235,9 +235,11 @@ mod tests {
             Ok(event)
         });
 
+        log::info!("Instantiate result: {:?}", result);
+
         assert!(
             result.is_ok(),
-            "Contracts CodeStored event should be received and decoded"
+            "Contract should be instantiated successfully"
         );
     }
 }

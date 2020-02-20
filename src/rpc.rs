@@ -361,7 +361,7 @@ pub struct ExtrinsicSuccess<T: System> {
     /// Extrinsic hash.
     pub extrinsic: T::Hash,
     /// Raw runtime events, can be decoded by the caller.
-    pub events: Vec<RuntimeEvent>,
+    pub events: Vec<RuntimeEvent<T>>,
 }
 
 impl<T: System> ExtrinsicSuccess<T> {
@@ -381,7 +381,7 @@ impl<T: System> ExtrinsicSuccess<T> {
     }
 
     /// Returns all System Events
-    pub fn system_events(&self) -> Vec<&SystemEvent> {
+    pub fn system_events(&self) -> Vec<&SystemEvent<T>> {
         self.events
             .iter()
             .filter_map(|evt| {

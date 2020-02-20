@@ -50,8 +50,8 @@ use crate::{
 
 /// Top level Event that can be produced by a substrate runtime
 #[derive(Debug)]
-pub enum RuntimeEvent {
-    System(SystemEvent),
+pub enum RuntimeEvent<T: System> {
+    System(SystemEvent<T>),
     Raw(RawEvent),
 }
 
@@ -197,7 +197,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RuntimeEvent)>, EventsError> {
+    ) -> Result<Vec<(Phase, RuntimeEvent<T>)>, EventsError> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
 

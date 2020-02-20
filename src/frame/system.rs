@@ -182,11 +182,17 @@ use frame_support::weights::DispatchInfo;
 
 /// Event for the System module.
 #[derive(Clone, Debug, codec::Decode)]
-pub enum SystemEvent {
+pub enum SystemEvent<T: System> {
     /// An extrinsic completed successfully.
     ExtrinsicSuccess(DispatchInfo),
     /// An extrinsic failed.
     ExtrinsicFailed(sp_runtime::DispatchError, DispatchInfo),
+    /// `:code` was updated.
+    CodeUpdated,
+    /// A new account was created.
+    NewAccount(T::AccountId),
+    /// An account was reaped.
+    ReapedAccount(T::AccountId),
 }
 
 /// A phase of a block's execution.
