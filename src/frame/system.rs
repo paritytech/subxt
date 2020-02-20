@@ -116,6 +116,10 @@ pub trait System: 'static + Eq + Clone + Debug {
 
     /// Extrinsic type within blocks.
     type Extrinsic: Parameter + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
+
+    /// Data to be associated with an account (other than nonce/transaction counter, which this
+	/// module does regardless).
+    type AccountData: Member + Codec + Clone + Default;
 }
 
 /// The System extension trait for the Client.
@@ -123,12 +127,12 @@ pub trait SystemStore {
     /// System type.
     type System: System;
 
-    /// Returns the account nonce for an account_id.
-    fn account_nonce(
+    /// Returns the nonce and account data for an account_id.
+    fn account(
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>,
+        Box<dyn Future<Output = Result<(<Self::System as System>::Index, <Self::System as System>::AccountData), Error>> + Send>,
     >;
 }
 
@@ -137,20 +141,20 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
 {
     type System = T;
 
-    fn account_nonce(
+    fn account(
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<<Self::System as System>::Index, Error>> + Send>,
+        Box<dyn Future<Output = Result<(<Self::System as System>::Index, <Self::System as System>::AccountData), Error>> + Send>,
     > {
-        let account_nonce_map = || {
+        let account_map = || {
             Ok(self
                 .metadata
                 .module("System")?
-                .storage("AccountNonce")?
+                .storage("Account")?
                 .get_map()?)
         };
-        let map = match account_nonce_map() {
+        let map = match account_map() {
             Ok(map) => map,
             Err(err) => return Box::pin(future::err(err)),
         };

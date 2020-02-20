@@ -311,7 +311,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account_nonce(account_id).await?,
+            None => self.account(account_id).await?.0,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -499,7 +499,6 @@ mod tests {
         Error,
     };
 
-    type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
     type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
