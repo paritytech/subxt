@@ -18,28 +18,19 @@
 
 use std::{
     fmt::Debug,
-    pin::Pin,
 };
-
-use futures::future::{
-    self,
-    Future,
-};
-
+use codec::{Encode, Decode};
 use frame_support::Parameter;
 use sp_runtime::traits::{
     MaybeSerialize,
     Member,
-    SimpleArithmetic,
+    AtLeast32Bit,
 };
-
 use crate::{
-    error::Error,
     frame::{
         system::System,
         Call,
     },
-    Client,
 };
 
 /// The subset of the `pallet_balances::Trait` that a client must implement.
@@ -47,7 +38,7 @@ pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
         + Member
-        + SimpleArithmetic
+        + AtLeast32Bit
         + codec::Codec
         + Default
         + Copy
@@ -56,67 +47,28 @@ pub trait Balances: System {
         + From<<Self as System>::BlockNumber>;
 }
 
-/// The Balances extension trait for the Client.
-pub trait BalancesStore {
-    /// Balances type.
-    type Balances: Balances;
-
-    /// The 'free' balance of a given account.
+/// All balance information for an account.
+#[derive(Debug, Encode, Decode, Clone, PartialEq, Eq, Default)]
+pub struct AccountData<Balance> {
+    /// Non-reserved part of the balance. There may still be restrictions on this, but it is the
+    /// total pool what may in principle be transferred, reserved and used for tipping.
     ///
-    /// This is the only balance that matters in terms of most operations on
-    /// tokens. It alone is used to determine the balance when in the contract
-    ///  execution environment. When this balance falls below the value of
-    ///  `ExistentialDeposit`, then the 'current account' is deleted:
-    ///  specifically `FreeBalance`. Further, the `OnFreeBalanceZero` callback
-    /// is invoked, giving a chance to external modules to clean up data
-    /// associated with the deleted account.
+    /// This is the only balance that matters in terms of most operations on tokens. It
+    /// alone is used to determine the balance when in the contract execution environment.
+    pub free: Balance,
+    /// Balance which is reserved and may not be used at all.
     ///
-    /// `system::AccountNonce` is also deleted if `ReservedBalance` is also
-    /// zero. It also gets collapsed to zero if it ever becomes less than
-    /// `ExistentialDeposit`.
-    fn free_balance(
-        &self,
-        account_id: <Self::Balances as System>::AccountId,
-    ) -> Pin<
-        Box<
-            dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>>
-                + Send,
-        >,
-    >;
-}
-
-impl<T: Balances + Sync + Send + 'static, S: 'static> BalancesStore for Client<T, S> {
-    type Balances = T;
-
-    fn free_balance(
-        &self,
-        account_id: <Self::Balances as System>::AccountId,
-    ) -> Pin<
-        Box<
-            dyn Future<Output = Result<<Self::Balances as Balances>::Balance, Error>>
-                + Send,
-        >,
-    > {
-        let free_balance_map = || {
-            Ok(self
-                .metadata()
-                .module("Balances")?
-                .storage("FreeBalance")?
-                .get_map::<
-                <Self::Balances as System>::AccountId,
-                <Self::Balances as Balances>::Balance>()?)
-        };
-        let map = match free_balance_map() {
-            Ok(map) => map,
-            Err(err) => return Box::pin(future::err(err)),
-        };
-        let client = self.clone();
-        Box::pin(async move {
-            client
-                .fetch_or(map.key(account_id), None, map.default())
-                .await
-        })
-    }
+    /// This can still get slashed, but gets slashed last of all.
+    ///
+    /// This balance is a 'reserve' balance that other subsystems use in order to set aside tokens
+    /// that are still 'owned' by the account holder, but which are suspendable.
+    pub reserved: Balance,
+    /// The amount that `free` may not drop below when withdrawing for *anything except transaction
+    /// fee payment*.
+    pub misc_frozen: Balance,
+    /// The amount that `free` may not drop below when withdrawing specifically for transaction
+    /// fee payment.
+    pub fee_frozen: Balance,
 }
 
 const MODULE: &str = "Balances";

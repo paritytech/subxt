@@ -26,7 +26,7 @@ use sp_runtime::{
 };
 
 use crate::frame::{
-    balances::Balances,
+    balances::{Balances, AccountData},
     contracts::Contracts,
     system::System,
 };
@@ -49,6 +49,7 @@ impl System for DefaultNodeRuntime {
     type Address = pallet_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
     type Extrinsic = OpaqueExtrinsic;
+    type AccountData = AccountData<<Self as Balances>::Balance>;
 }
 
 impl Balances for DefaultNodeRuntime {

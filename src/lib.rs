@@ -311,7 +311,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account_nonce(account_id).await?,
+            None => self.account(account_id).await?.0,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -491,15 +491,11 @@ mod tests {
 
     use super::*;
     use crate::{
-        frame::balances::{
-            Balances,
-            BalancesStore,
-        },
+        frame::balances::Balances,
         DefaultNodeRuntime as Runtime,
         Error,
     };
 
-    type Index = <Runtime as System>::Index;
     type AccountId = <Runtime as System>::AccountId;
     type Address = <Runtime as System>::Address;
     type Balance = <Runtime as Balances>::Balance;
@@ -565,7 +561,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.free_balance(account.into()).await?;
+            let balance = client.account(account.into()).await?.1.free;
             Ok(balance)
         });
 
@@ -614,32 +610,18 @@ mod tests {
         let call2 = balances.call("transfer", subxt_transfer.args).unwrap();
         assert_eq!(call.encode().to_vec(), call2.0);
 
-        let free_balance =
-            <pallet_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
-        let free_balance_key = StorageKey(free_balance);
-        let free_balance_key2 = client
-            .metadata()
-            .module("Balances")
-            .unwrap()
-            .storage("FreeBalance")
-            .unwrap()
-            .get_map::<AccountId, Balance>()
-            .unwrap()
-            .key(dest.clone());
-        assert_eq!(free_balance_key, free_balance_key2);
-
-        let account_nonce =
-            <frame_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
-        let account_nonce_key = StorageKey(account_nonce);
-        let account_nonce_key2 = client
+        let account_key =
+            <frame_system::Account<node_runtime::Runtime>>::hashed_key_for(&dest);
+        let account_key_substrate = StorageKey(account_key);
+        let account_key_from_meta = client
             .metadata()
             .module("System")
             .unwrap()
-            .storage("AccountNonce")
+            .storage("Account")
             .unwrap()
-            .get_map::<AccountId, Index>()
+            .get_map::<AccountId, pallet_balances::AccountData<Balance>>()
             .unwrap()
-            .key(dest);
-        assert_eq!(account_nonce_key, account_nonce_key2);
+            .key(dest.clone());
+        assert_eq!(account_key_substrate, account_key_from_meta);
     }
 }
