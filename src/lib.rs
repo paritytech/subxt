@@ -491,10 +491,7 @@ mod tests {
 
     use super::*;
     use crate::{
-        frame::balances::{
-            Balances,
-            BalancesStore,
-        },
+        frame::balances::Balances,
         DefaultNodeRuntime as Runtime,
         Error,
     };
@@ -564,7 +561,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.free_balance(account.into()).await?;
+            let balance = client.account(account.into()).await?.1.free;
             Ok(balance)
         });
 
