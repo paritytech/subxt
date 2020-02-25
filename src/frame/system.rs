@@ -16,26 +16,29 @@
 
 //! Implements support for the frame_system module.
 
-use codec::Codec;
+use codec::{Codec, Decode, Encode};
 use frame_support::Parameter;
 use futures::future::{
     self,
     Future,
 };
 use serde::de::DeserializeOwned;
-use sp_runtime::traits::{
-    Bounded,
-    CheckEqual,
-    Extrinsic,
-    Hash,
-    Header,
-    MaybeDisplay,
-    MaybeMallocSizeOf,
-    MaybeSerialize,
-    MaybeSerializeDeserialize,
-    Member,
-    AtLeast32Bit,
-    SimpleBitOps,
+use sp_runtime::{
+    RuntimeDebug,
+    traits::{
+        Bounded,
+        CheckEqual,
+        Extrinsic,
+        Hash,
+        Header,
+        MaybeDisplay,
+        MaybeMallocSizeOf,
+        MaybeSerialize,
+        MaybeSerializeDeserialize,
+        Member,
+        AtLeast32Bit,
+        SimpleBitOps,
+    }
 };
 use std::{
     fmt::Debug,
@@ -122,6 +125,22 @@ pub trait System: 'static + Eq + Clone + Debug {
     type AccountData: Member + Codec + Clone + Default;
 }
 
+/// Type used to encode the number of references an account has.
+pub type RefCount = u8;
+
+/// Information of an account.
+#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
+pub struct AccountInfo<Index, AccountData> {
+    /// The number of transactions this account has sent.
+    pub nonce: Index,
+    /// The number of other modules that currently depend on this account's existence. The account
+    /// cannot be reaped until this is zero.
+    pub refcount: RefCount,
+    /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
+    /// chains.
+    pub data: AccountData,
+}
+
 /// The System extension trait for the Client.
 pub trait SystemStore {
     /// System type.
@@ -132,7 +151,7 @@ pub trait SystemStore {
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<(<Self::System as System>::Index, <Self::System as System>::AccountData), Error>> + Send>,
+        Box<dyn Future<Output = Result<AccountInfo<<Self::System as System>::Index, <Self::System as System>::AccountData>, Error>> + Send>,
     >;
 }
 
@@ -145,7 +164,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<(<Self::System as System>::Index, <Self::System as System>::AccountData), Error>> + Send>,
+        Box<dyn Future<Output = Result<AccountInfo<<Self::System as System>::Index, <Self::System as System>::AccountData>, Error>> + Send>,
     > {
         let account_map = || {
             Ok(self
