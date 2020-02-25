@@ -26,7 +26,10 @@ use sp_runtime::{
 };
 
 use crate::frame::{
-    balances::{Balances, AccountData},
+    balances::{
+        AccountData,
+        Balances,
+    },
     contracts::Contracts,
     system::System,
 };

@@ -16,7 +16,11 @@
 
 //! Implements support for the frame_system module.
 
-use codec::{Codec, Decode, Encode};
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use frame_support::Parameter;
 use futures::future::{
     self,
@@ -24,8 +28,8 @@ use futures::future::{
 };
 use serde::de::DeserializeOwned;
 use sp_runtime::{
-    RuntimeDebug,
     traits::{
+        AtLeast32Bit,
         Bounded,
         CheckEqual,
         Extrinsic,
@@ -36,9 +40,9 @@ use sp_runtime::{
         MaybeSerialize,
         MaybeSerializeDeserialize,
         Member,
-        AtLeast32Bit,
         SimpleBitOps,
-    }
+    },
+    RuntimeDebug,
 };
 use std::{
     fmt::Debug,
@@ -121,7 +125,7 @@ pub trait System: 'static + Eq + Clone + Debug {
     type Extrinsic: Parameter + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
 
     /// Data to be associated with an account (other than nonce/transaction counter, which this
-	/// module does regardless).
+    /// module does regardless).
     type AccountData: Member + Codec + Clone + Default;
 }
 
@@ -151,7 +155,17 @@ pub trait SystemStore {
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<AccountInfo<<Self::System as System>::Index, <Self::System as System>::AccountData>, Error>> + Send>,
+        Box<
+            dyn Future<
+                    Output = Result<
+                        AccountInfo<
+                            <Self::System as System>::Index,
+                            <Self::System as System>::AccountData,
+                        >,
+                        Error,
+                    >,
+                > + Send,
+        >,
     >;
 }
 
@@ -164,7 +178,17 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
         &self,
         account_id: <Self::System as System>::AccountId,
     ) -> Pin<
-        Box<dyn Future<Output = Result<AccountInfo<<Self::System as System>::Index, <Self::System as System>::AccountData>, Error>> + Send>,
+        Box<
+            dyn Future<
+                    Output = Result<
+                        AccountInfo<
+                            <Self::System as System>::Index,
+                            <Self::System as System>::AccountData,
+                        >,
+                        Error,
+                    >,
+                > + Send,
+        >,
     > {
         let account_map = || {
             Ok(self

@@ -160,10 +160,7 @@ mod tests {
 
     type AccountId = <Runtime as System>::AccountId;
 
-    async fn put_code<T, P, S>(
-        client: &Client<T, S>,
-        signer: P,
-    ) -> Result<T::Hash, Error>
+    async fn put_code<T, P, S>(client: &Client<T, S>, signer: P) -> Result<T::Hash, Error>
     where
         T: System + Balances + Send + Sync,
         T::Address: From<T::AccountId>,
