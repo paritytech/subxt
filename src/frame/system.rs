@@ -134,15 +134,15 @@ pub type RefCount = u8;
 
 /// Information of an account.
 #[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
-pub struct AccountInfo<Index, AccountData> {
+pub struct AccountInfo<T: System> {
     /// The number of transactions this account has sent.
-    pub nonce: Index,
+    pub nonce: T::Index,
     /// The number of other modules that currently depend on this account's existence. The account
     /// cannot be reaped until this is zero.
     pub refcount: RefCount,
     /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
     /// chains.
-    pub data: AccountData,
+    pub data: T::AccountData,
 }
 
 /// The System extension trait for the Client.
@@ -154,19 +154,7 @@ pub trait SystemStore {
     fn account(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Pin<
-        Box<
-            dyn Future<
-                    Output = Result<
-                        AccountInfo<
-                            <Self::System as System>::Index,
-                            <Self::System as System>::AccountData,
-                        >,
-                        Error,
-                    >,
-                > + Send,
-        >,
-    >;
+    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>;
 }
 
 impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
@@ -177,19 +165,8 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
     fn account(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Pin<
-        Box<
-            dyn Future<
-                    Output = Result<
-                        AccountInfo<
-                            <Self::System as System>::Index,
-                            <Self::System as System>::AccountData,
-                        >,
-                        Error,
-                    >,
-                > + Send,
-        >,
-    > {
+    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>
+    {
         let account_map = || {
             Ok(self
                 .metadata
