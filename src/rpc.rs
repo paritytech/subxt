@@ -130,8 +130,15 @@ where
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
-        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(from)?, to_json_value(to)?]);
-        self.client.request("state_queryStorage", params).await.map_err(Into::into)
+        let params = Params::Array(vec![
+            to_json_value(keys)?,
+            to_json_value(from)?,
+            to_json_value(to)?,
+        ]);
+        self.client
+            .request("state_queryStorage", params)
+            .await
+            .map_err(Into::into)
     }
 
     /// Fetch the genesis hash
@@ -343,10 +350,16 @@ impl<T: System + Balances + 'static> Rpc<T> {
                 TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
                 TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
                 TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
-                TransactionStatus::Retracted(_) => return Err("Extrinsic Retracted".into()),
+                TransactionStatus::Retracted(_) => {
+                    return Err("Extrinsic Retracted".into())
+                }
                 // should have made it `InBlock` before either of these
-                TransactionStatus::Finalized(_) => return Err("Extrinsic Finalized".into()),
-                TransactionStatus::FinalityTimeout(_) => return Err("Extrinsic FinalityTimeout".into()),
+                TransactionStatus::Finalized(_) => {
+                    return Err("Extrinsic Finalized".into())
+                }
+                TransactionStatus::FinalityTimeout(_) => {
+                    return Err("Extrinsic FinalityTimeout".into())
+                }
             }
         }
         unreachable!()

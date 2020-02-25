@@ -311,7 +311,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account(account_id).await?.0,
+            None => self.account(account_id).await?.nonce,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -561,7 +561,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.account(account.into()).await?.1.free;
+            let balance = client.account(account.into()).await?.data.free;
             Ok(balance)
         });
 
