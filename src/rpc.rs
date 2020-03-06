@@ -28,7 +28,7 @@ use codec::{
 };
 use jsonrpsee::{
     client::Subscription,
-    core::common::{
+    common::{
         to_value as to_json_value,
         Params,
     },
@@ -96,9 +96,9 @@ where
     T: System,
 {
     pub async fn connect_ws(url: &str) -> Result<Self, Error> {
-        let raw_client = jsonrpsee::ws::ws_raw_client(&url).await?;
+        let client = jsonrpsee::ws_client(&url).await?;
         Ok(Rpc {
-            client: raw_client.into(),
+            client: client.into(),
             marker: PhantomData,
         })
     }

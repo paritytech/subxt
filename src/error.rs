@@ -16,7 +16,7 @@
 
 use jsonrpsee::{
     client::RequestError,
-    ws::WsNewDnsError,
+    transport::ws::WsNewDnsError,
 };
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;

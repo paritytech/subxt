@@ -593,35 +593,4 @@ mod tests {
 
         assert!(result.is_ok())
     }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_chain_read_metadata() {
-        let client = async_std::task::block_on(test_client());
-
-        let balances = client.metadata().module_with_calls("Balances").unwrap();
-        let dest = sp_keyring::AccountKeyring::Bob.to_account_id();
-        let address: Address = dest.clone().into();
-        let amount: Balance = 10_000;
-
-        let transfer = pallet_balances::Call::transfer(address.clone(), amount);
-        let call = node_runtime::Call::Balances(transfer);
-        let subxt_transfer = crate::frame::balances::transfer::<Runtime>(address, amount);
-        let call2 = balances.call("transfer", subxt_transfer.args).unwrap();
-        assert_eq!(call.encode().to_vec(), call2.0);
-
-        let account_key =
-            <frame_system::Account<node_runtime::Runtime>>::hashed_key_for(&dest);
-        let account_key_substrate = StorageKey(account_key);
-        let account_key_from_meta = client
-            .metadata()
-            .module("System")
-            .unwrap()
-            .storage("Account")
-            .unwrap()
-            .get_map::<AccountId, pallet_balances::AccountData<Balance>>()
-            .unwrap()
-            .key(dest.clone());
-        assert_eq!(account_key_substrate, account_key_from_meta);
-    }
 }
