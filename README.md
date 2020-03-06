@@ -1,4 +1,4 @@
-# subxt
+# subxt &middot; ![build](https://github.com/paritytech/substrate-subxt/workflows/Rust/badge.svg)
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
