@@ -35,6 +35,5 @@ async-std = "1.2.0"
 env_logger = "0.7"
 wabt = "0.9"
 frame-system = { version = "2.0.0-alpha.3", package = "frame-system" }
-node-runtime = { git = "https://github.com/paritytech/substrate/", package = "node-runtime" }
 pallet-balances = { version = "2.0.0-alpha.3", package = "pallet-balances" }
 sp-keyring = { version = "2.0.0-alpha.3", package = "sp-keyring" }
