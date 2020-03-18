@@ -488,7 +488,6 @@ mod tests {
 
     use super::*;
     use crate::{
-        frame::balances::Balances,
         DefaultNodeRuntime as Runtime,
         Error,
     };
