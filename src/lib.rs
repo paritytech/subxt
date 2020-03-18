@@ -493,10 +493,6 @@ mod tests {
         Error,
     };
 
-    type AccountId = <Runtime as System>::AccountId;
-    type Address = <Runtime as System>::Address;
-    type Balance = <Runtime as Balances>::Balance;
-
     pub(crate) async fn test_client() -> Client<Runtime> {
         ClientBuilder::<Runtime>::new()
             .build()
