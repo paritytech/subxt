@@ -484,9 +484,6 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use codec::Encode;
-    use frame_support::StorageMap;
-    use sp_core::storage::StorageKey;
     use sp_keyring::AccountKeyring;
 
     use super::*;
