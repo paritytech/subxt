@@ -58,7 +58,7 @@ fn main() {
                     println!("Balance transfer success: value: {:?}", value)
                 }
                 Some(Err(err)) => println!("Failed to decode code hash: {}", err),
-                None => println!("Failed to find Contracts::CodeStored Event"),
+                None => println!("Failed to find Balances::Transfer Event"),
             }
         }
         Err(err) => println!("Error: {:?}", err),
