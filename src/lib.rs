@@ -484,21 +484,13 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use codec::Encode;
-    use frame_support::StorageMap;
-    use sp_core::storage::StorageKey;
     use sp_keyring::AccountKeyring;
 
     use super::*;
     use crate::{
-        frame::balances::Balances,
         DefaultNodeRuntime as Runtime,
         Error,
     };
-
-    type AccountId = <Runtime as System>::AccountId;
-    type Address = <Runtime as System>::Address;
-    type Balance = <Runtime as Balances>::Balance;
 
     pub(crate) async fn test_client() -> Client<Runtime> {
         ClientBuilder::<Runtime>::new()

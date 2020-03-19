@@ -18,7 +18,6 @@ use sp_keyring::AccountKeyring;
 use substrate_subxt::{
     balances,
     Error,
-    system::System,
     KusamaRuntime,
 };
 
