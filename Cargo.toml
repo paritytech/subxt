@@ -22,7 +22,11 @@ serde_json = "1.0"
 url = "1.7"
 codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
 
-frame-metadata = { version = "11.0.0-alpha.3", package = "frame-metadata" }
+[dependencies.frame-metadata]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'frame-metadata'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '11.0.0-alpha.3'
 
 [dependencies.frame-support]
 git = 'https://github.com/paritytech/substrate.git'
