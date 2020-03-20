@@ -11,6 +11,7 @@ keywords = ["parity", "substrate", "blockchain"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
 [dependencies]
+hex = "0.4.0"
 log = "0.4"
 thiserror = "1.0"
 futures = "0.3"
@@ -22,19 +23,68 @@ url = "1.7"
 codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
 
 frame-metadata = { version = "11.0.0-alpha.3", package = "frame-metadata" }
-frame-support = { version = "2.0.0-alpha.3", package = "frame-support" }
-sp-runtime = { version = "2.0.0-alpha.3", package = "sp-runtime" }
-sp-version = { version = "2.0.0-alpha.3", package = "sp-version" }
-pallet-indices = { version = "2.0.0-alpha.3", package = "pallet-indices" }
-hex = "0.4.0"
-sp-rpc = { version = "2.0.0-alpha.3", package = "sp-rpc" }
-sp-core = { version = "2.0.0-alpha.3", package = "sp-core" }
-sp-transaction-pool = { version = "2.0.0-alpha.3", package = "sp-transaction-pool" }
+
+[dependencies.frame-support]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'frame-support'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.sp-runtime]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-runtime'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.sp-version]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-version'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.pallet-indices]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'pallet-indices'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.sp-rpc]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-rpc'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.sp-core]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-core'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dependencies.sp-transaction-pool]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-transaction-pool'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
 
 [dev-dependencies]
 async-std = "1.2.0"
 env_logger = "0.7"
 wabt = "0.9"
-frame-system = { version = "2.0.0-alpha.3", package = "frame-system" }
-pallet-balances = { version = "2.0.0-alpha.3", package = "pallet-balances" }
-sp-keyring = { version = "2.0.0-alpha.3", package = "sp-keyring" }
+
+[dev-dependencies.frame-system]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'frame-system'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dev-dependencies.pallet-balances]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'pallet-balances'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
+
+[dev-dependencies.sp-keyring]
+git = 'https://github.com/paritytech/substrate.git'
+package = 'sp-keyring'
+rev = '013c1ee167354a08283fb69915fda56a62fee943'
+version = '2.0.0-alpha.3'
