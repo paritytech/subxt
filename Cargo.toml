@@ -6,6 +6,9 @@ edition = "2018"
 
 license = "GPL-3.0"
 readme = "README.md"
+repository = "https://github.com/paritytech/substrate-subxt"
+documentation = "https://docs.rs/substrate-subxt"
+homepage = "https://www.parity.io/"
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
