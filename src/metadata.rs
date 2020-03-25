@@ -238,6 +238,7 @@ impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
         bytes.extend(&sp_core::twox_128(&self.storage_prefix)[..]);
         let encoded_key = key.encode();
         let hash = match self.hasher {
+            StorageHasher::Identity => encoded_key.to_vec(),
             StorageHasher::Blake2_128 => sp_core::blake2_128(&encoded_key).to_vec(),
             StorageHasher::Blake2_128Concat => {
                 // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
