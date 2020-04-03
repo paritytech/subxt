@@ -59,7 +59,10 @@ use sp_core::{
     Pair,
 };
 use sp_runtime::{
-    generic::UncheckedExtrinsic,
+    generic::{
+        SignedPayload,
+        UncheckedExtrinsic,
+    },
     traits::{
         IdentifyAccount,
         Verify,
@@ -296,6 +299,30 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         Ok(headers)
     }
 
+    /// Creates raw payload to be signed for the supplied `Call` without private key
+    pub async fn create_raw_payload<C>(
+        &self,
+        account_id: <T as System>::AccountId,
+        call: Call<C>,
+    ) -> Result<
+        Vec<u8>,
+        Error,
+    >
+    where
+        C: codec::Encode,
+    {
+        let account_nonce = self.account(account_id).await?.nonce;
+        let version = self.runtime_version.spec_version;
+        let genesis_hash = self.genesis_hash;
+        let call = self
+            .metadata()
+            .module_with_calls(&call.module)
+            .and_then(|module| module.call(&call.function, call.args))?;
+        let extra: extrinsic::DefaultExtra<T> = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let raw_payload = SignedPayload::new(call, extra.extra())?;
+        Ok(raw_payload.encode())
+    }
+
     /// Create a transaction builder for a private key.
     pub async fn xt<P>(
         &self,
@@ -484,7 +511,7 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use sp_keyring::AccountKeyring;
+    use sp_keyring::{ AccountKeyring, Ed25519Keyring };
 
     use super::*;
     use crate::{
@@ -581,6 +608,36 @@ mod tests {
             let mut blocks = client.subscribe_finalized_blocks().await?;
             let block = blocks.next().await;
             Ok(block)
+        });
+
+        assert!(result.is_ok())
+    }
+
+    #[test]
+    #[ignore] // requires locally running substrate node
+    fn test_create_raw_payload() {
+        
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let signer_pair = Ed25519Keyring::Alice.pair();
+            let signer_account_id = Ed25519Keyring::Alice.to_account_id();
+            let dest = AccountKeyring::Bob.to_account_id();
+
+            let client = test_client().await;
+
+            // create raw payload with AccoundId and sign it          
+            let raw_payload = client.create_raw_payload(signer_account_id, balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
+            let raw_signature = signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
+            let raw_multisig = MultiSignature::from(raw_signature);
+
+            // create signature with Xtbuilder
+            let xt = client.xt(signer_pair.clone(), None).await?;
+            let xt_multi_sig = xt.create_and_sign(balances::transfer::<Runtime>(dest.clone().into(), 10_000))?.signature.unwrap().1;
+
+            // compare signatures
+            assert_eq!(raw_multisig, xt_multi_sig);
+
+            Ok(())
+            
         });
 
         assert!(result.is_ok())
