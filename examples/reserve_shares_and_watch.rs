@@ -14,25 +14,29 @@ fn main() {
 
             let reserves_alices_shares = AccountKeyring::Alice.to_account_id();
 
-            let organization: OrgId = 1u128.into();
-            let share_id: ShareId = 1u128.into();
+            let organization: OrgId = 1u64;
+            let share_id: ShareId = 1u64;
 
             let cli = substrate_subxt::ClientBuilder::<Runtime>::new()
                 .build()
                 .await?;
             let xt = cli.xt(alice_the_signer, None).await?;
+            // debugging
+            println!("last message shown");
             let xt_result = xt
                 .watch()
                 .events_decoder(|decoder| {
                     // for any primitive event with no type size registered
-                    decoder.register_type_size::<(u64, u64)>("IdentificationTuple")
+                    decoder.register_type_size::<(u64, u64, u64)>("IdentificationTuple")
                 })
-                .submit(shares_atomic::reserve::<Runtime>(
-                    organization,
-                    share_id,
+                .submit(shares_atomic::reserve_shares::<Runtime>(
+                    organization.into(),
+                    share_id.into(),
                     reserves_alices_shares.clone().into(),
                 ))
                 .await?;
+            // debugging
+            println!("first message not shown");
             Ok(xt_result)
         });
     match result {

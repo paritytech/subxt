@@ -23,7 +23,7 @@ serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 url = "2.1"
 codec = { version = "1.2", package = "parity-scale-codec", default-features = false, features = ["derive", "full"] }
-util = {path = "../sunshine/modules/util", default-features=false}
+util = {package = "util", git = "https://github.com/web3garden/sunshine-node", default-features=false}
 frame-metadata = { version = "11.0.0-alpha.5", git = "https://github.com/paritytech/substrate.git", rev = '8c1858048148c1c717123b0e4d360f8ad1be5bf2', package = "frame-metadata" }
 frame-support = { version = "2.0.0-alpha.5", git = "https://github.com/paritytech/substrate.git", rev = '8c1858048148c1c717123b0e4d360f8ad1be5bf2', package = "frame-support" }
 sp-runtime = { version = "2.0.0-alpha.5", git = "https://github.com/paritytech/substrate.git", rev = '8c1858048148c1c717123b0e4d360f8ad1be5bf2', package = "sp-runtime" }

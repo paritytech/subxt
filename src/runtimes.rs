@@ -48,8 +48,8 @@ impl Balances for SunTime {
 }
 
 impl SharesAtomic for SunTime {
-    type OrgId = u128;
-    type ShareId = u128;
+    type OrgId = u64;
+    type ShareId = u64;
 }
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`

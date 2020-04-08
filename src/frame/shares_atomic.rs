@@ -27,7 +27,7 @@ pub trait SharesAtomic: System {
 }
 
 const MODULE: &str = "SharesAtomic";
-const RESERVE: &str = "reserve";
+const RESERVE: &str = "reserve_shares";
 
 /// Arguments for requesting a share reservation
 #[derive(codec::Encode)]
@@ -38,7 +38,7 @@ pub struct ReserveArgs<T: SharesAtomic> {
 }
 
 /// Request the share reservation
-pub fn reserve<T: SharesAtomic>(
+pub fn reserve_shares<T: SharesAtomic>(
     org: T::OrgId,
     share: T::ShareId,
     account: <T as System>::AccountId,
