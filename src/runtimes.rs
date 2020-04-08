@@ -26,7 +26,10 @@ use sp_runtime::{
 };
 
 use crate::frame::{
-    balances::Balances,
+    balances::{
+        AccountData,
+        Balances,
+    },
     contracts::Contracts,
     system::System,
 };
@@ -49,6 +52,7 @@ impl System for DefaultNodeRuntime {
     type Address = pallet_indices::address::Address<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
     type Extrinsic = OpaqueExtrinsic;
+    type AccountData = AccountData<<Self as Balances>::Balance>;
 }
 
 impl Balances for DefaultNodeRuntime {
@@ -56,3 +60,28 @@ impl Balances for DefaultNodeRuntime {
 }
 
 impl Contracts for DefaultNodeRuntime {}
+
+/// Concrete type definitions compatible with those for kusama, v0.7
+///
+/// # Note
+///
+/// Main difference is `type Address = AccountId`.
+/// Also the contracts module is not part of the kusama runtime.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct KusamaRuntime;
+
+impl System for KusamaRuntime {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = BlakeTwo256;
+    type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
+    type Address = Self::AccountId;
+    type Header = Header<Self::BlockNumber, BlakeTwo256>;
+    type Extrinsic = OpaqueExtrinsic;
+    type AccountData = AccountData<<Self as Balances>::Balance>;
+}
+
+impl Balances for KusamaRuntime {
+    type Balance = u128;
+}

@@ -28,7 +28,7 @@ use codec::{
 };
 use jsonrpsee::{
     client::Subscription,
-    core::common::{
+    common::{
         to_value as to_json_value,
         Params,
     },
@@ -96,9 +96,9 @@ where
     T: System,
 {
     pub async fn connect_ws(url: &str) -> Result<Self, Error> {
-        let raw_client = jsonrpsee::ws::ws_raw_client(&url).await?;
+        let client = jsonrpsee::ws_client(&url).await?;
         Ok(Rpc {
-            client: raw_client.into(),
+            client: client.into(),
             marker: PhantomData,
         })
     }
@@ -130,8 +130,15 @@ where
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
-        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(from)?, to_json_value(to)?]);
-        self.client.request("state_queryStorage", params).await.map_err(Into::into)
+        let params = Params::Array(vec![
+            to_json_value(keys)?,
+            to_json_value(from)?,
+            to_json_value(to)?,
+        ]);
+        self.client
+            .request("state_queryStorage", params)
+            .await
+            .map_err(Into::into)
     }
 
     /// Fetch the genesis hash
@@ -340,9 +347,19 @@ impl<T: System + Balances + 'static> Rpc<T> {
                         }
                     }
                 }
+                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
                 TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
                 TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
-                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
+                TransactionStatus::Retracted(_) => {
+                    return Err("Extrinsic Retracted".into())
+                }
+                // should have made it `InBlock` before either of these
+                TransactionStatus::Finalized(_) => {
+                    return Err("Extrinsic Finalized".into())
+                }
+                TransactionStatus::FinalityTimeout(_) => {
+                    return Err("Extrinsic FinalityTimeout".into())
+                }
             }
         }
         unreachable!()
@@ -357,7 +374,7 @@ pub struct ExtrinsicSuccess<T: System> {
     /// Extrinsic hash.
     pub extrinsic: T::Hash,
     /// Raw runtime events, can be decoded by the caller.
-    pub events: Vec<RuntimeEvent>,
+    pub events: Vec<RuntimeEvent<T>>,
 }
 
 impl<T: System> ExtrinsicSuccess<T> {
@@ -377,7 +394,7 @@ impl<T: System> ExtrinsicSuccess<T> {
     }
 
     /// Returns all System Events
-    pub fn system_events(&self) -> Vec<&SystemEvent> {
+    pub fn system_events(&self) -> Vec<&SystemEvent<T>> {
         self.events
             .iter()
             .filter_map(|evt| {

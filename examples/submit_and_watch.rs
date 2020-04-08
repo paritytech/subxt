@@ -51,14 +51,14 @@ fn main() {
     match result {
         Ok(extrinsic_success) => {
             match extrinsic_success
-                .find_event::<(AccountId, AccountId, Balance, Balance)>(
+                .find_event::<(AccountId, AccountId, Balance)>(
                     "Balances", "Transfer",
                 ) {
-                Some(Ok((_from, _to, value, _fees))) => {
+                Some(Ok((_from, _to, value))) => {
                     println!("Balance transfer success: value: {:?}", value)
                 }
                 Some(Err(err)) => println!("Failed to decode code hash: {}", err),
-                None => println!("Failed to find Contracts::CodeStored Event"),
+                None => println!("Failed to find Balances::Transfer Event"),
             }
         }
         Err(err) => println!("Error: {:?}", err),

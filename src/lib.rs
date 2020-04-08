@@ -59,7 +59,10 @@ use sp_core::{
     Pair,
 };
 use sp_runtime::{
-    generic::UncheckedExtrinsic,
+    generic::{
+        SignedPayload,
+        UncheckedExtrinsic,
+    },
     traits::{
         IdentifyAccount,
         Verify,
@@ -296,6 +299,30 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         Ok(headers)
     }
 
+    /// Creates raw payload to be signed for the supplied `Call` without private key
+    pub async fn create_raw_payload<C>(
+        &self,
+        account_id: <T as System>::AccountId,
+        call: Call<C>,
+    ) -> Result<
+        Vec<u8>,
+        Error,
+    >
+    where
+        C: codec::Encode,
+    {
+        let account_nonce = self.account(account_id).await?.nonce;
+        let version = self.runtime_version.spec_version;
+        let genesis_hash = self.genesis_hash;
+        let call = self
+            .metadata()
+            .module_with_calls(&call.module)
+            .and_then(|module| module.call(&call.function, call.args))?;
+        let extra: extrinsic::DefaultExtra<T> = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let raw_payload = SignedPayload::new(call, extra.extra())?;
+        Ok(raw_payload.encode())
+    }
+
     /// Create a transaction builder for a private key.
     pub async fn xt<P>(
         &self,
@@ -311,7 +338,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account_nonce(account_id).await?,
+            None => self.account(account_id).await?.nonce,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -484,25 +511,13 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use codec::Encode;
-    use frame_support::StorageMap;
-    use sp_core::storage::StorageKey;
-    use sp_keyring::AccountKeyring;
+    use sp_keyring::{ AccountKeyring, Ed25519Keyring };
 
     use super::*;
     use crate::{
-        frame::balances::{
-            Balances,
-            BalancesStore,
-        },
         DefaultNodeRuntime as Runtime,
         Error,
     };
-
-    type Index = <Runtime as System>::Index;
-    type AccountId = <Runtime as System>::AccountId;
-    type Address = <Runtime as System>::Address;
-    type Balance = <Runtime as Balances>::Balance;
 
     pub(crate) async fn test_client() -> Client<Runtime> {
         ClientBuilder::<Runtime>::new()
@@ -565,7 +580,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.free_balance(account.into()).await?;
+            let balance = client.account(account.into()).await?.data.free;
             Ok(balance)
         });
 
@@ -600,46 +615,31 @@ mod tests {
 
     #[test]
     #[ignore] // requires locally running substrate node
-    fn test_chain_read_metadata() {
-        let client = async_std::task::block_on(test_client());
+    fn test_create_raw_payload() {
+        
+        let result: Result<_, Error> = async_std::task::block_on(async move {
+            let signer_pair = Ed25519Keyring::Alice.pair();
+            let signer_account_id = Ed25519Keyring::Alice.to_account_id();
+            let dest = AccountKeyring::Bob.to_account_id();
 
-        let balances = client.metadata().module_with_calls("Balances").unwrap();
-        let dest = sp_keyring::AccountKeyring::Bob.to_account_id();
-        let address: Address = dest.clone().into();
-        let amount: Balance = 10_000;
+            let client = test_client().await;
 
-        let transfer = pallet_balances::Call::transfer(address.clone(), amount);
-        let call = node_runtime::Call::Balances(transfer);
-        let subxt_transfer = crate::frame::balances::transfer::<Runtime>(address, amount);
-        let call2 = balances.call("transfer", subxt_transfer.args).unwrap();
-        assert_eq!(call.encode().to_vec(), call2.0);
+            // create raw payload with AccoundId and sign it          
+            let raw_payload = client.create_raw_payload(signer_account_id, balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
+            let raw_signature = signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
+            let raw_multisig = MultiSignature::from(raw_signature);
 
-        let free_balance =
-            <pallet_balances::FreeBalance<node_runtime::Runtime>>::hashed_key_for(&dest);
-        let free_balance_key = StorageKey(free_balance);
-        let free_balance_key2 = client
-            .metadata()
-            .module("Balances")
-            .unwrap()
-            .storage("FreeBalance")
-            .unwrap()
-            .get_map::<AccountId, Balance>()
-            .unwrap()
-            .key(dest.clone());
-        assert_eq!(free_balance_key, free_balance_key2);
+            // create signature with Xtbuilder
+            let xt = client.xt(signer_pair.clone(), None).await?;
+            let xt_multi_sig = xt.create_and_sign(balances::transfer::<Runtime>(dest.clone().into(), 10_000))?.signature.unwrap().1;
 
-        let account_nonce =
-            <frame_system::AccountNonce<node_runtime::Runtime>>::hashed_key_for(&dest);
-        let account_nonce_key = StorageKey(account_nonce);
-        let account_nonce_key2 = client
-            .metadata()
-            .module("System")
-            .unwrap()
-            .storage("AccountNonce")
-            .unwrap()
-            .get_map::<AccountId, Index>()
-            .unwrap()
-            .key(dest);
-        assert_eq!(account_nonce_key, account_nonce_key2);
+            // compare signatures
+            assert_eq!(raw_multisig, xt_multi_sig);
+
+            Ok(())
+            
+        });
+
+        assert!(result.is_ok())
     }
 }
