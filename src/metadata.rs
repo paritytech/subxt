@@ -14,26 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    marker::PhantomData,
-    str::FromStr,
-};
+use std::{collections::HashMap, convert::TryFrom, marker::PhantomData, str::FromStr};
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 
 use frame_metadata::{
-    DecodeDifferent,
-    RuntimeMetadata,
-    RuntimeMetadataPrefixed,
-    StorageEntryModifier,
-    StorageEntryType,
-    StorageHasher,
-    META_RESERVED,
+    DecodeDifferent, RuntimeMetadata, RuntimeMetadataPrefixed, StorageEntryModifier,
+    StorageEntryType, StorageHasher, META_RESERVED,
 };
 use sp_core::storage::StorageKey;
 
@@ -91,10 +78,7 @@ impl Metadata {
         self.modules_with_events.values()
     }
 
-    pub fn module_with_events(
-        &self,
-        module_index: u8,
-    ) -> Result<&ModuleWithEvents, MetadataError> {
+    pub fn module_with_events(&self, module_index: u8) -> Result<&ModuleWithEvents, MetadataError> {
         self.modules_with_events
             .values()
             .find(|&module| module.index == module_index)
@@ -200,9 +184,7 @@ pub struct StorageMetadata {
 }
 
 impl StorageMetadata {
-    pub fn get_map<K: Encode, V: Decode + Clone>(
-        &self,
-    ) -> Result<StorageMap<K, V>, MetadataError> {
+    pub fn get_map<K: Encode, V: Decode + Clone>(&self) -> Result<StorageMap<K, V>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
                 let module_prefix = self.module_prefix.as_bytes().to_vec();
@@ -353,7 +335,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(ConversionError::InvalidPrefix.into())
+            return Err(ConversionError::InvalidPrefix.into());
         }
         let meta = match metadata.1 {
             RuntimeMetadata::V11(meta) => meta,
@@ -371,11 +353,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let module_prefix = convert(storage.prefix)?;
                 for entry in convert(storage.entries)?.into_iter() {
                     let storage_prefix = convert(entry.name.clone())?;
-                    let entry = convert_entry(
-                        module_prefix.clone(),
-                        storage_prefix.clone(),
-                        entry,
-                    )?;
+                    let entry =
+                        convert_entry(module_prefix.clone(), storage_prefix.clone(), entry)?;
                     storage_map.insert(storage_prefix, entry);
                 }
             }
@@ -424,9 +403,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     }
 }
 
-fn convert<B: 'static, O: 'static>(
-    dd: DecodeDifferent<B, O>,
-) -> Result<O, ConversionError> {
+fn convert<B: 'static, O: 'static>(dd: DecodeDifferent<B, O>) -> Result<O, ConversionError> {
     match dd {
         DecodeDifferent::Decoded(value) => Ok(value),
         _ => Err(ConversionError::ExpectedDecoded),

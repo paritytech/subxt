@@ -16,45 +16,22 @@
 
 //! Implements support for the frame_system module.
 
-use codec::{
-    Codec,
-    Decode,
-    Encode,
-};
+use codec::{Codec, Decode, Encode};
 use frame_support::Parameter;
-use futures::future::{
-    self,
-    Future,
-};
+use futures::future::{self, Future};
 use serde::de::DeserializeOwned;
 use sp_runtime::{
     traits::{
-        AtLeast32Bit,
-        Bounded,
-        CheckEqual,
-        Extrinsic,
-        Hash,
-        Header,
-        MaybeDisplay,
-        MaybeMallocSizeOf,
-        MaybeSerialize,
-        MaybeSerializeDeserialize,
-        Member,
-        SimpleBitOps,
+        AtLeast32Bit, Bounded, CheckEqual, Extrinsic, Hash, Header, MaybeDisplay,
+        MaybeMallocSizeOf, MaybeSerialize, MaybeSerializeDeserialize, Member, SimpleBitOps,
     },
     RuntimeDebug,
 };
-use std::{
-    fmt::Debug,
-    pin::Pin,
-};
+use std::{fmt::Debug, pin::Pin};
 
 use crate::{
     error::Error,
-    frame::{
-        balances::Balances,
-        Call,
-    },
+    frame::{balances::Balances, Call},
     Client,
 };
 
@@ -105,13 +82,7 @@ pub trait System: 'static + Eq + Clone + Debug {
     type Hashing: Hash<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
-    type AccountId: Parameter
-        + Member
-        + MaybeSerialize
-        + Debug
-        + MaybeDisplay
-        + Ord
-        + Default;
+    type AccountId: Parameter + Member + MaybeSerialize + Debug + MaybeDisplay + Ord + Default;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq + Debug;
@@ -157,16 +128,13 @@ pub trait SystemStore {
     ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>;
 }
 
-impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore
-    for Client<T, S>
-{
+impl<T: System + Balances + Sync + Send + 'static, S: 'static> SystemStore for Client<T, S> {
     type System = T;
 
     fn account(
         &self,
         account_id: <Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>
-    {
+    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>> {
         let account_map = || {
             Ok(self
                 .metadata

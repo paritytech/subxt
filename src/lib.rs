@@ -39,34 +39,18 @@
 )]
 #![allow(clippy::type_complexity)]
 
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
+use std::{convert::TryFrom, marker::PhantomData};
 
-use codec::{
-    Codec,
-    Decode,
-    Encode,
-};
+use codec::{Codec, Decode, Encode};
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
+    storage::{StorageChangeSet, StorageKey},
     Pair,
 };
 use sp_runtime::{
-    generic::{
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::{
-        IdentifyAccount,
-        Verify,
-    },
+    generic::{SignedPayload, UncheckedExtrinsic},
+    traits::{IdentifyAccount, Verify},
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
@@ -79,37 +63,16 @@ mod metadata;
 mod rpc;
 mod runtimes;
 
-pub use self::{
-    error::Error,
-    events::RawEvent,
-    frame::*,
-    rpc::ExtrinsicSuccess,
-    runtimes::*,
-};
+pub use self::{error::Error, events::RawEvent, frame::*, rpc::ExtrinsicSuccess, runtimes::*};
 use self::{
-    events::{
-        EventsDecoder,
-        EventsError,
-    },
-    extrinsic::{
-        DefaultExtra,
-        SignedExtra,
-    },
+    events::{EventsDecoder, EventsError},
+    extrinsic::{DefaultExtra, SignedExtra},
     frame::{
         balances::Balances,
-        system::{
-            Phase,
-            System,
-            SystemEvent,
-            SystemStore,
-        },
+        system::{Phase, System, SystemEvent, SystemStore},
     },
     metadata::Metadata,
-    rpc::{
-        BlockNumber,
-        ChainBlock,
-        Rpc,
-    },
+    rpc::{BlockNumber, ChainBlock, Rpc},
 };
 
 /// ClientBuilder for constructing a Client.
@@ -256,10 +219,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<E: Encode>(
-        &self,
-        extrinsic: E,
-    ) -> Result<T::Hash, Error> {
+    pub async fn submit_extrinsic<E: Encode>(&self, extrinsic: E) -> Result<T::Hash, Error> {
         let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
     }
@@ -278,9 +238,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Subscribe to events.
-    pub async fn subscribe_events(
-        &self,
-    ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
+    pub async fn subscribe_events(&self) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
         let events = self.rpc.subscribe_events().await?;
         Ok(events)
     }
@@ -292,9 +250,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_finalized_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let headers = self.rpc.subscribe_finalized_blocks().await?;
         Ok(headers)
     }
@@ -304,10 +260,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         &self,
         account_id: <T as System>::AccountId,
         call: Call<C>,
-    ) -> Result<
-        Vec<u8>,
-        Error,
-    >
+    ) -> Result<Vec<u8>, Error>
     where
         C: codec::Encode,
     {
@@ -318,7 +271,8 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
             .metadata()
             .module_with_calls(&call.module)
             .and_then(|module| module.call(&call.function, call.args))?;
-        let extra: extrinsic::DefaultExtra<T> = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let extra: extrinsic::DefaultExtra<T> =
+            extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload.encode())
     }
@@ -402,12 +356,7 @@ where
         &self,
         call: Call<C>,
     ) -> Result<
-        UncheckedExtrinsic<
-            T::Address,
-            Encoded,
-            S,
-            <DefaultExtra<T> as SignedExtra<T>>::Extra,
-        >,
+        UncheckedExtrinsic<T::Address, Encoded, S, <DefaultExtra<T> as SignedExtra<T>>::Extra>,
         Error,
     >
     where
@@ -459,8 +408,7 @@ pub struct EventsSubscriber<T: System, P, S> {
     decoder: Result<EventsDecoder<T>, EventsError>,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
-    EventsSubscriber<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> EventsSubscriber<T, P, S>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -468,9 +416,7 @@ where
     T::Address: From<T::AccountId>,
 {
     /// Access the events decoder for registering custom type sizes
-    pub fn events_decoder<
-        F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>,
-    >(
+    pub fn events_decoder<F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>>(
         self,
         f: F,
     ) -> Self {
@@ -484,10 +430,7 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub async fn submit<C: Encode>(
-        self,
-        call: Call<C>,
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
+    pub async fn submit<C: Encode>(self, call: Call<C>) -> Result<ExtrinsicSuccess<T>, Error> {
         let decoder = self.decoder?;
         let extrinsic = self.builder.create_and_sign(call)?;
         let xt_success = self
@@ -511,13 +454,10 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use sp_keyring::{ AccountKeyring, Ed25519Keyring };
+    use sp_keyring::{AccountKeyring, Ed25519Keyring};
 
     use super::*;
-    use crate::{
-        DefaultNodeRuntime as Runtime,
-        Error,
-    };
+    use crate::{DefaultNodeRuntime as Runtime, Error};
 
     pub(crate) async fn test_client() -> Client<Runtime> {
         ClientBuilder::<Runtime>::new()
@@ -616,7 +556,6 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_create_raw_payload() {
-        
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let signer_pair = Ed25519Keyring::Alice.pair();
             let signer_account_id = Ed25519Keyring::Alice.to_account_id();
@@ -624,20 +563,28 @@ mod tests {
 
             let client = test_client().await;
 
-            // create raw payload with AccoundId and sign it          
-            let raw_payload = client.create_raw_payload(signer_account_id, balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
+            // create raw payload with AccoundId and sign it
+            let raw_payload = client
+                .create_raw_payload(
+                    signer_account_id,
+                    balances::transfer::<Runtime>(dest.clone().into(), 10_000),
+                )
+                .await?;
             let raw_signature = signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
             let raw_multisig = MultiSignature::from(raw_signature);
 
             // create signature with Xtbuilder
             let xt = client.xt(signer_pair.clone(), None).await?;
-            let xt_multi_sig = xt.create_and_sign(balances::transfer::<Runtime>(dest.clone().into(), 10_000))?.signature.unwrap().1;
+            let xt_multi_sig = xt
+                .create_and_sign(balances::transfer::<Runtime>(dest.clone().into(), 10_000))?
+                .signature
+                .unwrap()
+                .1;
 
             // compare signatures
             assert_eq!(raw_multisig, xt_multi_sig);
 
             Ok(())
-            
         });
 
         assert!(result.is_ok())

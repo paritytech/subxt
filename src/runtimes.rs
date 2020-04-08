@@ -16,23 +16,37 @@
 
 use sp_runtime::{
     generic::Header,
-    traits::{
-        BlakeTwo256,
-        IdentifyAccount,
-        Verify,
-    },
-    MultiSignature,
-    OpaqueExtrinsic,
+    traits::{BlakeTwo256, IdentifyAccount, Verify},
+    MultiSignature, OpaqueExtrinsic,
 };
 
 use crate::frame::{
-    balances::{
-        AccountData,
-        Balances,
-    },
+    balances::{AccountData, Balances},
     contracts::Contracts,
+    shares_atomic::SharesAtomic,
     system::System,
 };
+
+/// Concrete type definitions compatible w/ sunshine's runtime aka `suntime`
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct SunTime;
+
+impl System for SunTime {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = BlakeTwo256;
+    type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
+    type Address = pallet_indices::address::Address<Self::AccountId, u32>;
+    type Header = Header<Self::BlockNumber, BlakeTwo256>;
+    type Extrinsic = OpaqueExtrinsic;
+    type AccountData = AccountData<<Self as Balances>::Balance>;
+}
+
+impl SharesAtomic for SunTime {
+    type OrgId = u128;
+    type ShareId = u128;
+}
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
 ///

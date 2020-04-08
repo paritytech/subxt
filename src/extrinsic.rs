@@ -16,31 +16,16 @@
 
 use std::marker::PhantomData;
 
-use codec::{
-    Codec,
-    Decode,
-    Encode,
-};
+use codec::{Codec, Decode, Encode};
 
 use sp_core::Pair;
 use sp_runtime::{
-    generic::{
-        Era,
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::{
-        IdentifyAccount,
-        SignedExtension,
-        Verify,
-    },
+    generic::{Era, SignedPayload, UncheckedExtrinsic},
+    traits::{IdentifyAccount, SignedExtension, Verify},
     transaction_validity::TransactionValidityError,
 };
 
-use crate::frame::{
-    balances::Balances,
-    system::System,
-};
+use crate::frame::{balances::Balances, system::System};
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `frame_system::Trait`
@@ -69,9 +54,7 @@ where
     type AdditionalSigned = u32;
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -100,9 +83,7 @@ where
     type AdditionalSigned = T::Hash;
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -133,9 +114,7 @@ where
     type AdditionalSigned = T::Hash;
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
 }
@@ -154,9 +133,7 @@ where
     type AdditionalSigned = ();
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -175,9 +152,7 @@ where
     type AdditionalSigned = ();
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -197,9 +172,7 @@ where
     type AdditionalSigned = ();
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -218,9 +191,7 @@ where
     type AdditionalSigned = ();
     type Pre = ();
     type DispatchInfo = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
 }
@@ -276,14 +247,11 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;
     type Call = ();
-    type AdditionalSigned =
-        <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
+    type AdditionalSigned = <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
     type Pre = ();
     type DispatchInfo = ();
 
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         self.extra().additional_signed()
     }
 }

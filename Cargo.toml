@@ -34,6 +34,8 @@ sp-rpc = { version = "2.0.0-alpha.5", git = "https://github.com/paritytech/subst
 sp-core = { version = "2.0.0-alpha.5", git = "https://github.com/paritytech/substrate.git", rev = 'b14359cf5341a37028996a5002cf731a49312454', package = "sp-core" }
 sp-transaction-pool = { version = "2.0.0-alpha.5", git = "https://github.com/paritytech/substrate.git", rev = 'b14359cf5341a37028996a5002cf731a49312454', package = "sp-transaction-pool" }
 
+util = {package = "util", path = "../sunshine/modules/util", default-features=false}
+
 [dev-dependencies]
 async-std = "1.2.0"
 env_logger = "0.7"

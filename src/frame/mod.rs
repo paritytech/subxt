@@ -20,7 +20,9 @@ use codec::Encode;
 
 pub mod balances;
 pub mod contracts;
+pub mod shares_atomic;
 pub mod system;
+pub mod vote_yesno;
 
 /// Creates module calls
 pub struct Call<T: Encode> {

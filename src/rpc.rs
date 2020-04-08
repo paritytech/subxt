@@ -21,17 +21,10 @@
 
 use std::convert::TryInto;
 
-use codec::{
-    Decode,
-    Encode,
-    Error as CodecError,
-};
+use codec::{Decode, Encode, Error as CodecError};
 use jsonrpsee::{
     client::Subscription,
-    common::{
-        to_value as to_json_value,
-        Params,
-    },
+    common::{to_value as to_json_value, Params},
     Client,
 };
 
@@ -39,23 +32,12 @@ use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
 use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageData,
-        StorageKey,
-    },
-    twox_128,
-    Bytes,
+    storage::{StorageChangeSet, StorageData, StorageKey},
+    twox_128, Bytes,
 };
-use sp_rpc::{
-    list::ListOrValue,
-    number::NumberOrHex,
-};
+use sp_rpc::{list::ListOrValue, number::NumberOrHex};
 use sp_runtime::{
-    generic::{
-        Block,
-        SignedBlock,
-    },
+    generic::{Block, SignedBlock},
     traits::Hash,
 };
 use sp_transaction_pool::TransactionStatus;
@@ -64,24 +46,15 @@ use std::marker::PhantomData;
 
 use crate::{
     error::Error,
-    events::{
-        EventsDecoder,
-        RawEvent,
-        RuntimeEvent,
-    },
+    events::{EventsDecoder, RawEvent, RuntimeEvent},
     frame::{
         balances::Balances,
-        system::{
-            Phase,
-            System,
-            SystemEvent,
-        },
+        system::{Phase, System, SystemEvent},
     },
     metadata::Metadata,
 };
 
-pub type ChainBlock<T> =
-    SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
+pub type ChainBlock<T> = SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
 
 /// Client for substrate rpc interfaces
@@ -112,8 +85,7 @@ where
         // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
         // until then we manually construct params here and in other methods
         let params = Params::Array(vec![to_json_value(key)?, to_json_value(hash)?]);
-        let data: Option<StorageData> =
-            self.client.request("state_getStorage", params).await?;
+        let data: Option<StorageData> = self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {
                 let value = Decode::decode(&mut &data.0[..])?;
@@ -169,10 +141,7 @@ where
     }
 
     /// Get a header
-    pub async fn header(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, Error> {
+    pub async fn header(&self, hash: Option<T::Hash>) -> Result<Option<T::Header>, Error> {
         let params = Params::Array(vec![to_json_value(hash)?]);
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -202,20 +171,14 @@ where
     }
 
     /// Get a Block
-    pub async fn block(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, Error> {
+    pub async fn block(&self, hash: Option<T::Hash>) -> Result<Option<ChainBlock<T>>, Error> {
         let params = Params::Array(vec![to_json_value(hash)?]);
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
     }
 
     /// Fetch the runtime version
-    pub async fn runtime_version(
-        &self,
-        at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, Error> {
+    pub async fn runtime_version(&self, at: Option<T::Hash>) -> Result<RuntimeVersion, Error> {
         let params = Params::Array(vec![to_json_value(at)?]);
         let version = self
             .client
@@ -259,9 +222,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
     }
 
     /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_finalized_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
             .subscribe(
@@ -274,10 +235,7 @@ impl<T: System + Balances + 'static> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<E: Encode>(
-        &self,
-        extrinsic: E,
-    ) -> Result<T::Hash, Error> {
+    pub async fn submit_extrinsic<E: Encode>(&self, extrinsic: E) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = Params::Array(vec![to_json_value(bytes)?]);
         let xt_hash = self
@@ -342,21 +300,15 @@ impl<T: System + Balances + 'static> Rpc<T> {
                             )
                             .await
                         }
-                        None => {
-                            Err(format!("Failed to find block {:?}", block_hash).into())
-                        }
-                    }
+                        None => Err(format!("Failed to find block {:?}", block_hash).into()),
+                    };
                 }
                 TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
                 TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
                 TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
-                TransactionStatus::Retracted(_) => {
-                    return Err("Extrinsic Retracted".into())
-                }
+                TransactionStatus::Retracted(_) => return Err("Extrinsic Retracted".into()),
                 // should have made it `InBlock` before either of these
-                TransactionStatus::Finalized(_) => {
-                    return Err("Extrinsic Finalized".into())
-                }
+                TransactionStatus::Finalized(_) => return Err("Extrinsic Finalized".into()),
                 TransactionStatus::FinalityTimeout(_) => {
                     return Err("Extrinsic FinalityTimeout".into())
                 }
@@ -381,15 +333,11 @@ impl<T: System> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
-        self.events.iter().find_map(|evt| {
-            match evt {
-                RuntimeEvent::Raw(ref raw)
-                    if raw.module == module && raw.variant == variant =>
-                {
-                    Some(raw)
-                }
-                _ => None,
+        self.events.iter().find_map(|evt| match evt {
+            RuntimeEvent::Raw(ref raw) if raw.module == module && raw.variant == variant => {
+                Some(raw)
             }
+            _ => None,
         })
     }
 
@@ -397,11 +345,9 @@ impl<T: System> ExtrinsicSuccess<T> {
     pub fn system_events(&self) -> Vec<&SystemEvent<T>> {
         self.events
             .iter()
-            .filter_map(|evt| {
-                match evt {
-                    RuntimeEvent::System(evt) => Some(evt),
-                    _ => None,
-                }
+            .filter_map(|evt| match evt {
+                RuntimeEvent::System(evt) => Some(evt),
+                _ => None,
             })
             .collect()
     }
@@ -443,7 +389,7 @@ pub async fn wait_for_block_events<T: System + Balances + 'static>(
     while let change_set = subscription.next().await {
         // only interested in events for the given block
         if change_set.block != block_hash {
-            continue
+            continue;
         }
         let mut events = Vec::new();
         for (_key, data) in change_set.changes {
@@ -470,7 +416,7 @@ pub async fn wait_for_block_events<T: System + Balances + 'static>(
             })
         } else {
             Err(format!("No events found for block {}", block_hash).into())
-        }
+        };
     }
     unreachable!()
 }

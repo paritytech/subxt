@@ -16,11 +16,7 @@
 
 //! Implements support for the pallet_contracts module.
 
-use crate::frame::{
-    balances::Balances,
-    system::System,
-    Call,
-};
+use crate::frame::{balances::Balances, system::System, Call};
 use codec::Encode;
 
 const MODULE: &str = "Contracts";
@@ -142,20 +138,12 @@ mod tests {
     use codec::Codec;
     use sp_core::Pair;
     use sp_keyring::AccountKeyring;
-    use sp_runtime::traits::{
-        IdentifyAccount,
-        Verify,
-    };
+    use sp_runtime::traits::{IdentifyAccount, Verify};
 
     use super::events;
     use crate::{
-        frame::contracts::MODULE,
-        tests::test_client,
-        Balances,
-        Client,
-        DefaultNodeRuntime as Runtime,
-        Error,
-        System,
+        frame::contracts::MODULE, tests::test_client, Balances, Client,
+        DefaultNodeRuntime as Runtime, Error, System,
     };
 
     type AccountId = <Runtime as System>::AccountId;

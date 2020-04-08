@@ -15,12 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{
-    balances,
-    system::System,
-    DefaultNodeRuntime as Runtime,
-    ExtrinsicSuccess,
-};
+use substrate_subxt::{balances, system::System, DefaultNodeRuntime as Runtime, ExtrinsicSuccess};
 
 type AccountId = <Runtime as System>::AccountId;
 type Balance = <Runtime as balances::Balances>::Balance;
@@ -51,9 +46,8 @@ fn main() {
     match result {
         Ok(extrinsic_success) => {
             match extrinsic_success
-                .find_event::<(AccountId, AccountId, Balance)>(
-                    "Balances", "Transfer",
-                ) {
+                .find_event::<(AccountId, AccountId, Balance)>("Balances", "Transfer")
+            {
                 Some(Ok((_from, _to, value))) => {
                     println!("Balance transfer success: value: {:?}", value)
                 }
