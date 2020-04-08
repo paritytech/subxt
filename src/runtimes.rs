@@ -43,6 +43,10 @@ impl System for SunTime {
     type AccountData = AccountData<<Self as Balances>::Balance>;
 }
 
+impl Balances for SunTime {
+    type Balance = u128;
+}
+
 impl SharesAtomic for SunTime {
     type OrgId = u128;
     type ShareId = u128;

@@ -1,18 +1,8 @@
-use crate::{
-    error::Error,
-    frame::{balances::Balances, Call},
-    Client,
-};
-use codec::{Codec, Decode, Encode};
+use crate::frame::{system::System, Call};
+use codec::Codec;
 use frame_support::Parameter;
-use sp_runtime::{
-    traits::{AtLeast32Bit, MaybeSerializeDeserialize, Member, Zero},
-    Permill,
-};
+use sp_runtime::traits::{AtLeast32Bit, MaybeSerializeDeserialize, Member, Zero};
 use std::fmt::Debug;
-use util::traits::{
-    GroupMembership, LockableProfile, ReservableProfile, ShareBank, ShareRegistration,
-};
 
 /// The subset of the `shares_atomic::Trait` that a client must implement.
 pub trait SharesAtomic: System {

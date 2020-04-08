@@ -17,26 +17,26 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-#![deny(
-    bad_style,
-    const_err,
-    improper_ctypes,
-    missing_docs,
-    non_shorthand_field_patterns,
-    no_mangle_generic_items,
-    overflowing_literals,
-    path_statements,
-    patterns_in_fns_without_body,
-    private_in_public,
-    unconditional_recursion,
-    unused_allocation,
-    unused_comparisons,
-    unused_parens,
-    while_true,
-    trivial_casts,
-    trivial_numeric_casts,
-    unused_extern_crates
-)]
+// #![deny(
+//     bad_style,
+//     const_err,
+//     improper_ctypes,
+//     missing_docs,
+//     non_shorthand_field_patterns,
+//     no_mangle_generic_items,
+//     overflowing_literals,
+//     path_statements,
+//     patterns_in_fns_without_body,
+//     private_in_public,
+//     unconditional_recursion,
+//     unused_allocation,
+//     unused_comparisons,
+//     unused_parens,
+//     while_true,
+//     trivial_casts,
+//     trivial_numeric_casts,
+//     unused_extern_crates
+// )]
 #![allow(clippy::type_complexity)]
 
 use std::{convert::TryFrom, marker::PhantomData};
