@@ -157,45 +157,6 @@ where
     }
 }
 
-/// Require the transactor pay for themselves and maybe include a tip to gain additional priority
-/// in the queue.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct ChargeTransactionPayment<T: Balances>(#[codec(compact)] T::Balance);
-
-impl<T> SignedExtension for ChargeTransactionPayment<T>
-where
-    T: Balances + Send + Sync,
-{
-    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
-    type AccountId = u64;
-    type Call = ();
-    type AdditionalSigned = ();
-    type Pre = ();
-    type DispatchInfo = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-        Ok(())
-    }
-}
-
-/// Checks if a transaction would exhausts the block gas limit.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
-
-impl<T> SignedExtension for CheckBlockGasLimit<T>
-where
-    T: System + Send + Sync,
-{
-    const IDENTIFIER: &'static str = "CheckBlockGasLimit";
-    type AccountId = u64;
-    type Call = ();
-    type AdditionalSigned = ();
-    type Pre = ();
-    type DispatchInfo = ();
-    fn additional_signed(&self) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-        Ok(())
-    }
-}
-
 pub trait SignedExtra<T> {
     type Extra: SignedExtension;
 
@@ -226,8 +187,6 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
         CheckEra<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        ChargeTransactionPayment<T>,
-        CheckBlockGasLimit<T>,
     );
 
     fn extra(&self) -> Self::Extra {
@@ -237,8 +196,6 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
             CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeTransactionPayment(<T as Balances>::Balance::default()),
-            CheckBlockGasLimit(PhantomData),
         )
     }
 }

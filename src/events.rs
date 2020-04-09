@@ -85,6 +85,8 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         decoder.register_type_size::<u32>("AuthorityIndex")?;
         decoder.register_type_size::<u64>("AuthorityWeight")?;
         decoder.register_type_size::<u32>("MemberCount")?;
+        decoder.register_type_size::<u64>("OrgId")?;
+        decoder.register_type_size::<u64>("ShareId")?;
         decoder.register_type_size::<T::AccountId>("AccountId")?;
         decoder.register_type_size::<T::BlockNumber>("BlockNumber")?;
         decoder.register_type_size::<T::Hash>("Hash")?;

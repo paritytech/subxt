@@ -21,8 +21,6 @@ fn main() {
                 .build()
                 .await?;
             let xt = cli.xt(alice_the_signer, None).await?;
-            // debugging
-            println!("last message shown");
             let xt_result = xt
                 .watch()
                 .events_decoder(|decoder| {
@@ -30,23 +28,21 @@ fn main() {
                     decoder.register_type_size::<(u64, u64, u64)>("IdentificationTuple")
                 })
                 .submit(shares_atomic::reserve_shares::<Runtime>(
-                    organization.into(),
-                    share_id.into(),
+                    organization,
+                    share_id,
                     reserves_alices_shares.clone().into(),
                 ))
                 .await?;
-            // debugging
-            println!("first message not shown");
             Ok(xt_result)
         });
     match result {
         Ok(extrinsic_success) => {
             match extrinsic_success
-                .find_event::<(OrgId, ShareId, AccountId)>("SharesAtomic", "Reserve")
+                .find_event::<(OrgId, ShareId, AccountId, u32)>("SharesAtomic", "SharesReserved")
             {
-                Some(Ok((org, share, account))) => println!(
-                    "Account {:?} reserved id number {:?} shares for id number {:?} organization",
-                    account, share, org
+                Some(Ok((org, share, account, amt))) => println!(
+                    "Account {:?} reserved {:?} shares with share id {:?} for organization id {:?}",
+                    account, amt, share, org
                 ),
                 Some(Err(err)) => println!("Failed to decode code hash: {}", err),
                 None => println!("Failed to find SharesAtomic::Reserve Event"),
