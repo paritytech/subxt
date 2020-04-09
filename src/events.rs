@@ -15,37 +15,17 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use std::{
-    collections::{
-        HashMap,
-        HashSet,
-    },
+    collections::{HashMap, HashSet},
     convert::TryFrom,
-    marker::{
-        PhantomData,
-        Send,
-    },
+    marker::{PhantomData, Send},
 };
 
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-    Output,
-};
+use codec::{Codec, Compact, Decode, Encode, Error as CodecError, Input, Output};
 
 use crate::{
     frame::balances::Balances,
-    metadata::{
-        EventArg,
-        Metadata,
-        MetadataError,
-    },
-    Phase,
-    System,
-    SystemEvent,
+    metadata::{EventArg, Metadata, MetadataError},
+    Phase, System, SystemEvent,
 };
 
 /// Top level Event that can be produced by a substrate runtime
@@ -105,6 +85,8 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         decoder.register_type_size::<u32>("AuthorityIndex")?;
         decoder.register_type_size::<u64>("AuthorityWeight")?;
         decoder.register_type_size::<u32>("MemberCount")?;
+        decoder.register_type_size::<u64>("OrgId")?;
+        decoder.register_type_size::<u64>("ShareId")?;
         decoder.register_type_size::<T::AccountId>("AccountId")?;
         decoder.register_type_size::<T::BlockNumber>("BlockNumber")?;
         decoder.register_type_size::<T::Hash>("Hash")?;
@@ -179,14 +161,14 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 EventArg::Primitive(name) => {
                     if name.contains("PhantomData") {
                         // PhantomData is size 0
-                        return Ok(())
+                        return Ok(());
                     }
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
                         input.read(&mut buf)?;
                         output.write(&buf);
                     } else {
-                        return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
+                        return Err(EventsError::TypeSizeUnavailable(name.to_owned()));
                     }
                 }
             }
@@ -216,11 +198,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
                 let event_metadata = module.event(event_variant)?;
 
                 let mut event_data = Vec::<u8>::new();
-                self.decode_raw_bytes(
-                    &event_metadata.arguments(),
-                    input,
-                    &mut event_data,
-                )?;
+                self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
 
                 log::debug!(
                     "received event '{}::{}', raw bytes: {}",

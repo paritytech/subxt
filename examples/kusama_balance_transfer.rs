@@ -15,11 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{
-    balances,
-    Error,
-    KusamaRuntime,
-};
+use substrate_subxt::{balances, Error, KusamaRuntime};
 
 fn main() {
     async_std::task::block_on(async move {
@@ -39,8 +35,13 @@ async fn transfer_balance() -> Result<sp_core::H256, Error> {
 
     // note use of `KusamaRuntime`
     substrate_subxt::ClientBuilder::<KusamaRuntime>::new()
-        .build().await?
-        .xt(signer, None).await?
-        .submit(balances::transfer::<KusamaRuntime>(dest.clone().into(), 10_000))
+        .build()
+        .await?
+        .xt(signer, None)
+        .await?
+        .submit(balances::transfer::<KusamaRuntime>(
+            dest.clone().into(),
+            10_000,
+        ))
         .await
 }
