@@ -53,10 +53,10 @@ use crate::frame::{
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckVersion<T: System + Send + Sync>(
-    PhantomData<T>,
+    pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
-    u32,
+    pub u32,
 );
 
 impl<T> SignedExtension for CheckVersion<T>
@@ -84,10 +84,10 @@ where
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckGenesis<T: System + Send + Sync>(
-    PhantomData<T>,
+    pub PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
     #[codec(skip)]
-    T::Hash,
+    pub T::Hash,
 );
 
 impl<T> SignedExtension for CheckGenesis<T>
@@ -117,10 +117,10 @@ where
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckEra<T: System + Send + Sync>(
     /// The default structure for the Extra encoding
-    (Era, PhantomData<T>),
+    pub (Era, PhantomData<T>),
     /// Local genesis hash to be used for `AdditionalSigned`
     #[codec(skip)]
-    T::Hash,
+    pub T::Hash,
 );
 
 impl<T> SignedExtension for CheckEra<T>
@@ -142,7 +142,7 @@ where
 
 /// Nonce check and increment to give replay protection for transactions.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] T::Index);
+pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] pub T::Index);
 
 impl<T> SignedExtension for CheckNonce<T>
 where
@@ -163,7 +163,7 @@ where
 
 /// Resource limit check.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckWeight<T: System + Send + Sync>(PhantomData<T>);
+pub struct CheckWeight<T: System + Send + Sync>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckWeight<T>
 where
@@ -185,7 +185,7 @@ where
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct ChargeTransactionPayment<T: Balances>(#[codec(compact)] T::Balance);
+pub struct ChargeTransactionPayment<T: Balances>(#[codec(compact)] pub T::Balance);
 
 impl<T> SignedExtension for ChargeTransactionPayment<T>
 where
@@ -206,7 +206,7 @@ where
 
 /// Checks if a transaction would exhausts the block gas limit.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckBlockGasLimit<T: System + Send + Sync>(PhantomData<T>);
+pub struct CheckBlockGasLimit<T: System + Send + Sync>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckBlockGasLimit<T>
 where
@@ -225,27 +225,24 @@ where
     }
 }
 
-pub trait SignedExtra<T> {
+/// Trait for implementing transaction extras for a runtime.
+pub trait SignedExtra<T: System> {
+    /// The type the extras.
     type Extra: SignedExtension;
 
+    /// Creates a new `SignedExtra`.
+    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self;
+
+    /// Returns the transaction extra.
     fn extra(&self) -> Self::Extra;
 }
 
+/// Default `SignedExtra` for substrate runtimes.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct DefaultExtra<T: System> {
     version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
-}
-
-impl<T: System + Balances + Send + Sync> DefaultExtra<T> {
-    pub fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
-        DefaultExtra {
-            version,
-            nonce,
-            genesis_hash,
-        }
-    }
 }
 
 impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
@@ -258,6 +255,14 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
         ChargeTransactionPayment<T>,
         CheckBlockGasLimit<T>,
     );
+
+    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
+        DefaultExtra {
+            version,
+            nonce,
+            genesis_hash,
+        }
+    }
 
     fn extra(&self) -> Self::Extra {
         (
@@ -288,7 +293,7 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     }
 }
 
-pub fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
+pub(crate) fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
     signer: P,
     call: C,
     extra: E,
