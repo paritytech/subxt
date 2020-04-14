@@ -83,7 +83,7 @@ pub use self::{
     error::Error,
     events::RawEvent,
     frame::*,
-    rpc::ExtrinsicSuccess,
+    rpc::{BlockNumber, ExtrinsicSuccess},
     runtimes::*,
 };
 use self::{
@@ -106,7 +106,6 @@ use self::{
     },
     metadata::Metadata,
     rpc::{
-        BlockNumber,
         ChainBlock,
         Rpc,
     },
@@ -616,7 +615,7 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_create_raw_payload() {
-        
+
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let signer_pair = Ed25519Keyring::Alice.pair();
             let signer_account_id = Ed25519Keyring::Alice.to_account_id();
@@ -624,7 +623,7 @@ mod tests {
 
             let client = test_client().await;
 
-            // create raw payload with AccoundId and sign it          
+            // create raw payload with AccoundId and sign it
             let raw_payload = client.create_raw_payload(signer_account_id, balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
             let raw_signature = signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
             let raw_multisig = MultiSignature::from(raw_signature);
@@ -637,7 +636,7 @@ mod tests {
             assert_eq!(raw_multisig, xt_multi_sig);
 
             Ok(())
-            
+
         });
 
         assert!(result.is_ok())
