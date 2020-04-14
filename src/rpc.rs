@@ -87,11 +87,11 @@ pub type ChainBlock<T> =
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
 #[serde(bound = "<T as System>::BlockNumber: Serialize")]
-pub struct BlockNumber<T: System> (NumberOrHex<<T as System>::BlockNumber>);
+pub struct BlockNumber<T: System>(NumberOrHex<<T as System>::BlockNumber>);
 
 impl<T> From<NumberOrHex<<T as System>::BlockNumber>> for BlockNumber<T>
 where
-    T: System
+    T: System,
 {
     fn from(x: NumberOrHex<<T as System>::BlockNumber>) -> Self {
         BlockNumber(x)
