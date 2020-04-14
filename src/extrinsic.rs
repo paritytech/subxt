@@ -68,7 +68,6 @@ where
     type Call = ();
     type AdditionalSigned = u32;
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -99,7 +98,6 @@ where
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -132,7 +130,6 @@ where
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -153,7 +150,6 @@ where
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -174,7 +170,6 @@ where
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -196,7 +191,6 @@ where
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -217,7 +211,6 @@ where
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
-    type DispatchInfo = ();
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
@@ -284,7 +277,6 @@ impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
     type AdditionalSigned =
         <<Self as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned;
     type Pre = ();
-    type DispatchInfo = ();
 
     fn additional_signed(
         &self,
