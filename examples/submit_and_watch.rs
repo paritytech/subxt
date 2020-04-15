@@ -51,9 +51,8 @@ fn main() {
     match result {
         Ok(extrinsic_success) => {
             match extrinsic_success
-                .find_event::<(AccountId, AccountId, Balance)>(
-                    "Balances", "Transfer",
-                ) {
+                .find_event::<(AccountId, AccountId, Balance)>("Balances", "Transfer")
+            {
                 Some(Ok((_from, _to, value))) => {
                     println!("Balance transfer success: value: {:?}", value)
                 }

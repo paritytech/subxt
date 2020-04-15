@@ -65,6 +65,7 @@ use sp_runtime::{
     },
     traits::{
         IdentifyAccount,
+        SignedExtension,
         Verify,
     },
     MultiSignature,
@@ -82,6 +83,7 @@ mod runtimes;
 pub use self::{
     error::Error,
     events::RawEvent,
+    extrinsic::*,
     frame::*,
     rpc::ExtrinsicSuccess,
     runtimes::*,
@@ -90,10 +92,6 @@ use self::{
     events::{
         EventsDecoder,
         EventsError,
-    },
-    extrinsic::{
-        DefaultExtra,
-        SignedExtra,
     },
     frame::{
         balances::Balances,
@@ -114,12 +112,12 @@ use self::{
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-pub struct ClientBuilder<T: System, S = MultiSignature> {
-    _marker: std::marker::PhantomData<(T, S)>,
+pub struct ClientBuilder<T: System, S = MultiSignature, E = DefaultExtra<T>> {
+    _marker: std::marker::PhantomData<(T, S, E)>,
     url: Option<String>,
 }
 
-impl<T: System, S> ClientBuilder<T, S> {
+impl<T: System, S, E> ClientBuilder<T, S, E> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
@@ -135,7 +133,7 @@ impl<T: System, S> ClientBuilder<T, S> {
     }
 
     /// Creates a new Client.
-    pub async fn build(self) -> Result<Client<T, S>, Error> {
+    pub async fn build(self) -> Result<Client<T, S, E>, Error> {
         let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
         let rpc = Rpc::connect_ws(&url).await?;
 
@@ -156,15 +154,15 @@ impl<T: System, S> ClientBuilder<T, S> {
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: System, S = MultiSignature> {
+pub struct Client<T: System, S = MultiSignature, E = DefaultExtra<T>> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
-    _marker: PhantomData<fn() -> S>,
+    _marker: PhantomData<(fn() -> S, E)>,
 }
 
-impl<T: System, S> Clone for Client<T, S> {
+impl<T: System, S, E> Clone for Client<T, S, E> {
     fn clone(&self) -> Self {
         Self {
             rpc: self.rpc.clone(),
@@ -176,7 +174,10 @@ impl<T: System, S> Clone for Client<T, S> {
     }
 }
 
-impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
+impl<T: System + Balances + Sync + Send + 'static, S: 'static, E> Client<T, S, E>
+where
+    E: SignedExtra<T> + SignedExtension + 'static,
+{
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
@@ -256,18 +257,18 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<E: Encode>(
+    pub async fn submit_extrinsic<X: Encode>(
         &self,
-        extrinsic: E,
+        extrinsic: X,
     ) -> Result<T::Hash, Error> {
         let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
+    pub async fn submit_and_watch_extrinsic<X: Encode + 'static>(
         self,
-        extrinsic: E,
+        extrinsic: X,
         decoder: EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
         let success = self
@@ -304,10 +305,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         &self,
         account_id: <T as System>::AccountId,
         call: Call<C>,
-    ) -> Result<
-        Vec<u8>,
-        Error,
-    >
+    ) -> Result<Vec<u8>, Error>
     where
         C: codec::Encode,
     {
@@ -318,7 +316,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
             .metadata()
             .module_with_calls(&call.module)
             .and_then(|module| module.call(&call.function, call.args))?;
-        let extra: extrinsic::DefaultExtra<T> = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let extra: E = E::new(version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload.encode())
     }
@@ -328,7 +326,7 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
         &self,
         signer: P,
         nonce: Option<T::Index>,
-    ) -> Result<XtBuilder<T, P, S>, Error>
+    ) -> Result<XtBuilder<T, P, S, E>, Error>
     where
         P: Pair,
         P::Signature: Codec,
@@ -355,17 +353,18 @@ impl<T: System + Balances + Sync + Send + 'static, S: 'static> Client<T, S> {
 
 /// Transaction builder.
 #[derive(Clone)]
-pub struct XtBuilder<T: System, P, S> {
-    client: Client<T, S>,
+pub struct XtBuilder<T: System, P, S, E> {
+    client: Client<T, S, E>,
     nonce: T::Index,
     runtime_version: RuntimeVersion,
     genesis_hash: T::Hash,
     signer: P,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
 where
     P: Pair,
+    E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
@@ -378,36 +377,32 @@ where
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S> {
+    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S, E> {
         self.nonce = nonce;
         self
     }
 
     /// Increment the nonce
-    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S> {
+    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S, E> {
         self.set_nonce(self.nonce() + 1.into());
         self
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static> XtBuilder<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     T::Address: From<T::AccountId>,
+    E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
     pub fn create_and_sign<C>(
         &self,
         call: Call<C>,
     ) -> Result<
-        UncheckedExtrinsic<
-            T::Address,
-            Encoded,
-            S,
-            <DefaultExtra<T> as SignedExtra<T>>::Extra,
-        >,
+        UncheckedExtrinsic<T::Address, Encoded, S, <E as SignedExtra<T>>::Extra>,
         Error,
     >
     where
@@ -428,7 +423,7 @@ where
             account_nonce
         );
 
-        let extra = extrinsic::DefaultExtra::new(version, account_nonce, genesis_hash);
+        let extra = E::new(version, account_nonce, genesis_hash);
         let xt = extrinsic::create_and_sign::<_, _, _, S, _>(signer, call, extra)?;
         Ok(xt)
     }
@@ -441,7 +436,7 @@ where
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn watch(self) -> EventsSubscriber<T, P, S> {
+    pub fn watch(self) -> EventsSubscriber<T, P, S, E> {
         let metadata = self.client.metadata().clone();
         let decoder = EventsDecoder::try_from(metadata).map_err(Into::into);
         EventsSubscriber {
@@ -453,19 +448,20 @@ where
 }
 
 /// Submits an extrinsic and subscribes to the triggered events
-pub struct EventsSubscriber<T: System, P, S> {
-    client: Client<T, S>,
-    builder: XtBuilder<T, P, S>,
+pub struct EventsSubscriber<T: System, P, S, E> {
+    client: Client<T, S, E>,
+    builder: XtBuilder<T, P, S, E>,
     decoder: Result<EventsDecoder<T>, EventsError>,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static>
-    EventsSubscriber<T, P, S>
+impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E>
+    EventsSubscriber<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     T::Address: From<T::AccountId>,
+    E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Access the events decoder for registering custom type sizes
     pub fn events_decoder<
@@ -511,7 +507,10 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use sp_keyring::{ AccountKeyring, Ed25519Keyring };
+    use sp_keyring::{
+        AccountKeyring,
+        Ed25519Keyring,
+    };
 
     use super::*;
     use crate::{
@@ -616,7 +615,6 @@ mod tests {
     #[test]
     #[ignore] // requires locally running substrate node
     fn test_create_raw_payload() {
-        
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let signer_pair = Ed25519Keyring::Alice.pair();
             let signer_account_id = Ed25519Keyring::Alice.to_account_id();
@@ -624,20 +622,32 @@ mod tests {
 
             let client = test_client().await;
 
-            // create raw payload with AccoundId and sign it          
-            let raw_payload = client.create_raw_payload(signer_account_id, balances::transfer::<Runtime>(dest.clone().into(), 10_000)).await?;
-            let raw_signature = signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
+            // create raw payload with AccoundId and sign it
+            let raw_payload = client
+                .create_raw_payload(
+                    signer_account_id,
+                    balances::transfer::<Runtime>(dest.clone().into(), 10_000),
+                )
+                .await?;
+            let raw_signature =
+                signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
             let raw_multisig = MultiSignature::from(raw_signature);
 
             // create signature with Xtbuilder
             let xt = client.xt(signer_pair.clone(), None).await?;
-            let xt_multi_sig = xt.create_and_sign(balances::transfer::<Runtime>(dest.clone().into(), 10_000))?.signature.unwrap().1;
+            let xt_multi_sig = xt
+                .create_and_sign(balances::transfer::<Runtime>(
+                    dest.clone().into(),
+                    10_000,
+                ))?
+                .signature
+                .unwrap()
+                .1;
 
             // compare signatures
             assert_eq!(raw_multisig, xt_multi_sig);
 
             Ok(())
-            
         });
 
         assert!(result.is_ok())

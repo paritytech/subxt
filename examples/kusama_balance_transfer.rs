@@ -39,8 +39,13 @@ async fn transfer_balance() -> Result<sp_core::H256, Error> {
 
     // note use of `KusamaRuntime`
     substrate_subxt::ClientBuilder::<KusamaRuntime>::new()
-        .build().await?
-        .xt(signer, None).await?
-        .submit(balances::transfer::<KusamaRuntime>(dest.clone().into(), 10_000))
+        .build()
+        .await?
+        .xt(signer, None)
+        .await?
+        .submit(balances::transfer::<KusamaRuntime>(
+            dest.clone().into(),
+            10_000,
+        ))
         .await
 }
