@@ -38,6 +38,7 @@ use jsonrpsee::{
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
+use serde::Serialize;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -82,7 +83,30 @@ use crate::{
 
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
-pub type BlockNumber<T> = NumberOrHex<<T as System>::BlockNumber>;
+
+/// Wrapper for NumberOrHex to allow custom From impls
+#[derive(Serialize)]
+#[serde(bound = "<T as System>::BlockNumber: Serialize")]
+pub struct BlockNumber<T: System>(NumberOrHex<<T as System>::BlockNumber>);
+
+impl<T> From<NumberOrHex<<T as System>::BlockNumber>> for BlockNumber<T>
+where
+    T: System,
+{
+    fn from(x: NumberOrHex<<T as System>::BlockNumber>) -> Self {
+        BlockNumber(x)
+    }
+}
+
+impl<T> From<u32> for BlockNumber<T>
+where
+    T: System,
+    <T as System>::BlockNumber: From<u32>,
+{
+    fn from(x: u32) -> Self {
+        NumberOrHex::Number(x.into()).into()
+    }
+}
 
 /// Client for substrate rpc interfaces
 #[derive(Clone)]

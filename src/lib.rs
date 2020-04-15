@@ -85,7 +85,10 @@ pub use self::{
     events::RawEvent,
     extrinsic::*,
     frame::*,
-    rpc::ExtrinsicSuccess,
+    rpc::{
+        BlockNumber,
+        ExtrinsicSuccess,
+    },
     runtimes::*,
 };
 use self::{
@@ -104,7 +107,6 @@ use self::{
     },
     metadata::Metadata,
     rpc::{
-        BlockNumber,
         ChainBlock,
         Rpc,
     },
