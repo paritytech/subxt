@@ -80,7 +80,7 @@ mod metadata;
 mod rpc;
 mod runtimes;
 
-pub use self::{
+pub use crate::{
     error::Error,
     events::RawEvent,
     extrinsic::*,
@@ -91,7 +91,7 @@ pub use self::{
     },
     runtimes::*,
 };
-use self::{
+use crate::{
     events::{
         EventsDecoder,
         EventsError,
@@ -197,10 +197,7 @@ impl<T: System, S, E> Clone for Client<T, S, E> {
     }
 }
 
-impl<T: System + Balances + Sync + Send + 'static, S: 'static, E> Client<T, S, E>
-where
-    E: SignedExtra<T> + SignedExtension + 'static,
-{
+impl<T: System, S, E> Client<T, S, E> {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
@@ -322,7 +319,14 @@ where
         let headers = self.rpc.subscribe_finalized_blocks().await?;
         Ok(headers)
     }
+}
 
+impl<T, S, E> Client<T, S, E>
+where
+    T: System + Balances + Send + Sync,
+    S: 'static,
+    E: SignedExtra<T> + SignedExtension + 'static,
+{
     /// Creates raw payload to be signed for the supplied `Call` without private key
     pub async fn create_raw_payload<C: Encode>(
         &self,
@@ -385,11 +389,7 @@ pub struct XtBuilder<T: System, P, S, E> {
     signer: P,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
-where
-    P: Pair,
-    E: SignedExtra<T> + SignedExtension + 'static,
-{
+impl<T: System, P, S, E> XtBuilder<T, P, S, E> {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         self.client.metadata()
@@ -413,7 +413,7 @@ where
     }
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
+impl<T: System + Send + Sync, P, S: 'static, E> XtBuilder<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -478,8 +478,7 @@ pub struct EventsSubscriber<T: System, P, S, E> {
     decoder: Result<EventsDecoder<T>, EventsError>,
 }
 
-impl<T: System + Balances + Send + Sync + 'static, P, S: 'static, E>
-    EventsSubscriber<T, P, S, E>
+impl<T: System + Send + Sync, P, S: 'static, E> EventsSubscriber<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,

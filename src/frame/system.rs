@@ -40,7 +40,6 @@ use sp_runtime::{
         MaybeSerialize,
         MaybeSerializeDeserialize,
         Member,
-        SignedExtension,
         SimpleBitOps,
     },
     RuntimeDebug,
@@ -52,11 +51,7 @@ use std::{
 
 use crate::{
     error::Error,
-    extrinsic::SignedExtra,
-    frame::{
-        balances::Balances,
-        Call,
-    },
+    frame::Call,
     Client,
 };
 
@@ -159,10 +154,11 @@ pub trait SystemStore {
     ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>;
 }
 
-impl<T: System + Balances + Sync + Send + 'static, S: 'static, E> SystemStore
-    for Client<T, S, E>
+impl<T, S, E> SystemStore for Client<T, S, E>
 where
-    E: SignedExtra<T> + SignedExtension + 'static,
+    T: System + Send + Sync,
+    S: 'static,
+    E: Send + Sync + 'static,
 {
     type System = T;
 

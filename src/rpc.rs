@@ -70,13 +70,10 @@ use crate::{
         RawEvent,
         RuntimeEvent,
     },
-    frame::{
-        balances::Balances,
-        system::{
-            Phase,
-            System,
-            SystemEvent,
-        },
+    frame::system::{
+        Phase,
+        System,
+        SystemEvent,
     },
     metadata::Metadata,
 };
@@ -115,10 +112,7 @@ pub struct Rpc<T: System> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T> Rpc<T>
-where
-    T: System,
-{
+impl<T: System> Rpc<T> {
     pub async fn new(client: Client) -> Result<Self, Error> {
         Ok(Rpc {
             client,
@@ -246,9 +240,7 @@ where
             .await?;
         Ok(version)
     }
-}
 
-impl<T: System + Balances + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
     pub async fn subscribe_events(
         &self,
@@ -443,7 +435,7 @@ impl<T: System> ExtrinsicSuccess<T> {
 }
 
 /// Waits for events for the block triggered by the extrinsic
-pub async fn wait_for_block_events<T: System + Balances + 'static>(
+pub async fn wait_for_block_events<T: System>(
     decoder: EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,
