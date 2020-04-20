@@ -303,13 +303,14 @@ where
     }
 
     /// Creates raw payload to be signed for the supplied `Call` without private key
-    pub async fn create_raw_payload<C>(
+    pub async fn create_raw_payload<C: Encode>(
         &self,
         account_id: <T as System>::AccountId,
         call: Call<C>,
-    ) -> Result<Vec<u8>, Error>
-    where
-        C: codec::Encode,
+    ) -> Result<
+        SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>,
+        Error
+    >
     {
         let account_nonce = self.account(account_id).await?.nonce;
         let version = self.runtime_version.spec_version;
@@ -320,7 +321,7 @@ where
             .and_then(|module| module.call(&call.function, call.args))?;
         let extra: E = E::new(version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
-        Ok(raw_payload.encode())
+        Ok(raw_payload)
     }
 
     /// Create a transaction builder for a private key.
@@ -632,7 +633,7 @@ mod tests {
                 )
                 .await?;
             let raw_signature =
-                signer_pair.sign(raw_payload.encode().split_off(2).as_slice());
+                signer_pair.sign(raw_payload.encode().as_slice());
             let raw_multisig = MultiSignature::from(raw_signature);
 
             // create signature with Xtbuilder
