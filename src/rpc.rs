@@ -133,6 +133,7 @@ impl<T: System> Rpc<T> {
             self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {
+                log::debug!("state_getStorage {:?}", data.0);
                 let value = Decode::decode(&mut &data.0[..])?;
                 Ok(Some(value))
             }

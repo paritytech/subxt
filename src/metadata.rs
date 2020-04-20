@@ -200,22 +200,77 @@ pub struct StorageMetadata {
 }
 
 impl StorageMetadata {
-    pub fn get_map<K: Encode, V: Decode + Clone>(
-        &self,
-    ) -> Result<StorageMap<K, V>, MetadataError> {
+    pub fn prefix(&self) -> Vec<u8> {
+        let mut bytes = sp_core::twox_128(self.module_prefix.as_bytes()).to_vec();
+        bytes.extend(&sp_core::twox_128(self.storage_prefix.as_bytes())[..]);
+        bytes
+    }
+
+    pub fn default<V: Decode>(&self) -> Option<V> {
+        // substrate handles the default different for A => B vs A => Option<B>
+        Decode::decode(&mut &self.default[..]).ok()
+    }
+
+    pub fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {
+        match hasher {
+            StorageHasher::Identity => bytes.to_vec(),
+            StorageHasher::Blake2_128 => sp_core::blake2_128(bytes).to_vec(),
+            StorageHasher::Blake2_128Concat => {
+                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
+                sp_core::blake2_128(bytes)
+                    .iter()
+                    .chain(bytes)
+                    .cloned()
+                    .collect()
+            }
+            StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
+            StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
+            StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
+            StorageHasher::Twox64Concat => sp_core::twox_64(bytes).to_vec(),
+        }
+    }
+
+    pub fn hash_key<K: Encode>(hasher: &StorageHasher, key: &K) -> Vec<u8> {
+        Self::hash(hasher, &key.encode())
+    }
+
+    pub fn plain<V: Decode>(&self) -> Result<StoragePlain<V>, MetadataError> {
+        match &self.ty {
+            StorageEntryType::Plain(_) => {
+                Ok(StoragePlain {
+                    prefix: self.prefix(),
+                    default: self.default::<V>(),
+                })
+            }
+            _ => Err(MetadataError::StorageTypeError),
+        }
+    }
+
+    pub fn map<K: Encode, V: Decode + Clone>(&self) -> Result<StorageMap<K, V>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
-                let module_prefix = self.module_prefix.as_bytes().to_vec();
-                let storage_prefix = self.storage_prefix.as_bytes().to_vec();
-                let hasher = hasher.to_owned();
-                let default = Decode::decode(&mut &self.default[..])
-                    .map_err(|_| MetadataError::MapValueTypeError)?;
                 Ok(StorageMap {
                     _marker: PhantomData,
-                    module_prefix,
-                    storage_prefix,
-                    hasher,
-                    default,
+                    prefix: self.prefix(),
+                    default: self.default::<V>(),
+                    hasher: hasher.clone(),
+                })
+            }
+            _ => Err(MetadataError::StorageTypeError),
+        }
+    }
+
+    pub fn double_map<K1: Encode, K2: Encode, V: Decode + Clone>(
+        &self,
+    ) -> Result<StorageDoubleMap<K1, K2, V>, MetadataError> {
+        match &self.ty {
+            StorageEntryType::DoubleMap { hasher, key2_hasher, .. } => {
+                Ok(StorageDoubleMap {
+                    _marker: PhantomData,
+                    prefix: self.prefix(),
+                    default: self.default::<V>(),
+                    hasher1: hasher.clone(),
+                    hasher2: key2_hasher.clone(),
                 })
             }
             _ => Err(MetadataError::StorageTypeError),
@@ -224,41 +279,60 @@ impl StorageMetadata {
 }
 
 #[derive(Clone, Debug)]
-pub struct StorageMap<K, V> {
-    _marker: PhantomData<K>,
-    module_prefix: Vec<u8>,
-    storage_prefix: Vec<u8>,
-    hasher: StorageHasher,
-    default: V,
+pub struct StoragePlain<V> {
+    prefix: Vec<u8>,
+    default: Option<V>,
 }
 
-impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
-    pub fn key(&self, key: K) -> StorageKey {
-        let mut bytes = sp_core::twox_128(&self.module_prefix).to_vec();
-        bytes.extend(&sp_core::twox_128(&self.storage_prefix)[..]);
-        let encoded_key = key.encode();
-        let hash = match self.hasher {
-            StorageHasher::Identity => encoded_key.to_vec(),
-            StorageHasher::Blake2_128 => sp_core::blake2_128(&encoded_key).to_vec(),
-            StorageHasher::Blake2_128Concat => {
-                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
-                sp_core::blake2_128(&encoded_key)
-                    .iter()
-                    .chain(&encoded_key)
-                    .cloned()
-                    .collect::<Vec<_>>()
-            }
-            StorageHasher::Blake2_256 => sp_core::blake2_256(&encoded_key).to_vec(),
-            StorageHasher::Twox128 => sp_core::twox_128(&encoded_key).to_vec(),
-            StorageHasher::Twox256 => sp_core::twox_256(&encoded_key).to_vec(),
-            StorageHasher::Twox64Concat => sp_core::twox_64(&encoded_key).to_vec(),
-        };
-        bytes.extend(hash);
+impl<V> StoragePlain<V> {
+    pub fn key(&self) -> StorageKey {
+        StorageKey(self.prefix.clone())
+    }
+
+    pub fn default(&self) -> Option<&V> {
+        self.default.as_ref()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct StorageMap<K, V> {
+    _marker: PhantomData<K>,
+    prefix: Vec<u8>,
+    hasher: StorageHasher,
+    default: Option<V>,
+}
+
+impl<K: Encode, V> StorageMap<K, V> {
+    pub fn key(&self, key: &K) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(StorageMetadata::hash_key(&self.hasher, key));
         StorageKey(bytes)
     }
 
-    pub fn default(&self) -> V {
-        self.default.clone()
+    pub fn default(&self) -> Option<&V> {
+        self.default.as_ref()
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct StorageDoubleMap<K1, K2, V> {
+    _marker: PhantomData<(K1, K2)>,
+    prefix: Vec<u8>,
+    hasher1: StorageHasher,
+    hasher2: StorageHasher,
+    default: Option<V>,
+}
+
+impl<K1: Encode, K2: Encode, V> StorageDoubleMap<K1, K2, V> {
+    pub fn key(&self, key1: &K1, key2: &K2) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(StorageMetadata::hash_key(&self.hasher1, key1));
+        bytes.extend(StorageMetadata::hash_key(&self.hasher2, key2));
+        StorageKey(bytes)
+    }
+
+    pub fn default(&self) -> Option<&V> {
+        self.default.as_ref()
     }
 }
 

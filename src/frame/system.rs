@@ -148,10 +148,10 @@ pub trait SystemStore {
     type System: System;
 
     /// Returns the nonce and account data for an account_id.
-    fn account(
-        &self,
-        account_id: <Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>;
+    fn account<'a>(
+        &'a self,
+        account_id: &<Self::System as System>::AccountId,
+    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send + 'a>>;
 }
 
 impl<T, S, E> SystemStore for Client<T, S, E>
@@ -162,27 +162,30 @@ where
 {
     type System = T;
 
-    fn account(
-        &self,
-        account_id: <Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send>>
+    fn account<'a>(
+        &'a self,
+        account_id: &<Self::System as System>::AccountId,
+    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send + 'a>>
     {
-        let account_map = || {
+        let map_fn = || {
             Ok(self
                 .metadata
                 .module("System")?
                 .storage("Account")?
-                .get_map()?)
+                .map()?)
         };
-        let map = match account_map() {
+        let map = match map_fn() {
             Ok(map) => map,
             Err(err) => return Box::pin(future::err(err)),
         };
-        let client = self.clone();
+        let future = self.fetch(map.key(account_id), None);
         Box::pin(async move {
-            client
-                .fetch_or(map.key(account_id), None, map.default())
-                .await
+            let v = if let Some(v) = future.await? {
+                Some(v)
+            } else {
+                map.default().cloned()
+            };
+            Ok(v.unwrap())
         })
     }
 }

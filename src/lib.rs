@@ -212,27 +212,6 @@ impl<T: System, S, E> Client<T, S, E> {
         self.rpc.storage::<V>(key, hash).await
     }
 
-    /// Fetch a StorageKey or return the default.
-    pub async fn fetch_or<V: Decode>(
-        &self,
-        key: StorageKey,
-        hash: Option<T::Hash>,
-        default: V,
-    ) -> Result<V, Error> {
-        let result = self.fetch(key, hash).await?;
-        Ok(result.unwrap_or(default))
-    }
-
-    /// Fetch a StorageKey or return the default.
-    pub async fn fetch_or_default<V: Decode + Default>(
-        &self,
-        key: StorageKey,
-        hash: Option<T::Hash>,
-    ) -> Result<V, Error> {
-        let result = self.fetch(key, hash).await?;
-        Ok(result.unwrap_or_default())
-    }
-
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
@@ -330,7 +309,7 @@ where
     /// Creates raw payload to be signed for the supplied `Call` without private key
     pub async fn create_raw_payload<C: Encode>(
         &self,
-        account_id: <T as System>::AccountId,
+        account_id: &<T as System>::AccountId,
         call: Call<C>,
     ) -> Result<
         SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>,
@@ -364,7 +343,7 @@ where
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account(account_id).await?.nonce,
+            None => self.account(&account_id).await?.nonce,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -602,7 +581,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.account(account.into()).await?.data.free;
+            let balance = client.account(&account).await?.data.free;
             Ok(balance)
         });
 
@@ -648,7 +627,7 @@ mod tests {
             // create raw payload with AccoundId and sign it
             let raw_payload = client
                 .create_raw_payload(
-                    signer_account_id,
+                    &signer_account_id,
                     balances::transfer::<Runtime>(dest.clone().into(), 10_000),
                 )
                 .await?;
