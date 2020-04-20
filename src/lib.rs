@@ -319,8 +319,8 @@ where
             .metadata()
             .module_with_calls(&call.module)
             .and_then(|module| module.call(&call.function, call.args))?;
-        let extra = E::new(version, account_nonce, genesis_hash);
-        let raw_payload= SignedPayload::new(call, extra.extra())?;
+        let extra: E = E::new(version, account_nonce, genesis_hash);
+        let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
     }
 
