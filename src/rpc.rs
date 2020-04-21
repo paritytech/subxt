@@ -62,6 +62,7 @@ use sp_runtime::{
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
+use sc_rpc_api::state::ReadProof;
 
 use crate::{
     error::Error,
@@ -228,6 +229,17 @@ impl<T: System> Rpc<T> {
         let params = Params::Array(vec![to_json_value(hash)?]);
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
+    }
+
+    /// Get proof of storage entries at a specific block's state.
+    pub async fn read_proof(
+        &self,
+        keys: Vec<StorageKey>,
+        hash: Option<T::Hash>,
+    ) -> Result<ReadProof<T::Hash>, Error> {
+        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(hash)?]);
+        let proof = self.client.request("state_getReadProof", params).await?;
+        Ok(proof)
     }
 
     /// Fetch the runtime version

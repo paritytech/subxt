@@ -70,6 +70,7 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
+use sc_rpc_api::state::ReadProof;
 
 mod error;
 mod events;
@@ -261,6 +262,15 @@ impl<T: System, S, E> Client<T, S, E> {
     {
         let block = self.rpc.block(hash.map(|h| h.into())).await?;
         Ok(block)
+    }
+
+    /// Get proof of storage entries at a specific block's state.
+    pub async fn read_proof<H>(&self, keys: Vec<StorageKey>, hash: Option<H>) -> Result<ReadProof<T::Hash>, Error>
+    where
+        H: Into<T::Hash> + 'static,
+    {
+        let proof = self.rpc.read_proof(keys, hash.map(|h| h.into())).await?;
+        Ok(proof)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
