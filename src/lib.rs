@@ -457,14 +457,7 @@ pub struct EventsSubscriber<T: System, P, S, E> {
     decoder: Result<EventsDecoder<T>, EventsError>,
 }
 
-impl<T: System + Send + Sync, P, S: 'static, E> EventsSubscriber<T, P, S, E>
-where
-    P: Pair,
-    S: Verify + Codec + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    T::Address: From<T::AccountId>,
-    E: SignedExtra<T> + SignedExtension + 'static,
-{
+impl<T: System, P, S, E> EventsSubscriber<T, P, S, E> {
     /// Access the events decoder for registering custom type sizes
     pub fn events_decoder<
         F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>,
@@ -480,7 +473,16 @@ where
         }
         this
     }
+}
 
+impl<T: System + Send + Sync, P, S: 'static, E> EventsSubscriber<T, P, S, E>
+where
+    P: Pair,
+    S: Verify + Codec + From<P::Signature>,
+    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
+    T::Address: From<T::AccountId>,
+    E: SignedExtra<T> + SignedExtension + 'static,
+{
     /// Submits transaction to the chain and watch for events.
     pub async fn submit<C: Encode>(
         self,
