@@ -117,6 +117,7 @@ use self::{
 pub struct ClientBuilder<T: System, S = MultiSignature, E = DefaultExtra<T>> {
     _marker: std::marker::PhantomData<(T, S, E)>,
     url: Option<String>,
+    client: Option<jsonrpsee::Client>,
 }
 
 impl<T: System, S, E> ClientBuilder<T, S, E> {
@@ -125,19 +126,39 @@ impl<T: System, S, E> ClientBuilder<T, S, E> {
         Self {
             _marker: std::marker::PhantomData,
             url: None,
+            client: None,
         }
     }
 
+    /// Sets the jsonrpsee client.
+    pub fn set_client<P: Into<jsonrpsee::Client>>(mut self, client: P) -> Self {
+        self.client = Some(client.into());
+        self
+    }
+
     /// Set the substrate rpc address.
-    pub fn set_url(mut self, url: &str) -> Self {
-        self.url = Some(url.to_string());
+    pub fn set_url<P: Into<String>>(mut self, url: P) -> Self {
+        self.url = Some(url.into());
         self
     }
 
     /// Creates a new Client.
     pub async fn build(self) -> Result<Client<T, S, E>, Error> {
-        let url = self.url.unwrap_or("ws://127.0.0.1:9944".to_string());
-        let rpc = Rpc::connect_ws(&url).await?;
+        let client = if let Some(client) = self.client {
+            client
+        } else {
+            let url = self
+                .url
+                .as_ref()
+                .map(|s| &**s)
+                .unwrap_or("ws://127.0.0.1:9944");
+            if url.starts_with("ws://") || url.starts_with("wss://") {
+                jsonrpsee::ws_client(url).await?
+            } else {
+                jsonrpsee::http_client(url)
+            }
+        };
+        let rpc = Rpc::new(client).await?;
 
         let (metadata, genesis_hash, runtime_version) = future::join3(
             rpc.metadata(),

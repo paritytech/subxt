@@ -119,10 +119,9 @@ impl<T> Rpc<T>
 where
     T: System,
 {
-    pub async fn connect_ws(url: &str) -> Result<Self, Error> {
-        let client = jsonrpsee::ws_client(&url).await?;
+    pub async fn new(client: Client) -> Result<Self, Error> {
         Ok(Rpc {
-            client: client.into(),
+            client,
             marker: PhantomData,
         })
     }
