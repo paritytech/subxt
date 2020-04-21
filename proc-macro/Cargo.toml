@@ -1,0 +1,32 @@
+[package]
+name = "substrate-subxt-proc-macro"
+version = "0.1.0"
+authors = ["David Craven <david@craven.ch>"]
+edition = "2018"
+autotests = false
+
+[lib]
+proc-macro = true
+
+[dependencies]
+heck = "0.3.1"
+proc-macro2 = "1.0.10"
+proc-macro-crate = "0.1.4"
+quote = "1.0.3"
+syn = "1.0.17"
+synstructure = "0.12.3"
+
+[dev-dependencies]
+async-std = { version = "1.5.0", features = ["attributes"] }
+codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
+futures = "0.3.4"
+frame-support = "2.0.0-alpha.6"
+sp-core = "2.0.0-alpha.6"
+sp-keyring = "2.0.0-alpha.6"
+sp-runtime = "2.0.0-alpha.6"
+substrate-subxt = { path = ".." }
+trybuild = "1.0.25"
+
+[[test]]
+name = "balances"
+path = "tests/balances.rs"
