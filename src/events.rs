@@ -65,16 +65,21 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
+/// Events error.
 #[derive(Debug, thiserror::Error)]
 pub enum EventsError {
+    /// Codec error.
     #[error("Scale codec error: {0:?}")]
     CodecError(#[from] CodecError),
+    /// Metadata error.
     #[error("Metadata error: {0:?}")]
     Metadata(#[from] MetadataError),
+    /// Type size unavailable.
     #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
 }
 
+/// Event decoder.
 pub struct EventsDecoder<T> {
     metadata: Metadata, // todo: [AJ] borrow?
     type_sizes: HashMap<String, usize>,
@@ -114,6 +119,7 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System> EventsDecoder<T> {
+    /// Register a type.
     pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
         U: Default + Codec + Send + 'static,
@@ -127,6 +133,7 @@ impl<T: System> EventsDecoder<T> {
         }
     }
 
+    /// Check missing type sizes.
     pub fn check_missing_type_sizes(&self) {
         let mut missing = HashSet::new();
         for module in self.metadata.modules_with_events() {
@@ -191,6 +198,7 @@ impl<T: System> EventsDecoder<T> {
         Ok(())
     }
 
+    /// Decode events.
     pub fn decode_events(
         &self,
         input: &mut &[u8],

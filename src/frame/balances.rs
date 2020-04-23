@@ -18,7 +18,7 @@
 
 use crate::frame::{
     system::System,
-    Call,
+    Call, Event,
 };
 use codec::{
     Decode,
@@ -31,6 +31,8 @@ use sp_runtime::traits::{
     Member,
 };
 use std::fmt::Debug;
+
+const MODULE: &str = "Balances";
 
 /// The subset of the `pallet_balances::Trait` that a client must implement.
 pub trait Balances: System {
@@ -70,26 +72,38 @@ pub struct AccountData<Balance> {
     pub fee_frozen: Balance,
 }
 
-const MODULE: &str = "Balances";
-const TRANSFER: &str = "transfer";
-
-/// Arguments for transferring a balance
-#[derive(codec::Encode)]
-pub struct TransferArgs<T: Balances> {
-    to: <T as System>::Address,
-    #[codec(compact)]
-    amount: <T as Balances>::Balance,
-}
-
 /// Transfer some liquid free balance to another account.
 ///
 /// `transfer` will set the `FreeBalance` of the sender and receiver.
 /// It will decrease the total issuance of the system by the `TransferFee`.
 /// If the sender's account is below the existential deposit as a result
 /// of the transfer, the account will be reaped.
-pub fn transfer<T: Balances>(
-    to: <T as System>::Address,
-    amount: <T as Balances>::Balance,
-) -> Call<TransferArgs<T>> {
-    Call::new(MODULE, TRANSFER, TransferArgs { to, amount })
+#[derive(Encode)]
+pub struct TransferCall<'a, T: Balances> {
+    /// Destination of the transfer.
+    pub to: &'a <T as System>::Address,
+    /// Amount to transfer.
+    #[codec(compact)]
+    pub amount: T::Balance,
+}
+
+impl<'a, T: Balances> Call<T> for TransferCall<'a, T> {
+    const MODULE: &'static str = MODULE;
+    const FUNCTION: &'static str = "transfer";
+}
+
+/// Transfer event.
+#[derive(Debug, Decode, Eq, PartialEq)]
+pub struct TransferEvent<T: Balances> {
+    /// Account balance was transfered from.
+    pub from: <T as System>::AccountId,
+    /// Account balance was transfered to.
+    pub to: <T as System>::AccountId,
+    /// Amount of balance that was transfered.
+    pub amount: T::Balance,
+}
+
+impl<T: Balances> Event<T> for TransferEvent<T> {
+    const MODULE: &'static str = MODULE;
+    const EVENT: &'static str = "transfer";
 }

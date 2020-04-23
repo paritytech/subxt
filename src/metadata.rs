@@ -39,26 +39,33 @@ use sp_core::storage::StorageKey;
 
 use crate::Encoded;
 
+/// Metadata error.
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
+    /// Failed to parse metadata.
     #[error("Error converting substrate metadata: {0}")]
     Conversion(#[from] ConversionError),
-    #[error("Module not found")]
+    /// Module is not in metadata.
+    #[error("Module {0} not found")]
     ModuleNotFound(String),
-    #[error("Module with events not found")]
-    ModuleWithEventsNotFound(u8),
-    #[error("Call not found")]
+    /// Module is not in metadata.
+    #[error("Module index {0} not found")]
+    ModuleIndexNotFound(u8),
+    /// Call is not in metadata.
+    #[error("Call {0} not found")]
     CallNotFound(&'static str),
-    #[error("Event not found")]
+    /// Event is not in metadata.
+    #[error("Event {0} not found")]
     EventNotFound(u8),
-    #[error("Storage not found")]
+    /// Storage is not in metadata.
+    #[error("Storage {0} not found")]
     StorageNotFound(&'static str),
+    /// Storage type does not match requested type.
     #[error("Storage type error")]
     StorageTypeError,
-    #[error("Map value type error")]
-    MapValueTypeError,
 }
 
+/// Runtime metadata.
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
@@ -67,6 +74,7 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    /// Returns `ModuleMetadata`.
     pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError>
     where
         S: ToString,
@@ -77,7 +85,7 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
+    pub(crate) fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
     where
         S: ToString,
     {
@@ -87,20 +95,21 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
+    pub(crate) fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
         self.modules_with_events.values()
     }
 
-    pub fn module_with_events(
+    pub(crate) fn module_with_events(
         &self,
         module_index: u8,
     ) -> Result<&ModuleWithEvents, MetadataError> {
         self.modules_with_events
             .values()
             .find(|&module| module.index == module_index)
-            .ok_or(MetadataError::ModuleWithEventsNotFound(module_index))
+            .ok_or(MetadataError::ModuleIndexNotFound(module_index))
     }
 
+    /// Pretty print metadata.
     pub fn pretty(&self) -> String {
         let mut string = String::new();
         for (name, module) in &self.modules {
@@ -234,25 +243,23 @@ impl StorageMetadata {
         Self::hash(hasher, &key.encode())
     }
 
-    pub fn plain<V: Decode>(&self) -> Result<StoragePlain<V>, MetadataError> {
+    pub fn plain(&self) -> Result<StoragePlain, MetadataError> {
         match &self.ty {
             StorageEntryType::Plain(_) => {
                 Ok(StoragePlain {
                     prefix: self.prefix(),
-                    default: self.default::<V>(),
                 })
             }
             _ => Err(MetadataError::StorageTypeError),
         }
     }
 
-    pub fn map<K: Encode, V: Decode + Clone>(&self) -> Result<StorageMap<K, V>, MetadataError> {
+    pub fn map<K: Encode>(&self) -> Result<StorageMap<K>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
                 Ok(StorageMap {
                     _marker: PhantomData,
                     prefix: self.prefix(),
-                    default: self.default::<V>(),
                     hasher: hasher.clone(),
                 })
             }
@@ -260,15 +267,14 @@ impl StorageMetadata {
         }
     }
 
-    pub fn double_map<K1: Encode, K2: Encode, V: Decode + Clone>(
+    pub fn double_map<K1: Encode, K2: Encode>(
         &self,
-    ) -> Result<StorageDoubleMap<K1, K2, V>, MetadataError> {
+    ) -> Result<StorageDoubleMap<K1, K2>, MetadataError> {
         match &self.ty {
             StorageEntryType::DoubleMap { hasher, key2_hasher, .. } => {
                 Ok(StorageDoubleMap {
                     _marker: PhantomData,
                     prefix: self.prefix(),
-                    default: self.default::<V>(),
                     hasher1: hasher.clone(),
                     hasher2: key2_hasher.clone(),
                 })
@@ -279,60 +285,45 @@ impl StorageMetadata {
 }
 
 #[derive(Clone, Debug)]
-pub struct StoragePlain<V> {
+pub struct StoragePlain {
     prefix: Vec<u8>,
-    default: Option<V>,
 }
 
-impl<V> StoragePlain<V> {
+impl StoragePlain {
     pub fn key(&self) -> StorageKey {
         StorageKey(self.prefix.clone())
-    }
-
-    pub fn default(&self) -> Option<&V> {
-        self.default.as_ref()
     }
 }
 
 #[derive(Clone, Debug)]
-pub struct StorageMap<K, V> {
+pub struct StorageMap<K> {
     _marker: PhantomData<K>,
     prefix: Vec<u8>,
     hasher: StorageHasher,
-    default: Option<V>,
 }
 
-impl<K: Encode, V> StorageMap<K, V> {
+impl<K: Encode> StorageMap<K> {
     pub fn key(&self, key: &K) -> StorageKey {
         let mut bytes = self.prefix.clone();
         bytes.extend(StorageMetadata::hash_key(&self.hasher, key));
         StorageKey(bytes)
     }
-
-    pub fn default(&self) -> Option<&V> {
-        self.default.as_ref()
-    }
 }
 
 #[derive(Clone, Debug)]
-pub struct StorageDoubleMap<K1, K2, V> {
+pub struct StorageDoubleMap<K1, K2> {
     _marker: PhantomData<(K1, K2)>,
     prefix: Vec<u8>,
     hasher1: StorageHasher,
     hasher2: StorageHasher,
-    default: Option<V>,
 }
 
-impl<K1: Encode, K2: Encode, V> StorageDoubleMap<K1, K2, V> {
+impl<K1: Encode, K2: Encode> StorageDoubleMap<K1, K2> {
     pub fn key(&self, key1: &K1, key2: &K2) -> StorageKey {
         let mut bytes = self.prefix.clone();
         bytes.extend(StorageMetadata::hash_key(&self.hasher1, key1));
         bytes.extend(StorageMetadata::hash_key(&self.hasher2, key2));
         StorageKey(bytes)
-    }
-
-    pub fn default(&self) -> Option<&V> {
-        self.default.as_ref()
     }
 }
 

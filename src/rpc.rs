@@ -70,6 +70,7 @@ use crate::{
         RawEvent,
         RuntimeEvent,
     },
+    frame::Event,
     frame::system::{
         Phase,
         System,
@@ -424,14 +425,13 @@ impl<T: System> ExtrinsicSuccess<T> {
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
-    /// Returns `Err` if the data fails to decode into the supplied type
-    pub fn find_event<E: Decode>(
-        &self,
-        module: &str,
-        variant: &str,
-    ) -> Option<Result<E, CodecError>> {
-        self.find_event_raw(module, variant)
-            .map(|evt| E::decode(&mut &evt.data[..]))
+    /// Returns `Err` if the data fails to decode into the supplied type.
+    pub fn find_event<E: Event<T>>(&self) -> Result<Option<E>, CodecError> {
+        if let Some(event) = self.find_event_raw(E::MODULE, E::EVENT) {
+            Ok(Some(E::decode(&mut &event.data[..])?))
+        } else {
+            Ok(None)
+        }
     }
 }
 

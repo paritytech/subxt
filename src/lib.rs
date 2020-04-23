@@ -46,7 +46,6 @@ use std::{
 
 use codec::{
     Codec,
-    Decode,
     Encode,
 };
 use futures::future;
@@ -82,9 +81,10 @@ mod runtimes;
 
 pub use crate::{
     error::Error,
-    events::RawEvent,
+    events::{EventsDecoder, EventsError, RawEvent},
     extrinsic::*,
     frame::*,
+    metadata::{Metadata, MetadataError},
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
@@ -92,20 +92,15 @@ pub use crate::{
     runtimes::*,
 };
 use crate::{
-    events::{
-        EventsDecoder,
-        EventsError,
-    },
     frame::{
         balances::Balances,
         system::{
+            AccountStore,
             Phase,
             System,
             SystemEvent,
-            SystemStore,
         },
     },
-    metadata::Metadata,
     rpc::{
         ChainBlock,
         Rpc,
@@ -204,12 +199,18 @@ impl<T: System, S, E> Client<T, S, E> {
     }
 
     /// Fetch a StorageKey.
-    pub async fn fetch<V: Decode>(
+    pub async fn fetch<F: Store<T>>(
         &self,
-        key: StorageKey,
+        store: F,
         hash: Option<T::Hash>,
-    ) -> Result<Option<V>, Error> {
-        self.rpc.storage::<V>(key, hash).await
+    ) -> Result<Option<F::Returns>, Error> {
+        let key = store.key(&self.metadata)?;
+        let value = self.rpc.storage::<F::Returns>(key, hash).await?;
+        if let Some(v) = value {
+            Ok(Some(v))
+        } else {
+            Ok(store.default(&self.metadata)?)
+        }
     }
 
     /// Query historical storage entries
@@ -307,22 +308,26 @@ where
     E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Creates raw payload to be signed for the supplied `Call` without private key
-    pub async fn create_raw_payload<C: Encode>(
+    pub async fn create_raw_payload<C: Call<T>>(
         &self,
         account_id: &<T as System>::AccountId,
-        call: Call<C>,
+        call: C,
     ) -> Result<
         SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>,
         Error
     >
     {
-        let account_nonce = self.account(account_id).await?.nonce;
+        let account_nonce = self
+            .fetch(AccountStore(account_id), None)
+            .await?
+            .unwrap()
+            .nonce;
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
-            .module_with_calls(&call.module)
-            .and_then(|module| module.call(&call.function, call.args))?;
+            .module_with_calls(C::MODULE)
+            .and_then(|module| module.call(C::FUNCTION, call))?;
         let extra: E = E::new(version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
@@ -343,7 +348,13 @@ where
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account(&account_id).await?.nonce,
+            None => {
+                self
+                    .fetch(AccountStore(&account_id), None)
+                    .await?
+                    .unwrap()
+                    .nonce
+            }
         };
 
         let genesis_hash = self.genesis_hash;
@@ -401,24 +412,21 @@ where
     E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Creates and signs an Extrinsic for the supplied `Call`
-    pub fn create_and_sign<C>(
+    pub fn create_and_sign<C: Call<T>>(
         &self,
-        call: Call<C>,
+        call: C,
     ) -> Result<
         UncheckedExtrinsic<T::Address, Encoded, S, <E as SignedExtra<T>>::Extra>,
         Error,
-    >
-    where
-        C: codec::Encode,
-    {
+    > {
         let signer = self.signer.clone();
         let account_nonce = self.nonce;
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
-            .module_with_calls(&call.module)
-            .and_then(|module| module.call(&call.function, call.args))?;
+            .module_with_calls(C::MODULE)
+            .and_then(|module| module.call(C::FUNCTION, call))?;
 
         log::info!(
             "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
@@ -432,7 +440,7 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub async fn submit<C: Encode>(&self, call: Call<C>) -> Result<T::Hash, Error> {
+    pub async fn submit<C: Call<T>>(&self, call: C) -> Result<T::Hash, Error> {
         let extrinsic = self.create_and_sign(call)?;
         let xt_hash = self.client.submit_extrinsic(extrinsic).await?;
         Ok(xt_hash)
@@ -484,11 +492,12 @@ where
     E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Submits transaction to the chain and watch for events.
-    pub async fn submit<C: Encode>(
+    pub async fn submit<C: Call<T>>(
         self,
-        call: Call<C>,
+        call: C,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
-        let decoder = self.decoder?;
+        let mut decoder = self.decoder?;
+        C::events_decoder(&mut decoder)?;
         let extrinsic = self.builder.create_and_sign(call)?;
         let xt_success = self
             .client
@@ -535,17 +544,23 @@ mod tests {
         env_logger::try_init().ok();
         let transfer = async_std::task::block_on(async move {
             let signer = AccountKeyring::Alice.pair();
-            let dest = AccountKeyring::Bob.to_account_id();
+            let dest = AccountKeyring::Bob.to_account_id().into();
 
             let client = test_client().await;
             let mut xt = client.xt(signer, None).await?;
             let _ = xt
-                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .submit(balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000,
+                })
                 .await?;
 
             // check that nonce is handled correctly
             xt.increment_nonce()
-                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
+                .submit(balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000
+                })
                 .await
         });
 
@@ -583,7 +598,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let account = AccountKeyring::Alice.to_account_id();
             let client = test_client().await;
-            let balance = client.account(&account).await?.data.free;
+            let balance = client.fetch(AccountStore(&account), None).await?.unwrap().data.free;
             Ok(balance)
         });
 
@@ -622,7 +637,7 @@ mod tests {
         let result: Result<_, Error> = async_std::task::block_on(async move {
             let signer_pair = Ed25519Keyring::Alice.pair();
             let signer_account_id = Ed25519Keyring::Alice.to_account_id();
-            let dest = AccountKeyring::Bob.to_account_id();
+            let dest = AccountKeyring::Bob.to_account_id().into();
 
             let client = test_client().await;
 
@@ -630,7 +645,10 @@ mod tests {
             let raw_payload = client
                 .create_raw_payload(
                     &signer_account_id,
-                    balances::transfer::<Runtime>(dest.clone().into(), 10_000),
+                    balances::TransferCall {
+                        to: &dest,
+                        amount: 10_000,
+                    },
                 )
                 .await?;
             let raw_signature =
@@ -640,10 +658,10 @@ mod tests {
             // create signature with Xtbuilder
             let xt = client.xt(signer_pair.clone(), None).await?;
             let xt_multi_sig = xt
-                .create_and_sign(balances::transfer::<Runtime>(
-                    dest.clone().into(),
-                    10_000,
-                ))?
+                .create_and_sign(balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000,
+                })?
                 .signature
                 .unwrap()
                 .1;

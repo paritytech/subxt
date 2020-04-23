@@ -38,7 +38,7 @@ sp-core = { version = "2.0.0-alpha.6", package = "sp-core" }
 sp-transaction-pool = { version = "2.0.0-alpha.6", package = "sp-transaction-pool" }
 
 [dev-dependencies]
-async-std = "1.5.0"
+async-std = { version = "1.5.0", features = ["attributes"] }
 env_logger = "0.7"
 wabt = "0.9"
 frame-system = { version = "2.0.0-alpha.6", package = "frame-system" }

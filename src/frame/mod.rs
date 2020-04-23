@@ -16,29 +16,52 @@
 
 //! Implements support for built-in runtime modules.
 
-use codec::Encode;
+use codec::{Decode, Encode};
+use sp_core::storage::StorageKey;
+use crate::{
+    events::{EventsDecoder, EventsError},
+    metadata::{Metadata, MetadataError},
+};
 
 pub mod balances;
 pub mod contracts;
 pub mod system;
 
-/// Creates module calls
-pub struct Call<T: Encode> {
-    /// Module name
-    pub module: &'static str,
-    /// Function name
-    pub function: &'static str,
-    /// Call arguments
-    pub args: T,
+/// Store trait.
+pub trait Store<T>: Encode {
+    /// Module name.
+    const MODULE: &'static str;
+    /// Field name.
+    const FIELD: &'static str;
+    /// Return type.
+    type Returns: Decode;
+    /// Returns the `StorageKey`.
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError>;
+    /// Returns the default value.
+    fn default(&self, metadata: &Metadata) -> Result<Option<Self::Returns>, MetadataError> {
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .default())
+    }
 }
 
-impl<T: Encode> Call<T> {
-    /// Create a module call
-    pub fn new(module: &'static str, function: &'static str, args: T) -> Self {
-        Call {
-            module,
-            function,
-            args,
-        }
+/// Call trait.
+pub trait Call<T>: Encode {
+    /// Module name.
+    const MODULE: &'static str;
+    /// Function name.
+    const FUNCTION: &'static str;
+    /// Load event decoder.
+    fn events_decoder(_decoder: &mut EventsDecoder<T>) -> Result<(), EventsError> {
+        Ok(())
     }
+}
+
+/// Event trait.
+pub trait Event<T>: Decode {
+    /// Module name.
+    const MODULE: &'static str;
+    /// Event name.
+    const EVENT: &'static str;
 }

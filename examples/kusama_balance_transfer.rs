@@ -35,7 +35,7 @@ fn main() {
 
 async fn transfer_balance() -> Result<sp_core::H256, Error> {
     let signer = AccountKeyring::Alice.pair();
-    let dest = AccountKeyring::Bob.to_account_id();
+    let dest = AccountKeyring::Bob.to_account_id().into();
 
     // note use of `KusamaRuntime`
     substrate_subxt::ClientBuilder::<KusamaRuntime>::new()
@@ -43,9 +43,9 @@ async fn transfer_balance() -> Result<sp_core::H256, Error> {
         .await?
         .xt(signer, None)
         .await?
-        .submit(balances::transfer::<KusamaRuntime>(
-            dest.clone().into(),
-            10_000,
-        ))
+        .submit(balances::TransferCall {
+            to: &dest,
+            amount: 10_000,
+        })
         .await
 }

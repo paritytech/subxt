@@ -22,11 +22,8 @@ use codec::{
     Encode,
 };
 use frame_support::Parameter;
-use futures::future::{
-    self,
-    Future,
-};
 use serde::de::DeserializeOwned;
+use sp_core::storage::StorageKey;
 use sp_runtime::{
     traits::{
         AtLeast32Bit,
@@ -44,15 +41,11 @@ use sp_runtime::{
     },
     RuntimeDebug,
 };
-use std::{
-    fmt::Debug,
-    pin::Pin,
-};
+use std::fmt::Debug;
 
 use crate::{
-    error::Error,
-    frame::Call,
-    Client,
+    frame::{Call, Store},
+    metadata::{Metadata, MetadataError},
 };
 
 /// The subset of the `frame::Trait` that a client must implement.
@@ -111,7 +104,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Default;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
-    type Address: Codec + Clone + PartialEq + Debug;
+    type Address: Codec + Clone + PartialEq + Debug + Send + Sync;
 
     /// The block header.
     type Header: Parameter
@@ -142,63 +135,33 @@ pub struct AccountInfo<T: System> {
     pub data: T::AccountData,
 }
 
-/// The System extension trait for the Client.
-pub trait SystemStore {
-    /// System type.
-    type System: System;
+const MODULE: &str = "System";
 
-    /// Returns the nonce and account data for an account_id.
-    fn account<'a>(
-        &'a self,
-        account_id: &<Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send + 'a>>;
-}
+/// Account field of the `System` module.
+#[derive(Encode)]
+pub struct AccountStore<'a, T: System>(pub &'a T::AccountId);
 
-impl<T, S, E> SystemStore for Client<T, S, E>
-where
-    T: System + Send + Sync,
-    S: 'static,
-    E: Send + Sync + 'static,
-{
-    type System = T;
+impl<'a, T: System> Store<T> for AccountStore<'a, T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "Account";
+    type Returns = AccountInfo<T>;
 
-    fn account<'a>(
-        &'a self,
-        account_id: &<Self::System as System>::AccountId,
-    ) -> Pin<Box<dyn Future<Output = Result<AccountInfo<Self::System>, Error>> + Send + 'a>>
-    {
-        let map_fn = || {
-            Ok(self
-                .metadata
-                .module("System")?
-                .storage("Account")?
-                .map()?)
-        };
-        let map = match map_fn() {
-            Ok(map) => map,
-            Err(err) => return Box::pin(future::err(err)),
-        };
-        let future = self.fetch(map.key(account_id), None);
-        Box::pin(async move {
-            let v = if let Some(v) = future.await? {
-                Some(v)
-            } else {
-                map.default().cloned()
-            };
-            Ok(v.unwrap())
-        })
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(self.0))
     }
 }
 
-const MODULE: &str = "System";
-const SET_CODE: &str = "set_code";
-
 /// Arguments for updating the runtime code
-pub type SetCode = Vec<u8>;
+#[derive(Encode)]
+pub struct SetCodeCall<'a>(pub &'a Vec<u8>);
 
-/// Sets the new code.
-pub fn set_code(code: Vec<u8>) -> Call<SetCode> {
-    Call::new(MODULE, SET_CODE, code)
+impl<'a, T: System> Call<T> for SetCodeCall<'a> {
+    const MODULE: &'static str = MODULE;
+    const FUNCTION: &'static str = "set_code";
 }
 
 use frame_support::weights::DispatchInfo;
