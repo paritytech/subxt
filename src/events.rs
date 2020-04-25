@@ -119,6 +119,11 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System> EventsDecoder<T> {
+    /// Register system types.
+    pub fn with_system(&mut self) -> Result<(), EventsError> {
+        Ok(())
+    }
+
     /// Register a type.
     pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
