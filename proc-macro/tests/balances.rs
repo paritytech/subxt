@@ -17,10 +17,21 @@ use substrate_subxt::{
 };
 use substrate_subxt_proc_macro::{
     module,
-    storage,
     Call,
     Event,
+    Store,
+    subxt_test,
 };
+
+pub trait SystemEventsDecoder {
+    fn with_system(&mut self) -> Result<(), substrate_subxt::EventsError>;
+}
+
+impl<T: System> SystemEventsDecoder for substrate_subxt::EventsDecoder<T> {
+    fn with_system(&mut self) -> Result<(), substrate_subxt::EventsError> {
+        Ok(())
+    }
+}
 
 #[module]
 pub trait Balances: System {
@@ -35,57 +46,6 @@ pub trait Balances: System {
         + From<<Self as System>::BlockNumber>;
 }
 
-// generates:
-//
-// const MODULE: &str = "Balances";
-//
-// put trait BalancesEventsDecoder {
-//     fn with_balances(self) -> Self;
-// }
-//
-// impl<T: Balances, P, S, E> BalancesEventsDecoder for EventsSubscriber<T, P, S, E> {
-//     fn with_balances(self) -> Self {
-//         self.events_decoder(|decoder| {
-//             decoder.register_type_size::<T::Balance>("Balance")
-//         }
-//     }
-// }
-
-#[derive(Call, Encode)]
-pub struct TransferCall<T: Balances> {
-    to: <T as System>::Address,
-    #[codec(compact)]
-    amount: T::Balance,
-}
-
-// generates:
-//
-// pub fn transfer<T: Balances>(
-//     to: <T as System>::Address,
-//     amount: T::Balance,
-// ) -> Call<Transfer<T>> {
-//     Call::new(MODULE, "transfer", Transfer { to, amount })
-// }
-
-#[derive(Decode, Event)]
-pub struct TransferEvent<T: Balances> {
-    pub from: <T as System>::AccountId,
-    pub to: <T as System>::AccountId,
-    pub amount: T::Balance,
-}
-
-// generates:
-//
-// pub trait TransferEventExt<T: Balances> {
-//     fn transfer(&self) -> Option<Result<TransferEvent<T>, codec::Error>>;
-// }
-//
-// impl<T: Balances> TransferEventExt<T: Balances> for ExtrisicSuccess<T> {
-//     fn transfer(&self) -> Option<Result<TransferEvent<T>, codec::Error>> {
-//         self.find_event(MODULE, "transfer")
-//     }
-// }
-
 #[derive(Clone, Decode, Default)]
 pub struct AccountData<Balance> {
     pub free: Balance,
@@ -94,91 +54,96 @@ pub struct AccountData<Balance> {
     pub fee_frozen: Balance,
 }
 
-#[storage]
-pub trait BalancesStore<T: Balances> {
-    fn account(account_id: &<T as System>::AccountId) -> AccountData<T::Balance>;
+#[derive(Encode, Store)]
+pub struct AccountStore<'a, T: Balances> {
+    #[store(returns = AccountData<T::Balance>)]
+    pub account_id: &'a <T as System>::AccountId,
 }
 
-// generates:
-//
-// pub trait BalancesStore<T: Balances> {
-//     fn account<'a>(
-//         &'a self,
-//         account_id: &<T as System>::AccountId,
-//     ) -> Pin<Box<dyn Future<Output = Result<AccountData<T::Balance>, Error>> + Send + 'a>>;
-// }
-//
-// impl<T, S, E> BalancesStore<T> for Client<T, S, E>
-// where
-//     T: Balances + Send + Sync,
-//     S: 'static,
-//     E: Send + Sync + 'static,
-// {
-//     fn account<'a>(
-//         &'a self,
-//         account_id: &<T as System>::AccountId,
-//     ) -> Pin<Box<dyn Future<Output = Result<AccountData<T::Balance>, Error>> + Send + 'a>> {
-//         let store_fn = || {
-//             Ok(self.metadata().module(MODULE)?.storage("Account")?.map()?)
-//         };
-//         let store = match store_fn() {
-//             Ok(v) => v,
-//             Err(e) => return Box::pin(future::err(e)),
-//         };
-//         let future = self.fetch(store.key(account_id), None);
-//         Box::pin(async move {
-//             let v = if let Some(v) = future.await? {
-//                 Some(v)
-//             } else {
-//                 store.default().cloned()
-//             };
-//             Ok(v.unwrap_or_default())
-//         })
-//     }
+#[derive(Call, Encode)]
+pub struct TransferCall<'a, T: Balances> {
+    pub to: &'a <T as System>::Address,
+    #[codec(compact)]
+    pub amount: T::Balance,
+}
+
+#[derive(Debug, Decode, Eq, Event, PartialEq)]
+pub struct TransferEvent<T: Balances> {
+    pub from: <T as System>::AccountId,
+    pub to: <T as System>::AccountId,
+    pub amount: T::Balance,
+}
 
 impl Balances for KusamaRuntime {
     type Balance = u128;
 }
 
+subxt_test!({
+    name: transfer_test_case,
+    runtime: KusamaRuntime,
+    account: Alice,
+    step: {
+        state: {
+            alice: AccountStore { account_id: &alice },
+            bob: AccountStore { account_id: &bob },
+        },
+        call: TransferCall {
+            to: &bob,
+            amount: 10_000,
+        },
+        event: TransferEvent {
+            from: alice.clone(),
+            to: bob.clone(),
+            amount: 10_000,
+        },
+        assert: {
+            assert_eq!(pre.alice.free, post.alice.free - 10_000);
+            assert_eq!(pre.bob.free, post.bob.free + 10_000);
+        },
+    },
+});
+
 #[async_std::test]
 #[ignore]
-async fn test_balances() -> Result<(), Box<dyn std::error::Error>> {
+async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
     let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
+    let alice = AccountKeyring::Alice.to_account_id();
+    let bob = AccountKeyring::Bob.to_account_id();
 
-    let alice_balance = client
-        .account(&AccountKeyring::Alice.to_account_id())
-        .await?
-        .free;
-    let bob_balance = client
-        .account(&AccountKeyring::Bob.to_account_id())
-        .await?
-        .free;
+    let (alice_account, bob_account) = futures::join!(
+        client.account(&alice),
+        client.account(&bob),
+    );
+    let alice_account = alice_account?.unwrap_or_default();
+    let bob_account = bob_account?.unwrap_or_default();
+    let pre = (alice_account, bob_account);
 
-    let transfer_event = client
+    let result = client
         .xt(AccountKeyring::Alice.pair(), None)
         .await?
         .watch()
-        .with_balances()
-        .transfer(AccountKeyring::Bob.to_account_id(), 10_000)
-        .await?
-        .transfer()
-        .unwrap()?;
+        .transfer(&bob.clone().into(), 10_000)
+        .await?;
 
-    assert_eq!(transfer_event.from, AccountKeyring::Alice.to_account_id());
-    assert_eq!(transfer_event.to, AccountKeyring::Bob.to_account_id());
-    assert_eq!(transfer_event.amount, 10_000);
+    assert_eq!(
+        result.transfer()?,
+        Some(TransferEvent {
+            from: alice.clone(),
+            to: bob.clone(),
+            amount: 10_000,
+        })
+    );
 
-    let new_alice_balance = client
-        .account(&AccountKeyring::Alice.to_account_id())
-        .await?
-        .free;
-    let new_bob_balance = client
-        .account(&AccountKeyring::Bob.to_account_id())
-        .await?
-        .free;
+    let (alice_account, bob_account) = futures::join!(
+        client.account(&alice),
+        client.account(&bob),
+    );
+    let alice_account = alice_account?.unwrap_or_default();
+    let bob_account = bob_account?.unwrap_or_default();
+    let post = (alice_account, bob_account);
 
-    assert_eq!(new_alice_balance, alice_balance - 10_000);
-    assert_eq!(new_bob_balance, bob_balance + 10_000);
-
+    assert_eq!(pre.0.free, post.0.free - 10_000);
+    assert_eq!(pre.1.free, post.1.free + 10_000);
     Ok(())
 }
