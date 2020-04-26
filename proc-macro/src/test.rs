@@ -10,6 +10,8 @@ mod kw {
     custom_keyword!(name);
     custom_keyword!(runtime);
     custom_keyword!(account);
+    custom_keyword!(signature);
+    custom_keyword!(extra);
     custom_keyword!(step);
     custom_keyword!(state);
     custom_keyword!(call);
@@ -57,6 +59,8 @@ enum TestItem {
     Name(Item<kw::name, syn::Ident>),
     Runtime(Item<kw::runtime, syn::Type>),
     Account(Item<kw::account, syn::Ident>),
+    Signature(Item<kw::signature, syn::Type>),
+    Extra(Item<kw::extra, syn::Type>),
     Step(Item<kw::step, ItemStep>),
 }
 
@@ -68,6 +72,10 @@ impl Parse for TestItem {
             Ok(TestItem::Runtime(input.parse()?))
         } else if input.peek(kw::account) {
             Ok(TestItem::Account(input.parse()?))
+        } else if input.peek(kw::signature) {
+            Ok(TestItem::Signature(input.parse()?))
+        } else if input.peek(kw::extra) {
+            Ok(TestItem::Extra(input.parse()?))
         } else {
             Ok(TestItem::Step(input.parse()?))
         }
@@ -105,6 +113,8 @@ struct Test {
     name: syn::Ident,
     runtime: syn::Type,
     account: syn::Ident,
+    signature: syn::Type,
+    extra: syn::Type,
     steps: Vec<Step>,
 }
 
@@ -113,6 +123,8 @@ impl From<ItemTest> for Test {
         let mut name = None;
         let mut runtime = None;
         let mut account = None;
+        let mut signature = None;
+        let mut extra = None;
         let mut steps = vec![];
         for test_item in test.items {
             match test_item {
@@ -125,15 +137,33 @@ impl From<ItemTest> for Test {
                 TestItem::Account(item) => {
                     account = Some(item.value);
                 }
+                TestItem::Signature(item) => {
+                    signature = Some(item.value);
+                }
+                TestItem::Extra(item) => {
+                    extra = Some(item.value);
+                }
                 TestItem::Step(item) => {
                     steps.push(item.value.into());
                 }
             }
         }
+        let runtime = runtime.unwrap_or_else(|| {
+            let subxt = utils::use_crate("substrate-subxt");
+            syn::parse2(quote!(#subxt::DefaultNodeRuntime)).unwrap()
+        });
         Self {
             name: name.expect("No name specified"),
-            runtime: runtime.expect("No runtime specified"),
             account: account.unwrap_or_else(|| format_ident!("Alice")),
+            signature: signature.unwrap_or_else(|| {
+                let sp_runtime = utils::use_crate("sp-runtime");
+                syn::parse2(quote!(#sp_runtime::MultiSignature)).unwrap()
+            }),
+            extra: extra.unwrap_or_else(|| {
+                let subxt = utils::use_crate("substrate-subxt");
+                syn::parse2(quote!(#subxt::DefaultExtra<#runtime>)).unwrap()
+            }),
+            runtime,
             steps,
         }
     }
@@ -145,7 +175,7 @@ impl From<Test> for TokenStream {
         let futures = utils::use_crate("futures");
         let sp_keyring = utils::use_crate("sp-keyring");
         let subxt = utils::use_crate("substrate-subxt");
-        let Test { name, runtime, account, steps } = test;
+        let Test { name, runtime, account, signature, extra, steps } = test;
         let step = steps.into_iter().map(TokenStream::from);
         quote! {
             #[async_std::test]
@@ -154,7 +184,8 @@ impl From<Test> for TokenStream {
                 use #futures::future::FutureExt;
                 #env_logger::init();
 
-                let client = #subxt::ClientBuilder::<#runtime>::new().build().await.unwrap();
+                let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
+                    .build().await.unwrap();
                 let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
                 #[allow(unused)]
                 let alice = #sp_keyring::AccountKeyring::Alice.to_account_id();
@@ -334,7 +365,11 @@ mod tests {
                 use futures::future::FutureExt;
 
                 env_logger::init();
-                let client = substrate_subxt::ClientBuilder::<KusamaRuntime>::new().build().await.unwrap();
+                let client = substrate_subxt::ClientBuilder::<
+                    KusamaRuntime,
+                    sp_runtime::MultiSignature,
+                    substrate_subxt::DefaultExtra<KusamaRuntime>
+                >::new().build().await.unwrap();
                 let xt = client.xt(sp_keyring::AccountKeyring::Alice.pair(), None).await.unwrap();
                 #[allow(unused)]
                 let alice = sp_keyring::AccountKeyring::Alice.to_account_id();
