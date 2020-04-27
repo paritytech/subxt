@@ -111,12 +111,8 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     let alice = AccountKeyring::Alice.to_account_id();
     let bob = AccountKeyring::Bob.to_account_id();
 
-    let (alice_account, bob_account) = futures::join!(
-        client.account(&alice),
-        client.account(&bob),
-    );
-    let alice_account = alice_account?.unwrap_or_default();
-    let bob_account = bob_account?.unwrap_or_default();
+    let alice_account = client.account(&alice).await?.unwrap_or_default();
+    let bob_account = client.account(&bob).await?.unwrap_or_default();
     let pre = (alice_account, bob_account);
 
     let result = client
@@ -135,12 +131,8 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
         })
     );
 
-    let (alice_account, bob_account) = futures::join!(
-        client.account(&alice),
-        client.account(&bob),
-    );
-    let alice_account = alice_account?.unwrap_or_default();
-    let bob_account = bob_account?.unwrap_or_default();
+    let alice_account = client.account(&alice).await?.unwrap_or_default();
+    let bob_account = client.account(&bob).await?.unwrap_or_default();
     let post = (alice_account, bob_account);
 
     assert_eq!(pre.0.free, post.0.free - 10_000);

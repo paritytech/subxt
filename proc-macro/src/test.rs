@@ -181,7 +181,6 @@ impl From<ItemTest> for Test {
 impl Test {
     fn into_tokens(self) -> TokenStream {
         let env_logger = utils::use_crate("env_logger");
-        let futures = utils::use_crate("futures");
         let sp_keyring = utils::use_crate("sp-keyring");
         let subxt = utils::use_crate("substrate-subxt");
         let Test { name, runtime, account, signature, extra, state, steps } = self;
@@ -190,9 +189,7 @@ impl Test {
             #[async_std::test]
             #[ignore]
             async fn #name() {
-                use #futures::future::FutureExt;
                 #env_logger::try_init().ok();
-
                 let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
                     .build().await.unwrap();
                 #[allow(unused)]
@@ -263,7 +260,6 @@ impl From<ItemStep> for Step {
 impl Step {
     fn into_tokens(self, account: &syn::Ident, test_state: Option<&State>) -> TokenStream {
         let sp_keyring = utils::use_crate("sp-keyring");
-        let futures = utils::use_crate("futures");
         let Step { state, call, event_name, event, assert } = self;
         let state = state.as_ref().unwrap_or_else(|| test_state.expect("No state for step"));
         let State { state_name, state, state_param } = state;
@@ -275,13 +271,9 @@ impl Step {
             }
 
             let pre = {
-                let (#(#state_name,)*) = #futures::join!(
-                    #(
-                        client
-                            .fetch(#state, None)
-                            .map(|r| r.unwrap().unwrap())
-                    ),*
-                );
+                #(
+                    let #state_name = client.fetch(#state, None).await.unwrap().unwrap();
+                )*
                 State { #(#state_name),* }
             };
 
@@ -300,13 +292,9 @@ impl Step {
             )*
 
             let post = {
-                let (#(#state_name,)*) = #futures::join!(
-                    #(
-                        client
-                            .fetch(#state, None)
-                            .map(|r| r.unwrap().unwrap())
-                    ),*
-                );
+                #(
+                    let #state_name = client.fetch(#state, None).await.unwrap().unwrap();
+                )*
                 State { #(#state_name),* }
             };
 
@@ -388,8 +376,6 @@ mod tests {
             #[async_std::test]
             #[ignore]
             async fn test_transfer_balance() {
-                use futures::future::FutureExt;
-
                 env_logger::try_init().ok();
                 let client = substrate_subxt::ClientBuilder::<
                     KusamaRuntime,
@@ -418,14 +404,16 @@ mod tests {
                     }
 
                     let pre = {
-                        let (alice, bob,) = futures::join!(
-                            client
-                                .fetch(AccountStore { account_id: &alice }, None)
-                                .map(|r| r.unwrap().unwrap()),
-                            client
-                                .fetch(AccountStore { account_id: &bob }, None)
-                                .map(|r| r.unwrap().unwrap())
-                        );
+                        let alice = client
+                            .fetch(AccountStore { account_id: &alice }, None)
+                            .await
+                            .unwrap()
+                            .unwrap();
+                        let bob = client
+                            .fetch(AccountStore { account_id: &bob }, None)
+                            .await
+                            .unwrap()
+                            .unwrap();
                         State { alice, bob }
                     };
 
@@ -449,14 +437,16 @@ mod tests {
                     );
 
                     let post = {
-                        let (alice, bob,) = futures::join!(
-                            client
-                                .fetch(AccountStore { account_id: &alice }, None)
-                                .map(|r| r.unwrap().unwrap()),
-                            client
-                                .fetch(AccountStore { account_id: &bob }, None)
-                                .map(|r| r.unwrap().unwrap())
-                        );
+                        let alice = client
+                            .fetch(AccountStore { account_id: &alice }, None)
+                            .await
+                            .unwrap()
+                            .unwrap();
+                        let bob = client
+                            .fetch(AccountStore { account_id: &bob }, None)
+                            .await
+                            .unwrap()
+                            .unwrap();
                         State { alice, bob }
                     };
 
