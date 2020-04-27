@@ -61,6 +61,7 @@ enum TestItem {
     Account(Item<kw::account, syn::Ident>),
     Signature(Item<kw::signature, syn::Type>),
     Extra(Item<kw::extra, syn::Type>),
+    State(Item<kw::state, ItemState>),
     Step(Item<kw::step, ItemStep>),
 }
 
@@ -76,6 +77,8 @@ impl Parse for TestItem {
             Ok(TestItem::Signature(input.parse()?))
         } else if input.peek(kw::extra) {
             Ok(TestItem::Extra(input.parse()?))
+        } else if input.peek(kw::state) {
+            Ok(TestItem::State(input.parse()?))
         } else {
             Ok(TestItem::Step(input.parse()?))
         }
@@ -115,6 +118,7 @@ struct Test {
     account: syn::Ident,
     signature: syn::Type,
     extra: syn::Type,
+    state: Option<State>,
     steps: Vec<Step>,
 }
 
@@ -125,6 +129,7 @@ impl From<ItemTest> for Test {
         let mut account = None;
         let mut signature = None;
         let mut extra = None;
+        let mut state = None;
         let mut steps = vec![];
         for test_item in test.items {
             match test_item {
@@ -142,6 +147,9 @@ impl From<ItemTest> for Test {
                 }
                 TestItem::Extra(item) => {
                     extra = Some(item.value);
+                }
+                TestItem::State(item) => {
+                    state = Some(item.value.into());
                 }
                 TestItem::Step(item) => {
                     steps.push(item.value.into());
@@ -164,29 +172,29 @@ impl From<ItemTest> for Test {
                 syn::parse2(quote!(#subxt::DefaultExtra<#runtime>)).unwrap()
             }),
             runtime,
+            state,
             steps,
         }
     }
 }
 
-impl From<Test> for TokenStream {
-    fn from(test: Test) -> Self {
+impl Test {
+    fn into_tokens(self) -> TokenStream {
         let env_logger = utils::use_crate("env_logger");
         let futures = utils::use_crate("futures");
         let sp_keyring = utils::use_crate("sp-keyring");
         let subxt = utils::use_crate("substrate-subxt");
-        let Test { name, runtime, account, signature, extra, steps } = test;
-        let step = steps.into_iter().map(TokenStream::from);
+        let Test { name, runtime, account, signature, extra, state, steps } = self;
+        let step = steps.into_iter().map(|step| step.into_tokens(&account, state.as_ref()));
         quote! {
             #[async_std::test]
             #[ignore]
             async fn #name() {
                 use #futures::future::FutureExt;
-                #env_logger::init();
+                #env_logger::try_init().ok();
 
                 let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
                     .build().await.unwrap();
-                let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
                 #[allow(unused)]
                 let alice = #sp_keyring::AccountKeyring::Alice.to_account_id();
                 #[allow(unused)]
@@ -209,9 +217,7 @@ impl From<Test> for TokenStream {
 }
 
 struct Step {
-    state_name: Vec<syn::Ident>,
-    state: Vec<syn::Expr>,
-    state_param: Vec<syn::Ident>,
+    state: Option<State>,
     call: syn::Expr,
     event_name: Vec<syn::Path>,
     event: Vec<syn::Expr>,
@@ -220,8 +226,7 @@ struct Step {
 
 impl From<ItemStep> for Step {
     fn from(step: ItemStep) -> Self {
-        let mut state_name = vec![];
-        let mut state = vec![];
+        let mut state = None;
         let mut call = None;
         let mut event_name = vec![];
         let mut event = vec![];
@@ -230,10 +235,7 @@ impl From<ItemStep> for Step {
         for step_item in step.items {
             match step_item {
                 StepItem::State(item) => {
-                    for item in item.value.items {
-                        state_name.push(item.key);
-                        state.push(item.value);
-                    }
+                    state = Some(item.value.into());
                 }
                 StepItem::Call(item) => {
                     call = Some(item.value);
@@ -248,15 +250,8 @@ impl From<ItemStep> for Step {
             }
         }
 
-        let state_param = (b'A'..b'Z')
-            .map(|c| format_ident!("{}", (c as char).to_string()))
-            .take(state_name.len())
-            .collect::<Vec<_>>();
-
         Self {
-            state_name,
             state,
-            state_param,
             call: call.expect("Step requires a call."),
             event_name,
             event,
@@ -265,11 +260,16 @@ impl From<ItemStep> for Step {
     }
 }
 
-impl From<Step> for TokenStream {
-    fn from(step: Step) -> Self {
+impl Step {
+    fn into_tokens(self, account: &syn::Ident, test_state: Option<&State>) -> TokenStream {
+        let sp_keyring = utils::use_crate("sp-keyring");
         let futures = utils::use_crate("futures");
-        let Step { state_name, state, state_param, call, event_name, event, assert } = step;
+        let Step { state, call, event_name, event, assert } = self;
+        let state = state.as_ref().unwrap_or_else(|| test_state.expect("No state for step"));
+        let State { state_name, state, state_param } = state;
         quote! {
+            let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
+
             struct State<#(#state_param),*> {
                 #(#state_name: #state_param,)*
             }
@@ -315,6 +315,32 @@ impl From<Step> for TokenStream {
     }
 }
 
+struct State {
+    state_name: Vec<syn::Ident>,
+    state: Vec<syn::Expr>,
+    state_param: Vec<syn::Ident>,
+}
+
+impl From<ItemState> for State {
+    fn from(item_state: ItemState) -> Self {
+        let mut state_name = vec![];
+        let mut state = vec![];
+        for item in item_state.items {
+            state_name.push(item.key);
+            state.push(item.value);
+        }
+        let state_param = (b'A'..b'Z')
+            .map(|c| format_ident!("{}", (c as char).to_string()))
+            .take(state_name.len())
+            .collect::<Vec<_>>();
+        Self {
+            state_name,
+            state,
+            state_param,
+        }
+    }
+}
+
 fn struct_name(expr: &syn::Expr) -> syn::Path {
     if let syn::Expr::Struct(syn::ExprStruct { path, .. }) = expr {
         return path.clone();
@@ -325,7 +351,7 @@ fn struct_name(expr: &syn::Expr) -> syn::Path {
 
 pub fn test(input: TokenStream) -> TokenStream {
     let item_test: ItemTest = syn::parse2(input).unwrap();
-    Test::from(item_test).into()
+    Test::from(item_test).into_tokens()
 }
 
 #[cfg(test)]
@@ -364,13 +390,12 @@ mod tests {
             async fn test_transfer_balance() {
                 use futures::future::FutureExt;
 
-                env_logger::init();
+                env_logger::try_init().ok();
                 let client = substrate_subxt::ClientBuilder::<
                     KusamaRuntime,
                     sp_runtime::MultiSignature,
                     substrate_subxt::DefaultExtra<KusamaRuntime>
                 >::new().build().await.unwrap();
-                let xt = client.xt(sp_keyring::AccountKeyring::Alice.pair(), None).await.unwrap();
                 #[allow(unused)]
                 let alice = sp_keyring::AccountKeyring::Alice.to_account_id();
                 #[allow(unused)]
@@ -385,6 +410,8 @@ mod tests {
                 let ferdie = sp_keyring::AccountKeyring::Ferdie.to_account_id();
 
                 {
+                    let xt = client.xt(sp_keyring::AccountKeyring::Alice.pair(), None).await.unwrap();
+
                     struct State<A, B> {
                         alice: A,
                         bob: B,
