@@ -16,15 +16,24 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::{
-    system::System,
-    Call, Event,
+use crate::{
+    frame::{
+        system::System,
+        Call,
+        Event,
+        Store,
+    },
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
 };
 use codec::{
     Decode,
     Encode,
 };
 use frame_support::Parameter;
+use sp_core::storage::StorageKey;
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
@@ -70,6 +79,24 @@ pub struct AccountData<Balance> {
     /// The amount that `free` may not drop below when withdrawing specifically for transaction
     /// fee payment.
     pub fee_frozen: Balance,
+}
+
+/// The total issuance of the balances module.
+#[derive(Encode)]
+pub struct TotalIssuance<T>(pub core::marker::PhantomData<T>);
+
+impl<T: Balances> Store<T> for TotalIssuance<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "TotalIssuance";
+    type Returns = T::Balance;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .plain()?
+            .key())
+    }
 }
 
 /// Transfer some liquid free balance to another account.

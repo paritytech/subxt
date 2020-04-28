@@ -81,10 +81,17 @@ mod runtimes;
 
 pub use crate::{
     error::Error,
-    events::{EventsDecoder, EventsError, RawEvent},
+    events::{
+        EventsDecoder,
+        EventsError,
+        RawEvent,
+    },
     extrinsic::*,
     frame::*,
-    metadata::{Metadata, MetadataError},
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
@@ -312,11 +319,7 @@ where
         &self,
         account_id: &<T as System>::AccountId,
         call: C,
-    ) -> Result<
-        SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>,
-        Error
-    >
-    {
+    ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
         let account_nonce = self
             .fetch(AccountStore(account_id), None)
             .await?
@@ -349,8 +352,7 @@ where
         let nonce = match nonce {
             Some(nonce) => nonce,
             None => {
-                self
-                    .fetch(AccountStore(&account_id), None)
+                self.fetch(AccountStore(&account_id), None)
                     .await?
                     .unwrap()
                     .nonce
@@ -492,10 +494,7 @@ where
     E: SignedExtra<T> + SignedExtension + 'static,
 {
     /// Submits transaction to the chain and watch for events.
-    pub async fn submit<C: Call<T>>(
-        self,
-        call: C,
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
+    pub async fn submit<C: Call<T>>(self, call: C) -> Result<ExtrinsicSuccess<T>, Error> {
         let mut decoder = self.decoder?;
         C::events_decoder(&mut decoder)?;
         let extrinsic = self.builder.create_and_sign(call)?;
@@ -526,152 +525,131 @@ mod tests {
     };
 
     use super::*;
-    use crate::{
-        DefaultNodeRuntime as Runtime,
-        Error,
-    };
 
-    pub(crate) async fn test_client() -> Client<Runtime> {
-        ClientBuilder::<Runtime>::new()
+    pub(crate) async fn test_client() -> Client<crate::DefaultNodeRuntime> {
+        ClientBuilder::new()
             .build()
             .await
             .expect("Error creating client")
     }
 
-    #[test]
+    #[async_std::test]
     #[ignore] // requires locally running substrate node
-    fn test_tx_transfer_balance() {
+    async fn test_tx_transfer_balance() {
         env_logger::try_init().ok();
-        let transfer = async_std::task::block_on(async move {
-            let signer = AccountKeyring::Alice.pair();
-            let dest = AccountKeyring::Bob.to_account_id().into();
+        let signer = AccountKeyring::Alice.pair();
+        let dest = AccountKeyring::Bob.to_account_id().into();
 
-            let client = test_client().await;
-            let mut xt = client.xt(signer, None).await?;
-            let _ = xt
-                .submit(balances::TransferCall {
+        let client = test_client().await;
+        let mut xt = client.xt(signer, None).await.unwrap();
+        let _ = xt
+            .submit(balances::TransferCall {
+                to: &dest,
+                amount: 10_000,
+            })
+            .await
+            .unwrap();
+
+        // check that nonce is handled correctly
+        xt.increment_nonce()
+            .submit(balances::TransferCall {
+                to: &dest,
+                amount: 10_000,
+            })
+            .await
+            .unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_getting_hash() {
+        let client = test_client().await;
+        client.block_hash(None).await.unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_getting_block() {
+        let client = test_client().await;
+        let block_hash = client.block_hash(None).await.unwrap();
+        client.block(block_hash).await.unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_state_total_issuance() {
+        let client = test_client().await;
+        client
+            .fetch(balances::TotalIssuance(Default::default()), None)
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_state_read_free_balance() {
+        let client = test_client().await;
+        let account = AccountKeyring::Alice.to_account_id();
+        client
+            .fetch(AccountStore(&account), None)
+            .await
+            .unwrap()
+            .unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_chain_subscribe_blocks() {
+        let client = test_client().await;
+        let mut blocks = client.subscribe_blocks().await.unwrap();
+        blocks.next().await;
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_chain_subscribe_finalized_blocks() {
+        let client = test_client().await;
+        let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
+        blocks.next().await;
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_create_raw_payload() {
+        let signer_pair = Ed25519Keyring::Alice.pair();
+        let signer_account_id = Ed25519Keyring::Alice.to_account_id();
+        let dest = AccountKeyring::Bob.to_account_id().into();
+
+        let client = test_client().await;
+
+        // create raw payload with AccoundId and sign it
+        let raw_payload = client
+            .create_raw_payload(
+                &signer_account_id,
+                balances::TransferCall {
                     to: &dest,
                     amount: 10_000,
-                })
-                .await?;
+                },
+            )
+            .await
+            .unwrap();
+        let raw_signature = signer_pair.sign(raw_payload.encode().as_slice());
+        let raw_multisig = MultiSignature::from(raw_signature);
 
-            // check that nonce is handled correctly
-            xt.increment_nonce()
-                .submit(balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000
-                })
-                .await
-        });
+        // create signature with Xtbuilder
+        let xt = client.xt(signer_pair.clone(), None).await.unwrap();
+        let xt_multi_sig = xt
+            .create_and_sign(balances::TransferCall {
+                to: &dest,
+                amount: 10_000,
+            })
+            .unwrap()
+            .signature
+            .unwrap()
+            .1;
 
-        assert!(transfer.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_getting_hash() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let client = test_client().await;
-            let block_hash = client.block_hash(None).await?;
-            Ok(block_hash)
-        });
-
-        assert!(result.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_getting_block() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let client = test_client().await;
-            let block_hash = client.block_hash(None).await?;
-            let block = client.block(block_hash).await?;
-            Ok(block)
-        });
-
-        assert!(result.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_state_read_free_balance() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let account = AccountKeyring::Alice.to_account_id();
-            let client = test_client().await;
-            let balance = client.fetch(AccountStore(&account), None).await?.unwrap().data.free;
-            Ok(balance)
-        });
-
-        assert!(result.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_chain_subscribe_blocks() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let client = test_client().await;
-            let mut blocks = client.subscribe_blocks().await?;
-            let block = blocks.next().await;
-            Ok(block)
-        });
-
-        assert!(result.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_chain_subscribe_finalized_blocks() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let client = test_client().await;
-            let mut blocks = client.subscribe_finalized_blocks().await?;
-            let block = blocks.next().await;
-            Ok(block)
-        });
-
-        assert!(result.is_ok())
-    }
-
-    #[test]
-    #[ignore] // requires locally running substrate node
-    fn test_create_raw_payload() {
-        let result: Result<_, Error> = async_std::task::block_on(async move {
-            let signer_pair = Ed25519Keyring::Alice.pair();
-            let signer_account_id = Ed25519Keyring::Alice.to_account_id();
-            let dest = AccountKeyring::Bob.to_account_id().into();
-
-            let client = test_client().await;
-
-            // create raw payload with AccoundId and sign it
-            let raw_payload = client
-                .create_raw_payload(
-                    &signer_account_id,
-                    balances::TransferCall {
-                        to: &dest,
-                        amount: 10_000,
-                    },
-                )
-                .await?;
-            let raw_signature =
-                signer_pair.sign(raw_payload.encode().as_slice());
-            let raw_multisig = MultiSignature::from(raw_signature);
-
-            // create signature with Xtbuilder
-            let xt = client.xt(signer_pair.clone(), None).await?;
-            let xt_multi_sig = xt
-                .create_and_sign(balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000,
-                })?
-                .signature
-                .unwrap()
-                .1;
-
-            // compare signatures
-            assert_eq!(raw_multisig, xt_multi_sig);
-
-            Ok(())
-        });
-
-        assert!(result.is_ok())
+        // compare signatures
+        assert_eq!(raw_multisig, xt_multi_sig);
     }
 }
