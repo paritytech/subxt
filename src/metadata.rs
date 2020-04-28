@@ -85,7 +85,10 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub(crate) fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
+    pub(crate) fn module_with_calls<S>(
+        &self,
+        name: S,
+    ) -> Result<&ModuleWithCalls, MetadataError>
     where
         S: ToString,
     {
@@ -271,7 +274,11 @@ impl StorageMetadata {
         &self,
     ) -> Result<StorageDoubleMap<K1, K2>, MetadataError> {
         match &self.ty {
-            StorageEntryType::DoubleMap { hasher, key2_hasher, .. } => {
+            StorageEntryType::DoubleMap {
+                hasher,
+                key2_hasher,
+                ..
+            } => {
                 Ok(StorageDoubleMap {
                     _marker: PhantomData,
                     prefix: self.prefix(),

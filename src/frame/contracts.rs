@@ -19,9 +19,13 @@
 use crate::frame::{
     balances::Balances,
     system::System,
-    Call, Event,
+    Call,
+    Event,
 };
-use codec::{Decode, Encode};
+use codec::{
+    Decode,
+    Encode,
+};
 
 const MODULE: &str = "Contracts";
 
@@ -121,7 +125,10 @@ impl<T: Contracts> Event<T> for CodeStoredEvent<T> {
 
 /// Instantiated event.
 #[derive(Debug, Decode)]
-pub struct InstantiatedEvent<T: Contracts>(pub <T as System>::AccountId, pub <T as System>::AccountId);
+pub struct InstantiatedEvent<T: Contracts>(
+    pub <T as System>::AccountId,
+    pub <T as System>::AccountId,
+);
 
 impl<T: Contracts> Event<T> for InstantiatedEvent<T> {
     const MODULE: &'static str = MODULE;
@@ -164,10 +171,13 @@ mod tests {
 
         let xt = client.xt(signer, None).await?;
 
-        let result = xt.watch().submit(PutCodeCall {
-            gas_limit: 500_000,
-            code: &wasm,
-        }).await?;
+        let result = xt
+            .watch()
+            .submit(PutCodeCall {
+                gas_limit: 500_000,
+                code: &wasm,
+            })
+            .await?;
         let code_hash = result
             .find_event::<CodeStoredEvent<T>>()?
             .ok_or(Error::Other("Failed to find CodeStored event".into()))?

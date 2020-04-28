@@ -1,8 +1,16 @@
 use crate::utils;
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
-use syn::parse::{Parse, ParseStream};
-use syn::punctuated::Punctuated;
+use quote::{
+    format_ident,
+    quote,
+};
+use syn::{
+    parse::{
+        Parse,
+        ParseStream,
+    },
+    punctuated::Punctuated,
+};
 
 mod kw {
     use syn::custom_keyword;
@@ -183,8 +191,18 @@ impl Test {
         let env_logger = utils::use_crate("env_logger");
         let sp_keyring = utils::use_crate("sp-keyring");
         let subxt = utils::use_crate("substrate-subxt");
-        let Test { name, runtime, account, signature, extra, state, steps } = self;
-        let step = steps.into_iter().map(|step| step.into_tokens(&account, state.as_ref()));
+        let Test {
+            name,
+            runtime,
+            account,
+            signature,
+            extra,
+            state,
+            steps,
+        } = self;
+        let step = steps
+            .into_iter()
+            .map(|step| step.into_tokens(&account, state.as_ref()));
         quote! {
             #[async_std::test]
             #[ignore]
@@ -258,11 +276,27 @@ impl From<ItemStep> for Step {
 }
 
 impl Step {
-    fn into_tokens(self, account: &syn::Ident, test_state: Option<&State>) -> TokenStream {
+    fn into_tokens(
+        self,
+        account: &syn::Ident,
+        test_state: Option<&State>,
+    ) -> TokenStream {
         let sp_keyring = utils::use_crate("sp-keyring");
-        let Step { state, call, event_name, event, assert } = self;
-        let state = state.as_ref().unwrap_or_else(|| test_state.expect("No state for step"));
-        let State { state_name, state, state_param } = state;
+        let Step {
+            state,
+            call,
+            event_name,
+            event,
+            assert,
+        } = self;
+        let state = state
+            .as_ref()
+            .unwrap_or_else(|| test_state.expect("No state for step"));
+        let State {
+            state_name,
+            state,
+            state_param,
+        } = state;
         quote! {
             let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
 
@@ -331,7 +365,7 @@ impl From<ItemState> for State {
 
 fn struct_name(expr: &syn::Expr) -> syn::Path {
     if let syn::Expr::Struct(syn::ExprStruct { path, .. }) = expr {
-        return path.clone();
+        return path.clone()
     } else {
         panic!("not a struct");
     }

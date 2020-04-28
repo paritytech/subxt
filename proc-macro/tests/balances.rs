@@ -17,10 +17,10 @@ use substrate_subxt::{
 };
 use substrate_subxt_proc_macro::{
     module,
+    subxt_test,
     Call,
     Event,
     Store,
-    subxt_test,
 };
 
 pub trait SystemEventsDecoder {

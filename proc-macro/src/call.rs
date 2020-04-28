@@ -1,7 +1,13 @@
 use crate::utils;
-use heck::{CamelCase, SnakeCase};
+use heck::{
+    CamelCase,
+    SnakeCase,
+};
 use proc_macro2::TokenStream;
-use quote::{format_ident, quote};
+use quote::{
+    format_ident,
+    quote,
+};
 use synstructure::Structure;
 
 pub fn call(s: Structure) -> TokenStream {
@@ -13,7 +19,10 @@ pub fn call(s: Structure) -> TokenStream {
     let generics = &s.ast().generics;
     let params = utils::type_params(generics);
     let module = utils::module_name(generics);
-    let with_module = format_ident!("with_{}", utils::path_to_ident(module).to_string().to_snake_case());
+    let with_module = format_ident!(
+        "with_{}",
+        utils::path_to_ident(module).to_string().to_snake_case()
+    );
     let call_name = ident.to_string().trim_end_matches("Call").to_snake_case();
     let call = format_ident!("{}", call_name);
     let call_trait = format_ident!("{}CallExt", call_name.to_camel_case());

@@ -1,6 +1,12 @@
-use proc_macro2::{Span, TokenStream};
+use proc_macro2::{
+    Span,
+    TokenStream,
+};
 use quote::quote;
-use synstructure::{BindingInfo, Structure};
+use synstructure::{
+    BindingInfo,
+    Structure,
+};
 
 pub fn use_crate(name: &str) -> syn::Ident {
     let krate = proc_macro_crate::crate_name(name).unwrap();

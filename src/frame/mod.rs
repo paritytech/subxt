@@ -16,12 +16,21 @@
 
 //! Implements support for built-in runtime modules.
 
-use codec::{Decode, Encode};
-use sp_core::storage::StorageKey;
 use crate::{
-    events::{EventsDecoder, EventsError},
-    metadata::{Metadata, MetadataError},
+    events::{
+        EventsDecoder,
+        EventsError,
+    },
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
 };
+use codec::{
+    Decode,
+    Encode,
+};
+use sp_core::storage::StorageKey;
 
 pub mod balances;
 pub mod contracts;
@@ -38,7 +47,10 @@ pub trait Store<T>: Encode {
     /// Returns the `StorageKey`.
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError>;
     /// Returns the default value.
-    fn default(&self, metadata: &Metadata) -> Result<Option<Self::Returns>, MetadataError> {
+    fn default(
+        &self,
+        metadata: &Metadata,
+    ) -> Result<Option<Self::Returns>, MetadataError> {
         Ok(metadata
             .module(Self::MODULE)?
             .storage(Self::FIELD)?

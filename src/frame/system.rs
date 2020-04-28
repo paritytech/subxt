@@ -44,8 +44,14 @@ use sp_runtime::{
 use std::fmt::Debug;
 
 use crate::{
-    frame::{Call, Store},
-    metadata::{Metadata, MetadataError},
+    frame::{
+        Call,
+        Store,
+    },
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
 };
 
 /// The subset of the `frame::Trait` that a client must implement.

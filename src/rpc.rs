@@ -70,11 +70,13 @@ use crate::{
         RawEvent,
         RuntimeEvent,
     },
-    frame::Event,
-    frame::system::{
-        Phase,
-        System,
-        SystemEvent,
+    frame::{
+        system::{
+            Phase,
+            System,
+            SystemEvent,
+        },
+        Event,
     },
     metadata::Metadata,
 };

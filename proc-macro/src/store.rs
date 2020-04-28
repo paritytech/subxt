@@ -1,9 +1,20 @@
 use crate::utils;
 use heck::SnakeCase;
-use proc_macro2::{TokenStream, TokenTree};
-use quote::{format_ident, quote};
-use syn::Token;
-use syn::parse::{Parse, ParseStream};
+use proc_macro2::{
+    TokenStream,
+    TokenTree,
+};
+use quote::{
+    format_ident,
+    quote,
+};
+use syn::{
+    parse::{
+        Parse,
+        ParseStream,
+    },
+    Token,
+};
 use synstructure::Structure;
 
 struct Returns {
@@ -26,7 +37,7 @@ fn parse_returns_attr(attr: &syn::Attribute) -> Option<syn::Type> {
     if let TokenTree::Group(group) = attr.tokens.clone().into_iter().next().unwrap() {
         if let Ok(Returns { returns, ty, .. }) = syn::parse2(group.stream()) {
             if returns.to_string() == "returns" {
-                return Some(ty);
+                return Some(ty)
             }
         }
     }
@@ -44,23 +55,33 @@ pub fn store(s: Structure) -> TokenStream {
     let store = format_ident!("{}", store_name.to_snake_case());
     let store_trait = format_ident!("{}StoreExt", store_name);
     let bindings = utils::bindings(&s);
-    let fields = bindings.iter().enumerate().map(|(i, bi)| {
-        (
-            bi.ast().ident.clone().unwrap_or_else(|| format_ident!("key{}", i)),
-            bi.ast().ty.clone(),
-        )
-    }).collect::<Vec<_>>();
-    let ret = bindings.iter().filter_map(|bi| {
-        bi.ast().attrs.iter().filter_map(parse_returns_attr).next()
-    })
-    .next()
-    .expect("#[store(returns = ..)] needs to be specified.");
-    let store_ty = format_ident!("{}", match fields.len() {
-        0 => "plain",
-        1 => "map",
-        2 => "double_map",
-        _ => panic!("invalid number of arguments"),
-    });
+    let fields = bindings
+        .iter()
+        .enumerate()
+        .map(|(i, bi)| {
+            (
+                bi.ast()
+                    .ident
+                    .clone()
+                    .unwrap_or_else(|| format_ident!("key{}", i)),
+                bi.ast().ty.clone(),
+            )
+        })
+        .collect::<Vec<_>>();
+    let ret = bindings
+        .iter()
+        .filter_map(|bi| bi.ast().attrs.iter().filter_map(parse_returns_attr).next())
+        .next()
+        .expect("#[store(returns = ..)] needs to be specified.");
+    let store_ty = format_ident!(
+        "{}",
+        match fields.len() {
+            0 => "plain",
+            1 => "map",
+            2 => "double_map",
+            _ => panic!("invalid number of arguments"),
+        }
+    );
     let args = fields.iter().map(|(field, ty)| quote!(#field: #ty,));
     let args = quote!(#(#args)*);
     let keys = fields.iter().map(|(field, _)| quote!(&self.#field,));
