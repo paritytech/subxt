@@ -17,7 +17,7 @@ pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {
     bindings
 }
 
-pub fn module_name<'a>(generics: &'a syn::Generics) -> &'a syn::Path {
+pub fn module_name(generics: &syn::Generics) -> &syn::Path {
     generics
         .params
         .iter()
@@ -41,19 +41,20 @@ pub fn module_name<'a>(generics: &'a syn::Generics) -> &'a syn::Path {
         .unwrap()
 }
 
-pub fn path_to_ident<'a>(path: &'a syn::Path) -> &'a syn::Ident {
+pub fn path_to_ident(path: &syn::Path) -> &syn::Ident {
     &path.segments.iter().last().unwrap().ident
 }
 
-pub fn type_params<'a>(generics: &'a syn::Generics) -> Vec<TokenStream> {
-    generics.params
+pub fn type_params(generics: &syn::Generics) -> Vec<TokenStream> {
+    generics
+        .params
         .iter()
         .filter_map(|g| {
             match g {
                 syn::GenericParam::Type(p) => {
                     let ident = &p.ident;
                     Some(quote!(#ident))
-                },
+                }
                 syn::GenericParam::Lifetime(p) => {
                     let lifetime = &p.lifetime;
                     Some(quote!(#lifetime))
