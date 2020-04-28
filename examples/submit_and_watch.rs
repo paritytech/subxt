@@ -17,49 +17,31 @@
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
     balances,
-    system::System,
     DefaultNodeRuntime as Runtime,
-    ExtrinsicSuccess,
 };
 
-type AccountId = <Runtime as System>::AccountId;
-type Balance = <Runtime as balances::Balances>::Balance;
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
 
-fn main() {
-    let result: Result<ExtrinsicSuccess<_>, Box<dyn std::error::Error + 'static>> =
-        async_std::task::block_on(async move {
-            env_logger::init();
+    let signer = AccountKeyring::Alice.pair();
+    let dest = AccountKeyring::Bob.to_account_id().into();
 
-            let signer = AccountKeyring::Alice.pair();
-
-            let dest = AccountKeyring::Bob.to_account_id();
-
-            let cli = substrate_subxt::ClientBuilder::<Runtime>::new()
-                .build()
-                .await?;
-            let xt = cli.xt(signer, None).await?;
-            let xt_result = xt
-                .watch()
-                .events_decoder(|decoder| {
-                    // for any primitive event with no type size registered
-                    decoder.register_type_size::<(u64, u64)>("IdentificationTuple")
-                })
-                .submit(balances::transfer::<Runtime>(dest.clone().into(), 10_000))
-                .await?;
-            Ok(xt_result)
-        });
-    match result {
-        Ok(extrinsic_success) => {
-            match extrinsic_success
-                .find_event::<(AccountId, AccountId, Balance)>("Balances", "Transfer")
-            {
-                Some(Ok((_from, _to, value))) => {
-                    println!("Balance transfer success: value: {:?}", value)
-                }
-                Some(Err(err)) => println!("Failed to decode code hash: {}", err),
-                None => println!("Failed to find Balances::Transfer Event"),
-            }
-        }
-        Err(err) => println!("Error: {:?}", err),
+    let cli = substrate_subxt::ClientBuilder::<Runtime>::new()
+        .build()
+        .await?;
+    let xt = cli.xt(signer, None).await?;
+    let xt_result = xt
+        .watch()
+        .submit(balances::TransferCall {
+            to: &dest,
+            amount: 10_000,
+        })
+        .await?;
+    if let Some(event) = xt_result.find_event::<balances::TransferEvent<_>>()? {
+        println!("Balance transfer success: value: {:?}", event.amount);
+    } else {
+        println!("Failed to find Balances::Transfer Event");
     }
+    Ok(())
 }

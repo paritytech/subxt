@@ -71,12 +71,12 @@ use crate::{
         RuntimeEvent,
     },
     frame::{
-        balances::Balances,
         system::{
             Phase,
             System,
             SystemEvent,
         },
+        Event,
     },
     metadata::Metadata,
 };
@@ -115,14 +115,10 @@ pub struct Rpc<T: System> {
     marker: std::marker::PhantomData<T>,
 }
 
-impl<T> Rpc<T>
-where
-    T: System,
-{
-    pub async fn connect_ws(url: &str) -> Result<Self, Error> {
-        let client = jsonrpsee::ws_client(&url).await?;
+impl<T: System> Rpc<T> {
+    pub async fn new(client: Client) -> Result<Self, Error> {
         Ok(Rpc {
-            client: client.into(),
+            client,
             marker: PhantomData,
         })
     }
@@ -140,6 +136,7 @@ where
             self.client.request("state_getStorage", params).await?;
         match data {
             Some(data) => {
+                log::debug!("state_getStorage {:?}", data.0);
                 let value = Decode::decode(&mut &data.0[..])?;
                 Ok(Some(value))
             }
@@ -247,9 +244,7 @@ where
             .await?;
         Ok(version)
     }
-}
 
-impl<T: System + Balances + 'static> Rpc<T> {
     /// Subscribe to substrate System Events
     pub async fn subscribe_events(
         &self,
@@ -432,19 +427,18 @@ impl<T: System> ExtrinsicSuccess<T> {
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
-    /// Returns `Err` if the data fails to decode into the supplied type
-    pub fn find_event<E: Decode>(
-        &self,
-        module: &str,
-        variant: &str,
-    ) -> Option<Result<E, CodecError>> {
-        self.find_event_raw(module, variant)
-            .map(|evt| E::decode(&mut &evt.data[..]))
+    /// Returns `Err` if the data fails to decode into the supplied type.
+    pub fn find_event<E: Event<T>>(&self) -> Result<Option<E>, CodecError> {
+        if let Some(event) = self.find_event_raw(E::MODULE, E::EVENT) {
+            Ok(Some(E::decode(&mut &event.data[..])?))
+        } else {
+            Ok(None)
+        }
     }
 }
 
 /// Waits for events for the block triggered by the extrinsic
-pub async fn wait_for_block_events<T: System + Balances + 'static>(
+pub async fn wait_for_block_events<T: System>(
     decoder: EventsDecoder<T>,
     ext_hash: T::Hash,
     signed_block: ChainBlock<T>,

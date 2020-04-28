@@ -37,7 +37,6 @@ use codec::{
 };
 
 use crate::{
-    frame::balances::Balances,
     metadata::{
         EventArg,
         Metadata,
@@ -66,23 +65,28 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
+/// Events error.
 #[derive(Debug, thiserror::Error)]
 pub enum EventsError {
+    /// Codec error.
     #[error("Scale codec error: {0:?}")]
     CodecError(#[from] CodecError),
+    /// Metadata error.
     #[error("Metadata error: {0:?}")]
     Metadata(#[from] MetadataError),
+    /// Type size unavailable.
     #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
 }
 
+/// Event decoder.
 pub struct EventsDecoder<T> {
     metadata: Metadata, // todo: [AJ] borrow?
     type_sizes: HashMap<String, usize>,
     marker: PhantomData<fn() -> T>,
 }
 
-impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
+impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
     type Error = EventsError;
 
     fn try_from(metadata: Metadata) -> Result<Self, Self::Error> {
@@ -108,15 +112,19 @@ impl<T: System + Balances + 'static> TryFrom<Metadata> for EventsDecoder<T> {
         decoder.register_type_size::<T::AccountId>("AccountId")?;
         decoder.register_type_size::<T::BlockNumber>("BlockNumber")?;
         decoder.register_type_size::<T::Hash>("Hash")?;
-        decoder.register_type_size::<<T as Balances>::Balance>("Balance")?;
-        // VoteThreshold enum index
         decoder.register_type_size::<u8>("VoteThreshold")?;
 
         Ok(decoder)
     }
 }
 
-impl<T: System + Balances + 'static> EventsDecoder<T> {
+impl<T: System> EventsDecoder<T> {
+    /// Register system types.
+    pub fn with_system(&mut self) -> Result<(), EventsError> {
+        Ok(())
+    }
+
+    /// Register a type.
     pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
         U: Default + Codec + Send + 'static,
@@ -130,6 +138,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         }
     }
 
+    /// Check missing type sizes.
     pub fn check_missing_type_sizes(&self) {
         let mut missing = HashSet::new();
         for module in self.metadata.modules_with_events() {
@@ -194,6 +203,7 @@ impl<T: System + Balances + 'static> EventsDecoder<T> {
         Ok(())
     }
 
+    /// Decode events.
     pub fn decode_events(
         &self,
         input: &mut &[u8],

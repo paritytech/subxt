@@ -39,26 +39,33 @@ use sp_core::storage::StorageKey;
 
 use crate::Encoded;
 
+/// Metadata error.
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
+    /// Failed to parse metadata.
     #[error("Error converting substrate metadata: {0}")]
     Conversion(#[from] ConversionError),
-    #[error("Module not found")]
+    /// Module is not in metadata.
+    #[error("Module {0} not found")]
     ModuleNotFound(String),
-    #[error("Module with events not found")]
-    ModuleWithEventsNotFound(u8),
-    #[error("Call not found")]
+    /// Module is not in metadata.
+    #[error("Module index {0} not found")]
+    ModuleIndexNotFound(u8),
+    /// Call is not in metadata.
+    #[error("Call {0} not found")]
     CallNotFound(&'static str),
-    #[error("Event not found")]
+    /// Event is not in metadata.
+    #[error("Event {0} not found")]
     EventNotFound(u8),
-    #[error("Storage not found")]
+    /// Storage is not in metadata.
+    #[error("Storage {0} not found")]
     StorageNotFound(&'static str),
+    /// Storage type does not match requested type.
     #[error("Storage type error")]
     StorageTypeError,
-    #[error("Map value type error")]
-    MapValueTypeError,
 }
 
+/// Runtime metadata.
 #[derive(Clone, Debug)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
@@ -67,6 +74,7 @@ pub struct Metadata {
 }
 
 impl Metadata {
+    /// Returns `ModuleMetadata`.
     pub fn module<S>(&self, name: S) -> Result<&ModuleMetadata, MetadataError>
     where
         S: ToString,
@@ -77,7 +85,10 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
+    pub(crate) fn module_with_calls<S>(
+        &self,
+        name: S,
+    ) -> Result<&ModuleWithCalls, MetadataError>
     where
         S: ToString,
     {
@@ -87,20 +98,21 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
+    pub(crate) fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
         self.modules_with_events.values()
     }
 
-    pub fn module_with_events(
+    pub(crate) fn module_with_events(
         &self,
         module_index: u8,
     ) -> Result<&ModuleWithEvents, MetadataError> {
         self.modules_with_events
             .values()
             .find(|&module| module.index == module_index)
-            .ok_or(MetadataError::ModuleWithEventsNotFound(module_index))
+            .ok_or(MetadataError::ModuleIndexNotFound(module_index))
     }
 
+    /// Pretty print metadata.
     pub fn pretty(&self) -> String {
         let mut string = String::new();
         for (name, module) in &self.modules {
@@ -200,22 +212,78 @@ pub struct StorageMetadata {
 }
 
 impl StorageMetadata {
-    pub fn get_map<K: Encode, V: Decode + Clone>(
-        &self,
-    ) -> Result<StorageMap<K, V>, MetadataError> {
+    pub fn prefix(&self) -> Vec<u8> {
+        let mut bytes = sp_core::twox_128(self.module_prefix.as_bytes()).to_vec();
+        bytes.extend(&sp_core::twox_128(self.storage_prefix.as_bytes())[..]);
+        bytes
+    }
+
+    pub fn default<V: Decode>(&self) -> Option<V> {
+        // substrate handles the default different for A => B vs A => Option<B>
+        Decode::decode(&mut &self.default[..]).ok()
+    }
+
+    pub fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {
+        match hasher {
+            StorageHasher::Identity => bytes.to_vec(),
+            StorageHasher::Blake2_128 => sp_core::blake2_128(bytes).to_vec(),
+            StorageHasher::Blake2_128Concat => {
+                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
+                sp_core::blake2_128(bytes)
+                    .iter()
+                    .chain(bytes)
+                    .cloned()
+                    .collect()
+            }
+            StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
+            StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
+            StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
+            StorageHasher::Twox64Concat => sp_core::twox_64(bytes).to_vec(),
+        }
+    }
+
+    pub fn hash_key<K: Encode>(hasher: &StorageHasher, key: &K) -> Vec<u8> {
+        Self::hash(hasher, &key.encode())
+    }
+
+    pub fn plain(&self) -> Result<StoragePlain, MetadataError> {
+        match &self.ty {
+            StorageEntryType::Plain(_) => {
+                Ok(StoragePlain {
+                    prefix: self.prefix(),
+                })
+            }
+            _ => Err(MetadataError::StorageTypeError),
+        }
+    }
+
+    pub fn map<K: Encode>(&self) -> Result<StorageMap<K>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hasher, .. } => {
-                let module_prefix = self.module_prefix.as_bytes().to_vec();
-                let storage_prefix = self.storage_prefix.as_bytes().to_vec();
-                let hasher = hasher.to_owned();
-                let default = Decode::decode(&mut &self.default[..])
-                    .map_err(|_| MetadataError::MapValueTypeError)?;
                 Ok(StorageMap {
                     _marker: PhantomData,
-                    module_prefix,
-                    storage_prefix,
-                    hasher,
-                    default,
+                    prefix: self.prefix(),
+                    hasher: hasher.clone(),
+                })
+            }
+            _ => Err(MetadataError::StorageTypeError),
+        }
+    }
+
+    pub fn double_map<K1: Encode, K2: Encode>(
+        &self,
+    ) -> Result<StorageDoubleMap<K1, K2>, MetadataError> {
+        match &self.ty {
+            StorageEntryType::DoubleMap {
+                hasher,
+                key2_hasher,
+                ..
+            } => {
+                Ok(StorageDoubleMap {
+                    _marker: PhantomData,
+                    prefix: self.prefix(),
+                    hasher1: hasher.clone(),
+                    hasher2: key2_hasher.clone(),
                 })
             }
             _ => Err(MetadataError::StorageTypeError),
@@ -224,41 +292,45 @@ impl StorageMetadata {
 }
 
 #[derive(Clone, Debug)]
-pub struct StorageMap<K, V> {
-    _marker: PhantomData<K>,
-    module_prefix: Vec<u8>,
-    storage_prefix: Vec<u8>,
-    hasher: StorageHasher,
-    default: V,
+pub struct StoragePlain {
+    prefix: Vec<u8>,
 }
 
-impl<K: Encode, V: Decode + Clone> StorageMap<K, V> {
-    pub fn key(&self, key: K) -> StorageKey {
-        let mut bytes = sp_core::twox_128(&self.module_prefix).to_vec();
-        bytes.extend(&sp_core::twox_128(&self.storage_prefix)[..]);
-        let encoded_key = key.encode();
-        let hash = match self.hasher {
-            StorageHasher::Identity => encoded_key.to_vec(),
-            StorageHasher::Blake2_128 => sp_core::blake2_128(&encoded_key).to_vec(),
-            StorageHasher::Blake2_128Concat => {
-                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
-                sp_core::blake2_128(&encoded_key)
-                    .iter()
-                    .chain(&encoded_key)
-                    .cloned()
-                    .collect::<Vec<_>>()
-            }
-            StorageHasher::Blake2_256 => sp_core::blake2_256(&encoded_key).to_vec(),
-            StorageHasher::Twox128 => sp_core::twox_128(&encoded_key).to_vec(),
-            StorageHasher::Twox256 => sp_core::twox_256(&encoded_key).to_vec(),
-            StorageHasher::Twox64Concat => sp_core::twox_64(&encoded_key).to_vec(),
-        };
-        bytes.extend(hash);
+impl StoragePlain {
+    pub fn key(&self) -> StorageKey {
+        StorageKey(self.prefix.clone())
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct StorageMap<K> {
+    _marker: PhantomData<K>,
+    prefix: Vec<u8>,
+    hasher: StorageHasher,
+}
+
+impl<K: Encode> StorageMap<K> {
+    pub fn key(&self, key: &K) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(StorageMetadata::hash_key(&self.hasher, key));
         StorageKey(bytes)
     }
+}
 
-    pub fn default(&self) -> V {
-        self.default.clone()
+#[derive(Clone, Debug)]
+pub struct StorageDoubleMap<K1, K2> {
+    _marker: PhantomData<(K1, K2)>,
+    prefix: Vec<u8>,
+    hasher1: StorageHasher,
+    hasher2: StorageHasher,
+}
+
+impl<K1: Encode, K2: Encode> StorageDoubleMap<K1, K2> {
+    pub fn key(&self, key1: &K1, key2: &K2) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(StorageMetadata::hash_key(&self.hasher1, key1));
+        bytes.extend(StorageMetadata::hash_key(&self.hasher2, key2));
+        StorageKey(bytes)
     }
 }
 
