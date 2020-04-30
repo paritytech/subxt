@@ -129,8 +129,6 @@ impl<T: System> Rpc<T> {
         key: StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<V>, Error> {
-        // todo: update jsonrpsee::rpc_api! macro to accept shared Client (currently only RawClient)
-        // until then we manually construct params here and in other methods
         let params = Params::Array(vec![to_json_value(key)?, to_json_value(hash)?]);
         let data: Option<StorageData> =
             self.client.request("state_getStorage", params).await?;

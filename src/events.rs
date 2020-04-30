@@ -81,7 +81,7 @@ pub enum EventsError {
 
 /// Event decoder.
 pub struct EventsDecoder<T> {
-    metadata: Metadata, // todo: [AJ] borrow?
+    metadata: Metadata,
     type_sizes: HashMap<String, usize>,
     marker: PhantomData<fn() -> T>,
 }
