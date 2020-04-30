@@ -463,7 +463,6 @@ pub async fn wait_for_block_events<T: System>(
         if change_set.block != block_hash {
             continue
         }
-        log::debug!("Received {} changes", change_set.changes.len());
         let mut events = Vec::new();
         for (_key, data) in change_set.changes {
             if let Some(data) = data {
