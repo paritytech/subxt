@@ -1,4 +1,4 @@
-// Copyright 2019 Parity Technologies (UK) Ltd.
+// Copyright 2019-2020 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -463,6 +463,7 @@ pub async fn wait_for_block_events<T: System>(
         if change_set.block != block_hash {
             continue
         }
+        log::debug!("Received {} changes", change_set.changes.len());
         let mut events = Vec::new();
         for (_key, data) in change_set.changes {
             if let Some(data) = data {

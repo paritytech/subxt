@@ -13,7 +13,9 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+    - name: fmt
+      run: cargo +nightly fmt --all -- --check
+    - name: build
       run: cargo build --verbose
-    - name: Run tests
+    - name: test
       run: cargo test --verbose
