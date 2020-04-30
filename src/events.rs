@@ -1,4 +1,4 @@
-// Copyright 2019 Parity Technologies (UK) Ltd.
+// Copyright 2019-2020 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -81,7 +81,7 @@ pub enum EventsError {
 
 /// Event decoder.
 pub struct EventsDecoder<T> {
-    metadata: Metadata, // todo: [AJ] borrow?
+    metadata: Metadata,
     type_sizes: HashMap<String, usize>,
     marker: PhantomData<fn() -> T>,
 }

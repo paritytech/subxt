@@ -13,7 +13,17 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Build
+
+    - name: setup
+      run: |
+        rustup install nightly
+        rustup component add rustfmt --toolchain nightly
+
+    - name: fmt
+      run: cargo +nightly fmt --all -- --check
+
+    - name: build
       run: cargo build --verbose
-    - name: Run tests
+
+    - name: test
       run: cargo test --verbose
