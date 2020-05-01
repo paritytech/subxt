@@ -25,7 +25,7 @@ use sp_runtime::{
         AtLeast32Bit, Bounded, CheckEqual, Extrinsic, Hash, Header, MaybeDisplay,
         MaybeMallocSizeOf, MaybeSerialize, MaybeSerializeDeserialize, Member,
         SimpleBitOps,
-    },
+    }, Perbill,
     RuntimeDebug,
 };
 use std::fmt::Debug;
@@ -34,6 +34,31 @@ use crate::{
     frame::{Call, Store},
     metadata::{Metadata, MetadataError},
 };
+
+/// A record of the nominations made by a specific account.
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+pub struct Nominations<AccountId> {
+	/// The targets of nomination.
+	pub targets: Vec<AccountId>,
+	/// The era the nominations were submitted.
+	///
+	/// Except for initial nominations which are considered submitted at era 0.
+	pub submitted_in: EraIndex,
+	/// Whether the nominations have been suppressed.
+	pub suppressed: bool,
+}
+
+/// Information regarding the active era (era in used in session).
+#[derive(Encode, Decode, RuntimeDebug)]
+pub struct ActiveEraInfo {
+	/// Index of era.
+	pub index: EraIndex,
+	/// Moment of start expresed as millisecond from `$UNIX_EPOCH`.
+	///
+	/// Start can be none if start hasn't been set for the era yet,
+	/// Start is set on the first on_finalize of the era to guarantee usage of `Time`.
+	start: Option<u64>,
+}
 
 /// Data type used to index nominators in the compact type
 pub type NominatorIndex = u32;
@@ -50,6 +75,40 @@ pub type EraIndex = u32;
 
 /// Counter for the number of "reward" points earned by a given validator.
 pub type RewardPoint = u32;
+
+/// A destination account for payment.
+#[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, RuntimeDebug)]
+pub enum RewardDestination {
+	/// Pay into the stash account, increasing the amount at stake accordingly.
+	Staked,
+	/// Pay into the stash account, not increasing the amount at stake.
+	Stash,
+	/// Pay into the controller account.
+	Controller,
+}
+
+impl Default for RewardDestination {
+	fn default() -> Self {
+		RewardDestination::Staked
+	}
+}
+
+/// Preference of what happens regarding validation.
+#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+pub struct ValidatorPrefs {
+	/// Reward that validator takes up-front; only the rest is split between themselves and
+	/// nominators.
+	#[codec(compact)]
+	pub commission: Perbill,
+}
+
+impl Default for ValidatorPrefs {
+	fn default() -> Self {
+		ValidatorPrefs {
+			commission: Default::default(),
+		}
+	}
+}
 
 
 /// The subset of the `frame::Trait` that a client must implement.
@@ -195,6 +254,82 @@ impl<T: Staking> Store<T> for Ledger<T> {
     const MODULE: &'static str = MODULE;
     const FIELD: &'static str = "Ledger";
     type Returns = Option<StakingLedger<T::AccountId, ()>>;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+    }
+}
+
+/// Where the reward payment should be made. Keyed by stash.
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
+pub struct Payee<T: Staking>(pub T::AccountId);
+
+impl<T: Staking> Store<T> for Payee<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "Payee";
+    type Returns = RewardDestination;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+    }
+}
+
+/// The map from (wannabe) validator stash key to the preferences of that validator.
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
+pub struct Validators<T: Staking>(pub T::AccountId);
+
+impl<T: Staking> Store<T> for Validators<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "Validators";
+    type Returns = ValidatorPrefs;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+    }
+}
+
+/// The map from nominator stash key to the set of stash keys of all validators to nominate.
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
+pub struct Nominators<T: Staking>(pub T::AccountId);
+
+impl<T: Staking> Store<T> for Nominators<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "Nominators";
+    type Returns = Option<Nominations<T::AccountId>>;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+    }
+}
+
+/// The current era index.
+///
+/// This is the latest planned era, depending on how the Session pallet queues the validator
+/// set, it might be active or not.
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
+pub struct CurrentEra<T: Staking>(pub PhantomData<T>);
+
+impl<T: Staking> Store<T> for CurrentEra<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "CurrentEra";
+    type Returns = Option<EraIndex>;
+
+    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
+        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+    }
+}
+
+/// The active era information, it holds index and start.
+///
+/// The active era is the era currently rewarded.
+/// Validator set of this era must be equal to `SessionInterface::validators`.
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
+pub struct ActiveEra<T: Staking>(pub PhantomData<T>);
+
+impl<T: Staking> Store<T> for ActiveEra<T> {
+    const MODULE: &'static str = MODULE;
+    const FIELD: &'static str = "ActiveEra";
+	type Returns = Option<ActiveEraInfo>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
         Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
