@@ -1,4 +1,4 @@
-// Copyright 2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2020 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -16,48 +16,71 @@
 
 //! Implements support for the frame_staking module.
 
-use codec::{Codec, Decode, Encode, HasCompact};
+use crate::{
+    frame::{
+        Call,
+        Store,
+    },
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
+};
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+    HasCompact,
+};
 use frame_support::Parameter;
 use serde::de::DeserializeOwned;
 use sp_core::storage::StorageKey;
 use sp_runtime::{
     traits::{
-        AtLeast32Bit, Bounded, CheckEqual, Extrinsic, Hash, Header, MaybeDisplay,
-        MaybeMallocSizeOf, MaybeSerialize, MaybeSerializeDeserialize, Member,
+        AtLeast32Bit,
+        Bounded,
+        CheckEqual,
+        Extrinsic,
+        Hash,
+        Header,
+        MaybeDisplay,
+        MaybeMallocSizeOf,
+        MaybeSerialize,
+        MaybeSerializeDeserialize,
+        Member,
         SimpleBitOps,
-    }, Perbill,
+    },
+    Perbill,
     RuntimeDebug,
 };
-use std::fmt::Debug;
-use std::marker::PhantomData;
-use crate::{
-    frame::{Call, Store},
-    metadata::{Metadata, MetadataError},
+use std::{
+    fmt::Debug,
+    marker::PhantomData,
 };
 
 /// A record of the nominations made by a specific account.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
 pub struct Nominations<AccountId> {
-	/// The targets of nomination.
-	pub targets: Vec<AccountId>,
-	/// The era the nominations were submitted.
-	///
-	/// Except for initial nominations which are considered submitted at era 0.
-	pub submitted_in: EraIndex,
-	/// Whether the nominations have been suppressed.
-	pub suppressed: bool,
+    /// The targets of nomination.
+    pub targets: Vec<AccountId>,
+    /// The era the nominations were submitted.
+    ///
+    /// Except for initial nominations which are considered submitted at era 0.
+    pub submitted_in: EraIndex,
+    /// Whether the nominations have been suppressed.
+    pub suppressed: bool,
 }
 
 /// Information regarding the active era (era in used in session).
 #[derive(Encode, Decode, RuntimeDebug)]
 pub struct ActiveEraInfo {
-	/// Index of era.
-	pub index: EraIndex,
-	/// Moment of start expresed as millisecond from `$UNIX_EPOCH`.
-	///
-	/// Start can be none if start hasn't been set for the era yet,
-	/// Start is set on the first on_finalize of the era to guarantee usage of `Time`.
-	start: Option<u64>,
+    /// Index of era.
+    pub index: EraIndex,
+    /// Moment of start expresed as millisecond from `$UNIX_EPOCH`.
+    ///
+    /// Start can be none if start hasn't been set for the era yet,
+    /// Start is set on the first on_finalize of the era to guarantee usage of `Time`.
+    start: Option<u64>,
 }
 
 /// Data type used to index nominators in the compact type
@@ -79,91 +102,89 @@ pub type RewardPoint = u32;
 /// A destination account for payment.
 #[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, RuntimeDebug)]
 pub enum RewardDestination {
-	/// Pay into the stash account, increasing the amount at stake accordingly.
-	Staked,
-	/// Pay into the stash account, not increasing the amount at stake.
-	Stash,
-	/// Pay into the controller account.
-	Controller,
+    /// Pay into the stash account, increasing the amount at stake accordingly.
+    Staked,
+    /// Pay into the stash account, not increasing the amount at stake.
+    Stash,
+    /// Pay into the controller account.
+    Controller,
 }
 
 impl Default for RewardDestination {
-	fn default() -> Self {
-		RewardDestination::Staked
-	}
+    fn default() -> Self {
+        RewardDestination::Staked
+    }
 }
 
 /// Preference of what happens regarding validation.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
 pub struct ValidatorPrefs {
-	/// Reward that validator takes up-front; only the rest is split between themselves and
-	/// nominators.
-	#[codec(compact)]
-	pub commission: Perbill,
+    /// Reward that validator takes up-front; only the rest is split between themselves and
+    /// nominators.
+    #[codec(compact)]
+    pub commission: Perbill,
 }
 
 impl Default for ValidatorPrefs {
-	fn default() -> Self {
-		ValidatorPrefs {
-			commission: Default::default(),
-		}
-	}
+    fn default() -> Self {
+        ValidatorPrefs {
+            commission: Default::default(),
+        }
+    }
 }
-
 
 /// The subset of the `frame::Trait` that a client must implement.
 pub trait Staking: super::system::System {
-	/*
-	type UnixTime;
-	type CurrencyToVote;
-	type RewardRemainder;
-	type Event;
-	type Slash;
-	type Reward;
-	type SessionsPerEra;
-	type BondingDuration;
-	type SlashDeferDuration;
-	type SlashCancelOrigin;
-	type SessionInterface;
-	type RewardCurve;
-	type NextNewSession;
-	type ElectionLookahead;
-	type Call;
-	type MaxIterations;
-	type MaxNominatorRewardPerValidator;
-	type UnsignedPriority; */
+    // type UnixTime;
+    // type CurrencyToVote;
+    // type RewardRemainder;
+    // type Event;
+    // type Slash;
+    // type Reward;
+    // type SessionsPerEra;
+    // type BondingDuration;
+    // type SlashDeferDuration;
+    // type SlashCancelOrigin;
+    // type SessionInterface;
+    // type RewardCurve;
+    // type NextNewSession;
+    // type ElectionLookahead;
+    // type Call;
+    // type MaxIterations;
+    // type MaxNominatorRewardPerValidator;
+    // type UnsignedPriority;
 }
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(PartialEq, Eq, Clone, Encode, Decode)]
 pub struct UnlockChunk<Balance: HasCompact> {
-	/// Amount of funds to be unlocked.
-	#[codec(compact)]
-	value: Balance,
-	/// Era number at which point it'll be unlocked.
-	#[codec(compact)]
-	era: EraIndex,
+    /// Amount of funds to be unlocked.
+    #[codec(compact)]
+    value: Balance,
+    /// Era number at which point it'll be unlocked.
+    #[codec(compact)]
+    era: EraIndex,
 }
 
 /// The ledger of a (bonded) stash.
 #[derive(PartialEq, Eq, Clone, Encode, Decode)]
 pub struct StakingLedger<AccountId, Balance: HasCompact> {
-	/// The stash account whose balance is actually locked and at stake.
-	pub stash: AccountId,
-	/// The total amount of the stash's balance that we are currently accounting for.
-	/// It's just `active` plus all the `unlocking` balances.
-	#[codec(compact)]
-	pub total: Balance,
-	/// The total amount of the stash's balance that will be at stake in any forthcoming
-	/// rounds.
-	#[codec(compact)]
-	pub active: Balance,
-	/// Any balance that is becoming free, which may eventually be transferred out
-	/// of the stash (assuming it doesn't get slashed first).
-	pub unlocking: Vec<UnlockChunk<Balance>>,
-	/// List of eras for which the stakers behind a validator have claimed rewards. Only updated
-	/// for validators.
-	pub claimed_rewards: Vec<EraIndex>,
+    /// The stash account whose balance is actually locked and at stake.
+    pub stash: AccountId,
+    /// The total amount of the stash's balance that we are currently accounting for.
+    /// It's just `active` plus all the `unlocking` balances.
+    #[codec(compact)]
+    pub total: Balance,
+    /// The total amount of the stash's balance that will be at stake in any forthcoming
+    /// rounds.
+    #[codec(compact)]
+    pub active: Balance,
+    /// Any balance that is becoming free, which may eventually be transferred out
+    /// of the stash (assuming it doesn't get slashed first).
+    pub unlocking: Vec<UnlockChunk<Balance>>,
+    /// List of eras for which the stakers behind a validator have claimed rewards. Only updated
+    /// for validators.
+    pub claimed_rewards: Vec<EraIndex>,
 }
 
 const MODULE: &str = "Staking";
@@ -184,7 +205,11 @@ impl<T: Staking> Store<T> for HistoryDepth<T> {
     type Returns = u32;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.plain()?.key())
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .plain()?
+            .key())
     }
 }
 
@@ -198,7 +223,11 @@ impl<T: Staking> Store<T> for ValidatorCount<T> {
     type Returns = u32;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.plain()?.key())
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .plain()?
+            .key())
     }
 }
 
@@ -212,7 +241,11 @@ impl<T: Staking> Store<T> for MinimumValidatorCount<T> {
     type Returns = u32;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.plain()?.key())
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .plain()?
+            .key())
     }
 }
 
@@ -228,7 +261,11 @@ impl<T: Staking> Store<T> for Invulnerables<T> {
     type Returns = Vec<T::AccountId>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.plain()?.key())
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .plain()?
+            .key())
     }
 }
 
@@ -242,7 +279,11 @@ impl<T: Staking> Store<T> for Bonded<T> {
     type Returns = Vec<T::AccountId>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -256,7 +297,11 @@ impl<T: Staking> Store<T> for Ledger<T> {
     type Returns = Option<StakingLedger<T::AccountId, ()>>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -270,7 +315,11 @@ impl<T: Staking> Store<T> for Payee<T> {
     type Returns = RewardDestination;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -284,7 +333,11 @@ impl<T: Staking> Store<T> for Validators<T> {
     type Returns = ValidatorPrefs;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -298,7 +351,11 @@ impl<T: Staking> Store<T> for Nominators<T> {
     type Returns = Option<Nominations<T::AccountId>>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -315,7 +372,11 @@ impl<T: Staking> Store<T> for CurrentEra<T> {
     type Returns = Option<EraIndex>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }
 
@@ -329,9 +390,13 @@ pub struct ActiveEra<T: Staking>(pub PhantomData<T>);
 impl<T: Staking> Store<T> for ActiveEra<T> {
     const MODULE: &'static str = MODULE;
     const FIELD: &'static str = "ActiveEra";
-	type Returns = Option<ActiveEraInfo>;
+    type Returns = Option<ActiveEraInfo>;
 
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata.module(Self::MODULE)?.storage(Self::FIELD)?.map()?.key(&self.0))
+        Ok(metadata
+            .module(Self::MODULE)?
+            .storage(Self::FIELD)?
+            .map()?
+            .key(&self.0))
     }
 }

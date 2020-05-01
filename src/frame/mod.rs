@@ -34,8 +34,8 @@ use sp_core::storage::StorageKey;
 
 pub mod balances;
 pub mod contracts;
-pub mod system;
 pub mod staking;
+pub mod system;
 
 /// Store trait.
 pub trait Store<T>: Encode {
