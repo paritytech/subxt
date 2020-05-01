@@ -71,8 +71,9 @@ pub type NominatorIndex = u32;
 /// Data type used to index validators in the compact type.
 pub type ValidatorIndex = u16;
 
-/// Maximum number of stakers that can be stored in a snapshot.
+/// Maximum number of validators that can be stored in a snapshot.
 pub const MAX_VALIDATORS: usize = ValidatorIndex::max_value() as usize;
+/// Maximum number of nominators that can be stored in a snapshot.
 pub const MAX_NOMINATORS: usize = NominatorIndex::max_value() as usize;
 
 /// Counter for the number of eras that have passed.
