@@ -18,7 +18,6 @@
 
 use crate::{
     frame::{
-        Call,
         Store,
     },
     metadata::{
@@ -27,29 +26,12 @@ use crate::{
     },
 };
 use codec::{
-    Codec,
     Decode,
     Encode,
     HasCompact,
 };
-use frame_support::Parameter;
-use serde::de::DeserializeOwned;
 use sp_core::storage::StorageKey;
 use sp_runtime::{
-    traits::{
-        AtLeast32Bit,
-        Bounded,
-        CheckEqual,
-        Extrinsic,
-        Hash,
-        Header,
-        MaybeDisplay,
-        MaybeMallocSizeOf,
-        MaybeSerialize,
-        MaybeSerializeDeserialize,
-        Member,
-        SimpleBitOps,
-    },
     Perbill,
     RuntimeDebug,
 };
@@ -90,8 +72,8 @@ pub type NominatorIndex = u32;
 pub type ValidatorIndex = u16;
 
 /// Maximum number of stakers that can be stored in a snapshot.
-pub(crate) const MAX_VALIDATORS: usize = ValidatorIndex::max_value() as usize;
-pub(crate) const MAX_NOMINATORS: usize = NominatorIndex::max_value() as usize;
+pub const MAX_VALIDATORS: usize = ValidatorIndex::max_value() as usize;
+pub const MAX_NOMINATORS: usize = NominatorIndex::max_value() as usize;
 
 /// Counter for the number of eras that have passed.
 pub type EraIndex = u32;
@@ -134,26 +116,7 @@ impl Default for ValidatorPrefs {
 }
 
 /// The subset of the `frame::Trait` that a client must implement.
-pub trait Staking: super::system::System {
-    // type UnixTime;
-    // type CurrencyToVote;
-    // type RewardRemainder;
-    // type Event;
-    // type Slash;
-    // type Reward;
-    // type SessionsPerEra;
-    // type BondingDuration;
-    // type SlashDeferDuration;
-    // type SlashCancelOrigin;
-    // type SessionInterface;
-    // type RewardCurve;
-    // type NextNewSession;
-    // type ElectionLookahead;
-    // type Call;
-    // type MaxIterations;
-    // type MaxNominatorRewardPerValidator;
-    // type UnsignedPriority;
-}
+pub trait Staking: super::system::System {}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(PartialEq, Eq, Clone, Encode, Decode)]
