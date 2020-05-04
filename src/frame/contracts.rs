@@ -109,7 +109,9 @@ pub struct CodeStoredEvent<T: Contracts> {
 /// Instantiated event.
 #[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
 pub struct InstantiatedEvent<T: Contracts> {
+    /// Caller that instantiated the contract.
     pub caller: <T as System>::AccountId,
+    /// The address of the contract.
     pub contract: <T as System>::AccountId,
 }
 
@@ -127,7 +129,7 @@ mod tests {
 )
 "#;
             let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-            let code_hash = 0.into();
+            let code_hash = [0u8; 32].into();
             let contract = bob.clone();
         },
         step: {
@@ -137,7 +139,7 @@ mod tests {
                 code: &wasm,
             },
             event: CodeStoredEvent {
-                code_hash: code_hash.clone(),
+                code_hash,
             },
         },
         step: {

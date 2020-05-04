@@ -42,7 +42,9 @@ pub fn event(s: Structure) -> TokenStream {
             const EVENT: &'static str = #event_name;
         }
 
+        /// Event extension trait.
         pub trait #event_trait<T: #module> {
+            /// Retrieves the event.
             fn #event(&self) -> Result<Option<#ident<T>>, #codec::Error>;
         }
 
@@ -76,7 +78,9 @@ mod tests {
                 const EVENT: &'static str = "Transfer";
             }
 
+            /// Event extension trait.
             pub trait TransferEventExt<T: Balances> {
+                /// Retrieves the event.
                 fn transfer(&self) -> Result<Option<TransferEvent<T>>, codec::Error>;
             }
 

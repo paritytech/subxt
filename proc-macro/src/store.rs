@@ -120,7 +120,9 @@ pub fn store(s: Structure) -> TokenStream {
             }
         }
 
+        /// Store extension trait.
         pub trait #store_trait<T: #module> {
+            /// Retrive the store element.
             fn #store<'a>(
                 &'a self,
                 #args
@@ -174,7 +176,9 @@ mod tests {
                 }
             }
 
+            /// Store extension trait.
             pub trait AccountStoreExt<T: Balances> {
+                /// Retrive the store element.
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,

@@ -76,6 +76,7 @@ pub struct AccountData<Balance> {
 #[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
 pub struct TotalIssuanceStore<T: Balances> {
     #[store(returns = T::Balance)]
+    /// Runtime marker.
     pub _runtime: PhantomData<T>,
 }
 

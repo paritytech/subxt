@@ -142,13 +142,16 @@ pub struct AccountInfo<T: System> {
 #[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
 pub struct AccountStore<'a, T: System> {
     #[store(returns = AccountInfo<T>)]
+    /// Account to retrieve the `AccountInfo<T>` for.
     pub account_id: &'a T::AccountId,
 }
 
 /// Arguments for updating the runtime code
 #[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
 pub struct SetCodeCall<'a, T: System> {
+    /// Runtime marker.
     pub _runtime: PhantomData<T>,
+    /// Runtime wasm blob.
     pub code: &'a [u8],
 }
 

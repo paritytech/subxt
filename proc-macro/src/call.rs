@@ -105,7 +105,9 @@ pub fn generate_trait(
     let call = format_ident!("{}", call);
     let ty = format_ident!("{}", ty);
     quote! {
+        /// Call extension trait.
         pub trait #call_trait<T: #module> {
+            /// Create and submit the extrinsic.
             fn #call<'a>(
                 #me,
                 #args
@@ -158,7 +160,9 @@ mod tests {
                 }
             }
 
+            /// Call extension trait.
             pub trait TransferCallXtBuilder<T: Balances> {
+                /// Create and submit the extrinsic.
                 fn transfer<'a>(
                     &'a self,
                     to: &'a <T as System>::Address,
@@ -186,7 +190,9 @@ mod tests {
                 }
             }
 
+            /// Call extension trait.
             pub trait TransferCallEventsSubscriber<T: Balances> {
+                /// Create and submit the extrinsic.
                 fn transfer<'a>(
                     self,
                     to: &'a <T as System>::Address,

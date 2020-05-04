@@ -108,7 +108,9 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
 
         const MODULE: &str = #module_name;
 
+        /// `EventsDecoder` extension trait.
         pub trait #module_events_decoder {
+            /// Registers this modules types.
             fn #with_module(&mut self) -> Result<(), #subxt::EventsError>;
         }
 
@@ -159,7 +161,9 @@ mod tests {
 
             const MODULE: &str = "Balances";
 
+            /// `EventsDecoder` extension trait.
             pub trait BalancesEventsDecoder {
+                /// Registers this modules types.
                 fn with_balances(&mut self) -> Result<(), substrate_subxt::EventsError>;
             }
 
