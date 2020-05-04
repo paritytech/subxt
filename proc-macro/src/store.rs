@@ -85,24 +85,27 @@ pub fn store(s: Structure) -> TokenStream {
         .filter_map(|bi| bi.ast().attrs.iter().filter_map(parse_returns_attr).next())
         .next()
         .expect("#[store(returns = ..)] needs to be specified.");
+    let filtered_fields: Vec<_> = fields
+        .iter()
+        .filter(|(field, _)| field.to_string() != "_runtime")
+        .collect();
     let store_ty = format_ident!(
         "{}",
-        match fields.len() {
+        match filtered_fields.len() {
             0 => "plain",
             1 => "map",
             2 => "double_map",
             _ => panic!("invalid number of arguments"),
         }
     );
-    let args = fields
+    let args = filtered_fields
         .iter()
-        .filter(|(field, _)| field.to_string() != "_runtime")
         .map(|(field, ty)| quote!(#field: #ty,));
     let args = quote!(#(#args)*);
-    let keys = fields.iter().map(|(field, _)| quote!(&self.#field,));
-    let keys = quote!(#(#keys)*);
-    let fields = fields.iter().map(|(field, _)| quote!(#field,));
-    let fields = quote!(#(#fields)*);
+    let keys = filtered_fields
+        .iter()
+        .map(|(field, _)| quote!(&self.#field));
+    let fields = fields.iter().map(|(field, _)| field);
 
     quote! {
         impl#generics #subxt::Store<T> for #ident<#(#params),*> {
@@ -117,7 +120,7 @@ pub fn store(s: Structure) -> TokenStream {
                     .module(Self::MODULE)?
                     .storage(Self::FIELD)?
                     .#store_ty()?
-                    .key(#keys))
+                    .key(#(#keys,)*))
             }
         }
 
@@ -141,7 +144,7 @@ pub fn store(s: Structure) -> TokenStream {
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<Option<#ret>, #subxt::Error>> + Send + 'a>> {
                 let _runtime = core::marker::PhantomData::<T>;
-                Box::pin(self.fetch(#ident { #fields }, None))
+                Box::pin(self.fetch(#ident { #(#fields,)* }, None))
             }
         }
     }
