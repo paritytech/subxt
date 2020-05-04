@@ -135,7 +135,6 @@ mod tests {
         step: {
             call: PutCodeCall {
                 _runtime: PhantomData,
-                gas_limit: 500_000,
                 code: &wasm,
             },
             event: CodeStoredEvent {
