@@ -32,7 +32,7 @@ pub fn event(s: Structure) -> TokenStream {
     let ident = &s.ast().ident;
     let generics = &s.ast().generics;
     let module = utils::module_name(generics);
-    let event_name = ident.to_string().trim_end_matches("Event").to_camel_case();
+    let event_name = utils::ident_to_name(ident, "Event").to_camel_case();
     let event = format_ident!("{}", event_name.to_snake_case());
     let event_trait = format_ident!("{}EventExt", event_name);
 

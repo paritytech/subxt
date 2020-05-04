@@ -15,59 +15,55 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::utils;
-use heck::SnakeCase;
-use proc_macro2::{
-    TokenStream,
-    TokenTree,
+use heck::{
+    CamelCase,
+    SnakeCase,
 };
+use proc_macro2::TokenStream;
 use quote::{
     format_ident,
     quote,
 };
-use syn::{
-    parse::{
-        Parse,
-        ParseStream,
-    },
-    Token,
+use syn::parse::{
+    Parse,
+    ParseStream,
 };
 use synstructure::Structure;
 
-struct Returns {
-    returns: syn::Ident,
-    _eq: Token![=],
-    ty: syn::Type,
+mod kw {
+    use syn::custom_keyword;
+
+    custom_keyword!(returns);
 }
 
-impl Parse for Returns {
+#[derive(Debug)]
+enum StoreAttr {
+    Returns(utils::Attr<kw::returns, syn::Type>),
+}
+
+impl Parse for StoreAttr {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        Ok(Returns {
-            returns: input.parse()?,
-            _eq: input.parse()?,
-            ty: input.parse()?,
-        })
+        Ok(Self::Returns(input.parse()?))
     }
 }
+
+type StoreAttrs = utils::Attrs<StoreAttr>;
 
 fn parse_returns_attr(attr: &syn::Attribute) -> Option<syn::Type> {
-    if let TokenTree::Group(group) = attr.tokens.clone().into_iter().next().unwrap() {
-        if let Ok(Returns { returns, ty, .. }) = syn::parse2(group.stream()) {
-            if returns.to_string() == "returns" {
-                return Some(ty)
-            }
-        }
-    }
-    None
+    let attrs: StoreAttrs = syn::parse2(attr.tokens.clone()).unwrap();
+    attrs.attrs.into_iter().next().map(|attr| {
+        let StoreAttr::Returns(attr) = attr;
+        attr.value
+    })
 }
 
 pub fn store(s: Structure) -> TokenStream {
     let subxt = utils::use_crate("substrate-subxt");
-    let sp_core = utils::use_crate("sp-core");
     let ident = &s.ast().ident;
     let generics = &s.ast().generics;
     let params = utils::type_params(generics);
     let module = utils::module_name(generics);
-    let store_name = ident.to_string().trim_end_matches("Store").to_string();
+    let store_name = utils::ident_to_name(ident, "Store").to_camel_case();
     let store = format_ident!("{}", store_name.to_snake_case());
     let store_trait = format_ident!("{}StoreExt", store_name);
     let bindings = utils::bindings(&s);
@@ -98,7 +94,9 @@ pub fn store(s: Structure) -> TokenStream {
             _ => panic!("invalid number of arguments"),
         }
     );
-    let args = fields.iter().map(|(field, ty)| quote!(#field: #ty,));
+    let args = fields.iter()
+        .filter(|(field, _)| field.to_string() != "_runtime")
+        .map(|(field, ty)| quote!(#field: #ty,));
     let args = quote!(#(#args)*);
     let keys = fields.iter().map(|(field, _)| quote!(&self.#field,));
     let keys = quote!(#(#keys)*);
@@ -113,7 +111,7 @@ pub fn store(s: Structure) -> TokenStream {
             fn key(
                 &self,
                 metadata: &#subxt::Metadata,
-            ) -> Result<#sp_core::storage::StorageKey, #subxt::MetadataError> {
+            ) -> Result<#subxt::sp_core::storage::StorageKey, #subxt::MetadataError> {
                 Ok(metadata
                     .module(Self::MODULE)?
                     .storage(Self::FIELD)?
@@ -139,6 +137,7 @@ pub fn store(s: Structure) -> TokenStream {
                 &'a self,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<Option<#ret>, #subxt::Error>> + Send + 'a>> {
+                let _runtime = core::marker::PhantomData::<T>;
                 Box::pin(self.fetch(#ident { #fields }, None))
             }
         }
@@ -166,7 +165,7 @@ mod tests {
                 fn key(
                     &self,
                     metadata: &substrate_subxt::Metadata,
-                ) -> Result<sp_core::storage::StorageKey, substrate_subxt::MetadataError> {
+                ) -> Result<substrate_subxt::sp_core::storage::StorageKey, substrate_subxt::MetadataError> {
                     Ok(metadata
                         .module(Self::MODULE)?
                         .storage(Self::FIELD)?
@@ -193,6 +192,7 @@ mod tests {
                     account_id: &'a <T as System>::AccountId,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<Option<AccountData<T::Balance> >, substrate_subxt::Error>> + Send + 'a>>
                 {
+                    let _runtime = core::marker::PhantomData::<T>;
                     Box::pin(self.fetch(AccountStore { account_id, }, None))
                 }
             }

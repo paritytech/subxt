@@ -19,14 +19,26 @@ use proc_macro2::{
     TokenStream,
 };
 use quote::quote;
+use syn::{
+    parse::{
+        Parse,
+        ParseStream,
+    },
+    punctuated::Punctuated,
+};
 use synstructure::{
     BindingInfo,
     Structure,
 };
 
 pub fn use_crate(name: &str) -> syn::Ident {
-    let krate = proc_macro_crate::crate_name(name).unwrap();
-    syn::Ident::new(&krate, Span::call_site())
+    opt_crate(name).unwrap_or_else(|| syn::Ident::new("crate", Span::call_site()))
+}
+
+pub fn opt_crate(name: &str) -> Option<syn::Ident> {
+    proc_macro_crate::crate_name(name).ok().map(|krate| {
+        syn::Ident::new(&krate, Span::call_site())
+    })
 }
 
 pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {
@@ -37,6 +49,16 @@ pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {
         }
     }
     bindings
+}
+
+pub fn ident_to_name(ident: &syn::Ident, ty: &str) -> String {
+    let name = ident.to_string();
+    let name = name.trim_end_matches(ty);
+    if name.is_empty() {
+        ty.to_string()
+    } else {
+        name.to_string()
+    }
 }
 
 pub fn module_name(generics: &syn::Generics) -> &syn::Path {
@@ -85,6 +107,39 @@ pub fn type_params(generics: &syn::Generics) -> Vec<TokenStream> {
             }
         })
         .collect()
+}
+
+#[derive(Debug)]
+pub struct Attrs<A> {
+    pub paren: syn::token::Paren,
+    pub attrs: Punctuated<A, syn::token::Comma>,
+}
+
+impl<A: Parse> Parse for Attrs<A> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        Ok(Self {
+            paren: syn::parenthesized!(content in input),
+            attrs: content.parse_terminated(A::parse)?,
+        })
+    }
+}
+
+#[derive(Debug)]
+pub struct Attr<K, V> {
+    pub key: K,
+    pub eq: syn::token::Eq,
+    pub value: V,
+}
+
+impl<K: Parse, V: Parse> Parse for Attr<K, V> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self {
+            key: input.parse()?,
+            eq: input.parse()?,
+            value: input.parse()?,
+        })
+    }
 }
 
 #[cfg(test)]

@@ -14,47 +14,28 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Decode,
-    Encode,
-};
-use frame_support::Parameter;
+#[macro_use]
+extern crate substrate_subxt;
+
+use codec::{Codec, Decode, Encode};
 use sp_keyring::AccountKeyring;
-use sp_runtime::traits::{
-    AtLeast32Bit,
-    MaybeSerialize,
-    Member,
-};
 use std::fmt::Debug;
 use substrate_subxt::{
-    system::System,
+    sp_runtime::traits::{
+        AtLeast32Bit,
+        MaybeSerialize,
+        Member,
+    },
+    system::{System, SystemEventsDecoder},
     ClientBuilder,
     KusamaRuntime,
 };
-use substrate_subxt_proc_macro::{
-    module,
-    subxt_test,
-    Call,
-    Event,
-    Store,
-};
-
-pub trait SystemEventsDecoder {
-    fn with_system(&mut self) -> Result<(), substrate_subxt::EventsError>;
-}
-
-impl<T: System> SystemEventsDecoder for substrate_subxt::EventsDecoder<T> {
-    fn with_system(&mut self) -> Result<(), substrate_subxt::EventsError> {
-        Ok(())
-    }
-}
 
 #[module]
 pub trait Balances: System {
-    type Balance: Parameter
-        + Member
+    type Balance: Member
         + AtLeast32Bit
-        + codec::Codec
+        + Codec
         + Default
         + Copy
         + MaybeSerialize
@@ -94,6 +75,7 @@ impl Balances for KusamaRuntime {
     type Balance = u128;
 }
 
+
 subxt_test!({
     name: transfer_test_case,
     runtime: KusamaRuntime,
@@ -131,9 +113,15 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     let bob_account = client.account(&bob).await?.unwrap_or_default();
     let pre = (alice_account, bob_account);
 
-    let result = client
+    let builder = client
         .xt(AccountKeyring::Alice.pair(), None)
-        .await?
+        .await?;
+
+    let _hash = builder
+        .transfer(&bob.clone().into(), 10_000)
+        .await?;
+
+    let result = builder
         .watch()
         .transfer(&bob.clone().into(), 10_000)
         .await?;
