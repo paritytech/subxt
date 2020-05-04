@@ -15,10 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{
-    balances,
-    DefaultNodeRuntime as Runtime,
-};
+use substrate_subxt::{ClientBuilder, DefaultNodeRuntime, balances::*};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,18 +24,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = AccountKeyring::Alice.pair();
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let cli = substrate_subxt::ClientBuilder::<Runtime>::new()
+    let client = ClientBuilder::<DefaultNodeRuntime>::new()
         .build()
         .await?;
-    let xt = cli.xt(signer, None).await?;
-    let xt_result = xt
+    let result = client
+        .xt(signer, None)
+        .await?
         .watch()
-        .submit(balances::TransferCall {
-            to: &dest,
-            amount: 10_000,
-        })
+        .transfer(&dest, 10_000)
         .await?;
-    if let Some(event) = xt_result.find_event::<balances::TransferEvent<_>>()? {
+
+    if let Some(event) = result.transfer()? {
         println!("Balance transfer success: value: {:?}", event.amount);
     } else {
         println!("Failed to find Balances::Transfer Event");
