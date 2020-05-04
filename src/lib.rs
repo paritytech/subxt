@@ -21,7 +21,6 @@
     bad_style,
     const_err,
     improper_ctypes,
-    missing_docs,
     non_shorthand_field_patterns,
     no_mangle_generic_items,
     overflowing_literals,
@@ -38,6 +37,12 @@
     unused_extern_crates
 )]
 #![allow(clippy::type_complexity)]
+
+#[macro_use]
+extern crate substrate_subxt_proc_macro;
+
+pub use sp_core;
+pub use sp_runtime;
 
 use std::{
     convert::TryFrom,
@@ -97,12 +102,13 @@ pub use crate::{
         ExtrinsicSuccess,
     },
     runtimes::*,
+    substrate_subxt_proc_macro::*,
 };
 use crate::{
     frame::{
         balances::Balances,
         system::{
-            AccountStore,
+            AccountStoreExt,
             Phase,
             System,
             SystemEvent,
@@ -160,8 +166,7 @@ impl<T: System, S, E> ClientBuilder<T, S, E> {
                 jsonrpsee::http_client(url)
             }
         };
-        let rpc = Rpc::new(client).await?;
-
+        let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version) = future::join3(
             rpc.metadata(),
             rpc.genesis_hash(),
@@ -310,7 +315,7 @@ impl<T: System, S, E> Client<T, S, E> {
 
 impl<T, S, E> Client<T, S, E>
 where
-    T: System + Balances + Send + Sync,
+    T: System + Balances + Send + Sync + 'static,
     S: 'static,
     E: SignedExtra<T> + SignedExtension + 'static,
 {
@@ -320,11 +325,7 @@ where
         account_id: &<T as System>::AccountId,
         call: C,
     ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
-        let account_nonce = self
-            .fetch(AccountStore(account_id), None)
-            .await?
-            .unwrap()
-            .nonce;
+        let account_nonce = self.account(account_id).await?.unwrap().nonce;
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash;
         let call = self
@@ -351,12 +352,7 @@ where
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => {
-                self.fetch(AccountStore(&account_id), None)
-                    .await?
-                    .unwrap()
-                    .nonce
-            }
+            None => self.account(&account_id).await?.unwrap().nonce,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -405,7 +401,7 @@ impl<T: System, P, S, E> XtBuilder<T, P, S, E> {
     }
 }
 
-impl<T: System + Send + Sync, P, S: 'static, E> XtBuilder<T, P, S, E>
+impl<T: System + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -485,7 +481,7 @@ impl<T: System, P, S, E> EventsSubscriber<T, P, S, E> {
     }
 }
 
-impl<T: System + Send + Sync, P, S: 'static, E> EventsSubscriber<T, P, S, E>
+impl<T: System + Send + Sync + 'static, P, S: 'static, E> EventsSubscriber<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -508,7 +504,7 @@ where
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {
@@ -573,29 +569,6 @@ mod tests {
         let client = test_client().await;
         let block_hash = client.block_hash(None).await.unwrap();
         client.block(block_hash).await.unwrap();
-    }
-
-    #[async_std::test]
-    #[ignore] // requires locally running substrate node
-    async fn test_state_total_issuance() {
-        let client = test_client().await;
-        client
-            .fetch(balances::TotalIssuance(Default::default()), None)
-            .await
-            .unwrap()
-            .unwrap();
-    }
-
-    #[async_std::test]
-    #[ignore] // requires locally running substrate node
-    async fn test_state_read_free_balance() {
-        let client = test_client().await;
-        let account = AccountKeyring::Alice.to_account_id();
-        client
-            .fetch(AccountStore(&account), None)
-            .await
-            .unwrap()
-            .unwrap();
     }
 
     #[async_std::test]

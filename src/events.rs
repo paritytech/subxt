@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+    Output,
+};
 use std::{
     collections::{
         HashMap,
@@ -25,16 +34,7 @@ use std::{
         Send,
     },
 };
-
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-    Output,
-};
+use thiserror::Error;
 
 use crate::{
     metadata::{
@@ -66,7 +66,7 @@ pub struct RawEvent {
 }
 
 /// Events error.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Error)]
 pub enum EventsError {
     /// Codec error.
     #[error("Scale codec error: {0:?}")]
@@ -80,6 +80,7 @@ pub enum EventsError {
 }
 
 /// Event decoder.
+#[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
     type_sizes: HashMap<String, usize>,
@@ -123,11 +124,6 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System> EventsDecoder<T> {
-    /// Register system types.
-    pub fn with_system(&mut self) -> Result<(), EventsError> {
-        Ok(())
-    }
-
     /// Register a type.
     pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
