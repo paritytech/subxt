@@ -21,7 +21,10 @@ use quote::{
     format_ident,
     quote,
 };
-use syn::parse::{Parse, ParseStream};
+use syn::parse::{
+    Parse,
+    ParseStream,
+};
 
 mod kw {
     use syn::custom_keyword;
@@ -48,7 +51,7 @@ fn ignore(attrs: &[syn::Attribute]) -> bool {
             if ident.to_string() == "module" {
                 let attrs: ModuleAttrs = syn::parse2(attr.tokens.clone()).unwrap();
                 if !attrs.attrs.is_empty() {
-                    return true;
+                    return true
                 }
             }
         }
@@ -67,7 +70,7 @@ fn with_module_ident(module: &syn::Ident) -> syn::Ident {
 pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
     if input.is_err() {
-        return tokens;
+        return tokens
     }
     let input = input.unwrap();
 
@@ -91,7 +94,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let types = input.items.iter().filter_map(|item| {
         if let syn::TraitItem::Type(ty) = item {
             if ignore(&ty.attrs) {
-                return None;
+                return None
             }
             let ident = &ty.ident;
             let ident_str = ident.to_string();

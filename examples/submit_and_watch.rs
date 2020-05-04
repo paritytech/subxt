@@ -15,7 +15,11 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{ClientBuilder, DefaultNodeRuntime, balances::*};
+use substrate_subxt::{
+    balances::*,
+    ClientBuilder,
+    DefaultNodeRuntime,
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -24,9 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = AccountKeyring::Alice.pair();
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let client = ClientBuilder::<DefaultNodeRuntime>::new()
-        .build()
-        .await?;
+    let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
     let result = client
         .xt(signer, None)
         .await?

@@ -17,7 +17,11 @@
 #[macro_use]
 extern crate substrate_subxt;
 
-use codec::{Codec, Decode, Encode};
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+};
 use sp_keyring::AccountKeyring;
 use std::fmt::Debug;
 use substrate_subxt::{
@@ -26,7 +30,10 @@ use substrate_subxt::{
         MaybeSerialize,
         Member,
     },
-    system::{System, SystemEventsDecoder},
+    system::{
+        System,
+        SystemEventsDecoder,
+    },
     ClientBuilder,
     KusamaRuntime,
 };
@@ -75,7 +82,6 @@ impl Balances for KusamaRuntime {
     type Balance = u128;
 }
 
-
 subxt_test!({
     name: transfer_test_case,
     runtime: KusamaRuntime,
@@ -113,13 +119,9 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     let bob_account = client.account(&bob).await?.unwrap_or_default();
     let pre = (alice_account, bob_account);
 
-    let builder = client
-        .xt(AccountKeyring::Alice.pair(), None)
-        .await?;
+    let builder = client.xt(AccountKeyring::Alice.pair(), None).await?;
 
-    let _hash = builder
-        .transfer(&bob.clone().into(), 10_000)
-        .await?;
+    let _hash = builder.transfer(&bob.clone().into(), 10_000).await?;
 
     let result = builder
         .watch()

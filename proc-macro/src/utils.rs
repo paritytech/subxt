@@ -36,9 +36,9 @@ pub fn use_crate(name: &str) -> syn::Ident {
 }
 
 pub fn opt_crate(name: &str) -> Option<syn::Ident> {
-    proc_macro_crate::crate_name(name).ok().map(|krate| {
-        syn::Ident::new(&krate, Span::call_site())
-    })
+    proc_macro_crate::crate_name(name)
+        .ok()
+        .map(|krate| syn::Ident::new(&krate, Span::call_site()))
 }
 
 pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {

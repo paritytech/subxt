@@ -94,7 +94,8 @@ pub fn store(s: Structure) -> TokenStream {
             _ => panic!("invalid number of arguments"),
         }
     );
-    let args = fields.iter()
+    let args = fields
+        .iter()
         .filter(|(field, _)| field.to_string() != "_runtime")
         .map(|(field, ty)| quote!(#field: #ty,));
     let args = quote!(#(#args)*);

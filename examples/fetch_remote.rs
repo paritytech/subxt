@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use substrate_subxt::{ClientBuilder, KusamaRuntime};
+use substrate_subxt::{
+    ClientBuilder,
+    KusamaRuntime,
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -27,9 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let block_number = 1;
 
-    let block_hash = client
-        .block_hash(Some(block_number.into()))
-        .await?;
+    let block_hash = client.block_hash(Some(block_number.into())).await?;
 
     if let Some(hash) = block_hash {
         println!("Block hash for block number {}: {}", block_number, hash);

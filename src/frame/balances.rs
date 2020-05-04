@@ -147,11 +147,7 @@ mod tests {
     #[ignore] // requires locally running substrate node
     async fn test_state_total_issuance() {
         let client = test_client().await;
-        client
-            .total_issuance()
-            .await
-            .unwrap()
-            .unwrap();
+        client.total_issuance().await.unwrap().unwrap();
     }
 
     #[async_std::test]
@@ -159,10 +155,6 @@ mod tests {
     async fn test_state_read_free_balance() {
         let client = test_client().await;
         let account = AccountKeyring::Alice.to_account_id();
-        client
-            .account(&account)
-            .await
-            .unwrap()
-            .unwrap();
+        client.account(&account).await.unwrap().unwrap();
     }
 }
