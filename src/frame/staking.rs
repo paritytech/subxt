@@ -17,9 +17,7 @@
 //! Implements support for the frame_staking module.
 
 use crate::{
-    frame::{
-        Store,
-    },
+    frame::Store,
     metadata::{
         Metadata,
         MetadataError,
@@ -73,6 +71,7 @@ pub type ValidatorIndex = u16;
 
 /// Maximum number of validators that can be stored in a snapshot.
 pub const MAX_VALIDATORS: usize = ValidatorIndex::max_value() as usize;
+
 /// Maximum number of nominators that can be stored in a snapshot.
 pub const MAX_NOMINATORS: usize = NominatorIndex::max_value() as usize;
 
