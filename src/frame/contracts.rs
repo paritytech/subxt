@@ -129,8 +129,12 @@ mod tests {
 )
 "#;
             let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-            let code_hash = [0u8; 32].into();
-            let contract = bob.clone();
+            let mut buf = [0u8; 32];
+            hex::decode_to_slice(
+                "4d8b39b728b35fee98001095400a61f5c2ef91e0c807b1f1754b17f0397360ba",
+                &mut buf,
+            ).unwrap();
+            let code_hash = buf.into();
         },
         step: {
             call: PutCodeCall {
@@ -144,13 +148,13 @@ mod tests {
         step: {
             call: InstantiateCall {
                 endowment: 100_000_000_000_000,
-                gas_limit: 500_000,
+                gas_limit: 500_000_000,
                 code_hash: &code_hash,
                 data: &[],
             },
             event: InstantiatedEvent {
                 caller: alice.clone(),
-                contract,
+                contract: event.contract.clone(),
             },
         },
     });

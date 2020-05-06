@@ -365,10 +365,8 @@ impl Step {
                 .unwrap();
 
             #(
-                assert_eq!(
-                    result.find_event::<#event_name<_>>().unwrap(),
-                    Some(#event)
-                );
+                let event = result.find_event::<#event_name<_>>().unwrap().unwrap();
+                assert_eq!(event, #event);
             )*
 
             #post
@@ -502,13 +500,14 @@ mod tests {
                         .await
                         .unwrap();
 
+                    let event = result.find_event::<TransferEvent<_>>().unwrap().unwrap();
                     assert_eq!(
-                        result.find_event::<TransferEvent<_>>().unwrap(),
-                        Some(TransferEvent {
+                        event,
+                        TransferEvent {
                             from: alice.clone(),
                             to: bob.clone(),
                             amount: 10_000,
-                        })
+                        }
                     );
 
                     let post = {

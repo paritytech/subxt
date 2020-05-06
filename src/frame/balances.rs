@@ -80,14 +80,6 @@ pub struct TotalIssuanceStore<T: Balances> {
     pub _runtime: PhantomData<T>,
 }
 
-/// The account info.
-#[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
-pub struct AccountStore<'a, T: Balances> {
-    #[store(returns = AccountData<T::Balance>)]
-    /// Account id to fetch info for.
-    pub account_id: &'a <T as System>::AccountId,
-}
-
 /// Transfer some liquid free balance to another account.
 ///
 /// `transfer` will set the `FreeBalance` of the sender and receiver.
@@ -117,7 +109,13 @@ pub struct TransferEvent<T: Balances> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::tests::test_client;
+    use crate::{
+        system::{
+            AccountStore,
+            AccountStoreExt,
+        },
+        tests::test_client,
+    };
     use sp_keyring::AccountKeyring;
 
     subxt_test!({
@@ -137,8 +135,8 @@ mod tests {
                 amount: 10_000,
             },
             assert: {
-                assert_eq!(pre.alice.free, post.alice.free - 10_000);
-                assert_eq!(pre.bob.free, post.bob.free + 10_000);
+                assert!(pre.alice.data.free - 10_000 >= post.alice.data.free);
+                assert_eq!(pre.bob.data.free + 10_000, post.bob.data.free);
             },
         },
     });
@@ -146,15 +144,19 @@ mod tests {
     #[async_std::test]
     #[ignore] // requires locally running substrate node
     async fn test_state_total_issuance() {
+        env_logger::try_init().ok();
         let client = test_client().await;
-        client.total_issuance().await.unwrap().unwrap();
+        let total_issuance = client.total_issuance().await.unwrap().unwrap();
+        assert_ne!(total_issuance, 0);
     }
 
     #[async_std::test]
     #[ignore] // requires locally running substrate node
     async fn test_state_read_free_balance() {
+        env_logger::try_init().ok();
         let client = test_client().await;
         let account = AccountKeyring::Alice.to_account_id();
-        client.account(&account).await.unwrap().unwrap();
+        let info = client.account(&account).await.unwrap().unwrap();
+        assert_ne!(info.data.free, 0);
     }
 }
