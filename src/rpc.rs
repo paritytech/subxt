@@ -38,6 +38,7 @@ use jsonrpsee::{
 use num_traits::bounds::Bounded;
 
 use frame_metadata::RuntimeMetadataPrefixed;
+use sc_rpc_api::state::ReadProof;
 use serde::Serialize;
 use sp_core::{
     storage::{
@@ -62,7 +63,6 @@ use sp_runtime::{
 use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
-use sc_rpc_api::state::ReadProof;
 
 use crate::{
     error::Error,

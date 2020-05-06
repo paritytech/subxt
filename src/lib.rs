@@ -50,6 +50,7 @@ use codec::{
 };
 use futures::future;
 use jsonrpsee::client::Subscription;
+use sc_rpc_api::state::ReadProof;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -70,7 +71,6 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use sc_rpc_api::state::ReadProof;
 
 mod error;
 mod events;
@@ -265,7 +265,11 @@ impl<T: System, S, E> Client<T, S, E> {
     }
 
     /// Get proof of storage entries at a specific block's state.
-    pub async fn read_proof<H>(&self, keys: Vec<StorageKey>, hash: Option<H>) -> Result<ReadProof<T::Hash>, Error>
+    pub async fn read_proof<H>(
+        &self,
+        keys: Vec<StorageKey>,
+        hash: Option<H>,
+    ) -> Result<ReadProof<T::Hash>, Error>
     where
         H: Into<T::Hash> + 'static,
     {
