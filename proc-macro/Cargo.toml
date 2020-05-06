@@ -20,11 +20,11 @@ synstructure = "0.12.3"
 async-std = { version = "1.5.0", features = ["attributes"] }
 codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
 env_logger = "0.7.1"
-frame-support = "2.0.0-alpha.6"
+frame-support = "2.0.0-alpha.7"
 pretty_assertions = "0.6.1"
-sp-core = "2.0.0-alpha.6"
-sp-keyring = "2.0.0-alpha.6"
-sp-runtime = "2.0.0-alpha.6"
+sp-core = "2.0.0-alpha.7"
+sp-keyring = "2.0.0-alpha.7"
+sp-runtime = "2.0.0-alpha.7"
 substrate-subxt = { path = ".." }
 trybuild = "1.0.25"
 

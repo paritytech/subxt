@@ -41,9 +41,6 @@ pub trait Contracts: System + Balances {}
 /// You can instantiate contracts only with stored code.
 #[derive(Debug, Encode)]
 pub struct PutCodeCall<'a> {
-    /// Gas limit.
-    #[codec(compact)]
-    pub gas_limit: Gas,
     /// Wasm blob.
     pub code: &'a [u8],
 }
@@ -171,13 +168,7 @@ mod tests {
 
         let xt = client.xt(signer, None).await?;
 
-        let result = xt
-            .watch()
-            .submit(PutCodeCall {
-                gas_limit: 500_000,
-                code: &wasm,
-            })
-            .await?;
+        let result = xt.watch().submit(PutCodeCall { code: &wasm }).await?;
         let code_hash = result
             .find_event::<CodeStoredEvent<T>>()?
             .ok_or(Error::Other("Failed to find CodeStored event".into()))?
@@ -190,7 +181,7 @@ mod tests {
     #[ignore] // requires locally running substrate node
     fn tx_put_code() {
         env_logger::try_init().ok();
-        let code_hash: Result<_, Error> = async_std::task::block_on(async move {
+        let code_hash_result: Result<_, Error> = async_std::task::block_on(async move {
             let signer = AccountKeyring::Alice.pair();
             let client = test_client().await;
             let code_hash = put_code(&client, signer).await?;
@@ -198,8 +189,11 @@ mod tests {
         });
 
         assert!(
-            code_hash.is_ok(),
-            "Contracts CodeStored event should be received and decoded"
+            code_hash_result.is_ok(),
+            format!(
+                "Error calling put_code and receiving CodeStored Event: {:?}",
+                code_hash_result
+            )
         );
     }
 
@@ -220,7 +214,7 @@ mod tests {
                 .watch()
                 .submit(InstantiateCall {
                     endowment: 100_000_000_000_000,
-                    gas_limit: 500_000,
+                    gas_limit: 500_000_000,
                     code_hash: &code_hash,
                     data: &[],
                 })
@@ -235,7 +229,7 @@ mod tests {
 
         assert!(
             result.is_ok(),
-            "Contract should be instantiated successfully"
+            format!("Error instantiating contract: {:?}", result)
         );
     }
 }

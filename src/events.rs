@@ -95,6 +95,10 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
             type_sizes: HashMap::new(),
             marker: PhantomData,
         };
+        // REMOVE when https://github.com/paritytech/substrate-subxt/pull/102 is merged
+        // Balance type will be registered by the proc macro.
+        decoder.register_type_size::<u128>("Balance")?;
+
         // register default event arg type sizes for dynamic decoding of events
         decoder.register_type_size::<bool>("bool")?;
         decoder.register_type_size::<u32>("ReferendumIndex")?;
@@ -225,6 +229,12 @@ impl<T: System> EventsDecoder<T> {
                 let event_variant = input.read_byte()?;
                 let event_metadata = module.event(event_variant)?;
 
+                log::debug!(
+                    "received event '{}::{}'",
+                    module.name(),
+                    event_metadata.name
+                );
+
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(
                     &event_metadata.arguments(),
@@ -232,12 +242,7 @@ impl<T: System> EventsDecoder<T> {
                     &mut event_data,
                 )?;
 
-                log::debug!(
-                    "received event '{}::{}', raw bytes: {}",
-                    module.name(),
-                    event_metadata.name,
-                    hex::encode(&event_data),
-                );
+                log::debug!("raw bytes: {}", hex::encode(&event_data),);
 
                 RuntimeEvent::Raw(RawEvent {
                     module: module.name().to_string(),

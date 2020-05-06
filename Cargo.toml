@@ -27,20 +27,20 @@ serde_json = "1.0"
 url = "2.1"
 codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
 
-frame-metadata = { version = "11.0.0-alpha.6", package = "frame-metadata" }
-frame-support = { version = "2.0.0-alpha.6", package = "frame-support" }
-sp-runtime = { version = "2.0.0-alpha.6", package = "sp-runtime" }
-sp-version = { version = "2.0.0-alpha.6", package = "sp-version" }
-pallet-indices = { version = "2.0.0-alpha.6", package = "pallet-indices" }
+frame-metadata = { version = "11.0.0-alpha.7", package = "frame-metadata" }
+frame-support = { version = "2.0.0-alpha.7", package = "frame-support" }
+sp-runtime = { version = "2.0.0-alpha.7", package = "sp-runtime" }
+sp-version = { version = "2.0.0-alpha.7", package = "sp-version" }
+pallet-indices = { version = "2.0.0-alpha.7", package = "pallet-indices" }
 hex = "0.4.0"
-sp-rpc = { version = "2.0.0-alpha.6", package = "sp-rpc" }
-sp-core = { version = "2.0.0-alpha.6", package = "sp-core" }
-sp-transaction-pool = { version = "2.0.0-alpha.6", package = "sp-transaction-pool" }
+sp-rpc = { version = "2.0.0-alpha.7", package = "sp-rpc" }
+sp-core = { version = "2.0.0-alpha.7", package = "sp-core" }
+sp-transaction-pool = { version = "2.0.0-alpha.7", package = "sp-transaction-pool" }
 
 [dev-dependencies]
 async-std = { version = "1.5.0", features = ["attributes"] }
 env_logger = "0.7"
 wabt = "0.9"
-frame-system = { version = "2.0.0-alpha.6", package = "frame-system" }
-pallet-balances = { version = "2.0.0-alpha.6", package = "pallet-balances" }
-sp-keyring = { version = "2.0.0-alpha.6", package = "sp-keyring" }
+frame-system = { version = "2.0.0-alpha.7", package = "frame-system" }
+pallet-balances = { version = "2.0.0-alpha.7", package = "pallet-balances" }
+sp-keyring = { version = "2.0.0-alpha.7", package = "sp-keyring" }
