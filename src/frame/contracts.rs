@@ -41,9 +41,6 @@ pub trait Contracts: System + Balances {}
 /// You can instantiate contracts only with stored code.
 #[derive(Debug, Encode)]
 pub struct PutCodeCall<'a> {
-    /// Gas limit.
-    #[codec(compact)]
-    pub gas_limit: Gas,
     /// Wasm blob.
     pub code: &'a [u8],
 }
@@ -174,7 +171,6 @@ mod tests {
         let result = xt
             .watch()
             .submit(PutCodeCall {
-                gas_limit: 500_000,
                 code: &wasm,
             })
             .await?;
