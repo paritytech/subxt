@@ -184,7 +184,7 @@ pub enum SystemEvent<T: System> {
     /// A new account was created.
     NewAccount(T::AccountId),
     /// An account was reaped.
-    ReapedAccount(T::AccountId),
+    KilledAccount(T::AccountId),
 }
 
 /// A phase of a block's execution.
