@@ -95,6 +95,10 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
             type_sizes: HashMap::new(),
             marker: PhantomData,
         };
+        // REMOVE when https://github.com/paritytech/substrate-subxt/pull/102 is merged
+        // Balance type will be registered by the proc macro.
+        decoder.register_type_size::<u128>("Balance")?;
+
         // register default event arg type sizes for dynamic decoding of events
         decoder.register_type_size::<bool>("bool")?;
         decoder.register_type_size::<u32>("ReferendumIndex")?;
