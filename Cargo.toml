@@ -35,6 +35,7 @@ pallet-indices = { version = "2.0.0-alpha.7", package = "pallet-indices" }
 hex = "0.4.0"
 sp-rpc = { version = "2.0.0-alpha.7", package = "sp-rpc" }
 sp-core = { version = "2.0.0-alpha.7", package = "sp-core" }
+sc-rpc-api = { version = "0.8.0-alpha.7", package = "sc-rpc-api" }
 sp-transaction-pool = { version = "2.0.0-alpha.7", package = "sp-transaction-pool" }
 substrate-subxt-proc-macro = { path = "proc-macro" }
 
