@@ -36,6 +36,7 @@ hex = "0.4.0"
 sp-rpc = { version = "2.0.0-alpha.7", package = "sp-rpc" }
 sp-core = { version = "2.0.0-alpha.7", package = "sp-core" }
 sp-transaction-pool = { version = "2.0.0-alpha.7", package = "sp-transaction-pool" }
+sc-rpc-api = { version = "0.8.0-alpha.7", package = "sc-rpc-api" }
 
 [dev-dependencies]
 async-std = { version = "1.5.0", features = ["attributes"] }
