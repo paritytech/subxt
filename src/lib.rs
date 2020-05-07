@@ -533,6 +533,10 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
+    use sp_core::storage::{
+        well_known_keys,
+        StorageKey,
+    };
     use sp_keyring::{
         AccountKeyring,
         Ed25519Keyring,
@@ -587,6 +591,23 @@ mod tests {
         let client = test_client().await;
         let block_hash = client.block_hash(None).await.unwrap();
         client.block(block_hash).await.unwrap();
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_getting_read_proof() {
+        let client = test_client().await;
+        let block_hash = client.block_hash(None).await.unwrap();
+        client
+            .read_proof(
+                vec![
+                    StorageKey(well_known_keys::HEAP_PAGES.to_vec()),
+                    StorageKey(well_known_keys::EXTRINSIC_INDEX.to_vec()),
+                ],
+                block_hash,
+            )
+            .await
+            .unwrap();
     }
 
     #[async_std::test]
