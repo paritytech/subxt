@@ -23,7 +23,6 @@ use codec::{
     Input,
     Output,
 };
-use sp_runtime::DispatchError;
 use std::{
     collections::{
         HashMap,
@@ -78,20 +77,6 @@ pub enum EventsError {
     /// Type size unavailable.
     #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
-    /// Dispatch error.
-    #[error("Dispatch error: {0:?}")]
-    Dispatch(WrapDispatchError),
-}
-
-/// DispatchError doesn't implement std::error::Error.
-#[derive(Debug, Error)]
-#[error("{0:?}")]
-pub struct WrapDispatchError(pub DispatchError);
-
-impl From<DispatchError> for EventsError {
-    fn from(error: DispatchError) -> Self {
-        Self::Dispatch(WrapDispatchError(error))
-    }
 }
 
 /// Event decoder.
@@ -200,10 +185,6 @@ impl<T: System> EventsDecoder<T> {
                     if name.contains("PhantomData") {
                         // PhantomData is size 0
                         return Ok(())
-                    }
-                    if name.contains("DispatchError") {
-                        let error = DispatchError::decode(input)?;
-                        return Err(error.into())
                     }
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
