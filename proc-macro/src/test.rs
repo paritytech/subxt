@@ -354,9 +354,12 @@ impl Step {
                 (pre, post)
             })
             .unwrap_or_default();
-        let expect_event = event_name
-            .iter()
-            .map(|event| format!("failed to find event {}", utils::path_to_ident(event).to_string()));
+        let expect_event = event_name.iter().map(|event| {
+            format!(
+                "failed to find event {}",
+                utils::path_to_ident(event).to_string()
+            )
+        });
         let assert = assert.map(|block| block.stmts).unwrap_or_default();
         quote! {
             let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();

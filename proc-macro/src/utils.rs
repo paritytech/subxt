@@ -18,7 +18,10 @@ use proc_macro2::{
     Span,
     TokenStream,
 };
-use quote::quote;
+use quote::{
+    format_ident,
+    quote,
+};
 use syn::{
     parse::{
         Parse,
@@ -49,6 +52,61 @@ pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {
         }
     }
     bindings
+}
+
+type Field = (syn::Ident, syn::Type);
+
+pub fn fields<'a>(bindings: &'a [&'a BindingInfo<'a>]) -> Vec<Field> {
+    bindings
+        .iter()
+        .enumerate()
+        .map(|(i, bi)| {
+            (
+                bi.ast()
+                    .ident
+                    .clone()
+                    .unwrap_or_else(|| format_ident!("key{}", i)),
+                bi.ast().ty.clone(),
+            )
+        })
+        .collect()
+}
+
+pub fn marker_field<'a>(fields: &'a [Field]) -> Option<syn::Ident> {
+    fields
+        .iter()
+        .filter_map(|(field, ty)| {
+            if quote!(#ty).to_string() == quote!(PhantomData<T>).to_string() {
+                Some(field)
+            } else {
+                None
+            }
+        })
+        .next()
+        .cloned()
+}
+
+pub fn filter_fields<'a>(fields: &'a [Field], field: &'a syn::Ident) -> Vec<Field> {
+    fields
+        .iter()
+        .filter_map(|(field2, ty)| {
+            if field2 != field {
+                Some((field2.clone(), ty.clone()))
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+pub fn fields_to_args<'a>(fields: &'a [Field]) -> TokenStream {
+    let args = fields.iter().map(|(field, ty)| quote!(#field: #ty,));
+    quote!(#(#args)*)
+}
+
+pub fn build_struct<'a>(ident: &'a syn::Ident, fields: &'a [Field]) -> TokenStream {
+    let fields = fields.iter().map(|(field, _)| field);
+    quote!(#ident { #(#fields,)* })
 }
 
 pub fn ident_to_name(ident: &syn::Ident, ty: &str) -> String {

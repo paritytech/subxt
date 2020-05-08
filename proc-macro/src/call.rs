@@ -38,21 +38,11 @@ pub fn call(s: Structure) -> TokenStream {
     );
     let call_name = utils::ident_to_name(ident, "Call").to_snake_case();
     let bindings = utils::bindings(&s);
-    let fields = bindings.iter().map(|bi| {
-        let ident = bi.ast().ident.as_ref().unwrap();
-        quote!(#ident,)
-    });
-    let args = bindings.iter().filter_map(|bi| {
-        let ident = bi.ast().ident.as_ref().unwrap();
-        if ident.to_string() == "_runtime" {
-            None
-        } else {
-            let ty = &bi.ast().ty;
-            Some(quote!(#ident: #ty,))
-        }
-    });
-    let args = quote!(#(#args)*);
-    let build_struct = quote!(#ident { #(#fields)* });
+    let fields = utils::fields(&bindings);
+    let marker = utils::marker_field(&fields).unwrap_or_else(|| format_ident!("_"));
+    let filtered_fields = utils::filter_fields(&fields, &marker);
+    let args = utils::fields_to_args(&filtered_fields);
+    let build_struct = utils::build_struct(ident, &fields);
     let xt_builder = generate_trait(
         &module,
         &call_name,
@@ -61,6 +51,7 @@ pub fn call(s: Structure) -> TokenStream {
         quote!(T::Hash),
         &args,
         &build_struct,
+        &marker,
     );
     let events_subscriber = generate_trait(
         &module,
@@ -70,6 +61,7 @@ pub fn call(s: Structure) -> TokenStream {
         quote!(#subxt::ExtrinsicSuccess<T>),
         &args,
         &build_struct,
+        &marker,
     );
 
     quote! {
@@ -98,6 +90,7 @@ pub fn generate_trait(
     ret: TokenStream,
     args: &TokenStream,
     build_struct: &TokenStream,
+    marker: &syn::Ident,
 ) -> TokenStream {
     let subxt = utils::use_crate("substrate-subxt");
     let codec = utils::use_crate("parity-scale-codec");
@@ -127,7 +120,7 @@ pub fn generate_trait(
                 #me,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>> {
-                let _runtime = core::marker::PhantomData::<T>;
+                let #marker = core::marker::PhantomData::<T>;
                 Box::pin(self.submit(#build_struct))
             }
         }
@@ -185,7 +178,7 @@ mod tests {
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, substrate_subxt::Error>> + Send + 'a>> {
-                    let _runtime = core::marker::PhantomData::<T>;
+                    let _ = core::marker::PhantomData::<T>;
                     Box::pin(self.submit(TransferCall { to, amount, }))
                 }
             }
@@ -215,7 +208,7 @@ mod tests {
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>> + Send + 'a>> {
-                    let _runtime = core::marker::PhantomData::<T>;
+                    let _ = core::marker::PhantomData::<T>;
                     Box::pin(self.submit(TransferCall { to, amount, }))
                 }
             }

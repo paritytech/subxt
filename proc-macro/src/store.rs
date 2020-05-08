@@ -67,28 +67,16 @@ pub fn store(s: Structure) -> TokenStream {
     let store = format_ident!("{}", store_name.to_snake_case());
     let store_trait = format_ident!("{}StoreExt", store_name);
     let bindings = utils::bindings(&s);
-    let fields = bindings
-        .iter()
-        .enumerate()
-        .map(|(i, bi)| {
-            (
-                bi.ast()
-                    .ident
-                    .clone()
-                    .unwrap_or_else(|| format_ident!("key{}", i)),
-                bi.ast().ty.clone(),
-            )
-        })
-        .collect::<Vec<_>>();
+    let fields = utils::fields(&bindings);
+    let marker = utils::marker_field(&fields).unwrap_or_else(|| format_ident!("_"));
+    let filtered_fields = utils::filter_fields(&fields, &marker);
+    let args = utils::fields_to_args(&filtered_fields);
+    let build_struct = utils::build_struct(ident, &fields);
     let ret = bindings
         .iter()
         .filter_map(|bi| bi.ast().attrs.iter().filter_map(parse_returns_attr).next())
         .next()
         .expect("#[store(returns = ..)] needs to be specified.");
-    let filtered_fields: Vec<_> = fields
-        .iter()
-        .filter(|(field, _)| field.to_string() != "_runtime")
-        .collect();
     let store_ty = format_ident!(
         "{}",
         match filtered_fields.len() {
@@ -98,14 +86,9 @@ pub fn store(s: Structure) -> TokenStream {
             _ => panic!("invalid number of arguments"),
         }
     );
-    let args = filtered_fields
-        .iter()
-        .map(|(field, ty)| quote!(#field: #ty,));
-    let args = quote!(#(#args)*);
     let keys = filtered_fields
         .iter()
         .map(|(field, _)| quote!(&self.#field));
-    let fields = fields.iter().map(|(field, _)| field);
 
     quote! {
         impl#generics #subxt::Store<T> for #ident<#(#params),*> {
@@ -143,8 +126,8 @@ pub fn store(s: Structure) -> TokenStream {
                 &'a self,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<Option<#ret>, #subxt::Error>> + Send + 'a>> {
-                let _runtime = core::marker::PhantomData::<T>;
-                Box::pin(self.fetch(#ident { #(#fields,)* }, None))
+                let #marker = core::marker::PhantomData::<T>;
+                Box::pin(self.fetch(#build_struct, None))
             }
         }
     }
@@ -200,7 +183,7 @@ mod tests {
                     account_id: &'a <T as System>::AccountId,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<Option<AccountData<T::Balance> >, substrate_subxt::Error>> + Send + 'a>>
                 {
-                    let _runtime = core::marker::PhantomData::<T>;
+                    let _ = core::marker::PhantomData::<T>;
                     Box::pin(self.fetch(AccountStore { account_id, }, None))
                 }
             }
