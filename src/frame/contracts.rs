@@ -129,12 +129,7 @@ mod tests {
 )
 "#;
             let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-            let mut buf = [0u8; 32];
-            hex::decode_to_slice(
-                "4d8b39b728b35fee98001095400a61f5c2ef91e0c807b1f1754b17f0397360ba",
-                &mut buf,
-            ).unwrap();
-            let code_hash = buf.into();
+            let code_hash;
         },
         step: {
             call: PutCodeCall {
@@ -142,7 +137,10 @@ mod tests {
                 code: &wasm,
             },
             event: CodeStoredEvent {
-                code_hash,
+                code_hash: {
+                    code_hash = event.code_hash.clone();
+                    event.code_hash.clone()
+                },
             },
         },
         step: {
