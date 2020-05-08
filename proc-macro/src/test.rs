@@ -326,6 +326,9 @@ impl Step {
                 state,
                 state_param,
                 } = state;
+                let expect_state = state_name
+                    .iter()
+                    .map(|state| format!("failed to fetch state {}", state.to_string()));
                 let state_struct = quote! {
                     struct State<#(#state_param),*> {
                         #(#state_name: #state_param,)*
@@ -333,7 +336,7 @@ impl Step {
                 };
                 let build_struct = quote! {
                     #(
-                        let #state_name = client.fetch(#state, None).await.unwrap().unwrap();
+                        let #state_name = client.fetch(#state, None).await.unwrap().expect(#expect_state);
                     )*
                     State { #(#state_name),* }
                 };
@@ -351,6 +354,9 @@ impl Step {
                 (pre, post)
             })
             .unwrap_or_default();
+        let expect_event = event_name
+            .iter()
+            .map(|event| format!("failed to find event {}", utils::path_to_ident(event).to_string()));
         let assert = assert.map(|block| block.stmts).unwrap_or_default();
         quote! {
             let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
@@ -365,7 +371,7 @@ impl Step {
                 .unwrap();
 
             #(
-                let event = result.find_event::<#event_name<_>>().unwrap().unwrap();
+                let event = result.find_event::<#event_name<_>>().unwrap().expect(#expect_event);
                 assert_eq!(event, #event);
             )*
 
@@ -481,12 +487,12 @@ mod tests {
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
                             .unwrap()
-                            .unwrap();
+                            .expect("failed to fetch state alice");
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
                             .unwrap()
-                            .unwrap();
+                            .expect("failed to fetch state bob");
                         State { alice, bob }
                     };
 
@@ -500,7 +506,9 @@ mod tests {
                         .await
                         .unwrap();
 
-                    let event = result.find_event::<TransferEvent<_>>().unwrap().unwrap();
+                    let event = result.find_event::<TransferEvent<_>>()
+                        .unwrap()
+                        .expect("failed to find event TransferEvent");
                     assert_eq!(
                         event,
                         TransferEvent {
@@ -515,12 +523,12 @@ mod tests {
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
                             .unwrap()
-                            .unwrap();
+                            .expect("failed to fetch state alice");
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
                             .unwrap()
-                            .unwrap();
+                            .expect("failed to fetch state bob");
                         State { alice, bob }
                     };
 
