@@ -322,13 +322,10 @@ impl Step {
             .or(test_state)
             .map(|state| {
                 let State {
-                state_name,
-                state,
-                state_param,
+                    state_name,
+                    state,
+                    state_param,
                 } = state;
-                let expect_state = state_name
-                    .iter()
-                    .map(|state| format!("failed to fetch state {}", state.to_string()));
                 let state_struct = quote! {
                     struct State<#(#state_param),*> {
                         #(#state_name: #state_param,)*
@@ -336,7 +333,7 @@ impl Step {
                 };
                 let build_struct = quote! {
                     #(
-                        let #state_name = client.fetch(#state, None).await.unwrap().expect(#expect_state);
+                        let #state_name = client.fetch(#state, None).await.unwrap();
                     )*
                     State { #(#state_name),* }
                 };
@@ -489,13 +486,11 @@ mod tests {
                         let alice = client
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
-                            .unwrap()
-                            .expect("failed to fetch state alice");
+                            .unwrap();
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
-                            .unwrap()
-                            .expect("failed to fetch state bob");
+                            .unwrap();
                         State { alice, bob }
                     };
 
@@ -525,13 +520,11 @@ mod tests {
                         let alice = client
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
-                            .unwrap()
-                            .expect("failed to fetch state alice");
+                            .unwrap();
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
-                            .unwrap()
-                            .expect("failed to fetch state bob");
+                            .unwrap();
                         State { alice, bob }
                     };
 

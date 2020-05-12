@@ -146,7 +146,7 @@ mod tests {
     async fn test_state_total_issuance() {
         env_logger::try_init().ok();
         let client = test_client().await;
-        let total_issuance = client.total_issuance().await.unwrap().unwrap();
+        let total_issuance = client.total_issuance().await.unwrap();
         assert_ne!(total_issuance, 0);
     }
 
@@ -156,7 +156,7 @@ mod tests {
         env_logger::try_init().ok();
         let client = test_client().await;
         let account = AccountKeyring::Alice.to_account_id();
-        let info = client.account(&account).await.unwrap().unwrap();
+        let info = client.account(&account).await.unwrap();
         assert_ne!(info.data.free, 0);
     }
 }

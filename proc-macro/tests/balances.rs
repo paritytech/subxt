@@ -115,8 +115,8 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     let alice = AccountKeyring::Alice.to_account_id();
     let bob = AccountKeyring::Bob.to_account_id();
 
-    let alice_account = client.account(&alice).await?.unwrap_or_default();
-    let bob_account = client.account(&bob).await?.unwrap_or_default();
+    let alice_account = client.account(&alice).await?;
+    let bob_account = client.account(&bob).await?;
     let pre = (alice_account, bob_account);
 
     let builder = client.xt(AccountKeyring::Alice.pair(), None).await?;
@@ -137,8 +137,8 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
         })
     );
 
-    let alice_account = client.account(&alice).await?.unwrap_or_default();
-    let bob_account = client.account(&bob).await?.unwrap_or_default();
+    let alice_account = client.account(&alice).await?;
+    let bob_account = client.account(&bob).await?;
     let post = (alice_account, bob_account);
 
     assert_eq!(pre.0.free, post.0.free - 10_000);

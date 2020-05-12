@@ -217,11 +217,11 @@ impl<T: System, S, E> Client<T, S, E> {
         &self,
         store: F,
         hash: Option<T::Hash>,
-    ) -> Result<Option<F::Returns>, Error> {
+    ) -> Result<F::Returns, Error> {
         let key = store.key(&self.metadata)?;
         let value = self.rpc.storage::<F::Returns>(key, hash).await?;
         if let Some(v) = value {
-            Ok(Some(v))
+            Ok(v)
         } else {
             Ok(store.default(&self.metadata)?)
         }
@@ -340,7 +340,7 @@ where
         account_id: &<T as System>::AccountId,
         call: C,
     ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
-        let account_nonce = self.account(account_id).await?.unwrap().nonce;
+        let account_nonce = self.account(account_id).await?.nonce;
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash;
         let call = self
@@ -367,7 +367,7 @@ where
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => self.account(&account_id).await?.unwrap().nonce,
+            None => self.account(&account_id).await?.nonce,
         };
 
         let genesis_hash = self.genesis_hash;
