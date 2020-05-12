@@ -47,14 +47,11 @@ pub trait Store<T>: Encode {
     /// Returns the `StorageKey`.
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError>;
     /// Returns the default value.
-    fn default(
-        &self,
-        metadata: &Metadata,
-    ) -> Result<Option<Self::Returns>, MetadataError> {
+    fn default(&self, metadata: &Metadata) -> Result<Self::Returns, MetadataError> {
         Ok(metadata
             .module(Self::MODULE)?
             .storage(Self::FIELD)?
-            .default())
+            .default()?)
     }
 }
 

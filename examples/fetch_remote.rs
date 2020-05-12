@@ -15,31 +15,28 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use substrate_subxt::{
-    system::System,
-    Error,
+    ClientBuilder,
     KusamaRuntime,
 };
 
-fn main() {
-    async_std::task::block_on(async move {
-        env_logger::init();
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
 
-        let block_hash = fetch_block_hash(1).await;
-        match block_hash {
-            Ok(Some(hash)) => println!("Block hash for block number 1: {}", hash),
-            Ok(None) => println!("Block number 1 not found."),
-            Err(_) => eprintln!("Failed to fetch block hash"),
-        }
-    });
-}
-
-async fn fetch_block_hash(
-    block_number: u32,
-) -> Result<Option<<KusamaRuntime as System>::Hash>, Error> {
-    substrate_subxt::ClientBuilder::<KusamaRuntime>::new()
+    let client = ClientBuilder::<KusamaRuntime>::new()
         .set_url("wss://kusama-rpc.polkadot.io")
         .build()
-        .await?
-        .block_hash(Some(block_number.into()))
-        .await
+        .await?;
+
+    let block_number = 1;
+
+    let block_hash = client.block_hash(Some(block_number.into())).await?;
+
+    if let Some(hash) = block_hash {
+        println!("Block hash for block number {}: {}", block_number, hash);
+    } else {
+        println!("Block number {} not found.", block_number);
+    }
+
+    Ok(())
 }

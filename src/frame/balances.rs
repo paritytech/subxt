@@ -16,24 +16,16 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::{
-    frame::{
-        system::System,
-        Call,
-        Event,
-        Store,
-    },
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
+use crate::frame::system::{
+    System,
+    SystemEventsDecoder,
 };
 use codec::{
     Decode,
     Encode,
 };
+use core::marker::PhantomData;
 use frame_support::Parameter;
-use sp_core::storage::StorageKey;
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
@@ -41,9 +33,8 @@ use sp_runtime::traits::{
 };
 use std::fmt::Debug;
 
-const MODULE: &str = "Balances";
-
 /// The subset of the `pallet_balances::Trait` that a client must implement.
+#[module]
 pub trait Balances: System {
     /// The balance of an account.
     type Balance: Parameter
@@ -58,7 +49,7 @@ pub trait Balances: System {
 }
 
 /// All balance information for an account.
-#[derive(Debug, Encode, Decode, Clone, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, Eq, PartialEq, Default, Decode, Encode)]
 pub struct AccountData<Balance> {
     /// Non-reserved part of the balance. There may still be restrictions on this, but it is the
     /// total pool what may in principle be transferred, reserved and used for tipping.
@@ -82,21 +73,11 @@ pub struct AccountData<Balance> {
 }
 
 /// The total issuance of the balances module.
-#[derive(Encode)]
-pub struct TotalIssuance<T>(pub core::marker::PhantomData<T>);
-
-impl<T: Balances> Store<T> for TotalIssuance<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "TotalIssuance";
-    type Returns = T::Balance;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .plain()?
-            .key())
-    }
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
+pub struct TotalIssuanceStore<T: Balances> {
+    #[store(returns = T::Balance)]
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
 }
 
 /// Transfer some liquid free balance to another account.
@@ -105,7 +86,7 @@ impl<T: Balances> Store<T> for TotalIssuance<T> {
 /// It will decrease the total issuance of the system by the `TransferFee`.
 /// If the sender's account is below the existential deposit as a result
 /// of the transfer, the account will be reaped.
-#[derive(Encode)]
+#[derive(Clone, Debug, PartialEq, Call, Encode)]
 pub struct TransferCall<'a, T: Balances> {
     /// Destination of the transfer.
     pub to: &'a <T as System>::Address,
@@ -114,13 +95,8 @@ pub struct TransferCall<'a, T: Balances> {
     pub amount: T::Balance,
 }
 
-impl<'a, T: Balances> Call<T> for TransferCall<'a, T> {
-    const MODULE: &'static str = MODULE;
-    const FUNCTION: &'static str = "transfer";
-}
-
 /// Transfer event.
-#[derive(Debug, Decode, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
 pub struct TransferEvent<T: Balances> {
     /// Account balance was transfered from.
     pub from: <T as System>::AccountId,
@@ -130,7 +106,57 @@ pub struct TransferEvent<T: Balances> {
     pub amount: T::Balance,
 }
 
-impl<T: Balances> Event<T> for TransferEvent<T> {
-    const MODULE: &'static str = MODULE;
-    const EVENT: &'static str = "transfer";
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        system::{
+            AccountStore,
+            AccountStoreExt,
+        },
+        tests::test_client,
+    };
+    use sp_keyring::AccountKeyring;
+
+    subxt_test!({
+        name: test_transfer,
+        step: {
+            state: {
+                alice: AccountStore { account_id: &alice },
+                bob: AccountStore { account_id: &bob },
+            },
+            call: TransferCall {
+                to: &bob.clone().into(),
+                amount: 10_000,
+            },
+            event: TransferEvent {
+                from: alice.clone(),
+                to: bob.clone(),
+                amount: 10_000,
+            },
+            assert: {
+                assert!(pre.alice.data.free - 10_000 >= post.alice.data.free);
+                assert_eq!(pre.bob.data.free + 10_000, post.bob.data.free);
+            },
+        },
+    });
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_state_total_issuance() {
+        env_logger::try_init().ok();
+        let client = test_client().await;
+        let total_issuance = client.total_issuance().await.unwrap();
+        assert_ne!(total_issuance, 0);
+    }
+
+    #[async_std::test]
+    #[ignore] // requires locally running substrate node
+    async fn test_state_read_free_balance() {
+        env_logger::try_init().ok();
+        let client = test_client().await;
+        let account = AccountKeyring::Alice.to_account_id();
+        let info = client.account(&account).await.unwrap();
+        assert_ne!(info.data.free, 0);
+    }
 }

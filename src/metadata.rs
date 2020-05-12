@@ -24,6 +24,7 @@ use std::{
 use codec::{
     Decode,
     Encode,
+    Error as CodecError,
 };
 
 use frame_metadata::{
@@ -63,6 +64,9 @@ pub enum MetadataError {
     /// Storage type does not match requested type.
     #[error("Storage type error")]
     StorageTypeError,
+    /// Default error.
+    #[error("Failed to decode default: {0}")]
+    DefaultError(CodecError),
 }
 
 /// Runtime metadata.
@@ -218,9 +222,9 @@ impl StorageMetadata {
         bytes
     }
 
-    pub fn default<V: Decode>(&self) -> Option<V> {
-        // substrate handles the default different for A => B vs A => Option<B>
-        Decode::decode(&mut &self.default[..]).ok()
+    pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {
+        Decode::decode(&mut &self.default[..])
+            .map_err(|err| MetadataError::DefaultError(err))
     }
 
     pub fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {

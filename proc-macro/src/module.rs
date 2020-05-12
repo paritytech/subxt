@@ -21,6 +21,43 @@ use quote::{
     format_ident,
     quote,
 };
+use syn::parse::{
+    Parse,
+    ParseStream,
+};
+
+mod kw {
+    use syn::custom_keyword;
+
+    custom_keyword!(ignore);
+}
+
+#[derive(Debug)]
+enum ModuleAttr {
+    Ignore(kw::ignore),
+}
+
+impl Parse for ModuleAttr {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        Ok(Self::Ignore(input.parse()?))
+    }
+}
+
+type ModuleAttrs = utils::Attrs<ModuleAttr>;
+
+fn ignore(attrs: &[syn::Attribute]) -> bool {
+    for attr in attrs {
+        if let Some(ident) = attr.path.get_ident() {
+            if ident.to_string() == "module" {
+                let attrs: ModuleAttrs = syn::parse2(attr.tokens.clone()).unwrap();
+                if !attrs.attrs.is_empty() {
+                    return true
+                }
+            }
+        }
+    }
+    false
+}
 
 fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
     format_ident!("{}EventsDecoder", module.to_string())
@@ -30,8 +67,12 @@ fn with_module_ident(module: &syn::Ident) -> syn::Ident {
     format_ident!("with_{}", module.to_string().to_snake_case())
 }
 
-pub fn module(_args: TokenStream, input: TokenStream) -> TokenStream {
-    let input: syn::ItemTrait = syn::parse2(input).unwrap();
+pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
+    let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
+    if input.is_err() {
+        return tokens
+    }
+    let input = input.unwrap();
 
     let subxt = utils::use_crate("substrate-subxt");
     let module = &input.ident;
@@ -52,6 +93,9 @@ pub fn module(_args: TokenStream, input: TokenStream) -> TokenStream {
     });
     let types = input.items.iter().filter_map(|item| {
         if let syn::TraitItem::Type(ty) = item {
+            if ignore(&ty.attrs) {
+                return None
+            }
             let ident = &ty.ident;
             let ident_str = ident.to_string();
             Some(quote! {
@@ -67,7 +111,9 @@ pub fn module(_args: TokenStream, input: TokenStream) -> TokenStream {
 
         const MODULE: &str = #module_name;
 
+        /// `EventsDecoder` extension trait.
         pub trait #module_events_decoder {
+            /// Registers this modules types.
             fn #with_module(&mut self) -> Result<(), #subxt::EventsError>;
         }
 
@@ -118,7 +164,9 @@ mod tests {
 
             const MODULE: &str = "Balances";
 
+            /// `EventsDecoder` extension trait.
             pub trait BalancesEventsDecoder {
+                /// Registers this modules types.
                 fn with_balances(&mut self) -> Result<(), substrate_subxt::EventsError>;
             }
 
