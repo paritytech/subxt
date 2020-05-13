@@ -1,9 +1,15 @@
 [package]
 name = "substrate-subxt-proc-macro"
 version = "0.7.0"
-authors = ["David Craven <david@craven.ch>"]
+authors = ["David Craven <david@craven.ch>", "Parity Technologies <admin@parity.io>"]
 edition = "2018"
 autotests = false
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/substrate-subxt"
+documentation = "https://docs.rs/substrate-subxt"
+homepage = "https://www.parity.io/"
+description = "Derive calls, events, storage and tests for interacting Substrate modules with substrate-subxt"
 
 [lib]
 proc-macro = true
