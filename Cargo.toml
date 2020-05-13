@@ -3,7 +3,7 @@ members = [".", "proc-macro"]
 
 [package]
 name = "substrate-subxt"
-version = "0.6.0"
+version = "0.7.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
