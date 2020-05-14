@@ -1,9 +1,15 @@
 [package]
 name = "substrate-subxt-proc-macro"
-version = "0.1.0"
-authors = ["David Craven <david@craven.ch>"]
+version = "0.7.0"
+authors = ["David Craven <david@craven.ch>", "Parity Technologies <admin@parity.io>"]
 edition = "2018"
 autotests = false
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/substrate-subxt"
+documentation = "https://docs.rs/substrate-subxt"
+homepage = "https://www.parity.io/"
+description = "Derive calls, events, storage and tests for interacting Substrate modules with substrate-subxt"
 
 [lib]
 proc-macro = true
@@ -18,13 +24,10 @@ synstructure = "0.12.3"
 
 [dev-dependencies]
 async-std = { version = "1.5.0", features = ["attributes"] }
-codec = { package = "parity-scale-codec", version = "1.2", default-features = false, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", version = "1.3.0", features = ["derive"] }
 env_logger = "0.7.1"
-frame-support = "2.0.0-alpha.6"
 pretty_assertions = "0.6.1"
-sp-core = "2.0.0-alpha.6"
-sp-keyring = "2.0.0-alpha.6"
-sp-runtime = "2.0.0-alpha.6"
+sp-keyring = "2.0.0-alpha.7"
 substrate-subxt = { path = ".." }
 trybuild = "1.0.25"
 

@@ -36,6 +36,7 @@ mod kw {
     custom_keyword!(account);
     custom_keyword!(signature);
     custom_keyword!(extra);
+    custom_keyword!(prelude);
     custom_keyword!(step);
     custom_keyword!(state);
     custom_keyword!(call);
@@ -86,6 +87,7 @@ enum TestItem {
     Signature(Item<kw::signature, syn::Type>),
     Extra(Item<kw::extra, syn::Type>),
     State(Item<kw::state, ItemState>),
+    Prelude(Item<kw::prelude, syn::Block>),
     Step(Item<kw::step, ItemStep>),
 }
 
@@ -103,6 +105,8 @@ impl Parse for TestItem {
             Ok(TestItem::Extra(input.parse()?))
         } else if input.peek(kw::state) {
             Ok(TestItem::State(input.parse()?))
+        } else if input.peek(kw::prelude) {
+            Ok(TestItem::Prelude(input.parse()?))
         } else {
             Ok(TestItem::Step(input.parse()?))
         }
@@ -116,7 +120,7 @@ enum StepItem {
     State(Item<kw::state, ItemState>),
     Call(Item<kw::call, syn::Expr>),
     Event(Item<kw::event, syn::Expr>),
-    Assert(Item<kw::assert, syn::Expr>),
+    Assert(Item<kw::assert, syn::Block>),
 }
 
 impl Parse for StepItem {
@@ -143,6 +147,7 @@ struct Test {
     signature: syn::Type,
     extra: syn::Type,
     state: Option<State>,
+    prelude: Option<syn::Block>,
     steps: Vec<Step>,
 }
 
@@ -154,6 +159,7 @@ impl From<ItemTest> for Test {
         let mut signature = None;
         let mut extra = None;
         let mut state = None;
+        let mut prelude = None;
         let mut steps = vec![];
         for test_item in test.items {
             match test_item {
@@ -175,28 +181,29 @@ impl From<ItemTest> for Test {
                 TestItem::State(item) => {
                     state = Some(item.value.into());
                 }
+                TestItem::Prelude(item) => {
+                    prelude = Some(item.value);
+                }
                 TestItem::Step(item) => {
                     steps.push(item.value.into());
                 }
             }
         }
-        let runtime = runtime.unwrap_or_else(|| {
-            let subxt = utils::use_crate("substrate-subxt");
-            syn::parse2(quote!(#subxt::DefaultNodeRuntime)).unwrap()
-        });
+        let subxt = utils::use_crate("substrate-subxt");
+        let runtime = runtime
+            .unwrap_or_else(|| syn::parse2(quote!(#subxt::DefaultNodeRuntime)).unwrap());
         Self {
             name: name.expect("No name specified"),
             account: account.unwrap_or_else(|| format_ident!("Alice")),
             signature: signature.unwrap_or_else(|| {
-                let sp_runtime = utils::use_crate("sp-runtime");
-                syn::parse2(quote!(#sp_runtime::MultiSignature)).unwrap()
+                syn::parse2(quote!(#subxt::sp_runtime::MultiSignature)).unwrap()
             }),
             extra: extra.unwrap_or_else(|| {
-                let subxt = utils::use_crate("substrate-subxt");
                 syn::parse2(quote!(#subxt::DefaultExtra<#runtime>)).unwrap()
             }),
             runtime,
             state,
+            prelude,
             steps,
         }
     }
@@ -204,9 +211,10 @@ impl From<ItemTest> for Test {
 
 impl Test {
     fn into_tokens(self) -> TokenStream {
-        let env_logger = utils::use_crate("env_logger");
-        let sp_keyring = utils::use_crate("sp-keyring");
         let subxt = utils::use_crate("substrate-subxt");
+        let sp_keyring = utils::use_crate("sp-keyring");
+        let env_logger = utils::opt_crate("env_logger")
+            .map(|env_logger| quote!(#env_logger::try_init().ok();));
         let Test {
             name,
             runtime,
@@ -214,8 +222,10 @@ impl Test {
             signature,
             extra,
             state,
+            prelude,
             steps,
         } = self;
+        let prelude = prelude.map(|block| block.stmts).unwrap_or_default();
         let step = steps
             .into_iter()
             .map(|step| step.into_tokens(&account, state.as_ref()));
@@ -223,7 +233,7 @@ impl Test {
             #[async_std::test]
             #[ignore]
             async fn #name() {
-                #env_logger::try_init().ok();
+                #env_logger
                 let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
                     .build().await.unwrap();
                 #[allow(unused)]
@@ -239,6 +249,8 @@ impl Test {
                 #[allow(unused)]
                 let ferdie = #sp_keyring::AccountKeyring::Ferdie.to_account_id();
 
+                #(#prelude)*
+
                 #({
                     #step
                 })*
@@ -252,7 +264,7 @@ struct Step {
     call: syn::Expr,
     event_name: Vec<syn::Path>,
     event: Vec<syn::Expr>,
-    assert: syn::Expr,
+    assert: Option<syn::Block>,
 }
 
 impl From<ItemStep> for Step {
@@ -286,7 +298,7 @@ impl From<ItemStep> for Step {
             call: call.expect("Step requires a call."),
             event_name,
             event,
-            assert: assert.expect("Step requires assert."),
+            assert,
         }
     }
 }
@@ -305,27 +317,51 @@ impl Step {
             event,
             assert,
         } = self;
-        let state = state
+        let (pre, post) = state
             .as_ref()
-            .unwrap_or_else(|| test_state.expect("No state for step"));
-        let State {
-            state_name,
-            state,
-            state_param,
-        } = state;
+            .or(test_state)
+            .map(|state| {
+                let State {
+                    state_name,
+                    state,
+                    state_param,
+                } = state;
+                let state_struct = quote! {
+                    struct State<#(#state_param),*> {
+                        #(#state_name: #state_param,)*
+                    }
+                };
+                let build_struct = quote! {
+                    #(
+                        let #state_name = client.fetch(#state, None).await.unwrap();
+                    )*
+                    State { #(#state_name),* }
+                };
+                let pre = quote! {
+                    #state_struct
+                    let pre = {
+                        #build_struct
+                    };
+                };
+                let post = quote! {
+                    let post = {
+                        #build_struct
+                    };
+                };
+                (pre, post)
+            })
+            .unwrap_or_default();
+        let expect_event = event_name.iter().map(|event| {
+            format!(
+                "failed to find event {}",
+                utils::path_to_ident(event).to_string()
+            )
+        });
+        let assert = assert.map(|block| block.stmts).unwrap_or_default();
         quote! {
             let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
 
-            struct State<#(#state_param),*> {
-                #(#state_name: #state_param,)*
-            }
-
-            let pre = {
-                #(
-                    let #state_name = client.fetch(#state, None).await.unwrap().unwrap();
-                )*
-                State { #(#state_name),* }
-            };
+            #pre
 
             #[allow(unused)]
             let result = xt
@@ -335,20 +371,13 @@ impl Step {
                 .unwrap();
 
             #(
-                assert_eq!(
-                    result.find_event::<#event_name<_>>().unwrap(),
-                    Some(#event)
-                );
+                let event = result.find_event::<#event_name<_>>().unwrap().expect(#expect_event);
+                assert_eq!(event, #event);
             )*
 
-            let post = {
-                #(
-                    let #state_name = client.fetch(#state, None).await.unwrap().unwrap();
-                )*
-                State { #(#state_name),* }
-            };
+            #post
 
-            #assert
+            #(#assert)*
         }
     }
 }
@@ -429,7 +458,7 @@ mod tests {
                 env_logger::try_init().ok();
                 let client = substrate_subxt::ClientBuilder::<
                     KusamaRuntime,
-                    sp_runtime::MultiSignature,
+                    substrate_subxt::sp_runtime::MultiSignature,
                     substrate_subxt::DefaultExtra<KusamaRuntime>
                 >::new().build().await.unwrap();
                 #[allow(unused)]
@@ -457,12 +486,10 @@ mod tests {
                         let alice = client
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
-                            .unwrap()
                             .unwrap();
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
-                            .unwrap()
                             .unwrap();
                         State { alice, bob }
                     };
@@ -477,33 +504,32 @@ mod tests {
                         .await
                         .unwrap();
 
+                    let event = result.find_event::<TransferEvent<_>>()
+                        .unwrap()
+                        .expect("failed to find event TransferEvent");
                     assert_eq!(
-                        result.find_event::<TransferEvent<_>>().unwrap(),
-                        Some(TransferEvent {
+                        event,
+                        TransferEvent {
                             from: alice.clone(),
                             to: bob.clone(),
                             amount: 10_000,
-                        })
+                        }
                     );
 
                     let post = {
                         let alice = client
                             .fetch(AccountStore { account_id: &alice }, None)
                             .await
-                            .unwrap()
                             .unwrap();
                         let bob = client
                             .fetch(AccountStore { account_id: &bob }, None)
                             .await
-                            .unwrap()
                             .unwrap();
                         State { alice, bob }
                     };
 
-                    {
-                        assert_eq!(pre.alice.free, post.alice.free - 10_000);
-                        assert_eq!(pre.bob.free, post.bob.free + 10_000);
-                    }
+                    assert_eq!(pre.alice.free, post.alice.free - 10_000);
+                    assert_eq!(pre.bob.free, post.bob.free + 10_000);
                 }
             }
         };

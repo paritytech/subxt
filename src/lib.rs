@@ -39,6 +39,12 @@
 )]
 #![allow(clippy::type_complexity)]
 
+#[macro_use]
+extern crate substrate_subxt_proc_macro;
+
+pub use sp_core;
+pub use sp_runtime;
+
 use std::{
     convert::TryFrom,
     marker::PhantomData,
@@ -50,6 +56,7 @@ use codec::{
 };
 use futures::future;
 use jsonrpsee::client::Subscription;
+use sc_rpc_api::state::ReadProof;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -97,12 +104,13 @@ pub use crate::{
         ExtrinsicSuccess,
     },
     runtimes::*,
+    substrate_subxt_proc_macro::*,
 };
 use crate::{
     frame::{
         balances::Balances,
         system::{
-            AccountStore,
+            AccountStoreExt,
             Phase,
             System,
             SystemEvent,
@@ -160,8 +168,7 @@ impl<T: System, S, E> ClientBuilder<T, S, E> {
                 jsonrpsee::http_client(url)
             }
         };
-        let rpc = Rpc::new(client).await?;
-
+        let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version) = future::join3(
             rpc.metadata(),
             rpc.genesis_hash(),
@@ -210,11 +217,11 @@ impl<T: System, S, E> Client<T, S, E> {
         &self,
         store: F,
         hash: Option<T::Hash>,
-    ) -> Result<Option<F::Returns>, Error> {
+    ) -> Result<F::Returns, Error> {
         let key = store.key(&self.metadata)?;
         let value = self.rpc.storage::<F::Returns>(key, hash).await?;
         if let Some(v) = value {
-            Ok(Some(v))
+            Ok(v)
         } else {
             Ok(store.default(&self.metadata)?)
         }
@@ -261,6 +268,19 @@ impl<T: System, S, E> Client<T, S, E> {
     {
         let block = self.rpc.block(hash.map(|h| h.into())).await?;
         Ok(block)
+    }
+
+    /// Get proof of storage entries at a specific block's state.
+    pub async fn read_proof<H>(
+        &self,
+        keys: Vec<StorageKey>,
+        hash: Option<H>,
+    ) -> Result<ReadProof<T::Hash>, Error>
+    where
+        H: Into<T::Hash> + 'static,
+    {
+        let proof = self.rpc.read_proof(keys, hash.map(|h| h.into())).await?;
+        Ok(proof)
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -310,7 +330,7 @@ impl<T: System, S, E> Client<T, S, E> {
 
 impl<T, S, E> Client<T, S, E>
 where
-    T: System + Balances + Send + Sync,
+    T: System + Balances + Send + Sync + 'static,
     S: 'static,
     E: SignedExtra<T> + SignedExtension + 'static,
 {
@@ -320,11 +340,7 @@ where
         account_id: &<T as System>::AccountId,
         call: C,
     ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
-        let account_nonce = self
-            .fetch(AccountStore(account_id), None)
-            .await?
-            .unwrap()
-            .nonce;
+        let account_nonce = self.account(account_id).await?.nonce;
         let version = self.runtime_version.spec_version;
         let genesis_hash = self.genesis_hash;
         let call = self
@@ -351,12 +367,7 @@ where
         let account_id = S::Signer::from(signer.public()).into_account();
         let nonce = match nonce {
             Some(nonce) => nonce,
-            None => {
-                self.fetch(AccountStore(&account_id), None)
-                    .await?
-                    .unwrap()
-                    .nonce
-            }
+            None => self.account(&account_id).await?.nonce,
         };
 
         let genesis_hash = self.genesis_hash;
@@ -405,7 +416,7 @@ impl<T: System, P, S, E> XtBuilder<T, P, S, E> {
     }
 }
 
-impl<T: System + Send + Sync, P, S: 'static, E> XtBuilder<T, P, S, E>
+impl<T: System + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -485,7 +496,7 @@ impl<T: System, P, S, E> EventsSubscriber<T, P, S, E> {
     }
 }
 
-impl<T: System + Send + Sync, P, S: 'static, E> EventsSubscriber<T, P, S, E>
+impl<T: System + Send + Sync + 'static, P, S: 'static, E> EventsSubscriber<T, P, S, E>
 where
     P: Pair,
     S: Verify + Codec + From<P::Signature>,
@@ -508,7 +519,7 @@ where
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {
@@ -519,6 +530,10 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
+    use sp_core::storage::{
+        well_known_keys,
+        StorageKey,
+    };
     use sp_keyring::{
         AccountKeyring,
         Ed25519Keyring,
@@ -577,24 +592,18 @@ mod tests {
 
     #[async_std::test]
     #[ignore] // requires locally running substrate node
-    async fn test_state_total_issuance() {
+    async fn test_getting_read_proof() {
         let client = test_client().await;
+        let block_hash = client.block_hash(None).await.unwrap();
         client
-            .fetch(balances::TotalIssuance(Default::default()), None)
+            .read_proof(
+                vec![
+                    StorageKey(well_known_keys::HEAP_PAGES.to_vec()),
+                    StorageKey(well_known_keys::EXTRINSIC_INDEX.to_vec()),
+                ],
+                block_hash,
+            )
             .await
-            .unwrap()
-            .unwrap();
-    }
-
-    #[async_std::test]
-    #[ignore] // requires locally running substrate node
-    async fn test_state_read_free_balance() {
-        let client = test_client().await;
-        let account = AccountKeyring::Alice.to_account_id();
-        client
-            .fetch(AccountStore(&account), None)
-            .await
-            .unwrap()
             .unwrap();
     }
 

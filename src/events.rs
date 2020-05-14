@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+    Output,
+};
 use std::{
     collections::{
         HashMap,
@@ -25,16 +34,7 @@ use std::{
         Send,
     },
 };
-
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-    Output,
-};
+use thiserror::Error;
 
 use crate::{
     metadata::{
@@ -66,7 +66,7 @@ pub struct RawEvent {
 }
 
 /// Events error.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Error)]
 pub enum EventsError {
     /// Codec error.
     #[error("Scale codec error: {0:?}")]
@@ -80,6 +80,7 @@ pub enum EventsError {
 }
 
 /// Event decoder.
+#[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
     type_sizes: HashMap<String, usize>,
@@ -119,11 +120,6 @@ impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
 }
 
 impl<T: System> EventsDecoder<T> {
-    /// Register system types.
-    pub fn with_system(&mut self) -> Result<(), EventsError> {
-        Ok(())
-    }
-
     /// Register a type.
     pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
     where
@@ -225,6 +221,12 @@ impl<T: System> EventsDecoder<T> {
                 let event_variant = input.read_byte()?;
                 let event_metadata = module.event(event_variant)?;
 
+                log::debug!(
+                    "received event '{}::{}'",
+                    module.name(),
+                    event_metadata.name
+                );
+
                 let mut event_data = Vec::<u8>::new();
                 self.decode_raw_bytes(
                     &event_metadata.arguments(),
@@ -232,12 +234,7 @@ impl<T: System> EventsDecoder<T> {
                     &mut event_data,
                 )?;
 
-                log::debug!(
-                    "received event '{}::{}', raw bytes: {}",
-                    module.name(),
-                    event_metadata.name,
-                    hex::encode(&event_data),
-                );
+                log::debug!("raw bytes: {}", hex::encode(&event_data),);
 
                 RuntimeEvent::Raw(RawEvent {
                     module: module.name().to_string(),

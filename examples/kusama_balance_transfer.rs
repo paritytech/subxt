@@ -16,36 +16,27 @@
 
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
-    balances,
-    Error,
+    balances::*,
+    ClientBuilder,
     KusamaRuntime,
 };
 
-fn main() {
-    async_std::task::block_on(async move {
-        env_logger::init();
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
 
-        let xt_result = transfer_balance().await;
-        match xt_result {
-            Ok(hash) => println!("Balance transfer extrinsic submitted: {}", hash),
-            Err(_) => eprintln!("Balance transfer extrinisic failed"),
-        }
-    });
-}
-
-async fn transfer_balance() -> Result<sp_core::H256, Error> {
     let signer = AccountKeyring::Alice.pair();
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    // note use of `KusamaRuntime`
-    substrate_subxt::ClientBuilder::<KusamaRuntime>::new()
-        .build()
-        .await?
+    let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
+
+    let hash = client
         .xt(signer, None)
         .await?
-        .submit(balances::TransferCall {
-            to: &dest,
-            amount: 10_000,
-        })
-        .await
+        .transfer(&dest, 10_000)
+        .await?;
+
+    println!("Balance transfer extrinsic submitted: {}", hash);
+
+    Ok(())
 }

@@ -21,9 +21,12 @@ use codec::{
     Decode,
     Encode,
 };
-use frame_support::Parameter;
+use core::marker::PhantomData;
+use frame_support::{
+    weights::DispatchInfo,
+    Parameter,
+};
 use serde::de::DeserializeOwned;
-use sp_core::storage::StorageKey;
 use sp_runtime::{
     traits::{
         AtLeast32Bit,
@@ -39,23 +42,13 @@ use sp_runtime::{
         Member,
         SimpleBitOps,
     },
-    RuntimeDebug,
+    DispatchError,
 };
 use std::fmt::Debug;
 
-use crate::{
-    frame::{
-        Call,
-        Store,
-    },
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
-};
-
 /// The subset of the `frame::Trait` that a client must implement.
-pub trait System: 'static + Eq + Clone + Debug {
+#[module]
+pub trait System {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
@@ -98,6 +91,7 @@ pub trait System: 'static + Eq + Clone + Debug {
         + AsMut<[u8]>;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
+    #[module(ignore)]
     type Hashing: Hash<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
@@ -110,14 +104,17 @@ pub trait System: 'static + Eq + Clone + Debug {
         + Default;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
+    #[module(ignore)]
     type Address: Codec + Clone + PartialEq + Debug + Send + Sync;
 
     /// The block header.
+    #[module(ignore)]
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
         + DeserializeOwned;
 
     /// Extrinsic type within blocks.
+    #[module(ignore)]
     type Extrinsic: Parameter + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
 
     /// Data to be associated with an account (other than nonce/transaction counter, which this
@@ -129,7 +126,7 @@ pub trait System: 'static + Eq + Clone + Debug {
 pub type RefCount = u8;
 
 /// Information of an account.
-#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Default, Decode, Encode)]
 pub struct AccountInfo<T: System> {
     /// The number of transactions this account has sent.
     pub nonce: T::Index,
@@ -141,54 +138,40 @@ pub struct AccountInfo<T: System> {
     pub data: T::AccountData,
 }
 
-const MODULE: &str = "System";
-
 /// Account field of the `System` module.
-#[derive(Encode)]
-pub struct AccountStore<'a, T: System>(pub &'a T::AccountId);
-
-impl<'a, T: System> Store<T> for AccountStore<'a, T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Account";
-    type Returns = AccountInfo<T>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(self.0))
-    }
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode)]
+pub struct AccountStore<'a, T: System> {
+    #[store(returns = AccountInfo<T>)]
+    /// Account to retrieve the `AccountInfo<T>` for.
+    pub account_id: &'a T::AccountId,
 }
 
 /// Arguments for updating the runtime code
-#[derive(Encode)]
-pub struct SetCodeCall<'a>(pub &'a Vec<u8>);
-
-impl<'a, T: System> Call<T> for SetCodeCall<'a> {
-    const MODULE: &'static str = MODULE;
-    const FUNCTION: &'static str = "set_code";
+#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
+pub struct SetCodeCall<'a, T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Runtime wasm blob.
+    pub code: &'a [u8],
 }
 
-use frame_support::weights::DispatchInfo;
-
 /// Event for the System module.
-#[derive(Clone, Debug, codec::Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum SystemEvent<T: System> {
     /// An extrinsic completed successfully.
     ExtrinsicSuccess(DispatchInfo),
     /// An extrinsic failed.
-    ExtrinsicFailed(sp_runtime::DispatchError, DispatchInfo),
+    ExtrinsicFailed(DispatchError, DispatchInfo),
     /// `:code` was updated.
     CodeUpdated,
     /// A new account was created.
     NewAccount(T::AccountId),
     /// An account was reaped.
-    ReapedAccount(T::AccountId),
+    KilledAccount(T::AccountId),
 }
 
 /// A phase of a block's execution.
-#[derive(codec::Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),

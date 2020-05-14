@@ -14,14 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::marker::PhantomData;
-
 use codec::{
     Codec,
     Decode,
     Encode,
 };
-
+use core::{
+    fmt::Debug,
+    marker::PhantomData,
+};
 use sp_core::Pair;
 use sp_runtime::{
     generic::{
@@ -52,7 +53,7 @@ use crate::frame::{
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckVersion<T: System + Send + Sync>(
+pub struct CheckVersion<T: System>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
@@ -61,7 +62,7 @@ pub struct CheckVersion<T: System + Send + Sync>(
 
 impl<T> SignedExtension for CheckVersion<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckVersion";
     type AccountId = u64;
@@ -82,7 +83,7 @@ where
 /// This is modified from the substrate version to allow passing in of the genesis hash, which is
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckGenesis<T: System + Send + Sync>(
+pub struct CheckGenesis<T: System>(
     pub PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
     #[codec(skip)]
@@ -91,7 +92,7 @@ pub struct CheckGenesis<T: System + Send + Sync>(
 
 impl<T> SignedExtension for CheckGenesis<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckGenesis";
     type AccountId = u64;
@@ -113,7 +114,7 @@ where
 /// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
 /// valid forever)
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckEra<T: System + Send + Sync>(
+pub struct CheckEra<T: System>(
     /// The default structure for the Extra encoding
     pub (Era, PhantomData<T>),
     /// Local genesis hash to be used for `AdditionalSigned`
@@ -123,7 +124,7 @@ pub struct CheckEra<T: System + Send + Sync>(
 
 impl<T> SignedExtension for CheckEra<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckEra";
     type AccountId = u64;
@@ -139,11 +140,11 @@ where
 
 /// Nonce check and increment to give replay protection for transactions.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckNonce<T: System + Send + Sync>(#[codec(compact)] pub T::Index);
+pub struct CheckNonce<T: System>(#[codec(compact)] pub T::Index);
 
 impl<T> SignedExtension for CheckNonce<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckNonce";
     type AccountId = u64;
@@ -159,11 +160,11 @@ where
 
 /// Resource limit check.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckWeight<T: System + Send + Sync>(pub PhantomData<T>);
+pub struct CheckWeight<T: System>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckWeight<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckWeight";
     type AccountId = u64;
@@ -184,7 +185,7 @@ pub struct ChargeTransactionPayment<T: Balances>(#[codec(compact)] pub T::Balanc
 
 impl<T> SignedExtension for ChargeTransactionPayment<T>
 where
-    T: Balances + Send + Sync,
+    T: Balances + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "ChargeTransactionPayment";
     type AccountId = u64;
@@ -200,11 +201,11 @@ where
 
 /// Checks if a transaction would exhausts the block gas limit.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckBlockGasLimit<T: System + Send + Sync>(pub PhantomData<T>);
+pub struct CheckBlockGasLimit<T: System>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckBlockGasLimit<T>
 where
-    T: System + Send + Sync,
+    T: System + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckBlockGasLimit";
     type AccountId = u64;
@@ -238,7 +239,9 @@ pub struct DefaultExtra<T: System> {
     genesis_hash: T::Hash,
 }
 
-impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
+impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
+    for DefaultExtra<T>
+{
     type Extra = (
         CheckVersion<T>,
         CheckGenesis<T>,
@@ -270,7 +273,9 @@ impl<T: System + Balances + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
     }
 }
 
-impl<T: System + Balances + Send + Sync> SignedExtension for DefaultExtra<T> {
+impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtension
+    for DefaultExtra<T>
+{
     const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;
     type Call = ();
