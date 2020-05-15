@@ -16,11 +16,13 @@
 // Copyright 2019-2020 Parity Technologies (UK) Ltd.
 
 //! Session support
-#![warn(missing_docs)] // yuck ☹
 use crate::frame::system::System;
 use codec::Encode;
 use frame_support::Parameter;
-use std::{fmt::Debug, marker::PhantomData};
+use std::{
+    fmt::Debug,
+    marker::PhantomData,
+};
 use substrate_subxt_proc_macro::Store;
 
 /// The trait needed for this module.
