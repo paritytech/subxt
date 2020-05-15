@@ -16,19 +16,11 @@
 
 //! Implements support for the frame_staking module.
 
-use crate::{
-    frame::Store,
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
-};
 use codec::{
     Decode,
     Encode,
     HasCompact,
 };
-use sp_core::storage::StorageKey;
 use sp_runtime::{
     Perbill,
     RuntimeDebug,
@@ -159,207 +151,117 @@ const MODULE: &str = "Staking";
 /// Must be more than the number of eras delayed by session otherwise.
 /// I.e. active era must always be in history.
 /// I.e. `active_era > current_era - history_depth` must be guaranteed.
-#[derive(Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct HistoryDepth<T: Staking>(PhantomData<T>);
-
-impl<T: Staking> Store<T> for HistoryDepth<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "HistoryDepth";
-    type Returns = u32;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .plain()?
-            .key())
-    }
+#[derive(
+    Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store,
+)]
+pub struct HistoryDepthStore<T: Staking> {
+    #[store(returns = u32)]
+    /// Number of eras to keep in history.
+    ///
+    /// Information is kept for eras in `[current_era - history_depth; current_era]`.
+    ///
+    /// Must be more than the number of eras delayed by session otherwise.
+    /// I.e. active era must always be in history.
+    /// I.e. `active_era > current_era - history_depth` must be guaranteed.
+    pub _runtime: PhantomData<T>,
 }
 
 /// The ideal number of staking participants.
-#[derive(Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct ValidatorCount<T: Staking>(PhantomData<T>);
-
-impl<T: Staking> Store<T> for ValidatorCount<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "ValidatorCount";
-    type Returns = u32;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .plain()?
-            .key())
-    }
+#[derive(
+    Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store,
+)]
+pub struct ValidatorCountStore<T: Staking> {
+    #[store(returns = u32)]
+    /// The ideal number of staking participants.
+    pub _runtime: PhantomData<T>,
 }
 
 /// Minimum number of staking participants before emergency conditions are imposed.
-#[derive(Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct MinimumValidatorCount<T: Staking>(PhantomData<T>);
-
-impl<T: Staking> Store<T> for MinimumValidatorCount<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "MinimumValidatorCount";
-    type Returns = u32;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .plain()?
-            .key())
-    }
+#[derive(
+    Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store,
+)]
+pub struct MinimumValidatorCountStore<T: Staking> {
+    #[store(returns = u32)]
+    /// Minimum number of staking participants before emergency conditions are imposed.
+    pub _runtime: PhantomData<T>,
 }
 
 /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
 /// easy to initialize and the performance hit is minimal (we expect no more than four
 /// invulnerables) and restricted to testnets.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Invulnerables<T: Staking>(pub core::marker::PhantomData<T>);
-
-impl<T: Staking> Store<T> for Invulnerables<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Invulnerables";
-    type Returns = Vec<T::AccountId>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .plain()?
-            .key())
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct InvulnerablesStore<T: Staking> {
+    #[store(returns = Vec<T::AccountId>)]
+    /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
+    /// easy to initialize and the performance hit is minimal (we expect no more than four
+    /// invulnerables) and restricted to testnets.
+    pub _runtime: core::marker::PhantomData<T>,
 }
 
 /// Map from all locked "stash" accounts to the controller account.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Bonded<T: Staking>(pub PhantomData<T>);
-
-impl<T: Staking> Store<T> for Bonded<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Bonded";
-    type Returns = Vec<T::AccountId>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct BondedStore<T: Staking> {
+    #[store(returns = Vec<T::AccountId>)]
+    /// Map from all locked "stash" accounts to the controller account.
+    pub _runtime: PhantomData<T>,
 }
 
 /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Ledger<T: Staking>(pub T::AccountId);
-
-impl<T: Staking> Store<T> for Ledger<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Ledger";
-    type Returns = Option<StakingLedger<T::AccountId, ()>>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct LedgerStore<T: Staking> {
+    #[store(returns = Option<StakingLedger<T::AccountId, ()>>)]
+    /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
+    pub _runtime: PhantomData<T>,
 }
 
 /// Where the reward payment should be made. Keyed by stash.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Payee<T: Staking>(pub T::AccountId);
-
-impl<T: Staking> Store<T> for Payee<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Payee";
-    type Returns = RewardDestination;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct PayeeStore<T: Staking> {
+    #[store(returns = RewardDestination)]
+    /// Where the reward payment should be made. Keyed by stash.
+    pub _runtime: PhantomData<T>,
 }
 
 /// The map from (wannabe) validator stash key to the preferences of that validator.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Validators<T: Staking>(pub T::AccountId);
-
-impl<T: Staking> Store<T> for Validators<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Validators";
-    type Returns = ValidatorPrefs;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct ValidatorsStore<T: Staking> {
+    #[store(returns = ValidatorPrefs)]
+    /// The map from (wannabe) validator stash key to the preferences of that validator.
+    pub _runtime: PhantomData<T>,
 }
 
 /// The map from nominator stash key to the set of stash keys of all validators to nominate.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct Nominators<T: Staking>(pub T::AccountId);
-
-impl<T: Staking> Store<T> for Nominators<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "Nominators";
-    type Returns = Option<Nominations<T::AccountId>>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct NominatorsStore<T: Staking> {
+    #[store(returns = Option<Nominations<T::AccountId>>)]
+    /// The map from nominator stash key to the set of stash keys of all validators to nominate.
+    pub _runtime: PhantomData<T>,
 }
 
 /// The current era index.
 ///
 /// This is the latest planned era, depending on how the Session pallet queues the validator
 /// set, it might be active or not.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct CurrentEra<T: Staking>(pub PhantomData<T>);
-
-impl<T: Staking> Store<T> for CurrentEra<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "CurrentEra";
-    type Returns = Option<EraIndex>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct CurrentEraStore<T: Staking> {
+    #[store(returns = Option<EraIndex>)]
+    /// The current era index.
+    ///
+    /// This is the latest planned era, depending on how the Session pallet queues the validator
+    /// set, it might be active or not.
+    pub _runtime: PhantomData<T>,
 }
 
 /// The active era information, it holds index and start.
 ///
 /// The active era is the era currently rewarded.
 /// Validator set of this era must be equal to `SessionInterface::validators`.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd)]
-pub struct ActiveEra<T: Staking>(pub PhantomData<T>);
-
-impl<T: Staking> Store<T> for ActiveEra<T> {
-    const MODULE: &'static str = MODULE;
-    const FIELD: &'static str = "ActiveEra";
-    type Returns = Option<ActiveEraInfo>;
-
-    fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError> {
-        Ok(metadata
-            .module(Self::MODULE)?
-            .storage(Self::FIELD)?
-            .map()?
-            .key(&self.0))
-    }
+#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+pub struct ActiveEraStore<T: Staking> {
+    #[store(returns = Option<ActiveEraInfo>)]
+    /// The active era information, it holds index and start.
+    ///
+    /// The active era is the era currently rewarded.
+    /// Validator set of this era must be equal to `SessionInterface::validators`.
+    pub _runtime: PhantomData<T>,
 }
