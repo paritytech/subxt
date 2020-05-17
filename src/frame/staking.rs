@@ -16,7 +16,7 @@
 
 //! Implements support for the frame_staking module.
 
-use super::system::System;
+use super::system::{System, SystemEventsDecoder as _};
 use codec::{
     Decode,
     Encode,
@@ -109,6 +109,7 @@ impl Default for ValidatorPrefs {
 }
 
 /// The subset of the `frame::Trait` that a client must implement.
+#[module]
 pub trait Staking: System {}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
@@ -142,8 +143,6 @@ pub struct StakingLedger<AccountId, Balance: HasCompact> {
     /// for validators.
     pub claimed_rewards: Vec<EraIndex>,
 }
-
-const MODULE: &str = "Staking";
 
 /// Number of eras to keep in history.
 ///
