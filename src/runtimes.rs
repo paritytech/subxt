@@ -32,6 +32,7 @@ use crate::frame::{
     },
     contracts::Contracts,
     session::Session,
+    staking::Staking,
     system::System,
 };
 

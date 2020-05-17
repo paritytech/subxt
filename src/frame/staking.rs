@@ -96,11 +96,13 @@ impl Default for RewardDestination {
 
 /// Preference of what happens regarding validation.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub struct ValidatorPrefs {
+pub struct ValidatorPrefs<T: Staking> {
     /// Reward that validator takes up-front; only the rest is split between themselves and
     /// nominators.
     #[codec(compact)]
     pub commission: Perbill,
+    /// Runtime marker
+    pub _r: PhantomData<T>,
 }
 
 impl Default for ValidatorPrefs {
@@ -317,4 +319,11 @@ pub struct ValidateCall<'a, T: Staking> {
 pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated
     pub targets: Vec<T::Address>,
+}
+
+/// Claim a payout.
+#[derive(PartialEq, Eq, Clone, Call, Encode)]
+struct PayoutStakersCall<'a, T: System> {
+    pub validator_stash: &'a T::AccountId,
+    pub era: EraIndex,
 }
