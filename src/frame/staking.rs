@@ -114,7 +114,6 @@ impl Default for ValidatorPrefs {
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
 pub trait Staking: System {}
-impl<T: System> Staking for T {}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(PartialEq, Eq, Clone, Encode, Decode)]

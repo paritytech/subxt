@@ -88,6 +88,8 @@ impl Session for KusamaRuntime {
     type ValidatorId = <Self as System>::AccountId;
 }
 
+impl Staking for KusamaRuntime {}
+
 impl Balances for KusamaRuntime {
     type Balance = u128;
 }
