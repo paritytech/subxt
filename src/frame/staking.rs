@@ -16,6 +16,7 @@
 
 //! Implements support for the frame_staking module.
 
+use super::system::System;
 use codec::{
     Decode,
     Encode,
@@ -108,7 +109,7 @@ impl Default for ValidatorPrefs {
 }
 
 /// The subset of the `frame::Trait` that a client must implement.
-pub trait Staking: super::system::System {}
+pub trait Staking: System {}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(PartialEq, Eq, Clone, Encode, Decode)]
@@ -264,4 +265,54 @@ pub struct ActiveEraStore<T: Staking> {
     /// The active era is the era currently rewarded.
     /// Validator set of this era must be equal to `SessionInterface::validators`.
     pub _runtime: PhantomData<T>,
+}
+
+/// Declare the desire to validate for the origin controller.
+///
+/// Effects will be felt at the beginning of the next era.
+///
+/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
+///
+/// # <weight>
+/// - Independent of the arguments. Insignificant complexity.
+/// - Contains a limited number of reads.
+/// - Writes are limited to the `origin` account key.
+/// -----------
+/// Base Weight: 17.13 µs
+/// DB Weight:
+/// - Read: Era Election Status, Ledger
+/// - Write: Nominators, Validators
+/// # </weight>
+#[derive(Clone, Debug, PartialEq, Call, Encode)]
+pub struct ValidateCall<'a, T: Staking> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Validation preferences.
+    pub prefs: &'a ValidatorPrefs,
+}
+
+/// Declare the desire to nominate `targets` for the origin controller.
+///
+/// Effects will be felt at the beginning of the next era. This can only be called when
+/// [`EraElectionStatus`] is `Closed`.
+///
+/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
+///
+/// # <weight>
+/// - The transaction's complexity is proportional to the size of `targets` (N)
+/// which is capped at CompactAssignments::LIMIT (MAX_NOMINATIONS).
+/// - Both the reads and writes follow a similar pattern.
+/// ---------
+/// Base Weight: 22.34 + .36 * N µs
+/// where N is the number of targets
+/// DB Weight:
+/// - Reads: Era Election Status, Ledger, Current Era
+/// - Writes: Validators, Nominators
+/// # </weight>
+#[derive(Call, Encode)]
+pub struct NominateCall<T: Staking> {
+    /// The targets that are being nominated
+    pub targets: Vec<T::Address>,
 }
