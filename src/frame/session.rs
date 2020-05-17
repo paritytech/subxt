@@ -16,7 +16,10 @@
 // Copyright 2019-2020 Parity Technologies (UK) Ltd.
 
 //! Session support
-use crate::frame::system::System;
+use crate::frame::system::{
+    System,
+    SystemEventsDecoder as _,
+};
 use codec::Encode;
 use frame_support::Parameter;
 use std::{
@@ -26,14 +29,14 @@ use std::{
 use substrate_subxt_proc_macro::Store;
 
 /// The trait needed for this module.
+#[module]
 pub trait Session: System {
     /// The validator account identifier type for the runtime.
-    type ValidatorId: Parameter + Debug + Ord + Default;
-    /// The validator account identifier type for the runtime.
-    type SessionIndex: Parameter + Debug + Ord + Default;
-}
+    type ValidatorId: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 
-const MODULE: &str = "Session";
+    /// The validator account identifier type for the runtime.
+    type SessionIndex: Parameter + Debug + Ord + Default + Send + Sync + 'static;
+}
 
 /// The current set of validators.
 #[derive(Encode, Store)]

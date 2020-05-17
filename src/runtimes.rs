@@ -31,6 +31,7 @@ use crate::frame::{
         Balances,
     },
     contracts::Contracts,
+    session::Session,
     system::System,
 };
 
@@ -80,6 +81,11 @@ impl System for KusamaRuntime {
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
     type Extrinsic = OpaqueExtrinsic;
     type AccountData = AccountData<<Self as Balances>::Balance>;
+}
+
+impl Session for KusamaRuntime {
+    type SessionIndex = u32;
+    type ValidatorId = <Self as System>::AccountId;
 }
 
 impl Balances for KusamaRuntime {
