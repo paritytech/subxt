@@ -96,13 +96,11 @@ impl Default for RewardDestination {
 
 /// Preference of what happens regarding validation.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
-pub struct ValidatorPrefs<T: Staking> {
+pub struct ValidatorPrefs {
     /// Reward that validator takes up-front; only the rest is split between themselves and
     /// nominators.
     #[codec(compact)]
     pub commission: Perbill,
-    /// Runtime marker
-    pub _r: PhantomData<T>,
 }
 
 impl Default for ValidatorPrefs {
@@ -289,11 +287,11 @@ pub struct ActiveEraStore<T: Staking> {
 /// - Write: Nominators, Validators
 /// # </weight>
 #[derive(Clone, Debug, PartialEq, Call, Encode)]
-pub struct ValidateCall<'a, T: Staking> {
+pub struct ValidateCall<T: Staking> {
     /// Runtime marker.
     pub _runtime: PhantomData<T>,
     /// Validation preferences.
-    pub prefs: &'a ValidatorPrefs,
+    pub prefs: ValidatorPrefs,
 }
 
 /// Declare the desire to nominate `targets` for the origin controller.
