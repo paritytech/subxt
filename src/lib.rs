@@ -439,6 +439,12 @@ mod tests {
         let dest = AccountKeyring::Bob.to_account_id().into();
 
         let client = test_client().await;
+        let nonce = client
+            .account(&AccountKeyring::Alice.to_account_id())
+            .await
+            .unwrap()
+            .nonce;
+        signer.set_nonce(nonce);
         client
             .submit(
                 balances::TransferCall {
