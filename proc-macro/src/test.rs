@@ -228,7 +228,7 @@ impl Test {
         let prelude = prelude.map(|block| block.stmts).unwrap_or_default();
         let step = steps
             .into_iter()
-            .map(|step| step.into_tokens(&account, state.as_ref()));
+            .map(|step| step.into_tokens(state.as_ref()));
         quote! {
             #[async_std::test]
             #[ignore]
@@ -236,6 +236,8 @@ impl Test {
                 #env_logger
                 let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
                     .build().await.unwrap();
+                let signer = #subxt::PairSigner::new(#sp_keyring::AccountKeyring::#account.pair());
+
                 #[allow(unused)]
                 let alice = #sp_keyring::AccountKeyring::Alice.to_account_id();
                 #[allow(unused)]
@@ -304,12 +306,7 @@ impl From<ItemStep> for Step {
 }
 
 impl Step {
-    fn into_tokens(
-        self,
-        account: &syn::Ident,
-        test_state: Option<&State>,
-    ) -> TokenStream {
-        let sp_keyring = utils::use_crate("sp-keyring");
+    fn into_tokens(self, test_state: Option<&State>) -> TokenStream {
         let Step {
             state,
             call,
@@ -359,14 +356,11 @@ impl Step {
         });
         let assert = assert.map(|block| block.stmts).unwrap_or_default();
         quote! {
-            let xt = client.xt(#sp_keyring::AccountKeyring::#account.pair(), None).await.unwrap();
-
             #pre
 
             #[allow(unused)]
-            let result = xt
-                .watch()
-                .submit(#call)
+            let result = client
+                .watch(#call, &signer)
                 .await
                 .unwrap();
 
@@ -461,6 +455,7 @@ mod tests {
                     substrate_subxt::sp_runtime::MultiSignature,
                     substrate_subxt::DefaultExtra<KusamaRuntime>
                 >::new().build().await.unwrap();
+                let signer = substrate_subxt::PairSigner::new(sp_keyring::AccountKeyring::Alice.pair());
                 #[allow(unused)]
                 let alice = sp_keyring::AccountKeyring::Alice.to_account_id();
                 #[allow(unused)]
@@ -475,8 +470,6 @@ mod tests {
                 let ferdie = sp_keyring::AccountKeyring::Ferdie.to_account_id();
 
                 {
-                    let xt = client.xt(sp_keyring::AccountKeyring::Alice.pair(), None).await.unwrap();
-
                     struct State<A, B> {
                         alice: A,
                         bob: B,
@@ -495,12 +488,11 @@ mod tests {
                     };
 
                     #[allow(unused)]
-                    let result = xt
-                        .watch()
-                        .submit(TransferCall {
+                    let result = client
+                        .watch(TransferCall {
                             to: &bob,
                             amount: 10_000,
-                        })
+                        }, &signer)
                         .await
                         .unwrap();
 

@@ -19,22 +19,18 @@ use substrate_subxt::{
     balances::*,
     ClientBuilder,
     KusamaRuntime,
+    PairSigner,
 };
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let signer = AccountKeyring::Alice.pair();
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
-
-    let hash = client
-        .xt(signer, None)
-        .await?
-        .transfer(&dest, 10_000)
-        .await?;
+    let hash = client.transfer(&signer, &dest, 10_000).await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 
