@@ -341,13 +341,14 @@ where
         call: C,
     ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
         let account_nonce = self.account(account_id).await?.nonce;
-        let version = self.runtime_version.spec_version;
+        let spec_version = self.runtime_version.spec_version;
+        let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
             .module_with_calls(C::MODULE)
             .and_then(|module| module.call(C::FUNCTION, call))?;
-        let extra: E = E::new(version, account_nonce, genesis_hash);
+        let extra: E = E::new(spec_version, tx_version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
     }
@@ -434,7 +435,8 @@ where
     > {
         let signer = self.signer.clone();
         let account_nonce = self.nonce;
-        let version = self.runtime_version.spec_version;
+        let spec_version = self.runtime_version.spec_version;
+        let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
@@ -447,7 +449,7 @@ where
             account_nonce
         );
 
-        let extra = E::new(version, account_nonce, genesis_hash);
+        let extra = E::new(spec_version, tx_version, account_nonce, genesis_hash);
         let xt = extrinsic::create_and_sign::<_, _, _, S, _>(signer, call, extra)?;
         Ok(xt)
     }

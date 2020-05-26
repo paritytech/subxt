@@ -52,19 +52,46 @@ use crate::frame::{
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
+
+/// Ensure the runtime version registered in the transaction is the same as at present.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckVersion<T: System>(
+pub struct CheckSpecVersion<T: System>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
     pub u32,
 );
 
-impl<T> SignedExtension for CheckVersion<T>
+impl<T> SignedExtension for CheckSpecVersion<T>
 where
     T: System + Clone + Debug + Eq + Send + Sync,
 {
-    const IDENTIFIER: &'static str = "CheckVersion";
+    const IDENTIFIER: &'static str = "CheckSpecVersion";
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = u32;
+    type Pre = ();
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(self.1)
+    }
+}
+
+/// Ensure the transaction version registered in the transaction is the same as at present.
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+pub struct CheckTxVersion<T: System>(
+    pub PhantomData<T>,
+    /// Local tx version to be used for `AdditionalSigned`
+    #[codec(skip)]
+    pub u32,
+);
+
+impl<T> SignedExtension for CheckTxVersion<T>
+where
+    T: System + Clone + Debug + Eq + Send + Sync,
+{
+    const IDENTIFIER: &'static str = "CheckTxVersion";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
@@ -225,7 +252,7 @@ pub trait SignedExtra<T: System> {
     type Extra: SignedExtension;
 
     /// Creates a new `SignedExtra`.
-    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self;
+    fn new(spec_version: u32, tx_version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self;
 
     /// Returns the transaction extra.
     fn extra(&self) -> Self::Extra;
@@ -234,7 +261,8 @@ pub trait SignedExtra<T: System> {
 /// Default `SignedExtra` for substrate runtimes.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct DefaultExtra<T: System> {
-    version: u32,
+    spec_version: u32,
+    tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
 }
@@ -243,7 +271,8 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
     for DefaultExtra<T>
 {
     type Extra = (
-        CheckVersion<T>,
+        CheckSpecVersion<T>,
+        CheckTxVersion<T>,
         CheckGenesis<T>,
         CheckEra<T>,
         CheckNonce<T>,
@@ -252,9 +281,10 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         CheckBlockGasLimit<T>,
     );
 
-    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
+    fn new(spec_version: u32, tx_version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
         DefaultExtra {
-            version,
+            spec_version,
+            tx_version,
             nonce,
             genesis_hash,
         }
@@ -262,7 +292,8 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
 
     fn extra(&self) -> Self::Extra {
         (
-            CheckVersion(PhantomData, self.version),
+            CheckSpecVersion(PhantomData, self.spec_version),
+            CheckTxVersion(PhantomData, self.tx_version),
             CheckGenesis(PhantomData, self.genesis_hash),
             CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
