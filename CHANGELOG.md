@@ -1,3 +1,9 @@
+# Version 0.8.0 (2020-05-26)
+
+* Update to Substrate release candidate [#116](https://github.com/paritytech/substrate-subxt/pull/116)
+* Update to alpha.8 [#114](https://github.com/paritytech/substrate-subxt/pull/114)
+* Refactors the api [#113](https://github.com/paritytech/substrate-subxt/pull/113)
+
 # Version 0.7.0 (2020-05-13)
 
 * Split subxt [#102](https://github.com/paritytech/substrate-subxt/pull/102)
