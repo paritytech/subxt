@@ -15,7 +15,6 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{
-    Codec,
     Decode,
     Encode,
 };
@@ -23,18 +22,9 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
 };
-use sp_core::Pair;
 use sp_runtime::{
-    generic::{
-        Era,
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::{
-        IdentifyAccount,
-        SignedExtension,
-        Verify,
-    },
+    generic::Era,
+    traits::SignedExtension,
     transaction_validity::TransactionValidityError,
 };
 
@@ -319,33 +309,4 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtension
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         self.extra().additional_signed()
     }
-}
-
-pub(crate) fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
-    signer: P,
-    call: C,
-    extra: E,
-) -> Result<
-    UncheckedExtrinsic<T::Address, C, S, <E as SignedExtra<T>>::Extra>,
-    TransactionValidityError,
->
-where
-    P: Pair,
-    S: Verify + Codec + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    C: Encode,
-    E: SignedExtra<T> + SignedExtension,
-    T::Address: From<T::AccountId>,
-{
-    let raw_payload = SignedPayload::new(call, extra.extra())?;
-    let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
-    let (call, extra, _) = raw_payload.deconstruct();
-    let account_id = S::Signer::from(signer.public()).into_account();
-
-    Ok(UncheckedExtrinsic::new_signed(
-        call,
-        account_id.into(),
-        signature.into(),
-        extra,
-    ))
 }
