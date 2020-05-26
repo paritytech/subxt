@@ -42,6 +42,8 @@ use crate::frame::{
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
+
+/// Ensure the runtime version registered in the transaction is the same as at present.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckSpecVersion<T: System>(
     pub PhantomData<T>,
@@ -219,26 +221,6 @@ where
     }
 }
 
-/// Checks if a transaction would exhausts the block gas limit.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckBlockGasLimit<T: System>(pub PhantomData<T>);
-
-impl<T> SignedExtension for CheckBlockGasLimit<T>
-where
-    T: System + Clone + Debug + Eq + Send + Sync,
-{
-    const IDENTIFIER: &'static str = "CheckBlockGasLimit";
-    type AccountId = u64;
-    type Call = ();
-    type AdditionalSigned = ();
-    type Pre = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-        Ok(())
-    }
-}
-
 /// Trait for implementing transaction extras for a runtime.
 pub trait SignedExtra<T: System> {
     /// The type the extras.
@@ -276,7 +258,6 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         CheckNonce<T>,
         CheckWeight<T>,
         ChargeTransactionPayment<T>,
-        CheckBlockGasLimit<T>,
     );
 
     fn new(
@@ -302,7 +283,6 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             ChargeTransactionPayment(<T as Balances>::Balance::default()),
-            CheckBlockGasLimit(PhantomData),
         )
     }
 }
