@@ -37,6 +37,7 @@ use crate::{
             Balances,
         },
         contracts::Contracts,
+        sudo::Sudo,
         system::System,
     },
     Encoded,
@@ -125,6 +126,8 @@ impl System for NodeTemplateRuntime {
 impl Balances for NodeTemplateRuntime {
     type Balance = u128;
 }
+
+impl Sudo for NodeTemplateRuntime {}
 
 /// Concrete type definitions compatible with those for kusama, v0.7
 ///
