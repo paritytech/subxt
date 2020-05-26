@@ -18,7 +18,7 @@
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 use crate::{
-    extrinsic::SignedExtra,
+    extra::SignedExtra,
     frame::system::System,
     Encoded,
 };
@@ -44,14 +44,14 @@ pub trait Signer<T: System, S: Encode, E: SignedExtra<T>> {
     /// Optionally returns a nonce.
     fn nonce(&self) -> Option<T::Index>;
 
-    /// Takes an usigned extrinsic and returns a signed extrinsic.
+    /// Takes an unsigned extrinsic and returns a signed extrinsic.
     fn sign(
         &self,
         extrinsic: SignedPayload<Encoded, E::Extra>,
     ) -> UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>;
 }
 
-/// Transaction builder.
+/// Extrinsic signer using a private key.
 pub struct PairSigner<T: System, S: Encode, E: SignedExtra<T>, P: Pair> {
     _marker: PhantomData<(S, E)>,
     account_id: T::AccountId,
@@ -59,10 +59,13 @@ pub struct PairSigner<T: System, S: Encode, E: SignedExtra<T>, P: Pair> {
     signer: P,
 }
 
-impl<T: System, S: Encode, E: SignedExtra<T>, P: Pair> PairSigner<T, S, E, P>
+impl<T, S, E, P> PairSigner<T, S, E, P>
 where
-    S: Verify + From<P::Signature>,
+    T: System,
+    S: Encode + Verify + From<P::Signature>,
     S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
+    E: SignedExtra<T>,
+    P: Pair,
 {
     /// Creates a new `Signer` from a `Pair`.
     pub fn new(signer: P) -> Self {
@@ -86,10 +89,13 @@ where
     }
 }
 
-impl<T: System, S: Encode, E: SignedExtra<T>, P: Pair> Signer<T, S, E>
-    for PairSigner<T, S, E, P>
+impl<T, S, E, P> Signer<T, S, E> for PairSigner<T, S, E, P>
 where
+    T: System,
     T::AccountId: Into<T::Address>,
+    S: Encode,
+    E: SignedExtra<T>,
+    P: Pair,
     P::Signature: Into<S>,
 {
     fn account_id(&self) -> &T::AccountId {

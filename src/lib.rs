@@ -69,7 +69,7 @@ use std::{
 
 mod error;
 mod events;
-mod extrinsic;
+mod extra;
 mod frame;
 mod metadata;
 mod rpc;
@@ -83,7 +83,7 @@ pub use crate::{
         EventsError,
         RawEvent,
     },
-    extrinsic::*,
+    extra::*,
     frame::*,
     metadata::{
         Metadata,
@@ -301,6 +301,8 @@ where
     E: SignedExtra<T> + SignedExtension + Send + Sync + 'static,
 {
     /// Creates an unsigned extrinsic.
+    ///
+    /// If `nonce` is `None` the nonce will be fetched from the chain.
     pub async fn create_unsigned<C: Call<T>>(
         &self,
         call: C,
