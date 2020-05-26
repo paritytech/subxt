@@ -314,13 +314,14 @@ where
         } else {
             self.account(account_id).await?.nonce
         };
-        let version = self.runtime_version.spec_version;
+        let spec_version = self.runtime_version.spec_version;
+        let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
             .module_with_calls(C::MODULE)
             .and_then(|module| module.call(C::FUNCTION, call))?;
-        let extra: E = E::new(version, account_nonce, genesis_hash);
+        let extra: E = E::new(spec_version, tx_version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
     }
