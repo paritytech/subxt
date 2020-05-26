@@ -300,6 +300,14 @@ where
     S: Encode + Send + Sync + 'static,
     E: SignedExtra<T> + SignedExtension + Send + Sync + 'static,
 {
+    /// Encodes a call.
+    pub fn encode<C: Call<T>>(&self, call: C) -> Result<Encoded, Error> {
+        Ok(self
+            .metadata()
+            .module_with_calls(C::MODULE)
+            .and_then(|module| module.call(C::FUNCTION, call))?)
+    }
+
     /// Creates an unsigned extrinsic.
     ///
     /// If `nonce` is `None` the nonce will be fetched from the chain.
@@ -317,10 +325,7 @@ where
         let spec_version = self.runtime_version.spec_version;
         let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
-        let call = self
-            .metadata()
-            .module_with_calls(C::MODULE)
-            .and_then(|module| module.call(C::FUNCTION, call))?;
+        let call = self.encode(call)?;
         let extra: E = E::new(spec_version, tx_version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
@@ -402,7 +407,7 @@ where
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {

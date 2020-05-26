@@ -34,6 +34,7 @@ use sp_core::storage::StorageKey;
 
 pub mod balances;
 pub mod contracts;
+pub mod sudo;
 pub mod system;
 
 /// Store trait.

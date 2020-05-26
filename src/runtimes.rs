@@ -31,6 +31,7 @@ use crate::frame::{
         Balances,
     },
     contracts::Contracts,
+    sudo::Sudo,
     system::System,
 };
 
@@ -60,6 +61,8 @@ impl Balances for DefaultNodeRuntime {
 }
 
 impl Contracts for DefaultNodeRuntime {}
+
+impl Sudo for DefaultNodeRuntime {}
 
 /// Concrete type definitions compatible with those for kusama, v0.7
 ///
