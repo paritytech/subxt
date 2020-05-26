@@ -69,10 +69,15 @@ where
 }
 
 /// Ensure the transaction version registered in the transaction is the same as at present.
+///
+/// # Note
+///
+/// This is modified from the substrate version to allow passing in of the version, which is
+/// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckTxVersion<T: System>(
     pub PhantomData<T>,
-    /// Local tx version to be used for `AdditionalSigned`
+    /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
     pub u32,
 );
@@ -222,7 +227,12 @@ pub trait SignedExtra<T: System> {
     type Extra: SignedExtension;
 
     /// Creates a new `SignedExtra`.
-    fn new(spec_version: u32, tx_version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self;
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> Self;
 
     /// Returns the transaction extra.
     fn extra(&self) -> Self::Extra;
@@ -250,7 +260,12 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         ChargeTransactionPayment<T>,
     );
 
-    fn new(spec_version: u32, tx_version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> Self {
         DefaultExtra {
             spec_version,
             tx_version,
