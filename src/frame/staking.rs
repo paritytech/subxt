@@ -25,17 +25,14 @@ use codec::{
     Encode,
     HasCompact,
 };
-use sp_runtime::{
-    Perbill,
-    RuntimeDebug,
-};
+use sp_runtime::Perbill;
 use std::{
     fmt::Debug,
     marker::PhantomData,
 };
 
 /// A record of the nominations made by a specific account.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Ord, PartialOrd, Hash)]
 pub struct Nominations<AccountId> {
     /// The targets of nomination.
     pub targets: Vec<AccountId>,
@@ -48,7 +45,7 @@ pub struct Nominations<AccountId> {
 }
 
 /// Information regarding the active era (era in used in session).
-#[derive(Encode, Decode, RuntimeDebug)]
+#[derive(Encode, Decode, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ActiveEraInfo {
     /// Index of era.
     pub index: EraIndex,
@@ -56,7 +53,7 @@ pub struct ActiveEraInfo {
     ///
     /// Start can be none if start hasn't been set for the era yet,
     /// Start is set on the first on_finalize of the era to guarantee usage of `Time`.
-    start: Option<u64>,
+    pub start: Option<u64>,
 }
 
 /// Data type used to index nominators in the compact type
@@ -78,7 +75,7 @@ pub type EraIndex = u32;
 pub type RewardPoint = u32;
 
 /// A destination account for payment.
-#[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, Debug)]
 pub enum RewardDestination {
     /// Pay into the stash account, increasing the amount at stake accordingly.
     Staked,
@@ -95,7 +92,7 @@ impl Default for RewardDestination {
 }
 
 /// Preference of what happens regarding validation.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, RuntimeDebug)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug)]
 pub struct ValidatorPrefs {
     /// Reward that validator takes up-front; only the rest is split between themselves and
     /// nominators.
@@ -116,18 +113,18 @@ impl Default for ValidatorPrefs {
 pub trait Staking: System {}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-#[derive(PartialEq, Eq, Clone, Encode, Decode)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
 pub struct UnlockChunk<Balance: HasCompact> {
     /// Amount of funds to be unlocked.
     #[codec(compact)]
-    value: Balance,
+    pub value: Balance,
     /// Era number at which point it'll be unlocked.
     #[codec(compact)]
-    era: EraIndex,
+    pub era: EraIndex,
 }
 
 /// The ledger of a (bonded) stash.
-#[derive(PartialEq, Eq, Clone, Encode, Decode)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
 pub struct StakingLedger<AccountId, Balance: HasCompact> {
     /// The stash account whose balance is actually locked and at stake.
     pub stash: AccountId,
@@ -159,13 +156,7 @@ pub struct StakingLedger<AccountId, Balance: HasCompact> {
 )]
 pub struct HistoryDepthStore<T: Staking> {
     #[store(returns = u32)]
-    /// Number of eras to keep in history.
-    ///
-    /// Information is kept for eras in `[current_era - history_depth; current_era]`.
-    ///
-    /// Must be more than the number of eras delayed by session otherwise.
-    /// I.e. active era must always be in history.
-    /// I.e. `active_era > current_era - history_depth` must be guaranteed.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -175,7 +166,7 @@ pub struct HistoryDepthStore<T: Staking> {
 )]
 pub struct ValidatorCountStore<T: Staking> {
     #[store(returns = u32)]
-    /// The ideal number of staking participants.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -185,7 +176,7 @@ pub struct ValidatorCountStore<T: Staking> {
 )]
 pub struct MinimumValidatorCountStore<T: Staking> {
     #[store(returns = u32)]
-    /// Minimum number of staking participants before emergency conditions are imposed.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -195,17 +186,15 @@ pub struct MinimumValidatorCountStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct InvulnerablesStore<T: Staking> {
     #[store(returns = Vec<T::AccountId>)]
-    /// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
-    /// easy to initialize and the performance hit is minimal (we expect no more than four
-    /// invulnerables) and restricted to testnets.
-    pub _runtime: core::marker::PhantomData<T>,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
 }
 
 /// Map from all locked "stash" accounts to the controller account.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct BondedStore<T: Staking> {
     #[store(returns = Vec<T::AccountId>)]
-    /// Map from all locked "stash" accounts to the controller account.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -213,7 +202,7 @@ pub struct BondedStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct LedgerStore<T: Staking> {
     #[store(returns = Option<StakingLedger<T::AccountId, ()>>)]
-    /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -221,7 +210,7 @@ pub struct LedgerStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct PayeeStore<T: Staking> {
     #[store(returns = RewardDestination)]
-    /// Where the reward payment should be made. Keyed by stash.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -229,7 +218,7 @@ pub struct PayeeStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct ValidatorsStore<T: Staking> {
     #[store(returns = ValidatorPrefs)]
-    /// The map from (wannabe) validator stash key to the preferences of that validator.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -237,7 +226,7 @@ pub struct ValidatorsStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct NominatorsStore<T: Staking> {
     #[store(returns = Option<Nominations<T::AccountId>>)]
-    /// The map from nominator stash key to the set of stash keys of all validators to nominate.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -262,10 +251,7 @@ pub struct CurrentEraStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct ActiveEraStore<T: Staking> {
     #[store(returns = Option<ActiveEraInfo>)]
-    /// The active era information, it holds index and start.
-    ///
-    /// The active era is the era currently rewarded.
-    /// Validator set of this era must be equal to `SessionInterface::validators`.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 

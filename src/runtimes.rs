@@ -61,6 +61,13 @@ impl Balances for DefaultNodeRuntime {
     type Balance = u128;
 }
 
+impl Session for DefaultNodeRuntime {
+    type SessionIndex = u32;
+    type ValidatorId = <Self as System>::AccountId;
+}
+
+impl Staking for DefaultNodeRuntime {}
+
 impl Contracts for DefaultNodeRuntime {}
 
 /// Concrete type definitions compatible with those for kusama, v0.7
