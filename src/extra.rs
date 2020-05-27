@@ -15,7 +15,6 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{
-    Codec,
     Decode,
     Encode,
 };
@@ -23,18 +22,9 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
 };
-use sp_core::Pair;
 use sp_runtime::{
-    generic::{
-        Era,
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::{
-        IdentifyAccount,
-        SignedExtension,
-        Verify,
-    },
+    generic::Era,
+    traits::SignedExtension,
     transaction_validity::TransactionValidityError,
 };
 
@@ -52,19 +42,51 @@ use crate::frame::{
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
+
+/// Ensure the runtime version registered in the transaction is the same as at present.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckVersion<T: System>(
+pub struct CheckSpecVersion<T: System>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
     pub u32,
 );
 
-impl<T> SignedExtension for CheckVersion<T>
+impl<T> SignedExtension for CheckSpecVersion<T>
 where
     T: System + Clone + Debug + Eq + Send + Sync,
 {
-    const IDENTIFIER: &'static str = "CheckVersion";
+    const IDENTIFIER: &'static str = "CheckSpecVersion";
+    type AccountId = u64;
+    type Call = ();
+    type AdditionalSigned = u32;
+    type Pre = ();
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(self.1)
+    }
+}
+
+/// Ensure the transaction version registered in the transaction is the same as at present.
+///
+/// # Note
+///
+/// This is modified from the substrate version to allow passing in of the version, which is
+/// returned via `additional_signed()`.
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+pub struct CheckTxVersion<T: System>(
+    pub PhantomData<T>,
+    /// Local version to be used for `AdditionalSigned`
+    #[codec(skip)]
+    pub u32,
+);
+
+impl<T> SignedExtension for CheckTxVersion<T>
+where
+    T: System + Clone + Debug + Eq + Send + Sync,
+{
+    const IDENTIFIER: &'static str = "CheckTxVersion";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = u32;
@@ -199,33 +221,18 @@ where
     }
 }
 
-/// Checks if a transaction would exhausts the block gas limit.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckBlockGasLimit<T: System>(pub PhantomData<T>);
-
-impl<T> SignedExtension for CheckBlockGasLimit<T>
-where
-    T: System + Clone + Debug + Eq + Send + Sync,
-{
-    const IDENTIFIER: &'static str = "CheckBlockGasLimit";
-    type AccountId = u64;
-    type Call = ();
-    type AdditionalSigned = ();
-    type Pre = ();
-    fn additional_signed(
-        &self,
-    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
-        Ok(())
-    }
-}
-
 /// Trait for implementing transaction extras for a runtime.
 pub trait SignedExtra<T: System> {
     /// The type the extras.
     type Extra: SignedExtension;
 
     /// Creates a new `SignedExtra`.
-    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self;
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> Self;
 
     /// Returns the transaction extra.
     fn extra(&self) -> Self::Extra;
@@ -234,7 +241,8 @@ pub trait SignedExtra<T: System> {
 /// Default `SignedExtra` for substrate runtimes.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct DefaultExtra<T: System> {
-    version: u32,
+    spec_version: u32,
+    tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
 }
@@ -243,18 +251,24 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
     for DefaultExtra<T>
 {
     type Extra = (
-        CheckVersion<T>,
+        CheckSpecVersion<T>,
+        CheckTxVersion<T>,
         CheckGenesis<T>,
         CheckEra<T>,
         CheckNonce<T>,
         CheckWeight<T>,
         ChargeTransactionPayment<T>,
-        CheckBlockGasLimit<T>,
     );
 
-    fn new(version: u32, nonce: T::Index, genesis_hash: T::Hash) -> Self {
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+    ) -> Self {
         DefaultExtra {
-            version,
+            spec_version,
+            tx_version,
             nonce,
             genesis_hash,
         }
@@ -262,13 +276,13 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
 
     fn extra(&self) -> Self::Extra {
         (
-            CheckVersion(PhantomData, self.version),
+            CheckSpecVersion(PhantomData, self.spec_version),
+            CheckTxVersion(PhantomData, self.tx_version),
             CheckGenesis(PhantomData, self.genesis_hash),
             CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             ChargeTransactionPayment(<T as Balances>::Balance::default()),
-            CheckBlockGasLimit(PhantomData),
         )
     }
 }
@@ -288,33 +302,4 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtension
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         self.extra().additional_signed()
     }
-}
-
-pub(crate) fn create_and_sign<T: System + Send + Sync, C, P, S, E>(
-    signer: P,
-    call: C,
-    extra: E,
-) -> Result<
-    UncheckedExtrinsic<T::Address, C, S, <E as SignedExtra<T>>::Extra>,
-    TransactionValidityError,
->
-where
-    P: Pair,
-    S: Verify + Codec + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    C: Encode,
-    E: SignedExtra<T> + SignedExtension,
-    T::Address: From<T::AccountId>,
-{
-    let raw_payload = SignedPayload::new(call, extra.extra())?;
-    let signature = raw_payload.using_encoded(|payload| signer.sign(payload));
-    let (call, extra, _) = raw_payload.deconstruct();
-    let account_id = S::Signer::from(signer.public()).into_account();
-
-    Ok(UncheckedExtrinsic::new_signed(
-        call,
-        account_id.into(),
-        signature.into(),
-        extra,
-    ))
 }

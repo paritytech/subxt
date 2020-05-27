@@ -45,46 +45,36 @@ extern crate substrate_subxt_proc_macro;
 pub use sp_core;
 pub use sp_runtime;
 
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
-
-use codec::{
-    Codec,
-    Encode,
-};
+use codec::Encode;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    Pair,
+use sp_core::storage::{
+    StorageChangeSet,
+    StorageKey,
 };
 use sp_runtime::{
     generic::{
         SignedPayload,
         UncheckedExtrinsic,
     },
-    traits::{
-        IdentifyAccount,
-        SignedExtension,
-        Verify,
-    },
+    traits::SignedExtension,
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
+use std::{
+    convert::TryFrom,
+    marker::PhantomData,
+};
 
 mod error;
 mod events;
-mod extrinsic;
+mod extra;
 mod frame;
 mod metadata;
 mod rpc;
 mod runtimes;
+mod signer;
 
 pub use crate::{
     error::Error,
@@ -93,7 +83,7 @@ pub use crate::{
         EventsError,
         RawEvent,
     },
-    extrinsic::*,
+    extra::*,
     frame::*,
     metadata::{
         Metadata,
@@ -104,17 +94,15 @@ pub use crate::{
         ExtrinsicSuccess,
     },
     runtimes::*,
+    signer::*,
     substrate_subxt_proc_macro::*,
 };
 use crate::{
-    frame::{
-        balances::Balances,
-        system::{
-            AccountStoreExt,
-            Phase,
-            System,
-            SystemEvent,
-        },
+    frame::system::{
+        AccountStoreExt,
+        Phase,
+        System,
+        SystemEvent,
     },
     rpc::{
         ChainBlock,
@@ -283,28 +271,6 @@ impl<T: System, S, E> Client<T, S, E> {
         Ok(proof)
     }
 
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<X: Encode>(
-        &self,
-        extrinsic: X,
-    ) -> Result<T::Hash, Error> {
-        let xt_hash = self.rpc.submit_extrinsic(extrinsic).await?;
-        Ok(xt_hash)
-    }
-
-    /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic<X: Encode + 'static>(
-        self,
-        extrinsic: X,
-        decoder: EventsDecoder<T>,
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
-        let success = self
-            .rpc
-            .submit_and_watch_extrinsic(extrinsic, decoder)
-            .await?;
-        Ok(success)
-    }
-
     /// Subscribe to events.
     pub async fn subscribe_events(
         &self,
@@ -330,190 +296,107 @@ impl<T: System, S, E> Client<T, S, E> {
 
 impl<T, S, E> Client<T, S, E>
 where
-    T: System + Balances + Send + Sync + 'static,
-    S: 'static,
-    E: SignedExtra<T> + SignedExtension + 'static,
+    T: System + Send + Sync + 'static,
+    S: Encode + Send + Sync + 'static,
+    E: SignedExtra<T> + SignedExtension + Send + Sync + 'static,
 {
-    /// Creates raw payload to be signed for the supplied `Call` without private key
-    pub async fn create_raw_payload<C: Call<T>>(
+    /// Creates an unsigned extrinsic.
+    ///
+    /// If `nonce` is `None` the nonce will be fetched from the chain.
+    pub async fn create_unsigned<C: Call<T>>(
         &self,
-        account_id: &<T as System>::AccountId,
         call: C,
+        account_id: &<T as System>::AccountId,
+        nonce: Option<T::Index>,
     ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
-        let account_nonce = self.account(account_id).await?.nonce;
-        let version = self.runtime_version.spec_version;
+        let account_nonce = if let Some(nonce) = nonce {
+            nonce
+        } else {
+            self.account(account_id).await?.nonce
+        };
+        let spec_version = self.runtime_version.spec_version;
+        let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
         let call = self
             .metadata()
             .module_with_calls(C::MODULE)
             .and_then(|module| module.call(C::FUNCTION, call))?;
-        let extra: E = E::new(version, account_nonce, genesis_hash);
+        let extra: E = E::new(spec_version, tx_version, account_nonce, genesis_hash);
         let raw_payload = SignedPayload::new(call, extra.extra())?;
         Ok(raw_payload)
     }
 
-    /// Create a transaction builder for a private key.
-    pub async fn xt<P>(
-        &self,
-        signer: P,
-        nonce: Option<T::Index>,
-    ) -> Result<XtBuilder<T, P, S, E>, Error>
-    where
-        P: Pair,
-        P::Signature: Codec,
-        S: Verify,
-        S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    {
-        let account_id = S::Signer::from(signer.public()).into_account();
-        let nonce = match nonce {
-            Some(nonce) => nonce,
-            None => self.account(&account_id).await?.nonce,
-        };
-
-        let genesis_hash = self.genesis_hash;
-        let runtime_version = self.runtime_version.clone();
-        Ok(XtBuilder {
-            client: self.clone(),
-            nonce,
-            runtime_version,
-            genesis_hash,
-            signer,
-        })
-    }
-}
-
-/// Transaction builder.
-#[derive(Clone)]
-pub struct XtBuilder<T: System, P, S, E> {
-    client: Client<T, S, E>,
-    nonce: T::Index,
-    runtime_version: RuntimeVersion,
-    genesis_hash: T::Hash,
-    signer: P,
-}
-
-impl<T: System, P, S, E> XtBuilder<T, P, S, E> {
-    /// Returns the chain metadata.
-    pub fn metadata(&self) -> &Metadata {
-        self.client.metadata()
-    }
-
-    /// Returns the nonce.
-    pub fn nonce(&self) -> T::Index {
-        self.nonce
-    }
-
-    /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) -> &mut XtBuilder<T, P, S, E> {
-        self.nonce = nonce;
-        self
-    }
-
-    /// Increment the nonce
-    pub fn increment_nonce(&mut self) -> &mut XtBuilder<T, P, S, E> {
-        self.set_nonce(self.nonce() + 1.into());
-        self
-    }
-}
-
-impl<T: System + Send + Sync + 'static, P, S: 'static, E> XtBuilder<T, P, S, E>
-where
-    P: Pair,
-    S: Verify + Codec + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    T::Address: From<T::AccountId>,
-    E: SignedExtra<T> + SignedExtension + 'static,
-{
-    /// Creates and signs an Extrinsic for the supplied `Call`
-    pub fn create_and_sign<C: Call<T>>(
+    /// Creates a signed extrinsic.
+    pub async fn create_signed<C: Call<T>>(
         &self,
         call: C,
+        signer: &(dyn Signer<T, S, E> + Send + Sync),
     ) -> Result<
         UncheckedExtrinsic<T::Address, Encoded, S, <E as SignedExtra<T>>::Extra>,
         Error,
     > {
-        let signer = self.signer.clone();
-        let account_nonce = self.nonce;
-        let version = self.runtime_version.spec_version;
-        let genesis_hash = self.genesis_hash;
-        let call = self
-            .metadata()
-            .module_with_calls(C::MODULE)
-            .and_then(|module| module.call(C::FUNCTION, call))?;
+        let unsigned = self
+            .create_unsigned(call, signer.account_id(), signer.nonce())
+            .await?;
+        Ok(signer.sign(unsigned))
+    }
 
-        log::info!(
-            "Creating Extrinsic with genesis hash {:?} and account nonce {:?}",
-            genesis_hash,
-            account_nonce
-        );
+    /// Returns an events decoder for a call.
+    pub fn events_decoder<C: Call<T>>(&self) -> Result<EventsDecoder<T>, Error> {
+        let metadata = self.metadata().clone();
+        let mut decoder = EventsDecoder::try_from(metadata)?;
+        C::events_decoder(&mut decoder)?;
+        Ok(decoder)
+    }
 
-        let extra = E::new(version, account_nonce, genesis_hash);
-        let xt = extrinsic::create_and_sign::<_, _, _, S, _>(signer, call, extra)?;
-        Ok(xt)
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    pub async fn submit_extrinsic(
+        &self,
+        extrinsic: UncheckedExtrinsic<
+            T::Address,
+            Encoded,
+            S,
+            <E as SignedExtra<T>>::Extra,
+        >,
+    ) -> Result<T::Hash, Error> {
+        self.rpc.submit_extrinsic(extrinsic).await
+    }
+
+    /// Create and submit an extrinsic and return corresponding Event if successful
+    pub async fn submit_and_watch_extrinsic(
+        &self,
+        extrinsic: UncheckedExtrinsic<
+            T::Address,
+            Encoded,
+            S,
+            <E as SignedExtra<T>>::Extra,
+        >,
+        decoder: EventsDecoder<T>,
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        self.rpc
+            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .await
     }
 
     /// Submits a transaction to the chain.
-    pub async fn submit<C: Call<T>>(&self, call: C) -> Result<T::Hash, Error> {
-        let extrinsic = self.create_and_sign(call)?;
-        let xt_hash = self.client.submit_extrinsic(extrinsic).await?;
-        Ok(xt_hash)
+    pub async fn submit<C: Call<T>>(
+        &self,
+        call: C,
+        signer: &(dyn Signer<T, S, E> + Send + Sync),
+    ) -> Result<T::Hash, Error> {
+        let extrinsic = self.create_signed(call, signer).await?;
+        self.submit_extrinsic(extrinsic).await
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub fn watch(self) -> EventsSubscriber<T, P, S, E> {
-        let metadata = self.client.metadata().clone();
-        let decoder = EventsDecoder::try_from(metadata).map_err(Into::into);
-        EventsSubscriber {
-            client: self.client.clone(),
-            builder: self,
-            decoder,
-        }
-    }
-}
-
-/// Submits an extrinsic and subscribes to the triggered events
-pub struct EventsSubscriber<T: System, P, S, E> {
-    client: Client<T, S, E>,
-    builder: XtBuilder<T, P, S, E>,
-    decoder: Result<EventsDecoder<T>, EventsError>,
-}
-
-impl<T: System, P, S, E> EventsSubscriber<T, P, S, E> {
-    /// Access the events decoder for registering custom type sizes
-    pub fn events_decoder<
-        F: FnOnce(&mut EventsDecoder<T>) -> Result<usize, EventsError>,
-    >(
-        self,
-        f: F,
-    ) -> Self {
-        let mut this = self;
-        if let Ok(ref mut decoder) = this.decoder {
-            if let Err(err) = f(decoder) {
-                this.decoder = Err(err)
-            }
-        }
-        this
-    }
-}
-
-impl<T: System + Send + Sync + 'static, P, S: 'static, E> EventsSubscriber<T, P, S, E>
-where
-    P: Pair,
-    S: Verify + Codec + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    T::Address: From<T::AccountId>,
-    E: SignedExtra<T> + SignedExtension + 'static,
-{
-    /// Submits transaction to the chain and watch for events.
-    pub async fn submit<C: Call<T>>(self, call: C) -> Result<ExtrinsicSuccess<T>, Error> {
-        let mut decoder = self.decoder?;
-        C::events_decoder(&mut decoder)?;
-        let extrinsic = self.builder.create_and_sign(call)?;
-        let xt_success = self
-            .client
-            .submit_and_watch_extrinsic(extrinsic, decoder)
-            .await?;
-        Ok(xt_success)
+    pub async fn watch<C: Call<T>>(
+        &self,
+        call: C,
+        signer: &(dyn Signer<T, S, E> + Send + Sync),
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let extrinsic = self.create_signed(call, signer).await?;
+        let decoder = self.events_decoder::<C>()?;
+        self.submit_and_watch_extrinsic(extrinsic, decoder).await
     }
 }
 
@@ -530,9 +413,12 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
-    use sp_core::storage::{
-        well_known_keys,
-        StorageKey,
+    use sp_core::{
+        storage::{
+            well_known_keys,
+            StorageKey,
+        },
+        Pair,
     };
     use sp_keyring::{
         AccountKeyring,
@@ -552,25 +438,37 @@ mod tests {
     #[ignore] // requires locally running substrate node
     async fn test_tx_transfer_balance() {
         env_logger::try_init().ok();
-        let signer = AccountKeyring::Alice.pair();
+        let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
         let dest = AccountKeyring::Bob.to_account_id().into();
 
         let client = test_client().await;
-        let mut xt = client.xt(signer, None).await.unwrap();
-        let _ = xt
-            .submit(balances::TransferCall {
-                to: &dest,
-                amount: 10_000,
-            })
+        let nonce = client
+            .account(&AccountKeyring::Alice.to_account_id())
+            .await
+            .unwrap()
+            .nonce;
+        signer.set_nonce(nonce);
+        client
+            .submit(
+                balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000,
+                },
+                &signer,
+            )
             .await
             .unwrap();
 
         // check that nonce is handled correctly
-        xt.increment_nonce()
-            .submit(balances::TransferCall {
-                to: &dest,
-                amount: 10_000,
-            })
+        signer.increment_nonce();
+        client
+            .submit(
+                balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000,
+                },
+                &signer,
+            )
             .await
             .unwrap();
     }
@@ -634,12 +532,13 @@ mod tests {
 
         // create raw payload with AccoundId and sign it
         let raw_payload = client
-            .create_raw_payload(
-                &signer_account_id,
+            .create_unsigned(
                 balances::TransferCall {
                     to: &dest,
                     amount: 10_000,
                 },
+                &signer_account_id,
+                None,
             )
             .await
             .unwrap();
@@ -647,12 +546,16 @@ mod tests {
         let raw_multisig = MultiSignature::from(raw_signature);
 
         // create signature with Xtbuilder
-        let xt = client.xt(signer_pair.clone(), None).await.unwrap();
-        let xt_multi_sig = xt
-            .create_and_sign(balances::TransferCall {
-                to: &dest,
-                amount: 10_000,
-            })
+        let signer = PairSigner::new(Ed25519Keyring::Alice.pair());
+        let xt_multi_sig = client
+            .create_signed(
+                balances::TransferCall {
+                    to: &dest,
+                    amount: 10_000,
+                },
+                &signer,
+            )
+            .await
             .unwrap()
             .signature
             .unwrap()

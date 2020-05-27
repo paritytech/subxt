@@ -36,6 +36,7 @@ use substrate_subxt::{
     },
     ClientBuilder,
     KusamaRuntime,
+    PairSigner,
 };
 
 #[module]
@@ -112,6 +113,7 @@ subxt_test!({
 async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
     let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let alice = AccountKeyring::Alice.to_account_id();
     let bob = AccountKeyring::Bob.to_account_id();
 
@@ -119,13 +121,12 @@ async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
     let bob_account = client.account(&bob).await?;
     let pre = (alice_account, bob_account);
 
-    let builder = client.xt(AccountKeyring::Alice.pair(), None).await?;
+    let _hash = client
+        .transfer(&signer, &bob.clone().into(), 10_000)
+        .await?;
 
-    let _hash = builder.transfer(&bob.clone().into(), 10_000).await?;
-
-    let result = builder
-        .watch()
-        .transfer(&bob.clone().into(), 10_000)
+    let result = client
+        .transfer_and_watch(&signer, &bob.clone().into(), 10_000)
         .await?;
 
     assert_eq!(

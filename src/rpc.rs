@@ -342,7 +342,7 @@ impl<T: System> Rpc<T> {
 
     /// Create and submit an extrinsic and return corresponding Event if successful
     pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
-        self,
+        &self,
         extrinsic: E,
         decoder: EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
