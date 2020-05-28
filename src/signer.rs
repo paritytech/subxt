@@ -17,27 +17,19 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-use crate::{
-    extra::SignedExtra,
-    frame::system::System,
-    Encoded,
-};
+use crate::{extra::SignedExtra, frame::system::System, Encoded};
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::{
-    generic::{
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::{
-        IdentifyAccount,
-        Verify,
-    },
+    generic::{SignedPayload, UncheckedExtrinsic},
+    traits::{IdentifyAccount, Verify, SignedExtension},
 };
-use std::marker::PhantomData;
+use std::{future::Future, marker::PhantomData, pin::Pin};
 
 /// Extrinsic signer.
-pub trait Signer<T: System, S: Encode, E: SignedExtra<T>> {
+pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>
+    where <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync
+{
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -45,10 +37,23 @@ pub trait Signer<T: System, S: Encode, E: SignedExtra<T>> {
     fn nonce(&self) -> Option<T::Index>;
 
     /// Takes an unsigned extrinsic and returns a signed extrinsic.
+    ///
+    /// Some signers may fail, for instance because the hardware on which the keys are located has
+    /// refused the operation.
     fn sign(
         &self,
         extrinsic: SignedPayload<Encoded, E::Extra>,
-    ) -> UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>;
+    ) -> Pin<
+        Box<
+            dyn Future<
+                    Output = Result<
+                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
+                        String,
+                    >,
+                > + Send
+                + Sync,
+        >,
+    >;
 }
 
 /// Extrinsic signer using a private key.
@@ -91,12 +96,13 @@ where
 
 impl<T, S, E, P> Signer<T, S, E> for PairSigner<T, S, E, P>
 where
-    T: System,
-    T::AccountId: Into<T::Address>,
-    S: Encode,
-    E: SignedExtra<T>,
-    P: Pair,
-    P::Signature: Into<S>,
+    T: System + 'static,
+    T::AccountId: Into<T::Address> + 'static,
+    S: Encode + 'static + Send + Sync,
+    E: SignedExtra<T> + 'static,
+    P: Pair + 'static,
+    P::Signature: Into<S> + 'static,
+    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     fn account_id(&self) -> &T::AccountId {
         &self.account_id
@@ -109,14 +115,24 @@ where
     fn sign(
         &self,
         extrinsic: SignedPayload<Encoded, E::Extra>,
-    ) -> UncheckedExtrinsic<T::Address, Encoded, S, E::Extra> {
+    ) -> Pin<
+        Box<
+            dyn Future<
+                    Output = Result<
+                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
+                        String,
+                    >,
+                > + Send
+                + Sync,
+        >,
+    > {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        UncheckedExtrinsic::new_signed(
+        Box::pin(futures::future::ready(Ok(UncheckedExtrinsic::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),
             extra,
-        )
+        ))))
     }
 }
