@@ -17,18 +17,34 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-use crate::{extra::SignedExtra, frame::system::System, Encoded};
+use crate::{
+    extra::SignedExtra,
+    frame::system::System,
+    Encoded,
+};
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::{
-    generic::{SignedPayload, UncheckedExtrinsic},
-    traits::{IdentifyAccount, Verify, SignedExtension},
+    generic::{
+        SignedPayload,
+        UncheckedExtrinsic,
+    },
+    traits::{
+        IdentifyAccount,
+        SignedExtension,
+        Verify,
+    },
 };
-use std::{future::Future, marker::PhantomData, pin::Pin};
+use std::{
+    future::Future,
+    marker::PhantomData,
+    pin::Pin,
+};
 
 /// Extrinsic signer.
 pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>
-    where <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync
+where
+    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;

@@ -16,11 +16,21 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::system::{System, SystemEventsDecoder};
-use codec::{Decode, Encode};
+use crate::frame::system::{
+    System,
+    SystemEventsDecoder,
+};
+use codec::{
+    Decode,
+    Encode,
+};
 use core::marker::PhantomData;
 use frame_support::Parameter;
-use sp_runtime::traits::{AtLeast32Bit, MaybeSerialize, Member};
+use sp_runtime::traits::{
+    AtLeast32Bit,
+    MaybeSerialize,
+    Member,
+};
 use std::fmt::Debug;
 
 /// The subset of the `pallet_balances::Trait` that a client must implement.
@@ -100,7 +110,10 @@ pub struct TransferEvent<T: Balances> {
 mod tests {
     use super::*;
     use crate::{
-        system::{AccountStore, AccountStoreExt},
+        system::{
+            AccountStore,
+            AccountStoreExt,
+        },
         tests::test_client,
     };
     use sp_keyring::AccountKeyring;
