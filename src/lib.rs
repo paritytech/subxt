@@ -46,10 +46,7 @@ pub use sp_core;
 pub use sp_runtime;
 
 use codec::Encode;
-use futures::{
-    future,
-    future::TryFutureExt as _,
-};
+use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
 use sp_core::storage::{
@@ -344,7 +341,8 @@ where
         let unsigned = self
             .create_unsigned(call, signer.account_id(), signer.nonce())
             .await?;
-        signer.sign(unsigned).map_err(From::from).await
+        let signed = signer.sign(unsigned).await?;
+        Ok(signed)
     }
 
     /// Returns an events decoder for a call.
