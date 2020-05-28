@@ -82,6 +82,7 @@ pub fn call(s: Structure) -> TokenStream {
             T: #module + #subxt::system::System + Send + Sync + 'static,
             S: #codec::Encode + Send + Sync + 'static,
             E: #subxt::SignedExtra<T> + #subxt::sp_runtime::traits::SignedExtension + Send + Sync + 'static,
+            <<E as #subxt::SignedExtra<T>>::Extra as #subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned: Send + Sync,
         {
             fn #call<'a>(
                 &'a self,
@@ -154,6 +155,7 @@ mod tests {
                 T: Balances + substrate_subxt::system::System + Send + Sync + 'static,
                 S: codec::Encode + Send + Sync + 'static,
                 E: substrate_subxt::SignedExtra<T> + substrate_subxt::sp_runtime::traits::SignedExtension + Send + Sync + 'static,
+                <<E as substrate_subxt::SignedExtra<T>>::Extra as substrate_subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned: Send + Sync,
             {
                 fn transfer<'a>(
                     &'a self,
