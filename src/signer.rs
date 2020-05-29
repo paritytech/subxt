@@ -144,11 +144,11 @@ where
     > {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        Box::pin(futures::future::ready(Ok(UncheckedExtrinsic::new_signed(
+        Box::pin(futures::future::ok(UncheckedExtrinsic::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),
             extra,
-        ))))
+        )))
     }
 }
