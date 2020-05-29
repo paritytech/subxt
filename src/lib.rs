@@ -118,7 +118,7 @@ pub struct ClientBuilder<T: System, S = MultiSignature, E = DefaultExtra<T>> {
     client: Option<jsonrpsee::Client>,
 }
 
-impl<T: System, S, E> ClientBuilder<T, S, E> {
+impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
@@ -327,18 +327,22 @@ where
     }
 
     /// Creates a signed extrinsic.
-    pub async fn create_signed<C: Call<T>>(
+    pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
         call: C,
         signer: &(dyn Signer<T, S, E> + Send + Sync),
     ) -> Result<
         UncheckedExtrinsic<T::Address, Encoded, S, <E as SignedExtra<T>>::Extra>,
         Error,
-    > {
+    >
+    where
+        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    {
         let unsigned = self
             .create_unsigned(call, signer.account_id(), signer.nonce())
             .await?;
-        Ok(signer.sign(unsigned))
+        let signed = signer.sign(unsigned).await?;
+        Ok(signed)
     }
 
     /// Returns an events decoder for a call.
@@ -379,21 +383,27 @@ where
     }
 
     /// Submits a transaction to the chain.
-    pub async fn submit<C: Call<T>>(
+    pub async fn submit<C: Call<T> + Send + Sync>(
         &self,
         call: C,
         signer: &(dyn Signer<T, S, E> + Send + Sync),
-    ) -> Result<T::Hash, Error> {
+    ) -> Result<T::Hash, Error>
+    where
+        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    {
         let extrinsic = self.create_signed(call, signer).await?;
         self.submit_extrinsic(extrinsic).await
     }
 
     /// Submits transaction to the chain and watch for events.
-    pub async fn watch<C: Call<T>>(
+    pub async fn watch<C: Call<T> + Send + Sync>(
         &self,
         call: C,
         signer: &(dyn Signer<T, S, E> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
+    ) -> Result<ExtrinsicSuccess<T>, Error>
+    where
+        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    {
         let extrinsic = self.create_signed(call, signer).await?;
         let decoder = self.events_decoder::<C>()?;
         self.submit_and_watch_extrinsic(extrinsic, decoder).await
