@@ -41,7 +41,7 @@ use std::{
 };
 
 /// Extrinsic signer.
-pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>: Send + Sync {
+pub trait Signer<T: System, S: Encode, E: SignedExtra<T>> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -111,7 +111,7 @@ where
     T: System + 'static,
     T::AccountId: Into<T::Address> + 'static,
     S: Encode + 'static + Send + Sync,
-    E: SignedExtra<T> + 'static + Send + Sync,
+    E: SignedExtra<T> + 'static,
     P: Pair + 'static,
     P::Signature: Into<S> + 'static,
 {
@@ -139,11 +139,43 @@ where
     > {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        Box::pin(futures::future::ready(Ok(UncheckedExtrinsic::new_signed(
+        Box::pin(futures::future::ok(UncheckedExtrinsic::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),
             extra,
-        ))))
+        )))
+    }
+}
+
+impl<T, S, E> Signer<T, S, E> for Box<dyn Signer<T, S, E>>
+where
+    T: System,
+    S: Encode,
+    E: SignedExtra<T>,
+{
+    fn account_id(&self) -> &T::AccountId {
+        (**self).account_id()
+    }
+
+    fn nonce(&self) -> Option<T::Index> {
+        (**self).nonce()
+    }
+
+    fn sign(
+        &self,
+        extrinsic: SignedPayload<Encoded, E::Extra>,
+    ) -> Pin<
+        Box<
+            dyn Future<
+                    Output = Result<
+                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
+                        String,
+                    >,
+                > + Send
+                + Sync,
+        >,
+    > {
+        (**self).sign(extrinsic)
     }
 }
