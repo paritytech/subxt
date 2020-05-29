@@ -148,7 +148,7 @@ where
     }
 }
 
-impl<T, S, E> Signer<T, S, E> for Box<dyn Signer<T, S, E>>
+impl<T, S, E> Signer<T, S, E> for Box<dyn Signer<T, S, E> + Send + Sync>
 where
     T: System,
     S: Encode,
