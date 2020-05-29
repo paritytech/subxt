@@ -31,7 +31,6 @@ use sp_runtime::{
     },
     traits::{
         IdentifyAccount,
-        SignedExtension,
         Verify,
     },
 };
@@ -42,10 +41,7 @@ use std::{
 };
 
 /// Extrinsic signer.
-pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>
-where
-    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
-{
+pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>: Send + Sync {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -115,10 +111,9 @@ where
     T: System + 'static,
     T::AccountId: Into<T::Address> + 'static,
     S: Encode + 'static + Send + Sync,
-    E: SignedExtra<T> + 'static,
+    E: SignedExtra<T> + 'static + Send + Sync,
     P: Pair + 'static,
     P::Signature: Into<S> + 'static,
-    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     fn account_id(&self) -> &T::AccountId {
         &self.account_id
