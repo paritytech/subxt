@@ -104,9 +104,14 @@ where
         self.nonce = Some(nonce);
     }
 
-    /// Increment the nonce
+    /// Increment the nonce.
     pub fn increment_nonce(&mut self) {
         self.nonce = self.nonce.map(|nonce| nonce + 1.into());
+    }
+
+    /// Returns the signer.
+    pub fn signer(&self) -> &P {
+        &self.signer
     }
 }
 
