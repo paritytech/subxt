@@ -194,40 +194,40 @@ pub struct InvulnerablesStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct BondedStore<T: Staking> {
     #[store(returns = Vec<T::AccountId>)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
 }
 
 /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct LedgerStore<T: Staking> {
     #[store(returns = Option<StakingLedger<T::AccountId, ()>>)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
+    /// The controller account
+    pub controller: T::AccountId,
 }
 
 /// Where the reward payment should be made. Keyed by stash.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct PayeeStore<T: Staking> {
     #[store(returns = RewardDestination)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
 }
 
 /// The map from (wannabe) validator stash key to the preferences of that validator.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct ValidatorsStore<T: Staking> {
     #[store(returns = ValidatorPrefs)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
 }
 
 /// The map from nominator stash key to the set of stash keys of all validators to nominate.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct NominatorsStore<T: Staking> {
     #[store(returns = Option<Nominations<T::AccountId>>)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
+    /// Tٗhe stash account
+    pub stash: T::AccountId,
 }
 
 /// The current era index.
@@ -237,10 +237,7 @@ pub struct NominatorsStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct CurrentEraStore<T: Staking> {
     #[store(returns = Option<EraIndex>)]
-    /// The current era index.
-    ///
-    /// This is the latest planned era, depending on how the Session pallet queues the validator
-    /// set, it might be active or not.
+    /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
 
@@ -306,7 +303,7 @@ pub struct NominateCall<T: Staking> {
 }
 
 /// Claim a payout.
-#[derive(PartialEq, Eq, Clone, Call, Encode)]
+#[derive(PartialEq, Eq, Clone, Call, Encode, Decode)]
 struct PayoutStakersCall<'a, T: System> {
     pub validator_stash: &'a T::AccountId,
     pub era: EraIndex,
