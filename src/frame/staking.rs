@@ -85,10 +85,13 @@ pub enum RewardDestination {
     Controller,
 }
 
-impl Default for RewardDestination {
-    fn default() -> Self {
-        RewardDestination::Staked
-    }
+/// Preference of what happens regarding validation.
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Call)]
+pub struct SetPayeeCall<T: Staking> {
+    /// The payee
+    pub payee: Perbill,
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
 }
 
 /// Preference of what happens regarding validation.
