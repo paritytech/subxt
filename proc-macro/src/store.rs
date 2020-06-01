@@ -49,11 +49,16 @@ impl Parse for StoreAttr {
 
 type StoreAttrs = utils::Attrs<StoreAttr>;
 
-fn parse_returns_attr(attr: &syn::Attribute) -> Option<syn::Type> {
+fn parse_returns_attr(attr: &syn::Attribute) -> Option<(syn::Type, syn::Type, bool)> {
     let attrs: StoreAttrs = syn::parse2(attr.tokens.clone()).unwrap();
     attrs.attrs.into_iter().next().map(|attr| {
         let StoreAttr::Returns(attr) = attr;
-        attr.value
+        let ty = attr.value;
+        if let Some(inner) = utils::parse_option(&ty) {
+            (ty, inner, false)
+        } else {
+            (ty.clone(), ty, true)
+        }
     })
 }
 
@@ -72,11 +77,16 @@ pub fn store(s: Structure) -> TokenStream {
     let filtered_fields = utils::filter_fields(&fields, &marker);
     let args = utils::fields_to_args(&filtered_fields);
     let build_struct = utils::build_struct(ident, &fields);
-    let ret = bindings
+    let (ret, store_ret, uses_default) = bindings
         .iter()
         .filter_map(|bi| bi.ast().attrs.iter().filter_map(parse_returns_attr).next())
         .next()
         .expect("#[store(returns = ..)] needs to be specified.");
+    let fetch = if uses_default {
+        quote!(fetch_or_default)
+    } else {
+        quote!(fetch)
+    };
     let store_ty = format_ident!(
         "{}",
         match filtered_fields.len() {
@@ -94,7 +104,7 @@ pub fn store(s: Structure) -> TokenStream {
         impl#generics #subxt::Store<T> for #ident<#(#params),*> {
             const MODULE: &'static str = MODULE;
             const FIELD: &'static str = #store_name;
-            type Returns = #ret;
+            type Returns = #store_ret;
             fn key(
                 &self,
                 metadata: &#subxt::Metadata,
@@ -113,6 +123,7 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store<'a>(
                 &'a self,
                 #args
+                hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>>;
         }
 
@@ -125,9 +136,10 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store<'a>(
                 &'a self,
                 #args
+                hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.fetch(#build_struct, None))
+                Box::pin(self.#fetch(#build_struct, hash))
             }
         }
     }
@@ -169,6 +181,7 @@ mod tests {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,
+                    hash: Option<T::Hash>,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
@@ -181,10 +194,11 @@ mod tests {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,
+                    hash: Option<T::Hash>,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>
                 {
                     let _ = core::marker::PhantomData::<T>;
-                    Box::pin(self.fetch(AccountStore { account_id, }, None))
+                    Box::pin(self.fetch_or_default(AccountStore { account_id, }, hash))
                 }
             }
         };

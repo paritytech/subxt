@@ -330,7 +330,7 @@ impl Step {
                 };
                 let build_struct = quote! {
                     #(
-                        let #state_name = client.fetch(#state, None).await.unwrap();
+                        let #state_name = client.fetch_or_default(#state, None).await.unwrap();
                     )*
                     State { #(#state_name),* }
                 };
@@ -477,11 +477,11 @@ mod tests {
 
                     let pre = {
                         let alice = client
-                            .fetch(AccountStore { account_id: &alice }, None)
+                            .fetch_or_default(AccountStore { account_id: &alice }, None)
                             .await
                             .unwrap();
                         let bob = client
-                            .fetch(AccountStore { account_id: &bob }, None)
+                            .fetch_or_default(AccountStore { account_id: &bob }, None)
                             .await
                             .unwrap();
                         State { alice, bob }
@@ -510,11 +510,11 @@ mod tests {
 
                     let post = {
                         let alice = client
-                            .fetch(AccountStore { account_id: &alice }, None)
+                            .fetch_or_default(AccountStore { account_id: &alice }, None)
                             .await
                             .unwrap();
                         let bob = client
-                            .fetch(AccountStore { account_id: &bob }, None)
+                            .fetch_or_default(AccountStore { account_id: &bob }, None)
                             .await
                             .unwrap();
                         State { alice, bob }

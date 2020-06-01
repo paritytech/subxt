@@ -45,7 +45,10 @@ extern crate substrate_subxt_proc_macro;
 pub use sp_core;
 pub use sp_runtime;
 
-use codec::Encode;
+use codec::{
+    Decode,
+    Encode,
+};
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
@@ -200,18 +203,31 @@ impl<T: System, S, E> Client<T, S, E> {
         &self.metadata
     }
 
-    /// Fetch a StorageKey.
-    pub async fn fetch<F: Store<T>>(
+    /// Fetch a StorageKey with default value.
+    pub async fn fetch_or_default<F: Store<T>>(
         &self,
         store: F,
         hash: Option<T::Hash>,
     ) -> Result<F::Returns, Error> {
         let key = store.key(&self.metadata)?;
-        let value = self.rpc.storage::<F::Returns>(key, hash).await?;
-        if let Some(v) = value {
-            Ok(v)
+        if let Some(data) = self.rpc.storage(key, hash).await? {
+            Ok(Decode::decode(&mut &data.0[..])?)
         } else {
             Ok(store.default(&self.metadata)?)
+        }
+    }
+
+    /// Fetch a StorageKey an optional storage key.
+    pub async fn fetch<F: Store<T>>(
+        &self,
+        store: F,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<F::Returns>, Error> {
+        let key = store.key(&self.metadata)?;
+        if let Some(data) = self.rpc.storage(key, hash).await? {
+            Ok(Some(Decode::decode(&mut &data.0[..])?))
+        } else {
+            Ok(None)
         }
     }
 
@@ -312,7 +328,7 @@ where
         let account_nonce = if let Some(nonce) = nonce {
             nonce
         } else {
-            self.account(account_id).await?.nonce
+            self.account(account_id, None).await?.nonce
         };
         let spec_version = self.runtime_version.spec_version;
         let tx_version = self.runtime_version.transaction_version;
@@ -453,7 +469,7 @@ mod tests {
 
         let client = test_client().await;
         let nonce = client
-            .account(&AccountKeyring::Alice.to_account_id())
+            .account(&AccountKeyring::Alice.to_account_id(), None)
             .await
             .unwrap()
             .nonce;
