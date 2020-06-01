@@ -123,6 +123,7 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store<'a>(
                 &'a self,
                 #args
+                hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>>;
         }
 
@@ -135,9 +136,10 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store<'a>(
                 &'a self,
                 #args
+                hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.#fetch(#build_struct, None))
+                Box::pin(self.#fetch(#build_struct, hash))
             }
         }
     }
@@ -179,6 +181,7 @@ mod tests {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,
+                    hash: Option<T::Hash>,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
@@ -191,10 +194,11 @@ mod tests {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,
+                    hash: Option<T::Hash>,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>
                 {
                     let _ = core::marker::PhantomData::<T>;
-                    Box::pin(self.fetch_or_default(AccountStore { account_id, }, None))
+                    Box::pin(self.fetch_or_default(AccountStore { account_id, }, hash))
                 }
             }
         };

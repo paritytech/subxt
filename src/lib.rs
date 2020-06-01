@@ -328,7 +328,7 @@ where
         let account_nonce = if let Some(nonce) = nonce {
             nonce
         } else {
-            self.account(account_id).await?.nonce
+            self.account(account_id, None).await?.nonce
         };
         let spec_version = self.runtime_version.spec_version;
         let tx_version = self.runtime_version.transaction_version;
@@ -469,7 +469,7 @@ mod tests {
 
         let client = test_client().await;
         let nonce = client
-            .account(&AccountKeyring::Alice.to_account_id())
+            .account(&AccountKeyring::Alice.to_account_id(), None)
             .await
             .unwrap()
             .nonce;
