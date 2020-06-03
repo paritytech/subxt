@@ -38,6 +38,11 @@ sp-core = { version = "2.0.0-rc2", package = "sp-core" }
 sc-rpc-api = { version = "0.8.0-rc2", package = "sc-rpc-api" }
 sp-transaction-pool = { version = "2.0.0-rc2", package = "sp-transaction-pool" }
 substrate-subxt-proc-macro = { version = "0.8.0", path = "proc-macro" }
+sp-std = "2.0.0-rc2"
+sp-finality-grandpa = "2.0.0-rc2"
+sp-consensus-babe = "0.8.0-rc2"
+pallet-im-online = "2.0.0-rc2"
+sp-authority-discovery = "2.0.0-rc2"
 
 [dev-dependencies]
 async-std = { version = "1.5.0", features = ["attributes"] }

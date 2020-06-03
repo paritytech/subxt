@@ -13,9 +13,12 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+#![allow(missing_docs)]
 
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_runtime::{
     generic::Header,
+    impl_opaque_keys,
     traits::{
         BlakeTwo256,
         IdentifyAccount,
@@ -24,6 +27,47 @@ use sp_runtime::{
     MultiSignature,
     OpaqueExtrinsic,
 };
+use sp_std::prelude::*;
+
+/// BABE marker struct
+pub struct Babe;
+impl sp_runtime::BoundToRuntimeAppPublic for Babe {
+    type Public = sp_consensus_babe::AuthorityId;
+}
+
+/// ImOnline marker struct
+pub struct ImOnline;
+impl sp_runtime::BoundToRuntimeAppPublic for ImOnline {
+    type Public = ImOnlineId;
+}
+
+/// GRANDPA marker struct
+pub struct Grandpa;
+impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
+    type Public = sp_finality_grandpa::AuthorityId;
+}
+
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+
+/// Authority discovery marker struct
+pub struct AuthorityDiscovery;
+impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
+    type Public = AuthorityDiscoveryId;
+}
+
+impl_opaque_keys! {
+    /// Runtime keys
+    pub struct SessionKeys {
+        //// GRANDPA session key
+        pub grandpa: Grandpa,
+        //// BABE session key
+        pub babe: Babe,
+        //// ImOnline session key
+        pub im_online: ImOnline,
+        //// AuthorityDiscovery session key
+        pub authority_discovery: AuthorityDiscovery,
+    }
+}
 
 use crate::frame::{
     balances::{
@@ -73,6 +117,7 @@ impl Balances for DefaultNodeRuntime {
 impl Session for DefaultNodeRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
+    type Keys = SessionKeys;
 }
 
 impl Contracts for DefaultNodeRuntime {}
@@ -101,6 +146,7 @@ impl System for KusamaRuntime {
 impl Session for KusamaRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
+    type Keys = SessionKeys;
 }
 
 impl Staking for KusamaRuntime {

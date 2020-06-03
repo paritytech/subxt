@@ -22,6 +22,10 @@ use crate::frame::system::{
 };
 use codec::Encode;
 use frame_support::Parameter;
+use sp_runtime::traits::{
+    Member,
+    OpaqueKeys,
+};
 use std::{
     fmt::Debug,
     marker::PhantomData,
@@ -36,6 +40,9 @@ pub trait Session: System {
 
     /// The validator account identifier type for the runtime.
     type SessionIndex: Parameter + Debug + Ord + Default + Send + Sync + 'static;
+
+    /// The keys.
+    type Keys: OpaqueKeys + Member + Parameter + Default;
 }
 
 /// The current set of validators.
@@ -61,4 +68,13 @@ pub struct QueuedChangedStore<T: Session> {
     #[store(returns = bool)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
+}
+
+/// The current set of validators.
+#[derive(Encode, Call)]
+pub struct SetKeysCall<T: Session> {
+    /// The keys
+    pub keys: T::Keys,
+    /// The proof. This is not currently used and can be set to an empty vector.
+    pub proof: Vec<u8>,
 }
