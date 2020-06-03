@@ -16,16 +16,23 @@
 
 //! Implements support for the frame_staking module.
 
-use super::system::{
-    System,
-    SystemEventsDecoder as _,
+use super::balances::{
+    Balances,
+    BalancesEventsDecoder as _,
 };
 use codec::{
     Decode,
     Encode,
-    HasCompact,
 };
-use sp_runtime::Perbill;
+use frame_support::Parameter;
+use sp_runtime::{
+    traits::{
+        AtLeast32Bit,
+        MaybeSerialize,
+        Member,
+    },
+    Perbill,
+};
 use std::{
     fmt::Debug,
     marker::PhantomData,
@@ -33,46 +40,28 @@ use std::{
 
 /// A record of the nominations made by a specific account.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Ord, PartialOrd, Hash)]
-pub struct Nominations<AccountId> {
+pub struct Nominations<T: Staking> {
     /// The targets of nomination.
-    pub targets: Vec<AccountId>,
+    pub targets: Vec<T::AccountId>,
     /// The era the nominations were submitted.
     ///
     /// Except for initial nominations which are considered submitted at era 0.
-    pub submitted_in: EraIndex,
+    pub submitted_in: T::EraIndex,
     /// Whether the nominations have been suppressed.
     pub suppressed: bool,
 }
 
 /// Information regarding the active era (era in used in session).
 #[derive(Encode, Decode, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
-pub struct ActiveEraInfo {
+pub struct ActiveEraInfo<T: Staking> {
     /// Index of era.
-    pub index: EraIndex,
+    pub index: T::EraIndex,
     /// Moment of start expresed as millisecond from `$UNIX_EPOCH`.
     ///
     /// Start can be none if start hasn't been set for the era yet,
     /// Start is set on the first on_finalize of the era to guarantee usage of `Time`.
     pub start: Option<u64>,
 }
-
-/// Data type used to index nominators in the compact type
-pub type NominatorIndex = u32;
-
-/// Data type used to index validators in the compact type.
-pub type ValidatorIndex = u16;
-
-/// Maximum number of validators that can be stored in a snapshot.
-pub const MAX_VALIDATORS: usize = ValidatorIndex::max_value() as usize;
-
-/// Maximum number of nominators that can be stored in a snapshot.
-pub const MAX_NOMINATORS: usize = NominatorIndex::max_value() as usize;
-
-/// Counter for the number of eras that have passed.
-pub type EraIndex = u32;
-
-/// Counter for the number of "reward" points earned by a given validator.
-pub type RewardPoint = u32;
 
 /// A destination account for payment.
 #[derive(PartialEq, Eq, Copy, Clone, Encode, Decode, Debug)]
@@ -89,7 +78,7 @@ pub enum RewardDestination {
 #[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Call)]
 pub struct SetPayeeCall<T: Staking> {
     /// The payee
-    pub payee: Perbill,
+    pub payee: RewardDestination,
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -113,38 +102,84 @@ impl Default for ValidatorPrefs {
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
-pub trait Staking: System {}
+pub trait Staking: Balances {
+    /// Data type used to index nominators in the compact type
+    type NominatorIndex: Parameter
+        + codec::Codec
+        + Member
+        + Default
+        + Copy
+        + MaybeSerialize
+        + Debug;
+
+    /// Data type used to index validators in the compact type.
+    type ValidatorIndex: Parameter
+        + codec::Codec
+        + Send
+        + Sync
+        + Default
+        + Member
+        + Copy
+        + MaybeSerialize
+        + Debug;
+
+    /// Maximum number of validators that can be stored in a snapshot.
+    const MAX_VALIDATORS: usize;
+
+    /// Maximum number of nominators that can be stored in a snapshot.
+    const MAX_NOMINATORS: usize;
+
+    /// Counter for the number of eras that have passed.
+    type EraIndex: Parameter
+        + Member
+        + AtLeast32Bit
+        + codec::Codec
+        + Default
+        + Copy
+        + MaybeSerialize
+        + Debug;
+
+    /// Counter for the number of "reward" points earned by a given validator.
+    type RewardPoint: Parameter
+        + Member
+        + AtLeast32Bit
+        + codec::Codec
+        + Default
+        + Copy
+        + MaybeSerialize
+        + Debug;
+}
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
-pub struct UnlockChunk<Balance: HasCompact> {
+pub struct UnlockChunk<T: Staking> {
     /// Amount of funds to be unlocked.
     #[codec(compact)]
-    pub value: Balance,
+    pub value: T::Balance,
     /// Era number at which point it'll be unlocked.
     #[codec(compact)]
-    pub era: EraIndex,
+    pub era: T::EraIndex,
 }
 
 /// The ledger of a (bonded) stash.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
-pub struct StakingLedger<AccountId, Balance: HasCompact> {
+pub struct StakingLedger<T: Staking> {
     /// The stash account whose balance is actually locked and at stake.
-    pub stash: AccountId,
+    pub stash: T::AccountId,
     /// The total amount of the stash's balance that we are currently accounting for.
     /// It's just `active` plus all the `unlocking` balances.
     #[codec(compact)]
-    pub total: Balance,
+    pub total: T::Balance,
     /// The total amount of the stash's balance that will be at stake in any forthcoming
     /// rounds.
     #[codec(compact)]
-    pub active: Balance,
+    pub active: T::Balance,
     /// Any balance that is becoming free, which may eventually be transferred out
     /// of the stash (assuming it doesn't get slashed first).
-    pub unlocking: Vec<UnlockChunk<Balance>>,
+    pub unlocking: Vec<UnlockChunk<T>>,
     /// List of eras for which the stakers behind a validator have claimed rewards. Only updated
     /// for validators.
-    pub claimed_rewards: Vec<EraIndex>,
+    pub claimed_rewards: Vec<T::EraIndex>,
 }
 
 /// Number of eras to keep in history.
@@ -204,7 +239,7 @@ pub struct BondedStore<T: Staking> {
 /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct LedgerStore<T: Staking> {
-    #[store(returns = Option<StakingLedger<T::AccountId, ()>>)]
+    #[store(returns = Option<StakingLedger<T>>)]
     /// The controller account
     pub controller: T::AccountId,
 }
@@ -228,7 +263,7 @@ pub struct ValidatorsStore<T: Staking> {
 /// The map from nominator stash key to the set of stash keys of all validators to nominate.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct NominatorsStore<T: Staking> {
-    #[store(returns = Option<Nominations<T::AccountId>>)]
+    #[store(returns = Option<Nominations<T>>)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
 }
@@ -239,7 +274,7 @@ pub struct NominatorsStore<T: Staking> {
 /// set, it might be active or not.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct CurrentEraStore<T: Staking> {
-    #[store(returns = Option<EraIndex>)]
+    #[store(returns = Option<T::EraIndex>)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -250,7 +285,7 @@ pub struct CurrentEraStore<T: Staking> {
 /// Validator set of this era must be equal to `SessionInterface::validators`.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct ActiveEraStore<T: Staking> {
-    #[store(returns = Option<ActiveEraInfo>)]
+    #[store(returns = Option<ActiveEraInfo<T>>)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -307,7 +342,7 @@ pub struct NominateCall<T: Staking> {
 
 /// Claim a payout.
 #[derive(PartialEq, Eq, Clone, Call, Encode, Decode)]
-struct PayoutStakersCall<'a, T: System> {
+struct PayoutStakersCall<'a, T: Staking> {
     pub validator_stash: &'a T::AccountId,
-    pub era: EraIndex,
+    pub era: T::EraIndex,
 }

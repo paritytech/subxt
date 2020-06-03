@@ -45,6 +45,15 @@ use crate::frame::{
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DefaultNodeRuntime;
 
+impl Staking for DefaultNodeRuntime {
+    type NominatorIndex = u32;
+    type ValidatorIndex = u16;
+    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
+    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
+    type EraIndex = u32;
+    type RewardPoint = u32;
+}
+
 impl System for DefaultNodeRuntime {
     type Index = u32;
     type BlockNumber = u32;
@@ -65,8 +74,6 @@ impl Session for DefaultNodeRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
 }
-
-impl Staking for DefaultNodeRuntime {}
 
 impl Contracts for DefaultNodeRuntime {}
 
@@ -96,7 +103,14 @@ impl Session for KusamaRuntime {
     type ValidatorId = <Self as System>::AccountId;
 }
 
-impl Staking for KusamaRuntime {}
+impl Staking for KusamaRuntime {
+    type NominatorIndex = u32;
+    type ValidatorIndex = u16;
+    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
+    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
+    type EraIndex = u32;
+    type RewardPoint = u32;
+}
 
 impl Balances for KusamaRuntime {
     type Balance = u128;
