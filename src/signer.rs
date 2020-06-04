@@ -147,35 +147,3 @@ where
         )))
     }
 }
-
-impl<T, S, E> Signer<T, S, E> for Box<dyn Signer<T, S, E> + Send + Sync>
-where
-    T: System,
-    S: Encode,
-    E: SignedExtra<T>,
-{
-    fn account_id(&self) -> &T::AccountId {
-        (**self).account_id()
-    }
-
-    fn nonce(&self) -> Option<T::Index> {
-        (**self).nonce()
-    }
-
-    fn sign(
-        &self,
-        extrinsic: SignedPayload<Encoded, E::Extra>,
-    ) -> Pin<
-        Box<
-            dyn Future<
-                    Output = Result<
-                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
-                        String,
-                    >,
-                > + Send
-                + Sync,
-        >,
-    > {
-        (**self).sign(extrinsic)
-    }
-}
