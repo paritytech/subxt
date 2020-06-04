@@ -126,12 +126,8 @@ impl<T: System> EventsDecoder<T> {
         U: Default + Codec + Send + 'static,
     {
         let size = U::default().encode().len();
-        if size > 0 {
-            self.type_sizes.insert(name.to_string(), size);
-            Ok(size)
-        } else {
-            Err(EventsError::TypeSizeUnavailable(name.to_owned()))
-        }
+        self.type_sizes.insert(name.to_string(), size);
+        Ok(size)
     }
 
     /// Check missing type sizes.
