@@ -28,7 +28,6 @@ use std::{
         HashMap,
         HashSet,
     },
-    convert::TryFrom,
     marker::{
         PhantomData,
         Send,
@@ -87,47 +86,24 @@ pub struct EventsDecoder<T> {
     marker: PhantomData<fn() -> T>,
 }
 
-impl<T: System> TryFrom<Metadata> for EventsDecoder<T> {
-    type Error = EventsError;
-
-    fn try_from(metadata: Metadata) -> Result<Self, Self::Error> {
-        let mut decoder = Self {
+impl<T: System> EventsDecoder<T> {
+    /// Creates a new `EventsDecoder`.
+    pub fn new(metadata: Metadata) -> Self {
+        Self {
             metadata,
             type_sizes: HashMap::new(),
             marker: PhantomData,
-        };
-        // register default event arg type sizes for dynamic decoding of events
-        decoder.register_type_size::<bool>("bool")?;
-        decoder.register_type_size::<u32>("ReferendumIndex")?;
-        decoder.register_type_size::<[u8; 16]>("Kind")?;
-        decoder.register_type_size::<[u8; 32]>("AuthorityId")?;
-        decoder.register_type_size::<u8>("u8")?;
-        decoder.register_type_size::<u32>("u32")?;
-        decoder.register_type_size::<u32>("AccountIndex")?;
-        decoder.register_type_size::<u32>("SessionIndex")?;
-        decoder.register_type_size::<u32>("PropIndex")?;
-        decoder.register_type_size::<u32>("ProposalIndex")?;
-        decoder.register_type_size::<u32>("AuthorityIndex")?;
-        decoder.register_type_size::<u64>("AuthorityWeight")?;
-        decoder.register_type_size::<u32>("MemberCount")?;
-        decoder.register_type_size::<T::AccountId>("AccountId")?;
-        decoder.register_type_size::<T::BlockNumber>("BlockNumber")?;
-        decoder.register_type_size::<T::Hash>("Hash")?;
-        decoder.register_type_size::<u8>("VoteThreshold")?;
-
-        Ok(decoder)
+        }
     }
-}
 
-impl<T: System> EventsDecoder<T> {
     /// Register a type.
-    pub fn register_type_size<U>(&mut self, name: &str) -> Result<usize, EventsError>
+    pub fn register_type_size<U>(&mut self, name: &str) -> usize
     where
         U: Default + Codec + Send + 'static,
     {
         let size = U::default().encode().len();
         self.type_sizes.insert(name.to_string(), size);
-        Ok(size)
+        size
     }
 
     /// Check missing type sizes.

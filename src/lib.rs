@@ -65,10 +65,7 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
+use std::marker::PhantomData;
 
 mod error;
 mod events;
@@ -364,8 +361,8 @@ where
     /// Returns an events decoder for a call.
     pub fn events_decoder<C: Call<T>>(&self) -> Result<EventsDecoder<T>, Error> {
         let metadata = self.metadata().clone();
-        let mut decoder = EventsDecoder::try_from(metadata)?;
-        C::events_decoder(&mut decoder)?;
+        let mut decoder = EventsDecoder::new(metadata);
+        C::events_decoder(&mut decoder);
         Ok(decoder)
     }
 

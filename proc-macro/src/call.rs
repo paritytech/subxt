@@ -54,9 +54,8 @@ pub fn call(s: Structure) -> TokenStream {
             const FUNCTION: &'static str = #call_name;
             fn events_decoder(
                 decoder: &mut #subxt::EventsDecoder<T>,
-            ) -> Result<(), #subxt::EventsError> {
-                decoder.#with_module()?;
-                Ok(())
+            ) {
+                decoder.#with_module();
             }
         }
 
@@ -125,9 +124,8 @@ mod tests {
                 const FUNCTION: &'static str = "transfer";
                 fn events_decoder(
                     decoder: &mut substrate_subxt::EventsDecoder<T>,
-                ) -> Result<(), substrate_subxt::EventsError> {
-                    decoder.with_balances()?;
-                    Ok(())
+                ) {
+                    decoder.with_balances();
                 }
             }
 
