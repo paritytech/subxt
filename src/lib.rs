@@ -195,6 +195,11 @@ impl<T: System, S, E> Clone for Client<T, S, E> {
 }
 
 impl<T: System, S, E> Client<T, S, E> {
+    /// Returns the genesis hash.
+    pub fn genesis(&self) -> &T::Hash {
+        &self.genesis_hash
+    }
+
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
