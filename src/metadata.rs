@@ -223,8 +223,7 @@ impl StorageMetadata {
     }
 
     pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {
-        Decode::decode(&mut &self.default[..])
-            .map_err(|err| MetadataError::DefaultError(err))
+        Decode::decode(&mut &self.default[..]).map_err(MetadataError::DefaultError)
     }
 
     pub fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {

@@ -145,11 +145,7 @@ impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
         let client = if let Some(client) = self.client {
             client
         } else {
-            let url = self
-                .url
-                .as_ref()
-                .map(|s| &**s)
-                .unwrap_or("ws://127.0.0.1:9944");
+            let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             if url.starts_with("ws://") || url.starts_with("wss://") {
                 jsonrpsee::ws_client(url).await?
             } else {
