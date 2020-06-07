@@ -167,6 +167,21 @@ pub fn type_params(generics: &syn::Generics) -> Vec<TokenStream> {
         .collect()
 }
 
+pub fn parse_option(ty: &syn::Type) -> Option<syn::Type> {
+    if let syn::Type::Path(ty_path) = ty {
+        if let Some(seg) = ty_path.path.segments.first() {
+            if seg.ident.to_string() == "Option" {
+                if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
+                    if let Some(syn::GenericArgument::Type(ty)) = args.args.first() {
+                        return Some(ty.clone())
+                    }
+                }
+            }
+        }
+    }
+    None
+}
+
 #[derive(Debug)]
 pub struct Attrs<A> {
     pub paren: syn::token::Paren,
@@ -208,4 +223,17 @@ pub(crate) fn assert_proc_macro(
     let result = result.to_string();
     let expected = expected.to_string();
     pretty_assertions::assert_eq!(result, expected);
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_option() {
+        let option_t: syn::Type = syn::parse2(quote!(Option<T>)).unwrap();
+        let t: syn::Type = syn::parse2(quote!(T)).unwrap();
+        assert_eq!(parse_option(&option_t), Some(t.clone()));
+        assert_eq!(parse_option(&t), None);
+    }
 }
