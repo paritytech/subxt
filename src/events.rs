@@ -89,11 +89,30 @@ pub struct EventsDecoder<T> {
 impl<T: System> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
-        Self {
+        let mut decoder = Self {
             metadata,
             type_sizes: HashMap::new(),
             marker: PhantomData,
-        }
+        };
+        // register default event arg type sizes for dynamic decoding of events
+        decoder.register_type_size::<bool>("bool");
+        decoder.register_type_size::<u32>("ReferendumIndex");
+        decoder.register_type_size::<[u8; 16]>("Kind");
+        decoder.register_type_size::<[u8; 32]>("AuthorityId");
+        decoder.register_type_size::<u8>("u8");
+        decoder.register_type_size::<u32>("u32");
+        decoder.register_type_size::<u32>("AccountIndex");
+        decoder.register_type_size::<u32>("SessionIndex");
+        decoder.register_type_size::<u32>("PropIndex");
+        decoder.register_type_size::<u32>("ProposalIndex");
+        decoder.register_type_size::<u32>("AuthorityIndex");
+        decoder.register_type_size::<u64>("AuthorityWeight");
+        decoder.register_type_size::<u32>("MemberCount");
+        decoder.register_type_size::<T::AccountId>("AccountId");
+        decoder.register_type_size::<T::BlockNumber>("BlockNumber");
+        decoder.register_type_size::<T::Hash>("Hash");
+        decoder.register_type_size::<u8>("VoteThreshold");
+        decoder
     }
 
     /// Register a type.
