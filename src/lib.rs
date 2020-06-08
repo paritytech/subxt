@@ -360,11 +360,11 @@ where
     }
 
     /// Returns an events decoder for a call.
-    pub fn events_decoder<C: Call<T>>(&self) -> Result<EventsDecoder<T>, Error> {
+    pub fn events_decoder<C: Call<T>>(&self) -> EventsDecoder<T> {
         let metadata = self.metadata().clone();
         let mut decoder = EventsDecoder::new(metadata);
         C::events_decoder(&mut decoder);
-        Ok(decoder)
+        decoder
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -419,7 +419,7 @@ where
         <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
-        let decoder = self.events_decoder::<C>()?;
+        let decoder = self.events_decoder::<C>();
         self.submit_and_watch_extrinsic(extrinsic, decoder).await
     }
 }
