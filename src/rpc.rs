@@ -203,7 +203,7 @@ impl<T: System> Rpc<T> {
         &self,
         block_number: Option<BlockNumber<T>>,
     ) -> Result<Option<T::Hash>, Error> {
-        let block_number = block_number.map(|bn| ListOrValue::Value(bn));
+        let block_number = block_number.map(ListOrValue::Value);
         let params = Params::Array(vec![to_json_value(block_number)?]);
         let list_or_value = self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
@@ -490,7 +490,7 @@ pub async fn wait_for_block_events<T: System>(
                 }
             }
         }
-        return if events.len() > 0 {
+        return if !events.is_empty() {
             Ok(ExtrinsicSuccess {
                 block: block_hash,
                 extrinsic: ext_hash,

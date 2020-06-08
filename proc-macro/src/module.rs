@@ -85,7 +85,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
             let module = utils::path_to_ident(path);
             let with_module = with_module_ident(module);
             Some(quote! {
-                self.#with_module()?;
+                self.#with_module();
             })
         } else {
             None
@@ -99,7 +99,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
             let ident = &ty.ident;
             let ident_str = ident.to_string();
             Some(quote! {
-                self.register_type_size::<T::#ident>(#ident_str)?;
+                self.register_type_size::<T::#ident>(#ident_str);
             })
         } else {
             None
@@ -114,16 +114,15 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
         /// `EventsDecoder` extension trait.
         pub trait #module_events_decoder {
             /// Registers this modules types.
-            fn #with_module(&mut self) -> Result<(), #subxt::EventsError>;
+            fn #with_module(&mut self);
         }
 
         impl<T: #module> #module_events_decoder for
             #subxt::EventsDecoder<T>
         {
-            fn #with_module(&mut self) -> Result<(), #subxt::EventsError> {
+            fn #with_module(&mut self) {
                 #(#bounds)*
                 #(#types)*
-                Ok(())
             }
         }
     }
@@ -167,16 +166,15 @@ mod tests {
             /// `EventsDecoder` extension trait.
             pub trait BalancesEventsDecoder {
                 /// Registers this modules types.
-                fn with_balances(&mut self) -> Result<(), substrate_subxt::EventsError>;
+                fn with_balances(&mut self);
             }
 
             impl<T: Balances> BalancesEventsDecoder for
                 substrate_subxt::EventsDecoder<T>
             {
-                fn with_balances(&mut self) -> Result<(), substrate_subxt::EventsError> {
-                    self.with_system()?;
-                    self.register_type_size::<T::Balance>("Balance")?;
-                    Ok(())
+                fn with_balances(&mut self) {
+                    self.with_system();
+                    self.register_type_size::<T::Balance>("Balance");
                 }
             }
         };
