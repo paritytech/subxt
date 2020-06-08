@@ -17,10 +17,7 @@
 //! Implements support for built-in runtime modules.
 
 use crate::{
-    events::{
-        EventsDecoder,
-        EventsError,
-    },
+    events::EventsDecoder,
     metadata::{
         Metadata,
         MetadataError,
@@ -62,9 +59,7 @@ pub trait Call<T>: Encode {
     /// Function name.
     const FUNCTION: &'static str;
     /// Load event decoder.
-    fn events_decoder(_decoder: &mut EventsDecoder<T>) -> Result<(), EventsError> {
-        Ok(())
-    }
+    fn events_decoder(_decoder: &mut EventsDecoder<T>) {}
 }
 
 /// Event trait.

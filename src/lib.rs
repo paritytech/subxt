@@ -65,10 +65,7 @@ use sp_runtime::{
     MultiSignature,
 };
 use sp_version::RuntimeVersion;
-use std::{
-    convert::TryFrom,
-    marker::PhantomData,
-};
+use std::marker::PhantomData;
 
 mod error;
 mod events;
@@ -148,11 +145,7 @@ impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
         let client = if let Some(client) = self.client {
             client
         } else {
-            let url = self
-                .url
-                .as_ref()
-                .map(|s| &**s)
-                .unwrap_or("ws://127.0.0.1:9944");
+            let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             if url.starts_with("ws://") || url.starts_with("wss://") {
                 jsonrpsee::ws_client(url).await?
             } else {
@@ -198,6 +191,11 @@ impl<T: System, S, E> Clone for Client<T, S, E> {
 }
 
 impl<T: System, S, E> Client<T, S, E> {
+    /// Returns the genesis hash.
+    pub fn genesis(&self) -> &T::Hash {
+        &self.genesis_hash
+    }
+
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
@@ -362,11 +360,11 @@ where
     }
 
     /// Returns an events decoder for a call.
-    pub fn events_decoder<C: Call<T>>(&self) -> Result<EventsDecoder<T>, Error> {
+    pub fn events_decoder<C: Call<T>>(&self) -> EventsDecoder<T> {
         let metadata = self.metadata().clone();
-        let mut decoder = EventsDecoder::try_from(metadata)?;
-        C::events_decoder(&mut decoder)?;
-        Ok(decoder)
+        let mut decoder = EventsDecoder::new(metadata);
+        C::events_decoder(&mut decoder);
+        decoder
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -421,7 +419,7 @@ where
         <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
-        let decoder = self.events_decoder::<C>()?;
+        let decoder = self.events_decoder::<C>();
         self.submit_and_watch_extrinsic(extrinsic, decoder).await
     }
 }
