@@ -49,11 +49,19 @@ impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
 
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
+#[cfg(feature = "kusama")]
+mod validator_app {
+	use application_crypto::{app_crypto, sr25519};
+	app_crypto!(sr25519, sp_core::crypto::KeyTypeId(*b"para"));
+}
+
 /// Parachain marker struct
 #[cfg(feature = "kusama")]
 pub struct Parachains;
+
+#[cfg(feature = "kusama")]
 impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
-    type Public = polkadot::parachain::ValidatorId;
+    type Public = validator_app::Public;
 }
 
 /// Authority discovery marker struct
@@ -62,6 +70,7 @@ impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
     type Public = AuthorityDiscoveryId;
 }
 
+#[cfg(feature = "kusama")]
 impl_opaque_keys! {
     /// Substrate base runtime keys
     pub struct BasicSessionKeys {
