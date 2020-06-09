@@ -70,13 +70,12 @@ use crate::{
         RawEvent,
     },
     frame::{
-        system::{
-            Phase,
-            System,
-        },
+        system::System,
         Event,
     },
     metadata::Metadata,
+    runtimes::Runtime,
+    subscription::EventSubscription,
 };
 
 pub type ChainBlock<T> =
@@ -107,12 +106,12 @@ where
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: System> {
+pub struct Rpc<T: Runtime> {
     client: Client,
     marker: PhantomData<T>,
 }
 
-impl<T: System> Clone for Rpc<T> {
+impl<T: Runtime> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -121,7 +120,7 @@ impl<T: System> Clone for Rpc<T> {
     }
 }
 
-impl<T: System> Rpc<T> {
+impl<T: Runtime> Rpc<T> {
     pub fn new(client: Client) -> Self {
         Self {
             client,
@@ -256,7 +255,7 @@ impl<T: System> Rpc<T> {
     /// Subscribe to substrate System Events
     pub async fn subscribe_events(
         &self,
-    ) -> Result<Subscription<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
         let mut storage_key = twox_128(b"System").to_vec();
         storage_key.extend(twox_128(b"Events").to_vec());
         log::debug!("Events storage key {:?}", hex::encode(&storage_key));
@@ -360,14 +359,24 @@ impl<T: System> Rpc<T> {
                                 block_hash,
                                 signed_block.block.extrinsics.len()
                             );
-                            wait_for_block_events(
-                                decoder,
-                                ext_hash,
-                                signed_block,
-                                block_hash,
-                                events_sub,
-                            )
-                            .await
+                            let ext_index = find_extrinsic::<T>(&signed_block, &ext_hash)
+                                .ok_or_else(|| {
+                                    Error::Other(format!(
+                                        "Failed to find Extrinsic with hash {:?}",
+                                        ext_hash,
+                                    ))
+                                })?;
+                            let mut sub = EventSubscription::new(events_sub, decoder);
+                            sub.filter_extrinsic(block_hash, ext_index);
+                            let mut events = vec![];
+                            while let Some(event) = sub.next().await {
+                                events.push(event?);
+                            }
+                            Ok(ExtrinsicSuccess {
+                                block: block_hash,
+                                extrinsic: ext_hash,
+                                events,
+                            })
                         }
                         None => {
                             Err(format!("Failed to find block {:?}", block_hash).into())
@@ -425,58 +434,13 @@ impl<T: System> ExtrinsicSuccess<T> {
     }
 }
 
-/// Waits for events for the block triggered by the extrinsic
-pub async fn wait_for_block_events<T: System>(
-    decoder: EventsDecoder<T>,
-    ext_hash: T::Hash,
-    signed_block: ChainBlock<T>,
-    block_hash: T::Hash,
-    events_subscription: Subscription<StorageChangeSet<T::Hash>>,
-) -> Result<ExtrinsicSuccess<T>, Error> {
-    let ext_index = signed_block
-        .block
-        .extrinsics
-        .iter()
-        .position(|ext| {
-            let hash = T::Hashing::hash_of(ext);
-            hash == ext_hash
-        })
-        .ok_or_else(|| {
-            Error::Other(format!("Failed to find Extrinsic with hash {:?}", ext_hash))
-        })?;
-
-    let mut subscription = events_subscription;
-    while let change_set = subscription.next().await {
-        // only interested in events for the given block
-        if change_set.block != block_hash {
-            continue
-        }
-        let mut events = Vec::new();
-        for (_key, data) in change_set.changes {
-            if let Some(data) = data {
-                match decoder.decode_events(&mut &data.0[..]) {
-                    Ok(raw_events) => {
-                        for (phase, event) in raw_events {
-                            if let Phase::ApplyExtrinsic(i) = phase {
-                                if i as usize == ext_index {
-                                    events.push(event)
-                                }
-                            }
-                        }
-                    }
-                    Err(err) => return Err(err),
-                }
-            }
-        }
-        return if !events.is_empty() {
-            Ok(ExtrinsicSuccess {
-                block: block_hash,
-                extrinsic: ext_hash,
-                events,
-            })
-        } else {
-            Err(format!("No events found for block {}", block_hash).into())
-        }
-    }
-    unreachable!()
+/// Returns the index of an extrinsic in a block.
+pub fn find_extrinsic<T: Runtime>(
+    signed_block: &ChainBlock<T>,
+    extrinsic: &T::Hash,
+) -> Option<usize> {
+    signed_block.block.extrinsics.iter().position(|ext| {
+        let hash = T::Hashing::hash_of(ext);
+        hash == *extrinsic
+    })
 }

@@ -68,6 +68,7 @@ mod metadata;
 mod rpc;
 mod runtimes;
 mod signer;
+mod subscription;
 
 pub use crate::{
     error::Error,
@@ -87,6 +88,7 @@ pub use crate::{
     },
     runtimes::*,
     signer::*,
+    subscription::*,
     substrate_subxt_proc_macro::*,
 };
 use crate::{
