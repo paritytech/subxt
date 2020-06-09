@@ -42,6 +42,9 @@
 #[macro_use]
 extern crate substrate_subxt_proc_macro;
 
+#[cfg(feature = "client")]
+pub use substrate_subxt_client as client;
+
 pub use sp_core;
 pub use sp_runtime;
 
@@ -437,6 +440,7 @@ impl codec::Encode for Encoded {
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use sp_core::{
         storage::{
             well_known_keys,
@@ -448,24 +452,44 @@ mod tests {
         AccountKeyring,
         Ed25519Keyring,
     };
+    use substrate_subxt_client::{
+        DatabaseConfig,
+        Role,
+        SubxtClient,
+        SubxtClientConfig,
+    };
+    use tempdir::TempDir;
 
-    use super::*;
-
-    pub(crate) async fn test_client() -> Client<crate::DefaultNodeRuntime> {
-        ClientBuilder::new()
+    pub(crate) async fn test_client() -> (Client<crate::NodeTemplateRuntime>, TempDir) {
+        let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
+        let config = SubxtClientConfig {
+            impl_name: "substrate-subxt-full-client",
+            impl_version: "0.0.1",
+            author: "substrate subxt",
+            copyright_start_year: 2020,
+            db: DatabaseConfig::RocksDb {
+                path: tmp.path().into(),
+                cache_size: 128,
+            },
+            builder: node_template::service::new_full,
+            chain_spec: node_template::chain_spec::development_config(),
+            role: Role::Authority(AccountKeyring::Alice),
+        };
+        let client = ClientBuilder::new()
+            .set_client(SubxtClient::new(config).expect("Error creating subxt client"))
             .build()
             .await
-            .expect("Error creating client")
+            .expect("Error creating client");
+        (client, tmp)
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_tx_transfer_balance() {
         env_logger::try_init().ok();
         let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
         let dest = AccountKeyring::Bob.to_account_id().into();
 
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let nonce = client
             .account(&AccountKeyring::Alice.to_account_id(), None)
             .await
@@ -498,24 +522,21 @@ mod tests {
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_getting_hash() {
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         client.block_hash(None).await.unwrap();
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_getting_block() {
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let block_hash = client.block_hash(None).await.unwrap();
         client.block(block_hash).await.unwrap();
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_getting_read_proof() {
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let block_hash = client.block_hash(None).await.unwrap();
         client
             .read_proof(
@@ -530,29 +551,26 @@ mod tests {
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_chain_subscribe_blocks() {
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let mut blocks = client.subscribe_blocks().await.unwrap();
         blocks.next().await;
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_chain_subscribe_finalized_blocks() {
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
         blocks.next().await;
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_create_raw_payload() {
         let signer_pair = Ed25519Keyring::Alice.pair();
         let signer_account_id = Ed25519Keyring::Alice.to_account_id();
         let dest = AccountKeyring::Bob.to_account_id().into();
 
-        let client = test_client().await;
+        let (client, _) = test_client().await;
 
         // create raw payload with AccoundId and sign it
         let raw_payload = client

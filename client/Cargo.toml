@@ -1,0 +1,23 @@
+[package]
+name = "substrate-subxt-client"
+version = "0.1.0"
+authors = ["David Craven <david@craven.ch>"]
+edition = "2018"
+
+[dependencies]
+async-std = "=1.5.0"
+futures = { version = "0.3.5", features = ["compat"] }
+futures01 = { package = "futures", version = "0.1.29" }
+jsonrpsee = "0.1.0"
+log = "0.4.8"
+sc-network = { version = "0.8.0-rc3", default-features = false }
+sc-service = { version = "0.8.0-rc3", default-features = false }
+serde_json = "1.0.53"
+sp-keyring = "2.0.0-rc3"
+thiserror = "1.0.19"
+
+[dev-dependencies]
+async-std = { version = "=1.5.0", features = ["attributes"] }
+env_logger = "0.7.1"
+node-template = { git = "https://github.com/dvc94ch/substrate", branch = "node-template" }
+substrate-subxt = { path = ".." }
