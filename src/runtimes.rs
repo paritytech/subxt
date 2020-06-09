@@ -49,6 +49,13 @@ impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
 
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
+/// Parachain marker struct
+#[cfg(feature = "kusama")]
+pub struct Parachains;
+impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
+    type Public = polkadot::parachain::ValidatorId;
+}
+
 /// Authority discovery marker struct
 pub struct AuthorityDiscovery;
 impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
@@ -56,7 +63,24 @@ impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
 }
 
 impl_opaque_keys! {
-    /// Runtime keys
+    /// Substrate base runtime keys
+    pub struct BasicSessionKeys {
+        //// GRANDPA session key
+        pub grandpa: Grandpa,
+        //// BABE session key
+        pub babe: Babe,
+        //// ImOnline session key
+        pub im_online: ImOnline,
+        //// Parachain validation session key
+        pub parachains: Parachains,
+        //// AuthorityDiscovery session key
+        pub authority_discovery: AuthorityDiscovery,
+    }
+}
+
+#[cfg(feature = "kusama")]
+impl_opaque_keys! {
+    /// Polkadot/Kusama runtime keys
     pub struct SessionKeys {
         //// GRANDPA session key
         pub grandpa: Grandpa,
@@ -64,6 +88,8 @@ impl_opaque_keys! {
         pub babe: Babe,
         //// ImOnline session key
         pub im_online: ImOnline,
+		//// ParachainValidator session key
+		pub parachain_validator: Parachains,
         //// AuthorityDiscovery session key
         pub authority_discovery: AuthorityDiscovery,
     }
@@ -117,7 +143,7 @@ impl Balances for DefaultNodeRuntime {
 impl Session for DefaultNodeRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
-    type Keys = SessionKeys;
+    type Keys = BasicSessionKeys;
 }
 
 impl Contracts for DefaultNodeRuntime {}
@@ -128,9 +154,11 @@ impl Contracts for DefaultNodeRuntime {}
 ///
 /// Main difference is `type Address = AccountId`.
 /// Also the contracts module is not part of the kusama runtime.
+#[cfg(feature = "kusama")]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KusamaRuntime;
 
+#[cfg(feature = "kusama")]
 impl System for KusamaRuntime {
     type Index = u32;
     type BlockNumber = u32;
@@ -143,12 +171,14 @@ impl System for KusamaRuntime {
     type AccountData = AccountData<<Self as Balances>::Balance>;
 }
 
+#[cfg(feature = "kusama")]
 impl Session for KusamaRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
     type Keys = SessionKeys;
 }
 
+#[cfg(feature = "kusama")]
 impl Staking for KusamaRuntime {
     type NominatorIndex = u32;
     type ValidatorIndex = u16;
@@ -158,6 +188,7 @@ impl Staking for KusamaRuntime {
     type RewardPoint = u32;
 }
 
+#[cfg(feature = "kusama")]
 impl Balances for KusamaRuntime {
     type Balance = u128;
 }
