@@ -16,7 +16,8 @@ jobs:
 
     - name: setup
       run: |
-        rustup install nightly --profile default
+          rustup install nightly --profile default
+          rustup +nightly target add wasm32-unknown-unknown
 
     - name: fmt
       run: cargo +nightly fmt --all -- --check
