@@ -271,6 +271,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use async_std::path::Path;
     use sp_keyring::AccountKeyring;
     use substrate_subxt::{
         balances::TransferCallExt,
@@ -299,10 +300,11 @@ mod tests {
     #[ignore]
     async fn test_light_client() {
         env_logger::try_init().ok();
-        let chain_spec = node_template::chain_spec::ChainSpec::from_json_bytes(
-            &include_bytes!("../dev-chain.json")[..],
-        )
-        .unwrap();
+        let chain_spec_path =
+            Path::new(env!("CARGO_MANIFEST_DIR")).join("dev-chain.json");
+        let bytes = async_std::fs::read(chain_spec_path).await.unwrap();
+        let chain_spec =
+            node_template::chain_spec::ChainSpec::from_json_bytes(bytes).unwrap();
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-light-client",
             impl_version: "0.0.1",
