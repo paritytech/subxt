@@ -1,8 +1,15 @@
 [package]
 name = "substrate-subxt-client"
 version = "0.1.0"
-authors = ["David Craven <david@craven.ch>"]
+authors = ["David Craven <david@craven.ch>", "Parity Technologies <admin@parity.io>"]
 edition = "2018"
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/substrate-subxt"
+documentation = "https://docs.rs/substrate-subxt-client"
+homepage = "https://www.parity.io/"
+description = "Embed a substrate node into your subxt application."
+keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]
 async-std = "=1.5.0"
@@ -19,5 +26,5 @@ thiserror = "1.0.19"
 [dev-dependencies]
 async-std = { version = "=1.5.0", features = ["attributes"] }
 env_logger = "0.7.1"
-node-template = { git = "https://github.com/dvc94ch/substrate", branch = "node-template" }
+node-template = { git = "https://github.com/paritytech/substrate" }
 substrate-subxt = { path = ".." }

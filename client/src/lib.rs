@@ -14,6 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! Client for embedding substrate nodes.
+
+#![deny(missing_docs)]
+
 use async_std::task;
 use futures::{
     compat::{
@@ -61,17 +65,23 @@ use std::{
 };
 use thiserror::Error;
 
+/// Error thrown by the client.
 #[derive(Debug, Error)]
 pub enum SubxtClientError {
+    /// Failed to parse json rpc message.
     #[error("{0}")]
     Json(#[from] serde_json::Error),
+    /// Channel closed.
     #[error("{0}")]
     Mpsc(#[from] mpsc::SendError<String>),
 }
 
+/// Role of the node.
 #[derive(Clone, Copy, Debug)]
 pub enum Role {
+    /// Light client.
     Light,
+    /// A full node (maninly used for testing purposes).
     Authority(sp_keyring::AccountKeyring),
 }
 
@@ -97,24 +107,35 @@ impl From<Role> for Option<String> {
     }
 }
 
+/// Client configuration.
 #[derive(Clone)]
 pub struct SubxtClientConfig<C: ChainSpec + 'static, S: AbstractService> {
+    /// Name of the implementation.
     pub impl_name: &'static str,
+    /// Version of the implementation.
     pub impl_version: &'static str,
+    /// Author of the implementation.
     pub author: &'static str,
+    /// Copyright start year.
     pub copyright_start_year: i32,
+    /// Database configuration.
     pub db: DatabaseConfig,
+    /// Service builder.
     pub builder: fn(Configuration) -> Result<S, sc_service::Error>,
+    /// Chain specification.
     pub chain_spec: C,
+    /// Role of the node.
     pub role: Role,
 }
 
+/// Client for an embedded substrate node.
 pub struct SubxtClient {
     to_back: Compat01As03Sink<mpsc::Sender<String>, String>,
     from_back: Compat01As03<mpsc::Receiver<String>>,
 }
 
 impl SubxtClient {
+    /// Create a new client from a config.
     pub fn new<C: ChainSpec + 'static, S: AbstractService>(
         config: SubxtClientConfig<C, S>,
     ) -> Result<Self, ServiceError> {
@@ -199,6 +220,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
+        base_path: None,
 
         telemetry_endpoints: Default::default(),
         telemetry_external_transport: Default::default(),
