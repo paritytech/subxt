@@ -265,7 +265,8 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
             match Pin::new(&mut from_front).poll_next(cx) {
                 Poll::Ready(Some(message)) => {
                     let mut to_front = to_front.clone().sink_compat();
-                    let message = message.unwrap();
+                    let message = message
+                        .expect("v1 streams require an error type; Stream of String can't fail; qed");
                     let fut = service.rpc_query(&session, &message);
                     task::spawn(async move {
                         if let Some(response) = fut.await {
