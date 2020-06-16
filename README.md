@@ -13,6 +13,11 @@ complaining about an undefined method with a name starting with `with_`.
 
 [substrate-api-client](https://github.com/scs/substrate-api-client) provides similar functionality.
 
+## Subxt Client
+By default the client builder will connect to a full node via rpc. The `subxt-client` helps
+embedding a light client directly. It can also be used to embed a full node. This is especially
+useful for testing and ci.
+
 #### License
 
 <sup>

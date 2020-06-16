@@ -157,6 +157,31 @@ impl Session for DefaultNodeRuntime {
 
 impl Contracts for DefaultNodeRuntime {}
 
+/// Concrete type definitions compatible with the node template.
+///
+/// # Note
+///
+/// Main difference is `type Address = AccountId`.
+/// Also the contracts module is not part of the node template runtime.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct NodeTemplateRuntime;
+
+impl System for NodeTemplateRuntime {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = BlakeTwo256;
+    type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
+    type Address = Self::AccountId;
+    type Header = Header<Self::BlockNumber, BlakeTwo256>;
+    type Extrinsic = OpaqueExtrinsic;
+    type AccountData = AccountData<<Self as Balances>::Balance>;
+}
+
+impl Balances for NodeTemplateRuntime {
+    type Balance = u128;
+}
+
 /// Concrete type definitions compatible with those for kusama, v0.7
 ///
 /// # Note

@@ -142,19 +142,17 @@ mod tests {
     });
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_state_total_issuance() {
         env_logger::try_init().ok();
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let total_issuance = client.total_issuance(None).await.unwrap();
         assert_ne!(total_issuance, 0);
     }
 
     #[async_std::test]
-    #[ignore] // requires locally running substrate node
     async fn test_state_read_free_balance() {
         env_logger::try_init().ok();
-        let client = test_client().await;
+        let (client, _) = test_client().await;
         let account = AccountKeyring::Alice.to_account_id();
         let info = client.account(&account, None).await.unwrap();
         assert_ne!(info.data.free, 0);
