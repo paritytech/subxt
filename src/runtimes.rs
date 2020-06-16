@@ -51,8 +51,11 @@ use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
 #[cfg(feature = "kusama")]
 mod validator_app {
-	use application_crypto::{app_crypto, sr25519};
-	app_crypto!(sr25519, sp_core::crypto::KeyTypeId(*b"para"));
+    use application_crypto::{
+        app_crypto,
+        sr25519,
+    };
+    app_crypto!(sr25519, sp_core::crypto::KeyTypeId(*b"para"));
 }
 
 /// Parachain marker struct
@@ -97,8 +100,8 @@ impl_opaque_keys! {
         pub babe: Babe,
         //// ImOnline session key
         pub im_online: ImOnline,
-		//// ParachainValidator session key
-		pub parachain_validator: Parachains,
+        //// ParachainValidator session key
+        pub parachain_validator: Parachains,
         //// AuthorityDiscovery session key
         pub authority_discovery: AuthorityDiscovery,
     }
