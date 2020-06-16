@@ -45,18 +45,11 @@ sp-transaction-pool = { version = "2.0.0-rc3", package = "sp-transaction-pool" }
 substrate-subxt-client = { path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.8.0", path = "proc-macro" }
 sp-std = "2.0.0-rc3"
-application-crypto = { version = "2.0.0-rc3", package = "sp-application-crypto" }
-pallet-indices = "2.0.0-rc3"
-sp-runtime = "2.0.0-rc3"
-sp-version = "2.0.0-rc3"
-sc-rpc-api = "0.8.0-rc3"
-sp-finality-grandpa = "2.0.0-rc3"
-sp-consensus-babe = "0.8.0-rc3"
-pallet-im-online = "2.0.0-rc3"
-sp-authority-discovery = "2.0.0-rc3"
-frame-metadata = "11.0.0-rc3"
-frame-support = "2.0.0-rc3"
-sp-transaction-pool = "2.0.0-rc3"
+application-crypto = { version = "2.0.0-rc3", package = "sp-application-crypto", default-features = false }
+sp-finality-grandpa = { version = "2.0.0-rc3" }
+sp-consensus-babe = { version = "0.8.0-rc3" }
+pallet-im-online = { version = "2.0.0-rc3" }
+sp-authority-discovery = { version = "2.0.0-rc3" }
 
 [dev-dependencies]
 async-std = { version = "=1.5.0", features = ["attributes"] }
