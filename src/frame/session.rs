@@ -46,7 +46,7 @@ pub trait Session: System {
 }
 
 /// The current set of validators.
-#[derive(Encode, Store)]
+#[derive(Encode, Store, Debug)]
 pub struct ValidatorsStore<T: Session> {
     #[store(returns = Vec<<T as Session>::ValidatorId>)]
     /// Marker for the runtime
@@ -54,7 +54,7 @@ pub struct ValidatorsStore<T: Session> {
 }
 
 /// Current index of the session.
-#[derive(Encode, Store)]
+#[derive(Encode, Store, Debug)]
 pub struct CurrentIndexStore<T: Session> {
     #[store(returns = <T as Session>::SessionIndex)]
     /// Marker for the runtime
@@ -63,7 +63,7 @@ pub struct CurrentIndexStore<T: Session> {
 
 /// True if the underlying economic identities or weighting behind the validators
 /// has changed in the queued validator set.
-#[derive(Encode, Store)]
+#[derive(Encode, Store, Debug)]
 pub struct QueuedChangedStore<T: Session> {
     #[store(returns = bool)]
     /// Marker for the runtime
@@ -71,7 +71,7 @@ pub struct QueuedChangedStore<T: Session> {
 }
 
 /// The current set of validators.
-#[derive(Encode, Call)]
+#[derive(Encode, Call, Debug)]
 pub struct SetKeysCall<T: Session> {
     /// The keys
     pub keys: T::Keys,

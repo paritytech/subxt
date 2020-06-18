@@ -27,6 +27,7 @@
     path_statements,
     patterns_in_fns_without_body,
     private_in_public,
+    missing_debug_implementations,
     unconditional_recursion,
     unused_allocation,
     unused_comparisons,
@@ -34,7 +35,8 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
-    unused_extern_crates
+    unused_extern_crates,
+    clippy::all
 )]
 #![allow(clippy::type_complexity)]
 
@@ -114,6 +116,7 @@ use crate::{
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
+#[allow(missing_debug_implementations)]
 pub struct ClientBuilder<T: System, S = MultiSignature, E = DefaultExtra<T>> {
     _marker: std::marker::PhantomData<(T, S, E)>,
     url: Option<String>,
@@ -172,6 +175,7 @@ impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
 }
 
 /// Client to interface with a substrate node.
+#[allow(missing_debug_implementations)]
 pub struct Client<T: System, S = MultiSignature, E = DefaultExtra<T>> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,

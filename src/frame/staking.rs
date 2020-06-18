@@ -151,7 +151,7 @@ pub trait Staking: Balances {
 }
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash, Debug)]
 pub struct UnlockChunk<T: Staking> {
     /// Amount of funds to be unlocked.
     #[codec(compact)]
@@ -162,7 +162,7 @@ pub struct UnlockChunk<T: Staking> {
 }
 
 /// The ledger of a (bonded) stash.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash, Debug)]
 pub struct StakingLedger<T: Staking> {
     /// The stash account whose balance is actually locked and at stake.
     pub stash: T::AccountId,
@@ -334,14 +334,14 @@ pub struct ValidateCall<T: Staking> {
 /// - Reads: Era Election Status, Ledger, Current Era
 /// - Writes: Validators, Nominators
 /// # </weight>
-#[derive(Call, Encode)]
+#[derive(Call, Encode, Debug)]
 pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated
     pub targets: Vec<T::Address>,
 }
 
 /// Claim a payout.
-#[derive(PartialEq, Eq, Clone, Call, Encode, Decode)]
+#[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
 struct PayoutStakersCall<'a, T: Staking> {
     pub validator_stash: &'a T::AccountId,
     pub era: T::EraIndex,

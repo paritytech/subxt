@@ -30,18 +30,21 @@ use sp_runtime::{
 use sp_std::prelude::*;
 
 /// BABE marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Babe;
 impl sp_runtime::BoundToRuntimeAppPublic for Babe {
     type Public = sp_consensus_babe::AuthorityId;
 }
 
 /// ImOnline marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ImOnline;
 impl sp_runtime::BoundToRuntimeAppPublic for ImOnline {
     type Public = ImOnlineId;
 }
 
 /// GRANDPA marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Grandpa;
 impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
     type Public = sp_finality_grandpa::AuthorityId;
@@ -60,6 +63,7 @@ mod validator_app {
 
 /// Parachain marker struct
 #[cfg(feature = "kusama")]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Parachains;
 
 #[cfg(feature = "kusama")]
@@ -68,6 +72,7 @@ impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
 }
 
 /// Authority discovery marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AuthorityDiscovery;
 impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
     type Public = AuthorityDiscoveryId;

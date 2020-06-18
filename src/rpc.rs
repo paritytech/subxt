@@ -85,7 +85,7 @@ pub type ChainBlock<T> =
     SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
 #[serde(bound = "<T as System>::BlockNumber: Serialize")]
 pub struct BlockNumber<T: System>(NumberOrHex<<T as System>::BlockNumber>);
 

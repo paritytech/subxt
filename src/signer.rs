@@ -69,6 +69,7 @@ pub trait Signer<T: System, S: Encode, E: SignedExtra<T>> {
 }
 
 /// Extrinsic signer using a private key.
+#[derive(Debug)]
 pub struct PairSigner<T: System, S: Encode, E: SignedExtra<T>, P: Pair> {
     _marker: PhantomData<(S, E)>,
     account_id: T::AccountId,
