@@ -231,7 +231,7 @@ pub struct InvulnerablesStore<T: Staking> {
 /// Map from all locked "stash" accounts to the controller account.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct BondedStore<T: Staking> {
-    #[store(returns = Vec<T::AccountId>)]
+    #[store(returns = Option<T::AccountId>)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
 }
