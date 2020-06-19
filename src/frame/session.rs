@@ -32,6 +32,18 @@ use std::{
 };
 use substrate_subxt_proc_macro::Store;
 
+macro_rules! def {
+    ($name:ident) => {
+        impl<T: Session> Default for $name<T> {
+            fn default() -> Self {
+                Self {
+                    _runtime: PhantomData,
+                }
+            }
+        }
+    };
+}
+
 /// The trait needed for this module.
 #[module]
 pub trait Session: System {
@@ -53,6 +65,8 @@ pub struct ValidatorsStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
+def!(ValidatorsStore);
+
 /// Current index of the session.
 #[derive(Encode, Store, Debug)]
 pub struct CurrentIndexStore<T: Session> {
@@ -60,6 +74,8 @@ pub struct CurrentIndexStore<T: Session> {
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
+
+def!(CurrentIndexStore);
 
 /// True if the underlying economic identities or weighting behind the validators
 /// has changed in the queued validator set.
@@ -70,6 +86,8 @@ pub struct QueuedChangedStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
+def!(QueuedChangedStore);
+
 /// The current set of validators.
 #[derive(Encode, Call, Debug)]
 pub struct SetKeysCall<T: Session> {
@@ -77,4 +95,21 @@ pub struct SetKeysCall<T: Session> {
     pub keys: T::Keys,
     /// The proof. This is not currently used and can be set to an empty vector.
     pub proof: Vec<u8>,
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::tests::test_client;
+
+    #[async_std::test]
+    async fn test_state_read_free_balance() {
+        env_logger::try_init().ok();
+        let (client, _) = test_client().await;
+        assert!(client
+            .fetch(QueuedChangedStore::default(), None)
+            .await
+            .unwrap()
+            .unwrap());
+    }
 }

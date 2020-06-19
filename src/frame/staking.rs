@@ -161,26 +161,7 @@ pub struct UnlockChunk<T: Staking> {
     pub era: T::EraIndex,
 }
 
-/// The ledger of a (bonded) stash.
-#[derive(PartialEq, Eq, Clone, Encode, Decode, Ord, PartialOrd, Hash, Debug)]
-pub struct StakingLedger<T: Staking> {
-    /// The stash account whose balance is actually locked and at stake.
-    pub stash: T::AccountId,
-    /// The total amount of the stash's balance that we are currently accounting for.
-    /// It's just `active` plus all the `unlocking` balances.
-    #[codec(compact)]
-    pub total: T::Balance,
-    /// The total amount of the stash's balance that will be at stake in any forthcoming
-    /// rounds.
-    #[codec(compact)]
-    pub active: T::Balance,
-    /// Any balance that is becoming free, which may eventually be transferred out
-    /// of the stash (assuming it doesn't get slashed first).
-    pub unlocking: Vec<UnlockChunk<T>>,
-    /// List of eras for which the stakers behind a validator have claimed rewards. Only updated
-    /// for validators.
-    pub claimed_rewards: Vec<T::EraIndex>,
-}
+pub use pallet_staking::StakingLedger;
 
 /// Number of eras to keep in history.
 ///
@@ -239,7 +220,7 @@ pub struct BondedStore<T: Staking> {
 /// Map from all (unlocked) "controller" accounts to the info regarding the staking.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct LedgerStore<T: Staking> {
-    #[store(returns = Option<StakingLedger<T>>)]
+    #[store(returns = Option<StakingLedger<T::AccountId, T::Balance>>)]
     /// The controller account
     pub controller: T::AccountId,
 }
