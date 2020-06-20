@@ -23,6 +23,7 @@ use codec::{
     Input,
     Output,
 };
+use sp_runtime::DispatchError;
 use std::{
     collections::{
         HashMap,
@@ -68,14 +69,32 @@ pub struct RawEvent {
 #[derive(Debug, Error)]
 pub enum EventsError {
     /// Codec error.
-    #[error("Scale codec error: {0:?}")]
+    #[error("Scale codec error: {0}")]
     CodecError(#[from] CodecError),
     /// Metadata error.
-    #[error("Metadata error: {0:?}")]
+    #[error("Metadata error: {0}")]
     Metadata(#[from] MetadataError),
     /// Type size unavailable.
     #[error("Type Sizes Unavailable: {0:?}")]
     TypeSizeUnavailable(String),
+    /// Bad origin.
+    #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
+    BadOrigin,
+    /// Cannot lookup.
+    #[error("Cannot lookup some information required to validate the transaction.")]
+    CannotLookup,
+    /// Other error.
+    #[error("Other dispatch error occured. Check subtrate logs for details.")]
+    Other,
+}
+
+/// Runtime errors the application should handle.
+#[derive(Debug, Error)]
+#[error("Runtime error {error} from {module}: {message}")]
+pub struct RuntimeError {
+    module: String,
+    error: String,
+    message: String,
 }
 
 /// Event decoder.
@@ -95,6 +114,7 @@ impl<T: System> EventsDecoder<T> {
             marker: PhantomData,
         };
         // register default event arg type sizes for dynamic decoding of events
+        decoder.register_type_size::<()>("PhantomData");
         decoder.register_type_size::<bool>("bool");
         decoder.register_type_size::<u32>("ReferendumIndex");
         decoder.register_type_size::<[u8; 16]>("Kind");
@@ -134,7 +154,6 @@ impl<T: System> EventsDecoder<T> {
                     for primitive in arg.primitives() {
                         if module.name() != "System"
                             && !self.type_sizes.contains_key(&primitive)
-                            && !primitive.contains("PhantomData")
                         {
                             missing.insert(format!(
                                 "{}::{}::{}",
@@ -173,9 +192,25 @@ impl<T: System> EventsDecoder<T> {
                 }
                 EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
-                    if name.contains("PhantomData") {
-                        // PhantomData is size 0
-                        return Ok(())
+                    if name == "DispatchError" {
+                        use DispatchError::*;
+                        match DispatchError::decode(input)? {
+                            Module {
+                                index,
+                                error,
+                                message,
+                            } => {
+                                log::error!(
+                                    "index: {}, error: {}, message: {:?}",
+                                    index,
+                                    error,
+                                    message
+                                );
+                            }
+                            BadOrigin => return Err(EventsError::BadOrigin),
+                            CannotLookup => return Err(EventsError::CannotLookup),
+                            Other(_) => return Err(EventsError::Other),
+                        }
                     }
                     if let Some(size) = self.type_sizes.get(name) {
                         let mut buf = vec![0; *size];
