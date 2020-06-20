@@ -16,6 +16,7 @@
 
 use crate::utils;
 use proc_macro2::TokenStream;
+use proc_macro_error::abort;
 use quote::{
     format_ident,
     quote,
@@ -161,6 +162,8 @@ impl From<ItemTest> for Test {
         let mut state = None;
         let mut prelude = None;
         let mut steps = vec![];
+
+        let span = test.brace.span;
         for test_item in test.items {
             match test_item {
                 TestItem::Name(item) => {
@@ -193,7 +196,7 @@ impl From<ItemTest> for Test {
         let runtime = runtime
             .unwrap_or_else(|| syn::parse2(quote!(#subxt::DefaultNodeRuntime)).unwrap());
         Self {
-            name: name.expect("No name specified"),
+            name: name.unwrap_or_else(|| abort!(span, "No name specified")),
             account: account.unwrap_or_else(|| format_ident!("Alice")),
             signature: signature.unwrap_or_else(|| {
                 syn::parse2(quote!(#subxt::sp_runtime::MultiSignature)).unwrap()
@@ -277,6 +280,7 @@ impl From<ItemStep> for Step {
         let mut event = vec![];
         let mut assert = None;
 
+        let span = step.brace.span;
         for step_item in step.items {
             match step_item {
                 StepItem::State(item) => {
@@ -297,7 +301,7 @@ impl From<ItemStep> for Step {
 
         Self {
             state,
-            call: call.expect("Step requires a call."),
+            call: call.unwrap_or_else(|| abort!(span, "Step requires a call.")),
             event_name,
             event,
             assert,
@@ -406,12 +410,13 @@ fn struct_name(expr: &syn::Expr) -> syn::Path {
     if let syn::Expr::Struct(syn::ExprStruct { path, .. }) = expr {
         return path.clone()
     } else {
-        panic!("not a struct");
+        abort!(expr, "Expected a struct");
     }
 }
 
 pub fn test(input: TokenStream) -> TokenStream {
-    let item_test: ItemTest = syn::parse2(input).unwrap();
+    let item_test: ItemTest =
+        syn::parse2(input).map_err(|err| abort!("{}", err)).unwrap();
     Test::from(item_test).into_tokens()
 }
 
