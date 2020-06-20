@@ -20,7 +20,7 @@ proc-macro2 = "1.0.18"
 proc-macro-crate = "0.1.4"
 proc-macro-error = "1.0.2"
 quote = "1.0.7"
-syn = "1.0.30"
+syn = "1.0.31"
 synstructure = "0.12.4"
 
 [dev-dependencies]
@@ -30,7 +30,7 @@ env_logger = "0.7.1"
 pretty_assertions = "0.6.1"
 sp-keyring = "2.0.0-rc3"
 substrate-subxt = { path = ".." }
-trybuild = "1.0.28"
+trybuild = "1.0.30"
 
 [[test]]
 name = "balances"
