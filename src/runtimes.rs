@@ -14,17 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::Encode;
 use sp_runtime::{
     generic::Header,
     traits::{
         BlakeTwo256,
         IdentifyAccount,
+        SignedExtension,
         Verify,
     },
     MultiSignature,
     OpaqueExtrinsic,
 };
 
+use crate::extra::{DefaultExtra, SignedExtra};
 use crate::frame::{
     balances::{
         AccountData,
@@ -34,6 +37,14 @@ use crate::frame::{
     system::System,
 };
 
+/// Runtime trait.
+pub trait Runtime: System + Sized + Send + Sync + 'static {
+    /// Signature type.
+    type Signature: Encode + Send + Sync + 'static;
+    /// Transaction extras.
+    type Extra: SignedExtra<Self> + SignedExtension + Send;
+}
+
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
 ///
 /// # Note
@@ -42,6 +53,11 @@ use crate::frame::{
 /// definition MUST be used to ensure type compatibility.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DefaultNodeRuntime;
+
+impl Runtime for DefaultNodeRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
 
 impl System for DefaultNodeRuntime {
     type Index = u32;
@@ -70,6 +86,11 @@ impl Contracts for DefaultNodeRuntime {}
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct NodeTemplateRuntime;
 
+impl Runtime for NodeTemplateRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
+
 impl System for NodeTemplateRuntime {
     type Index = u32;
     type BlockNumber = u32;
@@ -94,6 +115,11 @@ impl Balances for NodeTemplateRuntime {
 /// Also the contracts module is not part of the kusama runtime.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KusamaRuntime;
+
+impl Runtime for KusamaRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
 
 impl System for KusamaRuntime {
     type Index = u32;
