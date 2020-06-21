@@ -20,30 +20,49 @@ use sp_runtime::{
     traits::{
         BlakeTwo256,
         IdentifyAccount,
-        SignedExtension,
         Verify,
     },
     MultiSignature,
     OpaqueExtrinsic,
 };
 
-use crate::extra::{DefaultExtra, SignedExtra};
-use crate::frame::{
-    balances::{
-        AccountData,
-        Balances,
+use crate::{
+    extra::{
+        DefaultExtra,
+        SignedExtra,
     },
-    contracts::Contracts,
-    system::System,
+    frame::{
+        balances::{
+            AccountData,
+            Balances,
+        },
+        contracts::Contracts,
+        system::System,
+    },
+    Encoded,
 };
 
 /// Runtime trait.
 pub trait Runtime: System + Sized + Send + Sync + 'static {
     /// Signature type.
-    type Signature: Encode + Send + Sync + 'static;
+    type Signature: Verify + Encode + Send + Sync + 'static;
     /// Transaction extras.
-    type Extra: SignedExtra<Self> + SignedExtension + Send;
+    type Extra: SignedExtra<Self> + Send + Sync + 'static;
 }
+
+/// Extra type.
+pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
+
+/// UncheckedExtrinsic type.
+pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
+    <T as System>::Address,
+    Encoded,
+    <T as Runtime>::Signature,
+    Extra<T>,
+>;
+
+/// SignedPayload type.
+pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, Extra<T>>;
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
 ///

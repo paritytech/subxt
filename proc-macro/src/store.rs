@@ -138,12 +138,7 @@ pub fn store(s: Structure) -> TokenStream {
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>>;
         }
 
-        impl<T, S, E> #store_trait<T> for #subxt::Client<T, S, E>
-        where
-            T: #module + Send + Sync,
-            S: 'static,
-            E: Send + Sync + 'static,
-        {
+        impl<T: #subxt::Runtime + #module> #store_trait<T> for #subxt::Client<T> {
             fn #store<'a>(
                 &'a self,
                 #args
@@ -196,12 +191,7 @@ mod tests {
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
-            impl<T, S, E> AccountStoreExt<T> for substrate_subxt::Client<T, S, E>
-            where
-                T: Balances + Send + Sync,
-                S: 'static,
-                E: Send + Sync + 'static,
-            {
+            impl<T: substrate_subxt::Runtime + Balances> AccountStoreExt<T> for substrate_subxt::Client<T> {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,

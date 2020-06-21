@@ -19,33 +19,26 @@
 
 use crate::{
     extra::SignedExtra,
-    frame::system::System,
-    Encoded,
-};
-use codec::Encode;
-use sp_core::Pair;
-use sp_runtime::{
-    generic::{
+    runtimes::{
+        Runtime,
         SignedPayload,
         UncheckedExtrinsic,
     },
-    traits::{
-        IdentifyAccount,
-        SignedExtension,
-        Verify,
-    },
+};
+use codec::Encode;
+use sp_core::Pair;
+use sp_runtime::traits::{
+    IdentifyAccount,
+    SignedExtension,
+    Verify,
 };
 use std::{
     future::Future,
-    marker::PhantomData,
     pin::Pin,
 };
 
 /// Extrinsic signer.
-pub trait Signer<T: System, S: Encode, E: SignedExtra<T>>
-where
-    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
-{
+pub trait Signer<T: Runtime> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -58,41 +51,30 @@ where
     /// refused the operation.
     fn sign(
         &self,
-        extrinsic: SignedPayload<Encoded, E::Extra>,
-    ) -> Pin<
-        Box<
-            dyn Future<
-                    Output = Result<
-                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
-                        String,
-                    >,
-                > + Send
-                + Sync,
-        >,
-    >;
+        extrinsic: SignedPayload<T>,
+    ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>;
 }
 
 /// Extrinsic signer using a private key.
-pub struct PairSigner<T: System, S: Encode, E: SignedExtra<T>, P: Pair> {
-    _marker: PhantomData<(S, E)>,
+pub struct PairSigner<T: Runtime, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
 }
 
-impl<T, S, E, P> PairSigner<T, S, E, P>
+impl<T, P> PairSigner<T, P>
 where
-    T: System,
-    S: Encode + Verify + From<P::Signature>,
-    S::Signer: From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    E: SignedExtra<T>,
+    T: Runtime,
+    T::Signature: From<P::Signature>,
+    <T::Signature as Verify>::Signer:
+        From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P: Pair,
 {
     /// Creates a new `Signer` from a `Pair`.
     pub fn new(signer: P) -> Self {
-        let account_id = S::Signer::from(signer.public()).into_account();
+        let account_id =
+            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
         Self {
-            _marker: PhantomData,
             account_id,
             nonce: None,
             signer,
@@ -115,15 +97,14 @@ where
     }
 }
 
-impl<T, S, E, P> Signer<T, S, E> for PairSigner<T, S, E, P>
+impl<T, P> Signer<T> for PairSigner<T, P>
 where
-    T: System + 'static,
+    T: Runtime,
     T::AccountId: Into<T::Address> + 'static,
-    S: Encode + 'static + Send + Sync,
-    E: SignedExtra<T> + 'static,
+    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        Send + Sync,
     P: Pair + 'static,
-    P::Signature: Into<S> + 'static,
-    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    P::Signature: Into<T::Signature> + 'static,
 {
     fn account_id(&self) -> &T::AccountId {
         &self.account_id
@@ -135,25 +116,17 @@ where
 
     fn sign(
         &self,
-        extrinsic: SignedPayload<Encoded, E::Extra>,
-    ) -> Pin<
-        Box<
-            dyn Future<
-                    Output = Result<
-                        UncheckedExtrinsic<T::Address, Encoded, S, E::Extra>,
-                        String,
-                    >,
-                > + Send
-                + Sync,
-        >,
-    > {
+        extrinsic: SignedPayload<T>,
+    ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>
+    {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        Box::pin(futures::future::ok(UncheckedExtrinsic::new_signed(
+        let extrinsic = UncheckedExtrinsic::<T>::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),
             extra,
-        )))
+        );
+        Box::pin(async move { Ok(extrinsic) })
     }
 }
