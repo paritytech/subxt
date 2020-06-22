@@ -56,7 +56,7 @@ use sp_core::storage::{
     StorageChangeSet,
     StorageKey,
 };
-use sp_runtime::traits::SignedExtension;
+pub use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 

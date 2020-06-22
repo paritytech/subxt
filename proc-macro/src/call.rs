@@ -146,7 +146,7 @@ mod tests {
 
             impl<T: substrate_subxt::Runtime + Balances> TransferCallExt<T> for substrate_subxt::Client<T>
             where
-                <T::Extra as substrate_subxt::SignedExtra<T>>::AdditionalSigned: Send + Sync,
+                <<T::Extra as substrate_subxt::SignedExtra<T>>::Extra as substrate_subxt::SignedExtension>::AdditionalSigned: Send + Sync,
             {
                 fn transfer<'a>(
                     &'a self,

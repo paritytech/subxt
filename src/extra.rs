@@ -22,7 +22,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
 };
-pub use sp_runtime::traits::SignedExtension;
+use sp_runtime::traits::SignedExtension;
 use sp_runtime::{
     generic::Era,
     transaction_validity::TransactionValidityError,

@@ -429,9 +429,7 @@ mod tests {
             #[ignore]
             async fn test_transfer_balance() {
                 env_logger::try_init().ok();
-                let client = substrate_subxt::ClientBuilder::<
-                    KusamaRuntime,
-                >::new().build().await.unwrap();
+                let client = substrate_subxt::ClientBuilder::<KusamaRuntime>::new().build().await.unwrap();
                 let signer = substrate_subxt::PairSigner::new(sp_keyring::AccountKeyring::Alice.pair());
                 #[allow(unused)]
                 let alice = sp_keyring::AccountKeyring::Alice.to_account_id();
