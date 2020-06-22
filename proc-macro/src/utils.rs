@@ -56,7 +56,7 @@ pub fn bindings<'a>(s: &'a Structure) -> Vec<&'a BindingInfo<'a>> {
 
 type Field = (syn::Ident, syn::Type);
 
-pub fn fields<'a>(bindings: &'a [&'a BindingInfo<'a>]) -> Vec<Field> {
+pub fn fields(bindings: &[&BindingInfo<'_>]) -> Vec<Field> {
     bindings
         .iter()
         .enumerate()
@@ -72,7 +72,7 @@ pub fn fields<'a>(bindings: &'a [&'a BindingInfo<'a>]) -> Vec<Field> {
         .collect()
 }
 
-pub fn marker_field<'a>(fields: &'a [Field]) -> Option<syn::Ident> {
+pub fn marker_field(fields: &[Field]) -> Option<syn::Ident> {
     fields
         .iter()
         .filter_map(|(field, ty)| {
@@ -86,7 +86,7 @@ pub fn marker_field<'a>(fields: &'a [Field]) -> Option<syn::Ident> {
         .cloned()
 }
 
-pub fn filter_fields<'a>(fields: &'a [Field], field: &'a syn::Ident) -> Vec<Field> {
+pub fn filter_fields(fields: &[Field], field: &syn::Ident) -> Vec<Field> {
     fields
         .iter()
         .filter_map(|(field2, ty)| {
@@ -99,12 +99,12 @@ pub fn filter_fields<'a>(fields: &'a [Field], field: &'a syn::Ident) -> Vec<Fiel
         .collect()
 }
 
-pub fn fields_to_args<'a>(fields: &'a [Field]) -> TokenStream {
+pub fn fields_to_args(fields: &[Field]) -> TokenStream {
     let args = fields.iter().map(|(field, ty)| quote!(#field: #ty,));
     quote!(#(#args)*)
 }
 
-pub fn build_struct<'a>(ident: &'a syn::Ident, fields: &'a [Field]) -> TokenStream {
+pub fn build_struct(ident: &syn::Ident, fields: &[Field]) -> TokenStream {
     let fields = fields.iter().map(|(field, _)| field);
     quote!(#ident { #(#fields,)* })
 }
@@ -170,7 +170,7 @@ pub fn type_params(generics: &syn::Generics) -> Vec<TokenStream> {
 pub fn parse_option(ty: &syn::Type) -> Option<syn::Type> {
     if let syn::Type::Path(ty_path) = ty {
         if let Some(seg) = ty_path.path.segments.first() {
-            if seg.ident.to_string() == "Option" {
+            if &seg.ident == "Option" {
                 if let syn::PathArguments::AngleBracketed(args) = &seg.arguments {
                     if let Some(syn::GenericArgument::Type(ty)) = args.args.first() {
                         return Some(ty.clone())
@@ -191,10 +191,9 @@ pub struct Attrs<A> {
 impl<A: Parse> Parse for Attrs<A> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
-        Ok(Self {
-            paren: syn::parenthesized!(content in input),
-            attrs: content.parse_terminated(A::parse)?,
-        })
+        let paren = syn::parenthesized!(content in input);
+        let attrs = content.parse_terminated(A::parse)?;
+        Ok(Self { paren, attrs })
     }
 }
 

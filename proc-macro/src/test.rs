@@ -69,10 +69,9 @@ struct Items<I> {
 impl<I: Parse> Parse for Items<I> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
-        Ok(Self {
-            brace: syn::braced!(content in input),
-            items: content.parse_terminated(I::parse)?,
-        })
+        let brace = syn::braced!(content in input);
+        let items = content.parse_terminated(I::parse)?;
+        Ok(Self { brace, items })
     }
 }
 
@@ -81,7 +80,7 @@ type ItemTest = Items<TestItem>;
 #[derive(Debug)]
 enum TestItem {
     Name(Item<kw::name, syn::Ident>),
-    Runtime(Item<kw::runtime, syn::Type>),
+    Runtime(Item<kw::runtime, Box<syn::Type>>),
     Account(Item<kw::account, syn::Ident>),
     State(Item<kw::state, ItemState>),
     Prelude(Item<kw::prelude, syn::Block>),
@@ -135,7 +134,7 @@ type StateItem = Item<syn::Ident, syn::Expr>;
 
 struct Test {
     name: syn::Ident,
-    runtime: syn::Type,
+    runtime: Box<syn::Type>,
     account: syn::Ident,
     state: Option<State>,
     prelude: Option<syn::Block>,
@@ -382,7 +381,7 @@ impl From<ItemState> for State {
 
 fn struct_name(expr: &syn::Expr) -> syn::Path {
     if let syn::Expr::Struct(syn::ExprStruct { path, .. }) = expr {
-        return path.clone()
+        path.clone()
     } else {
         abort!(expr, "Expected a struct");
     }

@@ -49,7 +49,7 @@ type ModuleAttrs = utils::Attrs<ModuleAttr>;
 fn ignore(attrs: &[syn::Attribute]) -> bool {
     for attr in attrs {
         if let Some(ident) = attr.path.get_ident() {
-            if ident.to_string() == "module" {
+            if ident == "module" {
                 let attrs: ModuleAttrs = syn::parse2(attr.tokens.clone())
                     .map_err(|err| abort!("{}", err))
                     .unwrap();
@@ -72,11 +72,11 @@ fn with_module_ident(module: &syn::Ident) -> syn::Ident {
 
 pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
-    // handle #[module(ignore)] by just returning the tokens
-    let input = if input.is_err() {
-        return tokens
+    let input = if let Ok(input) = input {
+        input
     } else {
-        input.unwrap()
+        // handle #[module(ignore)] by just returning the tokens
+        return tokens
     };
 
     let subxt = utils::use_crate("substrate-subxt");
