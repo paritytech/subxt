@@ -58,6 +58,9 @@ pub enum MetadataError {
     /// Event is not in metadata.
     #[error("Event {0} not found")]
     EventNotFound(u8),
+    /// Event is not in metadata.
+    #[error("Error {0} not found")]
+    ErrorNotFound(u8),
     /// Storage is not in metadata.
     #[error("Storage {0} not found")]
     StorageNotFound(&'static str),
@@ -75,6 +78,7 @@ pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
     modules_with_calls: HashMap<String, ModuleWithCalls>,
     modules_with_events: HashMap<String, ModuleWithEvents>,
+    modules_with_errors: HashMap<String, ModuleWithErrors>,
 }
 
 impl Metadata {
@@ -111,6 +115,16 @@ impl Metadata {
         module_index: u8,
     ) -> Result<&ModuleWithEvents, MetadataError> {
         self.modules_with_events
+            .values()
+            .find(|&module| module.index == module_index)
+            .ok_or(MetadataError::ModuleIndexNotFound(module_index))
+    }
+
+    pub(crate) fn module_with_errors(
+        &self,
+        module_index: u8,
+    ) -> Result<&ModuleWithErrors, MetadataError> {
+        self.modules_with_errors
             .values()
             .find(|&module| module.index == module_index)
             .ok_or(MetadataError::ModuleIndexNotFound(module_index))
@@ -203,6 +217,25 @@ impl ModuleWithEvents {
         self.events
             .get(&index)
             .ok_or(MetadataError::EventNotFound(index))
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct ModuleWithErrors {
+    index: u8,
+    name: String,
+    errors: HashMap<u8, String>,
+}
+
+impl ModuleWithErrors {
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn error(&self, index: u8) -> Result<&String, MetadataError> {
+        self.errors
+            .get(&index)
+            .ok_or(MetadataError::ErrorNotFound(index))
     }
 }
 
@@ -437,6 +470,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         let mut modules = HashMap::new();
         let mut modules_with_calls = HashMap::new();
         let mut modules_with_events = HashMap::new();
+        let mut modules_with_errors = HashMap::new();
         for module in convert(meta.modules)?.into_iter() {
             let module_name = convert(module.name.clone())?;
 
@@ -490,11 +524,24 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                     },
                 );
             }
+            let mut error_map = HashMap::new();
+            for (index, error) in convert(module.errors)?.into_iter().enumerate() {
+                error_map.insert(index as u8, convert_error(error)?);
+            }
+            modules_with_errors.insert(
+                module_name.clone(),
+                ModuleWithErrors {
+                    index: modules_with_errors.len() as u8,
+                    name: module_name.clone(),
+                    errors: error_map,
+                },
+            );
         }
         Ok(Metadata {
             modules,
             modules_with_calls,
             modules_with_events,
+            modules_with_errors,
         })
     }
 }
@@ -533,4 +580,10 @@ fn convert_entry(
         ty: entry.ty,
         default,
     })
+}
+
+fn convert_error(
+    error: frame_metadata::ErrorMetadata,
+) -> Result<String, ConversionError> {
+    convert(error.name)
 }

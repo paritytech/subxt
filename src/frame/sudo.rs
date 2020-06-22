@@ -42,20 +42,37 @@ pub struct SudoCall<'a, T: Sudo> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::frame::balances::TransferCall;
+    use crate::{
+        error::Error,
+        frame::balances::TransferCall,
+        signer::PairSigner,
+        tests::{
+            test_client,
+            TestRuntime,
+        },
+    };
+    use sp_keyring::AccountKeyring;
 
-    subxt_test!({
-        name: test_sudo,
-        step: {
-            call: SudoCall {
-                _runtime: PhantomData,
-                call: &client.encode(
-                    TransferCall {
-                        to: &bob.clone().into(),
-                        amount: 10_000,
-                    }
-                ).unwrap(),
-            },
-        }
-    });
+    #[async_std::test]
+    async fn test_sudo() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let (client, _) = test_client().await;
+
+        let call = client
+            .encode(TransferCall {
+                to: &AccountKeyring::Bob.to_account_id(),
+                amount: 10_000,
+            })
+            .unwrap();
+
+        let res = client.sudo_and_watch(&alice, &call).await;
+        assert!(
+            if let Err(Error::BadOrigin) = res {
+                true
+            } else {
+                false
+            }
+        );
+    }
 }

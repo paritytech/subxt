@@ -73,7 +73,6 @@ pub use crate::{
     error::Error,
     events::{
         EventsDecoder,
-        EventsError,
         RawEvent,
     },
     extra::*,
@@ -95,7 +94,6 @@ use crate::{
         AccountStoreExt,
         Phase,
         System,
-        SystemEvent,
     },
     rpc::{
         ChainBlock,

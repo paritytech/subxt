@@ -97,6 +97,8 @@ impl Balances for DefaultNodeRuntime {
 
 impl Contracts for DefaultNodeRuntime {}
 
+impl Sudo for DefaultNodeRuntime {}
+
 /// Concrete type definitions compatible with the node template.
 ///
 /// # Note

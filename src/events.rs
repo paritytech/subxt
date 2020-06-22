@@ -19,11 +19,14 @@ use codec::{
     Compact,
     Decode,
     Encode,
-    Error as CodecError,
     Input,
     Output,
 };
-use sp_runtime::DispatchError;
+use frame_support::dispatch::DispatchInfo;
+use sp_runtime::{
+    DispatchError,
+    DispatchResult,
+};
 use std::{
     collections::{
         HashMap,
@@ -34,25 +37,16 @@ use std::{
         Send,
     },
 };
-use thiserror::Error;
 
 use crate::{
+    error::Error,
     metadata::{
         EventArg,
         Metadata,
-        MetadataError,
     },
     Phase,
     System,
-    SystemEvent,
 };
-
-/// Top level Event that can be produced by a substrate runtime
-#[derive(Debug)]
-pub enum RuntimeEvent<T: System> {
-    System(SystemEvent<T>),
-    Raw(RawEvent),
-}
 
 /// Raw bytes for an Event
 #[derive(Debug)]
@@ -63,38 +57,6 @@ pub struct RawEvent {
     pub variant: String,
     /// The raw Event data
     pub data: Vec<u8>,
-}
-
-/// Events error.
-#[derive(Debug, Error)]
-pub enum EventsError {
-    /// Codec error.
-    #[error("Scale codec error: {0}")]
-    CodecError(#[from] CodecError),
-    /// Metadata error.
-    #[error("Metadata error: {0}")]
-    Metadata(#[from] MetadataError),
-    /// Type size unavailable.
-    #[error("Type Sizes Unavailable: {0:?}")]
-    TypeSizeUnavailable(String),
-    /// Bad origin.
-    #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
-    BadOrigin,
-    /// Cannot lookup.
-    #[error("Cannot lookup some information required to validate the transaction.")]
-    CannotLookup,
-    /// Other error.
-    #[error("Other dispatch error occured. Check subtrate logs for details.")]
-    Other,
-}
-
-/// Runtime errors the application should handle.
-#[derive(Debug, Error)]
-#[error("Runtime error {error} from {module}: {message}")]
-pub struct RuntimeError {
-    module: String,
-    error: String,
-    message: String,
 }
 
 /// Event decoder.
@@ -115,6 +77,7 @@ impl<T: System> EventsDecoder<T> {
         };
         // register default event arg type sizes for dynamic decoding of events
         decoder.register_type_size::<()>("PhantomData");
+        decoder.register_type_size::<DispatchInfo>("DispatchInfo");
         decoder.register_type_size::<bool>("bool");
         decoder.register_type_size::<u32>("ReferendumIndex");
         decoder.register_type_size::<[u8; 16]>("Kind");
@@ -152,9 +115,7 @@ impl<T: System> EventsDecoder<T> {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if module.name() != "System"
-                            && !self.type_sizes.contains_key(&primitive)
-                        {
+                        if !self.type_sizes.contains_key(&primitive) {
                             missing.insert(format!(
                                 "{}::{}::{}",
                                 module.name(),
@@ -180,7 +141,7 @@ impl<T: System> EventsDecoder<T> {
         args: &[EventArg],
         input: &mut I,
         output: &mut W,
-    ) -> Result<(), EventsError> {
+    ) -> Result<(), Error> {
         for arg in args {
             match arg {
                 EventArg::Vec(arg) => {
@@ -192,32 +153,22 @@ impl<T: System> EventsDecoder<T> {
                 }
                 EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
-                    if name == "DispatchError" {
-                        use DispatchError::*;
-                        match DispatchError::decode(input)? {
-                            Module {
-                                index,
-                                error,
-                                message,
-                            } => {
-                                log::error!(
-                                    "index: {}, error: {}, message: {:?}",
-                                    index,
-                                    error,
-                                    message
-                                );
+                    let result = match name.as_str() {
+                        "DispatchResult" => DispatchResult::decode(input)?,
+                        "DispatchError" => Err(DispatchError::decode(input)?),
+                        _ => {
+                            if let Some(size) = self.type_sizes.get(name) {
+                                let mut buf = vec![0; *size];
+                                input.read(&mut buf)?;
+                                output.write(&buf);
+                                Ok(())
+                            } else {
+                                return Err(Error::TypeSizeUnavailable(name.to_owned()))
                             }
-                            BadOrigin => return Err(EventsError::BadOrigin),
-                            CannotLookup => return Err(EventsError::CannotLookup),
-                            Other(_) => return Err(EventsError::Other),
                         }
-                    }
-                    if let Some(size) = self.type_sizes.get(name) {
-                        let mut buf = vec![0; *size];
-                        input.read(&mut buf)?;
-                        output.write(&buf);
-                    } else {
-                        return Err(EventsError::TypeSizeUnavailable(name.to_owned()))
+                    };
+                    if let Err(error) = result {
+                        Error::from_dispatch(&self.metadata, error)?;
                     }
                 }
             }
@@ -229,7 +180,7 @@ impl<T: System> EventsDecoder<T> {
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RuntimeEvent<T>)>, EventsError> {
+    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
 
@@ -240,33 +191,24 @@ impl<T: System> EventsDecoder<T> {
             let module_variant = input.read_byte()?;
 
             let module = self.metadata.module_with_events(module_variant)?;
-            let event = if module.name() == "System" {
-                let system_event = SystemEvent::decode(input)?;
-                RuntimeEvent::System(system_event)
-            } else {
-                let event_variant = input.read_byte()?;
-                let event_metadata = module.event(event_variant)?;
+            let event_variant = input.read_byte()?;
+            let event_metadata = module.event(event_variant)?;
 
-                log::debug!(
-                    "received event '{}::{}'",
-                    module.name(),
-                    event_metadata.name
-                );
+            log::debug!(
+                "received event '{}::{}'",
+                module.name(),
+                event_metadata.name
+            );
 
-                let mut event_data = Vec::<u8>::new();
-                self.decode_raw_bytes(
-                    &event_metadata.arguments(),
-                    input,
-                    &mut event_data,
-                )?;
+            let mut event_data = Vec::<u8>::new();
+            self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
 
-                log::debug!("raw bytes: {}", hex::encode(&event_data),);
+            log::debug!("raw bytes: {}", hex::encode(&event_data),);
 
-                RuntimeEvent::Raw(RawEvent {
-                    module: module.name().to_string(),
-                    variant: event_metadata.name.clone(),
-                    data: event_data,
-                })
+            let event = RawEvent {
+                module: module.name().to_string(),
+                variant: event_metadata.name.clone(),
+                data: event_data,
             };
 
             // topics come after the event data in EventRecord

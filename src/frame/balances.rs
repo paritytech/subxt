@@ -110,6 +110,10 @@ pub struct TransferEvent<T: Balances> {
 mod tests {
     use super::*;
     use crate::{
+        error::{
+            Error,
+            RuntimeError,
+        },
         signer::{
             PairSigner,
             Signer,
@@ -180,17 +184,21 @@ mod tests {
         let alice = PairSigner::new(AccountKeyring::Alice.pair());
         let hans = PairSigner::new(Pair::generate().0);
         let (client, _) = test_client().await;
-        let res = client
+        client
             .transfer_and_watch(&alice, hans.account_id(), 100_000_000_000)
             .await
             .unwrap();
-        println!("{:?}", res);
         let res = client
             .transfer_and_watch(&hans, alice.account_id(), 100_000_000_000)
-            .await
-            .unwrap();
-
-        println!("{:?}", res);
-        assert!(false);
+            .await;
+        if let Err(Error::Runtime(error)) = res {
+            let error2 = RuntimeError {
+                module: "Balances".into(),
+                error: "InsufficientBalance".into(),
+            };
+            assert_eq!(error, error2);
+        } else {
+            panic!("expected an error");
+        }
     }
 }
