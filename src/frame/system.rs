@@ -155,21 +155,6 @@ pub struct SetCodeCall<'a, T: System> {
     pub code: &'a [u8],
 }
 
-/// Event for the System module.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
-pub enum SystemEvent<T: System> {
-    /// An extrinsic completed successfully.
-    ExtrinsicSuccess(DispatchInfo),
-    /// An extrinsic failed.
-    ExtrinsicFailed(DispatchError, DispatchInfo),
-    /// `:code` was updated.
-    CodeUpdated,
-    /// A new account was created.
-    NewAccount(T::AccountId),
-    /// An account was reaped.
-    KilledAccount(T::AccountId),
-}
-
 /// A phase of a block's execution.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum Phase {
@@ -177,4 +162,45 @@ pub enum Phase {
     ApplyExtrinsic(u32),
     /// The end.
     Finalization,
+}
+
+/// An extrinsic completed successfully.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct ExtrinsicSuccessEvent<T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// The dispatch info.
+    pub info: DispatchInfo,
+}
+
+/// An extrinsic failed.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct ExtrinsicFailedEvent<T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// The dispatch error.
+    pub error: DispatchError,
+    /// The dispatch info.
+    pub info: DispatchInfo,
+}
+
+/// `:code` was updated.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct CodeUpdatedEvent<T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+}
+
+/// A new account was created.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct NewAccountEvent<T: System> {
+    /// Created account id.
+    pub account: T::AccountId,
+}
+
+/// An account was reaped.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct KilledAccountEvent<T: System> {
+    /// Killed account id.
+    pub account: T::AccountId,
 }

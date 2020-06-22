@@ -20,6 +20,7 @@ use heck::{
     SnakeCase,
 };
 use proc_macro2::TokenStream;
+use proc_macro_error::abort;
 use quote::{
     format_ident,
     quote,
@@ -50,7 +51,9 @@ impl Parse for StoreAttr {
 type StoreAttrs = utils::Attrs<StoreAttr>;
 
 fn parse_returns_attr(attr: &syn::Attribute) -> Option<(syn::Type, syn::Type, bool)> {
-    let attrs: StoreAttrs = syn::parse2(attr.tokens.clone()).unwrap();
+    let attrs: StoreAttrs = syn::parse2(attr.tokens.clone())
+        .map_err(|err| abort!("{}", err))
+        .unwrap();
     attrs.attrs.into_iter().next().map(|attr| {
         let StoreAttr::Returns(attr) = attr;
         let ty = attr.value;
@@ -81,7 +84,9 @@ pub fn store(s: Structure) -> TokenStream {
         .iter()
         .filter_map(|bi| bi.ast().attrs.iter().filter_map(parse_returns_attr).next())
         .next()
-        .expect("#[store(returns = ..)] needs to be specified.");
+        .unwrap_or_else(|| {
+            abort!(ident, "#[store(returns = ..)] needs to be specified.")
+        });
     let fetch = if uses_default {
         quote!(fetch_or_default)
     } else {
@@ -93,7 +98,13 @@ pub fn store(s: Structure) -> TokenStream {
             0 => "plain",
             1 => "map",
             2 => "double_map",
-            _ => panic!("invalid number of arguments"),
+            _ => {
+                abort!(
+                    ident,
+                    "Expected 0-2 fields but found {}",
+                    filtered_fields.len()
+                );
+            }
         }
     );
     let keys = filtered_fields
@@ -127,12 +138,7 @@ pub fn store(s: Structure) -> TokenStream {
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>>;
         }
 
-        impl<T, S, E> #store_trait<T> for #subxt::Client<T, S, E>
-        where
-            T: #module + Send + Sync,
-            S: 'static,
-            E: Send + Sync + 'static,
-        {
+        impl<T: #subxt::Runtime + #module> #store_trait<T> for #subxt::Client<T> {
             fn #store<'a>(
                 &'a self,
                 #args
@@ -185,12 +191,7 @@ mod tests {
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
-            impl<T, S, E> AccountStoreExt<T> for substrate_subxt::Client<T, S, E>
-            where
-                T: Balances + Send + Sync,
-                S: 'static,
-                E: Send + Sync + 'static,
-            {
+            impl<T: substrate_subxt::Runtime + Balances> AccountStoreExt<T> for substrate_subxt::Client<T> {
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,

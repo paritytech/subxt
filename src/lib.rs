@@ -48,10 +48,7 @@ pub use substrate_subxt_client as client;
 pub use sp_core;
 pub use sp_runtime;
 
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::Decode;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
@@ -59,14 +56,7 @@ use sp_core::storage::{
     StorageChangeSet,
     StorageKey,
 };
-use sp_runtime::{
-    generic::{
-        SignedPayload,
-        UncheckedExtrinsic,
-    },
-    traits::SignedExtension,
-    MultiSignature,
-};
+pub use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
@@ -83,7 +73,6 @@ pub use crate::{
     error::Error,
     events::{
         EventsDecoder,
-        EventsError,
         RawEvent,
     },
     extra::*,
@@ -105,7 +94,6 @@ use crate::{
         AccountStoreExt,
         Phase,
         System,
-        SystemEvent,
     },
     rpc::{
         ChainBlock,
@@ -115,13 +103,13 @@ use crate::{
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-pub struct ClientBuilder<T: System, S = MultiSignature, E = DefaultExtra<T>> {
-    _marker: std::marker::PhantomData<(T, S, E)>,
+pub struct ClientBuilder<T: Runtime> {
+    _marker: std::marker::PhantomData<T>,
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
 }
 
-impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
+impl<T: Runtime> ClientBuilder<T> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
@@ -144,7 +132,7 @@ impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
     }
 
     /// Creates a new Client.
-    pub async fn build(self) -> Result<Client<T, S, E>, Error> {
+    pub async fn build(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -173,15 +161,15 @@ impl<T: System + Send + Sync, S, E> ClientBuilder<T, S, E> {
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: System, S = MultiSignature, E = DefaultExtra<T>> {
+pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     runtime_version: RuntimeVersion,
-    _marker: PhantomData<(fn() -> S, E)>,
+    _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
 }
 
-impl<T: System, S, E> Clone for Client<T, S, E> {
+impl<T: Runtime> Clone for Client<T> {
     fn clone(&self) -> Self {
         Self {
             rpc: self.rpc.clone(),
@@ -193,7 +181,7 @@ impl<T: System, S, E> Clone for Client<T, S, E> {
     }
 }
 
-impl<T: System, S, E> Client<T, S, E> {
+impl<T: Runtime> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -309,14 +297,15 @@ impl<T: System, S, E> Client<T, S, E> {
         let headers = self.rpc.subscribe_finalized_blocks().await?;
         Ok(headers)
     }
-}
 
-impl<T, S, E> Client<T, S, E>
-where
-    T: System + Send + Sync + 'static,
-    S: Encode + Send + Sync + 'static,
-    E: SignedExtra<T> + SignedExtension + Send + Sync + 'static,
-{
+    /// Encodes a call.
+    pub fn encode<C: Call<T>>(&self, call: C) -> Result<Encoded, Error> {
+        Ok(self
+            .metadata()
+            .module_with_calls(C::MODULE)
+            .and_then(|module| module.call(C::FUNCTION, call))?)
+    }
+
     /// Creates an unsigned extrinsic.
     ///
     /// If `nonce` is `None` the nonce will be fetched from the chain.
@@ -325,7 +314,11 @@ where
         call: C,
         account_id: &<T as System>::AccountId,
         nonce: Option<T::Index>,
-    ) -> Result<SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>, Error> {
+    ) -> Result<SignedPayload<T>, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
         let account_nonce = if let Some(nonce) = nonce {
             nonce
         } else {
@@ -334,12 +327,10 @@ where
         let spec_version = self.runtime_version.spec_version;
         let tx_version = self.runtime_version.transaction_version;
         let genesis_hash = self.genesis_hash;
-        let call = self
-            .metadata()
-            .module_with_calls(C::MODULE)
-            .and_then(|module| module.call(C::FUNCTION, call))?;
-        let extra: E = E::new(spec_version, tx_version, account_nonce, genesis_hash);
-        let raw_payload = SignedPayload::new(call, extra.extra())?;
+        let call = self.encode(call)?;
+        let extra: T::Extra =
+            T::Extra::new(spec_version, tx_version, account_nonce, genesis_hash);
+        let raw_payload = SignedPayload::<T>::new(call, extra.extra())?;
         Ok(raw_payload)
     }
 
@@ -347,13 +338,11 @@ where
     pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T, S, E> + Send + Sync),
-    ) -> Result<
-        UncheckedExtrinsic<T::Address, Encoded, S, <E as SignedExtra<T>>::Extra>,
-        Error,
-    >
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<UncheckedExtrinsic<T>, Error>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
     {
         let unsigned = self
             .create_unsigned(call, signer.account_id(), signer.nonce())
@@ -373,12 +362,7 @@ where
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn submit_extrinsic(
         &self,
-        extrinsic: UncheckedExtrinsic<
-            T::Address,
-            Encoded,
-            S,
-            <E as SignedExtra<T>>::Extra,
-        >,
+        extrinsic: UncheckedExtrinsic<T>,
     ) -> Result<T::Hash, Error> {
         self.rpc.submit_extrinsic(extrinsic).await
     }
@@ -386,12 +370,7 @@ where
     /// Create and submit an extrinsic and return corresponding Event if successful
     pub async fn submit_and_watch_extrinsic(
         &self,
-        extrinsic: UncheckedExtrinsic<
-            T::Address,
-            Encoded,
-            S,
-            <E as SignedExtra<T>>::Extra,
-        >,
+        extrinsic: UncheckedExtrinsic<T>,
         decoder: EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
         self.rpc
@@ -403,10 +382,11 @@ where
     pub async fn submit<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T, S, E> + Send + Sync),
+        signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, Error>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
         self.submit_extrinsic(extrinsic).await
@@ -416,10 +396,11 @@ where
     pub async fn watch<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T, S, E> + Send + Sync),
+        signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<ExtrinsicSuccess<T>, Error>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
         let decoder = self.events_decoder::<C>();
@@ -429,7 +410,7 @@ where
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
 /// the transaction payload
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Encoded(pub Vec<u8>);
 
 impl codec::Encode for Encoded {
@@ -441,6 +422,7 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use codec::Encode;
     use sp_core::{
         storage::{
             well_known_keys,
@@ -452,6 +434,7 @@ mod tests {
         AccountKeyring,
         Ed25519Keyring,
     };
+    use sp_runtime::MultiSignature;
     use substrate_subxt_client::{
         DatabaseConfig,
         Role,
@@ -460,7 +443,9 @@ mod tests {
     };
     use tempdir::TempDir;
 
-    pub(crate) async fn test_client() -> (Client<crate::NodeTemplateRuntime>, TempDir) {
+    pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
+
+    pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-full-client",

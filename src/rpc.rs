@@ -68,13 +68,11 @@ use crate::{
     events::{
         EventsDecoder,
         RawEvent,
-        RuntimeEvent,
     },
     frame::{
         system::{
             Phase,
             System,
-            SystemEvent,
         },
         Event,
     },
@@ -403,36 +401,16 @@ pub struct ExtrinsicSuccess<T: System> {
     /// Extrinsic hash.
     pub extrinsic: T::Hash,
     /// Raw runtime events, can be decoded by the caller.
-    pub events: Vec<RuntimeEvent<T>>,
+    pub events: Vec<RawEvent>,
 }
 
 impl<T: System> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
-        self.events.iter().find_map(|evt| {
-            match evt {
-                RuntimeEvent::Raw(ref raw)
-                    if raw.module == module && raw.variant == variant =>
-                {
-                    Some(raw)
-                }
-                _ => None,
-            }
-        })
-    }
-
-    /// Returns all System Events
-    pub fn system_events(&self) -> Vec<&SystemEvent<T>> {
         self.events
             .iter()
-            .filter_map(|evt| {
-                match evt {
-                    RuntimeEvent::System(evt) => Some(evt),
-                    _ => None,
-                }
-            })
-            .collect()
+            .find(|raw| raw.module == module && raw.variant == variant)
     }
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
@@ -486,7 +464,7 @@ pub async fn wait_for_block_events<T: System>(
                             }
                         }
                     }
-                    Err(err) => return Err(err.into()),
+                    Err(err) => return Err(err),
                 }
             }
         }

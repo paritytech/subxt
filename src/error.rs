@@ -19,15 +19,19 @@ use jsonrpsee::{
     transport::ws::WsNewDnsError,
 };
 use sp_core::crypto::SecretStringError;
-use sp_runtime::transaction_validity::TransactionValidityError;
+use sp_runtime::{
+    transaction_validity::TransactionValidityError,
+    DispatchError,
+};
+use thiserror::Error;
 
-use crate::{
-    events::EventsError,
-    metadata::MetadataError,
+use crate::metadata::{
+    Metadata,
+    MetadataError,
 };
 
 /// Error enum.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, Error)]
 pub enum Error {
     /// Io error.
     #[error("Io error: {0}")]
@@ -50,12 +54,21 @@ pub enum Error {
     /// Extrinsic validity error
     #[error("Transaction Validity Error: {0:?}")]
     Invalid(TransactionValidityError),
-    /// Events error.
-    #[error("Event error: {0}")]
-    Events(#[from] EventsError),
     /// Metadata error.
     #[error("Metadata error: {0}")]
     Metadata(#[from] MetadataError),
+    /// Type size unavailable.
+    #[error("Type size unavailable while decoding event: {0:?}")]
+    TypeSizeUnavailable(String),
+    /// Runtime error.
+    #[error("Runtime error: {0}")]
+    Runtime(RuntimeError),
+    /// Bad origin.
+    #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
+    BadOrigin,
+    /// Cannot lookup.
+    #[error("Cannot lookup some information required to validate the transaction.")]
+    CannotLookup,
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -83,4 +96,35 @@ impl From<String> for Error {
     fn from(error: String) -> Self {
         Error::Other(error)
     }
+}
+
+impl Error {
+    /// Converts a `DispatchError` into a subxt error.
+    pub fn from_dispatch(metadata: &Metadata, error: DispatchError) -> Result<(), Self> {
+        match error {
+            DispatchError::Module {
+                index,
+                error,
+                message: _,
+            } => {
+                let module = metadata.module_with_errors(index)?;
+                let error = module.error(error)?;
+                Err(Error::Runtime(RuntimeError {
+                    module: module.name().to_string(),
+                    error: error.to_string(),
+                }))
+            }
+            DispatchError::BadOrigin => Err(Error::BadOrigin),
+            DispatchError::CannotLookup => Err(Error::CannotLookup),
+            DispatchError::Other(msg) => Err(Error::Other(msg.into())),
+        }
+    }
+}
+
+/// Runtime errors.
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
+#[error("{error} from {module}")]
+pub struct RuntimeError {
+    pub module: String,
+    pub error: String,
 }

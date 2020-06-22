@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::Encode;
 use sp_runtime::{
     generic::Header,
     traits::{
@@ -25,14 +26,44 @@ use sp_runtime::{
     OpaqueExtrinsic,
 };
 
-use crate::frame::{
-    balances::{
-        AccountData,
-        Balances,
+use crate::{
+    extra::{
+        DefaultExtra,
+        SignedExtra,
     },
-    contracts::Contracts,
-    system::System,
+    frame::{
+        balances::{
+            AccountData,
+            Balances,
+        },
+        contracts::Contracts,
+        sudo::Sudo,
+        system::System,
+    },
+    Encoded,
 };
+
+/// Runtime trait.
+pub trait Runtime: System + Sized + Send + Sync + 'static {
+    /// Signature type.
+    type Signature: Verify + Encode + Send + Sync + 'static;
+    /// Transaction extras.
+    type Extra: SignedExtra<Self> + Send + Sync + 'static;
+}
+
+/// Extra type.
+pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
+
+/// UncheckedExtrinsic type.
+pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
+    <T as System>::Address,
+    Encoded,
+    <T as Runtime>::Signature,
+    Extra<T>,
+>;
+
+/// SignedPayload type.
+pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, Extra<T>>;
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
 ///
@@ -42,6 +73,11 @@ use crate::frame::{
 /// definition MUST be used to ensure type compatibility.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DefaultNodeRuntime;
+
+impl Runtime for DefaultNodeRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
 
 impl System for DefaultNodeRuntime {
     type Index = u32;
@@ -61,6 +97,8 @@ impl Balances for DefaultNodeRuntime {
 
 impl Contracts for DefaultNodeRuntime {}
 
+impl Sudo for DefaultNodeRuntime {}
+
 /// Concrete type definitions compatible with the node template.
 ///
 /// # Note
@@ -69,6 +107,11 @@ impl Contracts for DefaultNodeRuntime {}
 /// Also the contracts module is not part of the node template runtime.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct NodeTemplateRuntime;
+
+impl Runtime for NodeTemplateRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
 
 impl System for NodeTemplateRuntime {
     type Index = u32;
@@ -86,6 +129,8 @@ impl Balances for NodeTemplateRuntime {
     type Balance = u128;
 }
 
+impl Sudo for NodeTemplateRuntime {}
+
 /// Concrete type definitions compatible with those for kusama, v0.7
 ///
 /// # Note
@@ -94,6 +139,11 @@ impl Balances for NodeTemplateRuntime {
 /// Also the contracts module is not part of the kusama runtime.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KusamaRuntime;
+
+impl Runtime for KusamaRuntime {
+    type Signature = MultiSignature;
+    type Extra = DefaultExtra<Self>;
+}
 
 impl System for KusamaRuntime {
     type Index = u32;
