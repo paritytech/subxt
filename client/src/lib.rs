@@ -50,6 +50,7 @@ use sc_service::{
     config::{
         KeystoreConfig,
         NetworkConfiguration,
+        TaskExecutor,
         TaskType,
     },
     AbstractService,
@@ -60,7 +61,6 @@ use sc_service::{
 use std::{
     future::Future,
     pin::Pin,
-    sync::Arc,
     task::Poll,
 };
 use thiserror::Error;
@@ -209,7 +209,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         impl_version: config.impl_version,
         chain_spec: Box::new(config.chain_spec),
         role: config.role.into(),
-        task_executor: Arc::new(move |fut, ty| {
+        task_executor: TaskExecutor::from(move |fut, ty| {
             match ty {
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
