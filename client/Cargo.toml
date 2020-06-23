@@ -26,5 +26,6 @@ thiserror = "1.0.20"
 [dev-dependencies]
 async-std = { version = "=1.5.0", features = ["attributes"] }
 env_logger = "0.7.1"
-node-template = { git = "https://github.com/paritytech/substrate" }
 substrate-subxt = { path = ".." }
+tempdir = "0.3.7"
+test-node = { path = "../test-node" }

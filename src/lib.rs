@@ -458,8 +458,8 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 128,
             },
-            builder: node_template::service::new_full,
-            chain_spec: node_template::chain_spec::development_config(),
+            builder: test_node::service::new_full,
+            chain_spec: test_node::chain_spec::development_config(),
             role: Role::Authority(AccountKeyring::Alice),
         };
         let client = ClientBuilder::new()

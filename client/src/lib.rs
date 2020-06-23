@@ -50,7 +50,6 @@ use sc_service::{
     config::{
         KeystoreConfig,
         NetworkConfiguration,
-        TaskExecutor,
         TaskType,
     },
     AbstractService,
@@ -209,7 +208,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         impl_version: config.impl_version,
         chain_spec: Box::new(config.chain_spec),
         role: config.role.into(),
-        task_executor: TaskExecutor::from(move |fut, ty| {
+        task_executor: /*TaskExecutor::from(*/std::sync::Arc::new(move |fut, ty| {
             match ty {
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
@@ -220,7 +219,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
-        base_path: None,
+        //base_path: None,
 
         telemetry_endpoints: Default::default(),
         telemetry_external_transport: Default::default(),
@@ -233,7 +232,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         pruning: Default::default(),
         rpc_cors: Default::default(),
         rpc_http: Default::default(),
-        rpc_ipc: Default::default(),
+        //rpc_ipc: Default::default(),
         rpc_ws: Default::default(),
         rpc_ws_max_connections: Default::default(),
         rpc_methods: Default::default(),
@@ -303,6 +302,7 @@ mod tests {
         KusamaRuntime as NodeTemplateRuntime,
         PairSigner,
     };
+    use tempdir::TempDir;
 
     #[async_std::test]
     #[ignore]
@@ -328,17 +328,18 @@ mod tests {
             Path::new(env!("CARGO_MANIFEST_DIR")).join("dev-chain.json");
         let bytes = async_std::fs::read(chain_spec_path).await.unwrap();
         let chain_spec =
-            node_template::chain_spec::ChainSpec::from_json_bytes(bytes).unwrap();
+            test_node::chain_spec::ChainSpec::from_json_bytes(bytes).unwrap();
+        let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-light-client",
             impl_version: "0.0.1",
             author: "David Craven",
             copyright_start_year: 2020,
             db: DatabaseConfig::RocksDb {
-                path: "/tmp/subxt-light-client".into(),
+                path: tmp.path().into(),
                 cache_size: 64,
             },
-            builder: node_template::service::new_light,
+            builder: test_node::service::new_light,
             chain_spec,
             role: Role::Light,
         };
@@ -358,18 +359,18 @@ mod tests {
     #[async_std::test]
     async fn test_full_client() {
         env_logger::try_init().ok();
-        let chain_spec = node_template::chain_spec::development_config();
+        let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-full-client",
             impl_version: "0.0.1",
             author: "David Craven",
             copyright_start_year: 2020,
             db: DatabaseConfig::RocksDb {
-                path: "/tmp/subxt-full-client".into(),
+                path: tmp.path().into(),
                 cache_size: 128,
             },
-            builder: node_template::service::new_full,
-            chain_spec,
+            builder: test_node::service::new_full,
+            chain_spec: test_node::chain_spec::development_config(),
             role: Role::Authority(AccountKeyring::Alice),
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
