@@ -448,6 +448,7 @@ mod tests {
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
 
     pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
+        env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-full-client",
@@ -472,7 +473,6 @@ mod tests {
 
     #[async_std::test]
     async fn test_tx_transfer_balance() {
-        env_logger::try_init().ok();
         let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
         let dest = AccountKeyring::Bob.to_account_id().into();
 

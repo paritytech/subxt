@@ -13,30 +13,30 @@ repository = "https://github.com/paritytech/substrate/"
 targets = ["x86_64-unknown-linux-gnu"]
 
 [dependencies]
-futures = "0.3.4"
+futures = "0.3.5"
 log = "0.4.8"
-structopt = "0.3.8"
-parking_lot = "0.10.0"
+structopt = "0.3.15"
+parking_lot = "0.11.0"
 
 sc-cli = { version = "0.8.0-rc3", features = ["wasmtime"] }
-sp-core = { version = "2.0.0-rc3" }
+sp-core = "2.0.0-rc3"
 sc-executor = { version = "0.8.0-rc3", features = ["wasmtime"] }
 sc-service = { version = "0.8.0-rc3", features = ["wasmtime"] }
-sp-inherents = { version = "2.0.0-rc3" }
-sc-transaction-pool = { version = "2.0.0-rc3" }
-sp-transaction-pool = { version = "2.0.0-rc3" }
-sc-network = { version = "0.8.0-rc3" }
-sc-consensus-aura = { version = "0.8.0-rc3" }
-sp-consensus-aura = { version = "0.8.0-rc3" }
-sp-consensus = { version = "0.8.0-rc3" }
-sc-consensus = { version = "0.8.0-rc3" }
-sc-finality-grandpa = { version = "0.8.0-rc3" }
-sp-finality-grandpa = { version = "2.0.0-rc3" }
-sc-client-api = { version = "2.0.0-rc3" }
-sp-runtime = { version = "2.0.0-rc3" }
-sc-basic-authorship = { version = "0.8.0-rc3" }
+sp-inherents = "2.0.0-rc3"
+sc-transaction-pool = "2.0.0-rc3"
+sp-transaction-pool = "2.0.0-rc3"
+sc-network = "0.8.0-rc3"
+sc-consensus-aura = "0.8.0-rc3"
+sp-consensus-aura = "0.8.0-rc3"
+sp-consensus = "0.8.0-rc3"
+sc-consensus = "0.8.0-rc3"
+sc-finality-grandpa = "0.8.0-rc3"
+sp-finality-grandpa = "2.0.0-rc3"
+sc-client-api = "2.0.0-rc3"
+sp-runtime = "2.0.0-rc3"
+sc-basic-authorship = "0.8.0-rc3"
 
 test-node-runtime = { version = "2.0.0-rc3", path = "runtime" }
 
 [build-dependencies]
-substrate-build-script-utils = { version = "2.0.0-rc3" }
+substrate-build-script-utils = "2.0.0-rc3"

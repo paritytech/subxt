@@ -23,12 +23,12 @@ system = { version = "2.0.0-rc3", default-features = false, package = "frame-sys
 timestamp = { version = "2.0.0-rc3", default-features = false, package = "pallet-timestamp" }
 transaction-payment = { version = "2.0.0-rc3", default-features = false, package = "pallet-transaction-payment" }
 frame-executive = { version = "2.0.0-rc3", default-features = false }
-serde = { version = "1.0.101", optional = true, features = ["derive"] }
+serde = { version = "1.0.114", optional = true, features = ["derive"] }
 sp-api = { version = "2.0.0-rc3", default-features = false }
-sp-block-builder = { default-features = false, version = "2.0.0-rc3"}
+sp-block-builder = { default-features = false, version = "2.0.0-rc3" }
 sp-consensus-aura = { version = "0.8.0-rc3", default-features = false }
 sp-core = { version = "2.0.0-rc3", default-features = false }
-sp-inherents = { default-features = false, version = "2.0.0-rc3"}
+sp-inherents = { default-features = false, version = "2.0.0-rc3" }
 sp-io = { version = "2.0.0-rc3", default-features = false }
 sp-offchain = { version = "2.0.0-rc3", default-features = false }
 sp-runtime = { version = "2.0.0-rc3", default-features = false }
