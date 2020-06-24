@@ -359,7 +359,14 @@ impl<T: Runtime> Rpc<T> {
                                 block_hash,
                                 signed_block.block.extrinsics.len()
                             );
-                            let ext_index = find_extrinsic::<T>(&signed_block, &ext_hash)
+                            let ext_index = signed_block
+                                .block
+                                .extrinsics
+                                .iter()
+                                .position(|ext| {
+                                    let hash = T::Hashing::hash_of(ext);
+                                    hash == ext_hash
+                                })
                                 .ok_or_else(|| {
                                     Error::Other(format!(
                                         "Failed to find Extrinsic with hash {:?}",
@@ -432,15 +439,4 @@ impl<T: System> ExtrinsicSuccess<T> {
             Ok(None)
         }
     }
-}
-
-/// Returns the index of an extrinsic in a block.
-pub fn find_extrinsic<T: Runtime>(
-    signed_block: &ChainBlock<T>,
-    extrinsic: &T::Hash,
-) -> Option<usize> {
-    signed_block.block.extrinsics.iter().position(|ext| {
-        let hash = T::Hashing::hash_of(ext);
-        hash == *extrinsic
-    })
 }

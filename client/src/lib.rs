@@ -208,7 +208,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         impl_version: config.impl_version,
         chain_spec: Box::new(config.chain_spec),
         role: config.role.into(),
-        task_executor: /*TaskExecutor::from(*/std::sync::Arc::new(move |fut, ty| {
+        task_executor: std::sync::Arc::new(move |fut, ty| {
             match ty {
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
@@ -219,7 +219,6 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
-        //base_path: None,
 
         telemetry_endpoints: Default::default(),
         telemetry_external_transport: Default::default(),
@@ -232,7 +231,6 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         pruning: Default::default(),
         rpc_cors: Default::default(),
         rpc_http: Default::default(),
-        //rpc_ipc: Default::default(),
         rpc_ws: Default::default(),
         rpc_ws_max_connections: Default::default(),
         rpc_methods: Default::default(),
