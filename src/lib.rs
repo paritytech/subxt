@@ -68,6 +68,7 @@ mod metadata;
 mod rpc;
 mod runtimes;
 mod signer;
+mod subscription;
 
 pub use crate::{
     error::Error,
@@ -87,6 +88,7 @@ pub use crate::{
     },
     runtimes::*,
     signer::*,
+    subscription::*,
     substrate_subxt_proc_macro::*,
 };
 use crate::{
@@ -446,6 +448,7 @@ mod tests {
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
 
     pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
+        env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
             impl_name: "substrate-subxt-full-client",
@@ -456,8 +459,8 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 128,
             },
-            builder: node_template::service::new_full,
-            chain_spec: node_template::chain_spec::development_config(),
+            builder: test_node::service::new_full,
+            chain_spec: test_node::chain_spec::development_config(),
             role: Role::Authority(AccountKeyring::Alice),
         };
         let client = ClientBuilder::new()
@@ -470,7 +473,6 @@ mod tests {
 
     #[async_std::test]
     async fn test_tx_transfer_balance() {
-        env_logger::try_init().ok();
         let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
         let dest = AccountKeyring::Bob.to_account_id().into();
 
