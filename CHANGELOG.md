@@ -1,7 +1,16 @@
+# Version 0.9.0 (2020-06-25)
+
+* Events sub [#126](https://github.com/paritytech/substrate-subxt/pull/126)
+* Improve error handling in proc-macros, handle DispatchError etc. [#123](https://github.com/paritytech/substrate-subxt/pull/123)
+* Support embedded full/light node clients. [#91](https://github.com/paritytech/substrate-subxt/pull/91)
+* Zero sized types [#121](https://github.com/paritytech/substrate-subxt/pull/121)
+* Fix optional store items. [#120](https://github.com/paritytech/substrate-subxt/pull/120)
+* Make signing fallable and asynchronous [#119](https://github.com/paritytech/substrate-subxt/pull/119)
+
 # Version 0.8.0 (2020-05-26)
 
 * Update to Substrate release candidate [#116](https://github.com/paritytech/substrate-subxt/pull/116)
-* Update to alpha.8 [#114](https://github.com/paritytech/substrate-subxt/pull/114)
+* Update to alpha.8 [#114]c
 * Refactors the api [#113](https://github.com/paritytech/substrate-subxt/pull/113)
 
 # Version 0.7.0 (2020-05-13)
