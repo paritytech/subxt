@@ -36,7 +36,7 @@ pub fn event(s: Structure) -> TokenStream {
     let event = format_ident!("{}", event_name.to_snake_case());
     let event_trait = format_ident!("{}EventExt", event_name);
 
-    let expanded = quote! {
+    quote! {
         impl<T: #module> #subxt::Event<T> for #ident<T> {
             const MODULE: &'static str = MODULE;
             const EVENT: &'static str = #event_name;
@@ -53,9 +53,7 @@ pub fn event(s: Structure) -> TokenStream {
                 self.find_event()
             }
         }
-    };
-
-    TokenStream::from(expanded)
+    }
 }
 
 #[cfg(test)]

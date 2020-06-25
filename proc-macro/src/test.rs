@@ -16,6 +16,7 @@
 
 use crate::utils;
 use proc_macro2::TokenStream;
+use proc_macro_error::abort;
 use quote::{
     format_ident,
     quote,
@@ -34,8 +35,6 @@ mod kw {
     custom_keyword!(name);
     custom_keyword!(runtime);
     custom_keyword!(account);
-    custom_keyword!(signature);
-    custom_keyword!(extra);
     custom_keyword!(prelude);
     custom_keyword!(step);
     custom_keyword!(state);
@@ -70,10 +69,9 @@ struct Items<I> {
 impl<I: Parse> Parse for Items<I> {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let content;
-        Ok(Self {
-            brace: syn::braced!(content in input),
-            items: content.parse_terminated(I::parse)?,
-        })
+        let brace = syn::braced!(content in input);
+        let items = content.parse_terminated(I::parse)?;
+        Ok(Self { brace, items })
     }
 }
 
@@ -82,10 +80,8 @@ type ItemTest = Items<TestItem>;
 #[derive(Debug)]
 enum TestItem {
     Name(Item<kw::name, syn::Ident>),
-    Runtime(Item<kw::runtime, syn::Type>),
+    Runtime(Item<kw::runtime, Box<syn::Type>>),
     Account(Item<kw::account, syn::Ident>),
-    Signature(Item<kw::signature, syn::Type>),
-    Extra(Item<kw::extra, syn::Type>),
     State(Item<kw::state, ItemState>),
     Prelude(Item<kw::prelude, syn::Block>),
     Step(Item<kw::step, ItemStep>),
@@ -99,10 +95,6 @@ impl Parse for TestItem {
             Ok(TestItem::Runtime(input.parse()?))
         } else if input.peek(kw::account) {
             Ok(TestItem::Account(input.parse()?))
-        } else if input.peek(kw::signature) {
-            Ok(TestItem::Signature(input.parse()?))
-        } else if input.peek(kw::extra) {
-            Ok(TestItem::Extra(input.parse()?))
         } else if input.peek(kw::state) {
             Ok(TestItem::State(input.parse()?))
         } else if input.peek(kw::prelude) {
@@ -142,10 +134,8 @@ type StateItem = Item<syn::Ident, syn::Expr>;
 
 struct Test {
     name: syn::Ident,
-    runtime: syn::Type,
+    runtime: Box<syn::Type>,
     account: syn::Ident,
-    signature: syn::Type,
-    extra: syn::Type,
     state: Option<State>,
     prelude: Option<syn::Block>,
     steps: Vec<Step>,
@@ -156,11 +146,11 @@ impl From<ItemTest> for Test {
         let mut name = None;
         let mut runtime = None;
         let mut account = None;
-        let mut signature = None;
-        let mut extra = None;
         let mut state = None;
         let mut prelude = None;
         let mut steps = vec![];
+
+        let span = test.brace.span;
         for test_item in test.items {
             match test_item {
                 TestItem::Name(item) => {
@@ -171,12 +161,6 @@ impl From<ItemTest> for Test {
                 }
                 TestItem::Account(item) => {
                     account = Some(item.value);
-                }
-                TestItem::Signature(item) => {
-                    signature = Some(item.value);
-                }
-                TestItem::Extra(item) => {
-                    extra = Some(item.value);
                 }
                 TestItem::State(item) => {
                     state = Some(item.value.into());
@@ -193,14 +177,8 @@ impl From<ItemTest> for Test {
         let runtime = runtime
             .unwrap_or_else(|| syn::parse2(quote!(#subxt::DefaultNodeRuntime)).unwrap());
         Self {
-            name: name.expect("No name specified"),
+            name: name.unwrap_or_else(|| abort!(span, "No name specified")),
             account: account.unwrap_or_else(|| format_ident!("Alice")),
-            signature: signature.unwrap_or_else(|| {
-                syn::parse2(quote!(#subxt::sp_runtime::MultiSignature)).unwrap()
-            }),
-            extra: extra.unwrap_or_else(|| {
-                syn::parse2(quote!(#subxt::DefaultExtra<#runtime>)).unwrap()
-            }),
             runtime,
             state,
             prelude,
@@ -219,8 +197,6 @@ impl Test {
             name,
             runtime,
             account,
-            signature,
-            extra,
             state,
             prelude,
             steps,
@@ -234,7 +210,7 @@ impl Test {
             #[ignore]
             async fn #name() {
                 #env_logger
-                let client = #subxt::ClientBuilder::<#runtime, #signature, #extra>::new()
+                let client = #subxt::ClientBuilder::<#runtime>::new()
                     .build().await.unwrap();
                 let signer = #subxt::PairSigner::new(#sp_keyring::AccountKeyring::#account.pair());
 
@@ -277,6 +253,7 @@ impl From<ItemStep> for Step {
         let mut event = vec![];
         let mut assert = None;
 
+        let span = step.brace.span;
         for step_item in step.items {
             match step_item {
                 StepItem::State(item) => {
@@ -297,7 +274,7 @@ impl From<ItemStep> for Step {
 
         Self {
             state,
-            call: call.expect("Step requires a call."),
+            call: call.unwrap_or_else(|| abort!(span, "Step requires a call.")),
             event_name,
             event,
             assert,
@@ -404,14 +381,15 @@ impl From<ItemState> for State {
 
 fn struct_name(expr: &syn::Expr) -> syn::Path {
     if let syn::Expr::Struct(syn::ExprStruct { path, .. }) = expr {
-        return path.clone()
+        path.clone()
     } else {
-        panic!("not a struct");
+        abort!(expr, "Expected a struct");
     }
 }
 
 pub fn test(input: TokenStream) -> TokenStream {
-    let item_test: ItemTest = syn::parse2(input).unwrap();
+    let item_test: ItemTest =
+        syn::parse2(input).map_err(|err| abort!("{}", err)).unwrap();
     Test::from(item_test).into_tokens()
 }
 
@@ -450,11 +428,7 @@ mod tests {
             #[ignore]
             async fn test_transfer_balance() {
                 env_logger::try_init().ok();
-                let client = substrate_subxt::ClientBuilder::<
-                    KusamaRuntime,
-                    substrate_subxt::sp_runtime::MultiSignature,
-                    substrate_subxt::DefaultExtra<KusamaRuntime>
-                >::new().build().await.unwrap();
+                let client = substrate_subxt::ClientBuilder::<KusamaRuntime>::new().build().await.unwrap();
                 let signer = substrate_subxt::PairSigner::new(sp_keyring::AccountKeyring::Alice.pair());
                 #[allow(unused)]
                 let alice = sp_keyring::AccountKeyring::Alice.to_account_id();

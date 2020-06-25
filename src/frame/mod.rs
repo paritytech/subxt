@@ -33,6 +33,7 @@ pub mod balances;
 pub mod contracts;
 pub mod session;
 pub mod staking;
+pub mod sudo;
 pub mod system;
 
 /// Store trait.

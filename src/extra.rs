@@ -222,9 +222,9 @@ where
 }
 
 /// Trait for implementing transaction extras for a runtime.
-pub trait SignedExtra<T: System> {
+pub trait SignedExtra<T: System>: SignedExtension {
     /// The type the extras.
-    type Extra: SignedExtension;
+    type Extra: SignedExtension + Send + Sync;
 
     /// Creates a new `SignedExtra`.
     fn new(

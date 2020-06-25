@@ -24,32 +24,35 @@ mod test;
 mod utils;
 
 use proc_macro::TokenStream;
+use proc_macro_error::proc_macro_error;
 use synstructure::{
     decl_derive,
     Structure,
 };
 
 #[proc_macro_attribute]
+#[proc_macro_error]
 pub fn module(args: TokenStream, input: TokenStream) -> TokenStream {
     module::module(args.into(), input.into()).into()
 }
 
-decl_derive!([Call] => call);
+decl_derive!([Call] => #[proc_macro_error] call);
 fn call(s: Structure) -> TokenStream {
     call::call(s).into()
 }
 
-decl_derive!([Event] => event);
+decl_derive!([Event] => #[proc_macro_error] event);
 fn event(s: Structure) -> TokenStream {
     event::event(s).into()
 }
 
-decl_derive!([Store, attributes(store)] => store);
+decl_derive!([Store, attributes(store)] => #[proc_macro_error] store);
 fn store(s: Structure) -> TokenStream {
     store::store(s).into()
 }
 
 #[proc_macro]
+#[proc_macro_error]
 pub fn subxt_test(input: TokenStream) -> TokenStream {
     test::test(input.into()).into()
 }

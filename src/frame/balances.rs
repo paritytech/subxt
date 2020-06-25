@@ -110,36 +110,58 @@ pub struct TransferEvent<T: Balances> {
 mod tests {
     use super::*;
     use crate::{
-        system::{
-            AccountStore,
-            AccountStoreExt,
+        error::{
+            Error,
+            RuntimeError,
         },
-        tests::test_client,
+        events::EventsDecoder,
+        signer::{
+            PairSigner,
+            Signer,
+        },
+        subscription::EventSubscription,
+        system::AccountStoreExt,
+        tests::{
+            test_client,
+            TestRuntime,
+        },
+    };
+    use sp_core::{
+        sr25519::Pair,
+        Pair as _,
     };
     use sp_keyring::AccountKeyring;
 
-    subxt_test!({
-        name: test_transfer,
-        step: {
-            state: {
-                alice: AccountStore { account_id: &alice },
-                bob: AccountStore { account_id: &bob },
-            },
-            call: TransferCall {
-                to: &bob.clone().into(),
-                amount: 10_000,
-            },
-            event: TransferEvent {
-                from: alice.clone(),
-                to: bob.clone(),
-                amount: 10_000,
-            },
-            assert: {
-                assert!(pre.alice.data.free - 10_000 >= post.alice.data.free);
-                assert_eq!(pre.bob.data.free + 10_000, post.bob.data.free);
-            },
-        },
-    });
+    #[async_std::test]
+    async fn test_transfer() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+        let (client, _) = test_client().await;
+
+        let alice_pre = client.account(alice.account_id(), None).await.unwrap();
+        let bob_pre = client.account(bob.account_id(), None).await.unwrap();
+
+        let event = client
+            .transfer_and_watch(&alice, &bob.account_id(), 10_000)
+            .await
+            .unwrap()
+            .transfer()
+            .unwrap()
+            .unwrap();
+        let expected_event = TransferEvent {
+            from: alice.account_id().clone(),
+            to: bob.account_id().clone(),
+            amount: 10_000,
+        };
+        assert_eq!(event, expected_event);
+
+        let alice_post = client.account(alice.account_id(), None).await.unwrap();
+        let bob_post = client.account(bob.account_id(), None).await.unwrap();
+
+        assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
+        assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
+    }
 
     #[async_std::test]
     async fn test_state_total_issuance() {
@@ -156,5 +178,53 @@ mod tests {
         let account = AccountKeyring::Alice.to_account_id();
         let info = client.account(&account, None).await.unwrap();
         assert_ne!(info.data.free, 0);
+    }
+
+    #[async_std::test]
+    async fn test_transfer_error() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::new(AccountKeyring::Alice.pair());
+        let hans = PairSigner::new(Pair::generate().0);
+        let (client, _) = test_client().await;
+        client
+            .transfer_and_watch(&alice, hans.account_id(), 100_000_000_000)
+            .await
+            .unwrap();
+        let res = client
+            .transfer_and_watch(&hans, alice.account_id(), 100_000_000_000)
+            .await;
+        if let Err(Error::Runtime(error)) = res {
+            let error2 = RuntimeError {
+                module: "Balances".into(),
+                error: "InsufficientBalance".into(),
+            };
+            assert_eq!(error, error2);
+        } else {
+            panic!("expected an error");
+        }
+    }
+
+    #[async_std::test]
+    async fn test_transfer_subscription() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::new(AccountKeyring::Alice.pair());
+        let bob = AccountKeyring::Bob.to_account_id();
+        let (client, _) = test_client().await;
+        let sub = client.subscribe_events().await.unwrap();
+        let mut decoder = EventsDecoder::<TestRuntime>::new(client.metadata().clone());
+        decoder.with_balances();
+        let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
+        sub.filter_event::<TransferEvent<_>>();
+        client.transfer(&alice, &bob, 10_000).await.unwrap();
+        let raw = sub.next().await.unwrap().unwrap();
+        let event = TransferEvent::<TestRuntime>::decode(&mut &raw.data[..]).unwrap();
+        assert_eq!(
+            event,
+            TransferEvent {
+                from: alice.account_id().clone(),
+                to: bob.clone(),
+                amount: 10_000,
+            }
+        );
     }
 }
