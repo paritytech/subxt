@@ -177,7 +177,9 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
 
         // the AURA authoring task is considered essential, i.e. if it
         // fails we take down the service with it.
-        service.spawn_essential_task_handle().spawn_blocking("aura", aura);
+        service
+            .spawn_essential_task_handle()
+            .spawn_blocking("aura", aura);
     }
 
     // if the node isn't actively participating in consensus then it doesn't
@@ -221,7 +223,7 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
         // if it fails we take down the service with it.
         service.spawn_essential_task_handle().spawn_blocking(
             "grandpa-voter",
-            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
+            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     } else {
         sc_finality_grandpa::setup_disabled_grandpa(

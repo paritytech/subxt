@@ -213,7 +213,8 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
             };
-        }).into(),
+        })
+        .into(),
         database: config.db,
         keystore: KeystoreConfig::InMemory,
         max_runtime_instances: 8,
