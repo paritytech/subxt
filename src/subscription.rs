@@ -33,6 +33,7 @@ use crate::{
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
+#[allow(missing_debug_implementations)]
 pub struct EventSubscription<T: Runtime> {
     subscription: Subscription<StorageChangeSet<T::Hash>>,
     decoder: EventsDecoder<T>,

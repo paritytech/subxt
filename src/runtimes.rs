@@ -79,7 +79,6 @@ impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
     type Public = AuthorityDiscoveryId;
 }
 
-#[cfg(feature = "kusama")]
 impl_opaque_keys! {
     /// Substrate base runtime keys
     pub struct BasicSessionKeys {
@@ -96,7 +95,6 @@ impl_opaque_keys! {
     }
 }
 
-#[cfg(feature = "kusama")]
 impl_opaque_keys! {
     /// Polkadot/Kusama runtime keys
     pub struct SessionKeys {
@@ -124,9 +122,7 @@ use crate::{
             AccountData,
             Balances,
         },
-        contracts::Contracts,
         sudo::Sudo,
-        system::System,
     },
     session::Session,
     staking::Staking,
@@ -235,6 +231,12 @@ impl Balances for NodeTemplateRuntime {
     type Balance = u128;
 }
 
+impl Session for NodeTemplateRuntime {
+    type SessionIndex = u32;
+    type ValidatorId = <Self as System>::AccountId;
+    type Keys = BasicSessionKeys;
+}
+
 impl Sudo for NodeTemplateRuntime {}
 
 /// Concrete type definitions compatible with those for kusama, v0.7
@@ -243,17 +245,14 @@ impl Sudo for NodeTemplateRuntime {}
 ///
 /// Main difference is `type Address = AccountId`.
 /// Also the contracts module is not part of the kusama runtime.
-#[cfg(feature = "kusama")]
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct KusamaRuntime;
 
-#[cfg(feature = "kusama")]
 impl Runtime for KusamaRuntime {
     type Signature = MultiSignature;
     type Extra = DefaultExtra<Self>;
 }
 
-#[cfg(feature = "kusama")]
 impl System for KusamaRuntime {
     type Index = u32;
     type BlockNumber = u32;
@@ -266,14 +265,12 @@ impl System for KusamaRuntime {
     type AccountData = AccountData<<Self as Balances>::Balance>;
 }
 
-#[cfg(feature = "kusama")]
 impl Session for KusamaRuntime {
     type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
     type Keys = SessionKeys;
 }
 
-#[cfg(feature = "kusama")]
 impl Staking for KusamaRuntime {
     type NominatorIndex = u32;
     type ValidatorIndex = u16;

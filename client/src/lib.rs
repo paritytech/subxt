@@ -208,18 +208,20 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         impl_version: config.impl_version,
         chain_spec: Box::new(config.chain_spec),
         role: config.role.into(),
-        task_executor: std::sync::Arc::new(move |fut, ty| {
+        task_executor: (move |fut, ty| {
             match ty {
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
             };
-        }),
+        }).into(),
         database: config.db,
         keystore: KeystoreConfig::InMemory,
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
 
+		base_path: Default::default(),
+		informant_output_format: Default::default(),
         telemetry_endpoints: Default::default(),
         telemetry_external_transport: Default::default(),
         default_heap_pages: Default::default(),
