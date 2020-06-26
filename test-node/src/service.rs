@@ -145,7 +145,7 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
             let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
             Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
         })?
-        .build()?;
+        .build_full()?;
 
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
@@ -177,19 +177,19 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
 
         // the AURA authoring task is considered essential, i.e. if it
         // fails we take down the service with it.
-        service.spawn_essential_task("aura", aura);
+        service.spawn_essential_task_handle().spawn_blocking("aura", aura);
     }
 
     // if the node isn't actively participating in consensus then it doesn't
     // need a keystore, regardless of which protocol we use below.
     let keystore = if role.is_authority() {
-        Some(service.keystore())
+        Some(service.keystore() as sp_core::traits::BareCryptoStorePtr)
     } else {
         None
     };
 
     let grandpa_config = sc_finality_grandpa::Config {
-        // #1578 make this available through chainspec
+        // FIXME #1578 make this available through chainspec
         gossip_duration: Duration::from_millis(333),
         justification_period: 512,
         name: Some(name),
@@ -219,9 +219,9 @@ pub fn new_full(config: Configuration) -> Result<impl AbstractService, ServiceEr
 
         // the GRANDPA voter task is considered infallible, i.e.
         // if it fails we take down the service with it.
-        service.spawn_essential_task(
+        service.spawn_essential_task_handle().spawn_blocking(
             "grandpa-voter",
-            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
+            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
         );
     } else {
         sc_finality_grandpa::setup_disabled_grandpa(
@@ -299,5 +299,5 @@ pub fn new_light(config: Configuration) -> Result<impl AbstractService, ServiceE
 			let provider = client as Arc<dyn StorageAndProofProvider<_, _>>;
 			Ok(Arc::new(GrandpaFinalityProofProvider::new(backend, provider)) as _)
 		})?
-		.build()
+        .build_light()
 }
