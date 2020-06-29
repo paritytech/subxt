@@ -578,7 +578,7 @@ mod tests {
 
         // create raw payload with AccoundId and sign it
         let raw_payload = client
-            .create_unsigned(
+            .create_payload(
                 balances::TransferCall {
                     to: &dest,
                     amount: 10_000,
