@@ -50,6 +50,6 @@ wabt = "0.9.2"
 frame-system = { version = "2.0.0-rc4", package = "frame-system" }
 pallet-balances = { version = "2.0.0-rc4", package = "pallet-balances" }
 sp-keyring = { version = "2.0.0-rc4", package = "sp-keyring" }
-substrate-subxt-client = { version = "0.1.0", path = "client" }
+substrate-subxt-client = { version = "0.2.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
