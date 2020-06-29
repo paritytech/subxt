@@ -40,7 +40,7 @@ sp-rpc = { version = "2.0.0-rc4", package = "sp-rpc" }
 sp-core = { version = "2.0.0-rc4", package = "sp-core" }
 sc-rpc-api = { version = "0.8.0-rc4", package = "sc-rpc-api" }
 sp-transaction-pool = { version = "2.0.0-rc4", package = "sp-transaction-pool" }
-substrate-subxt-client = { version = "0.1.0", path = "client", optional = true }
+substrate-subxt-client = { version = "0.2.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.9.0", path = "proc-macro" }
 
 [dev-dependencies]
