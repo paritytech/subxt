@@ -37,7 +37,6 @@ use jsonrpsee::{
     },
     Client,
 };
-use num_traits::bounds::Bounded;
 use sc_rpc_api::state::ReadProof;
 use serde::Serialize;
 use sp_core::{
@@ -83,23 +82,15 @@ pub type ChainBlock<T> =
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
-#[serde(bound = "<T as System>::BlockNumber: Serialize")]
-pub struct BlockNumber<T: System>(NumberOrHex<<T as System>::BlockNumber>);
+pub struct BlockNumber(NumberOrHex);
 
-impl<T> From<NumberOrHex<<T as System>::BlockNumber>> for BlockNumber<T>
-where
-    T: System,
-{
-    fn from(x: NumberOrHex<<T as System>::BlockNumber>) -> Self {
+impl From<NumberOrHex> for BlockNumber {
+    fn from(x: NumberOrHex) -> Self {
         BlockNumber(x)
     }
 }
 
-impl<T> From<u32> for BlockNumber<T>
-where
-    T: System,
-    <T as System>::BlockNumber: From<u32>,
-{
+impl From<u32> for BlockNumber {
     fn from(x: u32) -> Self {
         NumberOrHex::Number(x.into()).into()
     }
@@ -160,9 +151,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(
-            T::BlockNumber::min_value(),
-        )));
+        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
         let params = Params::Array(vec![to_json_value(block_zero)?]);
         let list_or_value: ListOrValue<Option<T::Hash>> =
             self.client.request("chain_getBlockHash", params).await?;
@@ -198,7 +187,7 @@ impl<T: Runtime> Rpc<T> {
     /// Get a block hash, returns hash of latest block by default
     pub async fn block_hash(
         &self,
-        block_number: Option<BlockNumber<T>>,
+        block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(ListOrValue::Value);
         let params = Params::Array(vec![to_json_value(block_number)?]);

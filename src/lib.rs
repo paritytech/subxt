@@ -244,7 +244,7 @@ impl<T: Runtime> Client<T> {
     /// Get a block hash. By default returns the latest block hash
     pub async fn block_hash(
         &self,
-        block_number: Option<BlockNumber<T>>,
+        block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
         let hash = self.rpc.block_hash(block_number).await?;
         Ok(hash)
@@ -578,7 +578,7 @@ mod tests {
 
         // create raw payload with AccoundId and sign it
         let raw_payload = client
-            .create_unsigned(
+            .create_payload(
                 balances::TransferCall {
                     to: &dest,
                     amount: 10_000,

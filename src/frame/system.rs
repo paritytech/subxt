@@ -30,6 +30,7 @@ use serde::de::DeserializeOwned;
 use sp_runtime::{
     traits::{
         AtLeast32Bit,
+        AtLeast32BitUnsigned,
         Bounded,
         CheckEqual,
         Extrinsic,
@@ -67,7 +68,7 @@ pub trait System {
         + MaybeSerializeDeserialize
         + Debug
         + MaybeDisplay
-        + AtLeast32Bit
+        + AtLeast32BitUnsigned
         + Default
         + Bounded
         + Copy

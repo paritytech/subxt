@@ -17,10 +17,10 @@ futures = { version = "0.3.5", features = ["compat"] }
 futures01 = { package = "futures", version = "0.1.29" }
 jsonrpsee = "0.1.0"
 log = "0.4.8"
-sc-network = { version = "0.8.0-rc3", default-features = false }
-sc-service = { version = "0.8.0-rc3", default-features = false }
+sc-network = { version = "0.8.0-rc4", default-features = false }
+sc-service = { version = "0.8.0-rc4", default-features = false }
 serde_json = "1.0.55"
-sp-keyring = "2.0.0-rc3"
+sp-keyring = "2.0.0-rc4"
 thiserror = "1.0.20"
 
 [dev-dependencies]
