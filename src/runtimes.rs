@@ -280,7 +280,6 @@ impl Staking for KusamaRuntime {
     type RewardPoint = u32;
 }
 
-#[cfg(feature = "kusama")]
 impl Balances for KusamaRuntime {
     type Balance = u128;
 }
