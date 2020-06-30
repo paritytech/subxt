@@ -43,12 +43,14 @@ use jsonrpsee::{
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
-    config::DatabaseConfig,
+    config::{
+        DatabaseConfig,
+        KeystoreConfig,
+    },
     Error as ServiceError,
 };
 use sc_service::{
     config::{
-        KeystoreConfig,
         NetworkConfiguration,
         TaskType,
     },
@@ -119,6 +121,8 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static, S: AbstractService> {
     pub copyright_start_year: i32,
     /// Database configuration.
     pub db: DatabaseConfig,
+    /// Keystore configuration.
+    pub keystore: KeystoreConfig,
     /// Service builder.
     pub builder: fn(Configuration) -> Result<S, sc_service::Error>,
     /// Chain specification.
@@ -216,7 +220,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         })
         .into(),
         database: config.db,
-        keystore: KeystoreConfig::InMemory,
+        keystore: config.keystore,
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
@@ -342,6 +346,7 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 64,
             },
+            keystore: KeystoreConfig::InMemory,
             builder: test_node::service::new_light,
             chain_spec,
             role: Role::Light,
@@ -372,6 +377,7 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 128,
             },
+            keystore: KeystoreConfig::InMemory,
             builder: test_node::service::new_full,
             chain_spec: test_node::chain_spec::development_config(),
             role: Role::Authority(AccountKeyring::Alice),
