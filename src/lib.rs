@@ -94,8 +94,8 @@ pub use crate::{
 use crate::{
     extrinsic::{
         SignedExtra,
-        UncheckedExtrinsic,
         Signer,
+        UncheckedExtrinsic,
     },
     frame::system::{
         AccountStoreExt,
@@ -338,7 +338,14 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        let signed = extrinsic::create_signed(&self.runtime_version, self.genesis_hash, account_nonce, call, signer).await?;
+        let signed = extrinsic::create_signed(
+            &self.runtime_version,
+            self.genesis_hash,
+            account_nonce,
+            call,
+            signer,
+        )
+        .await?;
         Ok(signed)
     }
 

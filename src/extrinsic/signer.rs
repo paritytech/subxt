@@ -17,6 +17,11 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
+use super::{
+    SignedExtra,
+    SignedPayload,
+    UncheckedExtrinsic,
+};
 use crate::runtimes::Runtime;
 use codec::Encode;
 use sp_core::Pair;
@@ -28,11 +33,6 @@ use sp_runtime::traits::{
 use std::{
     future::Future,
     pin::Pin,
-};
-use super::{
-    SignedExtra,
-    SignedPayload,
-    UncheckedExtrinsic,
 };
 
 /// Extrinsic signer.
