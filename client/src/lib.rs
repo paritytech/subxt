@@ -43,12 +43,14 @@ use jsonrpsee::{
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
-    config::DatabaseConfig,
+    config::{
+        DatabaseConfig,
+        KeystoreConfig,
+    },
     Error as ServiceError,
 };
 use sc_service::{
     config::{
-        KeystoreConfig,
         NetworkConfiguration,
         TaskType,
     },
@@ -119,6 +121,8 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static, S: AbstractService> {
     pub copyright_start_year: i32,
     /// Database configuration.
     pub db: DatabaseConfig,
+    /// Keystore configuration.
+    pub keystore: KeystoreConfig,
     /// Service builder.
     pub builder: fn(Configuration) -> Result<S, sc_service::Error>,
     /// Chain specification.
@@ -208,14 +212,15 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         impl_version: config.impl_version,
         chain_spec: Box::new(config.chain_spec),
         role: config.role.into(),
-        task_executor: std::sync::Arc::new(move |fut, ty| {
+        task_executor: (move |fut, ty| {
             match ty {
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
             };
-        }),
+        })
+        .into(),
         database: config.db,
-        keystore: KeystoreConfig::InMemory,
+        keystore: config.keystore,
         max_runtime_instances: 8,
         announce_block: true,
         dev_key_seed: config.role.into(),
@@ -231,6 +236,7 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         pruning: Default::default(),
         rpc_cors: Default::default(),
         rpc_http: Default::default(),
+        rpc_ipc: Default::default(),
         rpc_ws: Default::default(),
         rpc_ws_max_connections: Default::default(),
         rpc_methods: Default::default(),
@@ -240,6 +246,8 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         tracing_targets: Default::default(),
         transaction_pool: Default::default(),
         wasm_method: Default::default(),
+        base_path: Default::default(),
+        informant_output_format: Default::default(),
     };
 
     log::info!("{}", service_config.impl_name);
@@ -329,6 +337,7 @@ mod tests {
             test_node::chain_spec::ChainSpec::from_json_bytes(bytes).unwrap();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
+            // base_path:
             impl_name: "substrate-subxt-light-client",
             impl_version: "0.0.1",
             author: "David Craven",
@@ -337,6 +346,7 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 64,
             },
+            keystore: KeystoreConfig::InMemory,
             builder: test_node::service::new_light,
             chain_spec,
             role: Role::Light,
@@ -367,6 +377,7 @@ mod tests {
                 path: tmp.path().into(),
                 cache_size: 128,
             },
+            keystore: KeystoreConfig::InMemory,
             builder: test_node::service::new_full,
             chain_spec: test_node::chain_spec::development_config(),
             role: Role::Authority(AccountKeyring::Alice),

@@ -1,3 +1,12 @@
+# Version 0.10.1 (2020-06-19)
+
+* Release client v0.2.0 [#133](https://github.com/paritytech/substrate-subxt/pull/133)
+
+# Version 0.10.0 (2020-06-19)
+
+* Upgrade to substrate rc4 release [#131](https://github.com/paritytech/substrate-subxt/pull/131)
+* Support unsigned extrinsics. [#130](https://github.com/paritytech/substrate-subxt/pull/130)
+
 # Version 0.9.0 (2020-06-25)
 
 * Events sub [#126](https://github.com/paritytech/substrate-subxt/pull/126)

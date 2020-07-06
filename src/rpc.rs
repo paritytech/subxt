@@ -37,7 +37,6 @@ use jsonrpsee::{
     },
     Client,
 };
-use num_traits::bounds::Bounded;
 use sc_rpc_api::state::ReadProof;
 use serde::Serialize;
 use sp_core::{
@@ -83,23 +82,15 @@ pub type ChainBlock<T> =
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
-#[serde(bound = "<T as System>::BlockNumber: Serialize")]
-pub struct BlockNumber<T: System>(NumberOrHex<<T as System>::BlockNumber>);
+pub struct BlockNumber(NumberOrHex);
 
-impl<T> From<NumberOrHex<<T as System>::BlockNumber>> for BlockNumber<T>
-where
-    T: System,
-{
-    fn from(x: NumberOrHex<<T as System>::BlockNumber>) -> Self {
+impl From<NumberOrHex> for BlockNumber {
+    fn from(x: NumberOrHex) -> Self {
         BlockNumber(x)
     }
 }
 
-impl<T> From<u32> for BlockNumber<T>
-where
-    T: System,
-    <T as System>::BlockNumber: From<u32>,
-{
+impl From<u32> for BlockNumber {
     fn from(x: u32) -> Self {
         NumberOrHex::Number(x.into()).into()
     }
@@ -160,9 +151,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
-        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(
-            T::BlockNumber::min_value(),
-        )));
+        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
         let params = Params::Array(vec![to_json_value(block_zero)?]);
         let list_or_value: ListOrValue<Option<T::Hash>> =
             self.client.request("chain_getBlockHash", params).await?;
@@ -198,7 +187,7 @@ impl<T: Runtime> Rpc<T> {
     /// Get a block hash, returns hash of latest block by default
     pub async fn block_hash(
         &self,
-        block_number: Option<BlockNumber<T>>,
+        block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(ListOrValue::Value);
         let params = Params::Array(vec![to_json_value(block_number)?]);
@@ -406,6 +395,53 @@ impl<T: Runtime> Rpc<T> {
             }
         }
         unreachable!()
+    }
+
+    /// Insert a key into the keystore.
+    pub async fn insert_key(
+        &self,
+        key_type: String,
+        suri: String,
+        public: Bytes,
+    ) -> Result<(), Error> {
+        let params = Params::Array(vec![
+            to_json_value(key_type)?,
+            to_json_value(suri)?,
+            to_json_value(public)?,
+        ]);
+        self.client.request("author_insertKey", params).await?;
+        Ok(())
+    }
+
+    /// Generate new session keys and returns the corresponding public keys.
+    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
+        Ok(self
+            .client
+            .request("author_rotateKeys", Params::None)
+            .await?)
+    }
+
+    /// Checks if the keystore has private keys for the given session public keys.
+    ///
+    /// `session_keys` is the SCALE encoded session keys object from the runtime.
+    ///
+    /// Returns `true` iff all private keys could be found.
+    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
+        let params = Params::Array(vec![to_json_value(session_keys)?]);
+        Ok(self.client.request("author_hasSessionKeys", params).await?)
+    }
+
+    /// Checks if the keystore has private keys for the given public key and key type.
+    ///
+    /// Returns `true` if a private key could be found.
+    pub async fn has_key(
+        &self,
+        public_key: Bytes,
+        key_type: String,
+    ) -> Result<bool, Error> {
+        let params =
+            Params::Array(vec![to_json_value(public_key)?, to_json_value(key_type)?]);
+        Ok(self.client.request("author_hasKey", params).await?)
     }
 }
 
