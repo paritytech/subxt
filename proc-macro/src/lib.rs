@@ -75,7 +75,6 @@ use synstructure::{
 ///         self.register_type_size::<T::Wool>("Wool");
 ///     }
 /// }
-///
 /// ```
 ///
 /// The size of the following types is registered by default: `bool, u8, u32, AccountId, AccountIndex, AuthorityId, AuthorityIndex, AuthorityWeight, BlockNumber, DispatchInfo, Hash, Kind, MemberCount, PhantomData, PropIndex, ProposalIndex, ReferendumIndex, SessionIndex, VoteThreshold`
