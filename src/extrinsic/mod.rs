@@ -14,13 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! Create signed or unsigned extrinsics.
+
 mod extra;
 mod signer;
 
 pub use self::{
     extra::{
         DefaultExtra,
-        SignedExtension,
+        Extra,
         SignedExtra,
     },
     signer::{
@@ -29,7 +31,6 @@ pub use self::{
     }
 };
 
-use codec::Decode;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
@@ -69,7 +70,7 @@ pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
 pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, Extra<T>>;
 
 /// Creates a signed extrinsic
-pub fn create_signed<T, S>(
+pub async fn create_signed<T>(
     runtime_version: &RuntimeVersion,
     genesis_hash: T::Hash,
     nonce: T::Index,

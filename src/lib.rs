@@ -88,7 +88,6 @@ pub use crate::{
         ExtrinsicSuccess,
     },
     runtimes::*,
-    signer::*,
     subscription::*,
     substrate_subxt_proc_macro::*,
 };
@@ -315,35 +314,13 @@ impl<T: Runtime> Client<T> {
             .and_then(|module| module.call(C::FUNCTION, call))?)
     }
 
-    /// Creates an payload for an extrinsic.
-    ///
-    /// If `nonce` is `None` the nonce will be fetched from the chain.
-    pub async fn create_payload<C: Call<T>>(
-        &self,
-        call: C,
-        account_id: &<T as System>::AccountId,
-        nonce: Option<T::Index>,
-    ) -> Result<SignedPayload<T>, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let account_nonce = if let Some(nonce) = nonce {
-            nonce
-        } else {
-            self.account(account_id, None).await?.nonce
-        };
-        let call = self.encode(call)?;
-        extrinsic::create_payload(&self.runtime_version, self.genesis_hash, account_nonce, call)
-    }
-
     /// Creates an unsigned extrinsic.
-    pub async fn create_unsigned<C: Call<T> + Send + Sync>(
+    pub fn create_unsigned<C: Call<T> + Send + Sync>(
         &self,
         call: C,
     ) -> Result<UncheckedExtrinsic<T>, Error> {
         let call = self.encode(call)?;
-        Ok(extrinsic::create_unsigned(call))
+        Ok(extrinsic::create_unsigned::<T>(call))
     }
 
     /// Creates a signed extrinsic.
@@ -362,7 +339,8 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        extrinsic::create_signed(&self.runtime_version, self.genesis_hash, account_nonce, call, signer)
+        let signed = extrinsic::create_signed(&self.runtime_version, self.genesis_hash, account_nonce, call, signer).await?;
+        Ok(signed)
     }
 
     /// Returns an events decoder for a call.
