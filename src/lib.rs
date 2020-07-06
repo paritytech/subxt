@@ -65,12 +65,11 @@ use std::marker::PhantomData;
 
 mod error;
 mod events;
-mod extra;
+pub mod extrinsic;
 mod frame;
 mod metadata;
 mod rpc;
 mod runtimes;
-mod signer;
 mod subscription;
 
 pub use crate::{
@@ -79,7 +78,6 @@ pub use crate::{
         EventsDecoder,
         RawEvent,
     },
-    extra::*,
     frame::*,
     metadata::{
         Metadata,
@@ -95,6 +93,12 @@ pub use crate::{
     substrate_subxt_proc_macro::*,
 };
 use crate::{
+    extrinsic::{
+        SignedExtra,
+        SignedPayload,
+        UncheckedExtrinsic,
+        Signer,
+    },
     frame::system::{
         AccountStoreExt,
         Phase,
@@ -329,31 +333,17 @@ impl<T: Runtime> Client<T> {
         } else {
             self.account(account_id, None).await?.nonce
         };
-        let spec_version = self.runtime_version.spec_version;
-        let tx_version = self.runtime_version.transaction_version;
-        let genesis_hash = self.genesis_hash;
         let call = self.encode(call)?;
-        let extra: T::Extra =
-            T::Extra::new(spec_version, tx_version, account_nonce, genesis_hash);
-        let raw_payload = SignedPayload::<T>::new(call, extra.extra())?;
-        Ok(raw_payload)
+        extrinsic::create_payload(&self.runtime_version, self.genesis_hash, account_nonce, call)
     }
 
     /// Creates an unsigned extrinsic.
     pub async fn create_unsigned<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        account_id: &<T as System>::AccountId,
-        nonce: Option<T::Index>,
-    ) -> Result<UncheckedExtrinsic<T>, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let payload = self.create_payload(call, account_id, nonce).await?;
-        let (call, _, _) = payload.deconstruct();
-        let unsigned = UncheckedExtrinsic::<T>::new_unsigned(call);
-        Ok(unsigned)
+    ) -> Result<UncheckedExtrinsic<T>, Error> {
+        let call = self.encode(call)?;
+        Ok(extrinsic::create_unsigned(call))
     }
 
     /// Creates a signed extrinsic.
@@ -366,11 +356,13 @@ impl<T: Runtime> Client<T> {
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
-        let payload = self
-            .create_payload(call, signer.account_id(), signer.nonce())
-            .await?;
-        let signed = signer.sign(payload).await?;
-        Ok(signed)
+        let account_nonce = if let Some(nonce) = signer.nonce() {
+            nonce
+        } else {
+            self.account(signer.account_id(), None).await?.nonce
+        };
+        let call = self.encode(call)?;
+        extrinsic::create_signed(&self.runtime_version, self.genesis_hash, account_nonce, call, signer)
     }
 
     /// Returns an events decoder for a call.
