@@ -16,8 +16,10 @@
 
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
-    // Traits derived by the `Call` macro
-    balances::{TransferCallExt, TransferEventExt},
+    balances::{
+        TransferCallExt,
+        TransferEventExt,
+    },
     ClientBuilder,
     DefaultNodeRuntime,
     PairSigner,
