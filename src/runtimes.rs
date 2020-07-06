@@ -40,7 +40,6 @@ use crate::{
         sudo::Sudo,
         system::System,
     },
-    Encoded,
 };
 
 /// Runtime trait.

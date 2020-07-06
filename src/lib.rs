@@ -94,7 +94,6 @@ pub use crate::{
 use crate::{
     extrinsic::{
         SignedExtra,
-        SignedPayload,
         UncheckedExtrinsic,
         Signer,
     },
