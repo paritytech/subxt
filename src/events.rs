@@ -59,7 +59,7 @@ pub struct RawEvent {
     pub data: Vec<u8>,
 }
 
-/// Event decoder.
+/// Events decoder.
 #[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
