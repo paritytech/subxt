@@ -43,10 +43,10 @@ use synstructure::{
 /// ```ignore
 /// #[module]
 /// pub trait Herd: Husbandry {
-/// 	type Hooves: HoofCounter;
-/// 	type Wool: WoollyAnimal;
-/// 	#[module(ignore)]
-/// 	type Digestion: EnergyProducer + std::fmt::Debug;
+///     type Hooves: HoofCounter;
+///     type Wool: WoollyAnimal;
+///     #[module(ignore)]
+///     type Digestion: EnergyProducer + std::fmt::Debug;
 /// }
 /// ```
 ///
