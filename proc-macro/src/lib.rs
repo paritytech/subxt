@@ -65,7 +65,7 @@ decl_derive!(
     /// }
     /// ```
     ///
-    /// When building a [Client](../substrate_subxt/struct.Client.html) parametrised to `MyRuntime`, you have access to
+    /// When building a [Client](../substrate_subxt/struct.Client.html) parameterised to `MyRuntime`, you have access to
     ///  two new methods: `fun_stuff()` and `fun_stuff_and_watch()` by way of the derived `FunStuffExt` trait. The fields
     ///  of the input struct become arguments to the calls (ignoring the marker field).
     ///
