@@ -30,6 +30,58 @@ use synstructure::{
     Structure,
 };
 
+/// Register type sizes for [EventsDecoder](struct.EventsDecoder.html) and set the `MODULE`.
+///
+/// The `module` macro registers the type sizes of the associated types of a trait so that [EventsDecoder](struct.EventsDecoder.html)
+/// can decode events of that type when received from Substrate. It also sets the `MODULE` constant
+/// to the name of the trait (must match the name of the Substrate pallet) that enables the [Call](), [Event]() and [Store]() macros to work.
+///
+/// If you do not want an associated type to be registered, likely because you never expect it as part of a response payload to be decoded, use `#[module(ignore)]` on the type.
+///
+/// Example:
+///
+/// ```ignore
+/// #[module]
+/// pub trait Herd: Husbandry {
+///     type Hooves: HoofCounter;
+///     type Wool: WoollyAnimal;
+///     #[module(ignore)]
+///     type Digestion: EnergyProducer + std::fmt::Debug;
+/// }
+/// ```
+///
+/// The above will produce the following code:
+///
+/// ```ignore
+/// pub trait Herd: Husbandry {
+///     type Hooves: HoofCounter;
+///     type Wool: WoollyAnimal;
+///     #[module(ignore)]
+///     type Digestion: EnergyProducer + std::fmt::Debug;
+/// }
+///
+/// const MODULE: &str = "Herd";
+///
+/// // `EventsDecoder` extension trait.
+/// pub trait HerdEventsDecoder {
+///     // Registers this modules types.
+///     fn with_herd(&mut self);
+/// }
+///
+/// impl<T: Herd> HerdEventsDecoder for
+///     substrate_subxt::EventsDecoder<T>
+/// {
+///     fn with_herd(&mut self) {
+///         self.with_husbandry();
+///         self.register_type_size::<T::Hooves>("Hooves");
+///         self.register_type_size::<T::Wool>("Wool");
+///     }
+/// }
+/// ```
+///
+/// The following type sizes are registered by default: `bool, u8, u32, AccountId, AccountIndex,
+/// AuthorityId, AuthorityIndex, AuthorityWeight, BlockNumber, DispatchInfo, Hash, Kind,
+/// MemberCount, PhantomData, PropIndex, ProposalIndex, ReferendumIndex, SessionIndex, VoteThreshold`
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn module(args: TokenStream, input: TokenStream) -> TokenStream {
