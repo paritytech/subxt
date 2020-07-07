@@ -69,7 +69,7 @@ fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
 fn with_module_ident(module: &syn::Ident) -> syn::Ident {
     format_ident!("with_{}", module.to_string().to_snake_case())
 }
-/// Attribute macro that registers the type sizes used by the module.
+/// Attribute macro that registers the type sizes used by the module; also sets the `MODULE` constant.
 pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
     let input = if let Ok(input) = input {
