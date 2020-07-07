@@ -30,7 +30,7 @@ use synstructure::{
     Structure,
 };
 
-/// Register type sizes for [EventsDecoder](struct.EventsDecoder.html)
+/// Register type sizes for [EventsDecoder](struct.EventsDecoder.html) and sets the `MODULE`.
 ///
 /// The `module` macro registers the type sizes of the associated types of a trait so that [EventsDecoder](struct.EventsDecoder.html)
 /// can decode events of that type when received from Substrate. It also sets the `MODULE` constant
