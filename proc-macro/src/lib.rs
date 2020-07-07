@@ -33,7 +33,8 @@ use synstructure::{
 /// Register type sizes for [EventsDecoder](struct.EventsDecoder.html)
 ///
 /// The `module` macro registers the type sizes of the associated types of a trait so that [EventsDecoder](struct.EventsDecoder.html)
-/// can decode events of that type when received from Substrate. It also sets the `MODULE` constant that enables the [Call](), [Event]() and [Store]() macros to work.
+/// can decode events of that type when received from Substrate. It also sets the `MODULE` constant
+/// to the name of the trait (must match the name of the Substrate pallet) that enables the [Call](), [Event]() and [Store]() macros to work.
 ///
 /// If you do not want an associated type to be registered, likely because you never expect it as part of a response payload to be decoded, use `#[module(ignore)]` on the type.
 ///
