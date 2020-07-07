@@ -32,7 +32,8 @@ use synstructure::{
 
 /// Register type sizes for [EventsDecoder](struct.EventsDecoder.html)
 ///
-/// The `module` macro registers the type sizes of the associated types of a trait so that [EventsDecoder](struct.EventsDecoder.html) can decode events of that type when received from Substrate.
+/// The `module` macro registers the type sizes of the associated types of a trait so that [EventsDecoder](struct.EventsDecoder.html)
+/// can decode events of that type when received from Substrate. It also sets the `MODULE` constant that enables the [Call](), [Event]() and [Store]() macros to work.
 ///
 /// If you do not want an associated type to be registered, likely because you never expect it as part of a response payload to be decoded, use `#[module(ignore)]` on the type.
 ///
@@ -71,13 +72,15 @@ use synstructure::{
 /// {
 ///     fn with_herd(&mut self) {
 ///         self.with_husbandry();
-///         self.register_type_size::<T::Hooves>("Hoves");
+///         self.register_type_size::<T::Hooves>("Hooves");
 ///         self.register_type_size::<T::Wool>("Wool");
 ///     }
 /// }
 /// ```
 ///
-/// The size of the following types is registered by default: `bool, u8, u32, AccountId, AccountIndex, AuthorityId, AuthorityIndex, AuthorityWeight, BlockNumber, DispatchInfo, Hash, Kind, MemberCount, PhantomData, PropIndex, ProposalIndex, ReferendumIndex, SessionIndex, VoteThreshold`
+/// The following type sizes are registered by default: `bool, u8, u32, AccountId, AccountIndex,
+/// AuthorityId, AuthorityIndex, AuthorityWeight, BlockNumber, DispatchInfo, Hash, Kind,
+/// MemberCount, PhantomData, PropIndex, ProposalIndex, ReferendumIndex, SessionIndex, VoteThreshold`
 #[proc_macro_attribute]
 #[proc_macro_error]
 pub fn module(args: TokenStream, input: TokenStream) -> TokenStream {
