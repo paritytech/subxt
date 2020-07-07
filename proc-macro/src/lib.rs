@@ -88,7 +88,53 @@ pub fn module(args: TokenStream, input: TokenStream) -> TokenStream {
     module::module(args.into(), input.into()).into()
 }
 
-decl_derive!([Call] => #[proc_macro_error] call);
+decl_derive!(
+    [Call] =>
+    /// Derive macro that implements [substrate_subxt::Call](../substrate_subxt/trait.Call.html) for your struct
+    /// and defines&implements the calls as an extension trait.
+    ///
+    /// Use the `Call` derive macro in tandem with the [#module](../substrate_subxt/attr.module.html) macro to extend
+    /// your struct to enable calls to substrate and to decode events. The struct maps to the corresponding Substrate runtime call, e.g.:
+    ///
+    /// ```ignore
+    /// decl_module! {
+    ///     /* … */
+    ///     pub fn fun_stuff(origin, something: Vec<u8>) -> DispatchResult { /* … */ }
+    ///     /* … */
+    /// }
+    ///```
+    ///
+    /// Implements [substrate_subxt::Call](../substrate_subxt/trait.Call.html) and adds an extension trait that
+    /// provides two methods named as your struct.
+    ///
+    /// Example:
+    /// ```rust,ignore
+    /// pub struct MyRuntime;
+    ///
+    /// impl System for MyRuntime { /* … */ }
+    /// impl Balances for MyRuntime { /* … */ }
+    ///
+    /// #[module]
+    /// pub trait MyTrait: System + Balances {}
+    ///
+    /// #[derive(Call)]
+    /// pub struct FunStuffCall<T: MyTrait> {
+    ///     /// Runtime marker.
+    ///     pub _runtime: PhantomData<T>,
+    ///     /// The argument passed to the call..
+    ///     pub something: Vec<u8>,
+    /// }
+    /// ```
+    ///
+    /// When building a [Client](../substrate_subxt/struct.Client.html) parameterised to `MyRuntime`, you have access to
+    /// two new methods: `fun_stuff()` and `fun_stuff_and_watch()` by way of the derived `FunStuffExt`
+    /// trait. The `_and_watch` variant makes the call and waits for the result. The fields of the
+    /// input struct become arguments to the calls (ignoring the marker field).
+    ///
+    /// Under the hood the implementation calls [submit()](../substrate_subxt/struct.Client.html#method.submit) and
+    /// [watch()](../substrate_subxt/struct.Client.html#method.watch) respectively.
+    #[proc_macro_error] call
+);
 fn call(s: Structure) -> TokenStream {
     call::call(s).into()
 }
