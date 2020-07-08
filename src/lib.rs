@@ -312,10 +312,10 @@ impl<T: Runtime> Client<T> {
             .and_then(|module| module.call(C::FUNCTION, call))?)
     }
 
-    /// Creates an unsigned extrinsic.
+    /// Creates an payload for an extrinsic.
     ///
     /// If `nonce` is `None` the nonce will be fetched from the chain.
-    pub async fn create_unsigned<C: Call<T>>(
+    pub async fn create_payload<C: Call<T>>(
         &self,
         call: C,
         account_id: &<T as System>::AccountId,
@@ -340,6 +340,23 @@ impl<T: Runtime> Client<T> {
         Ok(raw_payload)
     }
 
+    /// Creates an unsigned extrinsic.
+    pub async fn create_unsigned<C: Call<T> + Send + Sync>(
+        &self,
+        call: C,
+        account_id: &<T as System>::AccountId,
+        nonce: Option<T::Index>,
+    ) -> Result<UncheckedExtrinsic<T>, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
+        let payload = self.create_payload(call, account_id, nonce).await?;
+        let (call, _, _) = payload.deconstruct();
+        let unsigned = UncheckedExtrinsic::<T>::new_unsigned(call);
+        Ok(unsigned)
+    }
+
     /// Creates a signed extrinsic.
     pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
@@ -350,10 +367,10 @@ impl<T: Runtime> Client<T> {
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
-        let unsigned = self
-            .create_unsigned(call, signer.account_id(), signer.nonce())
+        let payload = self
+            .create_payload(call, signer.account_id(), signer.nonce())
             .await?;
-        let signed = signer.sign(unsigned).await?;
+        let signed = signer.sign(payload).await?;
         Ok(signed)
     }
 
@@ -565,7 +582,7 @@ mod tests {
 
         // create raw payload with AccoundId and sign it
         let raw_payload = client
-            .create_unsigned(
+            .create_payload(
                 balances::TransferCall {
                     to: &dest,
                     amount: 10_000,

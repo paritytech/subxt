@@ -37,7 +37,6 @@ use jsonrpsee::{
     },
     Client,
 };
-use num_traits::bounds::Bounded;
 use sc_rpc_api::state::ReadProof;
 use serde::Serialize;
 use sp_core::{
@@ -82,7 +81,7 @@ pub type ChainBlock<T> =
     SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
-#[derive(Serialize, Debug)]
+#[derive(Serialize)]
 pub struct BlockNumber(NumberOrHex);
 
 impl From<NumberOrHex> for BlockNumber {
@@ -151,8 +150,7 @@ impl<T: Runtime> Rpc<T> {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, Error>
-    {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
         let params = Params::Array(vec![to_json_value(block_zero)?]);
         let list_or_value: ListOrValue<Option<T::Hash>> =

@@ -1,6 +1,6 @@
 [package]
 name = "test-node"
-version = "2.0.0-rc3"
+version = "2.0.0-rc4"
 authors = ["Anonymous"]
 description = "Substrate Node template"
 edition = "2018"
@@ -19,12 +19,12 @@ structopt = "0.3.15"
 parking_lot = "0.11.0"
 
 sc-cli = { version = "0.8.0-rc4", features = ["wasmtime"] }
-sp-core = { version = "2.0.0-rc4", package = "sp-core" }
+sp-core = "2.0.0-rc4"
 sc-executor = { version = "0.8.0-rc4", features = ["wasmtime"] }
 sc-service = { version = "0.8.0-rc4", features = ["wasmtime"] }
 sp-inherents = "2.0.0-rc4"
 sc-transaction-pool = "2.0.0-rc4"
-sp-transaction-pool = { version = "2.0.0-rc4", package = "sp-transaction-pool" }
+sp-transaction-pool = "2.0.0-rc4"
 sc-network = "0.8.0-rc4"
 sc-consensus-aura = "0.8.0-rc4"
 sp-consensus-aura = "0.8.0-rc4"
@@ -33,10 +33,10 @@ sc-consensus = "0.8.0-rc4"
 sc-finality-grandpa = "0.8.0-rc4"
 sp-finality-grandpa = "2.0.0-rc4"
 sc-client-api = "2.0.0-rc4"
-sp-runtime = { version = "2.0.0-rc4", package = "sp-runtime" }
+sp-runtime = "2.0.0-rc4"
 sc-basic-authorship = "0.8.0-rc4"
 
-test-node-runtime = { version = "2.0.0-rc3", path = "runtime" }
+test-node-runtime = { version = "2.0.0-rc4", path = "runtime" }
 
 [build-dependencies]
 substrate-build-script-utils = "2.0.0-rc4"

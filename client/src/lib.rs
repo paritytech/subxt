@@ -213,7 +213,8 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
                 TaskType::Async => task::spawn(fut),
                 TaskType::Blocking => task::spawn_blocking(|| task::block_on(fut)),
             };
-        }).into(),
+        })
+        .into(),
         database: config.db,
         keystore: KeystoreConfig::InMemory,
         max_runtime_instances: 8,
@@ -243,6 +244,8 @@ fn start_subxt_client<C: ChainSpec + 'static, S: AbstractService>(
         tracing_targets: Default::default(),
         transaction_pool: Default::default(),
         wasm_method: Default::default(),
+        base_path: Default::default(),
+        informant_output_format: Default::default(),
     };
 
     log::info!("{}", service_config.impl_name);
@@ -332,6 +335,7 @@ mod tests {
             test_node::chain_spec::ChainSpec::from_json_bytes(bytes).unwrap();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
+            // base_path:
             impl_name: "substrate-subxt-light-client",
             impl_version: "0.0.1",
             author: "David Craven",
