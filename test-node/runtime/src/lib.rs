@@ -235,8 +235,6 @@ impl system::Trait for Runtime {
     type OnKilledAccount = ();
     /// The data to be stored in an account.
     type AccountData = balances::AccountData<Balance>;
-    /// The base call filter.
-    type BaseCallFilter = ();
 }
 
 impl aura::Trait for Runtime {

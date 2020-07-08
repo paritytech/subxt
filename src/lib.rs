@@ -28,7 +28,6 @@
     path_statements,
     patterns_in_fns_without_body,
     private_in_public,
-    missing_debug_implementations,
     unconditional_recursion,
     unused_allocation,
     unused_comparisons,
@@ -36,8 +35,7 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
-    unused_extern_crates,
-    clippy::all
+    unused_extern_crates
 )]
 #![allow(clippy::type_complexity)]
 
@@ -54,9 +52,12 @@ use codec::Decode;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sc_rpc_api::state::ReadProof;
-use sp_core::storage::{
-    StorageChangeSet,
-    StorageKey,
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
@@ -107,7 +108,6 @@ use crate::{
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-#[allow(missing_debug_implementations)]
 pub struct ClientBuilder<T: Runtime> {
     _marker: std::marker::PhantomData<T>,
     url: Option<String>,
@@ -166,7 +166,6 @@ impl<T: Runtime> ClientBuilder<T> {
 }
 
 /// Client to interface with a substrate node.
-#[allow(missing_debug_implementations)]
 pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
@@ -429,6 +428,41 @@ impl<T: Runtime> Client<T> {
         let decoder = self.events_decoder::<C>();
         self.submit_and_watch_extrinsic(extrinsic, decoder).await
     }
+
+    /// Insert a key into the keystore.
+    pub async fn insert_key(
+        &self,
+        key_type: String,
+        suri: String,
+        public: Bytes,
+    ) -> Result<(), Error> {
+        self.rpc.insert_key(key_type, suri, public).await
+    }
+
+    /// Generate new session keys and returns the corresponding public keys.
+    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
+        self.rpc.rotate_keys().await
+    }
+
+    /// Checks if the keystore has private keys for the given session public keys.
+    ///
+    /// `session_keys` is the SCALE encoded session keys object from the runtime.
+    ///
+    /// Returns `true` iff all private keys could be found.
+    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
+        self.rpc.has_session_keys(session_keys).await
+    }
+
+    /// Checks if the keystore has private keys for the given public key and key type.
+    ///
+    /// Returns `true` if a private key could be found.
+    pub async fn has_key(
+        &self,
+        public_key: Bytes,
+        key_type: String,
+    ) -> Result<bool, Error> {
+        self.rpc.has_key(public_key, key_type).await
+    }
 }
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
@@ -460,6 +494,7 @@ mod tests {
     use sp_runtime::MultiSignature;
     use substrate_subxt_client::{
         DatabaseConfig,
+        KeystoreConfig,
         Role,
         SubxtClient,
         SubxtClientConfig,
@@ -468,7 +503,9 @@ mod tests {
 
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
 
-    pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
+    pub(crate) async fn test_client_with(
+        key: AccountKeyring,
+    ) -> (Client<TestRuntime>, TempDir) {
         env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let config = SubxtClientConfig {
@@ -477,12 +514,16 @@ mod tests {
             author: "substrate subxt",
             copyright_start_year: 2020,
             db: DatabaseConfig::RocksDb {
-                path: tmp.path().into(),
+                path: tmp.path().join("db"),
                 cache_size: 128,
+            },
+            keystore: KeystoreConfig::Path {
+                path: tmp.path().join("keystore"),
+                password: None,
             },
             builder: test_node::service::new_full,
             chain_spec: test_node::chain_spec::development_config(),
-            role: Role::Authority(AccountKeyring::Alice),
+            role: Role::Authority(key),
         };
         let client = ClientBuilder::new()
             .set_client(SubxtClient::new(config).expect("Error creating subxt client"))
@@ -490,6 +531,34 @@ mod tests {
             .await
             .expect("Error creating client");
         (client, tmp)
+    }
+
+    pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
+        test_client_with(AccountKeyring::Alice).await
+    }
+
+    #[async_std::test]
+    async fn test_insert_key() {
+        // Bob is not an authority, so block production should be disabled.
+        let (client, _tmp) = test_client_with(AccountKeyring::Bob).await;
+        let mut blocks = client.subscribe_blocks().await.unwrap();
+        // get the genesis block.
+        assert_eq!(blocks.next().await.number, 0);
+        let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
+        client
+            .insert_key(
+                "aura".to_string(),
+                "//Alice".to_string(),
+                public.clone().into(),
+            )
+            .await
+            .unwrap();
+        assert!(client
+            .has_key(public.clone().into(), "aura".to_string())
+            .await
+            .unwrap());
+        // Alice is an authority, so blocks should be produced.
+        assert_eq!(blocks.next().await.number, 1);
     }
 
     #[async_std::test]

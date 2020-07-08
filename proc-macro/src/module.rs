@@ -69,7 +69,7 @@ fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
 fn with_module_ident(module: &syn::Ident) -> syn::Ident {
     format_ident!("with_{}", module.to_string().to_snake_case())
 }
-
+/// Attribute macro that registers the type sizes used by the module; also sets the `MODULE` constant.
 pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
     let input = if let Ok(input) = input {
@@ -180,6 +180,48 @@ mod tests {
                 fn with_balances(&mut self) {
                     self.with_system();
                     self.register_type_size::<T::Balance>("Balance");
+                }
+            }
+        };
+
+        let result = module(attr, input);
+        utils::assert_proc_macro(result, expected);
+    }
+
+    #[test]
+    fn test_herd() {
+        let attr = quote!(#[module]);
+        let input = quote! {
+            pub trait Herd: Husbandry {
+                type Hoves: u8;
+                type Wool: bool;
+                #[module(ignore)]
+                type Digestion: EnergyProducer + fmt::Debug;
+            }
+        };
+        let expected = quote! {
+            pub trait Herd: Husbandry {
+                type Hoves: u8;
+                type Wool: bool;
+                #[module(ignore)]
+                type Digestion: EnergyProducer + fmt::Debug;
+            }
+
+            const MODULE: &str = "Herd";
+
+            /// `EventsDecoder` extension trait.
+            pub trait HerdEventsDecoder {
+                /// Registers this modules types.
+                fn with_herd(&mut self);
+            }
+
+            impl<T: Herd> HerdEventsDecoder for
+                substrate_subxt::EventsDecoder<T>
+            {
+                fn with_herd(&mut self) {
+                    self.with_husbandry();
+                    self.register_type_size::<T::Hoves>("Hoves");
+                    self.register_type_size::<T::Wool>("Wool");
                 }
             }
         };

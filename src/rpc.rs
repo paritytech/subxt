@@ -396,6 +396,53 @@ impl<T: Runtime> Rpc<T> {
         }
         unreachable!()
     }
+
+    /// Insert a key into the keystore.
+    pub async fn insert_key(
+        &self,
+        key_type: String,
+        suri: String,
+        public: Bytes,
+    ) -> Result<(), Error> {
+        let params = Params::Array(vec![
+            to_json_value(key_type)?,
+            to_json_value(suri)?,
+            to_json_value(public)?,
+        ]);
+        self.client.request("author_insertKey", params).await?;
+        Ok(())
+    }
+
+    /// Generate new session keys and returns the corresponding public keys.
+    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
+        Ok(self
+            .client
+            .request("author_rotateKeys", Params::None)
+            .await?)
+    }
+
+    /// Checks if the keystore has private keys for the given session public keys.
+    ///
+    /// `session_keys` is the SCALE encoded session keys object from the runtime.
+    ///
+    /// Returns `true` iff all private keys could be found.
+    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
+        let params = Params::Array(vec![to_json_value(session_keys)?]);
+        Ok(self.client.request("author_hasSessionKeys", params).await?)
+    }
+
+    /// Checks if the keystore has private keys for the given public key and key type.
+    ///
+    /// Returns `true` if a private key could be found.
+    pub async fn has_key(
+        &self,
+        public_key: Bytes,
+        key_type: String,
+    ) -> Result<bool, Error> {
+        let params =
+            Params::Array(vec![to_json_value(public_key)?, to_json_value(key_type)?]);
+        Ok(self.client.request("author_hasKey", params).await?)
+    }
 }
 
 /// Captures data for when an extrinsic is successfully included in a block
