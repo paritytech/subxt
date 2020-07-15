@@ -17,15 +17,15 @@
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
     balances::{
-        TransferEvent,
-        TransferCallExt,
         BalancesEventsDecoder,
+        TransferCallExt,
+        TransferEvent,
     },
     sp_core::Decode,
-    EventsDecoder,
-    EventSubscription,
     ClientBuilder,
     DefaultNodeRuntime,
+    EventSubscription,
+    EventsDecoder,
     PairSigner,
 };
 
