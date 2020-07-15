@@ -456,11 +456,9 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use sp_core::{
-        storage::{
-            well_known_keys,
-            StorageKey,
-        },
+    use sp_core::storage::{
+        well_known_keys,
+        StorageKey,
     };
     use sp_keyring::AccountKeyring;
     use substrate_subxt_client::{

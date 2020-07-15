@@ -44,8 +44,8 @@ mod tests {
     use super::*;
     use crate::{
         error::Error,
-        frame::balances::TransferCall,
         extrinsic::PairSigner,
+        frame::balances::TransferCall,
         tests::{
             test_client,
             TestRuntime,
