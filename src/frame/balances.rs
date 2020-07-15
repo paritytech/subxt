@@ -115,7 +115,7 @@ mod tests {
             RuntimeError,
         },
         events::EventsDecoder,
-        signer::{
+        extrinsic::{
             PairSigner,
             Signer,
         },

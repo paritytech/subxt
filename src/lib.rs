@@ -78,6 +78,12 @@ pub use crate::{
         EventsDecoder,
         RawEvent,
     },
+    extrinsic::{
+        PairSigner,
+        SignedExtra,
+        Signer,
+        UncheckedExtrinsic,
+    },
     frame::*,
     metadata::{
         Metadata,
@@ -92,11 +98,6 @@ pub use crate::{
     substrate_subxt_proc_macro::*,
 };
 use crate::{
-    extrinsic::{
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
-    },
     frame::system::{
         AccountStoreExt,
         Phase,
@@ -455,19 +456,13 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codec::Encode;
     use sp_core::{
         storage::{
             well_known_keys,
             StorageKey,
         },
-        Pair,
     };
-    use sp_keyring::{
-        AccountKeyring,
-        Ed25519Keyring,
-    };
-    use sp_runtime::MultiSignature;
+    use sp_keyring::AccountKeyring;
     use substrate_subxt_client::{
         DatabaseConfig,
         KeystoreConfig,
@@ -615,48 +610,5 @@ mod tests {
         let (client, _) = test_client().await;
         let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
         blocks.next().await;
-    }
-
-    #[async_std::test]
-    async fn test_create_raw_payload() {
-        let signer_pair = Ed25519Keyring::Alice.pair();
-        let signer_account_id = Ed25519Keyring::Alice.to_account_id();
-        let dest = AccountKeyring::Bob.to_account_id().into();
-
-        let (client, _) = test_client().await;
-
-        // create raw payload with AccoundId and sign it
-        let raw_payload = client
-            .create_payload(
-                balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000,
-                },
-                &signer_account_id,
-                None,
-            )
-            .await
-            .unwrap();
-        let raw_signature = signer_pair.sign(raw_payload.encode().as_slice());
-        let raw_multisig = MultiSignature::from(raw_signature);
-
-        // create signature with Xtbuilder
-        let signer = PairSigner::new(Ed25519Keyring::Alice.pair());
-        let xt_multi_sig = client
-            .create_signed(
-                balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000,
-                },
-                &signer,
-            )
-            .await
-            .unwrap()
-            .signature
-            .unwrap()
-            .1;
-
-        // compare signatures
-        assert_eq!(raw_multisig, xt_multi_sig);
     }
 }
