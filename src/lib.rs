@@ -60,7 +60,7 @@ use sp_core::{
     Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
-use sp_version::RuntimeVersion;
+pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
 mod error;
