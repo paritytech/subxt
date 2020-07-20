@@ -289,6 +289,17 @@ impl<T: Runtime> Client<T> {
         Ok(events)
     }
 
+    /// Subscribe to specific event type.
+    pub async fn subscribe_to_event<E: Event<T>>(
+        &self,
+    ) -> Result<EventSubscription<T>, Error> {
+        let sub = self.subscribe_events().await?;
+        let decoder = EventsDecoder::<T>::new(self.metadata().clone());
+        let mut sub = EventSubscription::<T>::new(sub, decoder);
+        sub.filter_event::<E>();
+        Ok(sub)
+    }
+
     /// Subscribe to new blocks.
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let headers = self.rpc.subscribe_blocks().await?;
