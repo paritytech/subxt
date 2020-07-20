@@ -290,7 +290,7 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Subscribe to specific event type.
-    pub async fn subscribe_to_event<E: Event<T>>(
+    pub async fn event_subscription<E: Event<T>>(
         &self,
     ) -> Result<EventSubscription<T>, Error> {
         let sub = self.subscribe_events().await?;

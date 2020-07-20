@@ -37,11 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let sub = client.subscribe_events().await?;
-    let mut decoder = EventsDecoder::<DefaultNodeRuntime>::new(client.metadata().clone());
-    decoder.with_balances();
-    let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
-    sub.filter_event::<TransferEvent<_>>();
+    let mut sub = client.event_subscription::<TransferEvent<_>>().await?;
     client.transfer(&signer, &dest, 10_000).await?;
     let raw = sub.next().await.unwrap().unwrap();
     let event = TransferEvent::<DefaultNodeRuntime>::decode(&mut &raw.data[..]);
