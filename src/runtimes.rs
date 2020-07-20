@@ -27,7 +27,7 @@ use sp_runtime::{
 };
 
 use crate::{
-    extra::{
+    extrinsic::{
         DefaultExtra,
         SignedExtra,
     },
@@ -40,7 +40,6 @@ use crate::{
         sudo::Sudo,
         system::System,
     },
-    Encoded,
 };
 
 /// Runtime trait.
@@ -50,20 +49,6 @@ pub trait Runtime: System + Sized + Send + Sync + 'static {
     /// Transaction extras.
     type Extra: SignedExtra<Self> + Send + Sync + 'static;
 }
-
-/// Extra type.
-pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
-
-/// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
-    <T as System>::Address,
-    Encoded,
-    <T as Runtime>::Signature,
-    Extra<T>,
->;
-
-/// SignedPayload type.
-pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, Extra<T>>;
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
 ///
