@@ -90,11 +90,13 @@ impl SubxtClient {
         let (to_back, from_front) = mpsc::channel(4);
         let (to_front, from_back) = mpsc01::channel(4);
 
+        let session = RpcSession::new(to_front.clone());
+        let session2 = session.clone();
         task::spawn(
             select(
                 Box::pin(from_front.for_each(move |message: String| {
                     let rpc = rpc.clone();
-                    let session = RpcSession::new(to_front.clone());
+                    let session = session2.clone();
                     let mut to_front = to_front.clone().sink_compat();
                     async move {
                         let response = rpc.rpc_query(&session, &message).await;
@@ -285,7 +287,7 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             service_config.chain_spec.name()
         );
         log::info!("🏷  Node name: {}", service_config.network.node_name);
-        log::info!("👤 Role: {:?}", service_config.role);
+        log::info!("👤 Role: {:?}", self.role);
 
         service_config
     }

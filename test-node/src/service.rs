@@ -42,7 +42,7 @@ use std::{
 };
 use test_node_runtime::{
     self,
-    Block,
+    opaque::Block,
     RuntimeApi,
 };
 
