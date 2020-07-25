@@ -490,12 +490,14 @@ mod tests {
                 path: tmp.path().join("keystore"),
                 password: None,
             },
-            builder: test_node::service::new_full,
-            chain_spec: test_node::chain_spec::development_config(),
+            chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(key),
         };
         let client = ClientBuilder::new()
-            .set_client(SubxtClient::new(config).expect("Error creating subxt client"))
+            .set_client(
+                SubxtClient::from_config(config, test_node::service::new_full)
+                    .expect("Error creating subxt client"),
+            )
             .build()
             .await
             .expect("Error creating client");
