@@ -133,7 +133,7 @@ mod tests {
     use sp_keyring::AccountKeyring;
 
     #[async_std::test]
-    async fn test_transfer() {
+    async fn test_basic_transfer() {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
