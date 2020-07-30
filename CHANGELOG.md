@@ -1,8 +1,7 @@
 # Version 0.11.0
 
 * Rc5 [#143](https://github.com/paritytech/substrate-subxt/pull/143)
-* Refactor: extract functions and types for creating extrinsics [#138](https://github.com/paritytech/substrate
--subxt/pull/138)
+* Refactor: extract functions and types for creating extrinsics [#138](https://github.com/paritytech/substrate-subxt/pull/138)
 * event subscription example [#140](https://github.com/paritytech/substrate-subxt/pull/140)
 * Document the `Call` derive macro [#137](https://github.com/paritytech/substrate-subxt/pull/137)
 * Document the #[module] macro [#135](https://github.com/paritytech/substrate-subxt/pull/135)
