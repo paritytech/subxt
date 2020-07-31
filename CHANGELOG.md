@@ -1,5 +1,6 @@
 # Version 0.11.0
 
+* Fix build error, wabt 0.9.2 is yanked [#146](https://github.com/paritytech/substrate-subxt/pull/146)
 * Rc5 [#143](https://github.com/paritytech/substrate-subxt/pull/143)
 * Refactor: extract functions and types for creating extrinsics [#138](https://github.com/paritytech/substrate-subxt/pull/138)
 * event subscription example [#140](https://github.com/paritytech/substrate-subxt/pull/140)
