@@ -468,7 +468,9 @@ mod tests {
         SubxtClient,
         SubxtClientConfig,
     };
-    use tempdir::TempDir;
+	use tempdir::TempDir;
+	use std::sync::Arc;
+	
 
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
 
@@ -496,7 +498,13 @@ mod tests {
         };
         let client = ClientBuilder::new()
             .set_client(
-                SubxtClient::from_config(config, test_node::service::new_full)
+                SubxtClient::from_config(
+						config,
+						|config| {
+							test_node::service::new_full(config)
+								.map(|(task, rpc)| (task, Arc::new(rpc)))
+						},
+					)
                     .expect("Error creating subxt client"),
             )
             .build()

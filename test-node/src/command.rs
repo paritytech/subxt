@@ -14,19 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    chain_spec,
-    cli::Cli,
-    service,
-    service::new_full_params,
-};
-use sc_cli::{
-    ChainSpec,
-    Role,
-    RuntimeVersion,
-    SubstrateCli,
-};
-use sc_service::ServiceParams;
+use crate::{chain_spec, cli::Cli, service::{self, Executor}};
+use sc_cli::{ChainSpec, Role, RuntimeVersion, SubstrateCli};
+use std::sync::Arc;
+use sp_consensus_aura::sr25519::AuthorityPair as AuraPair;
+use test_node_runtime::{opaque::Block, RuntimeApi};
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -78,18 +70,36 @@ pub fn run() -> sc_cli::Result<()> {
         Some(subcommand) => {
             let runner = cli.create_runner(subcommand)?;
             runner.run_subcommand(subcommand, |config| {
-                let (
-                    ServiceParams {
-                        client,
-                        backend,
-                        task_manager,
-                        import_queue,
-                        ..
-                    },
-                    ..,
-                ) = new_full_params(config)?;
-                Ok((client, backend, import_queue, task_manager))
-            })
+				sc_service::new_full_parts::<Block, RuntimeApi, Executor>(&config)
+					.and_then(|(client, backend, _, task_manager)| {
+							let client = Arc::new(client);
+							let select_chain = sc_consensus::LongestChain::new(backend.clone());
+							let inherent_data_providers = sp_inherents::InherentDataProviders::new();
+
+							let (grandpa_block_import, _) = sc_finality_grandpa::block_import(
+    						    client.clone(),
+    						    &(client.clone() as Arc<_>),
+    						    select_chain.clone(),
+    						)?;
+						
+    						let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
+    						    grandpa_block_import.clone(),
+    						    client.clone(),
+    						);
+						
+    						let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _>(
+    						    sc_consensus_aura::slot_duration(&*client)?,
+    						    aura_block_import,
+    						    Some(Box::new(grandpa_block_import.clone())),
+    						    None,
+    						    client.clone(),
+    						    inherent_data_providers.clone(),
+    						    &task_manager.spawn_handle(),
+    						    config.prometheus_registry(),
+    						)?;
+						Ok((client, backend, import_queue, task_manager))
+					})
+			})
         }
         None => {
             let runner = cli.create_runner(&cli.run)?;

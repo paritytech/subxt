@@ -314,7 +314,8 @@ mod tests {
         ClientBuilder,
         KusamaRuntime as NodeTemplateRuntime,
         PairSigner,
-    };
+	};
+	use std::sync::Arc;
     use tempdir::TempDir;
 
     #[async_std::test]
@@ -360,7 +361,14 @@ mod tests {
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
-                SubxtClient::from_config(config, test_node::service::new_light).unwrap(),
+                SubxtClient::from_config(
+						config,
+						|config| {
+							test_node::service::new_light(config)
+								.map(|(task, rpc)| (task, Arc::new(rpc)))
+						},
+					)
+                    .expect("Error creating subxt client"),
             )
             .build()
             .await
@@ -393,7 +401,14 @@ mod tests {
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
-                SubxtClient::from_config(config, test_node::service::new_full).unwrap(),
+                SubxtClient::from_config(
+						config,
+						|config| {
+							test_node::service::new_full(config)
+								.map(|(task, rpc)| (task, Arc::new(rpc)))
+						},
+					)
+                    .expect("Error creating subxt client"),
             )
             .build()
             .await

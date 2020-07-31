@@ -18,23 +18,23 @@ log = "0.4.11"
 structopt = "0.3.15"
 parking_lot = "0.11.0"
 
-sc-cli = { version = "0.8.0-rc5", features = ["wasmtime"] }
-sp-core = "2.0.0-rc5"
-sc-executor = { version = "0.8.0-rc5", features = ["wasmtime"] }
-sc-service = { version = "0.8.0-rc5", features = ["wasmtime"] }
-sp-inherents = "2.0.0-rc5"
-sc-transaction-pool = "2.0.0-rc5"
-sp-transaction-pool = "2.0.0-rc5"
-sc-network = "0.8.0-rc5"
-sc-consensus-aura = "0.8.0-rc5"
-sp-consensus-aura = "0.8.0-rc5"
-sp-consensus = "0.8.0-rc5"
-sc-consensus = "0.8.0-rc5"
-sc-finality-grandpa = "0.8.0-rc5"
-sp-finality-grandpa = "2.0.0-rc5"
-sc-client-api = "2.0.0-rc5"
-sp-runtime = "2.0.0-rc5"
-sc-basic-authorship = "0.8.0-rc5"
+sc-cli = {git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner", features = ["wasmtime"] }
+sp-core = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-executor = {git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner", features = ["wasmtime"] }
+sc-service = {git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner", features = ["wasmtime"] }
+sp-inherents = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-network = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-consensus-aura = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sp-consensus-aura = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sp-consensus = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-consensus = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-finality-grandpa = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sp-finality-grandpa = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-client-api = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
+sc-basic-authorship = { git = "https://github.com/paritytech/substrate.git", branch = "seun-substrate-test-runner" }
 
 test-node-runtime = { version = "2.0.0-rc5", path = "runtime" }
 
