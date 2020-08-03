@@ -132,8 +132,8 @@ impl<T: Runtime> Rpc<T> {
     }
 
     /// Returns the keys with prefix with pagination support.
-	/// Up to `count` keys will be returned.
-	/// If `start_key` is passed, return next keys in storage in lexicographic order.
+    /// Up to `count` keys will be returned.
+    /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
         prefix: Option<StorageKey>,

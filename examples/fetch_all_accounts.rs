@@ -16,8 +16,8 @@
 
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
-    system::*,
     system,
+    system::*,
     ClientBuilder,
     DefaultNodeRuntime,
     PairSigner,
@@ -28,7 +28,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let _client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    // todo: impl accounts_iter in macro
     // for (key, account) in client.accounts_iter() {
     //     println!("{}: {}", key, account)
     // }
