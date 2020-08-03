@@ -228,6 +228,20 @@ impl<T: Runtime> Client<T> {
         }
     }
 
+	/// Fetch up to `count` keys for a storage map in lexicographic order.
+	///
+	/// Supports pagination by passing a value to `start_key`.
+    pub async fn fetch_keys<F: Store<T>>(
+        &self,
+        count: u32,
+        start_key: Option<StorageKey>,
+        hash: Option<T::Hash>,
+    ) -> Result<Vec<StorageKey>, Error> {
+        let prefix = <F as Store<T>>::prefix(&self.metadata)?;
+        let keys = self.rpc.storage_keys_paged(Some(prefix), count, start_key, hash).await?;
+        Ok(keys)
+    }
+
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
@@ -611,5 +625,12 @@ mod tests {
         let (client, _) = test_client().await;
         let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
         blocks.next().await;
+    }
+
+    #[async_std::test]
+    async fn test_fetch_keys() {
+        let (client, _) = test_client().await;
+        let keys = client.fetch_keys::<system::AccountStore<_>>(4, None, None).await.unwrap();
+        assert_eq!(keys.len(), 4)
     }
 }

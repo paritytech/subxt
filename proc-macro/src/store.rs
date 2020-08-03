@@ -116,6 +116,16 @@ pub fn store(s: Structure) -> TokenStream {
             const MODULE: &'static str = MODULE;
             const FIELD: &'static str = #store_name;
             type Returns = #store_ret;
+
+            fn prefix(
+                metadata: &#subxt::Metadata,
+            ) -> Result<#subxt::sp_core::storage::StorageKey, #subxt::MetadataError> {
+                Ok(metadata
+                    .module(Self::MODULE)?
+                    .storage(Self::FIELD)?
+                    .prefix())
+            }
+
             fn key(
                 &self,
                 metadata: &#subxt::Metadata,
@@ -130,7 +140,7 @@ pub fn store(s: Structure) -> TokenStream {
 
         /// Store extension trait.
         pub trait #store_trait<T: #module> {
-            /// Retrive the store element.
+            /// Retrieve the store element.
             fn #store<'a>(
                 &'a self,
                 #args
@@ -169,6 +179,16 @@ mod tests {
                 const MODULE: &'static str = MODULE;
                 const FIELD: &'static str = "Account";
                 type Returns = AccountData<T::Balance>;
+
+                fn prefix(
+                    metadata: &substrate_subxt::Metadata,
+                ) -> Result<substrate_subxt::sp_core::storage::StorageKey, substrate_subxt::MetadataError> {
+                    Ok(metadata
+                        .module(Self::MODULE)?
+                        .storage(Self::FIELD)?
+                        .prefix())
+                }
+
                 fn key(
                     &self,
                     metadata: &substrate_subxt::Metadata,
@@ -183,7 +203,7 @@ mod tests {
 
             /// Store extension trait.
             pub trait AccountStoreExt<T: Balances> {
-                /// Retrive the store element.
+                /// Retrieve the store element.
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,

@@ -131,6 +131,27 @@ impl<T: Runtime> Rpc<T> {
         Ok(data)
     }
 
+    /// Returns the keys with prefix with pagination support.
+	/// Up to `count` keys will be returned.
+	/// If `start_key` is passed, return next keys in storage in lexicographic order.
+    pub async fn storage_keys_paged(
+        &self,
+        prefix: Option<StorageKey>,
+        count: u32,
+        start_key: Option<StorageKey>,
+        hash: Option<T::Hash>,
+    ) -> Result<Vec<StorageKey>, Error> {
+        let params = Params::Array(vec![
+            to_json_value(prefix)?,
+            to_json_value(count)?,
+            to_json_value(start_key)?,
+            to_json_value(hash)?,
+        ]);
+        let data = self.client.request("state_getKeysPaged", params).await?;
+        log::debug!("state_getKeysPaged {:?}", data);
+        Ok(data)
+    }
+
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
