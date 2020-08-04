@@ -25,7 +25,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let mut iter = client.account_iter(None);
+    let mut iter = client.account_iter(None).await?;
     while let Some((key, account)) = iter.next().await? {
         println!("{:?}: {}", key, account.data.free);
     }

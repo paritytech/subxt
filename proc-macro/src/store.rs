@@ -111,6 +111,7 @@ pub fn store(s: Structure) -> TokenStream {
     let keys = filtered_fields
         .iter()
         .map(|(field, _)| quote!(&self.#field));
+    let key_iter = quote!(#subxt::KeyIter<T, #ident<#(#params),*>>);
 
     quote! {
         impl#generics #subxt::Store<T> for #ident<#(#params),*> {
@@ -152,7 +153,7 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store_iter<'a>(
                 &'a self,
                 hash: Option<T::Hash>,
-            ) -> #subxt::KeyIter<T, #ident<#(#params),*>>;
+            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#key_iter, #subxt::Error>> + Send + 'a>>;
         }
 
         impl<T: #subxt::Runtime + #module> #store_trait<T> for #subxt::Client<T> {
@@ -168,8 +169,8 @@ pub fn store(s: Structure) -> TokenStream {
             fn #store_iter<'a>(
                 &'a self,
                 hash: Option<T::Hash>,
-            ) -> #subxt::KeyIter<T, #ident<#(#params),*>> {
-                self.iter(hash)
+            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#key_iter, #subxt::Error>> + Send + 'a>> {
+                Box::pin(self.iter(hash))
             }
         }
     }
@@ -227,7 +228,7 @@ mod tests {
                 fn account_iter<'a>(
                     &'a self,
                     hash: Option<T::Hash>,
-                ) -> substrate_subxt::KeyIter<T, AccountStore<'a, T>>;
+                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::KeyIter<T, AccountStore<'a, T>>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
             impl<T: substrate_subxt::Runtime + Balances> AccountStoreExt<T> for substrate_subxt::Client<T> {
@@ -244,8 +245,8 @@ mod tests {
                 fn account_iter<'a>(
                     &'a self,
                     hash: Option<T::Hash>,
-                ) -> substrate_subxt::KeyIter<T, AccountStore<'a, T>> {
-                    self.iter(hash)
+                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::KeyIter<T, AccountStore<'a, T>>, substrate_subxt::Error>> + Send + 'a>> {
+                    Box::pin(self.iter(hash))
                 }
             }
         };

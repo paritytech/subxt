@@ -170,6 +170,19 @@ impl<T: Runtime> Rpc<T> {
             .map_err(Into::into)
     }
 
+    /// Query historical storage entries
+    pub async fn query_storage_at(
+        &self,
+        keys: &[StorageKey],
+        at: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(at)?]);
+        self.client
+            .request("state_queryStorage", params)
+            .await
+            .map_err(Into::into)
+    }
+
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
