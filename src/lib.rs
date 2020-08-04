@@ -115,6 +115,7 @@ pub struct ClientBuilder<T: Runtime> {
     _marker: std::marker::PhantomData<T>,
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
+    page_size: Option<u32>,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -124,6 +125,7 @@ impl<T: Runtime> ClientBuilder<T> {
             _marker: std::marker::PhantomData,
             url: None,
             client: None,
+            page_size: None,
         }
     }
 
@@ -136,6 +138,12 @@ impl<T: Runtime> ClientBuilder<T> {
     /// Set the substrate rpc address.
     pub fn set_url<P: Into<String>>(mut self, url: P) -> Self {
         self.url = Some(url.into());
+        self
+    }
+
+    /// Set the page size.
+    pub fn set_page_size(mut self, size: u32) -> Self {
+        self.page_size = Some(size);
         self
     }
 
@@ -164,6 +172,7 @@ impl<T: Runtime> ClientBuilder<T> {
             metadata: metadata?,
             runtime_version: runtime_version?,
             _marker: PhantomData,
+            page_size: self.page_size.unwrap_or(10),
         })
     }
 }
@@ -175,6 +184,7 @@ pub struct Client<T: Runtime> {
     metadata: Metadata,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
+    page_size: u32,
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -185,6 +195,42 @@ impl<T: Runtime> Clone for Client<T> {
             metadata: self.metadata.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
+            page_size: self.page_size,
+        }
+    }
+}
+
+/// Iterates over key value pairs in a map.
+pub struct KeyIter<T: Runtime, F: Store<T>> {
+    client: Client<T>,
+    _marker: PhantomData<F>,
+    count: u32,
+    hash: Option<T::Hash>,
+    start_key: Option<StorageKey>,
+    keys: Vec<StorageKey>,
+}
+
+impl<T: Runtime, F: Store<T>> KeyIter<T, F> {
+    /// Returns the next key value pair from a map.
+    pub async fn next(&mut self) -> Result<Option<(StorageKey, F::Returns)>, Error> {
+        loop {
+            if let Some(key) = self.keys.pop() {
+                if let Some(value) = self.client.rpc.storage(&key, self.hash).await? {
+                    return Ok(Some((key, Decode::decode(&mut &value.0[..])?)))
+                }
+            } else {
+                self.keys = self
+                    .client
+                    .fetch_keys::<F>(self.count, self.start_key.take(), self.hash)
+                    .await?
+                    .into_iter()
+                    .rev()
+                    .collect();
+                if self.keys.is_empty() {
+                    return Ok(None)
+                }
+                self.start_key = self.keys.first().cloned();
+            }
         }
     }
 }
@@ -200,31 +246,42 @@ impl<T: Runtime> Client<T> {
         &self.metadata
     }
 
+    /// Fetch a StorageKey an optional storage key.
+    pub async fn fetch<F: Store<T>>(
+        &self,
+        store: &F,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<F::Returns>, Error> {
+        let key = store.key(&self.metadata)?;
+        if let Some(data) = self.rpc.storage(&key, hash).await? {
+            Ok(Some(Decode::decode(&mut &data.0[..])?))
+        } else {
+            Ok(None)
+        }
+    }
+
     /// Fetch a StorageKey with default value.
     pub async fn fetch_or_default<F: Store<T>>(
         &self,
-        store: F,
+        store: &F,
         hash: Option<T::Hash>,
     ) -> Result<F::Returns, Error> {
-        let key = store.key(&self.metadata)?;
-        if let Some(data) = self.rpc.storage(key, hash).await? {
-            Ok(Decode::decode(&mut &data.0[..])?)
+        if let Some(data) = self.fetch(store, hash).await? {
+            Ok(data)
         } else {
             Ok(store.default(&self.metadata)?)
         }
     }
 
-    /// Fetch a StorageKey an optional storage key.
-    pub async fn fetch<F: Store<T>>(
-        &self,
-        store: F,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<F::Returns>, Error> {
-        let key = store.key(&self.metadata)?;
-        if let Some(data) = self.rpc.storage(key, hash).await? {
-            Ok(Some(Decode::decode(&mut &data.0[..])?))
-        } else {
-            Ok(None)
+    /// Returns an iterator of key value pairs.
+    pub fn iter<F: Store<T>>(&self, hash: Option<T::Hash>) -> KeyIter<T, F> {
+        KeyIter {
+            client: self.clone(),
+            hash,
+            count: self.page_size,
+            start_key: None,
+            keys: Default::default(),
+            _marker: PhantomData,
         }
     }
 

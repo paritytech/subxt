@@ -27,9 +27,10 @@ use substrate_subxt::{
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let _client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    // for (key, account) in client.accounts_iter() {
-    //     println!("{}: {}", key, account)
-    // }
+    let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
+    let mut iter = client.accounts_iter();
+    while let Some((key, account)) = iter.next().await? {
+        println!("{}: {}", key, account);
+    }
     Ok(())
 }

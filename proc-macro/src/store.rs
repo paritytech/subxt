@@ -155,7 +155,7 @@ pub fn store(s: Structure) -> TokenStream {
                 hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.#fetch(#build_struct, hash))
+                Box::pin(async move { self.#fetch(&#build_struct, hash).await })
             }
         }
     }

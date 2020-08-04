@@ -122,7 +122,7 @@ impl<T: Runtime> Rpc<T> {
     /// Fetch a storage key
     pub async fn storage(
         &self,
-        key: StorageKey,
+        key: &StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
         let params = Params::Array(vec![to_json_value(key)?, to_json_value(hash)?]);
