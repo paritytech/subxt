@@ -573,6 +573,7 @@ mod tests {
                 SubxtClient::from_config(config, test_node::service::new_full)
                     .expect("Error creating subxt client"),
             )
+            .set_page_size(2)
             .build()
             .await
             .expect("Error creating client");
@@ -695,5 +696,16 @@ mod tests {
             .await
             .unwrap();
         assert_eq!(keys.len(), 4)
+    }
+
+    #[async_std::test]
+    async fn test_iter() {
+        let (client, _) = test_client().await;
+        let mut iter = client.iter::<system::AccountStore<_>>(None);
+        let mut i = 0;
+        while let Some(_) = iter.next().await.unwrap() {
+            i += 1;
+        }
+        assert_eq!(i, 4);
     }
 }

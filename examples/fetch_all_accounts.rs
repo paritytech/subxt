@@ -14,13 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use sp_keyring::AccountKeyring;
 use substrate_subxt::{
-    system,
-    system::*,
+    system::AccountStoreExt,
     ClientBuilder,
     DefaultNodeRuntime,
-    PairSigner,
 };
 
 #[async_std::main]
@@ -28,9 +25,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let mut iter = client.accounts_iter();
+    let mut iter = client.account_iter(None);
     while let Some((key, account)) = iter.next().await? {
-        println!("{}: {}", key, account);
+        println!("{:?}: {}", key, account.data.free);
     }
     Ok(())
 }

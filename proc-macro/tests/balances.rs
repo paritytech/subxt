@@ -89,8 +89,8 @@ subxt_test!({
     account: Alice,
     step: {
         state: {
-            alice: AccountStore { account_id: &alice },
-            bob: AccountStore { account_id: &bob },
+            alice: &AccountStore { account_id: &alice },
+            bob: &AccountStore { account_id: &bob },
         },
         call: TransferCall {
             to: &bob,
