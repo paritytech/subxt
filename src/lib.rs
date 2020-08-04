@@ -258,7 +258,7 @@ impl<T: Runtime> Client<T> {
         &self.metadata
     }
 
-    /// Fetch a StorageKey an optional storage key.
+    /// Fetch a StorageKey with an optional block hash.
     pub async fn fetch<F: Store<T>>(
         &self,
         store: &F,
@@ -272,7 +272,7 @@ impl<T: Runtime> Client<T> {
         }
     }
 
-    /// Fetch a StorageKey with default value.
+    /// Fetch a StorageKey that has a default value with an optional block hash.
     pub async fn fetch_or_default<F: Store<T>>(
         &self,
         store: &F,
