@@ -286,7 +286,10 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Returns an iterator of key value pairs.
-    pub async fn iter<F: Store<T>>(&self, hash: Option<T::Hash>) -> Result<KeyIter<T, F>, Error> {
+    pub async fn iter<F: Store<T>>(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> Result<KeyIter<T, F>, Error> {
         let hash = if let Some(hash) = hash {
             hash
         } else {
