@@ -24,7 +24,10 @@ use super::{
 };
 use crate::runtimes::Runtime;
 use codec::Encode;
-use sp_core::{DeriveJunction, Pair};
+use sp_core::{
+    DeriveJunction,
+    Pair,
+};
 use sp_runtime::traits::{
     IdentifyAccount,
     SignedExtension,
@@ -64,13 +67,14 @@ pub trait Signer<T: Runtime>: Send + Sync {
 
 pub trait DerivableSigner<T: Runtime>: Signer<T> {
     /// Derive signer.
-    fn derive<I: Iterator<Item = DeriveJunction>>(&self, iter: I) -> Box<dyn DerivedSigner<T>>;
+    fn derive<I: Iterator<Item = DeriveJunction>>(
+        &self,
+        iter: I,
+    ) -> Box<dyn DerivedSigner<T>>;
 }
 
 pub trait DerivedSigner<T: Runtime>: Signer<T> {
     /// Signs an arbitrary payload using a key derived with the soft junction.
-    ///
-    /// This allows authenticating the sig
     fn sign(
         &self,
         payload: &[u8],
@@ -93,7 +97,8 @@ where
     /// Creates a new `Signer` from a `Pair`.
     pub fn new(signer: P) -> Self {
         let public = <T::Signature as Verify>::Signer::from(signer.public());
-        let account_id = <T::Signature as Verify>::Signer::from(signer.public()).into_account();
+        let account_id =
+            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
         Self {
             signer,
             public,
@@ -158,8 +163,13 @@ where
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId> + Send + Sync,
     P::Signature: Into<T::Signature>,
 {
-    fn derive<I: Iterator<Item = DeriveJunction>>(&self, iter: I) -> Box<dyn DerivedSigner<T>> {
-        Box::new(PairSigner::new(self.signer.derive(iter, None).map_err(|_| "").unwrap().0))
+    fn derive<I: Iterator<Item = DeriveJunction>>(
+        &self,
+        iter: I,
+    ) -> Box<dyn DerivedSigner<T>> {
+        Box::new(PairSigner::new(
+            self.signer.derive(iter, None).map_err(|_| "").unwrap().0,
+        ))
     }
 }
 
