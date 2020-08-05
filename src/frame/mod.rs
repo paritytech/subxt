@@ -44,6 +44,8 @@ pub trait Store<T>: Encode {
     const FIELD: &'static str;
     /// Return type.
     type Returns: Decode;
+    /// Returns the key prefix for storage maps
+    fn prefix(metadata: &Metadata) -> Result<StorageKey, MetadataError>;
     /// Returns the `StorageKey`.
     fn key(&self, metadata: &Metadata) -> Result<StorageKey, MetadataError>;
     /// Returns the default value.

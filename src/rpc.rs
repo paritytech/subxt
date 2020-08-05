@@ -122,12 +122,33 @@ impl<T: Runtime> Rpc<T> {
     /// Fetch a storage key
     pub async fn storage(
         &self,
-        key: StorageKey,
+        key: &StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
         let params = Params::Array(vec![to_json_value(key)?, to_json_value(hash)?]);
         let data = self.client.request("state_getStorage", params).await?;
         log::debug!("state_getStorage {:?}", data);
+        Ok(data)
+    }
+
+    /// Returns the keys with prefix with pagination support.
+    /// Up to `count` keys will be returned.
+    /// If `start_key` is passed, return next keys in storage in lexicographic order.
+    pub async fn storage_keys_paged(
+        &self,
+        prefix: Option<StorageKey>,
+        count: u32,
+        start_key: Option<StorageKey>,
+        hash: Option<T::Hash>,
+    ) -> Result<Vec<StorageKey>, Error> {
+        let params = Params::Array(vec![
+            to_json_value(prefix)?,
+            to_json_value(count)?,
+            to_json_value(start_key)?,
+            to_json_value(hash)?,
+        ]);
+        let data = self.client.request("state_getKeysPaged", params).await?;
+        log::debug!("state_getKeysPaged {:?}", data);
         Ok(data)
     }
 
@@ -143,6 +164,19 @@ impl<T: Runtime> Rpc<T> {
             to_json_value(from)?,
             to_json_value(to)?,
         ]);
+        self.client
+            .request("state_queryStorage", params)
+            .await
+            .map_err(Into::into)
+    }
+
+    /// Query historical storage entries
+    pub async fn query_storage_at(
+        &self,
+        keys: &[StorageKey],
+        at: Option<T::Hash>,
+    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+        let params = Params::Array(vec![to_json_value(keys)?, to_json_value(at)?]);
         self.client
             .request("state_queryStorage", params)
             .await
