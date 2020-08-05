@@ -43,11 +43,20 @@ pub trait Signer<T: Runtime> {
     /// Optionally returns a nonce.
     fn nonce(&self) -> Option<T::Index>;
 
+    /// Sets the nonce.
+    fn set_nonce(&mut self, nonce: T::Index);
+
+    /// Increments the nonce.
+    fn increment_nonce(&mut self);
+
+    /// Signs an arbitrary payload.
+    fn sign(&self, payload: &[u8]) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>>;
+
     /// Takes an unsigned extrinsic and returns a signed extrinsic.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
-    fn sign(
+    fn sign_extrinsic(
         &self,
         extrinsic: SignedPayload<T>,
     ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>;
@@ -63,7 +72,6 @@ pub struct PairSigner<T: Runtime, P: Pair> {
 impl<T, P> PairSigner<T, P>
 where
     T: Runtime,
-    T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P: Pair,
@@ -77,21 +85,6 @@ where
             nonce: None,
             signer,
         }
-    }
-
-    /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: T::Index) {
-        self.nonce = Some(nonce);
-    }
-
-    /// Increment the nonce.
-    pub fn increment_nonce(&mut self) {
-        self.nonce = self.nonce.map(|nonce| nonce + 1.into());
-    }
-
-    /// Returns the signer.
-    pub fn signer(&self) -> &P {
-        &self.signer
     }
 }
 
@@ -112,7 +105,20 @@ where
         self.nonce
     }
 
-    fn sign(
+    fn set_nonce(&mut self, nonce: T::Index) {
+        self.nonce = Some(nonce);
+    }
+
+    fn increment_nonce(&mut self) {
+        self.nonce = self.nonce.map(|nonce| nonce + 1.into());
+    }
+
+    fn sign(&self, payload: &[u8]) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>> {
+        let signature = self.signer.sign(payload).into();
+        Box::pin(async move { Ok(signature) })
+    }
+
+    fn sign_extrinsic(
         &self,
         extrinsic: SignedPayload<T>,
     ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>
