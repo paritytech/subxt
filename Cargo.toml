@@ -53,12 +53,35 @@ sp-authority-discovery = "2.0.0-rc4"
 pallet-staking = "2.0.0-rc4"
 
 [dev-dependencies]
-async-std = { version = "=1.5.0", features = ["attributes"] }
+async-std = { version = "1.5.0", features = ["attributes"] }
 env_logger = "0.7.1"
 wabt = "0.9.2"
+wabt-sys = "=0.7.1" # pinned because 0.7.2 fails to compile
 frame-system = { version = "2.0.0-rc4", package = "frame-system" }
 pallet-balances = { version = "2.0.0-rc4", package = "pallet-balances" }
 sp-keyring = { version = "2.0.0-rc4", package = "sp-keyring" }
 substrate-subxt-client = { version = "0.2.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
+
+[patch.crates-io]
+frame-metadata = { git = "https://github.com/paritytech/substrate", package = "frame-metadata" }
+frame-support = { git = "https://github.com/paritytech/substrate", package = "frame-support" }
+sp-runtime = { git = "https://github.com/paritytech/substrate", package = "sp-runtime" }
+sp-version = { git = "https://github.com/paritytech/substrate", package = "sp-version" }
+pallet-indices = { git = "https://github.com/paritytech/substrate", package = "pallet-indices" }
+sp-rpc = { git = "https://github.com/paritytech/substrate", package = "sp-rpc" }
+sp-core = { git = "https://github.com/paritytech/substrate", package = "sp-core" }
+sc-rpc-api = { git = "https://github.com/paritytech/substrate", package = "sc-rpc-api" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate", package = "sp-transaction-pool" }
+sp-std = { git = "https://github.com/paritytech/substrate" }
+application-crypto = { git = "https://github.com/paritytech/substrate", package = "sp-application-crypto", default-features = false }
+sp-finality-grandpa = { git = "https://github.com/paritytech/substrate" }
+sp-consensus-babe = { git = "https://github.com/paritytech/substrate" }
+pallet-im-online = { git = "https://github.com/paritytech/substrate" }
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate" }
+pallet-staking = { git = "https://github.com/paritytech/substrate" }
+sc-service = { git = "https://github.com/paritytech/substrate" }
+sc-cli = { git = "https://github.com/paritytech/substrate" }
+sc-transaction-pool = { git = "https://github.com/paritytech/substrate" }
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee" }

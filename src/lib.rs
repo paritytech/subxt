@@ -60,17 +60,16 @@ use sp_core::{
     Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
-use sp_version::RuntimeVersion;
+pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
 mod error;
 mod events;
-mod extra;
+pub mod extrinsic;
 mod frame;
 mod metadata;
 mod rpc;
 mod runtimes;
-mod signer;
 mod subscription;
 
 pub use crate::{
@@ -79,7 +78,12 @@ pub use crate::{
         EventsDecoder,
         RawEvent,
     },
-    extra::*,
+    extrinsic::{
+        PairSigner,
+        SignedExtra,
+        Signer,
+        UncheckedExtrinsic,
+    },
     frame::*,
     metadata::{
         Metadata,
@@ -90,7 +94,6 @@ pub use crate::{
         ExtrinsicSuccess,
     },
     runtimes::*,
-    signer::*,
     subscription::*,
     substrate_subxt_proc_macro::*,
 };
@@ -311,49 +314,13 @@ impl<T: Runtime> Client<T> {
             .and_then(|module| module.call(C::FUNCTION, call))?)
     }
 
-    /// Creates an payload for an extrinsic.
-    ///
-    /// If `nonce` is `None` the nonce will be fetched from the chain.
-    pub async fn create_payload<C: Call<T>>(
-        &self,
-        call: C,
-        account_id: &<T as System>::AccountId,
-        nonce: Option<T::Index>,
-    ) -> Result<SignedPayload<T>, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let account_nonce = if let Some(nonce) = nonce {
-            nonce
-        } else {
-            self.account(account_id, None).await?.nonce
-        };
-        let spec_version = self.runtime_version.spec_version;
-        let tx_version = self.runtime_version.transaction_version;
-        let genesis_hash = self.genesis_hash;
-        let call = self.encode(call)?;
-        let extra: T::Extra =
-            T::Extra::new(spec_version, tx_version, account_nonce, genesis_hash);
-        let raw_payload = SignedPayload::<T>::new(call, extra.extra())?;
-        Ok(raw_payload)
-    }
-
     /// Creates an unsigned extrinsic.
-    pub async fn create_unsigned<C: Call<T> + Send + Sync>(
+    pub fn create_unsigned<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        account_id: &<T as System>::AccountId,
-        nonce: Option<T::Index>,
-    ) -> Result<UncheckedExtrinsic<T>, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let payload = self.create_payload(call, account_id, nonce).await?;
-        let (call, _, _) = payload.deconstruct();
-        let unsigned = UncheckedExtrinsic::<T>::new_unsigned(call);
-        Ok(unsigned)
+    ) -> Result<UncheckedExtrinsic<T>, Error> {
+        let call = self.encode(call)?;
+        Ok(extrinsic::create_unsigned::<T>(call))
     }
 
     /// Creates a signed extrinsic.
@@ -366,10 +333,20 @@ impl<T: Runtime> Client<T> {
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
-        let payload = self
-            .create_payload(call, signer.account_id(), signer.nonce())
-            .await?;
-        let signed = signer.sign(payload).await?;
+        let account_nonce = if let Some(nonce) = signer.nonce() {
+            nonce
+        } else {
+            self.account(signer.account_id(), None).await?.nonce
+        };
+        let call = self.encode(call)?;
+        let signed = extrinsic::create_signed(
+            &self.runtime_version,
+            self.genesis_hash,
+            account_nonce,
+            call,
+            signer,
+        )
+        .await?;
         Ok(signed)
     }
 
@@ -479,19 +456,11 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use codec::Encode;
-    use sp_core::{
-        storage::{
-            well_known_keys,
-            StorageKey,
-        },
-        Pair,
+    use sp_core::storage::{
+        well_known_keys,
+        StorageKey,
     };
-    use sp_keyring::{
-        AccountKeyring,
-        Ed25519Keyring,
-    };
-    use sp_runtime::MultiSignature;
+    use sp_keyring::AccountKeyring;
     use substrate_subxt_client::{
         DatabaseConfig,
         KeystoreConfig,
@@ -639,48 +608,5 @@ mod tests {
         let (client, _) = test_client().await;
         let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
         blocks.next().await;
-    }
-
-    #[async_std::test]
-    async fn test_create_raw_payload() {
-        let signer_pair = Ed25519Keyring::Alice.pair();
-        let signer_account_id = Ed25519Keyring::Alice.to_account_id();
-        let dest = AccountKeyring::Bob.to_account_id().into();
-
-        let (client, _) = test_client().await;
-
-        // create raw payload with AccoundId and sign it
-        let raw_payload = client
-            .create_payload(
-                balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000,
-                },
-                &signer_account_id,
-                None,
-            )
-            .await
-            .unwrap();
-        let raw_signature = signer_pair.sign(raw_payload.encode().as_slice());
-        let raw_multisig = MultiSignature::from(raw_signature);
-
-        // create signature with Xtbuilder
-        let signer = PairSigner::new(Ed25519Keyring::Alice.pair());
-        let xt_multi_sig = client
-            .create_signed(
-                balances::TransferCall {
-                    to: &dest,
-                    amount: 10_000,
-                },
-                &signer,
-            )
-            .await
-            .unwrap()
-            .signature
-            .unwrap()
-            .1;
-
-        // compare signatures
-        assert_eq!(raw_multisig, xt_multi_sig);
     }
 }

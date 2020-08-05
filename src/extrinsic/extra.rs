@@ -28,10 +28,16 @@ use sp_runtime::{
     transaction_validity::TransactionValidityError,
 };
 
-use crate::frame::{
-    balances::Balances,
-    system::System,
+use crate::{
+    frame::{
+        balances::Balances,
+        system::System,
+    },
+    runtimes::Runtime,
 };
+
+/// Extra type.
+pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `frame_system::Trait`
