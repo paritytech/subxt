@@ -24,7 +24,7 @@ use super::{
 };
 use crate::runtimes::Runtime;
 use codec::Encode;
-use sp_core::Pair;
+use sp_core::{DeriveJunction, Pair};
 use sp_runtime::traits::{
     IdentifyAccount,
     SignedExtension,
@@ -37,6 +37,9 @@ use std::{
 
 /// Extrinsic signer.
 pub trait Signer<T: Runtime>: Send + Sync {
+    /// Returns the public key.
+    fn public(&self) -> &<T::Signature as Verify>::Signer;
+
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -49,12 +52,6 @@ pub trait Signer<T: Runtime>: Send + Sync {
     /// Increments the nonce.
     fn increment_nonce(&mut self);
 
-    /// Signs an arbitrary payload.
-    fn sign(
-        &self,
-        payload: &[u8],
-    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>>;
-
     /// Takes an unsigned extrinsic and returns a signed extrinsic.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
@@ -65,41 +62,60 @@ pub trait Signer<T: Runtime>: Send + Sync {
     ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>;
 }
 
+pub trait DerivableSigner<T: Runtime>: Signer<T> {
+    /// Derive signer.
+    fn derive<I: Iterator<Item = DeriveJunction>>(&self, iter: I) -> Box<dyn DerivedSigner<T>>;
+}
+
+pub trait DerivedSigner<T: Runtime>: Signer<T> {
+    /// Signs an arbitrary payload using a key derived with the soft junction.
+    ///
+    /// This allows authenticating the sig
+    fn sign(
+        &self,
+        payload: &[u8],
+    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>>;
+}
+
 /// Extrinsic signer using a private key.
 pub struct PairSigner<T: Runtime, P: Pair> {
     account_id: T::AccountId,
+    public: <T::Signature as Verify>::Signer,
     nonce: Option<T::Index>,
     signer: P,
 }
 
-impl<T, P> PairSigner<T, P>
+impl<T: Runtime, P: Pair> PairSigner<T, P>
 where
-    T: Runtime,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    P: Pair,
 {
     /// Creates a new `Signer` from a `Pair`.
     pub fn new(signer: P) -> Self {
-        let account_id =
-            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
+        let public = <T::Signature as Verify>::Signer::from(signer.public());
+        let account_id = <T::Signature as Verify>::Signer::from(signer.public()).into_account();
         Self {
+            signer,
+            public,
             account_id,
             nonce: None,
-            signer,
         }
     }
 }
 
-impl<T, P> Signer<T> for PairSigner<T, P>
+impl<T: Runtime, P: Pair> Signer<T> for PairSigner<T, P>
 where
-    T: Runtime,
-    T::AccountId: Into<T::Address> + 'static,
+    T::AccountId: Into<T::Address>,
     <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
         Send + Sync,
-    P: Pair + 'static,
-    P::Signature: Into<T::Signature> + 'static,
+    <T::Signature as Verify>::Signer:
+        From<P::Public> + IdentifyAccount<AccountId = T::AccountId> + Send + Sync,
+    P::Signature: Into<T::Signature>,
 {
+    fn public(&self) -> &<T::Signature as Verify>::Signer {
+        &self.public
+    }
+
     fn account_id(&self) -> &T::AccountId {
         &self.account_id
     }
@@ -116,14 +132,6 @@ where
         self.nonce = self.nonce.map(|nonce| nonce + 1.into());
     }
 
-    fn sign(
-        &self,
-        payload: &[u8],
-    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>> {
-        let signature = self.signer.sign(payload).into();
-        Box::pin(async move { Ok(signature) })
-    }
-
     fn sign_extrinsic(
         &self,
         extrinsic: SignedPayload<T>,
@@ -138,5 +146,37 @@ where
             extra,
         );
         Box::pin(async move { Ok(extrinsic) })
+    }
+}
+
+impl<T: Runtime, P: Pair> DerivableSigner<T> for PairSigner<T, P>
+where
+    T::AccountId: Into<T::Address>,
+    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        Send + Sync,
+    <T::Signature as Verify>::Signer:
+        From<P::Public> + IdentifyAccount<AccountId = T::AccountId> + Send + Sync,
+    P::Signature: Into<T::Signature>,
+{
+    fn derive<I: Iterator<Item = DeriveJunction>>(&self, iter: I) -> Box<dyn DerivedSigner<T>> {
+        Box::new(PairSigner::new(self.signer.derive(iter, None).map_err(|_| "").unwrap().0))
+    }
+}
+
+impl<T: Runtime, P: Pair> DerivedSigner<T> for PairSigner<T, P>
+where
+    T::AccountId: Into<T::Address>,
+    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        Send + Sync,
+    <T::Signature as Verify>::Signer:
+        From<P::Public> + IdentifyAccount<AccountId = T::AccountId> + Send + Sync,
+    P::Signature: Into<T::Signature>,
+{
+    fn sign(
+        &self,
+        payload: &[u8],
+    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>> {
+        let signature = self.signer.sign(payload).into();
+        Box::pin(async move { Ok(signature) })
     }
 }
