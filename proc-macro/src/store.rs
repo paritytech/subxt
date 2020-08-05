@@ -73,6 +73,7 @@ pub fn store(s: Structure) -> TokenStream {
     let module = utils::module_name(generics);
     let store_name = utils::ident_to_name(ident, "Store").to_camel_case();
     let store = format_ident!("{}", store_name.to_snake_case());
+    let store_iter = format_ident!("{}_iter", store_name.to_snake_case());
     let store_trait = format_ident!("{}StoreExt", store_name);
     let bindings = utils::bindings(&s);
     let fields = utils::fields(&bindings);
@@ -110,6 +111,7 @@ pub fn store(s: Structure) -> TokenStream {
     let keys = filtered_fields
         .iter()
         .map(|(field, _)| quote!(&self.#field));
+    let key_iter = quote!(#subxt::KeyIter<T, #ident<#(#params),*>>);
 
     quote! {
         impl#generics #subxt::Store<T> for #ident<#(#params),*> {
@@ -139,13 +141,19 @@ pub fn store(s: Structure) -> TokenStream {
         }
 
         /// Store extension trait.
-        pub trait #store_trait<T: #module> {
+        pub trait #store_trait<T: #subxt::Runtime + #module> {
             /// Retrieve the store element.
             fn #store<'a>(
                 &'a self,
                 #args
                 hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>>;
+
+            /// Iterate over the store element.
+            fn #store_iter<'a>(
+                &'a self,
+                hash: Option<T::Hash>,
+            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#key_iter, #subxt::Error>> + Send + 'a>>;
         }
 
         impl<T: #subxt::Runtime + #module> #store_trait<T> for #subxt::Client<T> {
@@ -155,7 +163,14 @@ pub fn store(s: Structure) -> TokenStream {
                 hash: Option<T::Hash>,
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#ret, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.#fetch(#build_struct, hash))
+                Box::pin(async move { self.#fetch(&#build_struct, hash).await })
+            }
+
+            fn #store_iter<'a>(
+                &'a self,
+                hash: Option<T::Hash>,
+            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#key_iter, #subxt::Error>> + Send + 'a>> {
+                Box::pin(self.iter(hash))
             }
         }
     }
@@ -202,13 +217,18 @@ mod tests {
             }
 
             /// Store extension trait.
-            pub trait AccountStoreExt<T: Balances> {
+            pub trait AccountStoreExt<T: substrate_subxt::Runtime + Balances> {
                 /// Retrieve the store element.
                 fn account<'a>(
                     &'a self,
                     account_id: &'a <T as System>::AccountId,
                     hash: Option<T::Hash>,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>;
+                /// Iterate over the store element.
+                fn account_iter<'a>(
+                    &'a self,
+                    hash: Option<T::Hash>,
+                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::KeyIter<T, AccountStore<'a, T>>, substrate_subxt::Error>> + Send + 'a>>;
             }
 
             impl<T: substrate_subxt::Runtime + Balances> AccountStoreExt<T> for substrate_subxt::Client<T> {
@@ -219,7 +239,14 @@ mod tests {
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<AccountData<T::Balance>, substrate_subxt::Error>> + Send + 'a>>
                 {
                     let _ = core::marker::PhantomData::<T>;
-                    Box::pin(self.fetch_or_default(AccountStore { account_id, }, hash))
+                    Box::pin(async move { self.fetch_or_default(&AccountStore { account_id, }, hash).await })
+                }
+
+                fn account_iter<'a>(
+                    &'a self,
+                    hash: Option<T::Hash>,
+                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::KeyIter<T, AccountStore<'a, T>>, substrate_subxt::Error>> + Send + 'a>> {
+                    Box::pin(self.iter(hash))
                 }
             }
         };
