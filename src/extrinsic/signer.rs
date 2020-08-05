@@ -50,7 +50,10 @@ pub trait Signer<T: Runtime> {
     fn increment_nonce(&mut self);
 
     /// Signs an arbitrary payload.
-    fn sign(&self, payload: &[u8]) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>>;
+    fn sign(
+        &self,
+        payload: &[u8],
+    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>>;
 
     /// Takes an unsigned extrinsic and returns a signed extrinsic.
     ///
@@ -113,7 +116,10 @@ where
         self.nonce = self.nonce.map(|nonce| nonce + 1.into());
     }
 
-    fn sign(&self, payload: &[u8]) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>> {
+    fn sign(
+        &self,
+        payload: &[u8],
+    ) -> Pin<Box<dyn Future<Output = Result<T::Signature, String>>>> {
         let signature = self.signer.sign(payload).into();
         Box::pin(async move { Ok(signature) })
     }
