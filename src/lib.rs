@@ -423,7 +423,7 @@ impl<T: Runtime> Client<T> {
     pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &dyn Signer<T>,
     ) -> Result<UncheckedExtrinsic<T>, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
@@ -477,7 +477,7 @@ impl<T: Runtime> Client<T> {
     pub async fn submit<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &dyn Signer<T>,
     ) -> Result<T::Hash, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
@@ -491,7 +491,7 @@ impl<T: Runtime> Client<T> {
     pub async fn watch<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
+        signer: &dyn Signer<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:

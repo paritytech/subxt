@@ -36,7 +36,7 @@ use std::{
 };
 
 /// Extrinsic signer.
-pub trait Signer<T: Runtime> {
+pub trait Signer<T: Runtime>: Send + Sync {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 

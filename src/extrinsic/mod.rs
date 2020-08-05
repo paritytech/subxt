@@ -58,7 +58,7 @@ pub async fn create_signed<T>(
     genesis_hash: T::Hash,
     nonce: T::Index,
     call: Encoded,
-    signer: &(dyn Signer<T> + Send + Sync),
+    signer: &dyn Signer<T>,
 ) -> Result<UncheckedExtrinsic<T>, Error>
 where
     T: Runtime,

@@ -63,14 +63,14 @@ pub fn call(s: Structure) -> TokenStream {
             /// Create and submit an extrinsic.
             fn #call<'a>(
                 &'a self,
-                signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
+                signer: &'a dyn #subxt::Signer<T>,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, #subxt::Error>> + Send + 'a>>;
 
             /// Create, submit and watch an extrinsic.
             fn #call_and_watch<'a>(
                 &'a self,
-                signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
+                signer: &'a dyn #subxt::Signer<T>,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error>> + Send + 'a>>;
         }
@@ -81,7 +81,7 @@ pub fn call(s: Structure) -> TokenStream {
         {
             fn #call<'a>(
                 &'a self,
-                signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
+                signer: &'a dyn #subxt::Signer<T>,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
@@ -90,7 +90,7 @@ pub fn call(s: Structure) -> TokenStream {
 
             fn #call_and_watch<'a>(
                 &'a self,
-                signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
+                signer: &'a dyn #subxt::Signer<T>,
                 #args
             ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error>> + Send + 'a>> {
                 let #marker = core::marker::PhantomData::<T>;
@@ -130,7 +130,7 @@ mod tests {
                 /// Create and submit an extrinsic.
                 fn transfer<'a>(
                     &'a self,
-                    signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
+                    signer: &'a dyn substrate_subxt::Signer<T>,
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, substrate_subxt::Error>> + Send + 'a>>;
@@ -138,7 +138,7 @@ mod tests {
                 /// Create, submit and watch an extrinsic.
                 fn transfer_and_watch<'a>(
                     &'a self,
-                    signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
+                    signer: &'a dyn substrate_subxt::Signer<T>,
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>> + Send + 'a>>;
@@ -150,7 +150,7 @@ mod tests {
             {
                 fn transfer<'a>(
                     &'a self,
-                    signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
+                    signer: &'a dyn substrate_subxt::Signer<T>,
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, substrate_subxt::Error>> + Send + 'a>> {
@@ -160,7 +160,7 @@ mod tests {
 
                 fn transfer_and_watch<'a>(
                     &'a self,
-                    signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
+                    signer: &'a dyn substrate_subxt::Signer<T>,
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
                 ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>> + Send + 'a>> {
