@@ -63,14 +63,11 @@ pub trait Signer<T: Runtime>: Send + Sync {
         &self,
         extrinsic: SignedPayload<T>,
     ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send + Sync>>;
-}
 
-pub trait DerivableSigner<T: Runtime>: Signer<T> {
     /// Derive signer.
-    fn derive<I: Iterator<Item = DeriveJunction>>(
-        &self,
-        iter: I,
-    ) -> Box<dyn DerivedSigner<T>>;
+    fn derive(&self, junction: DeriveJunction) -> Self
+    where
+        Self: Sized;
 }
 
 pub trait DerivedSigner<T: Runtime>: Signer<T> {
@@ -152,24 +149,15 @@ where
         );
         Box::pin(async move { Ok(extrinsic) })
     }
-}
 
-impl<T: Runtime, P: Pair> DerivableSigner<T> for PairSigner<T, P>
-where
-    T::AccountId: Into<T::Address>,
-    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-        Send + Sync,
-    <T::Signature as Verify>::Signer:
-        From<P::Public> + IdentifyAccount<AccountId = T::AccountId> + Send + Sync,
-    P::Signature: Into<T::Signature>,
-{
-    fn derive<I: Iterator<Item = DeriveJunction>>(
-        &self,
-        iter: I,
-    ) -> Box<dyn DerivedSigner<T>> {
-        Box::new(PairSigner::new(
-            self.signer.derive(iter, None).map_err(|_| "").unwrap().0,
-        ))
+    fn derive(&self, junction: DeriveJunction) -> Self {
+        Self::new(
+            self.signer
+                .derive(std::iter::once(junction), None)
+                .map_err(|_| "")
+                .unwrap()
+                .0,
+        )
     }
 }
 
