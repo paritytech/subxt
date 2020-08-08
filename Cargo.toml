@@ -24,7 +24,7 @@ client = ["substrate-subxt-client"]
 [dependencies]
 log = "0.4.11"
 thiserror = "1.0.20"
-futures = { version = "0.3.5", package = "futures" }
+futures = "0.3.5"
 jsonrpsee = { version = "0.1.0", features = ["ws"] }
 num-traits = { version = "0.2.12", default-features = false }
 serde = { version = "1.0.114", features = ["derive"] }
@@ -38,24 +38,14 @@ sp-runtime = { version = "2.0.0-rc5", package = "sp-runtime" }
 sp-version = { version = "2.0.0-rc5", package = "sp-version" }
 pallet-indices = { version = "2.0.0-rc5", package = "pallet-indices" }
 hex = "0.4.2"
-<<<<<<< HEAD
-sp-rpc = { version = "2.0.0-rc4", package = "sp-rpc" }
-sp-core = { version = "2.0.0-rc4", package = "sp-core" }
-sc-rpc-api = { version = "0.8.0-rc4", package = "sc-rpc-api" }
-sp-transaction-pool = { version = "2.0.0-rc4", package = "sp-transaction-pool" }
-substrate-subxt-client = { version = "0.2.0", path = "client", optional = true }
-substrate-subxt-proc-macro = { version = "0.9.0", path = "proc-macro" }
-sp-std = "2.0.0-rc4"
-application-crypto = { version = "2.0.0-rc4", package = "sp-application-crypto", default-features = false }
-sp-finality-grandpa = "2.0.0-rc4"
-sp-consensus-babe = "0.8.0-rc4"
-pallet-im-online = "2.0.0-rc4"
-sp-authority-discovery = "2.0.0-rc4"
-pallet-staking = "2.0.0-rc4"
+sp-std = "2.0.0-rc5"
+application-crypto = { version = "2.0.0-rc5", package = "sp-application-crypto", default-features = false }
+sp-finality-grandpa = "2.0.0-rc5"
+sp-consensus-babe = "0.8.0-rc5"
+pallet-im-online = "2.0.0-rc5"
+sp-authority-discovery = "2.0.0-rc5"
+pallet-staking = "2.0.0-rc5"
 
-[dev-dependencies]
-async-std = { version = "1.5.0", features = ["attributes"] }
-=======
 sp-rpc = { version = "2.0.0-rc5", package = "sp-rpc" }
 sp-core = { version = "2.0.0-rc5", package = "sp-core" }
 sc-rpc-api = { version = "0.8.0-rc5", package = "sc-rpc-api" }
@@ -65,7 +55,6 @@ substrate-subxt-proc-macro = { version = "0.11.0", path = "proc-macro" }
 
 [dev-dependencies]
 async-std = { version = "1.6.2", features = ["attributes"] }
->>>>>>> master
 env_logger = "0.7.1"
 frame-system = { version = "2.0.0-rc5", package = "frame-system" }
 pallet-balances = { version = "2.0.0-rc5", package = "pallet-balances" }
@@ -73,29 +62,4 @@ sp-keyring = { version = "2.0.0-rc5", package = "sp-keyring" }
 substrate-subxt-client = { version = "0.3.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
-<<<<<<< HEAD
-
-[patch.crates-io]
-frame-metadata = { git = "https://github.com/paritytech/substrate", package = "frame-metadata" }
-frame-support = { git = "https://github.com/paritytech/substrate", package = "frame-support" }
-sp-runtime = { git = "https://github.com/paritytech/substrate", package = "sp-runtime" }
-sp-version = { git = "https://github.com/paritytech/substrate", package = "sp-version" }
-pallet-indices = { git = "https://github.com/paritytech/substrate", package = "pallet-indices" }
-sp-rpc = { git = "https://github.com/paritytech/substrate", package = "sp-rpc" }
-sp-core = { git = "https://github.com/paritytech/substrate", package = "sp-core" }
-sc-rpc-api = { git = "https://github.com/paritytech/substrate", package = "sc-rpc-api" }
-sp-transaction-pool = { git = "https://github.com/paritytech/substrate", package = "sp-transaction-pool" }
-sp-std = { git = "https://github.com/paritytech/substrate" }
-application-crypto = { git = "https://github.com/paritytech/substrate", package = "sp-application-crypto", default-features = false }
-sp-finality-grandpa = { git = "https://github.com/paritytech/substrate" }
-sp-consensus-babe = { git = "https://github.com/paritytech/substrate" }
-pallet-im-online = { git = "https://github.com/paritytech/substrate" }
-sp-authority-discovery = { git = "https://github.com/paritytech/substrate" }
-pallet-staking = { git = "https://github.com/paritytech/substrate" }
-sc-service = { git = "https://github.com/paritytech/substrate" }
-sc-cli = { git = "https://github.com/paritytech/substrate" }
-sc-transaction-pool = { git = "https://github.com/paritytech/substrate" }
-jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee" }
-=======
 wabt = "0.10.0"
->>>>>>> master

@@ -107,7 +107,7 @@ mod tests {
         env_logger::try_init().ok();
         let (client, _) = test_client().await;
         assert!(client
-            .fetch(QueuedChangedStore::default(), None)
+            .fetch(&QueuedChangedStore::default(), None)
             .await
             .unwrap()
             .unwrap());
