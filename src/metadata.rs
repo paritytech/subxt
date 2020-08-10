@@ -274,7 +274,13 @@ impl StorageMetadata {
             StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
             StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
             StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
-            StorageHasher::Twox64Concat => sp_core::twox_64(bytes).to_vec(),
+            StorageHasher::Twox64Concat => {
+                sp_core::twox_64(bytes)
+                    .iter()
+                    .chain(bytes)
+                    .cloned()
+                    .collect()
+            }
         }
     }
 
