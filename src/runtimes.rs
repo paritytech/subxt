@@ -151,8 +151,6 @@ impl Staking for DefaultNodeRuntime {
     type ValidatorIndex = u16;
     const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
     const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
-    type EraIndex = u32;
-    type RewardPoint = u32;
 }
 
 impl Runtime for DefaultNodeRuntime {
@@ -261,8 +259,6 @@ impl Staking for KusamaRuntime {
     type ValidatorIndex = u16;
     const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
     const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
-    type EraIndex = u32;
-    type RewardPoint = u32;
 }
 
 impl Balances for KusamaRuntime {

@@ -26,7 +26,6 @@ use codec::{
 };
 use frame_support::Parameter;
 use sp_runtime::traits::{
-    AtLeast32Bit,
     MaybeSerialize,
     Member,
 };
@@ -40,6 +39,7 @@ pub use pallet_staking::{
     ActiveEraInfo,
     EraIndex,
     EraRewardPoints,
+    Exposure,
     Nominations,
     RewardDestination,
     RewardPoint,
@@ -107,26 +107,6 @@ pub trait Staking: Balances {
 
     /// Maximum number of nominators that can be stored in a snapshot.
     const MAX_NOMINATORS: usize;
-
-    /// Counter for the number of eras that have passed.
-    type EraIndex: Parameter
-        + Member
-        + AtLeast32Bit
-        + codec::Codec
-        + Default
-        + Copy
-        + MaybeSerialize
-        + Debug;
-
-    /// Counter for the number of "reward" points earned by a given validator.
-    type RewardPoint: Parameter
-        + Member
-        + AtLeast32Bit
-        + codec::Codec
-        + Default
-        + Copy
-        + MaybeSerialize
-        + Debug;
 }
 
 /// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
@@ -137,7 +117,7 @@ pub struct UnlockChunk<T: Staking> {
     pub value: T::Balance,
     /// Era number at which point it'll be unlocked.
     #[codec(compact)]
-    pub era: T::EraIndex,
+    pub era: EraIndex,
 }
 
 /// Number of eras to keep in history.
@@ -226,11 +206,29 @@ pub struct NominatorsStore<T: Staking> {
 ///
 /// This is the latest planned era, depending on how the Session pallet queues the validator
 /// set, it might be active or not.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
+#[derive(Encode, Copy, Clone, Debug, Store)]
 pub struct CurrentEraStore<T: Staking> {
-    #[store(returns = Option<T::EraIndex>)]
+    #[store(returns = Option<EraIndex>)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
+}
+
+/// Clipped Exposure of validator at era.
+///
+/// This is similar to [`ErasStakers`] but number of nominators exposed is reduced to the
+/// `T::MaxNominatorRewardedPerValidator` biggest stakers.
+/// (Note: the field `total` and `own` of the exposure remains unchanged).
+/// This is used to limit the i/o cost for the nominator payout.
+///
+/// This is keyed fist by the era index to allow bulk deletion and then the stash account.
+///
+/// Is it removed after `HISTORY_DEPTH` eras.
+/// If stakers hasn't been set or has been removed then empty exposure is returned.
+#[derive(Encode, Copy, Clone, Debug, Store)]
+pub struct ErasStakersClippedStore<T: Staking> {
+    #[store(returns = Exposure<T::AccountId, T::Balance>)]
+    era: EraIndex,
+    validator_stash: T::AccountId,
 }
 
 /// The active era information, it holds index and start.
@@ -298,5 +296,5 @@ pub struct NominateCall<T: Staking> {
 #[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
 struct PayoutStakersCall<'a, T: Staking> {
     pub validator_stash: &'a T::AccountId,
-    pub era: T::EraIndex,
+    pub era: EraIndex,
 }
