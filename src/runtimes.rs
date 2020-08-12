@@ -127,7 +127,6 @@ use crate::{
     session::Session,
     staking::Staking,
     system::System,
-    Encoded,
 };
 
 /// Runtime trait.

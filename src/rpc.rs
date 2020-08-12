@@ -96,6 +96,18 @@ impl From<u32> for BlockNumber {
     }
 }
 
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq)]
+#[serde(rename_all = "camelCase")]
+/// System properties for a Substrate-based runtime
+pub struct Properties {
+    /// The address format
+    pub ss58_format: u8,
+    /// The number of digits after the decimal point in the native token
+    pub token_decimals: u8,
+    /// The symbol of the native token
+    pub token_symbol: String,
+}
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Runtime> {
     client: Client,
@@ -206,6 +218,14 @@ impl<T: Runtime> Rpc<T> {
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
+    }
+
+    /// Fetch system properties
+    pub async fn properties(&self) -> Result<Properties, Error> {
+        Ok(self
+            .client
+            .request("system_properties", Params::None)
+            .await?)
     }
 
     /// Get a header

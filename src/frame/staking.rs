@@ -38,6 +38,11 @@ use std::{
     marker::PhantomData,
 };
 
+pub use pallet_staking::{
+    EraIndex,
+    StakingLedger,
+};
+
 /// A record of the nominations made by a specific account.
 #[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Ord, PartialOrd, Hash)]
 pub struct Nominations<T: Staking> {
@@ -49,6 +54,20 @@ pub struct Nominations<T: Staking> {
     pub submitted_in: T::EraIndex,
     /// Whether the nominations have been suppressed.
     pub suppressed: bool,
+}
+
+/// Similar to `ErasStakers`, this holds the preferences of validators.
+///
+/// This is keyed first by the era index to allow bulk deletion and then the stash account.
+///
+/// Is it removed after `HISTORY_DEPTH` eras.
+#[derive(Encode, Decode, Debug, Store)]
+pub struct ErasValidatorPrefsStore<T: Staking> {
+    #[store(returns = ValidatorPrefs)]
+    /// Era index
+    index: EraIndex,
+    /// Account ID
+    account_id: T::AccountId,
 }
 
 /// Information regarding the active era (era in used in session).
@@ -160,8 +179,6 @@ pub struct UnlockChunk<T: Staking> {
     #[codec(compact)]
     pub era: T::EraIndex,
 }
-
-pub use pallet_staking::StakingLedger;
 
 /// Number of eras to keep in history.
 ///
