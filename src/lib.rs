@@ -278,11 +278,7 @@ impl<T: Runtime> Client<T> {
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Returns>, Error> {
         let key = store.key(&self.metadata)?;
-        if let Some(data) = self.rpc.storage(&key, hash).await? {
-            Ok(Some(Decode::decode(&mut &data.0[..])?))
-        } else {
-            Ok(None)
-        }
+        self.fetch_unhashed::<F::Returns>(key, hash).await
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
