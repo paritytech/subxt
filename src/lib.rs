@@ -588,7 +588,7 @@ mod tests {
             },
             chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(key),
-            enable_telemetry: false,
+            telemetry: None,
         };
         let client = ClientBuilder::new()
             .set_client(
