@@ -241,7 +241,7 @@ impl<T: Runtime, F: Store<T>> KeyIter<T, F> {
                         }
                     }
                 }
-                debug_assert_eq!(self.buffer.len(), self.count as usize);
+                debug_assert_eq!(self.buffer.len(), keys.len());
             }
         }
     }
@@ -595,7 +595,7 @@ mod tests {
                 SubxtClient::from_config(config, test_node::service::new_full)
                     .expect("Error creating subxt client"),
             )
-            .set_page_size(2)
+            .set_page_size(3)
             .build()
             .await
             .expect("Error creating client");
