@@ -31,6 +31,7 @@ use sp_runtime::traits::{
 };
 
 use std::{
+    collections::BTreeMap,
     fmt::Debug,
     marker::PhantomData,
 };
@@ -38,7 +39,6 @@ use std::{
 pub use pallet_staking::{
     ActiveEraInfo,
     EraIndex,
-    EraRewardPoints,
     Exposure,
     Nominations,
     RewardDestination,
@@ -56,18 +56,20 @@ pub use pallet_staking::{
 pub struct ErasValidatorPrefsStore<T: Staking> {
     #[store(returns = ValidatorPrefs)]
     /// Era index
-    index: EraIndex,
+    pub index: EraIndex,
     /// Account ID
-    account_id: T::AccountId,
+    pub account_id: T::AccountId,
 }
 
 /// Rewards for the last `HISTORY_DEPTH` eras.
 /// If reward hasn't been set or has been removed then 0 reward is returned.
 #[derive(Clone, Encode, Decode, Debug, Store)]
-pub struct ErasRewardPoints<T: Staking> {
+pub struct ErasRewardPointsStore<T: Staking> {
     #[store(returns = EraRewardPoints<T::AccountId>)]
-    index: EraIndex,
-    _phantom: PhantomData<T>,
+    /// Era index
+    pub index: EraIndex,
+    /// Marker for the runtime
+    pub _phantom: PhantomData<T>,
 }
 
 /// Preference of what happens regarding validation.
@@ -213,6 +215,17 @@ pub struct CurrentEraStore<T: Staking> {
     pub _runtime: PhantomData<T>,
 }
 
+/// Reward points of an era. Used to split era total payout between validators.
+///
+/// This points will be used to reward validators and their respective nominators.
+#[derive(PartialEq, Encode, Decode, Default, Debug)]
+pub struct EraRewardPoints<AccountId: Ord> {
+    /// Total number of points. Equals the sum of reward points for each validator.
+    pub total: RewardPoint,
+    /// The reward points earned by a given validator.
+    pub individual: BTreeMap<AccountId, RewardPoint>,
+}
+
 /// Clipped Exposure of validator at era.
 ///
 /// This is similar to [`ErasStakers`] but number of nominators exposed is reduced to the
@@ -227,8 +240,10 @@ pub struct CurrentEraStore<T: Staking> {
 #[derive(Encode, Copy, Clone, Debug, Store)]
 pub struct ErasStakersClippedStore<T: Staking> {
     #[store(returns = Exposure<T::AccountId, T::Balance>)]
-    era: EraIndex,
-    validator_stash: T::AccountId,
+    /// Era index
+    pub era: EraIndex,
+    /// Stash account of the validator
+    pub validator_stash: T::AccountId,
 }
 
 /// The active era information, it holds index and start.
