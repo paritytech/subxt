@@ -258,6 +258,15 @@ impl<T: Runtime> Client<T> {
         &self.metadata
     }
 
+    /// Fetch the value under an unhashed storage key
+    pub async fn fetch_unhashed(
+        &self,
+        key: &StorageKey,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<StorageData>, Error> {
+        self.rpc.storage(key, hash).await
+    }
+
     /// Fetch a StorageKey with an optional block hash.
     pub async fn fetch<F: Store<T>>(
         &self,
