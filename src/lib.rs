@@ -259,12 +259,16 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Fetch the value under an unhashed storage key
-    pub async fn fetch_unhashed(
+    pub async fn fetch_unhashed<V: Decode>(
         &self,
-        key: &StorageKey,
+        key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, Error> {
-        self.rpc.storage(key, hash).await
+    ) -> Result<Option<V>, Error> {
+        if let Some(data) = self.rpc.storage(&key, hash).await? {
+            Ok(Some(Decode::decode(&mut &data.0[..])?))
+        } else {
+            Ok(None)
+        }
     }
 
     /// Fetch a StorageKey with an optional block hash.
