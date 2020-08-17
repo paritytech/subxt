@@ -309,7 +309,7 @@ pub struct NominateCall<T: Staking> {
 
 /// Claim a payout.
 #[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
-struct PayoutStakersCall<'a, T: Staking> {
+pub struct PayoutStakersCall<'a, T: Staking> {
     pub validator_stash: &'a T::AccountId,
     pub era: EraIndex,
 }
