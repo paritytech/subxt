@@ -64,7 +64,6 @@ use sc_service::{
 use std::{
     future::Future,
     pin::Pin,
-    sync::Arc,
 };
 use thiserror::Error;
 
@@ -87,7 +86,7 @@ pub struct SubxtClient {
 
 impl SubxtClient {
     /// Create a new client.
-    pub fn new(mut task_manager: TaskManager, rpc: Arc<RpcHandlers>) -> Self {
+    pub fn new(mut task_manager: TaskManager, rpc: RpcHandlers) -> Self {
         let (to_back, from_front) = mpsc::channel(4);
         let (to_front, from_back) = mpsc01::channel(4);
 
@@ -122,9 +121,7 @@ impl SubxtClient {
     /// Creates a new client from a config.
     pub fn from_config<C: ChainSpec + 'static>(
         config: SubxtClientConfig<C>,
-        builder: impl Fn(
-            Configuration,
-        ) -> Result<(TaskManager, Arc<RpcHandlers>), ServiceError>,
+        builder: impl Fn(Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError>,
     ) -> Result<Self, ServiceError> {
         let config = config.to_service_config();
         let (task_manager, rpc_handlers) = (builder)(config)?;
