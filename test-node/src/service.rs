@@ -15,6 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Service and ServiceFactory implementation. Specialized wrapper over substrate service.
+#![allow(clippy::type_complexity)]
 
 use sc_client_api::{
     ExecutorProvider,
@@ -157,7 +158,7 @@ pub fn new_full(
             on_demand: None,
             block_announce_validator_builder: None,
             finality_proof_request_builder: None,
-            finality_proof_provider: Some(finality_proof_provider.clone()),
+            finality_proof_provider: Some(finality_proof_provider),
         })?;
 
     if config.offchain_worker.enabled {

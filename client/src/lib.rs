@@ -91,12 +91,11 @@ impl SubxtClient {
         let (to_front, from_back) = mpsc01::channel(4);
 
         let session = RpcSession::new(to_front.clone());
-        let session2 = session.clone();
         task::spawn(
             select(
                 Box::pin(from_front.for_each(move |message: String| {
                     let rpc = rpc.clone();
-                    let session = session2.clone();
+                    let session = session.clone();
                     let mut to_front = to_front.clone().sink_compat();
                     async move {
                         let response = rpc.rpc_query(&session, &message).await;
@@ -123,7 +122,7 @@ impl SubxtClient {
         config: SubxtClientConfig<C>,
         builder: impl Fn(Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError>,
     ) -> Result<Self, ServiceError> {
-        let config = config.to_service_config();
+        let config = config.into_service_config();
         let (task_manager, rpc_handlers) = (builder)(config)?;
         Ok(Self::new(task_manager, rpc_handlers))
     }
@@ -221,7 +220,7 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static> {
 
 impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
     /// Creates a service configuration.
-    pub fn to_service_config(self) -> Configuration {
+    pub fn into_service_config(self) -> Configuration {
         let mut network = NetworkConfiguration::new(
             format!("{} (subxt client)", self.chain_spec.name()),
             "unknown",
