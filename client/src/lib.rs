@@ -218,8 +218,8 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static> {
     pub chain_spec: C,
     /// Role of the node.
     pub role: Role,
-    /// Enable telemetry.
-    pub enable_telemetry: bool,
+    /// Enable telemetry on the given port.
+    pub telemetry: Option<u16>,
 }
 
 impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
@@ -238,10 +238,12 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             wasm_external_transport: None,
             use_yamux_flow_control: true,
         };
-        let telemetry_endpoints = if self.enable_telemetry {
-            let endpoints =
-                TelemetryEndpoints::new(vec![("/ip4/127.0.0.1/tcp/99000/ws".into(), 0)])
-                    .expect("valid config; qed");
+        let telemetry_endpoints = if let Some(port) = self.telemetry {
+            let endpoints = TelemetryEndpoints::new(vec![(
+                format!("/ip4/127.0.0.1/tcp/{}/ws", port),
+                0,
+            )])
+            .expect("valid config; qed");
             Some(endpoints)
         } else {
             None
@@ -356,7 +358,7 @@ mod tests {
             keystore: KeystoreConfig::InMemory,
             chain_spec,
             role: Role::Light,
-            enable_telemetry: false,
+            telemetry: None,
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
@@ -389,7 +391,7 @@ mod tests {
             keystore: KeystoreConfig::InMemory,
             chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(AccountKeyring::Alice),
-            enable_telemetry: false,
+            telemetry: None,
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(

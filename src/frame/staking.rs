@@ -307,9 +307,11 @@ pub struct NominateCall<T: Staking> {
     pub targets: Vec<T::Address>,
 }
 
-/// Claim a payout.
+/// Claim a payout for a validator’s stakers
 #[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
 pub struct PayoutStakersCall<'a, T: Staking> {
+    /// Stash account of the validator
     pub validator_stash: &'a T::AccountId,
+    /// Era index
     pub era: EraIndex,
 }
