@@ -39,7 +39,10 @@ use std::{
 };
 
 use crate::{
-    error::Error,
+    error::{
+        Error,
+        RuntimeError,
+    },
     metadata::{
         EventArg,
         Metadata,
@@ -168,7 +171,9 @@ impl<T: System> EventsDecoder<T> {
                         }
                     };
                     if let Err(error) = result {
-                        Error::from_dispatch(&self.metadata, error)?;
+                        return Err(
+                            RuntimeError::from_dispatch(&self.metadata, error)?.into()
+                        )
                     }
                 }
             }
@@ -177,10 +182,7 @@ impl<T: System> EventsDecoder<T> {
     }
 
     /// Decode events.
-    pub fn decode_events(
-        &self,
-        input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, Raw)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
 
@@ -201,20 +203,36 @@ impl<T: System> EventsDecoder<T> {
             );
 
             let mut event_data = Vec::<u8>::new();
-            self.decode_raw_bytes(&event_metadata.arguments(), input, &mut event_data)?;
+            let result = self.decode_raw_bytes(
+                &event_metadata.arguments(),
+                input,
+                &mut event_data,
+            );
+            let raw = match result {
+                Ok(()) => {
+                    log::debug!("raw bytes: {}", hex::encode(&event_data),);
 
-            log::debug!("raw bytes: {}", hex::encode(&event_data),);
+                    let event = RawEvent {
+                        module: module.name().to_string(),
+                        variant: event_metadata.name.clone(),
+                        data: event_data,
+                    };
 
-            let event = RawEvent {
-                module: module.name().to_string(),
-                variant: event_metadata.name.clone(),
-                data: event_data,
+                    // topics come after the event data in EventRecord
+                    let _topics = Vec::<T::Hash>::decode(input)?;
+                    Raw::Event(event)
+                }
+                Err(Error::Runtime(err)) => Raw::Error(err),
+                Err(err) => return Err(err),
             };
 
-            // topics come after the event data in EventRecord
-            let _topics = Vec::<T::Hash>::decode(input)?;
-            r.push((phase, event));
+            r.push((phase, raw));
         }
         Ok(r)
     }
+}
+
+pub enum Raw {
+    Event(RawEvent),
+    Error(RuntimeError),
 }

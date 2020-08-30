@@ -62,13 +62,7 @@ pub enum Error {
     TypeSizeUnavailable(String),
     /// Runtime error.
     #[error("Runtime error: {0}")]
-    Runtime(RuntimeError),
-    /// Bad origin.
-    #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
-    BadOrigin,
-    /// Cannot lookup.
-    #[error("Cannot lookup some information required to validate the transaction.")]
-    CannotLookup,
+    Runtime(#[from] RuntimeError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -98,9 +92,29 @@ impl From<String> for Error {
     }
 }
 
-impl Error {
+/// Runtime error.
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
+pub enum RuntimeError {
+    /// Module error.
+    #[error("Runtime module error: {0}")]
+    Module(ModuleError),
+    /// Bad origin.
+    #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
+    BadOrigin,
+    /// Cannot lookup.
+    #[error("Cannot lookup some information required to validate the transaction.")]
+    CannotLookup,
+    /// Other error.
+    #[error("Other error: {0}")]
+    Other(String),
+}
+
+impl RuntimeError {
     /// Converts a `DispatchError` into a subxt error.
-    pub fn from_dispatch(metadata: &Metadata, error: DispatchError) -> Result<(), Self> {
+    pub fn from_dispatch(
+        metadata: &Metadata,
+        error: DispatchError,
+    ) -> Result<Self, Error> {
         match error {
             DispatchError::Module {
                 index,
@@ -109,22 +123,22 @@ impl Error {
             } => {
                 let module = metadata.module_with_errors(index)?;
                 let error = module.error(error)?;
-                Err(Error::Runtime(RuntimeError {
+                Ok(Self::Module(ModuleError {
                     module: module.name().to_string(),
                     error: error.to_string(),
                 }))
             }
-            DispatchError::BadOrigin => Err(Error::BadOrigin),
-            DispatchError::CannotLookup => Err(Error::CannotLookup),
-            DispatchError::Other(msg) => Err(Error::Other(msg.into())),
+            DispatchError::BadOrigin => Ok(Self::BadOrigin),
+            DispatchError::CannotLookup => Ok(Self::CannotLookup),
+            DispatchError::Other(msg) => Ok(Self::Other(msg.into())),
         }
     }
 }
 
-/// Runtime errors.
+/// Module error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 #[error("{error} from {module}")]
-pub struct RuntimeError {
+pub struct ModuleError {
     pub module: String,
     pub error: String,
 }
