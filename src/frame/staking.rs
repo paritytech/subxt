@@ -76,7 +76,7 @@ pub struct ErasRewardPointsStore<T: Staking> {
 #[derive(Clone, Encode, Decode, Debug, Call)]
 pub struct SetPayeeCall<T: Staking> {
     /// The payee
-    pub payee: RewardDestination,
+    pub payee: RewardDestination<T::AccountId>,
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -183,7 +183,7 @@ pub struct LedgerStore<T: Staking> {
 /// Where the reward payment should be made. Keyed by stash.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct PayeeStore<T: Staking> {
-    #[store(returns = RewardDestination)]
+    #[store(returns = RewardDestination<T::AccountId>)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
 }
@@ -257,6 +257,45 @@ pub struct ActiveEraStore<T: Staking> {
     pub _runtime: PhantomData<T>,
 }
 
+/// Declare no desire to either validate or nominate.
+///
+/// Effects will be felt at the beginning of the next era.
+///
+/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
+///
+/// # <weight>
+/// - Independent of the arguments. Insignificant complexity.
+/// - Contains one read.
+/// - Writes are limited to the `origin` account key.
+/// --------
+/// Base Weight: 16.53 µs
+/// DB Weight:
+/// - Read: EraElectionStatus, Ledger
+/// - Write: Validators, Nominators
+/// # </weight>
+#[derive(Debug, Call, Encode)]
+pub struct ChillCall<T: Staking> {
+    /// Runtime marker
+    pub _runtime: PhantomData<T>,
+}
+
+impl<T: Staking> Default for ChillCall<T> {
+    fn default() -> Self {
+        Self {
+            _runtime: PhantomData,
+        }
+    }
+}
+impl<T: Staking> Clone for ChillCall<T> {
+    fn clone(&self) -> Self {
+        Self {
+            _runtime: self._runtime,
+        }
+    }
+}
+impl<T: Staking> Copy for ChillCall<T> {}
+
 /// Declare the desire to validate for the origin controller.
 ///
 /// Effects will be felt at the beginning of the next era.
@@ -276,9 +315,9 @@ pub struct ActiveEraStore<T: Staking> {
 /// # </weight>
 #[derive(Clone, Debug, PartialEq, Call, Encode)]
 pub struct ValidateCall<T: Staking> {
-    /// Runtime marker.
+    /// Runtime marker
     pub _runtime: PhantomData<T>,
-    /// Validation preferences.
+    /// Validation preferences
     pub prefs: ValidatorPrefs,
 }
 

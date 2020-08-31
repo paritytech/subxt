@@ -63,3 +63,21 @@ substrate-subxt-client = { version = "0.3.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"
+
+[patch.crates-io]
+frame-metadata = { git = "https://github.com/paritytech/substrate" }
+frame-support = { git = "https://github.com/paritytech/substrate" }
+sp-runtime = { git = "https://github.com/paritytech/substrate" }
+sp-version = { git = "https://github.com/paritytech/substrate" }
+pallet-indices = { git = "https://github.com/paritytech/substrate" }
+sp-rpc = { git = "https://github.com/paritytech/substrate" }
+sp-core = { git = "https://github.com/paritytech/substrate" }
+sc-rpc-api = { git = "https://github.com/paritytech/substrate" }
+sp-transaction-pool = { git = "https://github.com/paritytech/substrate" }
+sp-std = { git = "https://github.com/paritytech/substrate" }
+application-crypto = { git = "https://github.com/paritytech/substrate", package = "sp-application-crypto", default-features = false }
+sp-finality-grandpa = { git = "https://github.com/paritytech/substrate" }
+sp-consensus-babe = { git = "https://github.com/paritytech/substrate" }
+pallet-im-online = { git = "https://github.com/paritytech/substrate" }
+sp-authority-discovery = { git = "https://github.com/paritytech/substrate" }
+pallet-staking = { git = "https://github.com/paritytech/substrate" }
