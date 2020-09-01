@@ -41,7 +41,7 @@ sp-core = { version = "2.0.0-rc6", package = "sp-core" }
 sc-rpc-api = { version = "0.8.0-rc6", package = "sc-rpc-api" }
 sp-transaction-pool = { version = "2.0.0-rc6", package = "sp-transaction-pool" }
 substrate-subxt-client = { version = "0.3.0", path = "client", optional = true }
-substrate-subxt-proc-macro = { version = "0.11.0", path = "proc-macro" }
+substrate-subxt-proc-macro = { version = "0.12.0", path = "proc-macro" }
 
 [dev-dependencies]
 async-std = { version = "1.6.3", features = ["attributes"] }
