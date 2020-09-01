@@ -22,6 +22,7 @@ use crate::{
     error::Error,
     events::{
         EventsDecoder,
+        Raw,
         RawEvent,
     },
     frame::{
@@ -99,13 +100,17 @@ impl<T: Runtime> EventSubscription<T> {
                         Ok(events) => events,
                         Err(error) => return Some(Err(error)),
                     };
-                    for (phase, event) in raw_events {
+                    for (phase, raw) in raw_events {
                         if let Phase::ApplyExtrinsic(i) = phase {
                             if let Some(ext_index) = self.extrinsic {
                                 if i as usize != ext_index {
                                     continue
                                 }
                             }
+                            let event = match raw {
+                                Raw::Event(event) => event,
+                                Raw::Error(err) => return Some(Err(err.into())),
+                            };
                             if let Some((module, variant)) = self.event {
                                 if event.module != module || event.variant != variant {
                                     continue

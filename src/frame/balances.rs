@@ -112,6 +112,7 @@ mod tests {
     use crate::{
         error::{
             Error,
+            ModuleError,
             RuntimeError,
         },
         events::EventsDecoder,
@@ -193,8 +194,8 @@ mod tests {
         let res = client
             .transfer_and_watch(&hans, alice.account_id(), 100_000_000_000)
             .await;
-        if let Err(Error::Runtime(error)) = res {
-            let error2 = RuntimeError {
+        if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
+            let error2 = ModuleError {
                 module: "Balances".into(),
                 error: "InsufficientBalance".into(),
             };
