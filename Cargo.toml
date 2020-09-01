@@ -40,7 +40,7 @@ sp-rpc = { version = "2.0.0-rc6", package = "sp-rpc" }
 sp-core = { version = "2.0.0-rc6", package = "sp-core" }
 sc-rpc-api = { version = "0.8.0-rc6", package = "sc-rpc-api" }
 sp-transaction-pool = { version = "2.0.0-rc6", package = "sp-transaction-pool" }
-substrate-subxt-client = { version = "0.3.0", path = "client", optional = true }
+substrate-subxt-client = { version = "0.4.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.12.0", path = "proc-macro" }
 
 [dev-dependencies]
@@ -49,7 +49,7 @@ env_logger = "0.7.1"
 frame-system = { version = "2.0.0-rc6", package = "frame-system" }
 pallet-balances = { version = "2.0.0-rc6", package = "pallet-balances" }
 sp-keyring = { version = "2.0.0-rc6", package = "sp-keyring" }
-substrate-subxt-client = { version = "0.3.0", path = "client" }
+substrate-subxt-client = { version = "0.4.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"
