@@ -96,7 +96,7 @@ impl From<u32> for BlockNumber {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq)]
+#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
 /// System properties for a Substrate-based runtime
 pub struct Properties {

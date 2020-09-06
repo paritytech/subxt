@@ -174,7 +174,7 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc,
             genesis_hash: genesis_hash?,
             metadata: metadata?,
-            properties: properties?,
+            properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
             page_size: self.page_size.unwrap_or(10),
