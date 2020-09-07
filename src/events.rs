@@ -154,6 +154,17 @@ impl<T: System> EventsDecoder<T> {
                         self.decode_raw_bytes(&[*arg.clone()], input, output)?
                     }
                 }
+                EventArg::Option(arg) => {
+                    match input.read_byte()? {
+                        0 => (),
+                        1 => self.decode_raw_bytes(&[*arg.clone()], input, output)?,
+                        _ => {
+                            return Err(Error::Other(
+                                "unexpected first byte decoding Option".into(),
+                            ))
+                        }
+                    }
+                }
                 EventArg::Tuple(args) => self.decode_raw_bytes(args, input, output)?,
                 EventArg::Primitive(name) => {
                     let result = match name.as_str() {
