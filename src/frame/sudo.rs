@@ -43,7 +43,10 @@ pub struct SudoCall<'a, T: Sudo> {
 mod tests {
     use super::*;
     use crate::{
-        error::Error,
+        error::{
+            Error,
+            RuntimeError,
+        },
         extrinsic::PairSigner,
         frame::balances::TransferCall,
         tests::{
@@ -68,7 +71,7 @@ mod tests {
 
         let res = client.sudo_and_watch(&alice, &call).await;
         assert!(
-            if let Err(Error::BadOrigin) = res {
+            if let Err(Error::Runtime(RuntimeError::BadOrigin)) = res {
                 true
             } else {
                 false
