@@ -47,20 +47,6 @@ pub use pallet_staking::{
     ValidatorPrefs,
 };
 
-/// Similar to `ErasStakers`, this holds the preferences of validators.
-///
-/// This is keyed first by the era index to allow bulk deletion and then the stash account.
-///
-/// It is removed after `HISTORY_DEPTH` eras.
-#[derive(Encode, Decode, Debug, Store)]
-pub struct ErasValidatorPrefsStore<T: Staking> {
-    #[store(returns = ValidatorPrefs)]
-    /// Era index
-    pub index: EraIndex,
-    /// Account ID
-    pub account_id: T::AccountId,
-}
-
 /// Rewards for the last `HISTORY_DEPTH` eras.
 /// If reward hasn't been set or has been removed then 0 reward is returned.
 #[derive(Clone, Encode, Decode, Debug, Store)]
@@ -103,23 +89,6 @@ pub trait Staking: Balances {
         + Copy
         + MaybeSerialize
         + Debug;
-
-    /// Maximum number of validators that can be stored in a snapshot.
-    const MAX_VALIDATORS: usize;
-
-    /// Maximum number of nominators that can be stored in a snapshot.
-    const MAX_NOMINATORS: usize;
-}
-
-/// A Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-#[derive(Clone, Encode, Decode, Debug)]
-pub struct UnlockChunk<T: Staking> {
-    /// Amount of funds to be unlocked.
-    #[codec(compact)]
-    pub value: T::Balance,
-    /// Era number at which point the funds will be unlocked.
-    #[codec(compact)]
-    pub era: EraIndex,
 }
 
 /// Number of eras to keep in history.
@@ -132,34 +101,6 @@ pub struct UnlockChunk<T: Staking> {
 #[derive(Encode, Decode, Copy, Clone, Debug, Default, Store)]
 pub struct HistoryDepthStore<T: Staking> {
     #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// The ideal number of staking participants.
-#[derive(Encode, Decode, Copy, Clone, Debug, Store)]
-pub struct ValidatorCountStore<T: Staking> {
-    #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Minimum number of staking participants before emergency conditions are imposed.
-#[derive(
-    Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store,
-)]
-pub struct MinimumValidatorCountStore<T: Staking> {
-    #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
-/// easy to initialize and the performance hit is minimal (we expect no more than four
-/// invulnerables) and restricted to testnets.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct InvulnerablesStore<T: Staking> {
-    #[store(returns = Vec<T::AccountId>)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }

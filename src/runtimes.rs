@@ -149,8 +149,6 @@ pub struct DefaultNodeRuntime;
 impl Staking for DefaultNodeRuntime {
     type NominatorIndex = u32;
     type ValidatorIndex = u16;
-    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
-    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
 }
 
 impl Runtime for DefaultNodeRuntime {
@@ -257,8 +255,6 @@ impl Session for KusamaRuntime {
 impl Staking for KusamaRuntime {
     type NominatorIndex = u32;
     type ValidatorIndex = u16;
-    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
-    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
 }
 
 impl Balances for KusamaRuntime {
