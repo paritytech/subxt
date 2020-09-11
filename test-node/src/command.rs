@@ -18,7 +18,6 @@ use crate::{
     chain_spec,
     cli::Cli,
     service,
-    service::new_full_params,
 };
 use sc_cli::{
     ChainSpec,
@@ -26,7 +25,7 @@ use sc_cli::{
     RuntimeVersion,
     SubstrateCli,
 };
-use sc_service::ServiceParams;
+use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -78,16 +77,13 @@ pub fn run() -> sc_cli::Result<()> {
         Some(subcommand) => {
             let runner = cli.create_runner(subcommand)?;
             runner.run_subcommand(subcommand, |config| {
-                let (
-                    ServiceParams {
-                        client,
-                        backend,
-                        task_manager,
-                        import_queue,
-                        ..
-                    },
-                    ..,
-                ) = new_full_params(config)?;
+                let PartialComponents {
+                    client,
+                    backend,
+                    task_manager,
+                    import_queue,
+                    ..
+                } = service::new_partial(&config)?;
                 Ok((client, backend, import_queue, task_manager))
             })
         }

@@ -64,7 +64,6 @@ use sc_service::{
 use std::{
     future::Future,
     pin::Pin,
-    sync::Arc,
 };
 use thiserror::Error;
 
@@ -87,17 +86,16 @@ pub struct SubxtClient {
 
 impl SubxtClient {
     /// Create a new client.
-    pub fn new(mut task_manager: TaskManager, rpc: Arc<RpcHandlers>) -> Self {
+    pub fn new(mut task_manager: TaskManager, rpc: RpcHandlers) -> Self {
         let (to_back, from_front) = mpsc::channel(4);
         let (to_front, from_back) = mpsc01::channel(4);
 
         let session = RpcSession::new(to_front.clone());
-        let session2 = session.clone();
         task::spawn(
             select(
                 Box::pin(from_front.for_each(move |message: String| {
                     let rpc = rpc.clone();
-                    let session = session2.clone();
+                    let session = session.clone();
                     let mut to_front = to_front.clone().sink_compat();
                     async move {
                         let response = rpc.rpc_query(&session, &message).await;
@@ -122,11 +120,9 @@ impl SubxtClient {
     /// Creates a new client from a config.
     pub fn from_config<C: ChainSpec + 'static>(
         config: SubxtClientConfig<C>,
-        builder: impl Fn(
-            Configuration,
-        ) -> Result<(TaskManager, Arc<RpcHandlers>), ServiceError>,
+        builder: impl Fn(Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError>,
     ) -> Result<Self, ServiceError> {
-        let config = config.to_service_config();
+        let config = config.into_service_config();
         let (task_manager, rpc_handlers) = (builder)(config)?;
         Ok(Self::new(task_manager, rpc_handlers))
     }
@@ -218,13 +214,13 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static> {
     pub chain_spec: C,
     /// Role of the node.
     pub role: Role,
-    /// Enable telemetry.
-    pub enable_telemetry: bool,
+    /// Enable telemetry on the given port.
+    pub telemetry: Option<u16>,
 }
 
 impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
     /// Creates a service configuration.
-    pub fn to_service_config(self) -> Configuration {
+    pub fn into_service_config(self) -> Configuration {
         let mut network = NetworkConfiguration::new(
             format!("{} (subxt client)", self.chain_spec.name()),
             "unknown",
@@ -238,10 +234,12 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             wasm_external_transport: None,
             use_yamux_flow_control: true,
         };
-        let telemetry_endpoints = if self.enable_telemetry {
-            let endpoints =
-                TelemetryEndpoints::new(vec![("/ip4/127.0.0.1/tcp/99000/ws".into(), 0)])
-                    .expect("valid config; qed");
+        let telemetry_endpoints = if let Some(port) = self.telemetry {
+            let endpoints = TelemetryEndpoints::new(vec![(
+                format!("/ip4/127.0.0.1/tcp/{}/ws", port),
+                0,
+            )])
+            .expect("valid config; qed");
             Some(endpoints)
         } else {
             None
@@ -356,7 +354,7 @@ mod tests {
             keystore: KeystoreConfig::InMemory,
             chain_spec,
             role: Role::Light,
-            enable_telemetry: false,
+            telemetry: None,
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
@@ -389,7 +387,7 @@ mod tests {
             keystore: KeystoreConfig::InMemory,
             chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(AccountKeyring::Alice),
-            enable_telemetry: false,
+            telemetry: None,
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
