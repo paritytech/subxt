@@ -167,37 +167,6 @@ pub struct EraRewardPoints<AccountId: Ord> {
     pub individual: BTreeMap<AccountId, RewardPoint>,
 }
 
-/// Clipped Exposure of validator at era.
-///
-/// This is similar to [`ErasStakers`] but number of nominators exposed is reduced to the
-/// `T::MaxNominatorRewardedPerValidator` biggest stakers.
-/// (Note: the field `total` and `own` of the exposure remains unchanged).
-/// This is used to limit the i/o cost for the nominator payout.
-///
-/// This is keyed fist by the era index to allow bulk deletion and then the stash account.
-///
-/// It is removed after `HISTORY_DEPTH` eras.
-/// If stakers hasn't been set or has been removed then empty exposure is returned.
-#[derive(Encode, Copy, Clone, Debug, Store)]
-pub struct ErasStakersClippedStore<T: Staking> {
-    #[store(returns = Exposure<T::AccountId, T::Balance>)]
-    /// Era index
-    pub era: EraIndex,
-    /// Stash account of the validator
-    pub validator_stash: T::AccountId,
-}
-
-/// The active era information, holds index and start.
-///
-/// The active era is the era currently rewarded.
-/// Validator set of this era must be equal to `SessionInterface::validators`.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct ActiveEraStore<T: Staking> {
-    #[store(returns = Option<ActiveEraInfo>)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
 /// Declare no desire to either validate or nominate.
 ///
 /// Effective at the beginning of the next era.
@@ -250,13 +219,4 @@ pub struct ValidateCall<T: Staking> {
 pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated
     pub targets: Vec<T::Address>,
-}
-
-/// Claim a payout for a validator’s stakers
-#[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
-pub struct PayoutStakersCall<'a, T: Staking> {
-    /// Stash account of the validator
-    pub validator_stash: &'a T::AccountId,
-    /// Era index
-    pub era: EraIndex,
 }
