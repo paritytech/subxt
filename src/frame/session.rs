@@ -1,12 +1,12 @@
 // Copyright 2019-2020 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
-// subxt is free software: you can redistribute it and/or modify
+// substrate-subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// subxt is distributed in the hope that it will be useful,
+// substrate-subxt is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
@@ -32,7 +32,9 @@ use std::{
 };
 use substrate_subxt_proc_macro::Store;
 
-macro_rules! def {
+/// Impls `Default::default` for some types that have a `_runtime` field of type
+/// `PhantomData` as their only field.
+macro_rules! default_impl {
     ($name:ident) => {
         impl<T: Session> Default for $name<T> {
             fn default() -> Self {
@@ -50,7 +52,7 @@ pub trait Session: System {
     /// The validator account identifier type for the runtime.
     type ValidatorId: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 
-    /// The validator account identifier type for the runtime.
+    /// The session index identifier type for the runtime.
     type SessionIndex: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 
     /// The keys.
@@ -65,7 +67,7 @@ pub struct ValidatorsStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
-def!(ValidatorsStore);
+default_impl!(ValidatorsStore);
 
 /// Current index of the session.
 #[derive(Encode, Store, Debug)]
@@ -75,7 +77,7 @@ pub struct CurrentIndexStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
-def!(CurrentIndexStore);
+default_impl!(CurrentIndexStore);
 
 /// True if the underlying economic identities or weighting behind the validators
 /// has changed in the queued validator set.
@@ -86,9 +88,9 @@ pub struct QueuedChangedStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
-def!(QueuedChangedStore);
+default_impl!(QueuedChangedStore);
 
-/// The current set of validators.
+/// Set the session keys for a validator.
 #[derive(Encode, Call, Debug)]
 pub struct SetKeysCall<T: Session> {
     /// The keys
@@ -103,6 +105,7 @@ mod tests {
     use crate::tests::test_client;
 
     #[async_std::test]
+    #[ignore]
     async fn test_state_read_free_balance() {
         env_logger::try_init().ok();
         let (client, _) = test_client().await;

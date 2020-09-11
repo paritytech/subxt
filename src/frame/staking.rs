@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the frame_staking module.
+//! Implements support for the pallet_staking module.
 
 use super::balances::{
     Balances,
@@ -51,7 +51,7 @@ pub use pallet_staking::{
 ///
 /// This is keyed first by the era index to allow bulk deletion and then the stash account.
 ///
-/// Is it removed after `HISTORY_DEPTH` eras.
+/// It is removed after `HISTORY_DEPTH` eras.
 #[derive(Encode, Decode, Debug, Store)]
 pub struct ErasValidatorPrefsStore<T: Staking> {
     #[store(returns = ValidatorPrefs)]
@@ -76,7 +76,7 @@ pub struct ErasRewardPointsStore<T: Staking> {
 #[derive(Clone, Encode, Decode, Debug, Call)]
 pub struct SetPayeeCall<T: Staking> {
     /// The payee
-    pub payee: RewardDestination<T::AccountId>,
+    pub payee: RewardDestination,
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -111,13 +111,13 @@ pub trait Staking: Balances {
     const MAX_NOMINATORS: usize;
 }
 
-/// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
+/// A Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
 #[derive(Clone, Encode, Decode, Debug)]
 pub struct UnlockChunk<T: Staking> {
     /// Amount of funds to be unlocked.
     #[codec(compact)]
     pub value: T::Balance,
-    /// Era number at which point it'll be unlocked.
+    /// Era number at which point the funds will be unlocked.
     #[codec(compact)]
     pub era: EraIndex,
 }
@@ -183,7 +183,7 @@ pub struct LedgerStore<T: Staking> {
 /// Where the reward payment should be made. Keyed by stash.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct PayeeStore<T: Staking> {
-    #[store(returns = RewardDestination<T::AccountId>)]
+    #[store(returns = RewardDestination)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
 }
@@ -235,7 +235,7 @@ pub struct EraRewardPoints<AccountId: Ord> {
 ///
 /// This is keyed fist by the era index to allow bulk deletion and then the stash account.
 ///
-/// Is it removed after `HISTORY_DEPTH` eras.
+/// It is removed after `HISTORY_DEPTH` eras.
 /// If stakers hasn't been set or has been removed then empty exposure is returned.
 #[derive(Encode, Copy, Clone, Debug, Store)]
 pub struct ErasStakersClippedStore<T: Staking> {
@@ -246,7 +246,7 @@ pub struct ErasStakersClippedStore<T: Staking> {
     pub validator_stash: T::AccountId,
 }
 
-/// The active era information, it holds index and start.
+/// The active era information, holds index and start.
 ///
 /// The active era is the era currently rewarded.
 /// Validator set of this era must be equal to `SessionInterface::validators`.
@@ -259,21 +259,10 @@ pub struct ActiveEraStore<T: Staking> {
 
 /// Declare no desire to either validate or nominate.
 ///
-/// Effects will be felt at the beginning of the next era.
+/// Effective at the beginning of the next era.
 ///
 /// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
-///
-/// # <weight>
-/// - Independent of the arguments. Insignificant complexity.
-/// - Contains one read.
-/// - Writes are limited to the `origin` account key.
-/// --------
-/// Base Weight: 16.53 µs
-/// DB Weight:
-/// - Read: EraElectionStatus, Ledger
-/// - Write: Validators, Nominators
-/// # </weight>
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
 #[derive(Debug, Call, Encode)]
 pub struct ChillCall<T: Staking> {
     /// Runtime marker
@@ -298,21 +287,10 @@ impl<T: Staking> Copy for ChillCall<T> {}
 
 /// Declare the desire to validate for the origin controller.
 ///
-/// Effects will be felt at the beginning of the next era.
+/// Effective at the beginning of the next era.
 ///
 /// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
-///
-/// # <weight>
-/// - Independent of the arguments. Insignificant complexity.
-/// - Contains a limited number of reads.
-/// - Writes are limited to the `origin` account key.
-/// -----------
-/// Base Weight: 17.13 µs
-/// DB Weight:
-/// - Read: Era Election Status, Ledger
-/// - Write: Nominators, Validators
-/// # </weight>
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
 #[derive(Clone, Debug, PartialEq, Call, Encode)]
 pub struct ValidateCall<T: Staking> {
     /// Runtime marker
@@ -323,23 +301,10 @@ pub struct ValidateCall<T: Staking> {
 
 /// Declare the desire to nominate `targets` for the origin controller.
 ///
-/// Effects will be felt at the beginning of the next era. This can only be called when
-/// [`EraElectionStatus`] is `Closed`.
+/// Effective at the beginning of the next era.
 ///
 /// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
-///
-/// # <weight>
-/// - The transaction's complexity is proportional to the size of `targets` (N)
-/// which is capped at CompactAssignments::LIMIT (MAX_NOMINATIONS).
-/// - Both the reads and writes follow a similar pattern.
-/// ---------
-/// Base Weight: 22.34 + .36 * N µs
-/// where N is the number of targets
-/// DB Weight:
-/// - Reads: Era Election Status, Ledger, Current Era
-/// - Writes: Validators, Nominators
-/// # </weight>
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
 #[derive(Call, Encode, Debug)]
 pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated

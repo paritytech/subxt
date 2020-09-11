@@ -94,7 +94,7 @@ pub use crate::{
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
-        Properties,
+        SystemProperties,
     },
     runtimes::*,
     subscription::*,
@@ -167,7 +167,7 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc.metadata(),
             rpc.genesis_hash(),
             rpc.runtime_version(None),
-            rpc.properties(),
+            rpc.system_properties(),
         )
         .await;
         Ok(Client {
@@ -187,7 +187,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
-    properties: Properties,
+    properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     page_size: u32,
@@ -265,7 +265,7 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Returns the system properties
-    pub fn properties(&self) -> &Properties {
+    pub fn properties(&self) -> &SystemProperties {
         &self.properties
     }
 

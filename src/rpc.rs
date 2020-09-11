@@ -99,7 +99,7 @@ impl From<u32> for BlockNumber {
 #[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq, Default)]
 #[serde(rename_all = "camelCase")]
 /// System properties for a Substrate-based runtime
-pub struct Properties {
+pub struct SystemProperties {
     /// The address format
     pub ss58_format: u8,
     /// The number of digits after the decimal point in the native token
@@ -221,7 +221,7 @@ impl<T: Runtime> Rpc<T> {
     }
 
     /// Fetch system properties
-    pub async fn properties(&self) -> Result<Properties, Error> {
+    pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
         Ok(self
             .client
             .request("system_properties", Params::None)
