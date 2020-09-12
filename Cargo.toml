@@ -26,7 +26,7 @@ log = "0.4.11"
 thiserror = "1.0.20"
 futures = "0.3.5"
 jsonrpsee = { version = "0.1.0", features = ["ws"] }
-num-traits = "0.2.12"
+num-traits = { version = "0.2.12", default-features = false }
 serde = { version = "1.0.115", features = ["derive"] }
 serde_json = "1.0.57"
 url = "2.1.1"
@@ -63,21 +63,3 @@ substrate-subxt-client = { version = "0.4.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"
-
-# [patch.crates-io]
-# frame-metadata = { git = "https://github.com/paritytech/substrate" }
-# frame-support = { git = "https://github.com/paritytech/substrate" }
-# sp-runtime = { git = "https://github.com/paritytech/substrate" }
-# sp-version = { git = "https://github.com/paritytech/substrate" }
-# pallet-indices = { git = "https://github.com/paritytech/substrate" }
-# sp-rpc = { git = "https://github.com/paritytech/substrate" }
-# sp-core = { git = "https://github.com/paritytech/substrate" }
-# sc-rpc-api = { git = "https://github.com/paritytech/substrate" }
-# sp-transaction-pool = { git = "https://github.com/paritytech/substrate" }
-# sp-std = { git = "https://github.com/paritytech/substrate" }
-# application-crypto = { git = "https://github.com/paritytech/substrate", package = "sp-application-crypto", default-features = false }
-# sp-finality-grandpa = { git = "https://github.com/paritytech/substrate" }
-# sp-consensus-babe = { git = "https://github.com/paritytech/substrate" }
-# pallet-im-online = { git = "https://github.com/paritytech/substrate" }
-# sp-authority-discovery = { git = "https://github.com/paritytech/substrate" }
-# pallet-staking = { git = "https://github.com/paritytech/substrate" }
