@@ -24,11 +24,6 @@ use codec::{
     Decode,
     Encode,
 };
-use frame_support::Parameter;
-use sp_runtime::traits::{
-    MaybeSerialize,
-    Member,
-};
 
 use std::{
     collections::BTreeMap,
@@ -69,27 +64,7 @@ pub struct SetPayeeCall<T: Staking> {
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
-pub trait Staking: Balances {
-    /// Data type used to index nominators in the compact type
-    type NominatorIndex: Parameter
-        + codec::Codec
-        + Member
-        + Default
-        + Copy
-        + MaybeSerialize
-        + Debug;
-
-    /// Data type used to index validators in the compact type.
-    type ValidatorIndex: Parameter
-        + codec::Codec
-        + Send
-        + Sync
-        + Default
-        + Member
-        + Copy
-        + MaybeSerialize
-        + Debug;
-}
+pub trait Staking: Balances {}
 
 /// Number of eras to keep in history.
 ///

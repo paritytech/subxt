@@ -51,9 +51,6 @@ pub trait Session: System {
     /// The validator account identifier type for the runtime.
     type ValidatorId: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 
-    /// The session index identifier type for the runtime.
-    type SessionIndex: Parameter + Debug + Ord + Default + Send + Sync + 'static;
-
     /// The keys.
     type Keys: OpaqueKeys + Member + Parameter + Default;
 }
@@ -68,27 +65,6 @@ pub struct ValidatorsStore<T: Session> {
 
 default_impl!(ValidatorsStore);
 
-/// Current index of the session.
-#[derive(Encode, Store, Debug)]
-pub struct CurrentIndexStore<T: Session> {
-    #[store(returns = <T as Session>::SessionIndex)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-default_impl!(CurrentIndexStore);
-
-/// True if the underlying economic identities or weighting behind the validators
-/// has changed in the queued validator set.
-#[derive(Encode, Store, Debug)]
-pub struct QueuedChangedStore<T: Session> {
-    #[store(returns = bool)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-default_impl!(QueuedChangedStore);
-
 /// Set the session keys for a validator.
 #[derive(Encode, Call, Debug)]
 pub struct SetKeysCall<T: Session> {
@@ -96,22 +72,4 @@ pub struct SetKeysCall<T: Session> {
     pub keys: T::Keys,
     /// The proof. This is not currently used and can be set to an empty vector.
     pub proof: Vec<u8>,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::test_client;
-
-    #[async_std::test]
-    #[ignore]
-    async fn test_state_read_free_balance() {
-        env_logger::try_init().ok();
-        let (client, _) = test_client().await;
-        assert!(client
-            .fetch(&QueuedChangedStore::default(), None)
-            .await
-            .unwrap()
-            .unwrap());
-    }
 }
