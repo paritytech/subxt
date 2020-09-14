@@ -120,7 +120,11 @@ mod tests {
     use sp_keyring::AccountKeyring;
 
     use super::*;
-    use crate::{ClientBuilder, PairSigner, ContractsTemplateRuntime};
+    use crate::{
+        ClientBuilder,
+        ContractsTemplateRuntime,
+        PairSigner,
+    };
 
     fn contract_wasm() -> Vec<u8> {
         const CONTRACT: &str = r#"
@@ -138,7 +142,10 @@ mod tests {
         env_logger::try_init().ok();
 
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new().build().await.unwrap();
+        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
+            .build()
+            .await
+            .unwrap();
 
         let code = contract_wasm();
         let result = client.put_code_and_watch(&signer, &code).await.unwrap();
@@ -158,7 +165,10 @@ mod tests {
     async fn tx_instantiate() {
         env_logger::try_init().ok();
         let signer = PairSigner::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new().build().await.unwrap();
+        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
+            .build()
+            .await
+            .unwrap();
 
         // call put_code extrinsic
         let code = contract_wasm();
@@ -172,10 +182,10 @@ mod tests {
         let result = client
             .instantiate_and_watch(
                 &signer,
-                100_000_000_000_000,    // endowment
-                500_000_000,            // gas_limit
+                100_000_000_000_000, // endowment
+                500_000_000,         // gas_limit
                 &code_hash,
-                &[],                    // data
+                &[], // data
             )
             .await
             .unwrap();
