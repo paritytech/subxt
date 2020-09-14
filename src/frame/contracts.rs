@@ -153,39 +153,39 @@ mod tests {
         );
     }
 
-    // #[test]
-    // #[cfg(feature = "integration-tests")]
-    // fn tx_instantiate() {
-    //     env_logger::try_init().ok();
-    //     let result: Result<_, Error> = async_std::task::block_on(async move {
-    //         let signer = AccountKeyring::Bob.pair();
-    //         let client = test_client().await;
-    //
-    //         let code_hash = put_code(&client, signer.clone()).await?;
-    //
-    //         log::info!("Code hash: {:?}", code_hash);
-    //
-    //         let xt = client.xt(signer, None).await?;
-    //         let result = xt
-    //             .watch()
-    //             .submit(InstantiateCall {
-    //                 endowment: 100_000_000_000_000,
-    //                 gas_limit: 500_000_000,
-    //                 code_hash: &code_hash,
-    //                 data: &[],
-    //             })
-    //             .await?;
-    //         let event = result
-    //             .find_event::<InstantiatedEvent<_>>()?
-    //             .ok_or(Error::Other("Failed to find Instantiated event".into()))?;
-    //         Ok(event)
-    //     });
-    //
-    //     log::info!("Instantiate result: {:?}", result);
-    //
-    //     assert!(
-    //         result.is_ok(),
-    //         format!("Error instantiating contract: {:?}", result)
-    //     );
-    // }
+    #[async_std::test]
+    #[cfg(feature = "integration-tests")]
+    async fn tx_instantiate() {
+        env_logger::try_init().ok();
+        let signer = PairSigner::new(AccountKeyring::Bob.pair());
+        let client = ClientBuilder::<ContractsTemplateRuntime>::new().build().await.unwrap();
+
+        // call put_code extrinsic
+        let code = contract_wasm();
+        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
+        let code_stored = result.code_stored().unwrap();
+        let code_hash = code_stored.unwrap().code_hash;
+
+        log::info!("Code hash: {:?}", code_hash);
+
+        // call instantiate extrinsic
+        let result = client
+            .instantiate_and_watch(
+                &signer,
+                100_000_000_000_000,    // endowment
+                500_000_000,            // gas_limit
+                &code_hash,
+                &[],                    // data
+            )
+            .await
+            .unwrap();
+
+        log::info!("Instantiate result: {:?}", result);
+        let event = result.instantiated().unwrap();
+
+        assert!(
+            event.is_some(),
+            format!("Error instantiating contract: {:?}", result)
+        );
+    }
 }
