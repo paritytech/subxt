@@ -117,43 +117,75 @@ pub struct InstantiatedEvent<T: Contracts> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use sp_keyring::AccountKeyring;
 
-    subxt_test!({
-        name: test_put_code_and_instantiate,
-        prelude: {
-            const CONTRACT: &str = r#"
-(module
-    (func (export "call"))
-    (func (export "deploy"))
-)
-"#;
-            let wasm = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-            let code_hash;
-        },
-        step: {
-            call: PutCodeCall {
-                _runtime: PhantomData,
-                code: &wasm,
-            },
-            event: CodeStoredEvent {
-                code_hash: {
-                    code_hash = event.code_hash.clone();
-                    event.code_hash.clone()
-                },
-            },
-        },
-        step: {
-            call: InstantiateCall {
-                endowment: 100_000_000_000_000,
-                gas_limit: 500_000_000,
-                code_hash: &code_hash,
-                data: &[],
-            },
-            event: InstantiatedEvent {
-                caller: alice.clone(),
-                contract: event.contract.clone(),
-            },
-        },
-    });
+    use super::*;
+    use crate::{ClientBuilder, PairSigner, ContractsTemplateRuntime};
+
+    fn contract_wasm() -> Vec<u8> {
+        const CONTRACT: &str = r#"
+            (module
+                (func (export "call"))
+                (func (export "deploy"))
+            )
+        "#;
+        wabt::wat2wasm(CONTRACT).expect("invalid wabt")
+    }
+
+    #[async_std::test]
+    #[cfg(feature = "integration-tests")]
+    async fn tx_put_code() {
+        env_logger::try_init().ok();
+
+        let signer = PairSigner::new(AccountKeyring::Alice.pair());
+        let client = ClientBuilder::<ContractsTemplateRuntime>::new().build().await.unwrap();
+
+        let code = contract_wasm();
+        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
+        let code_stored = result.code_stored().unwrap();
+
+        assert!(
+            code_stored.is_some(),
+            format!(
+                "Error calling put_code and receiving CodeStored Event: {:?}",
+                code_stored
+            )
+        );
+    }
+
+    // #[test]
+    // #[cfg(feature = "integration-tests")]
+    // fn tx_instantiate() {
+    //     env_logger::try_init().ok();
+    //     let result: Result<_, Error> = async_std::task::block_on(async move {
+    //         let signer = AccountKeyring::Bob.pair();
+    //         let client = test_client().await;
+    //
+    //         let code_hash = put_code(&client, signer.clone()).await?;
+    //
+    //         log::info!("Code hash: {:?}", code_hash);
+    //
+    //         let xt = client.xt(signer, None).await?;
+    //         let result = xt
+    //             .watch()
+    //             .submit(InstantiateCall {
+    //                 endowment: 100_000_000_000_000,
+    //                 gas_limit: 500_000_000,
+    //                 code_hash: &code_hash,
+    //                 data: &[],
+    //             })
+    //             .await?;
+    //         let event = result
+    //             .find_event::<InstantiatedEvent<_>>()?
+    //             .ok_or(Error::Other("Failed to find Instantiated event".into()))?;
+    //         Ok(event)
+    //     });
+    //
+    //     log::info!("Instantiate result: {:?}", result);
+    //
+    //     assert!(
+    //         result.is_ok(),
+    //         format!("Error instantiating contract: {:?}", result)
+    //     );
+    // }
 }

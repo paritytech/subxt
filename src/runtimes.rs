@@ -116,6 +116,39 @@ impl Balances for NodeTemplateRuntime {
 
 impl Sudo for NodeTemplateRuntime {}
 
+/// Concrete type definitions compatible with the node template, with the
+/// contracts pallet enabled.
+///
+/// Inherits types from [`NodeTemplateRuntime`], but adds an implementation for
+/// the contracts pallet trait.
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct ContractsTemplateRuntime;
+
+impl Runtime for ContractsTemplateRuntime {
+    type Signature = <NodeTemplateRuntime as Runtime>::Signature;
+    type Extra = DefaultExtra<Self>;
+}
+
+impl System for ContractsTemplateRuntime {
+    type Index = <NodeTemplateRuntime as System>::Index;
+    type BlockNumber = <NodeTemplateRuntime as System>::BlockNumber;
+    type Hash = <NodeTemplateRuntime as System>::Hash;
+    type Hashing = <NodeTemplateRuntime as System>::Hashing;
+    type AccountId = <NodeTemplateRuntime as System>::AccountId;
+    type Address = <NodeTemplateRuntime as System>::Address;
+    type Header = <NodeTemplateRuntime as System>::Header;
+    type Extrinsic = <NodeTemplateRuntime as System>::Extrinsic;
+    type AccountData = <NodeTemplateRuntime as System>::AccountData;
+}
+
+impl Balances for ContractsTemplateRuntime {
+    type Balance = <NodeTemplateRuntime as Balances>::Balance;
+}
+
+impl Contracts for ContractsTemplateRuntime {}
+
+impl Sudo for ContractsTemplateRuntime {}
+
 /// Concrete type definitions compatible with those for kusama, v0.7
 ///
 /// # Note
