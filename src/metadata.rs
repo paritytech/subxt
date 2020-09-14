@@ -93,10 +93,7 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub fn module_with_calls<S>(
-        &self,
-        name: S,
-    ) -> Result<&ModuleWithCalls, MetadataError>
+    pub fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
     where
         S: ToString,
     {
