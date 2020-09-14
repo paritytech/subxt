@@ -121,19 +121,36 @@ mod tests {
 
     use super::*;
     use crate::{
+        Client,
         ClientBuilder,
         ContractsTemplateRuntime,
+        Error,
         PairSigner,
     };
+    use sp_core::sr25519::Pair;
 
-    fn contract_wasm() -> Vec<u8> {
+    async fn new_client() -> Client<ContractsTemplateRuntime> {
+        ClientBuilder::<ContractsTemplateRuntime>::new()
+            .build()
+            .await
+            .expect("Error creating client")
+    }
+
+    async fn put_code(signer: &PairSigner<ContractsTemplateRuntime, Pair>) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
         const CONTRACT: &str = r#"
             (module
                 (func (export "call"))
                 (func (export "deploy"))
             )
         "#;
-        wabt::wat2wasm(CONTRACT).expect("invalid wabt")
+        let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+        let client = new_client().await;
+
+        let result = client.put_code_and_watch(signer, &code).await?;
+        result
+            .code_stored()?
+            .ok_or_else(|| "Failed to find a CodeStored event".into())
     }
 
     #[async_std::test]
@@ -142,17 +159,10 @@ mod tests {
         env_logger::try_init().ok();
 
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
-            .build()
-            .await
-            .unwrap();
-
-        let code = contract_wasm();
-        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
-        let code_stored = result.code_stored().unwrap();
+        let code_stored = put_code(&signer).await;
 
         assert!(
-            code_stored.is_some(),
+            code_stored.is_ok(),
             format!(
                 "Error calling put_code and receiving CodeStored Event: {:?}",
                 code_stored
@@ -165,18 +175,13 @@ mod tests {
     async fn tx_instantiate() {
         env_logger::try_init().ok();
         let signer = PairSigner::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
-            .build()
-            .await
-            .unwrap();
 
         // call put_code extrinsic
-        let code = contract_wasm();
-        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
-        let code_stored = result.code_stored().unwrap();
-        let code_hash = code_stored.unwrap().code_hash;
+        let code_stored = put_code(&signer).await.unwrap();
 
-        log::info!("Code hash: {:?}", code_hash);
+        log::info!("Code hash: {:?}", code_stored.code_hash);
+
+        let client = new_client().await;
 
         // call instantiate extrinsic
         let result = client
@@ -184,7 +189,7 @@ mod tests {
                 &signer,
                 100_000_000_000_000, // endowment
                 500_000_000,         // gas_limit
-                &code_hash,
+                &code_stored.code_hash,
                 &[], // data
             )
             .await
