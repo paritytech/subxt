@@ -73,7 +73,7 @@ pub enum MetadataError {
 }
 
 /// Runtime metadata.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Metadata {
     modules: HashMap<String, ModuleMetadata>,
     modules_with_calls: HashMap<String, ModuleWithCalls>,

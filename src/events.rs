@@ -156,8 +156,11 @@ impl<T: System> EventsDecoder<T> {
                 }
                 EventArg::Option(arg) => {
                     match input.read_byte()? {
-                        0 => (),
-                        1 => self.decode_raw_bytes(&[*arg.clone()], input, output)?,
+                        0 => output.push_byte(0),
+                        1 => {
+                            output.push_byte(1);
+                            self.decode_raw_bytes(&[*arg.clone()], input, output)?
+                        }
                         _ => {
                             return Err(Error::Other(
                                 "unexpected first byte decoding Option".into(),
@@ -246,4 +249,32 @@ impl<T: System> EventsDecoder<T> {
 pub enum Raw {
     Event(RawEvent),
     Error(RuntimeError),
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    type TestRuntime = crate::NodeTemplateRuntime;
+
+    #[test]
+    fn test_decode_option() {
+        let decoder = EventsDecoder::<TestRuntime>::new(Metadata::default());
+
+        let value = Some(0u8);
+        let input = value.encode();
+        let mut output = Vec::<u8>::new();
+
+        decoder
+            .decode_raw_bytes(
+                &[EventArg::Option(Box::new(EventArg::Primitive(
+                    "u8".to_string(),
+                )))],
+                &mut &input[..],
+                &mut output,
+            )
+            .unwrap();
+
+        assert_eq!(output, vec![1, 0]);
+    }
 }
