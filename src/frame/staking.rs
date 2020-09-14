@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the frame_staking module.
+//! Implements support for the pallet_staking module.
 
 use super::balances::{
     Balances,
@@ -23,11 +23,6 @@ use super::balances::{
 use codec::{
     Decode,
     Encode,
-};
-use frame_support::Parameter;
-use sp_runtime::traits::{
-    MaybeSerialize,
-    Member,
 };
 
 use std::{
@@ -46,20 +41,6 @@ pub use pallet_staking::{
     StakingLedger,
     ValidatorPrefs,
 };
-
-/// Similar to `ErasStakers`, this holds the preferences of validators.
-///
-/// This is keyed first by the era index to allow bulk deletion and then the stash account.
-///
-/// Is it removed after `HISTORY_DEPTH` eras.
-#[derive(Encode, Decode, Debug, Store)]
-pub struct ErasValidatorPrefsStore<T: Staking> {
-    #[store(returns = ValidatorPrefs)]
-    /// Era index
-    pub index: EraIndex,
-    /// Account ID
-    pub account_id: T::AccountId,
-}
 
 /// Rewards for the last `HISTORY_DEPTH` eras.
 /// If reward hasn't been set or has been removed then 0 reward is returned.
@@ -83,44 +64,7 @@ pub struct SetPayeeCall<T: Staking> {
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
-pub trait Staking: Balances {
-    /// Data type used to index nominators in the compact type
-    type NominatorIndex: Parameter
-        + codec::Codec
-        + Member
-        + Default
-        + Copy
-        + MaybeSerialize
-        + Debug;
-
-    /// Data type used to index validators in the compact type.
-    type ValidatorIndex: Parameter
-        + codec::Codec
-        + Send
-        + Sync
-        + Default
-        + Member
-        + Copy
-        + MaybeSerialize
-        + Debug;
-
-    /// Maximum number of validators that can be stored in a snapshot.
-    const MAX_VALIDATORS: usize;
-
-    /// Maximum number of nominators that can be stored in a snapshot.
-    const MAX_NOMINATORS: usize;
-}
-
-/// Just a Balance/BlockNumber tuple to encode when a chunk of funds will be unlocked.
-#[derive(Clone, Encode, Decode, Debug)]
-pub struct UnlockChunk<T: Staking> {
-    /// Amount of funds to be unlocked.
-    #[codec(compact)]
-    pub value: T::Balance,
-    /// Era number at which point it'll be unlocked.
-    #[codec(compact)]
-    pub era: EraIndex,
-}
+pub trait Staking: Balances {}
 
 /// Number of eras to keep in history.
 ///
@@ -132,34 +76,6 @@ pub struct UnlockChunk<T: Staking> {
 #[derive(Encode, Decode, Copy, Clone, Debug, Default, Store)]
 pub struct HistoryDepthStore<T: Staking> {
     #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// The ideal number of staking participants.
-#[derive(Encode, Decode, Copy, Clone, Debug, Store)]
-pub struct ValidatorCountStore<T: Staking> {
-    #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Minimum number of staking participants before emergency conditions are imposed.
-#[derive(
-    Encode, Decode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store,
-)]
-pub struct MinimumValidatorCountStore<T: Staking> {
-    #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Any validators that may never be slashed or forcibly kicked. It's a Vec since they're
-/// easy to initialize and the performance hit is minimal (we expect no more than four
-/// invulnerables) and restricted to testnets.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct InvulnerablesStore<T: Staking> {
-    #[store(returns = Vec<T::AccountId>)]
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -226,90 +142,56 @@ pub struct EraRewardPoints<AccountId: Ord> {
     pub individual: BTreeMap<AccountId, RewardPoint>,
 }
 
-/// Clipped Exposure of validator at era.
+/// Declare no desire to either validate or nominate.
 ///
-/// This is similar to [`ErasStakers`] but number of nominators exposed is reduced to the
-/// `T::MaxNominatorRewardedPerValidator` biggest stakers.
-/// (Note: the field `total` and `own` of the exposure remains unchanged).
-/// This is used to limit the i/o cost for the nominator payout.
+/// Effective at the beginning of the next era.
 ///
-/// This is keyed fist by the era index to allow bulk deletion and then the stash account.
-///
-/// Is it removed after `HISTORY_DEPTH` eras.
-/// If stakers hasn't been set or has been removed then empty exposure is returned.
-#[derive(Encode, Copy, Clone, Debug, Store)]
-pub struct ErasStakersClippedStore<T: Staking> {
-    #[store(returns = Exposure<T::AccountId, T::Balance>)]
-    /// Era index
-    pub era: EraIndex,
-    /// Stash account of the validator
-    pub validator_stash: T::AccountId,
-}
-
-/// The active era information, it holds index and start.
-///
-/// The active era is the era currently rewarded.
-/// Validator set of this era must be equal to `SessionInterface::validators`.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct ActiveEraStore<T: Staking> {
-    #[store(returns = Option<ActiveEraInfo>)]
-    /// Marker for the runtime
+/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
+#[derive(Debug, Call, Encode)]
+pub struct ChillCall<T: Staking> {
+    /// Runtime marker
     pub _runtime: PhantomData<T>,
 }
+
+impl<T: Staking> Default for ChillCall<T> {
+    fn default() -> Self {
+        Self {
+            _runtime: PhantomData,
+        }
+    }
+}
+impl<T: Staking> Clone for ChillCall<T> {
+    fn clone(&self) -> Self {
+        Self {
+            _runtime: self._runtime,
+        }
+    }
+}
+impl<T: Staking> Copy for ChillCall<T> {}
 
 /// Declare the desire to validate for the origin controller.
 ///
-/// Effects will be felt at the beginning of the next era.
+/// Effective at the beginning of the next era.
 ///
 /// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
-///
-/// # <weight>
-/// - Independent of the arguments. Insignificant complexity.
-/// - Contains a limited number of reads.
-/// - Writes are limited to the `origin` account key.
-/// -----------
-/// Base Weight: 17.13 µs
-/// DB Weight:
-/// - Read: Era Election Status, Ledger
-/// - Write: Nominators, Validators
-/// # </weight>
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
 #[derive(Clone, Debug, PartialEq, Call, Encode)]
 pub struct ValidateCall<T: Staking> {
-    /// Runtime marker.
+    /// Runtime marker
     pub _runtime: PhantomData<T>,
-    /// Validation preferences.
+    /// Validation preferences
     pub prefs: ValidatorPrefs,
 }
 
 /// Declare the desire to nominate `targets` for the origin controller.
 ///
-/// Effects will be felt at the beginning of the next era. This can only be called when
-/// [`EraElectionStatus`] is `Closed`.
+/// Effective at the beginning of the next era.
 ///
 /// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// And, it can be only called when [`EraElectionStatus`] is `Closed`.
-///
-/// # <weight>
-/// - The transaction's complexity is proportional to the size of `targets` (N)
-/// which is capped at CompactAssignments::LIMIT (MAX_NOMINATIONS).
-/// - Both the reads and writes follow a similar pattern.
-/// ---------
-/// Base Weight: 22.34 + .36 * N µs
-/// where N is the number of targets
-/// DB Weight:
-/// - Reads: Era Election Status, Ledger, Current Era
-/// - Writes: Validators, Nominators
-/// # </weight>
+/// Can only be called when [`EraElectionStatus`] is `Closed`.
 #[derive(Call, Encode, Debug)]
 pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated
     pub targets: Vec<T::Address>,
-}
-
-/// Claim a payout.
-#[derive(PartialEq, Eq, Clone, Call, Encode, Decode, Debug)]
-struct PayoutStakersCall<'a, T: Staking> {
-    pub validator_stash: &'a T::AccountId,
-    pub era: EraIndex,
 }

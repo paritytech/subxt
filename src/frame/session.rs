@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
 
 //! Session support
 use crate::frame::system::{
@@ -32,7 +31,9 @@ use std::{
 };
 use substrate_subxt_proc_macro::Store;
 
-macro_rules! def {
+/// Impls `Default::default` for some types that have a `_runtime` field of type
+/// `PhantomData` as their only field.
+macro_rules! default_impl {
     ($name:ident) => {
         impl<T: Session> Default for $name<T> {
             fn default() -> Self {
@@ -50,9 +51,6 @@ pub trait Session: System {
     /// The validator account identifier type for the runtime.
     type ValidatorId: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 
-    /// The validator account identifier type for the runtime.
-    type SessionIndex: Parameter + Debug + Ord + Default + Send + Sync + 'static;
-
     /// The keys.
     type Keys: OpaqueKeys + Member + Parameter + Default;
 }
@@ -65,51 +63,13 @@ pub struct ValidatorsStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
-def!(ValidatorsStore);
+default_impl!(ValidatorsStore);
 
-/// Current index of the session.
-#[derive(Encode, Store, Debug)]
-pub struct CurrentIndexStore<T: Session> {
-    #[store(returns = <T as Session>::SessionIndex)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-def!(CurrentIndexStore);
-
-/// True if the underlying economic identities or weighting behind the validators
-/// has changed in the queued validator set.
-#[derive(Encode, Store, Debug)]
-pub struct QueuedChangedStore<T: Session> {
-    #[store(returns = bool)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-def!(QueuedChangedStore);
-
-/// The current set of validators.
+/// Set the session keys for a validator.
 #[derive(Encode, Call, Debug)]
 pub struct SetKeysCall<T: Session> {
     /// The keys
     pub keys: T::Keys,
     /// The proof. This is not currently used and can be set to an empty vector.
     pub proof: Vec<u8>,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::tests::test_client;
-
-    #[async_std::test]
-    async fn test_state_read_free_balance() {
-        env_logger::try_init().ok();
-        let (client, _) = test_client().await;
-        assert!(client
-            .fetch(&QueuedChangedStore::default(), None)
-            .await
-            .unwrap()
-            .unwrap());
-    }
 }

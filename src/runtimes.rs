@@ -146,12 +146,7 @@ pub trait Runtime: System + Sized + Send + Sync + 'static {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DefaultNodeRuntime;
 
-impl Staking for DefaultNodeRuntime {
-    type NominatorIndex = u32;
-    type ValidatorIndex = u16;
-    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
-    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
-}
+impl Staking for DefaultNodeRuntime {}
 
 impl Runtime for DefaultNodeRuntime {
     type Signature = MultiSignature;
@@ -175,7 +170,6 @@ impl Balances for DefaultNodeRuntime {
 }
 
 impl Session for DefaultNodeRuntime {
-    type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
     type Keys = BasicSessionKeys;
 }
@@ -215,7 +209,6 @@ impl Balances for NodeTemplateRuntime {
 }
 
 impl Session for NodeTemplateRuntime {
-    type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
     type Keys = BasicSessionKeys;
 }
@@ -249,17 +242,11 @@ impl System for KusamaRuntime {
 }
 
 impl Session for KusamaRuntime {
-    type SessionIndex = u32;
     type ValidatorId = <Self as System>::AccountId;
     type Keys = SessionKeys;
 }
 
-impl Staking for KusamaRuntime {
-    type NominatorIndex = u32;
-    type ValidatorIndex = u16;
-    const MAX_VALIDATORS: usize = Self::ValidatorIndex::max_value() as usize;
-    const MAX_NOMINATORS: usize = Self::NominatorIndex::max_value() as usize;
-}
+impl Staking for KusamaRuntime {}
 
 impl Balances for KusamaRuntime {
     type Balance = u128;
