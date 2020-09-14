@@ -93,10 +93,8 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub(crate) fn module_with_calls<S>(
-        &self,
-        name: S,
-    ) -> Result<&ModuleWithCalls, MetadataError>
+    /// Returns `ModuleWithCalls`.
+    pub fn module_with_calls<S>(&self, name: S) -> Result<&ModuleWithCalls, MetadataError>
     where
         S: ToString,
     {
@@ -106,11 +104,13 @@ impl Metadata {
             .ok_or(MetadataError::ModuleNotFound(name))
     }
 
-    pub(crate) fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
+    /// Returns Iterator of `ModuleWithEvents`.
+    pub fn modules_with_events(&self) -> impl Iterator<Item = &ModuleWithEvents> {
         self.modules_with_events.values()
     }
 
-    pub(crate) fn module_with_events(
+    /// Returns `ModuleWithEvents`.
+    pub fn module_with_events(
         &self,
         module_index: u8,
     ) -> Result<&ModuleWithEvents, MetadataError> {
@@ -120,7 +120,8 @@ impl Metadata {
             .ok_or(MetadataError::ModuleIndexNotFound(module_index))
     }
 
-    pub(crate) fn module_with_errors(
+    /// Returns `ModuleWithErrors`.
+    pub fn module_with_errors(
         &self,
         module_index: u8,
     ) -> Result<&ModuleWithErrors, MetadataError> {
