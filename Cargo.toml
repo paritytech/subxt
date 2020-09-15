@@ -19,6 +19,9 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 [features]
 client = ["substrate-subxt-client"]
 
+# enable this feature to run tests which require a local dev chain node
+integration-tests = []
+
 [dependencies]
 log = "0.4.11"
 thiserror = "1.0.20"
