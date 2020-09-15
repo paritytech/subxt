@@ -20,6 +20,7 @@ pallet-aura = { version = "2.0.0-rc6", default-features = false }
 pallet-balances = { version = "2.0.0-rc6", default-features = false }
 pallet-grandpa = { version = "2.0.0-rc6", default-features = false }
 pallet-randomness-collective-flip = { version = "2.0.0-rc6", default-features = false }
+pallet-staking = { version = "2.0.0-rc6", default-features = false }
 pallet-sudo = { version = "2.0.0-rc6", default-features = false }
 pallet-timestamp = { version = "2.0.0-rc6", default-features = false }
 pallet-transaction-payment = { version = "2.0.0-rc6", default-features = false }

@@ -195,3 +195,69 @@ pub struct NominateCall<T: Staking> {
     /// The targets that are being nominated
     pub targets: Vec<T::Address>,
 }
+
+#[cfg(all(test, feature = "integration-tests"))]
+mod tests {
+    use super::*;
+    use crate::{
+        // events::EventsDecoder,
+        extrinsic::PairSigner,
+        // subscription::EventSubscription,
+        // system::AccountStoreExt,
+        // tests::{test_client, TestRuntime},
+        runtimes::KusamaRuntime as RT,
+        ClientBuilder,
+        // frame::staking::NominateCallExt,
+        // frame::staking::CurrentEraStoreExt,
+        // frame::staking::CurrentEraStore,
+        // frame::staking::HistoryDepthStore,
+        // runtimes::StakingRuntime as RT,
+    };
+    // use sp_core::{sr25519::Pair, Pair as _};
+    use sp_keyring::AccountKeyring;
+    use crate::frame::balances::*;
+    use crate::frame::system::*;
+    use crate::extrinsic::Signer;
+
+    #[async_std::test]
+    async fn test_nominate() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+
+        let client = ClientBuilder::<RT>::new()
+            .build()
+            .await
+            .unwrap();
+        let current_era = client.current_era(None).await.unwrap();
+        println!("Current era: {:?}", current_era);
+        let hd = client.history_depth(None).await.unwrap();
+        println!("History depth: {:?}", hd);
+        let total_issuance = client.total_issuance(None).await.unwrap();
+        println!("total issuance: {:?}", total_issuance);
+        let alice_account = client.account(&alice.account_id(), None).await.unwrap();
+        println!("Alice's account info: {:?}", alice_account);
+        let o = client.nominate(&alice, vec![bob.account_id().clone()]).await.unwrap();
+        println!("Nom nom: {:?}", o);
+        let o = client.validate(&bob, ValidatorPrefs::default()).await.unwrap();
+        println!("Validator result: {:?}", o);
+        for &i in &[RewardDestination::Staked] {
+            for &j in &[&bob, &alice] {
+                println!("Transaction result: {:?}", client.set_payee(j, i).await.unwrap());
+            }
+        }
+        // let event = client.
+        //     current_era()
+        //     .await;
+        // println!("Current era: {:?}", event);
+        // let (client, _) = test_client().await;
+        // let event = client.
+        //     nominate_and_watch(&alice, vec![AccountKeyring::Bob.to_account_id()])
+        //     .await
+        //     .unwrap();
+        //     // .nominate()
+        //     // .unwrap()
+        //     // .unwrap();
+        // dbg!(event);
+    }
+}
