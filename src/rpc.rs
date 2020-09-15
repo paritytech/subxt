@@ -33,6 +33,7 @@ use jsonrpsee::{
     client::Subscription,
     common::{
         to_value as to_json_value,
+        DeserializeOwned,
         Params,
     },
     Client,
@@ -476,6 +477,14 @@ impl<T: Runtime> Rpc<T> {
         let params =
             Params::Array(vec![to_json_value(public_key)?, to_json_value(key_type)?]);
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+
+    pub async fn send_msg<R: DeserializeOwned>(
+        &self,
+        method: &str,
+        params: Params,
+    ) -> Result<R, Error> {
+        Ok(self.client.request(method, params).await?)
     }
 }
 

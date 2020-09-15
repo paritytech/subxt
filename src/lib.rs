@@ -50,7 +50,14 @@ pub use sp_runtime;
 
 use codec::Decode;
 use futures::future;
-use jsonrpsee::client::Subscription;
+pub use jsonrpsee::common::{
+    to_value as to_json_value,
+    Params,
+};
+use jsonrpsee::{
+    client::Subscription,
+    common::DeserializeOwned,
+};
 use sc_rpc_api::state::ReadProof;
 use sp_core::{
     storage::{
@@ -544,6 +551,15 @@ impl<T: Runtime> Client<T> {
         key_type: String,
     ) -> Result<bool, Error> {
         self.rpc.has_key(public_key, key_type).await
+    }
+
+    /// Send a custom RPC message
+    pub async fn send_msg<R: DeserializeOwned>(
+        &self,
+        method: &str,
+        params: Params,
+    ) -> Result<R, Error> {
+        self.rpc.send_msg(method, params).await
     }
 }
 
