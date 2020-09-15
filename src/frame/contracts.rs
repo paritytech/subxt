@@ -120,12 +120,24 @@ mod tests {
     use sp_keyring::AccountKeyring;
 
     use super::*;
-    use crate::{balances::*, system::*, Client, ClientBuilder, ContractsTemplateRuntime, Error, PairSigner, Signer};
+    use crate::{
+        balances::*,
+        system::*,
+        Client,
+        ClientBuilder,
+        ContractsTemplateRuntime,
+        Error,
+        PairSigner,
+        Signer,
+    };
     use sp_core::{
         crypto::AccountId32,
         sr25519::Pair,
     };
-    use std::sync::atomic::{AtomicU32, Ordering};
+    use std::sync::atomic::{
+        AtomicU32,
+        Ordering,
+    };
 
     static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
 
@@ -153,8 +165,7 @@ mod tests {
     }
 
     impl TestContext {
-        async fn init() -> Self
-        {
+        async fn init() -> Self {
             env_logger::try_init().ok();
 
             let client = ClientBuilder::<ContractsTemplateRuntime>::new()
@@ -167,18 +178,19 @@ mod tests {
                 .await
                 .unwrap()
                 .nonce;
-            let local_nonce = STASH_NONCE.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)).unwrap();
+            let local_nonce = STASH_NONCE
+                .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1))
+                .unwrap();
             stash.set_nonce(nonce + local_nonce);
 
             let signer = generate_account(&client, &mut stash).await;
 
-            TestContext {
-                client,
-                signer,
-            }
+            TestContext { client, signer }
         }
 
-        async fn put_code(&self) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+        async fn put_code(
+            &self,
+        ) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -218,7 +230,8 @@ mod tests {
         log::info!("Code hash: {:?}", code_stored.code_hash);
 
         // call instantiate extrinsic
-        let result = ctx.client
+        let result = ctx
+            .client
             .instantiate_and_watch(
                 &ctx.signer,
                 100_000_000_000_000, // endowment
