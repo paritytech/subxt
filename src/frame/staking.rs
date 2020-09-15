@@ -196,7 +196,7 @@ pub struct NominateCall<T: Staking> {
     pub targets: Vec<T::Address>,
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "integration-tests"))]
 mod tests {
     use super::*;
     use crate::{
@@ -215,7 +215,6 @@ mod tests {
     };
     // use sp_core::{sr25519::Pair, Pair as _};
     use sp_keyring::AccountKeyring;
-    use core::marker::PhantomData;
     use crate::frame::balances::*;
     use crate::frame::system::*;
     use crate::extrinsic::Signer;
@@ -230,18 +229,23 @@ mod tests {
             .build()
             .await
             .unwrap();
-        println!("HAVE CLIENT");
-
-        let current_era = client.current_era(None).await;
+        let current_era = client.current_era(None).await.unwrap();
         println!("Current era: {:?}", current_era);
-        let hd = client.history_depth(None).await;
+        let hd = client.history_depth(None).await.unwrap();
         println!("History depth: {:?}", hd);
-        let total_issuance = client.total_issuance(None).await;
+        let total_issuance = client.total_issuance(None).await.unwrap();
         println!("total issuance: {:?}", total_issuance);
-        let alice_account = client.account(&alice.account_id(), None).await;
+        let alice_account = client.account(&alice.account_id(), None).await.unwrap();
         println!("Alice's account info: {:?}", alice_account);
-        let o = client.nominate(&alice, vec![bob.account_id().clone()]).await;
+        let o = client.nominate(&alice, vec![bob.account_id().clone()]).await.unwrap();
         println!("Nom nom: {:?}", o);
+        let o = client.validate(&bob, ValidatorPrefs::default()).await.unwrap();
+        println!("Validator result: {:?}", o);
+        for &i in &[RewardDestination::Staked] {
+            for &j in &[&bob, &alice] {
+                println!("Transaction result: {:?}", client.set_payee(j, i).await.unwrap());
+            }
+        }
         // let event = client.
         //     current_era()
         //     .await;
