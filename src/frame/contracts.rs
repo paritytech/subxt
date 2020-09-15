@@ -121,6 +121,7 @@ mod tests {
 
     use super::*;
     use crate::{
+        balances::*,
         Client,
         ClientBuilder,
         ContractsTemplateRuntime,
@@ -128,6 +129,7 @@ mod tests {
         PairSigner,
     };
     use sp_core::sr25519::Pair;
+    use sp_core::crypto::AccountId32;
 
     async fn new_client() -> Client<ContractsTemplateRuntime> {
         ClientBuilder::<ContractsTemplateRuntime>::new()
@@ -153,12 +155,28 @@ mod tests {
             .ok_or_else(|| "Failed to find a CodeStored event".into())
     }
 
+    /// generate a new keypair for an account, and fund it so it can perform smart contract operations
+    async fn generate_account() -> PairSigner<ContractsTemplateRuntime, Pair> {
+        use sp_core::Pair as _;
+        let new_account = Pair::generate().0;
+        let new_account_id: AccountId32 = new_account.public().into();
+        // fund the account
+        let benefactor = PairSigner::new(AccountKeyring::Alice.pair());
+        let client = new_client().await;
+        let endowment = 200_000_000_000_000;
+        let _ = client.transfer_and_watch(&benefactor, &new_account_id, endowment)
+            .await
+            .expect("New account balance transfer failed");
+        PairSigner::new(new_account)
+    }
+
     #[async_std::test]
     #[cfg(feature = "integration-tests")]
     async fn tx_put_code() {
         env_logger::try_init().ok();
 
-        let signer = PairSigner::new(AccountKeyring::Alice.pair());
+        let signer = generate_account().await;
+
         let code_stored = put_code(&signer).await;
 
         assert!(
@@ -174,7 +192,7 @@ mod tests {
     #[cfg(feature = "integration-tests")]
     async fn tx_instantiate() {
         env_logger::try_init().ok();
-        let signer = PairSigner::new(AccountKeyring::Bob.pair());
+        let signer = generate_account().await;
 
         // call put_code extrinsic
         let code_stored = put_code(&signer).await.unwrap();
@@ -203,4 +221,10 @@ mod tests {
             format!("Error instantiating contract: {:?}", result)
         );
     }
+
+    // #[async_std::test]
+    // #[cfg(feature = "integration-tests")]
+    // async fn tx_call() {
+    //
+    // }
 }
