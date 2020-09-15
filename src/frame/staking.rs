@@ -200,24 +200,19 @@ pub struct NominateCall<T: Staking> {
 mod tests {
     use super::*;
     use crate::{
-        // events::EventsDecoder,
         extrinsic::PairSigner,
-        // subscription::EventSubscription,
-        // system::AccountStoreExt,
-        // tests::{test_client, TestRuntime},
         runtimes::KusamaRuntime as RT,
         ClientBuilder,
-        // frame::staking::NominateCallExt,
-        // frame::staking::CurrentEraStoreExt,
-        // frame::staking::CurrentEraStore,
-        // frame::staking::HistoryDepthStore,
-        // runtimes::StakingRuntime as RT,
     };
     // use sp_core::{sr25519::Pair, Pair as _};
+    use crate::{
+        extrinsic::Signer,
+        frame::{
+            balances::*,
+            system::*,
+        },
+    };
     use sp_keyring::AccountKeyring;
-    use crate::frame::balances::*;
-    use crate::frame::system::*;
-    use crate::extrinsic::Signer;
 
     #[async_std::test]
     async fn test_nominate() {
@@ -225,10 +220,7 @@ mod tests {
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
 
-        let client = ClientBuilder::<RT>::new()
-            .build()
-            .await
-            .unwrap();
+        let client = ClientBuilder::<RT>::new().build().await.unwrap();
         let current_era = client.current_era(None).await.unwrap();
         println!("Current era: {:?}", current_era);
         let hd = client.history_depth(None).await.unwrap();
@@ -237,13 +229,22 @@ mod tests {
         println!("total issuance: {:?}", total_issuance);
         let alice_account = client.account(&alice.account_id(), None).await.unwrap();
         println!("Alice's account info: {:?}", alice_account);
-        let o = client.nominate(&alice, vec![bob.account_id().clone()]).await.unwrap();
+        let o = client
+            .nominate(&alice, vec![bob.account_id().clone()])
+            .await
+            .unwrap();
         println!("Nom nom: {:?}", o);
-        let o = client.validate(&bob, ValidatorPrefs::default()).await.unwrap();
+        let o = client
+            .validate(&bob, ValidatorPrefs::default())
+            .await
+            .unwrap();
         println!("Validator result: {:?}", o);
         for &i in &[RewardDestination::Staked] {
             for &j in &[&bob, &alice] {
-                println!("Transaction result: {:?}", client.set_payee(j, i).await.unwrap());
+                println!(
+                    "Transaction result: {:?}",
+                    client.set_payee(j, i).await.unwrap()
+                );
             }
         }
         // let event = client.

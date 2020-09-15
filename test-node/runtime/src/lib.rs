@@ -82,7 +82,7 @@ pub use frame_support::{
     StorageValue,
 };
 pub use pallet_balances::Call as BalancesCall;
-pub use pallet_staking::Call  as StakingCall;
+pub use pallet_staking::Call as StakingCall;
 pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -329,7 +329,6 @@ impl pallet_sudo::Trait for Runtime {
 // 	type UnsignedPriority = ();
 // 	type WeightInfo = ();
 // }
-
 
 construct_runtime!(
     pub enum Runtime where
