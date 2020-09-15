@@ -120,64 +120,85 @@ mod tests {
     use sp_keyring::AccountKeyring;
 
     use super::*;
-    use crate::{
-        balances::*,
-        Client,
-        ClientBuilder,
-        ContractsTemplateRuntime,
-        Error,
-        PairSigner,
+    use crate::{balances::*, system::*, Client, ClientBuilder, ContractsTemplateRuntime, Error, PairSigner, Signer};
+    use sp_core::{
+        crypto::AccountId32,
+        sr25519::Pair,
     };
-    use sp_core::sr25519::Pair;
-    use sp_core::crypto::AccountId32;
+    use std::sync::atomic::{AtomicU32, Ordering};
 
-    async fn new_client() -> Client<ContractsTemplateRuntime> {
-        ClientBuilder::<ContractsTemplateRuntime>::new()
-            .build()
-            .await
-            .expect("Error creating client")
-    }
-
-    async fn put_code(signer: &PairSigner<ContractsTemplateRuntime, Pair>) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
-        const CONTRACT: &str = r#"
-            (module
-                (func (export "call"))
-                (func (export "deploy"))
-            )
-        "#;
-        let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
-
-        let client = new_client().await;
-
-        let result = client.put_code_and_watch(signer, &code).await?;
-        result
-            .code_stored()?
-            .ok_or_else(|| "Failed to find a CodeStored event".into())
-    }
+    static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
 
     /// generate a new keypair for an account, and fund it so it can perform smart contract operations
-    async fn generate_account() -> PairSigner<ContractsTemplateRuntime, Pair> {
+    async fn generate_account(
+        client: &Client<ContractsTemplateRuntime>,
+        stash: &mut PairSigner<ContractsTemplateRuntime, Pair>,
+    ) -> PairSigner<ContractsTemplateRuntime, Pair> {
         use sp_core::Pair as _;
         let new_account = Pair::generate().0;
         let new_account_id: AccountId32 = new_account.public().into();
         // fund the account
-        let benefactor = PairSigner::new(AccountKeyring::Alice.pair());
-        let client = new_client().await;
         let endowment = 200_000_000_000_000;
-        let _ = client.transfer_and_watch(&benefactor, &new_account_id, endowment)
+        let _ = client
+            .transfer_and_watch(stash, &new_account_id, endowment)
             .await
             .expect("New account balance transfer failed");
+        stash.increment_nonce();
         PairSigner::new(new_account)
+    }
+
+    struct TestContext {
+        client: Client<ContractsTemplateRuntime>,
+        signer: PairSigner<ContractsTemplateRuntime, Pair>,
+    }
+
+    impl TestContext {
+        async fn init() -> Self
+        {
+            env_logger::try_init().ok();
+
+            let client = ClientBuilder::<ContractsTemplateRuntime>::new()
+                .build()
+                .await
+                .expect("Error creating client");
+            let mut stash = PairSigner::new(AccountKeyring::Alice.pair());
+            let nonce = client
+                .account(&stash.account_id(), None)
+                .await
+                .unwrap()
+                .nonce;
+            let local_nonce = STASH_NONCE.fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1)).unwrap();
+            stash.set_nonce(nonce + local_nonce);
+
+            let signer = generate_account(&client, &mut stash).await;
+
+            TestContext {
+                client,
+                signer,
+            }
+        }
+
+        async fn put_code(&self) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+            const CONTRACT: &str = r#"
+                (module
+                    (func (export "call"))
+                    (func (export "deploy"))
+                )
+            "#;
+            let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+            let result = self.client.put_code_and_watch(&self.signer, &code).await?;
+            result
+                .code_stored()?
+                .ok_or_else(|| "Failed to find a CodeStored event".into())
+        }
     }
 
     #[async_std::test]
     #[cfg(feature = "integration-tests")]
     async fn tx_put_code() {
-        env_logger::try_init().ok();
-
-        let signer = generate_account().await;
-
-        let code_stored = put_code(&signer).await;
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await;
 
         assert!(
             code_stored.is_ok(),
@@ -191,20 +212,15 @@ mod tests {
     #[async_std::test]
     #[cfg(feature = "integration-tests")]
     async fn tx_instantiate() {
-        env_logger::try_init().ok();
-        let signer = generate_account().await;
-
-        // call put_code extrinsic
-        let code_stored = put_code(&signer).await.unwrap();
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await.unwrap();
 
         log::info!("Code hash: {:?}", code_stored.code_hash);
 
-        let client = new_client().await;
-
         // call instantiate extrinsic
-        let result = client
+        let result = ctx.client
             .instantiate_and_watch(
-                &signer,
+                &ctx.signer,
                 100_000_000_000_000, // endowment
                 500_000_000,         // gas_limit
                 &code_stored.code_hash,
