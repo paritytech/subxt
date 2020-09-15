@@ -82,6 +82,7 @@ pub use frame_support::{
     StorageValue,
 };
 pub use pallet_balances::Call as BalancesCall;
+pub use pallet_staking::Call  as StakingCall;
 pub use pallet_timestamp::Call as TimestampCall;
 #[cfg(any(feature = "std", test))]
 pub use sp_runtime::BuildStorage;
@@ -304,6 +305,31 @@ impl pallet_sudo::Trait for Runtime {
     type Event = Event;
     type Call = Call;
 }
+
+// impl pallet_staking::Trait for Runtime {
+// 	type Currency = Balances;
+// 	type UnixTime = pallet_timestamp::Module<Self>;
+// 	type CurrencyToVote = CurrencyToVoteHandler;
+// 	type RewardRemainder = ();
+// 	type Event = ();
+// 	type Slash = ();
+// 	type Reward = ();
+// 	type SessionsPerEra = ();
+// 	type SlashDeferDuration = ();
+// 	type SlashCancelOrigin = frame_system::EnsureRoot<Self::AccountId>;
+// 	type BondingDuration = ();
+// 	type SessionInterface = Self;
+// 	type RewardCurve = RewardCurve;
+// 	type NextNewSession = Session;
+// 	type ElectionLookahead = ();
+// 	type Call = Call;
+// 	type MaxIterations = MaxIterations;
+// 	type MinSolutionScoreBump = ();
+// 	type MaxNominatorRewardedPerValidator = MaxNominatorRewardedPerValidator;
+// 	type UnsignedPriority = ();
+// 	type WeightInfo = ();
+// }
+
 
 construct_runtime!(
     pub enum Runtime where
