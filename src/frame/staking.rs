@@ -239,7 +239,7 @@ mod tests {
             .await
             .unwrap();
         println!("Validator result: {:?}", o);
-        for &i in &[RewardDestination::Staked] {
+        for &i in &[RewardDestination::Controller] {
             for &j in &[&bob, &alice] {
                 println!(
                     "Transaction result: {:?}",
@@ -247,6 +247,18 @@ mod tests {
                 );
             }
         }
+        assert_eq!(
+            client
+                .fetch(
+                    &ValidatorsStore {
+                        stash: bob.account_id().clone()
+                    },
+                    None
+                )
+                .await
+                .unwrap(),
+            None
+        );
         // let event = client.
         //     current_era()
         //     .await;
