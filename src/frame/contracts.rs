@@ -157,8 +157,7 @@ mod tests {
         signer: PairSigner<ContractsTemplateRuntime, Pair>,
     }
 
-    impl TestContext
-    {
+    impl TestContext {
         async fn init() -> Self {
             env_logger::try_init().ok();
 
@@ -201,7 +200,9 @@ mod tests {
             PairSigner::new(new_account)
         }
 
-        async fn put_code(&self) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+        async fn put_code(
+            &self,
+        ) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -211,14 +212,18 @@ mod tests {
             let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
             let result = self.client.put_code_and_watch(&self.signer, &code).await?;
-            let code_stored = result
-                .code_stored()?
-                .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+            let code_stored = result.code_stored()?.ok_or_else(|| {
+                Error::Other("Failed to find a CodeStored event".into())
+            })?;
             log::info!("Code hash: {:?}", code_stored.code_hash);
             Ok(code_stored)
         }
 
-        async fn instantiate(&self, code_hash: &<ContractsTemplateRuntime as System>::Hash, data: &[u8]) -> Result<InstantiatedEvent<ContractsTemplateRuntime>, Error> {
+        async fn instantiate(
+            &self,
+            code_hash: &<ContractsTemplateRuntime as System>::Hash,
+            data: &[u8],
+        ) -> Result<InstantiatedEvent<ContractsTemplateRuntime>, Error> {
             // call instantiate extrinsic
             let result = self
                 .client
@@ -232,28 +237,32 @@ mod tests {
                 .await?;
 
             log::info!("Instantiate result: {:?}", result);
-            let instantiated = result
-                .instantiated()?
-                .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
+            let instantiated = result.instantiated()?.ok_or_else(|| {
+                Error::Other("Failed to find a Instantiated event".into())
+            })?;
 
             Ok(instantiated)
         }
 
-        async fn call(&self, contract: &<ContractsTemplateRuntime as System>::Address, input_data: &[u8]) -> Result<ContractExecutionEvent<ContractsTemplateRuntime>, Error> {
+        async fn call(
+            &self,
+            contract: &<ContractsTemplateRuntime as System>::Address,
+            input_data: &[u8],
+        ) -> Result<ContractExecutionEvent<ContractsTemplateRuntime>, Error> {
             let result = self
                 .client
                 .call_and_watch(
                     &self.signer,
                     contract,
-                    0,              // value
-                    500_000_000,    // gas_limit
+                    0,           // value
+                    500_000_000, // gas_limit
                     input_data,
                 )
                 .await?;
             log::info!("Call result: {:?}", result);
-            let executed = result
-                .contract_execution()?
-                .ok_or_else(|| Error::Other("Failed to find a ContractExecution event".into()))?;
+            let executed = result.contract_execution()?.ok_or_else(|| {
+                Error::Other("Failed to find a ContractExecution event".into())
+            })?;
 
             Ok(executed)
         }
@@ -295,7 +304,7 @@ mod tests {
         let code_stored = ctx.put_code().await.unwrap();
 
         let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await.unwrap();
-        let executed = ctx.call(&instantiated.contract, &[]).await.unwrap();
+        let executed = ctx.call(&instantiated.contract, &[]).await;
 
         assert!(
             executed.is_ok(),
