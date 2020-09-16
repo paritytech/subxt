@@ -115,6 +115,17 @@ pub struct InstantiatedEvent<T: Contracts> {
     pub contract: <T as System>::AccountId,
 }
 
+/// Contract execution event.
+///
+/// Raised upon successful executionFailing  of a contract call
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct ContractExecutionEvent<T: Contracts> {
+    /// Caller of the contract.
+    pub caller: <T as System>::AccountId,
+    /// Raw contract event data
+    pub data: Vec<u8>,
+}
+
 #[cfg(test)]
 mod tests {
     use sp_keyring::AccountKeyring;
@@ -141,30 +152,13 @@ mod tests {
 
     static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
 
-    /// generate a new keypair for an account, and fund it so it can perform smart contract operations
-    async fn generate_account(
-        client: &Client<ContractsTemplateRuntime>,
-        stash: &mut PairSigner<ContractsTemplateRuntime, Pair>,
-    ) -> PairSigner<ContractsTemplateRuntime, Pair> {
-        use sp_core::Pair as _;
-        let new_account = Pair::generate().0;
-        let new_account_id: AccountId32 = new_account.public().into();
-        // fund the account
-        let endowment = 200_000_000_000_000;
-        let _ = client
-            .transfer_and_watch(stash, &new_account_id, endowment)
-            .await
-            .expect("New account balance transfer failed");
-        stash.increment_nonce();
-        PairSigner::new(new_account)
-    }
-
     struct TestContext {
         client: Client<ContractsTemplateRuntime>,
         signer: PairSigner<ContractsTemplateRuntime, Pair>,
     }
 
-    impl TestContext {
+    impl TestContext
+    {
         async fn init() -> Self {
             env_logger::try_init().ok();
 
@@ -181,16 +175,33 @@ mod tests {
             let local_nonce = STASH_NONCE
                 .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1))
                 .unwrap();
+
             stash.set_nonce(nonce + local_nonce);
 
-            let signer = generate_account(&client, &mut stash).await;
+            let signer = Self::generate_account(&client, &mut stash).await;
 
             TestContext { client, signer }
         }
 
-        async fn put_code(
-            &self,
-        ) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+        /// generate a new keypair for an account, and fund it so it can perform smart contract operations
+        async fn generate_account(
+            client: &Client<ContractsTemplateRuntime>,
+            stash: &mut PairSigner<ContractsTemplateRuntime, Pair>,
+        ) -> PairSigner<ContractsTemplateRuntime, Pair> {
+            use sp_core::Pair as _;
+            let new_account = Pair::generate().0;
+            let new_account_id: AccountId32 = new_account.public().into();
+            // fund the account
+            let endowment = 200_000_000_000_000;
+            let _ = client
+                .transfer_and_watch(stash, &new_account_id, endowment)
+                .await
+                .expect("New account balance transfer failed");
+            stash.increment_nonce();
+            PairSigner::new(new_account)
+        }
+
+        async fn put_code(&self) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -200,9 +211,51 @@ mod tests {
             let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
             let result = self.client.put_code_and_watch(&self.signer, &code).await?;
-            result
+            let code_stored = result
                 .code_stored()?
-                .ok_or_else(|| "Failed to find a CodeStored event".into())
+                .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+            log::info!("Code hash: {:?}", code_stored.code_hash);
+            Ok(code_stored)
+        }
+
+        async fn instantiate(&self, code_hash: &<ContractsTemplateRuntime as System>::Hash, data: &[u8]) -> Result<InstantiatedEvent<ContractsTemplateRuntime>, Error> {
+            // call instantiate extrinsic
+            let result = self
+                .client
+                .instantiate_and_watch(
+                    &self.signer,
+                    100_000_000_000_000, // endowment
+                    500_000_000,         // gas_limit
+                    code_hash,
+                    data,
+                )
+                .await?;
+
+            log::info!("Instantiate result: {:?}", result);
+            let instantiated = result
+                .instantiated()?
+                .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
+
+            Ok(instantiated)
+        }
+
+        async fn call(&self, contract: &<ContractsTemplateRuntime as System>::Address, input_data: &[u8]) -> Result<ContractExecutionEvent<ContractsTemplateRuntime>, Error> {
+            let result = self
+                .client
+                .call_and_watch(
+                    &self.signer,
+                    contract,
+                    0,              // value
+                    500_000_000,    // gas_limit
+                    input_data,
+                )
+                .await?;
+            log::info!("Call result: {:?}", result);
+            let executed = result
+                .contract_execution()?
+                .ok_or_else(|| Error::Other("Failed to find a ContractExecution event".into()))?;
+
+            Ok(executed)
         }
     }
 
@@ -227,33 +280,26 @@ mod tests {
         let ctx = TestContext::init().await;
         let code_stored = ctx.put_code().await.unwrap();
 
-        log::info!("Code hash: {:?}", code_stored.code_hash);
-
-        // call instantiate extrinsic
-        let result = ctx
-            .client
-            .instantiate_and_watch(
-                &ctx.signer,
-                100_000_000_000_000, // endowment
-                500_000_000,         // gas_limit
-                &code_stored.code_hash,
-                &[], // data
-            )
-            .await
-            .unwrap();
-
-        log::info!("Instantiate result: {:?}", result);
-        let event = result.instantiated().unwrap();
+        let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await;
 
         assert!(
-            event.is_some(),
-            format!("Error instantiating contract: {:?}", result)
+            instantiated.is_ok(),
+            format!("Error instantiating contract: {:?}", instantiated)
         );
     }
 
-    // #[async_std::test]
-    // #[cfg(feature = "integration-tests")]
-    // async fn tx_call() {
-    //
-    // }
+    #[async_std::test]
+    #[cfg(feature = "integration-tests")]
+    async fn tx_call() {
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await.unwrap();
+
+        let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await.unwrap();
+        let executed = ctx.call(&instantiated.contract, &[]).await.unwrap();
+
+        assert!(
+            executed.is_ok(),
+            format!("Error calling contract: {:?}", instantiated)
+        );
+    }
 }
