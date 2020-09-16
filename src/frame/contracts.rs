@@ -308,7 +308,7 @@ mod tests {
 
         assert!(
             executed.is_ok(),
-            format!("Error calling contract: {:?}", instantiated)
+            format!("Error calling contract: {:?}", executed)
         );
     }
 }
