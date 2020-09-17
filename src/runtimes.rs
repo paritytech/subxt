@@ -111,7 +111,6 @@ impl_opaque_keys! {
 }
 
 use crate::{
-    contracts::Contracts,
     extrinsic::{
         DefaultExtra,
         SignedExtra,
