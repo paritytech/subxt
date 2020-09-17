@@ -237,6 +237,7 @@ mod tests {
     }
 
     #[async_std::test]
+    #[ignore]
     async fn test_nominate() {
         env_logger::try_init().ok();
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
