@@ -196,23 +196,45 @@ pub struct NominateCall<T: Staking> {
     pub targets: Vec<T::Address>,
 }
 
-#[cfg(all(test, feature = "integration-tests"))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
-        extrinsic::PairSigner,
-        runtimes::KusamaRuntime as RT,
-        ClientBuilder,
-    };
-    // use sp_core::{sr25519::Pair, Pair as _};
-    use crate::{
-        extrinsic::Signer,
+        extrinsic::{
+            PairSigner,
+            Signer,
+        },
         frame::{
             balances::*,
             system::*,
         },
+        runtimes::KusamaRuntime as RT,
+        ClientBuilder,
+        Error,
+    };
+    use jsonrpsee::{
+        client::RequestError,
+        common::{
+            Error as RPCError,
+            ErrorCode,
+        },
     };
     use sp_keyring::AccountKeyring;
+    macro_rules! retry_trans {
+        ($e: expr) => {
+            (loop {
+                match $e.await {
+                    Ok(o) => break o,
+                    Err(Error::Rpc(RequestError::Request(RPCError {
+                        code: ErrorCode::ServerError(1014),
+                        message: m,
+                        data: Some(_),
+                    }))) if m.starts_with("Priority is too low: ") => {}
+                    Err(e) => panic!("Unexpected error: {}", e),
+                }
+            })
+        };
+    }
 
     #[async_std::test]
     async fn test_nominate() {
@@ -234,18 +256,14 @@ mod tests {
             .await
             .unwrap();
         println!("Nom nom: {:?}", o);
-        let o = client
-            .validate(&bob, ValidatorPrefs::default())
-            .await
-            .unwrap();
+        let o = retry_trans!(client.validate(&bob, ValidatorPrefs::default()));
         println!("Validator result: {:?}", o);
         for &i in &[RewardDestination::Controller] {
             for &j in &[&bob, &alice] {
-                println!(
-                    "Transaction result: {:?}",
-                    client.set_payee(j, i).await.unwrap()
-                );
-                client.chill(j).await.unwrap();
+                let o = retry_trans!(client.validate(&bob, ValidatorPrefs::default()));
+                println!("Transaction result: {:?}", o);
+                let o = retry_trans!(client.chill(j));
+                println!("Transaction result: {:?}", o);
             }
         }
     }
