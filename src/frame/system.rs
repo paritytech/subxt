@@ -156,6 +156,15 @@ pub struct SetCodeCall<'a, T: System> {
     pub code: &'a [u8],
 }
 
+/// Arguments for updating the runtime code without checks
+#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
+pub struct SetCodeWithoutChecksCall<'a, T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Runtime wasm blob.
+    pub code: &'a [u8],
+}
+
 /// A phase of a block's execution.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum Phase {
