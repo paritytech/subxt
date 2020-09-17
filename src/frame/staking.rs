@@ -245,32 +245,8 @@ mod tests {
                     "Transaction result: {:?}",
                     client.set_payee(j, i).await.unwrap()
                 );
+                client.chill(j).await.unwrap();
             }
         }
-        assert_eq!(
-            client
-                .fetch(
-                    &ValidatorsStore {
-                        stash: bob.account_id().clone()
-                    },
-                    None
-                )
-                .await
-                .unwrap(),
-            None
-        );
-        // let event = client.
-        //     current_era()
-        //     .await;
-        // println!("Current era: {:?}", event);
-        // let (client, _) = test_client().await;
-        // let event = client.
-        //     nominate_and_watch(&alice, vec![AccountKeyring::Bob.to_account_id()])
-        //     .await
-        //     .unwrap();
-        //     // .nominate()
-        //     // .unwrap()
-        //     // .unwrap();
-        // dbg!(event);
     }
 }
