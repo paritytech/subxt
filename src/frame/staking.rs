@@ -201,7 +201,7 @@ pub struct NominateCall<T: Staking> {
 mod tests {
     use super::*;
     use crate::{
-        ExtrinsicSuccess,
+        error::RuntimeError,
         extrinsic::{
             PairSigner,
             Signer,
@@ -213,8 +213,9 @@ mod tests {
         runtimes::KusamaRuntime as RT,
         ClientBuilder,
         Error,
-        error::RuntimeError,
+        ExtrinsicSuccess,
     };
+    use assert_matches::assert_matches;
     use jsonrpsee::{
         client::RequestError,
         common::{
@@ -222,7 +223,6 @@ mod tests {
             ErrorCode,
         },
     };
-    use assert_matches::assert_matches;
     use sp_keyring::AccountKeyring;
 
     // TODO: I don't think this does the right thing.
@@ -290,9 +290,7 @@ mod tests {
         client
             .nominate_and_watch(&alice, vec![bob.account_id().clone()])
             .await?;
-        let chill = client
-            .chill_and_watch(&bob)
-            .await;
+        let chill = client.chill_and_watch(&bob).await;
 
         assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
             assert_eq!(module_err.module, "Staking");
