@@ -26,4 +26,4 @@ jobs:
       run: cargo build --workspace --verbose
 
     - name: test
-      run: cargo test --workspace --verbose
+      run: cargo test --workspace --verbose -- --test-threads=1
