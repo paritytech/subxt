@@ -66,3 +66,4 @@ substrate-subxt-client = { version = "0.4.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"
+assert_matches = "1.3"

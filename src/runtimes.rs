@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
-#![allow(missing_docs)]
 
 use codec::Encode;
 use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
@@ -82,15 +81,15 @@ impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
 impl_opaque_keys! {
     /// Substrate base runtime keys
     pub struct BasicSessionKeys {
-        //// GRANDPA session key
+        /// GRANDPA session key
         pub grandpa: Grandpa,
-        //// BABE session key
+        /// BABE session key
         pub babe: Babe,
-        //// ImOnline session key
+        /// ImOnline session key
         pub im_online: ImOnline,
-        //// Parachain validation session key
+        /// Parachain validation session key
         pub parachains: Parachains,
-        //// AuthorityDiscovery session key
+        /// AuthorityDiscovery session key
         pub authority_discovery: AuthorityDiscovery,
     }
 }
@@ -98,15 +97,15 @@ impl_opaque_keys! {
 impl_opaque_keys! {
     /// Polkadot/Kusama runtime keys
     pub struct SessionKeys {
-        //// GRANDPA session key
+        /// GRANDPA session key
         pub grandpa: Grandpa,
-        //// BABE session key
+        /// BABE session key
         pub babe: Babe,
-        //// ImOnline session key
+        /// ImOnline session key
         pub im_online: ImOnline,
-        //// ParachainValidator session key
+        /// ParachainValidator session key
         pub parachain_validator: Parachains,
-        //// AuthorityDiscovery session key
+        /// AuthorityDiscovery session key
         pub authority_discovery: AuthorityDiscovery,
     }
 }

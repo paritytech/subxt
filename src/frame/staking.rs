@@ -196,27 +196,122 @@ pub struct NominateCall<T: Staking> {
     pub targets: Vec<T::Address>,
 }
 
-#[cfg(all(test, feature = "integration-tests"))]
+#[cfg(test)]
+#[cfg(feature = "integration-tests")]
 mod tests {
     use super::*;
     use crate::{
-        extrinsic::PairSigner,
-        runtimes::KusamaRuntime as RT,
-        ClientBuilder,
-    };
-    // use sp_core::{sr25519::Pair, Pair as _};
-    use crate::{
-        error::Error,
-        extrinsic::Signer,
+        ExtrinsicSuccess,
+        extrinsic::{
+            PairSigner,
+            Signer,
+        },
         frame::{
             balances::*,
             system::*,
         },
+        runtimes::KusamaRuntime as RT,
+        ClientBuilder,
+        Error,
+        error::RuntimeError,
     };
+    use jsonrpsee::{
+        client::RequestError,
+        common::{
+            Error as RPCError,
+            ErrorCode,
+        },
+    };
+    use assert_matches::assert_matches;
     use sp_keyring::AccountKeyring;
 
+    // TODO: I don't think this does the right thing.
+    macro_rules! retry_trans {
+        ($e: expr) => {
+            (loop {
+                match $e.await {
+                    Ok(o) => break o,
+                    Err(Error::Rpc(RequestError::Request(RPCError {
+                        code: ErrorCode::ServerError(1014),
+                        message: m,
+                        data: Some(_),
+                    }))) if m.starts_with("Priority is too low: ") => {}
+                    Err(e) => panic!("Unexpected error: {}", e),
+                }
+            })
+        };
+    }
+
     #[async_std::test]
-    async fn test_nominate() -> Result<(), Error> {
+    async fn test_validate_with_stash_account() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let client = ClientBuilder::<RT>::new().build().await?;
+        let announce_validator = client
+            .validate_and_watch(&alice, ValidatorPrefs::default())
+            .await;
+        assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+            // TOOD: this is unsatisfying – can we do better?
+            assert_eq!(events.len(), 3);
+        });
+
+        Ok(())
+    }
+    #[async_std::test]
+    #[ignore]
+    async fn test_validate_with_controller_account() -> Result<(), Error> {
+        // TODO: how to set up the controller account for Alice?
+        Ok(())
+    }
+    #[async_std::test]
+    async fn test_nominate_with_stash_account() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+        let client = ClientBuilder::<RT>::new().build().await?;
+
+        let nomination = client
+            .nominate_and_watch(&alice, vec![bob.account_id().clone()])
+            .await;
+        assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+            // TOOD: this is unsatisfying – can we do better?
+            assert_eq!(events.len(), 3);
+        });
+        Ok(())
+    }
+
+    #[async_std::test]
+    async fn test_chill_not_possible_for_stash_account() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+        let client = ClientBuilder::<RT>::new().build().await?;
+
+        client
+            .nominate_and_watch(&alice, vec![bob.account_id().clone()])
+            .await?;
+        let chill = client
+            .chill_and_watch(&bob)
+            .await;
+
+        assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+            assert_eq!(module_err.module, "Staking");
+            assert_eq!(module_err.error, "NotController");
+        });
+        Ok(())
+    }
+
+    #[async_std::test]
+    #[ignore]
+    async fn test_chill_is_ok_for_controller_account() -> Result<(), Error> {
+        // TODO: how to set the controller for Alice?
+        Ok(())
+    }
+
+    #[async_std::test]
+    #[ignore]
+    // NOTE: this is throw-away code to be removed before merge
+    async fn test_scratchpad() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
@@ -234,29 +329,16 @@ mod tests {
             .nominate(&alice, vec![bob.account_id().clone()])
             .await?;
         println!("Nom nom: {:?}", o);
-        let o = client
-            .validate(&bob, ValidatorPrefs::default())
-            .await?;
+        let o = retry_trans!(client.validate(&bob, ValidatorPrefs::default()));
         println!("Validator result: {:?}", o);
-        for &i in &[RewardDestination::Controller] {
+        for &_i in &[RewardDestination::Controller] {
             for &j in &[&bob, &alice] {
-                println!(
-                    "Transaction result: {:?}",
-                    client.set_payee(j, i).await?
-                );
+                let o = retry_trans!(client.validate(&bob, ValidatorPrefs::default()));
+                println!("Transaction result: {:?}", o);
+                let o = retry_trans!(client.chill(j));
+                println!("Transaction result: {:?}", o);
             }
         }
-        assert_eq!(
-            client
-                .fetch(
-                    &ValidatorsStore {
-                        stash: bob.account_id().clone()
-                    },
-                    None
-                )
-                .await?,
-            None
-        );
         Ok(())
     }
 }
