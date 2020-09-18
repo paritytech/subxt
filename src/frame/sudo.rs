@@ -25,6 +25,7 @@ use crate::{
 };
 use codec::Encode;
 use core::marker::PhantomData;
+use frame_support::weights::Weight;
 
 /// The subset of the `frame_sudo::Trait` that a client must implement.
 #[module]
@@ -37,6 +38,20 @@ pub struct SudoCall<'a, T: Sudo> {
     pub _runtime: PhantomData<T>,
     /// Encoded transaction.
     pub call: &'a Encoded,
+}
+
+/// Execute a transaction with sudo permissions without checking the call weight.
+#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
+pub struct SudoUncheckedWeightCall<'a, T: Sudo> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Encoded transaction.
+    pub call: &'a Encoded,
+    /// Call weight.
+    ///
+    /// This argument is actually unused, you can pass any value of
+    /// `Weight` type when using this call.
+    pub weight: Weight,
 }
 
 #[cfg(test)]
