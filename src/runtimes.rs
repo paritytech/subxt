@@ -121,11 +121,11 @@ use crate::{
             AccountData,
             Balances,
         },
+        session::Session,
+        staking::Staking,
         sudo::Sudo,
+        system::System,
     },
-    session::Session,
-    staking::Staking,
-    system::System,
 };
 
 /// Runtime trait.
