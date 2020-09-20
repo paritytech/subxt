@@ -116,7 +116,6 @@ pub struct InstantiatedEvent<T: Contracts> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "integration-tests")]
 mod tests {
     use sp_keyring::AccountKeyring;
 
@@ -138,6 +137,7 @@ mod tests {
     }
 
     #[async_std::test]
+    #[cfg(feature = "integration-tests")]
     async fn tx_put_code() {
         env_logger::try_init().ok();
 
@@ -161,6 +161,7 @@ mod tests {
     }
 
     #[async_std::test]
+    #[cfg(feature = "integration-tests")]
     async fn tx_instantiate() {
         env_logger::try_init().ok();
         let signer = PairSigner::new(AccountKeyring::Bob.pair());
