@@ -206,10 +206,7 @@ mod tests {
             PairSigner,
             Signer,
         },
-        frame::{
-            balances::*,
-            system::*,
-        },
+        frame::balances::*,
         runtimes::KusamaRuntime as RT,
         ClientBuilder,
         Error,
@@ -295,16 +292,17 @@ mod tests {
     }
 
     #[async_std::test]
-    async fn test_chill_not_possible_for_stash_account() -> Result<(), Error> {
+    async fn test_chill_works_for_controller_only() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice_stash =
             PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+        let bob_stash = PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Bob//stash"));
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
         let client = ClientBuilder::<RT>::new().build().await?;
 
+        // this will fail the second time, which is why this is one test, not two
         client
-            .nominate_and_watch(&alice, vec![bob.account_id().clone()])
+            .nominate_and_watch(&alice, vec![bob_stash.account_id().clone()])
             .await?;
         let store = LedgerStore {
             controller: alice.account_id().clone(),
@@ -327,19 +325,28 @@ mod tests {
     }
 
     #[async_std::test]
-    #[ignore]
-    // NOTE: this is throw-away code to be removed before merge
-    async fn test_scratchpad() -> Result<(), Error> {
+    async fn test_total_issuance_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-
         let client = ClientBuilder::<RT>::new().build().await?;
-        let current_era = client.current_era(None).await?;
-        println!("Current era: {:?}", current_era);
-        let hd = client.history_depth(None).await?;
-        println!("History depth: {:?}", hd);
         let total_issuance = client.total_issuance(None).await?;
         println!("total issuance: {:?}", total_issuance);
+        Ok(())
+    }
+
+    #[async_std::test]
+    async fn test_history_depth_is_okay() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let client = ClientBuilder::<RT>::new().build().await?;
+        let history_depth = client.history_depth(None).await?;
+        assert_eq!(history_depth, 84);
+        Ok(())
+    }
+
+    #[async_std::test]
+    async fn test_current_era_is_okay() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let client = ClientBuilder::<RT>::new().build().await?;
+        let _current_era = client.current_era(None).await?;
+        Ok(())
     }
 }
