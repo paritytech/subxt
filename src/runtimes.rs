@@ -111,7 +111,6 @@ impl_opaque_keys! {
 }
 
 use crate::{
-    contracts::Contracts,
     extrinsic::{
         DefaultExtra,
         SignedExtra,
@@ -121,6 +120,7 @@ use crate::{
             AccountData,
             Balances,
         },
+        contracts::Contracts,
         session::Session,
         staking::Staking,
         sudo::Sudo,
