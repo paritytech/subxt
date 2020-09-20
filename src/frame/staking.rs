@@ -328,8 +328,7 @@ mod tests {
     async fn test_total_issuance_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
         let client = ClientBuilder::<RT>::new().build().await?;
-        let total_issuance = client.total_issuance(None).await?;
-        println!("total issuance: {:?}", total_issuance);
+        client.total_issuance(None).await?;
         Ok(())
     }
 
