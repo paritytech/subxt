@@ -49,7 +49,7 @@ pub struct SudoUncheckedWeightCall<'a, T: Sudo> {
     pub call: &'a Encoded,
     /// Call weight.
     ///
-    /// This argument is actually unused, you can pass any value of
+    /// This argument is actually unused in runtime, you can pass any value of
     /// `Weight` type when using this call.
     pub weight: Weight,
 }
