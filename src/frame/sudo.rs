@@ -25,6 +25,7 @@ use crate::{
 };
 use codec::Encode;
 use core::marker::PhantomData;
+use frame_support::weights::Weight;
 
 /// The subset of the `frame_sudo::Trait` that a client must implement.
 #[module]
@@ -37,6 +38,20 @@ pub struct SudoCall<'a, T: Sudo> {
     pub _runtime: PhantomData<T>,
     /// Encoded transaction.
     pub call: &'a Encoded,
+}
+
+/// Execute a transaction with sudo permissions without checking the call weight.
+#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
+pub struct SudoUncheckedWeightCall<'a, T: Sudo> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Encoded transaction.
+    pub call: &'a Encoded,
+    /// Call weight.
+    ///
+    /// This argument is actually unused in runtime, you can pass any value of
+    /// `Weight` type when using this call.
+    pub weight: Weight,
 }
 
 #[cfg(test)]
@@ -70,6 +85,31 @@ mod tests {
             .unwrap();
 
         let res = client.sudo_and_watch(&alice, &call).await;
+        assert!(
+            if let Err(Error::Runtime(RuntimeError::BadOrigin)) = res {
+                true
+            } else {
+                false
+            }
+        );
+    }
+
+    #[async_std::test]
+    async fn test_sudo_unchecked_weight() {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let (client, _) = test_client().await;
+
+        let call = client
+            .encode(TransferCall {
+                to: &AccountKeyring::Bob.to_account_id(),
+                amount: 10_000,
+            })
+            .unwrap();
+
+        let res = client
+            .sudo_unchecked_weight_and_watch(&alice, &call, 0u64)
+            .await;
         assert!(
             if let Err(Error::Runtime(RuntimeError::BadOrigin)) = res {
                 true
