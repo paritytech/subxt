@@ -328,7 +328,8 @@ mod tests {
     async fn test_total_issuance_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
         let client = ClientBuilder::<RT>::new().build().await?;
-        client.total_issuance(None).await?;
+        let total_issuance = client.total_issuance(None).await?;
+        assert!(total_issuance > 1u128 << 32);
         Ok(())
     }
 
@@ -345,7 +346,26 @@ mod tests {
     async fn test_current_era_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
         let client = ClientBuilder::<RT>::new().build().await?;
-        let _current_era = client.current_era(None).await?;
+        let _current_era = client
+            .current_era(None)
+            .await?
+            .expect("current era always exists");
+        Ok(())
+    }
+
+    #[async_std::test]
+    async fn test_era_reward_points_is_okay() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let client = ClientBuilder::<RT>::new().build().await?;
+        let store = ErasRewardPointsStore {
+            _phantom: PhantomData,
+            index: 0,
+        };
+
+        let _current_era = client
+            .fetch(&store, None)
+            .await?
+            .expect("current era always exists");
         Ok(())
     }
 }
