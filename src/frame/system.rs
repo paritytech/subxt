@@ -101,6 +101,8 @@ pub trait System {
         + MaybeSerialize
         + Debug
         + MaybeDisplay
+        + Encode
+        + Decode
         + Ord
         + Default;
 

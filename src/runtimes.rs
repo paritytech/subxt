@@ -15,8 +15,10 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::Encode;
+use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_runtime::{
     generic::Header,
+    impl_opaque_keys,
     traits::{
         BlakeTwo256,
         IdentifyAccount,
@@ -25,6 +27,88 @@ use sp_runtime::{
     MultiSignature,
     OpaqueExtrinsic,
 };
+use sp_std::prelude::*;
+
+/// BABE marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct Babe;
+impl sp_runtime::BoundToRuntimeAppPublic for Babe {
+    type Public = sp_consensus_babe::AuthorityId;
+}
+
+/// ImOnline marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct ImOnline;
+impl sp_runtime::BoundToRuntimeAppPublic for ImOnline {
+    type Public = ImOnlineId;
+}
+
+/// GRANDPA marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct Grandpa;
+impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
+    type Public = sp_finality_grandpa::AuthorityId;
+}
+
+use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
+
+#[cfg(feature = "kusama")]
+mod validator_app {
+    use application_crypto::{
+        app_crypto,
+        sr25519,
+    };
+    app_crypto!(sr25519, sp_core::crypto::KeyTypeId(*b"para"));
+}
+
+/// Parachain marker struct
+#[cfg(feature = "kusama")]
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct Parachains;
+
+#[cfg(feature = "kusama")]
+impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
+    type Public = validator_app::Public;
+}
+
+/// Authority discovery marker struct
+#[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
+pub struct AuthorityDiscovery;
+impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
+    type Public = AuthorityDiscoveryId;
+}
+
+impl_opaque_keys! {
+    /// Substrate base runtime keys
+    pub struct BasicSessionKeys {
+        /// GRANDPA session key
+        pub grandpa: Grandpa,
+        /// BABE session key
+        pub babe: Babe,
+        /// ImOnline session key
+        pub im_online: ImOnline,
+        /// Parachain validation session key
+        pub parachains: Parachains,
+        /// AuthorityDiscovery session key
+        pub authority_discovery: AuthorityDiscovery,
+    }
+}
+
+impl_opaque_keys! {
+    /// Polkadot/Kusama runtime keys
+    pub struct SessionKeys {
+        /// GRANDPA session key
+        pub grandpa: Grandpa,
+        /// BABE session key
+        pub babe: Babe,
+        /// ImOnline session key
+        pub im_online: ImOnline,
+        /// ParachainValidator session key
+        pub parachain_validator: Parachains,
+        /// AuthorityDiscovery session key
+        pub authority_discovery: AuthorityDiscovery,
+    }
+}
 
 use crate::{
     extrinsic::{
@@ -37,6 +121,8 @@ use crate::{
             Balances,
         },
         contracts::Contracts,
+        session::Session,
+        staking::Staking,
         sudo::Sudo,
         system::System,
     },
@@ -59,6 +145,8 @@ pub trait Runtime: System + Sized + Send + Sync + 'static {
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct DefaultNodeRuntime;
 
+impl Staking for DefaultNodeRuntime {}
+
 impl Runtime for DefaultNodeRuntime {
     type Signature = MultiSignature;
     type Extra = DefaultExtra<Self>;
@@ -78,6 +166,11 @@ impl System for DefaultNodeRuntime {
 
 impl Balances for DefaultNodeRuntime {
     type Balance = u128;
+}
+
+impl Session for DefaultNodeRuntime {
+    type ValidatorId = <Self as System>::AccountId;
+    type Keys = BasicSessionKeys;
 }
 
 impl Contracts for DefaultNodeRuntime {}
@@ -112,6 +205,11 @@ impl System for NodeTemplateRuntime {
 
 impl Balances for NodeTemplateRuntime {
     type Balance = u128;
+}
+
+impl Session for NodeTemplateRuntime {
+    type ValidatorId = <Self as System>::AccountId;
+    type Keys = BasicSessionKeys;
 }
 
 impl Sudo for NodeTemplateRuntime {}
@@ -174,6 +272,13 @@ impl System for KusamaRuntime {
     type Extrinsic = OpaqueExtrinsic;
     type AccountData = AccountData<<Self as Balances>::Balance>;
 }
+
+impl Session for KusamaRuntime {
+    type ValidatorId = <Self as System>::AccountId;
+    type Keys = SessionKeys;
+}
+
+impl Staking for KusamaRuntime {}
 
 impl Balances for KusamaRuntime {
     type Balance = u128;
