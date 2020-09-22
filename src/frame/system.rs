@@ -96,12 +96,7 @@ pub trait System {
     type Hashing: Hash<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
-    type AccountId: Parameter
-        + Member
-        + MaybeSerialize
-        + MaybeDisplay
-        + Ord
-        + Default;
+    type AccountId: Parameter + Member + MaybeSerialize + MaybeDisplay + Ord + Default;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     #[module(ignore)]
