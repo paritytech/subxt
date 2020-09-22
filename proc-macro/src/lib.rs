@@ -133,6 +133,10 @@ decl_derive!(
     ///
     /// Under the hood the implementation calls [submit()](../substrate_subxt/struct.Client.html#method.submit) and
     /// [watch()](../substrate_subxt/struct.Client.html#method.watch) respectively.
+    ///
+    /// *N.B.* You must use the `#[derive(Call)]` macro with `#[module]` in the same module or you will get errors
+    /// about undefined method with a name starting with `with_`.
+
     #[proc_macro_error] call
 );
 fn call(s: Structure) -> TokenStream {

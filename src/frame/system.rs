@@ -99,10 +99,7 @@ pub trait System {
     type AccountId: Parameter
         + Member
         + MaybeSerialize
-        + Debug
         + MaybeDisplay
-        + Encode
-        + Decode
         + Ord
         + Default;
 

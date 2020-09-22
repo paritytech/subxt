@@ -6,9 +6,6 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 See [examples](./examples).
 
-If you use `#[derive(Call)]` without `#[module]` in the same module, you will get errors
-complaining about an undefined method with a name starting with `with_`.
-
 **Alternatives**
 
 [substrate-api-client](https://github.com/scs/substrate-api-client) provides similar functionality.
