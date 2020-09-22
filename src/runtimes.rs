@@ -52,7 +52,6 @@ impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
 
 use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
 
-#[cfg(feature = "kusama")]
 mod validator_app {
     use application_crypto::{
         app_crypto,
@@ -62,11 +61,9 @@ mod validator_app {
 }
 
 /// Parachain marker struct
-#[cfg(feature = "kusama")]
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Parachains;
 
-#[cfg(feature = "kusama")]
 impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
     type Public = validator_app::Public;
 }

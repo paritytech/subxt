@@ -17,8 +17,7 @@ keywords = ["parity", "substrate", "blockchain"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
 [features]
-kusama = []
-default = ["kusama"]
+default = []
 client = ["substrate-subxt-client"]
 
 # enable this feature to run tests which require a local dev chain node
