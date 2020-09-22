@@ -91,6 +91,7 @@ pub struct CallCall<'a, T: Contracts> {
     /// Address of the contract.
     pub dest: &'a <T as System>::Address,
     /// Value to transfer to the contract.
+    #[codec(compact)]
     pub value: <T as Balances>::Balance,
     /// Gas limit.
     #[codec(compact)]
@@ -138,6 +139,7 @@ mod tests {
         ClientBuilder,
         ContractsTemplateRuntime,
         Error,
+        ExtrinsicSuccess,
         PairSigner,
         Signer,
     };
@@ -248,7 +250,7 @@ mod tests {
             &self,
             contract: &<ContractsTemplateRuntime as System>::Address,
             input_data: &[u8],
-        ) -> Result<ContractExecutionEvent<ContractsTemplateRuntime>, Error> {
+        ) -> Result<ExtrinsicSuccess<ContractsTemplateRuntime>, Error> {
             let result = self
                 .client
                 .call_and_watch(
@@ -260,11 +262,7 @@ mod tests {
                 )
                 .await?;
             log::info!("Call result: {:?}", result);
-            let executed = result.contract_execution()?.ok_or_else(|| {
-                Error::Other("Failed to find a ContractExecution event".into())
-            })?;
-
-            Ok(executed)
+            Ok(result)
         }
     }
 
