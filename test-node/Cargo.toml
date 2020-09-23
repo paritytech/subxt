@@ -18,25 +18,25 @@ log = "0.4.11"
 structopt = "0.3.16"
 parking_lot = "0.11.0"
 
-sc-cli = { version = "0.8.0-rc6", features = ["wasmtime"] }
-sp-core = "2.0.0-rc6"
-sc-executor = { version = "0.8.0-rc6", features = ["wasmtime"] }
-sc-service = { version = "0.8.0-rc6", features = ["wasmtime"] }
-sp-inherents = "2.0.0-rc6"
-sc-transaction-pool = "2.0.0-rc6"
-sp-transaction-pool = "2.0.0-rc6"
-sc-network = "0.8.0-rc6"
-sc-consensus-aura = "0.8.0-rc6"
-sp-consensus-aura = "0.8.0-rc6"
-sp-consensus = "0.8.0-rc6"
-sc-consensus = "0.8.0-rc6"
-sc-finality-grandpa = "0.8.0-rc6"
-sp-finality-grandpa = "2.0.0-rc6"
-sc-client-api = "2.0.0-rc6"
-sp-runtime = "2.0.0-rc6"
-sc-basic-authorship = "0.8.0-rc6"
+sc-cli = { version = "0.8.0", features = ["wasmtime"] }
+sp-core = "2.0.0"
+sc-executor = { version = "0.8.0", features = ["wasmtime"] }
+sc-service = { version = "0.8.0", features = ["wasmtime"] }
+sp-inherents = "2.0.0"
+sc-transaction-pool = "2.0.0"
+sp-transaction-pool = "2.0.0"
+sc-network = "0.8.0"
+sc-consensus-aura = "0.8.0"
+sp-consensus-aura = "0.8.0"
+sp-consensus = "0.8.0"
+sc-consensus = "0.8.0"
+sc-finality-grandpa = "0.8.0"
+sp-finality-grandpa = "2.0.0"
+sc-client-api = "2.0.0"
+sp-runtime = "2.0.0"
+sc-basic-authorship = "0.8.0"
 
 test-node-runtime = { path = "runtime" }
 
 [build-dependencies]
-substrate-build-script-utils = "2.0.0-rc6"
+substrate-build-script-utils = "2.0.0"
