@@ -16,9 +16,35 @@
 
 use sc_cli::{
     RunCmd,
-    Subcommand,
+    BuildSpecCmd,
+    // ExportBlocksCmd, ImportBlocksCmd, CheckBlockCmd, ExportStateCmd, RevertCmd,
+    PurgeChainCmd,
+    // Subcommand,
+    CliConfiguration, SharedParams,
 };
 use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+pub enum Subcommand {
+	/// Build a spec.json file, outputs to stdout.
+	BuildSpec(BuildSpecCmd),
+	/// Export blocks to a file.
+	// ExportBlocks(ExportBlocksCmd),
+	/// Import blocks from file.
+	// ImportBlocks(ImportBlocksCmd),
+	/// Validate a single block.
+	// CheckBlock(CheckBlockCmd),
+	/// Export state as raw chain spec.
+	// ExportState(ExportStateCmd),
+	/// Revert chain to the previous state.
+	// Revert(RevertCmd),
+	/// Remove the whole chain data.
+	PurgeChain(PurgeChainCmd),
+}
+
+impl CliConfiguration for Subcommand {
+    fn shared_params(&self) -> &SharedParams { todo!() }
+}
 
 #[derive(Debug, StructOpt)]
 pub struct Cli {

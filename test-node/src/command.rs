@@ -16,7 +16,7 @@
 
 use crate::{
     chain_spec,
-    cli::Cli,
+    cli::{Cli, Subcommand},
     service,
 };
 use sc_cli::{
@@ -25,7 +25,7 @@ use sc_cli::{
     RuntimeVersion,
     SubstrateCli,
 };
-use sc_service::PartialComponents;
+// use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
@@ -74,19 +74,21 @@ pub fn run() -> sc_cli::Result<()> {
     let cli = Cli::from_args();
 
     match &cli.subcommand {
-        Some(subcommand) => {
-            let runner = cli.create_runner(subcommand)?;
-            runner.run_subcommand(subcommand, |config| {
-                let PartialComponents {
-                    client,
-                    backend,
-                    task_manager,
-                    import_queue,
-                    ..
-                } = service::new_partial(&config)?;
-                Ok((client, backend, import_queue, task_manager))
-            })
-        }
+        Some(Subcommand::BuildSpec(_cmd)) => todo!(),
+        Some(Subcommand::PurgeChain(_cmd)) => todo!(),
+        // Some(subcommand) => {
+        //     let runner = cli.create_runner(subcommand)?;
+        //     runner.run_subcommand(subcommand, |config| {
+        //         let PartialComponents {
+        //             client,
+        //             backend,
+        //             task_manager,
+        //             import_queue,
+        //             ..
+        //         } = service::new_partial(&config)?;
+        //         Ok((client, backend, import_queue, task_manager))
+        //     })
+        // }
         None => {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| {
