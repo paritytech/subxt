@@ -116,6 +116,7 @@ pub struct InstantiatedEvent<T: Contracts> {
 }
 
 #[cfg(test)]
+#[cfg(feature = "integration-tests")]
 mod tests {
     use sp_keyring::AccountKeyring;
 
