@@ -278,9 +278,7 @@ pub fn new_full(
 }
 
 /// Builds a new service for a light client.
-pub fn new_light(
-    config: Configuration,
-) -> Result<(TaskManager, RpcHandlers), ServiceError> {
+pub fn new_light(config: Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError> {
     let (client, backend, keystore, mut task_manager, on_demand) =
         sc_service::new_light_parts::<Block, RuntimeApi, Executor>(&config)?;
 
@@ -293,9 +291,7 @@ pub fn new_light(
     ));
 
     let grandpa_block_import = sc_finality_grandpa::light_block_import(
-        client.clone(),
-        backend.clone(),
-        &(client.clone() as Arc<_>),
+        client.clone(), backend.clone(), &(client.clone() as Arc<_>),
         Arc::new(on_demand.checker().clone()) as Arc<_>,
     )?;
     let finality_proof_import = grandpa_block_import.clone();
@@ -332,11 +328,7 @@ pub fn new_light(
 
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
-            &config,
-            backend.clone(),
-            task_manager.spawn_handle(),
-            client.clone(),
-            network.clone(),
+            &config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
         );
     }
 
