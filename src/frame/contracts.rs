@@ -118,7 +118,7 @@ pub struct InstantiatedEvent<T: Contracts> {
 
 /// Contract execution event.
 ///
-/// Raised upon successful executionFailing  of a contract call
+/// Emitted upon successful execution of a contract, if any contract events were produced.
 #[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
 pub struct ContractExecutionEvent<T: Contracts> {
     /// Caller of the contract.
