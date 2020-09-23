@@ -57,7 +57,7 @@ pub struct ErasRewardPointsStore<T: Staking> {
 #[derive(Clone, Encode, Decode, Debug, Call)]
 pub struct SetPayeeCall<T: Staking> {
     /// The payee
-    pub payee: RewardDestination,
+    pub payee: RewardDestination<T::AccountId>,
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
@@ -99,7 +99,7 @@ pub struct LedgerStore<T: Staking> {
 /// Where the reward payment should be made. Keyed by stash.
 #[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
 pub struct PayeeStore<T: Staking> {
-    #[store(returns = RewardDestination)]
+    #[store(returns = RewardDestination<T::AccountId>)]
     /// Tٗhe stash account
     pub stash: T::AccountId,
 }
