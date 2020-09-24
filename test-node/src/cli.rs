@@ -15,10 +15,19 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sc_cli::{
+    BuildSpecCmd,
+    PurgeChainCmd,
     RunCmd,
-    Subcommand,
 };
 use structopt::StructOpt;
+
+#[derive(Debug, StructOpt)]
+pub enum Subcommand {
+    /// Build a spec.json file, outputs to stdout.
+    BuildSpec(BuildSpecCmd),
+    /// Remove the whole chain data.
+    PurgeChain(PurgeChainCmd),
+}
 
 #[derive(Debug, StructOpt)]
 pub struct Cli {
