@@ -175,8 +175,7 @@ mod tests {
                 .unwrap()
                 .nonce;
             let local_nonce = STASH_NONCE
-                .fetch_update(Ordering::SeqCst, Ordering::SeqCst, |x| Some(x + 1))
-                .unwrap();
+                .fetch_add(1, Ordering::SeqCst);
 
             stash.set_nonce(nonce + local_nonce);
 
