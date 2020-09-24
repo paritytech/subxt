@@ -118,7 +118,7 @@ pub trait System {
 }
 
 /// Type used to encode the number of references an account has.
-pub type RefCount = u8;
+pub type RefCount = u32;
 
 /// Information of an account.
 #[derive(Clone, Debug, Eq, PartialEq, Default, Decode, Encode)]

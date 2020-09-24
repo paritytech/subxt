@@ -146,7 +146,7 @@ mod tests {
         let event = client
             .transfer_and_watch(&alice, &bob.account_id(), 10_000)
             .await
-            .unwrap()
+            .expect("sending an xt works")
             .transfer()
             .unwrap()
             .unwrap();
