@@ -163,6 +163,7 @@ impl Metadata {
 
 #[derive(Clone, Debug)]
 pub struct ModuleMetadata {
+    index: u8,
     name: String,
     storage: HashMap<String, StorageMetadata>,
     // constants
@@ -509,6 +510,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             modules.insert(
                 module_name.clone(),
                 ModuleMetadata {
+                    index: module.index,
                     name: module_name.clone(),
                     storage: storage_map,
                 },
@@ -523,7 +525,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 modules_with_calls.insert(
                     module_name.clone(),
                     ModuleWithCalls {
-                        index: modules_with_calls.len() as u8,
+                        index: module.index,
                         calls: call_map,
                     },
                 );
@@ -536,7 +538,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 modules_with_events.insert(
                     module_name.clone(),
                     ModuleWithEvents {
-                        index: modules_with_events.len() as u8,
+                        index: module.index,
                         name: module_name.clone(),
                         events: event_map,
                     },
@@ -549,7 +551,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             modules_with_errors.insert(
                 module_name.clone(),
                 ModuleWithErrors {
-                    index: modules_with_errors.len() as u8,
+                    index: module.index,
                     name: module_name.clone(),
                     errors: error_map,
                 },
