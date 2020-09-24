@@ -123,7 +123,7 @@ pub struct InstantiatedEvent<T: Contracts> {
 pub struct ContractExecutionEvent<T: Contracts> {
     /// Caller of the contract.
     pub caller: <T as System>::AccountId,
-    /// Raw contract event data
+    /// SCALE encoded contract event data.
     pub data: Vec<u8>,
 }
 
