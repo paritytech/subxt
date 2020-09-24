@@ -96,13 +96,7 @@ pub trait System {
     type Hashing: Hash<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
-    type AccountId: Parameter
-        + Member
-        + MaybeSerialize
-        + Debug
-        + MaybeDisplay
-        + Ord
-        + Default;
+    type AccountId: Parameter + Member + MaybeSerialize + MaybeDisplay + Ord + Default;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     #[module(ignore)]
@@ -124,7 +118,7 @@ pub trait System {
 }
 
 /// Type used to encode the number of references an account has.
-pub type RefCount = u8;
+pub type RefCount = u32;
 
 /// Information of an account.
 #[derive(Clone, Debug, Eq, PartialEq, Default, Decode, Encode)]
@@ -150,6 +144,15 @@ pub struct AccountStore<'a, T: System> {
 /// Arguments for updating the runtime code
 #[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
 pub struct SetCodeCall<'a, T: System> {
+    /// Runtime marker.
+    pub _runtime: PhantomData<T>,
+    /// Runtime wasm blob.
+    pub code: &'a [u8],
+}
+
+/// Arguments for updating the runtime code without checks
+#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
+pub struct SetCodeWithoutChecksCall<'a, T: System> {
     /// Runtime marker.
     pub _runtime: PhantomData<T>,
     /// Runtime wasm blob.

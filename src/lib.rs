@@ -35,7 +35,8 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
-    unused_extern_crates
+    unused_extern_crates,
+    clippy::all
 )]
 #![allow(clippy::type_complexity)]
 
@@ -93,6 +94,7 @@ pub use crate::{
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
+        SystemProperties,
     },
     runtimes::*,
     subscription::*,
@@ -161,16 +163,18 @@ impl<T: Runtime> ClientBuilder<T> {
             }
         };
         let rpc = Rpc::new(client);
-        let (metadata, genesis_hash, runtime_version) = future::join3(
+        let (metadata, genesis_hash, runtime_version, properties) = future::join4(
             rpc.metadata(),
             rpc.genesis_hash(),
             rpc.runtime_version(None),
+            rpc.system_properties(),
         )
         .await;
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
             metadata: metadata?,
+            properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
             page_size: self.page_size.unwrap_or(10),
@@ -183,6 +187,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
+    properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     page_size: u32,
@@ -194,6 +199,7 @@ impl<T: Runtime> Clone for Client<T> {
             rpc: self.rpc.clone(),
             genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
+            properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
             page_size: self.page_size,
@@ -256,6 +262,11 @@ impl<T: Runtime> Client<T> {
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
+    }
+
+    /// Returns the system properties
+    pub fn properties(&self) -> &SystemProperties {
+        &self.properties
     }
 
     /// Fetch the value under an unhashed storage key

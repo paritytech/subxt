@@ -52,7 +52,6 @@ use crate::{
 };
 
 /// Raw bytes for an Event
-#[derive(Debug)]
 pub struct RawEvent {
     /// The name of the module from whence the Event originated
     pub module: String,
@@ -60,6 +59,16 @@ pub struct RawEvent {
     pub variant: String,
     /// The raw Event data
     pub data: Vec<u8>,
+}
+
+impl std::fmt::Debug for RawEvent {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("RawEvent")
+            .field("module", &self.module)
+            .field("variant", &self.variant)
+            .field("data", &hex::encode(&self.data))
+            .finish()
+    }
 }
 
 /// Events decoder.
