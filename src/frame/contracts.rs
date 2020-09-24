@@ -268,7 +268,6 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn tx_put_code() {
         let ctx = TestContext::init().await;
         let code_stored = ctx.put_code().await;
@@ -283,7 +282,6 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn tx_instantiate() {
         let ctx = TestContext::init().await;
         let code_stored = ctx.put_code().await.unwrap();
@@ -297,7 +295,6 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn tx_call() {
         let ctx = TestContext::init().await;
         let code_stored = ctx.put_code().await.unwrap();
