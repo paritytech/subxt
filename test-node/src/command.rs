@@ -28,7 +28,6 @@ use sc_cli::{
     RuntimeVersion,
     SubstrateCli,
 };
-// use sc_service::PartialComponents;
 
 impl SubstrateCli for Cli {
     fn impl_name() -> String {
