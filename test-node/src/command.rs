@@ -16,7 +16,10 @@
 
 use crate::{
     chain_spec,
-    cli::{Cli, Subcommand},
+    cli::{
+        Cli,
+        Subcommand,
+    },
     service,
 };
 use sc_cli::{
@@ -74,21 +77,14 @@ pub fn run() -> sc_cli::Result<()> {
     let cli = Cli::from_args();
 
     match &cli.subcommand {
-        Some(Subcommand::BuildSpec(_cmd)) => todo!(),
-        Some(Subcommand::PurgeChain(_cmd)) => todo!(),
-        // Some(subcommand) => {
-        //     let runner = cli.create_runner(subcommand)?;
-        //     runner.run_subcommand(subcommand, |config| {
-        //         let PartialComponents {
-        //             client,
-        //             backend,
-        //             task_manager,
-        //             import_queue,
-        //             ..
-        //         } = service::new_partial(&config)?;
-        //         Ok((client, backend, import_queue, task_manager))
-        //     })
-        // }
+        Some(Subcommand::BuildSpec(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.sync_run(|config| cmd.run(config.chain_spec, config.network))
+        }
+        Some(Subcommand::PurgeChain(cmd)) => {
+            let runner = cli.create_runner(cmd)?;
+            runner.sync_run(|config| cmd.run(config.database))
+        }
         None => {
             let runner = cli.create_runner(&cli.run)?;
             runner.run_node_until_exit(|config| {
