@@ -1,4 +1,5 @@
 # Version 0.13.0
+* Make the contract call extrinsic work [#165](https://github.com/paritytech/substrate-subxt/pull/165)
 * Update to Substrate 2.0.0 [#173](https://github.com/paritytech/substrate-subxt/pull/173)
 * Display RawEvent data in hex [#168](https://github.com/paritytech/substrate-subxt/pull/168)
 * Add SudoUncheckedWeightCall [#167](https://github.com/paritytech/substrate-subxt/pull/167)
