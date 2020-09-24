@@ -91,6 +91,7 @@ pub struct CallCall<'a, T: Contracts> {
     /// Address of the contract.
     pub dest: &'a <T as System>::Address,
     /// Value to transfer to the contract.
+    #[codec(compact)]
     pub value: <T as Balances>::Balance,
     /// Gas limit.
     #[codec(compact)]
@@ -115,6 +116,17 @@ pub struct InstantiatedEvent<T: Contracts> {
     pub contract: <T as System>::AccountId,
 }
 
+/// Contract execution event.
+///
+/// Emitted upon successful execution of a contract, if any contract events were produced.
+#[derive(Clone, Debug, Eq, PartialEq, Event, Decode)]
+pub struct ContractExecutionEvent<T: Contracts> {
+    /// Caller of the contract.
+    pub caller: <T as System>::AccountId,
+    /// SCALE encoded contract event data.
+    pub data: Vec<u8>,
+}
+
 #[cfg(test)]
 #[cfg(feature = "integration-tests")]
 mod tests {
@@ -122,38 +134,144 @@ mod tests {
 
     use super::*;
     use crate::{
+        balances::*,
+        system::*,
+        Client,
         ClientBuilder,
         ContractsTemplateRuntime,
+        Error,
+        ExtrinsicSuccess,
         PairSigner,
+        Signer,
+    };
+    use sp_core::{
+        crypto::AccountId32,
+        sr25519::Pair,
+    };
+    use std::sync::atomic::{
+        AtomicU32,
+        Ordering,
     };
 
-    fn contract_wasm() -> Vec<u8> {
-        const CONTRACT: &str = r#"
-            (module
-                (func (export "call"))
-                (func (export "deploy"))
-            )
-        "#;
-        wabt::wat2wasm(CONTRACT).expect("invalid wabt")
+    static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
+
+    struct TestContext {
+        client: Client<ContractsTemplateRuntime>,
+        signer: PairSigner<ContractsTemplateRuntime, Pair>,
+    }
+
+    impl TestContext {
+        async fn init() -> Self {
+            env_logger::try_init().ok();
+
+            let client = ClientBuilder::<ContractsTemplateRuntime>::new()
+                .build()
+                .await
+                .expect("Error creating client");
+            let mut stash = PairSigner::new(AccountKeyring::Alice.pair());
+            let nonce = client
+                .account(&stash.account_id(), None)
+                .await
+                .unwrap()
+                .nonce;
+            let local_nonce = STASH_NONCE.fetch_add(1, Ordering::SeqCst);
+
+            stash.set_nonce(nonce + local_nonce);
+
+            let signer = Self::generate_account(&client, &mut stash).await;
+
+            TestContext { client, signer }
+        }
+
+        /// generate a new keypair for an account, and fund it so it can perform smart contract operations
+        async fn generate_account(
+            client: &Client<ContractsTemplateRuntime>,
+            stash: &mut PairSigner<ContractsTemplateRuntime, Pair>,
+        ) -> PairSigner<ContractsTemplateRuntime, Pair> {
+            use sp_core::Pair as _;
+            let new_account = Pair::generate().0;
+            let new_account_id: AccountId32 = new_account.public().into();
+            // fund the account
+            let endowment = 200_000_000_000_000;
+            let _ = client
+                .transfer_and_watch(stash, &new_account_id, endowment)
+                .await
+                .expect("New account balance transfer failed");
+            stash.increment_nonce();
+            PairSigner::new(new_account)
+        }
+
+        async fn put_code(
+            &self,
+        ) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+            const CONTRACT: &str = r#"
+                (module
+                    (func (export "call"))
+                    (func (export "deploy"))
+                )
+            "#;
+            let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
+
+            let result = self.client.put_code_and_watch(&self.signer, &code).await?;
+            let code_stored = result.code_stored()?.ok_or_else(|| {
+                Error::Other("Failed to find a CodeStored event".into())
+            })?;
+            log::info!("Code hash: {:?}", code_stored.code_hash);
+            Ok(code_stored)
+        }
+
+        async fn instantiate(
+            &self,
+            code_hash: &<ContractsTemplateRuntime as System>::Hash,
+            data: &[u8],
+        ) -> Result<InstantiatedEvent<ContractsTemplateRuntime>, Error> {
+            // call instantiate extrinsic
+            let result = self
+                .client
+                .instantiate_and_watch(
+                    &self.signer,
+                    100_000_000_000_000, // endowment
+                    500_000_000,         // gas_limit
+                    code_hash,
+                    data,
+                )
+                .await?;
+
+            log::info!("Instantiate result: {:?}", result);
+            let instantiated = result.instantiated()?.ok_or_else(|| {
+                Error::Other("Failed to find a Instantiated event".into())
+            })?;
+
+            Ok(instantiated)
+        }
+
+        async fn call(
+            &self,
+            contract: &<ContractsTemplateRuntime as System>::Address,
+            input_data: &[u8],
+        ) -> Result<ExtrinsicSuccess<ContractsTemplateRuntime>, Error> {
+            let result = self
+                .client
+                .call_and_watch(
+                    &self.signer,
+                    contract,
+                    0,           // value
+                    500_000_000, // gas_limit
+                    input_data,
+                )
+                .await?;
+            log::info!("Call result: {:?}", result);
+            Ok(result)
+        }
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn tx_put_code() {
-        env_logger::try_init().ok();
-
-        let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
-            .build()
-            .await
-            .unwrap();
-
-        let code = contract_wasm();
-        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
-        let code_stored = result.code_stored().unwrap();
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await;
 
         assert!(
-            code_stored.is_some(),
+            code_stored.is_ok(),
             format!(
                 "Error calling put_code and receiving CodeStored Event: {:?}",
                 code_stored
@@ -162,41 +280,29 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn tx_instantiate() {
-        env_logger::try_init().ok();
-        let signer = PairSigner::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<ContractsTemplateRuntime>::new()
-            .build()
-            .await
-            .unwrap();
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await.unwrap();
 
-        // call put_code extrinsic
-        let code = contract_wasm();
-        let result = client.put_code_and_watch(&signer, &code).await.unwrap();
-        let code_stored = result.code_stored().unwrap();
-        let code_hash = code_stored.unwrap().code_hash;
-
-        log::info!("Code hash: {:?}", code_hash);
-
-        // call instantiate extrinsic
-        let result = client
-            .instantiate_and_watch(
-                &signer,
-                100_000_000_000_000, // endowment
-                500_000_000,         // gas_limit
-                &code_hash,
-                &[], // data
-            )
-            .await
-            .unwrap();
-
-        log::info!("Instantiate result: {:?}", result);
-        let event = result.instantiated().unwrap();
+        let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await;
 
         assert!(
-            event.is_some(),
-            format!("Error instantiating contract: {:?}", result)
+            instantiated.is_ok(),
+            format!("Error instantiating contract: {:?}", instantiated)
+        );
+    }
+
+    #[async_std::test]
+    async fn tx_call() {
+        let ctx = TestContext::init().await;
+        let code_stored = ctx.put_code().await.unwrap();
+
+        let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await.unwrap();
+        let executed = ctx.call(&instantiated.contract, &[]).await;
+
+        assert!(
+            executed.is_ok(),
+            format!("Error calling contract: {:?}", executed)
         );
     }
 }
