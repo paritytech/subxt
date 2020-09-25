@@ -183,8 +183,6 @@ parameter_types! {
     pub const Version: RuntimeVersion = VERSION;
 }
 
-// const_assert!(AvailableBlockRatio::get().deconstruct() >= AVERAGE_ON_INITIALIZE_WEIGHT.deconstruct());
-
 impl frame_system::Trait for Runtime {
     /// The basic call filter to use in dispatchable.
     type BaseCallFilter = ();
