@@ -9,6 +9,7 @@
 * Fix option decoding and add basic sanity test [#161](https://github.com/paritytech/substrate-subxt/pull/161)
 * Add staking support [#160](https://github.com/paritytech/substrate-subxt/pull/161)
 * Decode option event arg [#158](https://github.com/paritytech/substrate-subxt/pull/158)
+* Remove unnecessary Sync bound [#172](https://github.com/paritytech/substrate-subxt/pull/172)
 
 # Version 0.12.0
 
