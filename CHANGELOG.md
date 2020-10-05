@@ -1,3 +1,16 @@
+# Version 0.13.0
+* Make the contract call extrinsic work [#165](https://github.com/paritytech/substrate-subxt/pull/165)
+* Update to Substrate 2.0.0 [#173](https://github.com/paritytech/substrate-subxt/pull/173)
+* Display RawEvent data in hex [#168](https://github.com/paritytech/substrate-subxt/pull/168)
+* Add SudoUncheckedWeightCall [#167](https://github.com/paritytech/substrate-subxt/pull/167)
+* Add Add SetCodeWithoutChecksCall [#166](https://github.com/paritytech/substrate-subxt/pull/166)
+* Improve contracts pallet tests [#163](https://github.com/paritytech/substrate-subxt/pull/163)
+* Make Metadata types public [#162](https://github.com/paritytech/substrate-subxt/pull/162)
+* Fix option decoding and add basic sanity test [#161](https://github.com/paritytech/substrate-subxt/pull/161)
+* Add staking support [#160](https://github.com/paritytech/substrate-subxt/pull/161)
+* Decode option event arg [#158](https://github.com/paritytech/substrate-subxt/pull/158)
+* Remove unnecessary Sync bound [#172](https://github.com/paritytech/substrate-subxt/pull/172)
+
 # Version 0.12.0
 
 * Only return an error if the extrinsic failed. [#156](https://github.com/paritytech/substrate-subxt/pull/156)
@@ -61,4 +74,3 @@
 
 * First release
 * All substrate dependencies upgraded to `alpha.5`
-

@@ -1,6 +1,6 @@
 [package]
 name = "substrate-subxt-proc-macro"
-version = "0.12.0"
+version = "0.13.0"
 authors = ["David Craven <david@craven.ch>", "Parity Technologies <admin@parity.io>"]
 edition = "2018"
 autotests = false
