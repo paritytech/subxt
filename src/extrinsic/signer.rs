@@ -54,7 +54,7 @@ pub trait Signer<T: Runtime> {
 }
 
 /// Extrinsic signer using a private key.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct PairSigner<T: Runtime, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
