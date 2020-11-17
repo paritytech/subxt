@@ -131,6 +131,11 @@ impl<T: Runtime> Rpc<T> {
         }
     }
 
+    /// return client
+    pub fn client(&self) -> &Client {
+        &self.client
+    }
+
     /// Fetch a storage key
     pub async fn storage(
         &self,

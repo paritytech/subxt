@@ -259,6 +259,23 @@ impl<T: Runtime> Client<T> {
         &self.genesis_hash
     }
 
+    /// Return rpc.
+    pub fn rpc(&self) -> &Rpc<T> {
+        &self.rpc
+    }
+
+    /// Request method wrapper.
+    pub async fn request<Ret>(
+        &self,
+        method: impl Into<String>,
+        params: impl Into<jsonrpsee::common::Params>,
+    ) -> Result<Ret, jsonrpsee::client::RequestError>
+    where
+        Ret: jsonrpsee::common::DeserializeOwned,
+    {
+        self.rpc().client().request(method, params).await
+    }
+
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
         &self.metadata
