@@ -395,6 +395,12 @@ impl<T: Runtime> Client<T> {
         Ok(head)
     }
 
+    /// Get a block hash of the latest block
+    pub async fn head(&self) -> Result<T::Hash, Error> {
+        let head = self.rpc.head().await?;
+        Ok(head)
+    }
+
     /// Get a block
     pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
     where
