@@ -52,6 +52,7 @@ use crate::{
 };
 
 /// Raw bytes for an Event
+#[derive(Clone)]
 pub struct RawEvent {
     /// The name of the module from whence the Event originated
     pub module: String,
