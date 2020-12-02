@@ -34,7 +34,12 @@ pub struct Babe;
 
 /// Application specific crypto types
 pub mod app {
-    use application_crypto::{app_crypto, key_types, ed25519, sr25519};
+    use application_crypto::{
+        app_crypto,
+        ed25519,
+        key_types,
+        sr25519,
+    };
 
     /// Authority discovery app crypto types
     pub mod authority_discovery {
