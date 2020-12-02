@@ -50,8 +50,6 @@ pallet-staking = "2.0.0"
 
 sp-rpc = { version = "2.0.0", package = "sp-rpc" }
 sp-core = { version = "2.0.0", package = "sp-core" }
-sc-rpc-api = { version = "0.8.0", package = "sc-rpc-api" }
-sp-transaction-pool = { version = "2.0.0", package = "sp-transaction-pool" }
 substrate-subxt-client = { version = "0.5.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.13.0", path = "proc-macro" }
 

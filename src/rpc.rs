@@ -37,8 +37,7 @@ use jsonrpsee::{
     },
     Client,
 };
-use sc_rpc_api::state::ReadProof;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -48,7 +47,7 @@ use sp_core::{
     twox_128,
     Bytes,
 };
-use sp_rpc::{
+use csp_rpc::{
     list::ListOrValue,
     number::NumberOrHex,
 };
@@ -59,7 +58,6 @@ use sp_runtime::{
     },
     traits::Hash,
 };
-use sp_transaction_pool::TransactionStatus;
 use sp_version::RuntimeVersion;
 
 use crate::{
@@ -106,6 +104,43 @@ pub struct SystemProperties {
     pub token_decimals: u8,
     /// The symbol of the native token
     pub token_symbol: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub enum TransactionStatus<T: Runtime> {
+    /// Transaction is part of the future queue.
+    Future,
+    /// Transaction is part of the ready queue.
+    Ready,
+    /// The transaction has been broadcast to the given peers.
+    Broadcast(Vec<String>),
+    /// Transaction has been included in block with given hash.
+    InBlock(T::Hash),
+    /// The block this transaction was included in has been retracted.
+    Retracted(T::Hash),
+    /// Maximum number of finality watchers has been reached,
+    /// old watchers are being removed.
+    FinalityTimeout(T::Hash),
+    /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
+    Finalized(T::Hash),
+    /// Transaction has been replaced in the pool, by another transaction
+    /// that provides the same tags. (e.g. same (sender, nonce)).
+    Usurped(T::Hash),
+    /// Transaction has been dropped from the pool because of the limit.
+    Dropped,
+    /// Transaction is no longer valid in the current state.
+    Invalid,
+}
+
+/// ReadProof struct returned by the RPC
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ReadProof<Hash> {
+    /// Block hash used to generate the proof
+    pub at: Hash,
+    /// A proof used to prove that storage entries are included in the storage trie
+    pub proof: Vec<Bytes>,
 }
 
 /// Client for substrate rpc interfaces
@@ -359,7 +394,7 @@ impl<T: Runtime> Rpc<T> {
     pub async fn watch_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
-    ) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
+    ) -> Result<Subscription<TransactionStatus<T>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = Params::Array(vec![to_json_value(bytes)?]);
         let subscription = self
@@ -386,7 +421,7 @@ impl<T: Runtime> Rpc<T> {
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
         while let status = xt_sub.next().await {
-            log::info!("received status {:?}", status);
+            // log::info!("received status {:?}", status);
             match status {
                 // ignore in progress extrinsic for now
                 TransactionStatus::Future
