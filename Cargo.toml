@@ -42,10 +42,6 @@ pallet-indices = { version = "2.0.0", package = "pallet-indices" }
 hex = "0.4.2"
 sp-std = "2.0.0"
 application-crypto = { version = "2.0.0", package = "sp-application-crypto" }
-sp-finality-grandpa = "2.0.0"
-sp-consensus-babe = "0.8.0"
-pallet-im-online = "2.0.0"
-sp-authority-discovery = "2.0.0"
 pallet-staking = "2.0.0"
 
 sp-rpc = { version = "2.0.0", package = "sp-rpc" }

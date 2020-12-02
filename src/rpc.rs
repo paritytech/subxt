@@ -47,7 +47,7 @@ use sp_core::{
     twox_128,
     Bytes,
 };
-use csp_rpc::{
+use sp_rpc::{
     list::ListOrValue,
     number::NumberOrHex,
 };
