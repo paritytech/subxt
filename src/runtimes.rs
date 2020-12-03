@@ -15,7 +15,6 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::Encode;
-use pallet_im_online::sr25519::AuthorityId as ImOnlineId;
 use sp_runtime::{
     generic::Header,
     impl_opaque_keys,
@@ -32,32 +31,64 @@ use sp_std::prelude::*;
 /// BABE marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Babe;
+
+/// Application specific crypto types
+///
+/// # Note
+///
+/// These are redefined here to avoid dependencies on the substrate creates where they are defined.
+/// They must be identical to the definitions in the target substrate version.
+pub mod app {
+    use application_crypto::{
+        app_crypto,
+        ed25519,
+        key_types,
+        sr25519,
+    };
+
+    /// Authority discovery app crypto types
+    pub mod authority_discovery {
+        use super::*;
+        app_crypto!(sr25519, key_types::AUTHORITY_DISCOVERY);
+    }
+    /// Babe app crypto types
+    pub mod babe {
+        use super::*;
+        app_crypto!(sr25519, key_types::BABE);
+    }
+    /// Im online discovery app crypto types
+    pub mod im_online {
+        use super::*;
+        app_crypto!(ed25519, key_types::IM_ONLINE);
+    }
+    /// Grandpa app crypto types
+    pub mod grandpa {
+        use super::*;
+        app_crypto!(ed25519, key_types::GRANDPA);
+    }
+    /// Validator app crypto types
+    pub mod validator {
+        use super::*;
+        app_crypto!(ed25519, sp_core::crypto::KeyTypeId(*b"para"));
+    }
+}
+
 impl sp_runtime::BoundToRuntimeAppPublic for Babe {
-    type Public = sp_consensus_babe::AuthorityId;
+    type Public = app::babe::Public;
 }
 
 /// ImOnline marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct ImOnline;
 impl sp_runtime::BoundToRuntimeAppPublic for ImOnline {
-    type Public = ImOnlineId;
+    type Public = app::im_online::Public;
 }
 
 /// GRANDPA marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Grandpa;
 impl sp_runtime::BoundToRuntimeAppPublic for Grandpa {
-    type Public = sp_finality_grandpa::AuthorityId;
-}
-
-use sp_authority_discovery::AuthorityId as AuthorityDiscoveryId;
-
-mod validator_app {
-    use application_crypto::{
-        app_crypto,
-        sr25519,
-    };
-    app_crypto!(sr25519, sp_core::crypto::KeyTypeId(*b"para"));
+    type Public = app::grandpa::Public;
 }
 
 /// Parachain marker struct
@@ -65,14 +96,14 @@ mod validator_app {
 pub struct Parachains;
 
 impl sp_runtime::BoundToRuntimeAppPublic for Parachains {
-    type Public = validator_app::Public;
+    type Public = app::validator::Public;
 }
 
 /// Authority discovery marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct AuthorityDiscovery;
 impl sp_runtime::BoundToRuntimeAppPublic for AuthorityDiscovery {
-    type Public = AuthorityDiscoveryId;
+    type Public = app::authority_discovery::Public;
 }
 
 impl_opaque_keys! {
