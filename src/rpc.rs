@@ -97,9 +97,9 @@ impl From<u32> for BlockNumber {
     }
 }
 
-#[derive(serde::Serialize, serde::Deserialize, Debug, Clone, PartialEq, Eq, Default)]
-#[serde(rename_all = "camelCase")]
 /// System properties for a Substrate-based runtime
+#[derive(serde::Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
+#[serde(rename_all = "camelCase")]
 pub struct SystemProperties {
     /// The address format
     pub ss58_format: u8,
@@ -109,9 +109,15 @@ pub struct SystemProperties {
     pub token_symbol: String,
 }
 
+/// Possible transaction status events.
+///
+/// # Note
+///
+/// This is copied from `sp-transaction-pool` to avoid a dependency on that crate. Therefore it
+/// must be kept compatible with that type from the target substrate version.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum TransactionStatus<T: Runtime> {
+pub enum TransactionStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
     Future,
     /// Transaction is part of the ready queue.
@@ -119,17 +125,17 @@ pub enum TransactionStatus<T: Runtime> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// Transaction has been included in block with given hash.
-    InBlock(T::Hash),
+    InBlock(BlockHash),
     /// The block this transaction was included in has been retracted.
-    Retracted(T::Hash),
+    Retracted(BlockHash),
     /// Maximum number of finality watchers has been reached,
     /// old watchers are being removed.
-    FinalityTimeout(T::Hash),
+    FinalityTimeout(BlockHash),
     /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
-    Finalized(T::Hash),
+    Finalized(BlockHash),
     /// Transaction has been replaced in the pool, by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
-    Usurped(T::Hash),
+    Usurped(Hash),
     /// Transaction has been dropped from the pool because of the limit.
     Dropped,
     /// Transaction is no longer valid in the current state.
@@ -137,6 +143,11 @@ pub enum TransactionStatus<T: Runtime> {
 }
 
 /// ReadProof struct returned by the RPC
+///
+/// # Note
+///
+/// This is copied from `sc-rpc-api` to avoid a dependency on that crate. Therefore it
+/// must be kept compatible with that type from the target substrate version.
 #[derive(Debug, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct ReadProof<Hash> {
@@ -397,7 +408,7 @@ impl<T: Runtime> Rpc<T> {
     pub async fn watch_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
-    ) -> Result<Subscription<TransactionStatus<T>>, Error> {
+    ) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = Params::Array(vec![to_json_value(bytes)?]);
         let subscription = self

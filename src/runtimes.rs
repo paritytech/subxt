@@ -33,6 +33,11 @@ use sp_std::prelude::*;
 pub struct Babe;
 
 /// Application specific crypto types
+///
+/// # Note
+///
+/// These are redefined here to avoid dependencies on the substrate creates where they are defined.
+/// They must be identical to the definitions in the target substrate version.
 pub mod app {
     use application_crypto::{
         app_crypto,
