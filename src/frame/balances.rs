@@ -25,7 +25,10 @@ use codec::{
     Encode,
 };
 use core::marker::PhantomData;
-use frame_support::{Parameter, traits::LockIdentifier};
+use frame_support::{
+    traits::LockIdentifier,
+    Parameter,
+};
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
