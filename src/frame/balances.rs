@@ -25,7 +25,7 @@ use codec::{
     Encode,
 };
 use core::marker::PhantomData;
-use frame_support::Parameter;
+use frame_support::{Parameter, traits::LockIdentifier};
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
@@ -78,6 +78,47 @@ pub struct TotalIssuanceStore<T: Balances> {
     #[store(returns = T::Balance)]
     /// Runtime marker.
     pub _runtime: PhantomData<T>,
+}
+
+/// The locks of the balances module.
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode, Decode)]
+pub struct LocksStore<'a, T: Balances> {
+    #[store(returns = Vec<BalanceLock<T::Balance>>)]
+    /// Account to retrieve the balance locks for.
+    pub account_id: &'a T::AccountId,
+}
+
+/// A single lock on a balance. There can be many of these on an account and they "overlap", so the
+/// same balance is frozen by multiple locks.
+#[derive(Clone, PartialEq, Eq, Encode, Decode)]
+pub struct BalanceLock<Balance> {
+    /// An identifier for this lock. Only one lock may be in existence for each identifier.
+    pub id: LockIdentifier,
+    /// The amount which the free balance may not drop below when this lock is in effect.
+    pub amount: Balance,
+    /// If true, then the lock remains in effect even for payment of transaction fees.
+    pub reasons: Reasons,
+}
+
+impl<Balance: Debug> Debug for BalanceLock<Balance> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("BalanceLock")
+            .field("id", &String::from_utf8_lossy(&self.id))
+            .field("amount", &self.amount)
+            .field("reasons", &self.reasons)
+            .finish()
+    }
+}
+
+/// Simplified reasons for withdrawing balance.
+#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Reasons {
+    /// Paying system transaction fees.
+    Fee,
+    /// Any reason other than paying system transaction fees.
+    Misc,
+    /// Any reason at all.
+    All,
 }
 
 /// Transfer some liquid free balance to another account.
