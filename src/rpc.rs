@@ -268,10 +268,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Get a block hash of the latest block
     pub async fn head(&self) -> Result<T::Hash, Error> {
-        let hash = self
-            .client
-            .request("chain_getHead", Params::None)
-            .await?;
+        let hash = self.client.request("chain_getHead", Params::None).await?;
         Ok(hash)
     }
 
