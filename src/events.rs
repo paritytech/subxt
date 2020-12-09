@@ -96,6 +96,8 @@ impl<T: System> EventsDecoder<T> {
         decoder.register_type_size::<[u8; 32]>("AuthorityId");
         decoder.register_type_size::<u8>("u8");
         decoder.register_type_size::<u32>("u32");
+        decoder.register_type_size::<u64>("u64");
+        decoder.register_type_size::<u128>("u128");
         decoder.register_type_size::<u32>("AccountIndex");
         decoder.register_type_size::<u32>("SessionIndex");
         decoder.register_type_size::<u32>("PropIndex");
