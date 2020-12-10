@@ -46,6 +46,7 @@ extern crate substrate_subxt_proc_macro;
 #[cfg(feature = "client")]
 pub use substrate_subxt_client as client;
 
+pub use jsonrpsee::common::Params;
 pub use sp_core;
 pub use sp_runtime;
 
@@ -259,21 +260,20 @@ impl<T: Runtime> Client<T> {
         &self.genesis_hash
     }
 
-    /// Return rpc.
-    pub fn rpc(&self) -> &Rpc<T> {
-        &self.rpc
-    }
-
     /// Request method wrapper.
     pub async fn request<Ret>(
         &self,
         method: impl Into<String>,
-        params: impl Into<jsonrpsee::common::Params>,
-    ) -> Result<Ret, jsonrpsee::client::RequestError>
+        params: impl Into<Params>,
+    ) -> Result<Ret, Error>
     where
         Ret: jsonrpsee::common::DeserializeOwned,
     {
-        self.rpc().client().request(method, params).await
+        self.rpc
+            .client()
+            .request(method, params)
+            .await
+            .map_err(Into::into)
     }
 
     /// Returns the chain metadata.
