@@ -197,10 +197,10 @@ impl<T: Runtime> ClientBuilder<T> {
 /// Construction options for a signed extrinsic
 #[derive(Copy, Clone)]
 struct ClientSignedOptions {
-    /// The period, measured in blocks, that transaction will live for, starting from a checkpoint
+    /// The period, measured in blocks, that an extrinsic will live for, starting from a checkpoint
     /// block.
     ///
-    /// Logical encoding rules:
+    /// Rules for how the period will be encoded in an extrinsic:
     /// `mortal_period == None`: immortal transaction
     /// `0 <= mortal_period <= 65536`: rounded up to the closest power of 2, starting at 4
     /// `65536 < mortal_period`: Min(65536, mortal_period)
@@ -296,7 +296,7 @@ impl<T: Runtime> Client<T> {
         &self.properties
     }
 
-    /// Returns the current mortal_period configuration
+    /// Returns the current mortal_period
     pub fn mortal_period(&self) -> &Option<u64> {
         &self.signed_options.mortal_period
     }
