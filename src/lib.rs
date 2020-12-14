@@ -207,7 +207,6 @@ pub struct SignedOptions {
     /// `era_period == None`: immortal transaction.
     /// `0 <= era_period <= 65536`: rounded up to the closest power of 2, starting at 4.
     /// `65536 < era_period`: 65536.
-    // pub era_period: Option<u64>,
     pub era_period: Option<u64>,
 }
 
