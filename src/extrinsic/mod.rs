@@ -65,7 +65,7 @@ pub async fn create_signed<T>(
     nonce: T::Index,
     call: Encoded,
     signer: &(dyn Signer<T> + Send + Sync),
-    era_opts: Option<(u64, u64, T::Hash)>,
+    era_info: (Era, T::Hash),
 ) -> Result<UncheckedExtrinsic<T>, Error>
 where
     T: Runtime,
@@ -74,12 +74,6 @@ where
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let era_info = match era_opts {
-        Some((period, cur_num, cur_hash)) => {
-            (Era::mortal(period, cur_num), cur_hash)
-        },
-        None => (Era::Immortal, genesis_hash)
-    };
     let extra = T::Extra::new(spec_version, tx_version, nonce, genesis_hash, era_info);
     let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;

@@ -65,7 +65,8 @@ pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 use sp_runtime::{
     traits::{Block, Header},
-    SaturatedConversion
+    SaturatedConversion,
+    generic::Era
 };
 
 mod error;
@@ -481,9 +482,9 @@ impl<T: Runtime> Client<T> {
             let current_number = (*current_block.header().number()).saturated_into::<u64>();
             let current_hash = current_block.hash();
 
-            Some((era_period, current_number, current_hash))
+            (Era::mortal(era_period, current_number), current_hash)
         } else {
-            None
+            (Era::Immortal, self.genesis_hash)
         };
         let signed = extrinsic::create_signed(
             &self.runtime_version,
