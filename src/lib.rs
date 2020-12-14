@@ -199,7 +199,7 @@ pub struct Client<T: Runtime> {
 }
 
 /// Construction options for a signed extrinsic
-#[derive(Clone)]
+#[derive(Copy, Clone, Debug, PartialEq)]
 pub struct SignedOptions {
     /// The period, measured in blocks, that transaction will live for, starting from a checkpoint
     /// block. A good default is 64 (64 * 6secs = 6min 40sec).
@@ -473,9 +473,11 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        let era_opts = if opts.era_period.is_some() {
-            let era_period = opts.era_period.unwrap();
-            let current_block = self.block(None::<T::Hash>).await?.unwrap().block;
+        let era_opts = if let Some(era_period) = opts.era_period {
+            let current_block = match self.block(None::<T::Hash>).await? {
+                Some(signed_block) => signed_block.block,
+                None => return Err("RPC chain_getBlock returned None when Some(signed_block) was expected".into()),
+            };
             let current_number = (*current_block.header().number()).saturated_into::<u64>();
             let current_hash = current_block.hash();
 

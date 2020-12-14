@@ -80,7 +80,7 @@ where
         },
         None => (Era::Immortal, genesis_hash)
     };
-    let extra: T::Extra = T::Extra::new(spec_version, tx_version, nonce, genesis_hash, era_info);
+    let extra = T::Extra::new(spec_version, tx_version, nonce, genesis_hash, era_info);
     let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
