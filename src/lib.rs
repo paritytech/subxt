@@ -89,7 +89,7 @@ pub use crate::{
         SignedExtra,
         Signer,
         UncheckedExtrinsic,
-        DEFAULT_MORTAL_PERIOD
+        DEFAULT_MORTAL_PERIOD,
     },
     frame::*,
     metadata::{
@@ -186,7 +186,7 @@ impl<T: Runtime> ClientBuilder<T> {
             page_size: self.page_size.unwrap_or(10),
             signed_options: ClientSignedOptions {
                 mortal_period: Some(DEFAULT_MORTAL_PERIOD),
-            }
+            },
         })
     }
 }
@@ -478,7 +478,7 @@ impl<T: Runtime> Client<T> {
     pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T> + Send + Sync)
+        signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<UncheckedExtrinsic<T>, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
@@ -495,10 +495,14 @@ impl<T: Runtime> Client<T> {
                 Some(signed_block) => signed_block.block,
                 None => return Err("RPC chain_getBlock returned None when Some(signed_block) was expected".into()),
             };
-            let current_number = (*current_block.header().number()).saturated_into::<u64>();
+            let current_number =
+                (*current_block.header().number()).saturated_into::<u64>();
             let current_hash = current_block.hash();
 
-            (Era::mortal(mortal_period, current_number), Some(current_hash))
+            (
+                Era::mortal(mortal_period, current_number),
+                Some(current_hash),
+            )
         } else {
             (Era::Immortal, None)
         };
