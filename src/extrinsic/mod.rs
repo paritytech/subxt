@@ -32,8 +32,8 @@ pub use self::{
 };
 
 use sp_runtime::{
+    generic::Era,
     traits::SignedExtension,
-    generic::Era
 };
 use sp_version::RuntimeVersion;
 

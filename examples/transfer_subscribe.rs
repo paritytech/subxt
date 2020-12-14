@@ -42,11 +42,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     decoder.with_balances();
     let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
     sub.filter_event::<TransferEvent<_>>();
-    client.transfer(
-        &signer,
-        &dest,
-        10_000
-    ).await?;
+    client.transfer(&signer, &dest, 10_000).await?;
     let raw = sub.next().await.unwrap().unwrap();
     let event = TransferEvent::<DefaultNodeRuntime>::decode(&mut &raw.data[..]);
     if let Ok(e) = event {

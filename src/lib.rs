@@ -61,13 +61,16 @@ use sp_core::{
     Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
+use sp_runtime::{
+    generic::Era,
+    traits::{
+        Block,
+        Header,
+    },
+    SaturatedConversion,
+};
 pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
-use sp_runtime::{
-    traits::{Block, Header},
-    SaturatedConversion,
-    generic::Era
-};
 
 mod error;
 mod events;

@@ -237,7 +237,7 @@ pub trait SignedExtra<T: System>: SignedExtension {
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
-        era_info: (Era, Option<T::Hash>)
+        era_info: (Era, Option<T::Hash>),
     ) -> Self;
 
     /// Returns the transaction extra.
@@ -252,7 +252,7 @@ pub struct DefaultExtra<T: System> {
     nonce: T::Index,
     genesis_hash: T::Hash,
     // Era and either the genesis_hash if immortal or the current hash if mortal
-    era_info: (Era, Option<T::Hash>)
+    era_info: (Era, Option<T::Hash>),
 }
 
 impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
@@ -273,7 +273,7 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
-        era_info: (Era, Option<T::Hash>)
+        era_info: (Era, Option<T::Hash>),
     ) -> Self {
         DefaultExtra {
             spec_version,
