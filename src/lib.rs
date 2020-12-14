@@ -67,8 +67,6 @@ use sp_runtime::{
     traits::{Block, Header},
     SaturatedConversion
 };
-use quote::{TokenStreamExt, quote};
-use proc_macro2::TokenStream;
 
 mod error;
 mod events;
@@ -212,23 +210,6 @@ pub struct SignedOptions {
     /// `65536 < era_period`: 65536.
     // pub era_period: Option<u64>,
     pub era_period: Option<u64>,
-}
-// https://github.com/dtolnay/quote/issues/129#issue-481909264
-fn options_to_tokens<T : quote::ToTokens>(input: &core::option::Option<T>) -> TokenStream {
-    match input {
-        Some(value) => quote!(core::option::Option::Some(#value)),
-        None => quote!(core::option::Option::None)
-    }
-}
-impl quote::ToTokens for self::SignedOptions {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let era_period = options_to_tokens(&self.era_period);
-        tokens.append_all(quote!(
-            SignedOptions {
-                era_period: #era_period
-            }
-        ));
-    }
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -504,7 +485,6 @@ impl<T: Runtime> Client<T> {
         } else {
             None
         };
-
         let signed = extrinsic::create_signed(
             &self.runtime_version,
             self.genesis_hash,

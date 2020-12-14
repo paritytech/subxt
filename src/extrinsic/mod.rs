@@ -47,7 +47,6 @@ use crate::{
 /// A reasonable default for `era_period`
 pub const DEFAULT_ERA_PERIOD: u64 = 64;
 
-
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
     <T as System>::Address,
