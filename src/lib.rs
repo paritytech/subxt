@@ -89,7 +89,7 @@ pub use crate::{
         SignedExtra,
         Signer,
         UncheckedExtrinsic,
-        DEFAULT_ERA_PERIOD
+        DEFAULT_MORTAL_PERIOD
     },
     frame::*,
     metadata::{
@@ -184,8 +184,24 @@ impl<T: Runtime> ClientBuilder<T> {
             runtime_version: runtime_version?,
             _marker: PhantomData,
             page_size: self.page_size.unwrap_or(10),
+            signed_options: ClientSignedOptions {
+                mortal_period: Some(DEFAULT_MORTAL_PERIOD),
+            }
         })
     }
+}
+
+/// Construction options for a signed extrinsic
+#[derive(Copy, Clone)]
+struct ClientSignedOptions {
+    /// The period, measured in blocks, that transaction will live for, starting from a checkpoint
+    /// block.
+    ///
+    /// Logical encoding rules:
+    /// `mortal_period == None`: immortal transaction
+    /// `0 <= mortal_period <= 65536`: rounded up to the closest power of 2, starting at 4
+    /// `65536 < mortal_period`: Min(65536, mortal_period)
+    pub mortal_period: Option<u64>,
 }
 
 /// Client to interface with a substrate node.
@@ -197,18 +213,7 @@ pub struct Client<T: Runtime> {
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     page_size: u32,
-}
-
-/// Construction options for a signed extrinsic
-#[derive(Copy, Clone, Debug, PartialEq)]
-pub struct SignedOptions {
-    /// The period, measured in blocks, that transaction will live for, starting from a checkpoint
-    /// block. A good default is 64 (64 * 6secs = 6min 40sec).
-    ///
-    /// `era_period == None`: immortal transaction.
-    /// `0 <= era_period <= 65536`: rounded up to the closest power of 2, starting at 4.
-    /// `65536 < era_period`: 65536.
-    pub era_period: Option<u64>,
+    signed_options: ClientSignedOptions,
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -221,6 +226,7 @@ impl<T: Runtime> Clone for Client<T> {
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
             page_size: self.page_size,
+            signed_options: self.signed_options.clone(),
         }
     }
 }
@@ -285,6 +291,17 @@ impl<T: Runtime> Client<T> {
     /// Returns the system properties
     pub fn properties(&self) -> &SystemProperties {
         &self.properties
+    }
+
+    /// Returns the current mortal_period configuration
+    pub fn mortal_period(&self) -> &Option<u64> {
+        &self.signed_options.mortal_period
+    }
+
+    /// Set the mortal period for signed extrinsics
+    pub fn set_mortal_period(mut self, mortal_period: Option<u64>) -> Self {
+        self.signed_options.mortal_period = mortal_period;
+        self
     }
 
     /// Fetch the value under an unhashed storage key
@@ -461,8 +478,7 @@ impl<T: Runtime> Client<T> {
     pub async fn create_signed<C: Call<T> + Send + Sync>(
         &self,
         call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-        opts: SignedOptions,
+        signer: &(dyn Signer<T> + Send + Sync)
     ) -> Result<UncheckedExtrinsic<T>, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
@@ -474,7 +490,7 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        let era_opts = if let Some(era_period) = opts.era_period {
+        let era_info = if let Some(mortal_period) = self.signed_options.mortal_period {
             let current_block = match self.block(None::<T::Hash>).await? {
                 Some(signed_block) => signed_block.block,
                 None => return Err("RPC chain_getBlock returned None when Some(signed_block) was expected".into()),
@@ -482,9 +498,9 @@ impl<T: Runtime> Client<T> {
             let current_number = (*current_block.header().number()).saturated_into::<u64>();
             let current_hash = current_block.hash();
 
-            (Era::mortal(era_period, current_number), current_hash)
+            (Era::mortal(mortal_period, current_number), Some(current_hash))
         } else {
-            (Era::Immortal, self.genesis_hash)
+            (Era::Immortal, None)
         };
         let signed = extrinsic::create_signed(
             &self.runtime_version,
@@ -492,7 +508,7 @@ impl<T: Runtime> Client<T> {
             account_nonce,
             call,
             signer,
-            era_opts,
+            era_info,
         )
         .await?;
         Ok(signed)
@@ -530,13 +546,12 @@ impl<T: Runtime> Client<T> {
         &self,
         call: C,
         signer: &(dyn Signer<T> + Send + Sync),
-        opts: SignedOptions,
     ) -> Result<T::Hash, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
-        let extrinsic = self.create_signed(call, signer, opts).await?;
+        let extrinsic = self.create_signed(call, signer).await?;
         self.submit_extrinsic(extrinsic).await
     }
 
@@ -545,13 +560,12 @@ impl<T: Runtime> Client<T> {
         &self,
         call: C,
         signer: &(dyn Signer<T> + Send + Sync),
-        opts: SignedOptions,
     ) -> Result<ExtrinsicSuccess<T>, Error>
     where
         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
-        let extrinsic = self.create_signed(call, signer, opts).await?;
+        let extrinsic = self.create_signed(call, signer).await?;
         let decoder = self.events_decoder::<C>();
         self.submit_and_watch_extrinsic(extrinsic, decoder).await
     }

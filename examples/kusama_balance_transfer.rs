@@ -20,8 +20,6 @@ use substrate_subxt::{
     ClientBuilder,
     KusamaRuntime,
     PairSigner,
-    SignedOptions,
-    DEFAULT_ERA_PERIOD
 };
 
 #[async_std::main]
@@ -34,7 +32,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
     let hash = client.transfer(
         &signer,
-        SignedOptions { era_period: Some(DEFAULT_ERA_PERIOD) },
         &dest,
         10_000
     ).await?;

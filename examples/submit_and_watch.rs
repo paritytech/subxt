@@ -23,8 +23,6 @@ use substrate_subxt::{
     ClientBuilder,
     DefaultNodeRuntime,
     PairSigner,
-    SignedOptions,
-    DEFAULT_ERA_PERIOD,
 };
 
 #[async_std::main]
@@ -37,7 +35,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
     let result = client.transfer_and_watch(
         &signer,
-        SignedOptions { era_period: Some(DEFAULT_ERA_PERIOD) },
         &dest,
         10_000
     ).await?;

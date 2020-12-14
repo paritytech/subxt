@@ -44,8 +44,8 @@ use crate::{
     Error,
 };
 
-/// A reasonable default for `era_period`
-pub const DEFAULT_ERA_PERIOD: u64 = 64;
+/// A reasonable default for `mortal_period`
+pub const DEFAULT_MORTAL_PERIOD: u64 = 64;
 
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
@@ -65,7 +65,7 @@ pub async fn create_signed<T>(
     nonce: T::Index,
     call: Encoded,
     signer: &(dyn Signer<T> + Send + Sync),
-    era_info: (Era, T::Hash),
+    era_info: (Era, Option<T::Hash>),
 ) -> Result<UncheckedExtrinsic<T>, Error>
 where
     T: Runtime,
