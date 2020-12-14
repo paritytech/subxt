@@ -199,7 +199,6 @@ pub struct Client<T: Runtime> {
 }
 
 /// Construction options for a signed extrinsic
-// TODO: tip can go in here https://github.com/paritytech/substrate-subxt/issues/187
 #[derive(Clone)]
 pub struct SignedOptions {
     /// The period, measured in blocks, that transaction will live for, starting from a checkpoint
