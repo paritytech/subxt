@@ -27,6 +27,8 @@ use substrate_subxt::{
     EventSubscription,
     EventsDecoder,
     PairSigner,
+    SignedOptions,
+    DEFAULT_ERA_PERIOD,
 };
 
 #[async_std::main]
@@ -42,7 +44,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     decoder.with_balances();
     let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
     sub.filter_event::<TransferEvent<_>>();
-    client.transfer(&signer, &dest, 10_000).await?;
+    client.transfer(
+        &signer,
+        SignedOptions { era_period: Some(DEFAULT_ERA_PERIOD) },
+        &dest,
+        10_000
+    ).await?;
     let raw = sub.next().await.unwrap().unwrap();
     let event = TransferEvent::<DefaultNodeRuntime>::decode(&mut &raw.data[..]);
     if let Ok(e) = event {

@@ -138,14 +138,13 @@ where
 ///
 /// # Note
 ///
-/// This is modified from the substrate version to allow passing in of the genesis hash, which is
-/// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
-/// valid forever)
+/// This is modified from the substrate version to allow passing in a hash (either the genesis hash
+/// if immortal or current hash if mortal. The hash is returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
 pub struct CheckEra<T: System>(
     /// The default structure for the Extra encoding
     pub (Era, PhantomData<T>),
-    /// Local genesis hash to be used for `AdditionalSigned`
+    /// Local hash to be used for `AdditionalSigned`
     #[codec(skip)]
     pub T::Hash,
 );
@@ -238,6 +237,7 @@ pub trait SignedExtra<T: System>: SignedExtension {
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
+        era_info: (Era, T::Hash)
     ) -> Self;
 
     /// Returns the transaction extra.
@@ -251,6 +251,8 @@ pub struct DefaultExtra<T: System> {
     tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
+    // Era and either the genesis_hash if immortal or the current hash if mortal
+    era_info: (Era, T::Hash)
 }
 
 impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
@@ -271,12 +273,14 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
+        era_info: (Era, T::Hash)
     ) -> Self {
         DefaultExtra {
             spec_version,
             tx_version,
             nonce,
             genesis_hash,
+            era_info,
         }
     }
 
@@ -285,7 +289,7 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
             CheckSpecVersion(PhantomData, self.spec_version),
             CheckTxVersion(PhantomData, self.tx_version),
             CheckGenesis(PhantomData, self.genesis_hash),
-            CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
+            CheckEra((self.era_info.0, PhantomData), self.era_info.1),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             ChargeTransactionPayment(<T as Balances>::Balance::default()),

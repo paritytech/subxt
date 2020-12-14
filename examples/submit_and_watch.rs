@@ -23,6 +23,8 @@ use substrate_subxt::{
     ClientBuilder,
     DefaultNodeRuntime,
     PairSigner,
+    SignedOptions,
+    DEFAULT_ERA_PERIOD,
 };
 
 #[async_std::main]
@@ -33,7 +35,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let result = client.transfer_and_watch(&signer, &dest, 10_000).await?;
+    let result = client.transfer_and_watch(
+        &signer,
+        SignedOptions { era_period: Some(DEFAULT_ERA_PERIOD) },
+        &dest,
+        10_000
+    ).await?;
 
     if let Some(event) = result.transfer()? {
         println!("Balance transfer success: value: {:?}", event.amount);
