@@ -251,7 +251,6 @@ pub struct DefaultExtra<T: System> {
     tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
-    // Era and either the genesis_hash if immortal or the current hash if mortal
     era_info: (Era, Option<T::Hash>),
 }
 
