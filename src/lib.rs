@@ -200,10 +200,8 @@ struct ClientSignedOptions {
     /// The period, measured in blocks, that an extrinsic will live for, starting from a checkpoint
     /// block.
     ///
-    /// Rules for how the period will be encoded in an extrinsic:
-    /// `mortal_period == None`: immortal transaction
-    /// `0 <= mortal_period <= 65536`: rounded up to the closest power of 2, starting at 4
-    /// `65536 < mortal_period`: Min(65536, mortal_period)
+    /// Substrate reference:
+    /// https://docs.rs/sp-runtime/2.0.0/sp_runtime/generic/enum.Era.html#variant.Mortal
     pub mortal_period: Option<u64>,
 }
 
