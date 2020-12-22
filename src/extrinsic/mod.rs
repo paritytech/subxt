@@ -17,7 +17,6 @@
 //! Create signed or unsigned extrinsics.
 
 mod extra;
-mod mortal_period;
 mod signer;
 
 pub use self::{
@@ -26,7 +25,6 @@ pub use self::{
         Extra,
         SignedExtra,
     },
-    mortal_period::derive_mortal_period,
     signer::{
         PairSigner,
         Signer,

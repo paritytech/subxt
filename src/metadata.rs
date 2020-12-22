@@ -40,6 +40,15 @@ use sp_core::storage::StorageKey;
 
 use crate::Encoded;
 
+/// 5 min `mortal_period`in milliseconds, to be adjusted based on expected block time
+pub const BASELINE_MORTAL_PERIOD: u64 = 5 * 60 * 1000;
+
+/// Fallback `BlockHashCount`
+pub const FALLBACK_BLOCK_HASH_COUNT: u64 = 2_400;
+
+/// Fallback expected block time in milliseconds
+pub const FALLBACK_EXPECTED_BLOCK_TIME: u64 = 6_000;
+
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
@@ -164,7 +173,33 @@ impl Metadata {
             }
         }
         string
-    }
+	}
+
+	/// Derive a default mortal period
+	pub(crate) fn derive_mortal_period(&self) -> Result<u64, MetadataError> {
+		let block_hash_count = if let Ok(system_meta) = self.module("System") {
+			if let Ok(count) = system_meta.constant("BlockHashCount") {
+				count.value::<u32>()?.into()
+			} else {
+				FALLBACK_BLOCK_HASH_COUNT
+			}
+		} else {
+			FALLBACK_BLOCK_HASH_COUNT
+		};
+		let block_time = if let Ok(babe_meta) = self.module("Babe") {
+			if let Ok(milliseconds) = babe_meta.constant("ExpectedBlockTime") {
+				milliseconds.value::<u64>()?
+			} else {
+				FALLBACK_EXPECTED_BLOCK_TIME
+			}
+		} else {
+			FALLBACK_EXPECTED_BLOCK_TIME
+		};
+
+		Ok((BASELINE_MORTAL_PERIOD / block_time)
+			.next_power_of_two()
+			.min(block_hash_count.next_power_of_two()))
+	}
 }
 
 #[derive(Clone, Debug)]
