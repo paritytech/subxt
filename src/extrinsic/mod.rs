@@ -17,6 +17,7 @@
 //! Create signed or unsigned extrinsics.
 
 mod extra;
+mod mortal_period;
 mod signer;
 
 pub use self::{
@@ -25,6 +26,7 @@ pub use self::{
         Extra,
         SignedExtra,
     },
+    mortal_period::derive_mortal_period,
     signer::{
         PairSigner,
         Signer,
@@ -43,9 +45,6 @@ use crate::{
     Encoded,
     Error,
 };
-
-/// A reasonable default for `mortal_period`
-pub const DEFAULT_MORTAL_PERIOD: u64 = 64;
 
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<

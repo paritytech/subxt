@@ -50,6 +50,7 @@ pub use sp_core;
 pub use sp_runtime;
 
 use codec::Decode;
+use core::convert::Into;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sp_core::{
@@ -88,11 +89,11 @@ pub use crate::{
         RawEvent,
     },
     extrinsic::{
+        derive_mortal_period,
         PairSigner,
         SignedExtra,
         Signer,
         UncheckedExtrinsic,
-        DEFAULT_MORTAL_PERIOD,
     },
     frame::*,
     metadata::{
@@ -179,17 +180,17 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc.system_properties(),
         )
         .await;
+        let metadata = metadata?;
+        let mortal_period = derive_mortal_period(&metadata).ok();
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: metadata?,
+            metadata,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
             page_size: self.page_size.unwrap_or(10),
-            signed_options: ClientSignedOptions {
-                mortal_period: Some(DEFAULT_MORTAL_PERIOD),
-            },
+            signed_options: ClientSignedOptions { mortal_period },
         })
     }
 }
