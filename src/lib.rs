@@ -179,8 +179,8 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc.system_properties(),
         )
         .await;
-		let metadata = metadata?;
-		let mortal_period = Some(metadata.derive_mortal_period()?);
+        let metadata = metadata?;
+        let mortal_period = Some(metadata.derive_mortal_period()?);
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
