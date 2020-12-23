@@ -189,16 +189,16 @@ impl<T: Runtime> ClientBuilder<T> {
         .await;
         let metadata = metadata?;
         let mortal_period = if let Some(period) = self.mortal_period {
-			period
-		} else {
-        	match metadata.derive_mortal_period() {
-				Err(e) => {
-					log::error!("`Metadata::derive_mortal_period` failed. Set `mortal_period` prior to invoking `Client::build`.");
-					return Err(e.into())
-				}
-				Ok(period) => Some(period)
-        	}
-		};
+            period
+        } else {
+            match metadata.derive_mortal_period() {
+                Err(e) => {
+                    log::error!("`Metadata::derive_mortal_period` failed. Set `mortal_period` prior to invoking `Client::build`.");
+                    return Err(e.into())
+                }
+                Ok(period) => Some(period),
+            }
+        };
 
         Ok(Client {
             rpc,
