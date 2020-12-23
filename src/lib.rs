@@ -128,6 +128,7 @@ pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
     page_size: Option<u32>,
+    mortal_period: Option<Option<u64>>,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -138,6 +139,7 @@ impl<T: Runtime> ClientBuilder<T> {
             url: None,
             client: None,
             page_size: None,
+            mortal_period: None,
         }
     }
 
@@ -156,6 +158,12 @@ impl<T: Runtime> ClientBuilder<T> {
     /// Set the page size.
     pub fn set_page_size(mut self, size: u32) -> Self {
         self.page_size = Some(size);
+        self
+    }
+
+    /// Set the mortal period. Must be set if `Metadata::derive_mortal_period` results in an error.
+    pub fn set_mortal_period(mut self, mortal_period: u64) -> Self {
+        self.mortal_period = Some(Some(mortal_period));
         self
     }
 
@@ -180,7 +188,18 @@ impl<T: Runtime> ClientBuilder<T> {
         )
         .await;
         let metadata = metadata?;
-        let mortal_period = Some(metadata.derive_mortal_period()?);
+        let mortal_period = if let Some(period) = self.mortal_period {
+			period
+		} else {
+        	match metadata.derive_mortal_period() {
+				Err(e) => {
+					log::error!("`Metadata::derive_mortal_period` failed. Set `mortal_period` prior to invoking `Client::build`.");
+					return Err(e.into())
+				}
+				Ok(period) => Some(period)
+        	}
+		};
+
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
@@ -202,7 +221,7 @@ struct ClientSignedOptions {
     ///
     /// Substrate reference:
     /// https://docs.rs/sp-runtime/2.0.0/sp_runtime/generic/enum.Era.html#variant.Mortal
-    pub mortal_period: Option<u64>,
+    pub(crate) mortal_period: Option<u64>,
 }
 
 /// Client to interface with a substrate node.

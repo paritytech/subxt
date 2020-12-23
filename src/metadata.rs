@@ -40,14 +40,8 @@ use sp_core::storage::StorageKey;
 
 use crate::Encoded;
 
-/// 5 min `mortal_period`in milliseconds, to be adjusted based on expected block time
+/// 5 min `mortal_period` in milliseconds, to be adjusted based on expected block time
 pub const BASELINE_MORTAL_PERIOD: u64 = 5 * 60 * 1000;
-
-/// Fallback `BlockHashCount`
-pub const FALLBACK_BLOCK_HASH_COUNT: u64 = 2_400;
-
-/// Fallback expected block time in milliseconds
-pub const FALLBACK_EXPECTED_BLOCK_TIME: u64 = 6_000;
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
@@ -85,6 +79,9 @@ pub enum MetadataError {
     /// Constant is not in metadata.
     #[error("Constant {0} not found")]
     ConstantNotFound(&'static str),
+    /// A value was 0 when a non-zero value was expected.
+    #[error("A value was unexpectedly 0: {0}")]
+    ZeroValue(&'static str),
 }
 
 /// Runtime metadata.
@@ -175,30 +172,26 @@ impl Metadata {
         string
     }
 
-    /// Derive a default mortal period
+    /// Derive a mortal period
     pub(crate) fn derive_mortal_period(&self) -> Result<u64, MetadataError> {
-        let block_hash_count = if let Ok(system_meta) = self.module("System") {
-            if let Ok(count) = system_meta.constant("BlockHashCount") {
-                count.value::<u32>()?.into()
-            } else {
-                FALLBACK_BLOCK_HASH_COUNT
-            }
-        } else {
-            FALLBACK_BLOCK_HASH_COUNT
-        };
-        let block_time = if let Ok(babe_meta) = self.module("Babe") {
-            if let Ok(milliseconds) = babe_meta.constant("ExpectedBlockTime") {
-                milliseconds.value::<u64>()?
-            } else {
-                FALLBACK_EXPECTED_BLOCK_TIME
-            }
-        } else {
-            FALLBACK_EXPECTED_BLOCK_TIME
-        };
+        let block_hash_count: u64 = self
+            .module("System")
+            .and_then(|sys| sys.constant("BlockHashCount"))
+            .and_then(|count| count.value::<u32>())
+            .map(Into::into)?;
+        let expected_block_time = self
+            .module("Babe")
+            .and_then(|babe| babe.constant("ExpectedBlockTime"))
+            .and_then(|e| e.value::<u64>())?;
 
-        Ok((BASELINE_MORTAL_PERIOD / block_time)
-            .next_power_of_two()
-            .min(block_hash_count.next_power_of_two()))
+        match expected_block_time {
+            0 => Err(MetadataError::ZeroValue("Babe::ExpectedBlockTime")),
+            expected_block_time => {
+                Ok((BASELINE_MORTAL_PERIOD / expected_block_time)
+                    .next_power_of_two()
+                    .min(block_hash_count.next_power_of_two()))
+            }
+        }
     }
 }
 

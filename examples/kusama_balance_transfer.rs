@@ -29,7 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
+	let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
     let hash = client.transfer(&signer, &dest, 10_000).await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
