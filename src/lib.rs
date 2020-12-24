@@ -162,8 +162,8 @@ impl<T: Runtime> ClientBuilder<T> {
     }
 
     /// Set the mortal period. Must be set if `Metadata::derive_mortal_period` results in an error.
-    pub fn set_mortal_period(mut self, mortal_period: u64) -> Self {
-        self.mortal_period = Some(Some(mortal_period));
+    pub fn set_mortal_period(mut self, mortal_period: Option<u64>) -> Self {
+        self.mortal_period = Some(mortal_period);
         self
     }
 
@@ -193,7 +193,8 @@ impl<T: Runtime> ClientBuilder<T> {
         } else {
             match metadata.derive_mortal_period() {
                 Err(e) => {
-                    log::error!("`Metadata::derive_mortal_period` failed. Set `mortal_period` prior to invoking `Client::build`.");
+                    log::error!("{}", e);
+                    log::error!("`Metadata::derive_mortal_period` failed. You may need to set `mortal_period` prior to invoking `Client::build`");
                     return Err(e.into())
                 }
                 Ok(period) => Some(period),
@@ -318,7 +319,7 @@ impl<T: Runtime> Client<T> {
         &self.signed_options.mortal_period
     }
 
-    /// Set the mortal period for signed extrinsics
+    /// Set the mortal period
     pub fn set_mortal_period(mut self, mortal_period: Option<u64>) -> Self {
         self.signed_options.mortal_period = mortal_period;
         self

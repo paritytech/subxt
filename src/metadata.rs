@@ -79,9 +79,9 @@ pub enum MetadataError {
     /// Constant is not in metadata.
     #[error("Constant {0} not found")]
     ConstantNotFound(&'static str),
-    /// A value was 0 when a non-zero value was expected.
-    #[error("A value was unexpectedly 0: {0}")]
-    ZeroValue(&'static str),
+    /// Failed trying to derive mortal period
+    #[error("Failed trying to derive mortal period: {0}")]
+    MortalPeriodError(&'static str),
 }
 
 /// Runtime metadata.
@@ -180,12 +180,20 @@ impl Metadata {
             .and_then(|count| count.value::<u32>())
             .map(Into::into)?;
         let expected_block_time = self
-            .module("Babe")
-            .and_then(|babe| babe.constant("ExpectedBlockTime"))
-            .and_then(|e| e.value::<u64>())?;
+            .module("Timestamp")
+            .and_then(|babe| babe.constant("MinimumPeriod"))
+            .and_then(|e| e.value::<u64>())?
+            .checked_mul(2)
+            .ok_or(MetadataError::MortalPeriodError(
+                "Underflow or overflow attempting `TimeStamp::MinimumPeriod.checked_mul(2)`",
+            ))?;
 
         match expected_block_time {
-            0 => Err(MetadataError::ZeroValue("Babe::ExpectedBlockTime")),
+            0 => {
+                Err(MetadataError::MortalPeriodError(
+                    "`Babe::ExpectedBlockTime` was 0 when a value > 0 was expected",
+                ))
+            }
             expected_block_time => {
                 Ok((BASELINE_MORTAL_PERIOD / expected_block_time)
                     .next_power_of_two()
