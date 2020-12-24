@@ -247,7 +247,7 @@ impl<T: Runtime> Clone for Client<T> {
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
             page_size: self.page_size,
-            signed_options: self.signed_options.clone(),
+            signed_options: self.signed_options,
         }
     }
 }
