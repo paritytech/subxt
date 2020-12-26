@@ -197,8 +197,8 @@ impl<T: Runtime> ClientBuilder<T> {
         )
         .await;
         let metadata = metadata?;
-        let mortal_period = if let Some(period) = self.mortal_period {
-            period
+        let mortal_period = if let Some(mortal_period) = self.mortal_period {
+            mortal_period
         } else {
             match metadata.derive_mortal_period() {
                 Err(e) => {
