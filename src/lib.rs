@@ -201,8 +201,7 @@ impl<T: Runtime> ClientBuilder<T> {
         } else {
             match metadata.derive_mortal_period() {
                 Err(e) => {
-                    log::error!("{}", e);
-                    log::error!("`Metadata::derive_mortal_period` failed. You may need to set `mortal_period` prior to invoking `Client::build`");
+                    log::error!("`Metadata::derive_mortal_period` failed: {}. You may need to set `mortal_period` prior to invoking `Client::build`", e);
                     return Err(e.into())
                 }
                 Ok(period) => Some(period),
