@@ -121,6 +121,14 @@ use crate::{
     },
 };
 
+#[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
+pub enum MortalPeriod {
+	/// Create a mortal transaction with the specified period
+	Mortal(u64),
+	/// Create an immortal transaction
+	Immortal,
+}
+
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
 pub struct ClientBuilder<T: Runtime> {
@@ -128,7 +136,7 @@ pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
     page_size: Option<u32>,
-    mortal_period: Option<Option<u64>>,
+    mortal_period: Option<MortalPeriod>,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -162,7 +170,7 @@ impl<T: Runtime> ClientBuilder<T> {
     }
 
     /// Set the mortal period. Must be set if `Metadata::derive_mortal_period` results in an error.
-    pub fn set_mortal_period(mut self, mortal_period: Option<u64>) -> Self {
+    pub fn set_mortal_period(mut self, mortal_period: MortalPeriod) -> Self {
         self.mortal_period = Some(mortal_period);
         self
     }
@@ -222,7 +230,7 @@ struct ClientSignedOptions {
     ///
     /// Substrate reference:
     /// https://docs.rs/sp-runtime/2.0.0/sp_runtime/generic/enum.Era.html#variant.Mortal
-    pub(crate) mortal_period: Option<u64>,
+    pub(crate) mortal_period: MortalPeriod,
 }
 
 /// Client to interface with a substrate node.
@@ -511,7 +519,7 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        let era_info = if let Some(mortal_period) = self.signed_options.mortal_period {
+        let era_info = if let MortalPeriod::Mortal(mortal_period) = self.signed_options.mortal_period {
             let current_block = match self.block(None::<T::Hash>).await? {
                 Some(signed_block) => signed_block.block,
                 None => return Err("RPC chain_getBlock returned None when Some(signed_block) was expected".into()),

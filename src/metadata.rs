@@ -177,12 +177,12 @@ impl Metadata {
         let block_hash_count: u64 = self
             .module("System")
             .and_then(|sys| sys.constant("BlockHashCount"))
-            .and_then(|count| count.value::<u32>())
+            .and_then(|b| b.value::<u32>())
             .map(Into::into)?;
         let expected_block_time = self
             .module("Timestamp")
-            .and_then(|babe| babe.constant("MinimumPeriod"))
-            .and_then(|e| e.value::<u64>())?
+            .and_then(|time| time.constant("MinimumPeriod"))
+            .and_then(|m| m.value::<u64>())?
             .checked_mul(2)
             .ok_or(MetadataError::MortalPeriodError(
                 "Underflow or overflow attempting `TimeStamp::MinimumPeriod.checked_mul(2)`",
