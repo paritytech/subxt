@@ -121,12 +121,13 @@ use crate::{
     },
 };
 
+/// The mortality of a transaction
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum MortalPeriod {
-	/// Create a mortal transaction with the specified period
-	Mortal(u64),
-	/// Create an immortal transaction
-	Immortal,
+    /// Create a mortal transaction with the specified period
+    Mortal(u64),
+    /// Create an immortal transaction
+    Immortal,
 }
 
 /// ClientBuilder for constructing a Client.
@@ -204,7 +205,7 @@ impl<T: Runtime> ClientBuilder<T> {
                     log::error!("`Metadata::derive_mortal_period` failed: {}. You may need to set `mortal_period` prior to invoking `Client::build`", e);
                     return Err(e.into())
                 }
-                Ok(period) => Some(period),
+                Ok(period) => MortalPeriod::Mortal(period),
             }
         };
 
@@ -322,12 +323,12 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Returns the current mortal_period
-    pub fn mortal_period(&self) -> &Option<u64> {
+    pub fn mortal_period(&self) -> &MortalPeriod {
         &self.signed_options.mortal_period
     }
 
     /// Set the mortal period
-    pub fn set_mortal_period(mut self, mortal_period: Option<u64>) -> Self {
+    pub fn set_mortal_period(mut self, mortal_period: MortalPeriod) -> Self {
         self.signed_options.mortal_period = mortal_period;
         self
     }
@@ -518,7 +519,9 @@ impl<T: Runtime> Client<T> {
             self.account(signer.account_id(), None).await?.nonce
         };
         let call = self.encode(call)?;
-        let era_info = if let MortalPeriod::Mortal(mortal_period) = self.signed_options.mortal_period {
+        let era_info = if let MortalPeriod::Mortal(mortal_period) =
+            self.signed_options.mortal_period
+        {
             let current_block = match self.block(None::<T::Hash>).await? {
                 Some(signed_block) => signed_block.block,
                 None => return Err("RPC chain_getBlock returned None when Some(signed_block) was expected".into()),
