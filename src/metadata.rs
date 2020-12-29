@@ -41,7 +41,7 @@ use sp_core::storage::StorageKey;
 use crate::Encoded;
 
 /// 5 min `mortal_period` in milliseconds, to be adjusted based on expected block time
-pub const BASELINE_MORTAL_PERIOD: u64 = 5 * 60 * 1000;
+const BASELINE_MORTAL_PERIOD: u64 = 5 * 60 * 1000;
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]

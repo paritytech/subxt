@@ -217,14 +217,14 @@ impl<T: Runtime> ClientBuilder<T> {
             runtime_version: runtime_version?,
             _marker: PhantomData,
             page_size: self.page_size.unwrap_or(10),
-            signed_options: ClientSignedOptions { mortal_period },
+            signed_options: SigningOptions { mortal_period },
         })
     }
 }
 
 /// Construction options for a signed extrinsic
 #[derive(Copy, Clone)]
-struct ClientSignedOptions {
+struct SigningOptions {
     /// The period of validity, measured in blocks, that an extrinsic will live for, starting from a checkpoint
     /// block.
     ///
@@ -242,7 +242,7 @@ pub struct Client<T: Runtime> {
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     page_size: u32,
-    signed_options: ClientSignedOptions,
+    signed_options: SigningOptions,
 }
 
 impl<T: Runtime> Clone for Client<T> {
