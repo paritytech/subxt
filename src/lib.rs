@@ -121,7 +121,7 @@ use crate::{
     },
 };
 
-/// The mortality of a transaction
+/// The period of validity of a transaction
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash)]
 pub enum MortalPeriod {
     /// Create a mortal transaction with the specified period
@@ -225,7 +225,7 @@ impl<T: Runtime> ClientBuilder<T> {
 /// Construction options for a signed extrinsic
 #[derive(Copy, Clone)]
 struct ClientSignedOptions {
-    /// The period, measured in blocks, that an extrinsic will live for, starting from a checkpoint
+    /// The period of validity, measured in blocks, that an extrinsic will live for, starting from a checkpoint
     /// block.
     ///
     /// Substrate reference:
