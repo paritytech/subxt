@@ -50,6 +50,7 @@ pub use sp_core;
 pub use sp_runtime;
 
 use codec::Decode;
+use frame_metadata::StorageEntryModifier;
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sp_core::{
@@ -274,10 +275,19 @@ impl<T: Runtime> Client<T> {
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
+        modifier: StorageEntryModifier,
     ) -> Result<Option<V>, Error> {
-        if let Some(data) = self.rpc.storage(&key, hash).await? {
-            Ok(Some(Decode::decode(&mut &data.0[..])?))
+        if let Some(mut data) = self.rpc.storage(&key, hash).await? {
+            let bytes = if modifier == StorageEntryModifier::Optional {
+                let mut bytes = vec![1u8];
+                bytes.append(&mut data.0);
+                bytes
+            } else {
+                data.0
+            };
+            Ok(Some(Decode::decode(&mut &bytes[..])?))
         } else {
+            // null
             Ok(None)
         }
     }
@@ -289,7 +299,10 @@ impl<T: Runtime> Client<T> {
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Returns>, Error> {
         let key = store.key(&self.metadata)?;
-        self.fetch_unhashed::<F::Returns>(key, hash).await
+
+        let storage_meta = self.metadata.module(F::MODULE)?.storage(F::FIELD)?;
+        self.fetch_unhashed::<F::Returns>(key, hash, storage_meta.modifier.clone())
+            .await
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
