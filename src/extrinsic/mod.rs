@@ -21,6 +21,13 @@ mod signer;
 
 pub use self::{
     extra::{
+        ChargeTransactionPayment,
+        CheckEra,
+        CheckGenesis,
+        CheckNonce,
+        CheckSpecVersion,
+        CheckTxVersion,
+        CheckWeight,
         DefaultExtra,
         Extra,
         SignedExtra,
