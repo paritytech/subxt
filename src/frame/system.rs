@@ -166,6 +166,8 @@ pub enum Phase {
     ApplyExtrinsic(u32),
     /// The end.
     Finalization,
+    /// Initializing the block.
+    Initialization,
 }
 
 /// An extrinsic completed successfully.
