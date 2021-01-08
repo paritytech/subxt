@@ -29,13 +29,13 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee::{
-    client::Subscription,
-    common::{
-        to_value as to_json_value,
-        Params,
-    },
-    Client,
+use jsonrpsee_types::jsonrpc::{
+    to_value as to_json_value,
+    Params,
+};
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsSubscription as Subscription,
 };
 use serde::{
     Deserialize,
@@ -159,7 +159,7 @@ pub struct ReadProof<Hash> {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Runtime> {
-    client: Client,
+    client: WsClient,
     marker: PhantomData<T>,
 }
 
@@ -173,7 +173,7 @@ impl<T: Runtime> Clone for Rpc<T> {
 }
 
 impl<T: Runtime> Rpc<T> {
-    pub fn new(client: Client) -> Self {
+    pub fn new(client: WsClient) -> Self {
         Self {
             client,
             marker: PhantomData,
@@ -434,7 +434,7 @@ impl<T: Runtime> Rpc<T> {
         let events_sub = self.subscribe_events().await?;
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-        while let status = xt_sub.next().await {
+        while let Some(status) = xt_sub.next().await {
             // log::info!("received status {:?}", status);
             match status {
                 // ignore in progress extrinsic for now
@@ -497,7 +497,7 @@ impl<T: Runtime> Rpc<T> {
                 }
             }
         }
-        unreachable!()
+        Err("Subscription stream dropped; RPC client buffer full or RPC client terminated".into())
     }
 
     /// Insert a key into the keystore.

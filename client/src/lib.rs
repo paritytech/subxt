@@ -34,12 +34,9 @@ use futures::{
     stream::StreamExt,
 };
 use futures01::sync::mpsc as mpsc01;
-use jsonrpsee::{
-    common::{
-        Request,
-        Response,
-    },
-    transport::TransportClient,
+use jsonrpsee_types::jsonrpc::{
+    Request,
+    Response,
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
@@ -60,10 +57,6 @@ use sc_service::{
     RpcHandlers,
     RpcSession,
     TaskManager,
-};
-use std::{
-    future::Future,
-    pin::Pin,
 };
 use thiserror::Error;
 
@@ -126,41 +119,26 @@ impl SubxtClient {
         let (task_manager, rpc_handlers) = (builder)(config)?;
         Ok(Self::new(task_manager, rpc_handlers))
     }
-}
 
-impl TransportClient for SubxtClient {
-    type Error = SubxtClientError;
-
-    fn send_request<'a>(
-        &'a mut self,
+    /// Send a JSONRPC request.
+    pub async fn send_request(
+        &mut self,
         request: Request,
-    ) -> Pin<Box<dyn Future<Output = Result<(), Self::Error>> + Send + 'a>> {
-        Box::pin(async move {
-            let request = serde_json::to_string(&request)?;
-            self.to_back.send(request).await?;
-            Ok(())
-        })
+    ) -> Result<(), SubxtClientError> {
+        let request = serde_json::to_string(&request)?;
+        self.to_back.send(request).await?;
+        Ok(())
     }
 
-    fn next_response<'a>(
-        &'a mut self,
-    ) -> Pin<Box<dyn Future<Output = Result<Response, Self::Error>> + Send + 'a>> {
-        Box::pin(async move {
-            let response = self
-                .from_back
-                .next()
-                .await
-                .expect("channel shouldn't close")
-                .unwrap();
-            Ok(serde_json::from_str(&response)?)
-        })
-    }
-}
-
-impl From<SubxtClient> for jsonrpsee::Client {
-    fn from(client: SubxtClient) -> Self {
-        let client = jsonrpsee::raw::RawClient::new(client);
-        jsonrpsee::Client::new(client)
+    /// Receive a JSONRPC response.
+    pub async fn next_response(&mut self) -> Result<Response, SubxtClientError> {
+        let response = self
+            .from_back
+            .next()
+            .await
+            .expect("channel shouldn't close")
+            .unwrap();
+        Ok(serde_json::from_str(&response)?)
     }
 }
 
@@ -169,7 +147,7 @@ impl From<SubxtClient> for jsonrpsee::Client {
 pub enum Role {
     /// Light client.
     Light,
-    /// A full node (maninly used for testing purposes).
+    /// A full node (mainly used for testing purposes).
     Authority(sp_keyring::AccountKeyring),
 }
 

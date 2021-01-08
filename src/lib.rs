@@ -43,7 +43,7 @@
 #[macro_use]
 extern crate substrate_subxt_proc_macro;
 
-#[cfg(feature = "client")]
+// #[cfg(feature = "client")]
 pub use substrate_subxt_client as client;
 
 pub use sp_core;
@@ -51,7 +51,11 @@ pub use sp_runtime;
 
 use codec::Decode;
 use futures::future;
-use jsonrpsee::client::Subscription;
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsConfig,
+    WsSubscription as Subscription,
+};
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -117,7 +121,7 @@ use crate::{
 pub struct ClientBuilder<T: Runtime> {
     _marker: std::marker::PhantomData<T>,
     url: Option<String>,
-    client: Option<jsonrpsee::Client>,
+    client: Option<WsClient>,
     page_size: Option<u32>,
 }
 
@@ -132,10 +136,13 @@ impl<T: Runtime> ClientBuilder<T> {
         }
     }
 
-    /// Sets the jsonrpsee client.
-    pub fn set_client<P: Into<jsonrpsee::Client>>(mut self, client: P) -> Self {
-        self.client = Some(client.into());
-        self
+    /// Sets the client to use an embedded substrate node instead of `jsonrpsee::Client`.
+    ///
+    // TODO: the transport trait is removed because the WebSocket implementation
+    // is using different send and read ends (different types).
+    // Thus, we can't use the generic implementation anymore.
+    pub fn set_embedded_client(mut self, client: client::SubxtClient) -> Self {
+        todo!("Embedding substrate node not implemented; This is super annoying to implement now :(");
     }
 
     /// Set the substrate rpc address.
@@ -156,11 +163,8 @@ impl<T: Runtime> ClientBuilder<T> {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            if url.starts_with("ws://") || url.starts_with("wss://") {
-                jsonrpsee::ws_client(url).await?
-            } else {
-                jsonrpsee::http_client(url)
-            }
+            // TODO: specific WebSocket settings: max payload size, internal channel buffer.
+            WsClient::new(url, WsConfig::default()).await?
         };
         let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
@@ -611,7 +615,7 @@ mod tests {
             telemetry: None,
         };
         let client = ClientBuilder::new()
-            .set_client(
+            .set_embedded_client(
                 SubxtClient::from_config(config, test_node::service::new_full)
                     .expect("Error creating subxt client"),
             )
@@ -632,7 +636,7 @@ mod tests {
         let (client, _tmp) = test_client_with(AccountKeyring::Bob).await;
         let mut blocks = client.subscribe_blocks().await.unwrap();
         // get the genesis block.
-        assert_eq!(blocks.next().await.number, 0);
+        assert_eq!(blocks.next().await.unwrap().number, 0);
         let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
         client
             .insert_key(
@@ -647,7 +651,7 @@ mod tests {
             .await
             .unwrap());
         // Alice is an authority, so blocks should be produced.
-        assert_eq!(blocks.next().await.number, 1);
+        assert_eq!(blocks.next().await.unwrap().number, 1);
     }
 
     #[async_std::test]
