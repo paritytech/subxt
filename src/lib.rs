@@ -137,12 +137,8 @@ impl<T: Runtime> ClientBuilder<T> {
     }
 
     /// Sets the client to use an embedded substrate node instead of `jsonrpsee::Client`.
-    ///
-    // TODO: the transport trait is removed because the WebSocket implementation
-    // is using different send and read ends (different types).
-    // Thus, we can't use the generic implementation anymore.
     pub fn set_embedded_client(mut self, client: client::SubxtClient) -> Self {
-        todo!("Embedding substrate node not implemented; This is super annoying to implement now :(");
+        unimplemented!("Embedding substrate node not implemented; This is super annoying to implement now :(");
     }
 
     /// Set the substrate rpc address.
@@ -163,7 +159,6 @@ impl<T: Runtime> ClientBuilder<T> {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            // TODO: specific WebSocket settings: max payload size, internal channel buffer.
             WsClient::new(url, WsConfig::default()).await?
         };
         let rpc = Rpc::new(client);
