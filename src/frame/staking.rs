@@ -200,7 +200,7 @@ pub struct NominateCall<T: Staking> {
 /// `controller` will be the account that controls it.
 #[derive(Call, Encode, Debug)]
 pub struct BondCall<T: Staking> {
-    /// Tٗhe contrller account
+    /// Tٗhe controller account
     pub contrller: T::AccountId,
     /// Lock up `value` of its balance.
     #[codec(compact)]
