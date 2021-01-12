@@ -238,26 +238,26 @@ mod tests {
         };
 
         env_logger::try_init().ok();
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
         let client = ClientBuilder::<RT>::new().build().await.unwrap();
 
         client
             .bond_and_watch(
-                &alice,
-                AccountKeyring::Bob.to_account_id(),
+                &bob,
+                AccountKeyring::Charlie.to_account_id(),
                 100_000_000_000,
                 RewardDestination::Stash,
             )
             .await
             .unwrap();
 
-        let alice_locks = client
-            .locks(&AccountKeyring::Alice.to_account_id(), None)
+        let locks = client
+            .locks(&AccountKeyring::Bob.to_account_id(), None)
             .await
             .unwrap();
 
         assert_eq!(
-            alice_locks,
+            locks,
             vec![BalanceLock {
                 id: *b"staking ",
                 amount: 100_000_000_000,
