@@ -226,6 +226,47 @@ mod tests {
     }
 
     #[async_std::test]
+    #[cfg(feature = "integration-tests")]
+    async fn test_state_balance_lock() {
+        use crate::{
+            frame::staking::{
+                BondCallExt,
+                RewardDestination,
+            },
+            runtimes::KusamaRuntime as RT,
+            ClientBuilder,
+        };
+
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let client = ClientBuilder::<RT>::new().build().await.unwrap();
+
+        client
+            .bond_and_watch(
+                &alice,
+                AccountKeyring::Bob.to_account_id(),
+                100_000_000_000,
+                RewardDestination::Stash,
+            )
+            .await
+            .unwrap();
+
+        let alice_locks = client
+            .locks(&AccountKeyring::Alice.to_account_id(), None)
+            .await
+            .unwrap();
+
+        assert_eq!(
+            alice_locks,
+            vec![BalanceLock {
+                id: *b"staking ",
+                amount: 100_000_000_000,
+                reasons: Reasons::All,
+            }]
+        );
+    }
+
+    #[async_std::test]
     async fn test_transfer_error() {
         env_logger::try_init().ok();
         let alice = PairSigner::new(AccountKeyring::Alice.pair());
