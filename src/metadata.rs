@@ -70,6 +70,12 @@ pub enum MetadataError {
     /// Default error.
     #[error("Failed to decode default: {0}")]
     DefaultError(CodecError),
+    /// Failure to decode constant value.
+    #[error("Failed to decode constant value: {0}")]
+    ConstantValueError(CodecError),
+    /// Constant is not in metadata.
+    #[error("Constant {0} not found")]
+    ConstantNotFound(&'static str),
 }
 
 /// Runtime metadata.
@@ -166,7 +172,7 @@ pub struct ModuleMetadata {
     index: u8,
     name: String,
     storage: HashMap<String, StorageMetadata>,
-    // constants
+    constants: HashMap<String, ModuleConstantMetadata>,
 }
 
 impl ModuleMetadata {
@@ -174,6 +180,16 @@ impl ModuleMetadata {
         self.storage
             .get(key)
             .ok_or(MetadataError::StorageNotFound(key))
+    }
+
+    /// Get a constant's metadata by name
+    pub fn constant(
+        &self,
+        key: &'static str,
+    ) -> Result<&ModuleConstantMetadata, MetadataError> {
+        self.constants
+            .get(key)
+            .ok_or(MetadataError::ConstantNotFound(key))
     }
 }
 
@@ -463,6 +479,36 @@ impl EventArg {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct ModuleConstantMetadata {
+    name: String,
+    ty: String,
+    value: Vec<u8>,
+    documentation: Vec<String>,
+}
+
+impl ModuleConstantMetadata {
+    /// Name
+    pub fn name(&self) -> &String {
+        &self.name
+    }
+
+    /// Constant value (decoded)
+    pub fn value<V: Decode>(&self) -> Result<V, MetadataError> {
+        Decode::decode(&mut &self.value[..]).map_err(MetadataError::ConstantValueError)
+    }
+
+    /// Type (as defined in the runtime)
+    pub fn ty(&self) -> &String {
+        &self.ty
+    }
+
+    /// Documentation
+    pub fn documentation(&self) -> &Vec<String> {
+        &self.documentation
+    }
+}
+
 #[derive(Debug, thiserror::Error)]
 pub enum ConversionError {
     #[error("Invalid prefix")]
@@ -493,6 +539,12 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         for module in convert(meta.modules)?.into_iter() {
             let module_name = convert(module.name.clone())?;
 
+            let mut constant_map = HashMap::new();
+            for constant in convert(module.constants)?.into_iter() {
+                let constant_meta = convert_constant(constant)?;
+                constant_map.insert(constant_meta.name.clone(), constant_meta);
+            }
+
             let mut storage_map = HashMap::new();
             if let Some(storage) = module.storage {
                 let storage = convert(storage)?;
@@ -513,6 +565,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                     index: module.index,
                     name: module_name.clone(),
                     storage: storage_map,
+                    constants: constant_map,
                 },
             );
 
@@ -606,4 +659,19 @@ fn convert_error(
     error: frame_metadata::ErrorMetadata,
 ) -> Result<String, ConversionError> {
     convert(error.name)
+}
+
+fn convert_constant(
+    constant: frame_metadata::ModuleConstantMetadata,
+) -> Result<ModuleConstantMetadata, ConversionError> {
+    let name = convert(constant.name)?;
+    let ty = convert(constant.ty)?;
+    let value = convert(constant.value)?;
+    let documentation = convert(constant.documentation)?;
+    Ok(ModuleConstantMetadata {
+        name,
+        ty,
+        value,
+        documentation,
+    })
 }
