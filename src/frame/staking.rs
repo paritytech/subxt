@@ -44,7 +44,6 @@ pub use pallet_staking::{
     ValidatorPrefs,
 };
 
-
 /// Rewards for the last `HISTORY_DEPTH` eras.
 /// If reward hasn't been set or has been removed then 0 reward is returned.
 #[derive(Clone, Encode, Decode, Debug, Store)]
@@ -68,6 +67,7 @@ pub struct SetPayeeCall<T: Staking> {
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
 pub trait Staking: Balances {
+    #![rustfmt::skip]
     #![event_alias(ElectionCompute = u8)]
     #![event_type(EraIndex)]
     #![event_type(AuthorityList)]

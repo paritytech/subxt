@@ -16,14 +16,14 @@
 
 //! Session support
 use crate::frame::{
+    balances::{
+        Balances,
+        BalancesEventsDecoder as _,
+    },
     system::{
         System,
         SystemEventsDecoder as _,
     },
-    balances::{
-        Balances,
-        BalancesEventsDecoder as _,
-    }
 };
 use codec::Encode;
 use frame_support::Parameter;
@@ -53,7 +53,7 @@ macro_rules! default_impl {
 
 type IdentificationTuple<T> = (
     <T as Session>::ValidatorId,
-    pallet_staking::Exposure<<T as System>::AccountId, <T as Balances>::Balance>
+    pallet_staking::Exposure<<T as System>::AccountId, <T as Balances>::Balance>,
 );
 
 /// The trait needed for this module.

@@ -118,7 +118,8 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
 
     // Parse the inner attributes `event_type` and `event_alias` and remove them from the macro
     // outputs.
-    let (other_attrs, event_types): (Vec<_>, Vec<_>) = input.attrs
+    let (other_attrs, event_types): (Vec<_>, Vec<_>) = input
+        .attrs
         .iter()
         .cloned()
         .partition(|attr| parse_event_type_attr(attr).is_none());

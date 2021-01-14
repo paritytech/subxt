@@ -28,11 +28,11 @@ use sp_runtime::{
     DispatchResult,
 };
 use std::{
-    fmt,
     collections::{
         HashMap,
         HashSet,
     },
+    fmt,
     marker::{
         PhantomData,
         Send,
@@ -78,7 +78,7 @@ pub struct EventsDecoder<T> {
     type_sizes: HashMap<String, usize>,
     type_segmenters: HashMap<
         String,
-        Box<dyn Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send>
+        Box<dyn Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send>,
     >,
     marker: PhantomData<fn() -> T>,
 }
@@ -137,11 +137,15 @@ impl<T: System> EventsDecoder<T> {
         self.type_sizes.insert(name.to_string(), size);
         // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
         // type to the output stream (&mut Vec<u8>).
-        self.type_segmenters.insert(name.to_string(),
-            Box::new(|input: &mut &[u8], output: &mut Vec<u8>| -> Result<(), Error>  {
-                U::decode(input).map_err(Error::from)?.encode_to(output);
-                Ok(())
-            }));
+        self.type_segmenters.insert(
+            name.to_string(),
+            Box::new(
+                |input: &mut &[u8], output: &mut Vec<u8>| -> Result<(), Error> {
+                    U::decode(input).map_err(Error::from)?.encode_to(output);
+                    Ok(())
+                },
+            ),
+        );
         size
     }
 
