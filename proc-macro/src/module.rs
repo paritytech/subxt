@@ -77,7 +77,7 @@ type EventAliasAttr = utils::UniAttr<utils::Attr<syn::Ident, syn::Type>>;
 ///
 /// It supports two ways to define the associated event type:
 ///
-/// ```
+/// ```ignore
 /// #[module]
 /// trait Pallet: System {
 ///     #![event_type(SomeType)]
