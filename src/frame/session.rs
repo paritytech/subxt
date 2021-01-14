@@ -15,9 +15,15 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Session support
-use crate::frame::system::{
-    System,
-    SystemEventsDecoder as _,
+use crate::frame::{
+    system::{
+        System,
+        SystemEventsDecoder as _,
+    },
+    balances::{
+        Balances,
+        BalancesEventsDecoder as _,
+    }
 };
 use codec::Encode;
 use frame_support::Parameter;
@@ -45,9 +51,18 @@ macro_rules! default_impl {
     };
 }
 
+type IdentificationTuple<T> = (
+    <T as Session>::ValidatorId,
+    pallet_staking::Exposure<<T as System>::AccountId, <T as Balances>::Balance>
+);
+
 /// The trait needed for this module.
 #[module]
-pub trait Session: System {
+pub trait Session: System + Balances {
+    #![event_alias(IdentificationTuple = IdentificationTuple<T>)]
+    #![event_alias(OpaqueTimeSlot = Vec<u8>)]
+    #![event_alias(SessionIndex = u32)]
+
     /// The validator account identifier type for the runtime.
     type ValidatorId: Parameter + Debug + Ord + Default + Send + Sync + 'static;
 

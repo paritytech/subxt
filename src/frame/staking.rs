@@ -31,6 +31,8 @@ use std::{
     marker::PhantomData,
 };
 
+use sp_finality_grandpa::AuthorityList;
+
 pub use pallet_staking::{
     ActiveEraInfo,
     EraIndex,
@@ -41,6 +43,7 @@ pub use pallet_staking::{
     StakingLedger,
     ValidatorPrefs,
 };
+
 
 /// Rewards for the last `HISTORY_DEPTH` eras.
 /// If reward hasn't been set or has been removed then 0 reward is returned.
@@ -64,7 +67,11 @@ pub struct SetPayeeCall<T: Staking> {
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
-pub trait Staking: Balances {}
+pub trait Staking: Balances {
+    #![event_alias(ElectionCompute = u8)]
+    #![event_type(EraIndex)]
+    #![event_type(AuthorityList)]
+}
 
 /// Number of eras to keep in history.
 ///

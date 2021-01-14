@@ -28,6 +28,7 @@ use sp_runtime::{
     DispatchResult,
 };
 use std::{
+    fmt,
     collections::{
         HashMap,
         HashSet,
@@ -72,11 +73,23 @@ impl std::fmt::Debug for RawEvent {
 }
 
 /// Events decoder.
-#[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
     type_sizes: HashMap<String, usize>,
+    type_segmenters: HashMap<
+        String,
+        Box<dyn Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send>
+    >,
     marker: PhantomData<fn() -> T>,
+}
+
+impl<T> fmt::Debug for EventsDecoder<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EventsDecoder<T>")
+            .field("metadata", &self.metadata)
+            .field("type_sizes", &self.type_sizes)
+            .finish()
+    }
 }
 
 impl<T: System> EventsDecoder<T> {
@@ -85,6 +98,7 @@ impl<T: System> EventsDecoder<T> {
         let mut decoder = Self {
             metadata,
             type_sizes: HashMap::new(),
+            type_segmenters: HashMap::new(),
             marker: PhantomData,
         };
         // register default event arg type sizes for dynamic decoding of events
@@ -109,6 +123,8 @@ impl<T: System> EventsDecoder<T> {
         decoder.register_type_size::<T::BlockNumber>("BlockNumber");
         decoder.register_type_size::<T::Hash>("Hash");
         decoder.register_type_size::<u8>("VoteThreshold");
+        // Additional types
+        decoder.register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
         decoder
     }
 
@@ -119,6 +135,13 @@ impl<T: System> EventsDecoder<T> {
     {
         let size = U::default().encode().len();
         self.type_sizes.insert(name.to_string(), size);
+        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
+        // type to the output stream (&mut Vec<u8>).
+        self.type_segmenters.insert(name.to_string(),
+            Box::new(|input: &mut &[u8], output: &mut Vec<u8>| -> Result<(), Error>  {
+                U::decode(input).map_err(Error::from)?.encode_to(output);
+                Ok(())
+            }));
         size
     }
 
@@ -150,10 +173,10 @@ impl<T: System> EventsDecoder<T> {
         }
     }
 
-    fn decode_raw_bytes<I: Input, W: Output>(
+    fn decode_raw_bytes<W: Output>(
         &self,
         args: &[EventArg],
-        input: &mut I,
+        input: &mut &[u8],
         output: &mut W,
         errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
@@ -188,9 +211,9 @@ impl<T: System> EventsDecoder<T> {
                         "DispatchResult" => DispatchResult::decode(input)?,
                         "DispatchError" => Err(DispatchError::decode(input)?),
                         _ => {
-                            if let Some(size) = self.type_sizes.get(name) {
-                                let mut buf = vec![0; *size];
-                                input.read(&mut buf)?;
+                            if let Some(seg) = self.type_segmenters.get(name) {
+                                let mut buf = Vec::<u8>::new();
+                                seg(input, &mut buf)?;
                                 output.write(&buf);
                                 Ok(())
                             } else {
@@ -268,9 +291,12 @@ impl<T: System> EventsDecoder<T> {
     }
 }
 
+/// Raw event or error event
 #[derive(Debug)]
 pub enum Raw {
+    /// Event
     Event(RawEvent),
+    /// Error
     Error(RuntimeError),
 }
 
