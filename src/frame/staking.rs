@@ -66,8 +66,8 @@ pub struct SetPayeeCall<T: Staking> {
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
+#[rustfmt::skip]
 pub trait Staking: Balances {
-    #![rustfmt::skip]
     #![event_alias(ElectionCompute = u8)]
     #![event_type(EraIndex)]
     #![event_type(AuthorityList)]
