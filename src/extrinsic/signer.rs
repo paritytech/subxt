@@ -87,7 +87,7 @@ where
 
     /// Increment the nonce.
     pub fn increment_nonce(&mut self) {
-        self.nonce = self.nonce.map(|nonce| nonce + 1.into());
+        self.nonce = self.nonce.map(|nonce| nonce + 1u32.into());
     }
 
     /// Returns the signer.
