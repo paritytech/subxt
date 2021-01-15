@@ -196,6 +196,19 @@ pub struct NominateCall<T: Staking> {
     pub targets: Vec<T::Address>,
 }
 
+/// Take the origin account as a stash and lock up `value` of its balance.
+/// `controller` will be the account that controls it.
+#[derive(Call, Encode, Debug)]
+pub struct BondCall<T: Staking> {
+    /// Tٗhe controller account
+    pub contrller: T::AccountId,
+    /// Lock up `value` of its balance.
+    #[codec(compact)]
+    pub value: T::Balance,
+    /// Destination of Staking reward.
+    pub payee: RewardDestination<T::AccountId>,
+}
+
 #[cfg(test)]
 #[cfg(feature = "integration-tests")]
 mod tests {
@@ -321,6 +334,43 @@ mod tests {
             // TOOD: this is unsatisfying – can we do better?
             assert_eq!(events.len(), 3);
         });
+        Ok(())
+    }
+
+    #[async_std::test]
+    async fn test_bond() -> Result<(), Error> {
+        env_logger::try_init().ok();
+        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let client = ClientBuilder::<RT>::new().build().await.unwrap();
+
+        let bond = client
+            .bond_and_watch(
+                &alice,
+                AccountKeyring::Bob.to_account_id(),
+                100_000_000_000,
+                RewardDestination::Stash,
+            )
+            .await;
+
+        assert_matches!(bond, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+            // TOOD: this is unsatisfying – can we do better?
+            assert_eq!(events.len(), 3);
+        });
+
+        let bond_again = client
+            .bond_and_watch(
+                &alice,
+                AccountKeyring::Bob.to_account_id(),
+                100_000_000_000,
+                RewardDestination::Stash,
+            )
+            .await;
+
+        assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+            assert_eq!(module_err.module, "Staking");
+            assert_eq!(module_err.error, "AlreadyBonded");
+        });
+
         Ok(())
     }
 
