@@ -227,7 +227,7 @@ mod tests {
 
     #[async_std::test]
     #[cfg(feature = "integration-tests")]
-    async fn test_state_balance_lock() {
+    async fn test_state_balance_lock() -> Result<(), crate::Error> {
         use crate::{
             frame::staking::{
                 BondCallExt,
@@ -239,7 +239,7 @@ mod tests {
 
         env_logger::try_init().ok();
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<RT>::new().build().await.unwrap();
+        let client = ClientBuilder::<RT>::new().build().await?;
 
         client
             .bond_and_watch(
@@ -248,13 +248,11 @@ mod tests {
                 100_000_000_000,
                 RewardDestination::Stash,
             )
-            .await
-            .unwrap();
+            .await?;
 
         let locks = client
             .locks(&AccountKeyring::Bob.to_account_id(), None)
-            .await
-            .unwrap();
+            .await?;
 
         assert_eq!(
             locks,
@@ -264,6 +262,8 @@ mod tests {
                 reasons: Reasons::All,
             }]
         );
+
+        Ok(())
     }
 
     #[async_std::test]
