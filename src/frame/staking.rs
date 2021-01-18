@@ -31,8 +31,6 @@ use std::{
     marker::PhantomData,
 };
 
-use sp_finality_grandpa::AuthorityList;
-
 pub use pallet_staking::{
     ActiveEraInfo,
     EraIndex,
@@ -63,6 +61,13 @@ pub struct SetPayeeCall<T: Staking> {
     /// Marker for the runtime
     pub _runtime: PhantomData<T>,
 }
+
+/// Identity of a Grandpa authority.
+pub type AuthorityId = [u8; 32];
+/// The weight of an authority.
+pub type AuthorityWeight = u64;
+/// A list of Grandpa authorities with associated weights.
+pub type AuthorityList = Vec<(AuthorityId, AuthorityWeight)>;
 
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
