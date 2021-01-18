@@ -72,14 +72,18 @@ impl std::fmt::Debug for RawEvent {
     }
 }
 
+/// Functions that take an input stream, consume an object, and output the serialized bytes.
+trait TypeSegmenterFn: Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send {}
+impl<T> TypeSegmenterFn for T where
+    T: Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send
+{
+}
+
 /// Events decoder.
 pub struct EventsDecoder<T> {
     metadata: Metadata,
     type_sizes: HashMap<String, usize>,
-    type_segmenters: HashMap<
-        String,
-        Box<dyn Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send>,
-    >,
+    type_segmenters: HashMap<String, Box<dyn TypeSegmenterFn>>,
     marker: PhantomData<fn() -> T>,
 }
 
