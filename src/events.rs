@@ -82,7 +82,6 @@ impl<T> TypeSegmenterFn for T where
 /// Events decoder.
 pub struct EventsDecoder<T> {
     metadata: Metadata,
-    type_sizes: HashMap<String, usize>,
     type_segmenters: HashMap<String, Box<dyn TypeSegmenterFn>>,
     marker: PhantomData<fn() -> T>,
 }
@@ -91,7 +90,10 @@ impl<T> fmt::Debug for EventsDecoder<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EventsDecoder<T>")
             .field("metadata", &self.metadata)
-            .field("type_sizes", &self.type_sizes)
+            .field(
+                "type_segmenters",
+                &self.type_segmenters.keys().cloned().collect::<String>(),
+            )
             .finish()
     }
 }
@@ -101,7 +103,6 @@ impl<T: System> EventsDecoder<T> {
     pub fn new(metadata: Metadata) -> Self {
         let mut decoder = Self {
             metadata,
-            type_sizes: HashMap::new(),
             type_segmenters: HashMap::new(),
             marker: PhantomData,
         };
@@ -138,7 +139,6 @@ impl<T: System> EventsDecoder<T> {
         U: Default + Codec + Send + 'static,
     {
         let size = U::default().encode().len();
-        self.type_sizes.insert(name.to_string(), size);
         // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
         // type to the output stream (&mut Vec<u8>).
         self.type_segmenters.insert(
@@ -160,7 +160,7 @@ impl<T: System> EventsDecoder<T> {
             for event in module.events() {
                 for arg in event.arguments() {
                     for primitive in arg.primitives() {
-                        if !self.type_sizes.contains_key(&primitive) {
+                        if !self.type_segmenters.contains_key(&primitive) {
                             missing.insert(format!(
                                 "{}::{}::{}",
                                 module.name(),
