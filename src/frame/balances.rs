@@ -25,7 +25,10 @@ use codec::{
     Encode,
 };
 use core::marker::PhantomData;
-use frame_support::Parameter;
+use frame_support::{
+    traits::LockIdentifier,
+    Parameter,
+};
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
@@ -78,6 +81,47 @@ pub struct TotalIssuanceStore<T: Balances> {
     #[store(returns = T::Balance)]
     /// Runtime marker.
     pub _runtime: PhantomData<T>,
+}
+
+/// The locks of the balances module.
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode, Decode)]
+pub struct LocksStore<'a, T: Balances> {
+    #[store(returns = Vec<BalanceLock<T::Balance>>)]
+    /// Account to retrieve the balance locks for.
+    pub account_id: &'a T::AccountId,
+}
+
+/// A single lock on a balance. There can be many of these on an account and they "overlap", so the
+/// same balance is frozen by multiple locks.
+#[derive(Clone, PartialEq, Eq, Encode, Decode)]
+pub struct BalanceLock<Balance> {
+    /// An identifier for this lock. Only one lock may be in existence for each identifier.
+    pub id: LockIdentifier,
+    /// The amount which the free balance may not drop below when this lock is in effect.
+    pub amount: Balance,
+    /// If true, then the lock remains in effect even for payment of transaction fees.
+    pub reasons: Reasons,
+}
+
+impl<Balance: Debug> Debug for BalanceLock<Balance> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("BalanceLock")
+            .field("id", &String::from_utf8_lossy(&self.id))
+            .field("amount", &self.amount)
+            .field("reasons", &self.reasons)
+            .finish()
+    }
+}
+
+/// Simplified reasons for withdrawing balance.
+#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Reasons {
+    /// Paying system transaction fees.
+    Fee,
+    /// Any reason other than paying system transaction fees.
+    Misc,
+    /// Any reason at all.
+    All,
 }
 
 /// Transfer some liquid free balance to another account.
@@ -179,6 +223,47 @@ mod tests {
         let account = AccountKeyring::Alice.to_account_id();
         let info = client.account(&account, None).await.unwrap();
         assert_ne!(info.data.free, 0);
+    }
+
+    #[async_std::test]
+    #[cfg(feature = "integration-tests")]
+    async fn test_state_balance_lock() -> Result<(), crate::Error> {
+        use crate::{
+            frame::staking::{
+                BondCallExt,
+                RewardDestination,
+            },
+            runtimes::KusamaRuntime as RT,
+            ClientBuilder,
+        };
+
+        env_logger::try_init().ok();
+        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+        let client = ClientBuilder::<RT>::new().build().await?;
+
+        client
+            .bond_and_watch(
+                &bob,
+                AccountKeyring::Charlie.to_account_id(),
+                100_000_000_000,
+                RewardDestination::Stash,
+            )
+            .await?;
+
+        let locks = client
+            .locks(&AccountKeyring::Bob.to_account_id(), None)
+            .await?;
+
+        assert_eq!(
+            locks,
+            vec![BalanceLock {
+                id: *b"staking ",
+                amount: 100_000_000_000,
+                reasons: Reasons::All,
+            }]
+        );
+
+        Ok(())
     }
 
     #[async_std::test]

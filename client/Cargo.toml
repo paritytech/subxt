@@ -12,21 +12,21 @@ description = "Embed a substrate node into your subxt application."
 keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]
-async-std = "1.6.4"
-futures = { version = "0.3.5", features = ["compat"] }
+async-std = "1.8.0"
+futures = { version = "0.3.9", features = ["compat"], package = "futures" }
 futures01 = { package = "futures", version = "0.1.29" }
-jsonrpsee-types = { git = "https://github.com/paritytech/jsonrpsee", branch = "v2" }
-jsonrpsee-ws-client = { git = "https://github.com/paritytech/jsonrpsee", branch = "v2" }
-log = "0.4.11"
-sc-network = { version = "0.8.0", default-features = false }
-sc-service = { version = "0.8.0", default-features = false }
-serde_json = "1.0.57"
-sp-keyring = "2.0.0"
-thiserror = "1.0.20"
+jsonrpsee-types = { git = "https://github.com/paritytech/jsonrpsee" }
+jsonrpsee-ws-client = { git = "https://github.com/paritytech/jsonrpsee" }
+log = "0.4.13"
+sc-network = { version = "0.8.1", default-features = false }
+sc-service = { version = "0.8.1", default-features = false }
+serde_json = "1.0.61"
+sp-keyring = "2.0.1"
+thiserror = "1.0.23"
 
 [dev-dependencies]
-async-std = { version = "1.6.4", features = ["attributes"] }
-env_logger = "0.7.1"
+async-std = { version = "1.8.0", features = ["attributes"] }
+env_logger = "0.8.2"
 substrate-subxt = { path = ".." }
 tempdir = "0.3.7"
 test-node = { path = "../test-node" }

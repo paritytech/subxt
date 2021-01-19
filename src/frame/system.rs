@@ -164,8 +164,10 @@ pub struct SetCodeWithoutChecksCall<'a, T: System> {
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),
-    /// The end.
+    /// Finalizing the block.
     Finalization,
+    /// Initializing the block.
+    Initialization,
 }
 
 /// An extrinsic completed successfully.
