@@ -72,17 +72,25 @@ impl std::fmt::Debug for RawEvent {
     }
 }
 
-/// Functions that take an input stream, consume an object, and output the serialized bytes.
-trait TypeSegmenterFn: Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send {}
-impl<T> TypeSegmenterFn for T where
-    T: Fn(&mut &[u8], &mut Vec<u8>) -> Result<(), Error> + Send
+trait TypeSegmenter: Send {
+    /// Consumes an object from an input stream, and output the serialized bytes.
+    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error>;
+}
+
+impl<T> TypeSegmenter for PhantomData<T>
+where
+    T: Codec + Send,
 {
+    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error> {
+        T::decode(input).map_err(Error::from)?.encode_to(output);
+        Ok(())
+    }
 }
 
 /// Events decoder.
 pub struct EventsDecoder<T> {
     metadata: Metadata,
-    type_segmenters: HashMap<String, Box<dyn TypeSegmenterFn>>,
+    type_segmenters: HashMap<String, Box<dyn TypeSegmenter>>,
     marker: PhantomData<fn() -> T>,
 }
 
@@ -141,15 +149,8 @@ impl<T: System> EventsDecoder<T> {
         let size = U::default().encode().len();
         // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
         // type to the output stream (&mut Vec<u8>).
-        self.type_segmenters.insert(
-            name.to_string(),
-            Box::new(
-                |input: &mut &[u8], output: &mut Vec<u8>| -> Result<(), Error> {
-                    U::decode(input).map_err(Error::from)?.encode_to(output);
-                    Ok(())
-                },
-            ),
-        );
+        self.type_segmenters
+            .insert(name.to_string(), Box::new(PhantomData::<U>));
         size
     }
 
@@ -221,7 +222,7 @@ impl<T: System> EventsDecoder<T> {
                         _ => {
                             if let Some(seg) = self.type_segmenters.get(name) {
                                 let mut buf = Vec::<u8>::new();
-                                seg(input, &mut buf)?;
+                                seg.segment(input, &mut buf)?;
                                 output.write(&buf);
                                 Ok(())
                             } else {

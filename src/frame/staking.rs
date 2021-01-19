@@ -63,7 +63,7 @@ pub struct SetPayeeCall<T: Staking> {
 }
 
 /// Identity of a Grandpa authority.
-pub type AuthorityId = [u8; 32];
+pub type AuthorityId = crate::runtimes::app::grandpa::Public;
 /// The weight of an authority.
 pub type AuthorityWeight = u64;
 /// A list of Grandpa authorities with associated weights.
