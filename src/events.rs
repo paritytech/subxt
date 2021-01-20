@@ -77,7 +77,9 @@ trait TypeSegmenter: Send {
     fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error>;
 }
 
-impl<T> TypeSegmenter for PhantomData<T>
+#[derive(Default)]
+struct TypeMarker<T>(PhantomData<T>);
+impl<T> TypeSegmenter for TypeMarker<T>
 where
     T: Codec + Send,
 {
@@ -150,7 +152,7 @@ impl<T: System> EventsDecoder<T> {
         // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
         // type to the output stream (&mut Vec<u8>).
         self.type_segmenters
-            .insert(name.to_string(), Box::new(PhantomData::<U>));
+            .insert(name.to_string(), Box::new(TypeMarker::<U>::default()));
         size
     }
 
