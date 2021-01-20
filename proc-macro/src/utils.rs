@@ -214,6 +214,21 @@ impl<K: Parse, V: Parse> Parse for Attr<K, V> {
     }
 }
 
+#[derive(Debug)]
+pub struct UniAttr<A> {
+    pub paren: syn::token::Paren,
+    pub attr: A,
+}
+
+impl<A: Parse> Parse for UniAttr<A> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        let paren = syn::parenthesized!(content in input);
+        let attr = content.parse()?;
+        Ok(Self { paren, attr })
+    }
+}
+
 #[cfg(test)]
 pub(crate) fn assert_proc_macro(
     result: proc_macro2::TokenStream,

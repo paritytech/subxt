@@ -69,15 +69,61 @@ fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
 fn with_module_ident(module: &syn::Ident) -> syn::Ident {
     format_ident!("with_{}", module.to_string().to_snake_case())
 }
+
+type EventAttr = utils::UniAttr<syn::Type>;
+type EventAliasAttr = utils::UniAttr<utils::Attr<syn::Ident, syn::Type>>;
+
+/// Parses the event type definition macros within #[module]
+///
+/// It supports two ways to define the associated event type:
+///
+/// ```ignore
+/// #[module]
+/// trait Pallet: System {
+///     #![event_type(SomeType)]
+///     #![event_alias(TypeNameAlias = SomeType)]
+///     #![event_alias(SomeOtherAlias = TypeWithAssociatedTypes<T>)]
+/// }
+/// ```
+fn parse_event_type_attr(attr: &syn::Attribute) -> Option<(String, syn::Type)> {
+    let ident = utils::path_to_ident(&attr.path);
+    if ident == "event_type" {
+        let attrs: EventAttr = syn::parse2(attr.tokens.clone())
+            .map_err(|err| abort!("{}", err))
+            .unwrap();
+        let ty = attrs.attr;
+        let ident_str = quote!(#ty).to_string();
+        Some((ident_str, ty))
+    } else if ident == "event_alias" {
+        let attrs: EventAliasAttr = syn::parse2(attr.tokens.clone())
+            .map_err(|err| abort!("{}", err))
+            .unwrap();
+        let ty = attrs.attr.value;
+        let ident_str = attrs.attr.key.to_string();
+        Some((ident_str, ty))
+    } else {
+        None
+    }
+}
+
 /// Attribute macro that registers the type sizes used by the module; also sets the `MODULE` constant.
 pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let input: Result<syn::ItemTrait, _> = syn::parse2(tokens.clone());
-    let input = if let Ok(input) = input {
+    let mut input = if let Ok(input) = input {
         input
     } else {
         // handle #[module(ignore)] by just returning the tokens
         return tokens
     };
+
+    // Parse the inner attributes `event_type` and `event_alias` and remove them from the macro
+    // outputs.
+    let (other_attrs, event_types): (Vec<_>, Vec<_>) = input
+        .attrs
+        .iter()
+        .cloned()
+        .partition(|attr| parse_event_type_attr(attr).is_none());
+    input.attrs = other_attrs;
 
     let subxt = utils::use_crate("substrate-subxt");
     let module = &input.ident;
@@ -96,7 +142,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
             None
         }
     });
-    let types = input.items.iter().filter_map(|item| {
+    let associated_types = input.items.iter().filter_map(|item| {
         if let syn::TraitItem::Type(ty) = item {
             if ignore(&ty.attrs) {
                 return None
@@ -108,6 +154,12 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
             })
         } else {
             None
+        }
+    });
+    let types = event_types.iter().map(|attr| {
+        let (ident_str, ty) = parse_event_type_attr(&attr).unwrap();
+        quote! {
+            self.register_type_size::<#ty>(#ident_str);
         }
     });
 
@@ -127,6 +179,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
         {
             fn #with_module(&mut self) {
                 #(#bounds)*
+                #(#associated_types)*
                 #(#types)*
             }
         }
