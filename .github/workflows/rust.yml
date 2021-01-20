@@ -20,7 +20,8 @@ jobs:
           profile: minimal
           toolchain: nightly
           override: true
-          components: wasm32-unknown-unknown, rustfmt
+          components: rustfmt
+          targets: wasm32-unknown-unknown
 
     - name: fmt
       run: cargo fmt --all -- --check
