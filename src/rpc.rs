@@ -239,7 +239,7 @@ impl<T: Runtime> Rpc<T> {
     ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
         let params = Params::Array(vec![to_json_value(keys)?, to_json_value(at)?]);
         self.client
-            .request("state_queryStorage", params)
+            .request("state_queryStorageAt", params)
             .await
             .map_err(Into::into)
     }
