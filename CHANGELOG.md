@@ -1,3 +1,16 @@
+# Version 0.14.0 (2021-02-05)
+* Refactor event type decoding and declaration [#221](https://github.com/paritytech/substrate-subxt/pull/221)
+* Add Balances Locks [#197](https://github.com/paritytech/substrate-subxt/pull/197)
+* Add event Phase::Initialization [#215](https://github.com/paritytech/substrate-subxt/pull/215)
+* Make type explicit [#217](https://github.com/paritytech/substrate-subxt/pull/217)
+* Upgrade dependencies, bumps substrate to 2.0.1 [#219](https://github.com/paritytech/substrate-subxt/pull/219)
+* Export extra types [#212](https://github.com/paritytech/substrate-subxt/pull/212)
+* Enable retrieval of constants from rutnime metadata [#207](https://github.com/paritytech/substrate-subxt/pull/207)
+* register type sizes for u64 and u128 [#200](https://github.com/paritytech/substrate-subxt/pull/200)
+* Remove some substrate dependencies to improve compile time [#194](https://github.com/paritytech/substrate-subxt/pull/194)
+* propagate 'RuntimeError's to 'decode_raw_bytes' caller [#189](https://github.com/paritytech/substrate-subxt/pull/189)
+* Derive `Clone` for `PairSigner` [#184](https://github.com/paritytech/substrate-subxt/pull/184)
+
 # Version 0.13.0
 * Make the contract call extrinsic work [#165](https://github.com/paritytech/substrate-subxt/pull/165)
 * Update to Substrate 2.0.0 [#173](https://github.com/paritytech/substrate-subxt/pull/173)
