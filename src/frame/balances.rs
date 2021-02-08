@@ -170,6 +170,7 @@ mod tests {
             test_client,
             TestRuntime,
         },
+        EventBytesSegmenter,
     };
     use sp_core::{
         sr25519::Pair,
@@ -297,7 +298,9 @@ mod tests {
         let bob = AccountKeyring::Bob.to_account_id();
         let (client, _) = test_client().await;
         let sub = client.subscribe_events().await.unwrap();
-        let mut decoder = EventsDecoder::<TestRuntime>::new(client.metadata().clone());
+        let event_segmenter = EventBytesSegmenter::new();
+        let mut decoder =
+            EventsDecoder::<TestRuntime>::new(client.metadata().clone(), event_segmenter);
         decoder.with_balances();
         let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
         sub.filter_event::<TransferEvent<_>>();

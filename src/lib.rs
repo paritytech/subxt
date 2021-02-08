@@ -49,7 +49,10 @@ pub use substrate_subxt_client as client;
 pub use sp_core;
 pub use sp_runtime;
 
-use codec::Decode;
+use codec::{
+    Codec,
+    Decode,
+};
 use futures::future;
 use jsonrpsee::client::Subscription;
 use sp_core::{
@@ -76,6 +79,7 @@ mod subscription;
 pub use crate::{
     error::Error,
     events::{
+        EventBytesSegmenter,
         EventsDecoder,
         RawEvent,
     },
@@ -119,6 +123,7 @@ pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
     page_size: Option<u32>,
+    event_segmenter: EventBytesSegmenter<T>,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -129,6 +134,7 @@ impl<T: Runtime> ClientBuilder<T> {
             url: None,
             client: None,
             page_size: None,
+            event_segmenter: EventBytesSegmenter::new(),
         }
     }
 
@@ -148,6 +154,15 @@ impl<T: Runtime> ClientBuilder<T> {
     pub fn set_page_size(mut self, size: u32) -> Self {
         self.page_size = Some(size);
         self
+    }
+
+    /// Register a custom type segmenter, for consuming types in events where the size cannot
+    /// be inferred from the metadata.
+    pub fn register_type_size<U>(mut self, name: &str)
+    where
+        U: Codec + Send + Sync + 'static,
+    {
+        self.event_segmenter.register_type_size::<U>(name)
     }
 
     /// Creates a new Client.
@@ -174,6 +189,7 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc,
             genesis_hash: genesis_hash?,
             metadata: metadata?,
+            event_segmenter: self.event_segmenter,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
@@ -187,6 +203,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
+    event_segmenter: EventBytesSegmenter<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
@@ -199,6 +216,7 @@ impl<T: Runtime> Clone for Client<T> {
             rpc: self.rpc.clone(),
             genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
+            event_segmenter: self.event_segmenter.clone(),
             properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
@@ -469,7 +487,8 @@ impl<T: Runtime> Client<T> {
     /// Returns an events decoder for a call.
     pub fn events_decoder<C: Call<T>>(&self) -> EventsDecoder<T> {
         let metadata = self.metadata().clone();
-        let mut decoder = EventsDecoder::new(metadata);
+        let segmenter = self.event_segmenter.clone();
+        let mut decoder = EventsDecoder::new(metadata, segmenter);
         C::events_decoder(&mut decoder);
         decoder
     }

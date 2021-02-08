@@ -24,6 +24,7 @@ use substrate_subxt::{
     sp_core::Decode,
     ClientBuilder,
     DefaultNodeRuntime,
+    EventBytesSegmenter,
     EventSubscription,
     EventsDecoder,
     PairSigner,
@@ -38,7 +39,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
     let sub = client.subscribe_events().await?;
-    let mut decoder = EventsDecoder::<DefaultNodeRuntime>::new(client.metadata().clone());
+    let mut decoder = EventsDecoder::<DefaultNodeRuntime>::new(
+        client.metadata().clone(),
+        EventBytesSegmenter::new(),
+    );
     decoder.with_balances();
     let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
     sub.filter_event::<TransferEvent<_>>();
