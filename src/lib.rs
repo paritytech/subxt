@@ -158,11 +158,12 @@ impl<T: Runtime> ClientBuilder<T> {
 
     /// Register a custom type segmenter, for consuming types in events where the size cannot
     /// be inferred from the metadata.
-    pub fn register_type_size<U>(mut self, name: &str)
+    pub fn register_type_size<U>(mut self, name: &str) -> Self
     where
         U: Codec + Send + Sync + 'static,
     {
-        self.event_type_registry.register_type_size::<U>(name)
+        self.event_type_registry.register_type_size::<U>(name);
+        self
     }
 
     /// Disable the check for missing type sizes on `build`.
