@@ -366,7 +366,7 @@ impl Balances for KusamaRuntime {
 }
 
 /// Register default common runtime type sizes
-fn register_default_type_sizes<T: Runtime>(
+pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry: &mut EventTypeRegistry<T>,
 ) {
     // primitives
