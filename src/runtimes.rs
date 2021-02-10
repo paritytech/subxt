@@ -369,34 +369,49 @@ impl Balances for KusamaRuntime {
 fn register_default_type_sizes<T: Runtime>(
     event_type_registry: &mut EventTypeRegistry<T>,
 ) {
-    // register default event arg type sizes for dynamic decoding of events
+    // primitives
+    event_type_registry.register_type_size::<bool>("bool");
+    event_type_registry.register_type_size::<u8>("u8");
+    event_type_registry.register_type_size::<u32>("u32");
+    event_type_registry.register_type_size::<u64>("u64");
+    event_type_registry.register_type_size::<u128>("u128");
+
     event_type_registry.register_type_size::<()>("PhantomData");
+
+    // runtime associated types
+    event_type_registry.register_type_size::<T::AccountId>("AccountId");
+    event_type_registry.register_type_size::<T::BlockNumber>("BlockNumber");
+    event_type_registry.register_type_size::<T::Hash>("Hash");
+
+    // frame_support types
     event_type_registry
         .register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
     event_type_registry
         .register_type_size::<frame_support::dispatch::DispatchResult>("DispatchResult");
     event_type_registry
         .register_type_size::<frame_support::dispatch::DispatchError>("DispatchError");
-    event_type_registry.register_type_size::<bool>("bool");
+    event_type_registry
+        .register_type_size::<frame_support::traits::BalanceStatus>("Status");
+
+    // aliases etc.
+    type AuthorityId = [u8; 32];
+    type AuthorityWeight = u64;
+
     event_type_registry.register_type_size::<u32>("ReferendumIndex");
     event_type_registry.register_type_size::<[u8; 16]>("Kind");
-    event_type_registry.register_type_size::<[u8; 32]>("AuthorityId");
-    event_type_registry.register_type_size::<u8>("u8");
-    event_type_registry.register_type_size::<u32>("u32");
-    event_type_registry.register_type_size::<u64>("u64");
-    event_type_registry.register_type_size::<u128>("u128");
+    event_type_registry.register_type_size::<AuthorityId>("AuthorityId");
+
     event_type_registry.register_type_size::<u32>("AccountIndex");
     event_type_registry.register_type_size::<u32>("SessionIndex");
     event_type_registry.register_type_size::<u32>("PropIndex");
     event_type_registry.register_type_size::<u32>("ProposalIndex");
     event_type_registry.register_type_size::<u32>("AuthorityIndex");
-    event_type_registry.register_type_size::<u64>("AuthorityWeight");
+    event_type_registry.register_type_size::<AuthorityWeight>("AuthorityWeight");
     event_type_registry.register_type_size::<u32>("MemberCount");
-    event_type_registry.register_type_size::<T::AccountId>("AccountId");
-    event_type_registry.register_type_size::<T::BlockNumber>("BlockNumber");
-    event_type_registry.register_type_size::<T::Hash>("Hash");
+
     event_type_registry.register_type_size::<u8>("VoteThreshold");
-    // Additional types
     event_type_registry
         .register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
+    event_type_registry
+        .register_type_size::<Vec<(AuthorityId, AuthorityWeight)>>("AuthorityList");
 }
