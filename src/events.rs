@@ -263,7 +263,7 @@ impl<T: System> EventBytesSegmenter<T> {
     }
 
     /// Check missing type sizes.
-    pub fn check_missing_type_sizes(&self, metadata: &Metadata) {
+    pub fn check_missing_type_sizes(&self, metadata: &Metadata) -> Result<(), HashSet<String>> {
         let mut missing = HashSet::new();
         for module in metadata.modules_with_events() {
             for event in module.events() {
@@ -281,12 +281,11 @@ impl<T: System> EventBytesSegmenter<T> {
                 }
             }
         }
+
         if !missing.is_empty() {
-            log::warn!(
-                "The following primitive types do not have registered sizes: {:?} \
-                If any of these events are received, an error will occur since we cannot decode them",
-                missing
-            );
+            Err(missing)
+        } else {
+            Ok(())
         }
     }
 

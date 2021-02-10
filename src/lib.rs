@@ -124,6 +124,7 @@ pub struct ClientBuilder<T: Runtime> {
     client: Option<jsonrpsee::Client>,
     page_size: Option<u32>,
     event_segmenter: EventBytesSegmenter<T>,
+    skip_type_sizes_check: bool,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -135,6 +136,7 @@ impl<T: Runtime> ClientBuilder<T> {
             client: None,
             page_size: None,
             event_segmenter: EventBytesSegmenter::new(),
+            skip_type_sizes_check: false,
         }
     }
 
@@ -165,6 +167,14 @@ impl<T: Runtime> ClientBuilder<T> {
         self.event_segmenter.register_type_size::<U>(name)
     }
 
+    /// Disable the check for missing type sizes on `build`.
+    ///
+    /// *WARNING* can lead to runtime errors if receiving events with unknown types.
+    pub fn skip_type_sizes_check(mut self) -> Self {
+        self.skip_type_sizes_check = false;
+        self
+    }
+
     /// Creates a new Client.
     pub async fn build(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
@@ -185,10 +195,28 @@ impl<T: Runtime> ClientBuilder<T> {
             rpc.system_properties(),
         )
         .await;
+        let metadata = metadata?;
+
+        if let Err(missing) = self.event_segmenter.check_missing_type_sizes(&metadata) {
+            if self.skip_type_sizes_check {
+                log::warn!(
+                    "The following types do not have registered type segmenters: {:?} \
+                    If any events containing these types are received, this can cause a \
+                    `TypeSizeUnavailable` error and prevent decoding the actual event \
+                    being listened for.\
+                    \
+                    Use `ClientBuilder::register_type_size` to register missing type sizes.",
+                    missing
+                );
+            } else {
+                return Err(Error::MissingTypeSizes(missing.into_iter().collect()))
+            }
+        }
+
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: metadata?,
+            metadata,
             event_segmenter: self.event_segmenter,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
@@ -591,6 +619,7 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::balances::*;
     use sp_core::storage::{
         well_known_keys,
         StorageKey,
