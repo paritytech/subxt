@@ -174,7 +174,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
             fn #with_module(&mut self);
         }
 
-        impl<T: #module> #module_events_type_registry for
+        impl<T: #module + #subxt::Runtime> #module_events_type_registry for
             #subxt::EventTypeRegistry<T>
         {
             fn #with_module(&mut self) {

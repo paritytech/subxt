@@ -39,18 +39,13 @@ use std::{
     },
 };
 
-use crate::{
-    error::{
-        Error,
-        RuntimeError,
-    },
-    metadata::{
-        EventArg,
-        Metadata,
-    },
-    Phase,
-    System,
-};
+use crate::{error::{
+    Error,
+    RuntimeError,
+}, metadata::{
+    EventArg,
+    Metadata,
+}, Phase, System, Runtime};
 
 /// Raw bytes for an Event
 pub struct RawEvent {
@@ -119,7 +114,7 @@ impl<T> Clone for EventsDecoder<T> {
     }
 }
 
-impl<T: System> EventsDecoder<T> {
+impl<T: Runtime + System> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata, event_type_registry: EventTypeRegistry<T>) -> Self {
         Self {
@@ -273,13 +268,15 @@ impl<T> fmt::Debug for EventTypeRegistry<T> {
     }
 }
 
-impl<T> EventTypeRegistry<T> {
+impl<T: Runtime> EventTypeRegistry<T> {
     /// Create a new [`EventTypeRegistry`].
     pub fn new() -> Self {
-        Self {
+        let mut registry = Self {
             segmenters: HashMap::new(),
             marker: PhantomData,
-        }
+        };
+        T::register_type_sizes(&mut registry);
+        registry
     }
 
     /// Register a type.
