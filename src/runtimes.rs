@@ -373,6 +373,10 @@ fn register_default_type_sizes<T: Runtime>(
     event_type_registry.register_type_size::<()>("PhantomData");
     event_type_registry
         .register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
+    event_type_registry
+        .register_type_size::<frame_support::dispatch::DispatchResult>("DispatchResult");
+    event_type_registry
+        .register_type_size::<frame_support::dispatch::DispatchError>("DispatchError");
     event_type_registry.register_type_size::<bool>("bool");
     event_type_registry.register_type_size::<u32>("ReferendumIndex");
     event_type_registry.register_type_size::<[u8; 16]>("Kind");
