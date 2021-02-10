@@ -153,17 +153,23 @@ pub struct TransferEvent<T: Balances> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{error::{
-        Error,
-        ModuleError,
-        RuntimeError,
-    }, extrinsic::{
-        PairSigner,
-        Signer,
-    }, subscription::EventSubscription, system::AccountStoreExt, tests::{
-        test_client,
-        TestRuntime,
-    }};
+    use crate::{
+        error::{
+            Error,
+            ModuleError,
+            RuntimeError,
+        },
+        extrinsic::{
+            PairSigner,
+            Signer,
+        },
+        subscription::EventSubscription,
+        system::AccountStoreExt,
+        tests::{
+            test_client,
+            TestRuntime,
+        },
+    };
     use sp_core::{
         sr25519::Pair,
         Pair as _,

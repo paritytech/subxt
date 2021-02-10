@@ -199,12 +199,7 @@ impl<T: System> EventsDecoder<T> {
                     let len = <Compact<u32>>::decode(input)?;
                     len.encode_to(output);
                     for _ in 0..len.0 {
-                        self.decode_raw_bytes(
-                            &[*arg.clone()],
-                            input,
-                            output,
-                            errors,
-                        )?
+                        self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
                     }
                 }
                 EventArg::Option(arg) => {
@@ -212,12 +207,7 @@ impl<T: System> EventsDecoder<T> {
                         0 => output.push_byte(0),
                         1 => {
                             output.push_byte(1);
-                            self.decode_raw_bytes(
-                                &[*arg.clone()],
-                                input,
-                                output,
-                                errors,
-                            )?
+                            self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
                         }
                         _ => {
                             return Err(Error::Other(
@@ -275,7 +265,8 @@ impl<T> Clone for EventTypeRegistry<T> {
 impl<T> fmt::Debug for EventTypeRegistry<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("EventTypeRegistry")
-            .field("segmenters",
+            .field(
+                "segmenters",
                 &self.segmenters.keys().cloned().collect::<String>(),
             )
             .finish()
@@ -303,7 +294,10 @@ impl<T> EventTypeRegistry<T> {
     }
 
     /// Check missing type sizes.
-    pub fn check_missing_type_sizes(&self, metadata: &Metadata) -> Result<(), HashSet<String>> {
+    pub fn check_missing_type_sizes(
+        &self,
+        metadata: &Metadata,
+    ) -> Result<(), HashSet<String>> {
         let mut missing = HashSet::new();
         for module in metadata.modules_with_events() {
             for event in module.events() {
@@ -364,7 +358,10 @@ mod tests {
 
     #[test]
     fn test_decode_option() {
-        let decoder = EventsDecoder::<TestRuntime>::new(Metadata::default(), EventTypeRegistry::new());
+        let decoder = EventsDecoder::<TestRuntime>::new(
+            Metadata::default(),
+            EventTypeRegistry::new(),
+        );
 
         let value = Some(0u8);
         let input = value.encode();

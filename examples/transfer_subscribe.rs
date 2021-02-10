@@ -15,11 +15,18 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{balances::{
-    BalancesEventTypeRegistry,
-    TransferCallExt,
-    TransferEvent,
-}, sp_core::Decode, ClientBuilder, DefaultNodeRuntime, EventSubscription, PairSigner};
+use substrate_subxt::{
+    balances::{
+        BalancesEventTypeRegistry,
+        TransferCallExt,
+        TransferEvent,
+    },
+    sp_core::Decode,
+    ClientBuilder,
+    DefaultNodeRuntime,
+    EventSubscription,
+    PairSigner,
+};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

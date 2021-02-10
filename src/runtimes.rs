@@ -138,36 +138,40 @@ impl_opaque_keys! {
     }
 }
 
-use crate::{extrinsic::{
-    DefaultExtra,
-    SignedExtra,
-}, frame::{
-    balances::{
-        AccountData,
-        Balances,
-        BalancesEventTypeRegistry,
+use crate::{
+    extrinsic::{
+        DefaultExtra,
+        SignedExtra,
     },
-    contracts::{
-        Contracts,
-        ContractsEventTypeRegistry,
+    frame::{
+        balances::{
+            AccountData,
+            Balances,
+            BalancesEventTypeRegistry,
+        },
+        contracts::{
+            Contracts,
+            ContractsEventTypeRegistry,
+        },
+        session::{
+            Session,
+            SessionEventTypeRegistry,
+        },
+        staking::{
+            Staking,
+            StakingEventTypeRegistry,
+        },
+        sudo::{
+            Sudo,
+            SudoEventTypeRegistry,
+        },
+        system::{
+            System,
+            SystemEventTypeRegistry,
+        },
     },
-    session::{
-        Session,
-        SessionEventTypeRegistry,
-    },
-    staking::{
-        Staking,
-        StakingEventTypeRegistry,
-    },
-    sudo::{
-        Sudo,
-        SudoEventTypeRegistry,
-    },
-    system::{
-        System,
-        SystemEventTypeRegistry,
-    },
-}, EventTypeRegistry};
+    EventTypeRegistry,
+};
 
 /// Runtime trait.
 pub trait Runtime: System + Sized + Send + Sync + 'static {
@@ -362,10 +366,13 @@ impl Balances for KusamaRuntime {
 }
 
 /// Register default common runtime type sizes
-fn register_default_type_sizes<T: Runtime>(event_type_registry: &mut EventTypeRegistry<T>) {
+fn register_default_type_sizes<T: Runtime>(
+    event_type_registry: &mut EventTypeRegistry<T>,
+) {
     // register default event arg type sizes for dynamic decoding of events
     event_type_registry.register_type_size::<()>("PhantomData");
-    event_type_registry.register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
+    event_type_registry
+        .register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
     event_type_registry.register_type_size::<bool>("bool");
     event_type_registry.register_type_size::<u32>("ReferendumIndex");
     event_type_registry.register_type_size::<[u8; 16]>("Kind");
@@ -386,5 +393,6 @@ fn register_default_type_sizes<T: Runtime>(event_type_registry: &mut EventTypeRe
     event_type_registry.register_type_size::<T::Hash>("Hash");
     event_type_registry.register_type_size::<u8>("VoteThreshold");
     // Additional types
-    event_type_registry.register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
+    event_type_registry
+        .register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
 }

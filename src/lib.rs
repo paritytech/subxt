@@ -79,8 +79,8 @@ mod subscription;
 pub use crate::{
     error::Error,
     events::{
-        EventsDecoder,
         EventTypeRegistry,
+        EventsDecoder,
         RawEvent,
     },
     extrinsic::{
@@ -195,7 +195,8 @@ impl<T: Runtime> ClientBuilder<T> {
         .await;
         let metadata = metadata?;
 
-        if let Err(missing) = self.event_type_registry.check_missing_type_sizes(&metadata) {
+        if let Err(missing) = self.event_type_registry.check_missing_type_sizes(&metadata)
+        {
             if self.skip_type_sizes_check {
                 log::warn!(
                     "The following types do not have registered type segmenters: {:?} \
@@ -211,7 +212,8 @@ impl<T: Runtime> ClientBuilder<T> {
             }
         }
 
-        let events_decoder = EventsDecoder::new(metadata.clone(), self.event_type_registry);
+        let events_decoder =
+            EventsDecoder::new(metadata.clone(), self.event_type_registry);
 
         Ok(Client {
             rpc,

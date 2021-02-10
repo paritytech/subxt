@@ -16,11 +16,9 @@
 
 //! Implements support for built-in runtime modules.
 
-use crate::{
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
+use crate::metadata::{
+    Metadata,
+    MetadataError,
 };
 use codec::{
     Decode,
