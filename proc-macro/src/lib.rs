@@ -62,14 +62,14 @@ use synstructure::{
 ///
 /// const MODULE: &str = "Herd";
 ///
-/// // `EventsDecoder` extension trait.
-/// pub trait HerdEventsDecoder {
+/// // `EventTypeRegistry` extension trait.
+/// pub trait HerdEventTypeRegistry {
 ///     // Registers this modules types.
 ///     fn with_herd(&mut self);
 /// }
 ///
-/// impl<T: Herd> HerdEventsDecoder for
-///     substrate_subxt::EventsDecoder<T>
+/// impl<T: Herd + Runtime> EventTypeRegistry for
+///     substrate_subxt::EventTypeRegistry<T>
 /// {
 ///     fn with_herd(&mut self) {
 ///         self.with_husbandry();

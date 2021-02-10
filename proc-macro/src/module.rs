@@ -168,7 +168,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
 
         const MODULE: &str = #module_name;
 
-        /// `EventsDecoder` extension trait.
+        /// `EventTypeRegistry` extension trait.
         pub trait #module_events_type_registry {
             /// Registers this modules types.
             fn #with_module(&mut self);
@@ -221,7 +221,7 @@ mod tests {
 
             const MODULE: &str = "Balances";
 
-            /// `EventsDecoder` extension trait.
+            /// `EventTypeRegistry` extension trait.
             pub trait BalancesEventTypeRegistry {
                 /// Registers this modules types.
                 fn with_balances(&mut self);
