@@ -39,13 +39,19 @@ use std::{
     },
 };
 
-use crate::{error::{
-    Error,
-    RuntimeError,
-}, metadata::{
-    EventArg,
-    Metadata,
-}, Phase, System, Runtime};
+use crate::{
+    error::{
+        Error,
+        RuntimeError,
+    },
+    metadata::{
+        EventArg,
+        Metadata,
+    },
+    Phase,
+    Runtime,
+    System,
+};
 
 /// Raw bytes for an Event
 pub struct RawEvent {
