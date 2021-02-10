@@ -138,23 +138,36 @@ impl_opaque_keys! {
     }
 }
 
-use crate::{
-    extrinsic::{
-        DefaultExtra,
-        SignedExtra,
+use crate::{extrinsic::{
+    DefaultExtra,
+    SignedExtra,
+}, frame::{
+    balances::{
+        AccountData,
+        Balances,
+        BalancesEventTypeRegistry,
     },
-    frame::{
-        balances::{
-            AccountData,
-            Balances,
-        },
-        contracts::Contracts,
-        session::Session,
-        staking::Staking,
-        sudo::Sudo,
-        system::System,
+    contracts::{
+        Contracts,
+        ContractsEventTypeRegistry,
     },
-};
+    session::{
+        Session,
+        SessionEventTypeRegistry,
+    },
+    staking::{
+        Staking,
+        StakingEventTypeRegistry,
+    },
+    sudo::{
+        Sudo,
+        SudoEventTypeRegistry,
+    },
+    system::{
+        System,
+        SystemEventTypeRegistry,
+    },
+}, EventTypeRegistry};
 
 /// Runtime trait.
 pub trait Runtime: System + Sized + Send + Sync + 'static {
@@ -162,6 +175,9 @@ pub trait Runtime: System + Sized + Send + Sync + 'static {
     type Signature: Verify + Encode + Send + Sync + 'static;
     /// Transaction extras.
     type Extra: SignedExtra<Self> + Send + Sync + 'static;
+
+    /// Register type sizes for this runtime
+    fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>);
 }
 
 /// Concrete type definitions compatible with those in the default substrate `node_runtime`
@@ -178,6 +194,15 @@ impl Staking for DefaultNodeRuntime {}
 impl Runtime for DefaultNodeRuntime {
     type Signature = MultiSignature;
     type Extra = DefaultExtra<Self>;
+
+    fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
+        event_type_registry.with_system();
+        event_type_registry.with_balances();
+        event_type_registry.with_session();
+        event_type_registry.with_contracts();
+        event_type_registry.with_sudo();
+        register_default_type_sizes(event_type_registry);
+    }
 }
 
 impl System for DefaultNodeRuntime {
@@ -217,6 +242,14 @@ pub struct NodeTemplateRuntime;
 impl Runtime for NodeTemplateRuntime {
     type Signature = MultiSignature;
     type Extra = DefaultExtra<Self>;
+
+    fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
+        event_type_registry.with_system();
+        event_type_registry.with_balances();
+        event_type_registry.with_session();
+        event_type_registry.with_sudo();
+        register_default_type_sizes(event_type_registry);
+    }
 }
 
 impl System for NodeTemplateRuntime {
@@ -253,6 +286,14 @@ pub struct ContractsTemplateRuntime;
 impl Runtime for ContractsTemplateRuntime {
     type Signature = <NodeTemplateRuntime as Runtime>::Signature;
     type Extra = DefaultExtra<Self>;
+
+    fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
+        event_type_registry.with_system();
+        event_type_registry.with_balances();
+        event_type_registry.with_contracts();
+        event_type_registry.with_sudo();
+        register_default_type_sizes(event_type_registry);
+    }
 }
 
 impl System for ContractsTemplateRuntime {
@@ -287,6 +328,14 @@ pub struct KusamaRuntime;
 impl Runtime for KusamaRuntime {
     type Signature = MultiSignature;
     type Extra = DefaultExtra<Self>;
+
+    fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
+        event_type_registry.with_system();
+        event_type_registry.with_balances();
+        event_type_registry.with_session();
+        event_type_registry.with_staking();
+        register_default_type_sizes(event_type_registry);
+    }
 }
 
 impl System for KusamaRuntime {
@@ -310,4 +359,32 @@ impl Staking for KusamaRuntime {}
 
 impl Balances for KusamaRuntime {
     type Balance = u128;
+}
+
+/// Register default common runtime type sizes
+fn register_default_type_sizes<T: Runtime>(event_type_registry: &mut EventTypeRegistry<T>) {
+    // register default event arg type sizes for dynamic decoding of events
+    event_type_registry.register_type_size::<()>("PhantomData");
+    event_type_registry.register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
+    event_type_registry.register_type_size::<bool>("bool");
+    event_type_registry.register_type_size::<u32>("ReferendumIndex");
+    event_type_registry.register_type_size::<[u8; 16]>("Kind");
+    event_type_registry.register_type_size::<[u8; 32]>("AuthorityId");
+    event_type_registry.register_type_size::<u8>("u8");
+    event_type_registry.register_type_size::<u32>("u32");
+    event_type_registry.register_type_size::<u64>("u64");
+    event_type_registry.register_type_size::<u128>("u128");
+    event_type_registry.register_type_size::<u32>("AccountIndex");
+    event_type_registry.register_type_size::<u32>("SessionIndex");
+    event_type_registry.register_type_size::<u32>("PropIndex");
+    event_type_registry.register_type_size::<u32>("ProposalIndex");
+    event_type_registry.register_type_size::<u32>("AuthorityIndex");
+    event_type_registry.register_type_size::<u64>("AuthorityWeight");
+    event_type_registry.register_type_size::<u32>("MemberCount");
+    event_type_registry.register_type_size::<T::AccountId>("AccountId");
+    event_type_registry.register_type_size::<T::BlockNumber>("BlockNumber");
+    event_type_registry.register_type_size::<T::Hash>("Hash");
+    event_type_registry.register_type_size::<u8>("VoteThreshold");
+    // Additional types
+    event_type_registry.register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
 }

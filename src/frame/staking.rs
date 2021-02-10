@@ -18,7 +18,7 @@
 
 use super::balances::{
     Balances,
-    BalancesEventsDecoder as _,
+    BalancesEventTypeRegistry as _,
 };
 use codec::{
     Decode,

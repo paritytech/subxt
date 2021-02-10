@@ -18,7 +18,7 @@
 
 use crate::frame::system::{
     System,
-    SystemEventsDecoder,
+    SystemEventTypeRegistry,
 };
 use codec::{
     Decode,
@@ -153,25 +153,17 @@ pub struct TransferEvent<T: Balances> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        error::{
-            Error,
-            ModuleError,
-            RuntimeError,
-        },
-        events::EventsDecoder,
-        extrinsic::{
-            PairSigner,
-            Signer,
-        },
-        subscription::EventSubscription,
-        system::AccountStoreExt,
-        tests::{
-            test_client,
-            TestRuntime,
-        },
-        EventBytesSegmenter,
-    };
+    use crate::{error::{
+        Error,
+        ModuleError,
+        RuntimeError,
+    }, extrinsic::{
+        PairSigner,
+        Signer,
+    }, subscription::EventSubscription, system::AccountStoreExt, tests::{
+        test_client,
+        TestRuntime,
+    }};
     use sp_core::{
         sr25519::Pair,
         Pair as _,
@@ -298,11 +290,8 @@ mod tests {
         let bob = AccountKeyring::Bob.to_account_id();
         let (client, _) = test_client().await;
         let sub = client.subscribe_events().await.unwrap();
-        let event_segmenter = EventBytesSegmenter::new();
-        let mut decoder =
-            EventsDecoder::<TestRuntime>::new(client.metadata().clone(), event_segmenter);
-        decoder.with_balances();
-        let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
+        let decoder = client.events_decoder();
+        let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
         sub.filter_event::<TransferEvent<_>>();
         client.transfer(&alice, &bob, 10_000).await.unwrap();
         let raw = sub.next().await.unwrap().unwrap();

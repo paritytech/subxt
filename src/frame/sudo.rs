@@ -19,7 +19,7 @@
 use crate::{
     frame::system::{
         System,
-        SystemEventsDecoder,
+        SystemEventTypeRegistry,
     },
     Encoded,
 };

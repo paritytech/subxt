@@ -79,8 +79,8 @@ mod subscription;
 pub use crate::{
     error::Error,
     events::{
-        EventBytesSegmenter,
         EventsDecoder,
+        EventTypeRegistry,
         RawEvent,
     },
     extrinsic::{
@@ -119,11 +119,10 @@ use crate::{
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
 pub struct ClientBuilder<T: Runtime> {
-    _marker: std::marker::PhantomData<T>,
     url: Option<String>,
     client: Option<jsonrpsee::Client>,
     page_size: Option<u32>,
-    event_segmenter: EventBytesSegmenter<T>,
+    event_type_registry: EventTypeRegistry<T>,
     skip_type_sizes_check: bool,
 }
 
@@ -131,11 +130,10 @@ impl<T: Runtime> ClientBuilder<T> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
-            _marker: std::marker::PhantomData,
             url: None,
             client: None,
             page_size: None,
-            event_segmenter: EventBytesSegmenter::new(),
+            event_type_registry: EventTypeRegistry::new(),
             skip_type_sizes_check: false,
         }
     }
@@ -164,7 +162,7 @@ impl<T: Runtime> ClientBuilder<T> {
     where
         U: Codec + Send + Sync + 'static,
     {
-        self.event_segmenter.register_type_size::<U>(name)
+        self.event_type_registry.register_type_size::<U>(name)
     }
 
     /// Disable the check for missing type sizes on `build`.
@@ -176,7 +174,7 @@ impl<T: Runtime> ClientBuilder<T> {
     }
 
     /// Creates a new Client.
-    pub async fn build(self) -> Result<Client<T>, Error> {
+    pub async fn build<'a>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -197,7 +195,7 @@ impl<T: Runtime> ClientBuilder<T> {
         .await;
         let metadata = metadata?;
 
-        if let Err(missing) = self.event_segmenter.check_missing_type_sizes(&metadata) {
+        if let Err(missing) = self.event_type_registry.check_missing_type_sizes(&metadata) {
             if self.skip_type_sizes_check {
                 log::warn!(
                     "The following types do not have registered type segmenters: {:?} \
@@ -213,11 +211,13 @@ impl<T: Runtime> ClientBuilder<T> {
             }
         }
 
+        let events_decoder = EventsDecoder::new(metadata.clone(), self.event_type_registry);
+
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
             metadata,
-            event_segmenter: self.event_segmenter,
+            events_decoder,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
@@ -231,7 +231,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
-    event_segmenter: EventBytesSegmenter<T>,
+    events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
@@ -244,7 +244,7 @@ impl<T: Runtime> Clone for Client<T> {
             rpc: self.rpc.clone(),
             genesis_hash: self.genesis_hash,
             metadata: self.metadata.clone(),
-            event_segmenter: self.event_segmenter.clone(),
+            events_decoder: self.events_decoder.clone(),
             properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
@@ -512,13 +512,9 @@ impl<T: Runtime> Client<T> {
         Ok(signed)
     }
 
-    /// Returns an events decoder for a call.
-    pub fn events_decoder<C: Call<T>>(&self) -> EventsDecoder<T> {
-        let metadata = self.metadata().clone();
-        let segmenter = self.event_segmenter.clone();
-        let mut decoder = EventsDecoder::new(metadata, segmenter);
-        C::events_decoder(&mut decoder);
-        decoder
+    /// Returns the events decoder.
+    pub fn events_decoder(&self) -> &EventsDecoder<T> {
+        &self.events_decoder
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
@@ -533,10 +529,9 @@ impl<T: Runtime> Client<T> {
     pub async fn submit_and_watch_extrinsic(
         &self,
         extrinsic: UncheckedExtrinsic<T>,
-        decoder: EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
         self.rpc
-            .submit_and_watch_extrinsic(extrinsic, decoder)
+            .submit_and_watch_extrinsic(extrinsic, &self.events_decoder)
             .await
     }
 
@@ -565,8 +560,7 @@ impl<T: Runtime> Client<T> {
             Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
-        let decoder = self.events_decoder::<C>();
-        self.submit_and_watch_extrinsic(extrinsic, decoder).await
+        self.submit_and_watch_extrinsic(extrinsic).await
     }
 
     /// Insert a key into the keystore.
@@ -619,7 +613,6 @@ impl codec::Encode for Encoded {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::balances::*;
     use sp_core::storage::{
         well_known_keys,
         StorageKey,

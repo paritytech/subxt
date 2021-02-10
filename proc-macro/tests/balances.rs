@@ -32,7 +32,7 @@ use substrate_subxt::{
     },
     system::{
         System,
-        SystemEventsDecoder,
+        SystemEventTypeRegistry,
     },
     ClientBuilder,
     KusamaRuntime,

@@ -15,20 +15,11 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{
-    balances::{
-        BalancesEventsDecoder,
-        TransferCallExt,
-        TransferEvent,
-    },
-    sp_core::Decode,
-    ClientBuilder,
-    DefaultNodeRuntime,
-    EventBytesSegmenter,
-    EventSubscription,
-    EventsDecoder,
-    PairSigner,
-};
+use substrate_subxt::{balances::{
+    BalancesEventTypeRegistry,
+    TransferCallExt,
+    TransferEvent,
+}, sp_core::Decode, ClientBuilder, DefaultNodeRuntime, EventSubscription, PairSigner};
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -39,11 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
     let sub = client.subscribe_events().await?;
-    let mut decoder = EventsDecoder::<DefaultNodeRuntime>::new(
-        client.metadata().clone(),
-        EventBytesSegmenter::new(),
-    );
-    decoder.with_balances();
+    let decoder = client.events_decoder();
     let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
     sub.filter_event::<TransferEvent<_>>();
     client.transfer(&signer, &dest, 10_000).await?;

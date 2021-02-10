@@ -62,8 +62,8 @@ fn ignore(attrs: &[syn::Attribute]) -> bool {
     false
 }
 
-fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
-    format_ident!("{}EventsDecoder", module.to_string())
+fn event_type_registry_trait_name(module: &syn::Ident) -> syn::Ident {
+    format_ident!("{}EventTypeRegistry", module.to_string())
 }
 
 fn with_module_ident(module: &syn::Ident) -> syn::Ident {
@@ -128,7 +128,7 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let subxt = utils::use_crate("substrate-subxt");
     let module = &input.ident;
     let module_name = module.to_string();
-    let module_events_decoder = events_decoder_trait_name(module);
+    let module_events_type_registry = event_type_registry_trait_name(module);
     let with_module = with_module_ident(module);
 
     let bounds = input.supertraits.iter().filter_map(|bound| {
@@ -169,13 +169,13 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
         const MODULE: &str = #module_name;
 
         /// `EventsDecoder` extension trait.
-        pub trait #module_events_decoder {
+        pub trait #module_events_type_registry {
             /// Registers this modules types.
             fn #with_module(&mut self);
         }
 
-        impl<T: #module> #module_events_decoder for
-            #subxt::EventsDecoder<T>
+        impl<T: #module> #module_events_type_registry for
+            #subxt::EventTypeRegistry<T>
         {
             fn #with_module(&mut self) {
                 #(#bounds)*
@@ -222,12 +222,12 @@ mod tests {
             const MODULE: &str = "Balances";
 
             /// `EventsDecoder` extension trait.
-            pub trait BalancesEventsDecoder {
+            pub trait BalancesEventTypeRegistry {
                 /// Registers this modules types.
                 fn with_balances(&mut self);
             }
 
-            impl<T: Balances> BalancesEventsDecoder for
+            impl<T: Balances> BalancesEventTypeRegistry for
                 substrate_subxt::EventsDecoder<T>
             {
                 fn with_balances(&mut self) {

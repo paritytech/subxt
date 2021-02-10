@@ -19,11 +19,11 @@
 use crate::frame::{
     balances::{
         Balances,
-        BalancesEventsDecoder,
+        BalancesEventTypeRegistry,
     },
     system::{
         System,
-        SystemEventsDecoder,
+        SystemEventTypeRegistry,
     },
 };
 use codec::{

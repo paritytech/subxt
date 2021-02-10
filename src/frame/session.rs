@@ -18,11 +18,11 @@
 use crate::frame::{
     balances::{
         Balances,
-        BalancesEventsDecoder as _,
+        BalancesEventTypeRegistry as _,
     },
     system::{
         System,
-        SystemEventsDecoder as _,
+        SystemEventTypeRegistry as _,
     },
 };
 use codec::Encode;
