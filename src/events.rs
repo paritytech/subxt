@@ -29,7 +29,10 @@ use sp_runtime::{
 };
 use std::{
     collections::{
-        hash_map::{Entry, HashMap},
+        hash_map::{
+            Entry,
+            HashMap,
+        },
         HashSet,
     },
     fmt,
@@ -294,7 +297,7 @@ impl<T: Runtime> EventTypeRegistry<T> {
         // type to the output stream (&mut Vec<u8>).
         match self.segmenters.entry(name.to_string()) {
             Entry::Occupied(_) => panic!("Already a type registered with key {}", name),
-            Entry::Vacant(entry) => entry.insert(Box::new(TypeMarker::<U>::default()))
+            Entry::Vacant(entry) => entry.insert(Box::new(TypeMarker::<U>::default())),
         };
     }
 
