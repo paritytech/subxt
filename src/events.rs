@@ -29,7 +29,7 @@ use sp_runtime::{
 };
 use std::{
     collections::{
-        HashMap,
+        hash_map::{Entry, HashMap},
         HashSet,
     },
     fmt,
@@ -290,10 +290,12 @@ impl<T: Runtime> EventTypeRegistry<T> {
     where
         U: Codec + Send + Sync + 'static,
     {
-        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
+        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns te serialized
         // type to the output stream (&mut Vec<u8>).
-        self.segmenters
-            .insert(name.to_string(), Box::new(TypeMarker::<U>::default()));
+        match self.segmenters.entry(name.to_string()) {
+            Entry::Occupied(_) => panic!("Already a type registered with key {}", name),
+            Entry::Vacant(entry) => entry.insert(Box::new(TypeMarker::<U>::default()))
+        };
     }
 
     /// Check missing type sizes.
