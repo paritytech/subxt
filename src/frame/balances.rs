@@ -16,10 +16,7 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::system::{
-    System,
-    SystemEventTypeRegistry,
-};
+use crate::frame::system::System;
 use codec::{
     Decode,
     Encode,

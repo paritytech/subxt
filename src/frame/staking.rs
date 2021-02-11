@@ -16,10 +16,7 @@
 
 //! Implements support for the pallet_staking module.
 
-use super::balances::{
-    Balances,
-    BalancesEventTypeRegistry as _,
-};
+use super::balances::Balances;
 use codec::{
     Decode,
     Encode,

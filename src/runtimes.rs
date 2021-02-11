@@ -200,13 +200,12 @@ impl Runtime for DefaultNodeRuntime {
     type Extra = DefaultExtra<Self>;
 
     fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
-        println!("REGISTERING");
         event_type_registry.with_system();
-        // event_type_registry.with_balances();
-        // event_type_registry.with_session();
-        // event_type_registry.with_contracts();
-        // event_type_registry.with_sudo();
-        // register_default_type_sizes(event_type_registry);
+        event_type_registry.with_balances();
+        event_type_registry.with_session();
+        event_type_registry.with_contracts();
+        event_type_registry.with_sudo();
+        register_default_type_sizes(event_type_registry);
     }
 }
 
@@ -379,11 +378,6 @@ pub fn register_default_type_sizes<T: Runtime>(
 
     event_type_registry.register_type_size::<()>("PhantomData");
 
-    // runtime associated types
-    event_type_registry.register_type_size::<T::AccountId>("AccountId");
-    event_type_registry.register_type_size::<T::BlockNumber>("BlockNumber");
-    event_type_registry.register_type_size::<T::Hash>("Hash");
-
     // frame_support types
     event_type_registry
         .register_type_size::<frame_support::dispatch::DispatchInfo>("DispatchInfo");
@@ -403,7 +397,6 @@ pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry.register_type_size::<AuthorityId>("AuthorityId");
 
     event_type_registry.register_type_size::<u32>("AccountIndex");
-    event_type_registry.register_type_size::<u32>("SessionIndex");
     event_type_registry.register_type_size::<u32>("PropIndex");
     event_type_registry.register_type_size::<u32>("ProposalIndex");
     event_type_registry.register_type_size::<u32>("AuthorityIndex");

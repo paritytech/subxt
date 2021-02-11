@@ -16,14 +16,8 @@
 
 //! Session support
 use crate::frame::{
-    balances::{
-        Balances,
-        BalancesEventTypeRegistry as _,
-    },
-    system::{
-        System,
-        SystemEventTypeRegistry as _,
-    },
+    balances::Balances,
+    system::System,
 };
 use codec::Encode;
 use frame_support::Parameter;
