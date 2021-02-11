@@ -59,20 +59,12 @@ pub struct SetPayeeCall<T: Staking> {
     pub _runtime: PhantomData<T>,
 }
 
-/// Identity of a Grandpa authority.
-pub type AuthorityId = crate::runtimes::app::grandpa::Public;
-/// The weight of an authority.
-pub type AuthorityWeight = u64;
-/// A list of Grandpa authorities with associated weights.
-pub type AuthorityList = Vec<(AuthorityId, AuthorityWeight)>;
-
 /// The subset of the `frame::Trait` that a client must implement.
 #[module]
 #[rustfmt::skip]
 pub trait Staking: Balances {
     #![event_alias(ElectionCompute = u8)]
     #![event_type(EraIndex)]
-    #![event_type(AuthorityList)]
 }
 
 /// Number of eras to keep in history.

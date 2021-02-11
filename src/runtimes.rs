@@ -365,6 +365,13 @@ impl Balances for KusamaRuntime {
     type Balance = u128;
 }
 
+/// Identity of a Grandpa authority.
+pub type AuthorityId = crate::runtimes::app::grandpa::Public;
+/// The weight of an authority.
+pub type AuthorityWeight = u64;
+/// A list of Grandpa authorities with associated weights.
+pub type AuthorityList = Vec<(AuthorityId, AuthorityWeight)>;
+
 /// Register default common runtime type sizes
 pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry: &mut EventTypeRegistry<T>,
@@ -389,23 +396,46 @@ pub fn register_default_type_sizes<T: Runtime>(
         .register_type_size::<frame_support::traits::BalanceStatus>("Status");
 
     // aliases etc.
-    type AuthorityId = [u8; 32];
-    type AuthorityWeight = u64;
-
     event_type_registry.register_type_size::<u32>("ReferendumIndex");
     event_type_registry.register_type_size::<[u8; 16]>("Kind");
-    event_type_registry.register_type_size::<AuthorityId>("AuthorityId");
 
     event_type_registry.register_type_size::<u32>("AccountIndex");
     event_type_registry.register_type_size::<u32>("PropIndex");
     event_type_registry.register_type_size::<u32>("ProposalIndex");
     event_type_registry.register_type_size::<u32>("AuthorityIndex");
-    event_type_registry.register_type_size::<AuthorityWeight>("AuthorityWeight");
     event_type_registry.register_type_size::<u32>("MemberCount");
 
     event_type_registry.register_type_size::<u8>("VoteThreshold");
     event_type_registry
         .register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
+
+    event_type_registry.register_type_size::<AuthorityId>("AuthorityId");
+    event_type_registry.register_type_size::<AuthorityWeight>("AuthorityWeight");
     event_type_registry
         .register_type_size::<Vec<(AuthorityId, AuthorityWeight)>>("AuthorityList");
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn can_register_default_runtime_type_sizes() {
+        EventTypeRegistry::<DefaultNodeRuntime>::new();
+    }
+
+    #[test]
+    fn can_register_node_template_runtime_type_sizes() {
+        EventTypeRegistry::<NodeTemplateRuntime>::new();
+    }
+
+    #[test]
+    fn can_register_contracts_template_runtime_type_sizes() {
+        EventTypeRegistry::<ContractsTemplateRuntime>::new();
+    }
+
+    #[test]
+    fn can_register_kusama_runtime_type_sizes() {
+        EventTypeRegistry::<KusamaRuntime>::new();
+    }
 }
