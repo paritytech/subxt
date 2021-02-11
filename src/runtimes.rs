@@ -200,12 +200,13 @@ impl Runtime for DefaultNodeRuntime {
     type Extra = DefaultExtra<Self>;
 
     fn register_type_sizes(event_type_registry: &mut EventTypeRegistry<Self>) {
+        println!("REGISTERING");
         event_type_registry.with_system();
-        event_type_registry.with_balances();
-        event_type_registry.with_session();
-        event_type_registry.with_contracts();
-        event_type_registry.with_sudo();
-        register_default_type_sizes(event_type_registry);
+        // event_type_registry.with_balances();
+        // event_type_registry.with_session();
+        // event_type_registry.with_contracts();
+        // event_type_registry.with_sudo();
+        // register_default_type_sizes(event_type_registry);
     }
 }
 

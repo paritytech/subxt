@@ -72,7 +72,6 @@ use synstructure::{
 ///     substrate_subxt::EventTypeRegistry<T>
 /// {
 ///     fn with_herd(&mut self) {
-///         self.with_husbandry();
 ///         self.register_type_size::<T::Hooves>("Hooves");
 ///         self.register_type_size::<T::Wool>("Wool");
 ///     }
