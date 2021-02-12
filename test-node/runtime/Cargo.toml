@@ -39,7 +39,7 @@ sp-transaction-pool = { version = "3.0.0", default-features = false }
 sp-version = { version = "3.0.0", default-features = false }
 
 [build-dependencies]
-substrate-wasm-builder-runner = "3.0.0"
+substrate-wasm-builder = "3.0.0"
 
 [features]
 default = ["std"]
