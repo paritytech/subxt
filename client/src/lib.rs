@@ -317,7 +317,7 @@ mod tests {
     use substrate_subxt::{
         balances::TransferCallExt,
         ClientBuilder,
-        KusamaRuntime as NodeTemplateRuntime,
+        NodeTemplateRuntime,
         PairSigner,
     };
     use tempdir::TempDir;
