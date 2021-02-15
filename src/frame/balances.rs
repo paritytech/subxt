@@ -271,7 +271,7 @@ mod tests {
     async fn test_transfer_error() {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let alice_addr= alice.account_id().clone().into();
+        let alice_addr = alice.account_id().clone().into();
         let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
         let hans_address = hans.account_id().clone().into();
         let (client, _) = test_client().await;

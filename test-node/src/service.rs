@@ -54,23 +54,36 @@ type FullClient = sc_service::TFullClient<Block, RuntimeApi, Executor>;
 type FullBackend = sc_service::TFullBackend<Block>;
 type FullSelectChain = sc_consensus::LongestChain<FullBackend, Block>;
 
-pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponents<
-    FullClient, FullBackend, FullSelectChain,
-    sp_consensus::DefaultImportQueue<Block, FullClient>,
-    sc_transaction_pool::FullPool<Block, FullClient>,
-    (
-        sc_consensus_aura::AuraBlockImport<
-            Block,
-            FullClient,
-            sc_finality_grandpa::GrandpaBlockImport<FullBackend, Block, FullClient, FullSelectChain>,
-            AuraPair
-        >,
-        sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
-    )
->, ServiceError> {
+pub fn new_partial(
+    config: &Configuration,
+) -> Result<
+    sc_service::PartialComponents<
+        FullClient,
+        FullBackend,
+        FullSelectChain,
+        sp_consensus::DefaultImportQueue<Block, FullClient>,
+        sc_transaction_pool::FullPool<Block, FullClient>,
+        (
+            sc_consensus_aura::AuraBlockImport<
+                Block,
+                FullClient,
+                sc_finality_grandpa::GrandpaBlockImport<
+                    FullBackend,
+                    Block,
+                    FullClient,
+                    FullSelectChain,
+                >,
+                AuraPair,
+            >,
+            sc_finality_grandpa::LinkHalf<Block, FullClient, FullSelectChain>,
+        ),
+    >,
+    ServiceError,
+> {
     if config.keystore_remote.is_some() {
-        return Err(ServiceError::Other(
-            format!("Remote Keystores are not supported.")))
+        return Err(ServiceError::Other(format!(
+            "Remote Keystores are not supported."
+        )))
     }
     let inherent_data_providers = sp_inherents::InherentDataProviders::new();
 
@@ -89,11 +102,14 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
     );
 
     let (grandpa_block_import, grandpa_link) = sc_finality_grandpa::block_import(
-        client.clone(), &(client.clone() as Arc<_>), select_chain.clone(),
+        client.clone(),
+        &(client.clone() as Arc<_>),
+        select_chain.clone(),
     )?;
 
     let aura_block_import = sc_consensus_aura::AuraBlockImport::<_, _, _, AuraPair>::new(
-        grandpa_block_import.clone(), client.clone(),
+        grandpa_block_import.clone(),
+        client.clone(),
     );
 
     let import_queue = sc_consensus_aura::import_queue::<_, _, _, AuraPair, _, _>(
@@ -121,7 +137,9 @@ pub fn new_partial(config: &Configuration) -> Result<sc_service::PartialComponen
 }
 
 /// Builds a new service for a full client.
-pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError> {
+pub fn new_full(
+    mut config: Configuration,
+) -> Result<(TaskManager, RpcHandlers), ServiceError> {
     let PartialComponents {
         client,
         backend,
@@ -134,7 +152,10 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
         other: (block_import, grandpa_link),
     } = new_partial(&config)?;
 
-    config.network.extra_sets.push(sc_finality_grandpa::grandpa_peers_set_config());
+    config
+        .network
+        .extra_sets
+        .push(sc_finality_grandpa::grandpa_peers_set_config());
 
     let (network, network_status_sinks, system_rpc_tx, network_starter) =
         sc_service::build_network(sc_service::BuildNetworkParams {
@@ -149,7 +170,11 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
 
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
-            &config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
+            &config,
+            backend.clone(),
+            task_manager.spawn_handle(),
+            client.clone(),
+            network.clone(),
         );
     }
 
@@ -162,8 +187,8 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
 
     let rpc_extensions_builder = Box::new(|_, _| ());
 
-    let (rpc_handlers, telemetry_connection_notifier) = sc_service::spawn_tasks(
-        sc_service::SpawnTasksParams {
+    let (rpc_handlers, telemetry_connection_notifier) =
+        sc_service::spawn_tasks(sc_service::SpawnTasksParams {
             network: network.clone(),
             client: client.clone(),
             keystore: keystore_container.sync_keystore(),
@@ -176,8 +201,7 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
             network_status_sinks,
             system_rpc_tx,
             config,
-        },
-    )?;
+        })?;
 
     if role.is_authority() {
         let proposer = sc_basic_authorship::ProposerFactory::new(
@@ -190,7 +214,7 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
         let can_author_with =
             sp_consensus::CanAuthorWithNativeVersion::new(client.executor().clone());
 
-        let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _,_>(
+        let aura = sc_consensus_aura::start_aura::<_, _, _, _, _, AuraPair, _, _, _, _>(
             sc_consensus_aura::slot_duration(&*client)?,
             client.clone(),
             select_chain,
@@ -206,7 +230,9 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
 
         // the AURA authoring task is considered essential, i.e. if it
         // fails we take down the service with it.
-        task_manager.spawn_essential_handle().spawn_blocking("aura", aura);
+        task_manager
+            .spawn_essential_handle()
+            .spawn_blocking("aura", aura);
     }
 
     // if the node isn't actively participating in consensus then it doesn't
@@ -218,7 +244,6 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
     };
 
     let grandpa_config = sc_finality_grandpa::Config {
-        // FIXME #1578 make this available through chainspec
         gossip_duration: Duration::from_millis(333),
         justification_period: 512,
         name: Some(name),
@@ -238,7 +263,8 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
             config: grandpa_config,
             link: grandpa_link,
             network,
-            telemetry_on_connect: telemetry_connection_notifier.map(|x| x.on_connect_stream()),
+            telemetry_on_connect: telemetry_connection_notifier
+                .map(|x| x.on_connect_stream()),
             voting_rule: sc_finality_grandpa::VotingRulesBuilder::default().build(),
             prometheus_registry,
             shared_voter_state: SharedVoterState::empty(),
@@ -248,7 +274,7 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
         // if it fails we take down the service with it.
         task_manager.spawn_essential_handle().spawn_blocking(
             "grandpa-voter",
-            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?
+            sc_finality_grandpa::run_grandpa_voter(grandpa_config)?,
         );
     }
 
@@ -257,11 +283,16 @@ pub fn new_full(mut config: Configuration) -> Result<(TaskManager, RpcHandlers),
 }
 
 /// Builds a new service for a light client.
-pub fn new_light(mut config: Configuration) -> Result<(TaskManager, RpcHandlers), ServiceError> {
+pub fn new_light(
+    mut config: Configuration,
+) -> Result<(TaskManager, RpcHandlers), ServiceError> {
     let (client, backend, keystore_container, mut task_manager, on_demand) =
         sc_service::new_light_parts::<Block, RuntimeApi, Executor>(&config)?;
 
-    config.network.extra_sets.push(sc_finality_grandpa::grandpa_peers_set_config());
+    config
+        .network
+        .extra_sets
+        .push(sc_finality_grandpa::grandpa_peers_set_config());
 
     let select_chain = sc_consensus::LongestChain::new(backend.clone());
 
@@ -308,7 +339,11 @@ pub fn new_light(mut config: Configuration) -> Result<(TaskManager, RpcHandlers)
 
     if config.offchain_worker.enabled {
         sc_service::build_offchain_workers(
-            &config, backend.clone(), task_manager.spawn_handle(), client.clone(), network.clone(),
+            &config,
+            backend.clone(),
+            task_manager.spawn_handle(),
+            client.clone(),
+            network.clone(),
         );
     }
 

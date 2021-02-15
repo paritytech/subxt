@@ -49,11 +49,19 @@ pub use sc_service::{
     },
     Error as ServiceError,
 };
-use sc_service::{config::{
-    NetworkConfiguration,
-    TaskType,
-    TelemetryEndpoints,
-}, ChainSpec, Configuration, RpcHandlers, RpcSession, TaskManager, KeepBlocks};
+use sc_service::{
+    config::{
+        NetworkConfiguration,
+        TaskType,
+        TelemetryEndpoints,
+    },
+    ChainSpec,
+    Configuration,
+    KeepBlocks,
+    RpcHandlers,
+    RpcSession,
+    TaskManager,
+};
 use std::{
     future::Future,
     pin::Pin,
