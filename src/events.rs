@@ -179,7 +179,7 @@ impl<T: Runtime + System> EventsDecoder<T> {
                 Err(err) => return Err(err),
             };
 
-            if event_errors.len() == 0 {
+            if event_errors.is_empty() {
                 r.push((phase.clone(), raw));
             }
 
