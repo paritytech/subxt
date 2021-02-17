@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -105,6 +105,12 @@ pub enum RuntimeError {
     /// Module error.
     #[error("Runtime module error: {0}")]
     Module(ModuleError),
+    /// At least one consumer is remaining so the account cannot be destroyed.
+    #[error("At least one consumer is remaining so the account cannot be destroyed.")]
+    ConsumerRemaining,
+    /// There are no providers so the account cannot be created.
+    #[error("There are no providers so the account cannot be created.")]
+    NoProviders,
     /// Bad origin.
     #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
     BadOrigin,
@@ -137,6 +143,8 @@ impl RuntimeError {
             }
             DispatchError::BadOrigin => Ok(Self::BadOrigin),
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
+            DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
+            DispatchError::NoProviders => Ok(Self::NoProviders),
             DispatchError::Other(msg) => Ok(Self::Other(msg.into())),
         }
     }

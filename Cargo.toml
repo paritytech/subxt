@@ -32,30 +32,33 @@ num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.119", features = ["derive"] }
 serde_json = "1.0.61"
 url = "2.2.0"
-codec = { package = "parity-scale-codec", version = "1.3.6", default-features = false, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive", "full"] }
+# temporarily pinning funty via codec -> bitvec until https://github.com/myrrlyn/funty/issues/3
+# and https://github.com/bitvecto-rs/bitvec/issues/105 are resolved
+funty = "=1.1.0"
 dyn-clone = "1.0.4"
 
-frame-metadata = "12.0.1"
-frame-support = "2.0.1"
-sp-runtime = "2.0.1"
-sp-version = "2.0.1"
-pallet-indices = "2.0.1"
+frame-metadata = "13.0.0"
+frame-support = "3.0.0"
+sp-runtime = "3.0.0"
+sp-version = "3.0.0"
+pallet-indices = "3.0.0"
 hex = "0.4.2"
-sp-std = "2.0.1"
-application-crypto = { version = "2.0.1", package = "sp-application-crypto" }
-pallet-staking = "2.0.1"
+sp-std = "3.0.0"
+application-crypto = { version = "3.0.0", package = "sp-application-crypto" }
+pallet-staking = "3.0.0"
 
-sp-rpc = { version = "2.0.1", package = "sp-rpc" }
-sp-core = { version = "2.0.1", package = "sp-core" }
+sp-rpc = { version = "3.0.0", package = "sp-rpc" }
+sp-core = { version = "3.0.0", package = "sp-core" }
 substrate-subxt-client = { version = "0.6.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.14.0", path = "proc-macro" }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
 env_logger = "0.8.2"
-frame-system = "2.0.1"
-pallet-balances = "2.0.1"
-sp-keyring = "2.0.1"
+frame-system = "3.0.0"
+pallet-balances = "3.0.0"
+sp-keyring = "3.0.0"
 substrate-subxt-client = { version = "0.6.0", path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
