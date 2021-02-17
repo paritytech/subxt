@@ -186,7 +186,7 @@ impl System for DefaultNodeRuntime {
     type Hash = sp_core::H256;
     type Hashing = BlakeTwo256;
     type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
-    type Address = pallet_indices::address::Address<Self::AccountId, u32>;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
     type Extrinsic = OpaqueExtrinsic;
     type AccountData = AccountData<<Self as Balances>::Balance>;
@@ -225,7 +225,7 @@ impl System for NodeTemplateRuntime {
     type Hash = sp_core::H256;
     type Hashing = BlakeTwo256;
     type AccountId = <<MultiSignature as Verify>::Signer as IdentifyAccount>::AccountId;
-    type Address = Self::AccountId;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
     type Header = Header<Self::BlockNumber, BlakeTwo256>;
     type Extrinsic = OpaqueExtrinsic;
     type AccountData = AccountData<<Self as Balances>::Balance>;

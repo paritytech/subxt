@@ -57,6 +57,7 @@ use sc_service::{
     },
     ChainSpec,
     Configuration,
+    KeepBlocks,
     RpcHandlers,
     RpcSession,
     TaskManager,
@@ -232,7 +233,6 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             enable_mdns: true,
             allow_private_ipv4: true,
             wasm_external_transport: None,
-            use_yamux_flow_control: true,
         };
         let telemetry_endpoints = if let Some(port) = self.telemetry {
             let endpoints = TelemetryEndpoints::new(vec![(
@@ -265,13 +265,17 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             telemetry_endpoints,
 
             telemetry_external_transport: Default::default(),
+            telemetry_handle: Default::default(),
+            telemetry_span: Default::default(),
             default_heap_pages: Default::default(),
             disable_grandpa: Default::default(),
+            disable_log_reloading: Default::default(),
             execution_strategies: Default::default(),
             force_authoring: Default::default(),
+            keep_blocks: KeepBlocks::All,
+            keystore_remote: Default::default(),
             offchain_worker: Default::default(),
             prometheus_config: Default::default(),
-            pruning: Default::default(),
             rpc_cors: Default::default(),
             rpc_http: Default::default(),
             rpc_ipc: Default::default(),
@@ -286,6 +290,9 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             wasm_method: Default::default(),
             base_path: Default::default(),
             informant_output_format: Default::default(),
+            state_pruning: Default::default(),
+            transaction_storage: sc_client_db::TransactionStorageMode::BlockBody,
+            wasm_runtime_overrides: Default::default(),
         };
 
         log::info!("{}", service_config.impl_name);
@@ -310,7 +317,7 @@ mod tests {
     use substrate_subxt::{
         balances::TransferCallExt,
         ClientBuilder,
-        KusamaRuntime as NodeTemplateRuntime,
+        NodeTemplateRuntime,
         PairSigner,
     };
     use tempdir::TempDir;
