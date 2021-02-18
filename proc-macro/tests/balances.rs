@@ -30,10 +30,7 @@ use substrate_subxt::{
         MaybeSerialize,
         Member,
     },
-    system::{
-        System,
-        SystemEventsDecoder,
-    },
+    system::System,
     ClientBuilder,
     KusamaRuntime,
     PairSigner,

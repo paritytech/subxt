@@ -36,6 +36,7 @@ codec = { package = "parity-scale-codec", version = "2.0.0", default-features = 
 # temporarily pinning funty via codec -> bitvec until https://github.com/myrrlyn/funty/issues/3
 # and https://github.com/bitvecto-rs/bitvec/issues/105 are resolved
 funty = "=1.1.0"
+dyn-clone = "1.0.4"
 
 frame-metadata = "13.0.0"
 frame-support = "3.0.0"

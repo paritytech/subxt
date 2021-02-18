@@ -17,10 +17,7 @@
 //! Implements support for the frame_sudo module.
 
 use crate::{
-    frame::system::{
-        System,
-        SystemEventsDecoder,
-    },
+    frame::system::System,
     Encoded,
 };
 use codec::Encode;

@@ -17,14 +17,8 @@
 //! Implements support for the pallet_contracts module.
 
 use crate::frame::{
-    balances::{
-        Balances,
-        BalancesEventsDecoder,
-    },
-    system::{
-        System,
-        SystemEventsDecoder,
-    },
+    balances::Balances,
+    system::System,
 };
 use codec::{
     Decode,

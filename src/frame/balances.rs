@@ -16,10 +16,7 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::system::{
-    System,
-    SystemEventsDecoder,
-};
+use crate::frame::system::System;
 use codec::{
     Decode,
     Encode,
@@ -159,7 +156,6 @@ mod tests {
             ModuleError,
             RuntimeError,
         },
-        events::EventsDecoder,
         extrinsic::{
             PairSigner,
             Signer,
@@ -301,9 +297,8 @@ mod tests {
         let bob_addr = bob.clone().into();
         let (client, _) = test_client().await;
         let sub = client.subscribe_events().await.unwrap();
-        let mut decoder = EventsDecoder::<TestRuntime>::new(client.metadata().clone());
-        decoder.with_balances();
-        let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
+        let decoder = client.events_decoder();
+        let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
         sub.filter_event::<TransferEvent<_>>();
         client.transfer(&alice, &bob_addr, 10_000).await.unwrap();
         let raw = sub.next().await.unwrap().unwrap();

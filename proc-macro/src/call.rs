@@ -32,10 +32,6 @@ pub fn call(s: Structure) -> TokenStream {
     let generics = &s.ast().generics;
     let params = utils::type_params(generics);
     let module = utils::module_name(generics);
-    let with_module = format_ident!(
-        "with_{}",
-        utils::path_to_ident(module).to_string().to_snake_case()
-    );
     let call_name = utils::ident_to_name(ident, "Call").to_snake_case();
     let bindings = utils::bindings(&s);
     let fields = utils::fields(&bindings);
@@ -51,11 +47,6 @@ pub fn call(s: Structure) -> TokenStream {
         impl#generics #subxt::Call<T> for #ident<#(#params),*> {
             const MODULE: &'static str = MODULE;
             const FUNCTION: &'static str = #call_name;
-            fn events_decoder(
-                decoder: &mut #subxt::EventsDecoder<T>,
-            ) {
-                decoder.#with_module();
-            }
         }
 
         /// Call extension trait.
@@ -118,11 +109,6 @@ mod tests {
             impl<'a, T: Balances> substrate_subxt::Call<T> for TransferCall<'a, T> {
                 const MODULE: &'static str = MODULE;
                 const FUNCTION: &'static str = "transfer";
-                fn events_decoder(
-                    decoder: &mut substrate_subxt::EventsDecoder<T>,
-                ) {
-                    decoder.with_balances();
-                }
             }
 
             /// Call extension trait.

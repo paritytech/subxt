@@ -57,6 +57,13 @@ pub enum Error {
     /// Metadata error.
     #[error("Metadata error: {0}")]
     Metadata(#[from] MetadataError),
+    /// Unregistered type sizes.
+    #[error(
+        "The following types do not have a type size registered: \
+            {0:?} \
+         Use `ClientBuilder::register_type_size` to register missing type sizes."
+    )]
+    MissingTypeSizes(Vec<String>),
     /// Type size unavailable.
     #[error("Type size unavailable while decoding event: {0:?}")]
     TypeSizeUnavailable(String),
