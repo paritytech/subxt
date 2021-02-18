@@ -289,6 +289,10 @@ impl<T: Runtime> EventTypeRegistry<T> {
     }
 
     /// Register a type.
+    ///
+    /// # Panics
+    ///
+    /// If there is already a type size registered with this name.
     pub fn register_type_size<U>(&mut self, name: &str)
     where
         U: Codec + Send + Sync + 'static,
