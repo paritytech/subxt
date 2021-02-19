@@ -657,6 +657,7 @@ mod tests {
             chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(key),
             telemetry: None,
+            wasm_method: Default::default(),
         };
         let client = ClientBuilder::new()
             .set_client(
