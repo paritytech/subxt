@@ -54,6 +54,7 @@ use sc_service::{
         NetworkConfiguration,
         TaskType,
         TelemetryEndpoints,
+        WasmExecutionMethod,
     },
     ChainSpec,
     Configuration,
@@ -217,6 +218,8 @@ pub struct SubxtClientConfig<C: ChainSpec + 'static> {
     pub role: Role,
     /// Enable telemetry on the given port.
     pub telemetry: Option<u16>,
+    /// Wasm execution method
+    pub wasm_method: WasmExecutionMethod,
 }
 
 impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
@@ -287,7 +290,7 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             tracing_receiver: Default::default(),
             tracing_targets: Default::default(),
             transaction_pool: Default::default(),
-            wasm_method: Default::default(),
+            wasm_method: self.wasm_method,
             base_path: Default::default(),
             informant_output_format: Default::default(),
             state_pruning: Default::default(),
@@ -362,6 +365,7 @@ mod tests {
             chain_spec,
             role: Role::Light,
             telemetry: None,
+            wasm_method: Default::default(),
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
@@ -395,6 +399,7 @@ mod tests {
             chain_spec: test_node::chain_spec::development_config().unwrap(),
             role: Role::Authority(AccountKeyring::Alice),
             telemetry: None,
+            wasm_method: Default::default(),
         };
         let client = ClientBuilder::<NodeTemplateRuntime>::new()
             .set_client(
