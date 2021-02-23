@@ -174,7 +174,7 @@ impl<T: Runtime> ClientBuilder<T> {
     ///
     /// *WARNING* can lead to runtime errors if receiving events with unknown types.
     pub fn skip_type_sizes_check(mut self) -> Self {
-        self.skip_type_sizes_check = false;
+        self.skip_type_sizes_check = true;
         self
     }
 
