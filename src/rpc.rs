@@ -30,8 +30,14 @@ use core::{
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee_types::{
-    jsonrpc::{to_value as to_json_value, Params},
-    traits::{Client, SubscriptionClient}
+    jsonrpc::{
+        to_value as to_json_value,
+        Params,
+    },
+    traits::{
+        Client,
+        SubscriptionClient,
+    },
 };
 use jsonrpsee_ws_client::{
     WsClient,
