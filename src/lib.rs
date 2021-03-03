@@ -615,7 +615,7 @@ impl codec::Encode for Encoded {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, feature = "integration-tests"))]
 mod tests {
     use super::*;
     use sp_core::storage::{
@@ -623,12 +623,6 @@ mod tests {
         StorageKey,
     };
     use sp_keyring::AccountKeyring;
-    use substrate_subxt_client::{
-        DatabaseConfig,
-        KeystoreConfig,
-        Role,
-        SubxtClient,
-    };
     use tempdir::TempDir;
 
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
@@ -638,9 +632,7 @@ mod tests {
     ) -> (Client<TestRuntime>, TempDir) {
         env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
-        // NOTE: A local node must be running
         let client = ClientBuilder::new()
-            .set_url("ws://127.0.0.1:9944")
             .set_page_size(3)
             .build()
             .await
