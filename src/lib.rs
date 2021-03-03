@@ -43,9 +43,6 @@
 #[macro_use]
 extern crate substrate_subxt_proc_macro;
 
-// #[cfg(feature = "client")]
-// pub use substrate_subxt_client as client;
-
 pub use sp_core;
 pub use sp_runtime;
 
@@ -54,6 +51,10 @@ use codec::{
     Decode,
 };
 use futures::future;
+use jsonrpsee_http_client::{
+    HttpClient,
+    HttpConfig,
+};
 use jsonrpsee_ws_client::{
     WsClient,
     WsConfig,
@@ -69,7 +70,10 @@ use sp_core::{
 };
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    sync::Arc,
+};
 
 mod error;
 mod events;
@@ -102,6 +106,7 @@ pub use crate::{
         BlockNumber,
         ExtrinsicSuccess,
         ReadProof,
+        RpcClient,
         SystemProperties,
     },
     runtimes::*,
@@ -124,7 +129,6 @@ use crate::{
 #[derive(Default)]
 pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
-    client: Option<WsClient>,
     page_size: Option<u32>,
     event_type_registry: EventTypeRegistry<T>,
     skip_type_sizes_check: bool,
@@ -135,7 +139,6 @@ impl<T: Runtime> ClientBuilder<T> {
     pub fn new() -> Self {
         Self {
             url: None,
-            client: None,
             page_size: None,
             event_type_registry: EventTypeRegistry::new(),
             skip_type_sizes_check: false,
@@ -178,11 +181,12 @@ impl<T: Runtime> ClientBuilder<T> {
 
     /// Creates a new Client.
     pub async fn build<'a>(self) -> Result<Client<T>, Error> {
-        let client = if let Some(client) = self.client {
-            client
+        let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
+        let client = if url.starts_with("ws://") || url.starts_with("wss://") {
+            RpcClient::WebSocket(WsClient::new(WsConfig::with_url(&url)).await?)
         } else {
-            let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            WsClient::new(WsConfig::with_url(&url)).await?
+            let client = HttpClient::new(url, HttpConfig::default())?;
+            RpcClient::Http(Arc::new(client))
         };
         let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
@@ -624,7 +628,6 @@ mod tests {
         KeystoreConfig,
         Role,
         SubxtClient,
-        SubxtClientConfig,
     };
     use tempdir::TempDir;
 
@@ -635,29 +638,9 @@ mod tests {
     ) -> (Client<TestRuntime>, TempDir) {
         env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
-        let config = SubxtClientConfig {
-            impl_name: "substrate-subxt-full-client",
-            impl_version: "0.0.1",
-            author: "substrate subxt",
-            copyright_start_year: 2020,
-            db: DatabaseConfig::RocksDb {
-                path: tmp.path().join("db"),
-                cache_size: 128,
-            },
-            keystore: KeystoreConfig::Path {
-                path: tmp.path().join("keystore"),
-                password: None,
-            },
-            chain_spec: test_node::chain_spec::development_config().unwrap(),
-            role: Role::Authority(key),
-            telemetry: None,
-            wasm_method: Default::default(),
-        };
+        // NOTE: A local node must be running
         let client = ClientBuilder::new()
-            .set_embedded_client(
-                SubxtClient::from_config(config, test_node::service::new_full)
-                    .expect("Error creating subxt client"),
-            )
+            .set_url("ws://127.0.0.1:9944")
             .set_page_size(3)
             .build()
             .await

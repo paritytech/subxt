@@ -19,6 +19,8 @@
 // Related: https://github.com/paritytech/substrate-subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
+use std::sync::Arc;
+
 use codec::{
     Decode,
     Encode,
@@ -29,9 +31,12 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
+use jsonrpsee_http_client::HttpClient;
 use jsonrpsee_types::{
+    error::Error as RpcError,
     jsonrpc::{
         to_value as to_json_value,
+        DeserializeOwned,
         Params,
     },
     traits::{
@@ -148,6 +153,54 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
+/// Rpc client wrapper.
+/// This is workaround because adding generic types causes the macros to fail.
+#[derive(Clone)]
+pub enum RpcClient {
+    /// JSONRPC client over WebSocket transport.
+    WebSocket(WsClient),
+    /// JSONRPC client HTTP transport.
+    // NOTE: Arc because `HttpClient` is not clone.
+    Http(Arc<HttpClient>),
+}
+
+impl RpcClient {
+    async fn request<T: DeserializeOwned>(
+        &self,
+        method: &str,
+        params: Params,
+    ) -> Result<T, Error> {
+        match self {
+            Self::WebSocket(inner) => {
+                inner.request(method, params).await.map_err(Into::into)
+            }
+            Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
+        }
+    }
+
+    async fn subscribe<T: DeserializeOwned>(
+        &self,
+        subscribe_method: &str,
+        params: Params,
+        unsubscribe_method: &str,
+    ) -> Result<Subscription<T>, Error> {
+        match self {
+            Self::WebSocket(inner) => {
+                inner
+                    .subscribe(subscribe_method, params, unsubscribe_method)
+                    .await
+                    .map_err(Into::into)
+            }
+            Self::Http(_) => {
+                Err(RpcError::Custom(
+                    "Subscriptions not supported on HTTP transport".to_owned(),
+                )
+                .into())
+            }
+        }
+    }
+}
+
 /// ReadProof struct returned by the RPC
 ///
 /// # Note
@@ -165,7 +218,7 @@ pub struct ReadProof<Hash> {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Runtime> {
-    client: WsClient,
+    client: RpcClient,
     marker: PhantomData<T>,
 }
 
@@ -179,7 +232,7 @@ impl<T: Runtime> Clone for Rpc<T> {
 }
 
 impl<T: Runtime> Rpc<T> {
-    pub fn new(client: WsClient) -> Self {
+    pub fn new(client: RpcClient) -> Self {
         Self {
             client,
             marker: PhantomData,
