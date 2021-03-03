@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -29,9 +29,9 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_types::jsonrpc::{
-    to_value as to_json_value,
-    Params,
+use jsonrpsee_types::{
+    jsonrpc::{to_value as to_json_value, Params},
+    traits::{Client, SubscriptionClient}
 };
 use jsonrpsee_ws_client::{
     WsClient,
@@ -423,10 +423,10 @@ impl<T: Runtime> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic<E: Encode + 'static>(
+    pub async fn submit_and_watch_extrinsic<'a, E: Encode + 'static>(
         &self,
         extrinsic: E,
-        decoder: EventsDecoder<T>,
+        decoder: &'a EventsDecoder<T>,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
         let ext_hash = T::Hashing::hash_of(&extrinsic);
         log::info!("Submitting Extrinsic `{:?}`", ext_hash);
@@ -465,7 +465,7 @@ impl<T: Runtime> Rpc<T> {
                                         ext_hash,
                                     ))
                                 })?;
-                            let mut sub = EventSubscription::new(events_sub, decoder);
+                            let mut sub = EventSubscription::new(events_sub, &decoder);
                             sub.filter_extrinsic(block_hash, ext_index);
                             let mut events = vec![];
                             while let Some(event) = sub.next().await {

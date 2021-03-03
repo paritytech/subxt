@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -62,8 +62,8 @@ fn ignore(attrs: &[syn::Attribute]) -> bool {
     false
 }
 
-fn events_decoder_trait_name(module: &syn::Ident) -> syn::Ident {
-    format_ident!("{}EventsDecoder", module.to_string())
+fn event_type_registry_trait_name(module: &syn::Ident) -> syn::Ident {
+    format_ident!("{}EventTypeRegistry", module.to_string())
 }
 
 fn with_module_ident(module: &syn::Ident) -> syn::Ident {
@@ -128,20 +128,9 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
     let subxt = utils::use_crate("substrate-subxt");
     let module = &input.ident;
     let module_name = module.to_string();
-    let module_events_decoder = events_decoder_trait_name(module);
+    let module_events_type_registry = event_type_registry_trait_name(module);
     let with_module = with_module_ident(module);
 
-    let bounds = input.supertraits.iter().filter_map(|bound| {
-        if let syn::TypeParamBound::Trait(syn::TraitBound { path, .. }) = bound {
-            let module = utils::path_to_ident(path);
-            let with_module = with_module_ident(module);
-            Some(quote! {
-                self.#with_module();
-            })
-        } else {
-            None
-        }
-    });
     let associated_types = input.items.iter().filter_map(|item| {
         if let syn::TraitItem::Type(ty) = item {
             if ignore(&ty.attrs) {
@@ -168,17 +157,16 @@ pub fn module(_args: TokenStream, tokens: TokenStream) -> TokenStream {
 
         const MODULE: &str = #module_name;
 
-        /// `EventsDecoder` extension trait.
-        pub trait #module_events_decoder {
+        /// `EventTypeRegistry` extension trait.
+        pub trait #module_events_type_registry {
             /// Registers this modules types.
             fn #with_module(&mut self);
         }
 
-        impl<T: #module> #module_events_decoder for
-            #subxt::EventsDecoder<T>
+        impl<T: #module + #subxt::Runtime> #module_events_type_registry for
+            #subxt::EventTypeRegistry<T>
         {
             fn #with_module(&mut self) {
-                #(#bounds)*
                 #(#associated_types)*
                 #(#types)*
             }
@@ -221,17 +209,16 @@ mod tests {
 
             const MODULE: &str = "Balances";
 
-            /// `EventsDecoder` extension trait.
-            pub trait BalancesEventsDecoder {
+            /// `EventTypeRegistry` extension trait.
+            pub trait BalancesEventTypeRegistry {
                 /// Registers this modules types.
                 fn with_balances(&mut self);
             }
 
-            impl<T: Balances> BalancesEventsDecoder for
-                substrate_subxt::EventsDecoder<T>
+            impl<T: Balances + substrate_subxt::Runtime> BalancesEventTypeRegistry for
+                substrate_subxt::EventTypeRegistry<T>
             {
                 fn with_balances(&mut self) {
-                    self.with_system();
                     self.register_type_size::<T::Balance>("Balance");
                 }
             }
@@ -262,17 +249,16 @@ mod tests {
 
             const MODULE: &str = "Herd";
 
-            /// `EventsDecoder` extension trait.
-            pub trait HerdEventsDecoder {
+            /// `EventTypeRegistry` extension trait.
+            pub trait HerdEventTypeRegistry {
                 /// Registers this modules types.
                 fn with_herd(&mut self);
             }
 
-            impl<T: Herd> HerdEventsDecoder for
-                substrate_subxt::EventsDecoder<T>
+            impl<T: Herd + substrate_subxt::Runtime> HerdEventTypeRegistry for
+                substrate_subxt::EventTypeRegistry<T>
             {
                 fn with_herd(&mut self) {
-                    self.with_husbandry();
                     self.register_type_size::<T::Hoves>("Hoves");
                     self.register_type_size::<T::Wool>("Wool");
                 }

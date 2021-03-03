@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -16,12 +16,9 @@
 
 //! Implements support for built-in runtime modules.
 
-use crate::{
-    events::EventsDecoder,
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
+use crate::metadata::{
+    Metadata,
+    MetadataError,
 };
 use codec::{
     Decode,
@@ -63,8 +60,6 @@ pub trait Call<T>: Encode {
     const MODULE: &'static str;
     /// Function name.
     const FUNCTION: &'static str;
-    /// Load event decoder.
-    fn events_decoder(_decoder: &mut EventsDecoder<T>) {}
 }
 
 /// Event trait.

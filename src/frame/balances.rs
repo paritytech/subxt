@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -16,10 +16,7 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::system::{
-    System,
-    SystemEventsDecoder,
-};
+use crate::frame::system::System;
 use codec::{
     Decode,
     Encode,
@@ -159,7 +156,6 @@ mod tests {
             ModuleError,
             RuntimeError,
         },
-        events::EventsDecoder,
         extrinsic::{
             PairSigner,
             Signer,
@@ -182,13 +178,14 @@ mod tests {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+        let bob_address = bob.account_id().clone().into();
         let (client, _) = test_client().await;
 
         let alice_pre = client.account(alice.account_id(), None).await.unwrap();
         let bob_pre = client.account(bob.account_id(), None).await.unwrap();
 
         let event = client
-            .transfer_and_watch(&alice, &bob.account_id(), 10_000)
+            .transfer_and_watch(&alice, &bob_address, 10_000)
             .await
             .expect("sending an xt works")
             .transfer()
@@ -269,15 +266,17 @@ mod tests {
     #[async_std::test]
     async fn test_transfer_error() {
         env_logger::try_init().ok();
-        let alice = PairSigner::new(AccountKeyring::Alice.pair());
-        let hans = PairSigner::new(Pair::generate().0);
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let alice_addr = alice.account_id().clone().into();
+        let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
+        let hans_address = hans.account_id().clone().into();
         let (client, _) = test_client().await;
         client
-            .transfer_and_watch(&alice, hans.account_id(), 100_000_000_000)
+            .transfer_and_watch(&alice, &hans_address, 100_000_000_000)
             .await
             .unwrap();
         let res = client
-            .transfer_and_watch(&hans, alice.account_id(), 100_000_000_000)
+            .transfer_and_watch(&hans, &alice_addr, 100_000_000_000)
             .await;
         if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
             let error2 = ModuleError {
@@ -293,15 +292,15 @@ mod tests {
     #[async_std::test]
     async fn test_transfer_subscription() {
         env_logger::try_init().ok();
-        let alice = PairSigner::new(AccountKeyring::Alice.pair());
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = AccountKeyring::Bob.to_account_id();
+        let bob_addr = bob.clone().into();
         let (client, _) = test_client().await;
         let sub = client.subscribe_events().await.unwrap();
-        let mut decoder = EventsDecoder::<TestRuntime>::new(client.metadata().clone());
-        decoder.with_balances();
-        let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
+        let decoder = client.events_decoder();
+        let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
         sub.filter_event::<TransferEvent<_>>();
-        client.transfer(&alice, &bob, 10_000).await.unwrap();
+        client.transfer(&alice, &bob_addr, 10_000).await.unwrap();
         let raw = sub.next().await.unwrap().unwrap();
         let event = TransferEvent::<TestRuntime>::decode(&mut &raw.data[..]).unwrap();
         assert_eq!(

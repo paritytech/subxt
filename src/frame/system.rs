@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -127,7 +127,10 @@ pub struct AccountInfo<T: System> {
     pub nonce: T::Index,
     /// The number of other modules that currently depend on this account's existence. The account
     /// cannot be reaped until this is zero.
-    pub refcount: RefCount,
+    pub consumers: RefCount,
+    /// The number of other modules that allow this account to exist. The account may not be reaped
+    /// until this is zero.
+    pub providers: RefCount,
     /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
     /// chains.
     pub data: T::AccountData,

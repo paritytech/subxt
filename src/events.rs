@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -22,14 +22,17 @@ use codec::{
     Input,
     Output,
 };
-use frame_support::dispatch::DispatchInfo;
+use dyn_clone::DynClone;
 use sp_runtime::{
     DispatchError,
     DispatchResult,
 };
 use std::{
     collections::{
-        HashMap,
+        hash_map::{
+            Entry,
+            HashMap,
+        },
         HashSet,
     },
     fmt,
@@ -49,6 +52,7 @@ use crate::{
         Metadata,
     },
     Phase,
+    Runtime,
     System,
 };
 
@@ -72,16 +76,18 @@ impl std::fmt::Debug for RawEvent {
     }
 }
 
-trait TypeSegmenter: Send {
+pub trait TypeSegmenter: DynClone + Send + Sync {
     /// Consumes an object from an input stream, and output the serialized bytes.
     fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error>;
 }
 
-#[derive(Default)]
+// derive object safe Clone impl for `Box<dyn TypeSegmenter>`
+dyn_clone::clone_trait_object!(TypeSegmenter);
+
 struct TypeMarker<T>(PhantomData<T>);
 impl<T> TypeSegmenter for TypeMarker<T>
 where
-    T: Codec + Send,
+    T: Codec + Send + Sync,
 {
     fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error> {
         T::decode(input).map_err(Error::from)?.encode_to(output);
@@ -89,158 +95,41 @@ where
     }
 }
 
+impl<T> Clone for TypeMarker<T> {
+    fn clone(&self) -> Self {
+        Self(Default::default())
+    }
+}
+
+impl<T> Default for TypeMarker<T> {
+    fn default() -> Self {
+        Self(Default::default())
+    }
+}
+
 /// Events decoder.
+#[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
-    type_segmenters: HashMap<String, Box<dyn TypeSegmenter>>,
-    marker: PhantomData<fn() -> T>,
+    event_type_registry: EventTypeRegistry<T>,
 }
 
-impl<T> fmt::Debug for EventsDecoder<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EventsDecoder<T>")
-            .field("metadata", &self.metadata)
-            .field(
-                "type_segmenters",
-                &self.type_segmenters.keys().cloned().collect::<String>(),
-            )
-            .finish()
+impl<T> Clone for EventsDecoder<T> {
+    fn clone(&self) -> Self {
+        Self {
+            metadata: self.metadata.clone(),
+            event_type_registry: self.event_type_registry.clone(),
+        }
     }
 }
 
-impl<T: System> EventsDecoder<T> {
+impl<T: Runtime + System> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
-    pub fn new(metadata: Metadata) -> Self {
-        let mut decoder = Self {
+    pub fn new(metadata: Metadata, event_type_registry: EventTypeRegistry<T>) -> Self {
+        Self {
             metadata,
-            type_segmenters: HashMap::new(),
-            marker: PhantomData,
-        };
-        // register default event arg type sizes for dynamic decoding of events
-        decoder.register_type_size::<()>("PhantomData");
-        decoder.register_type_size::<DispatchInfo>("DispatchInfo");
-        decoder.register_type_size::<bool>("bool");
-        decoder.register_type_size::<u32>("ReferendumIndex");
-        decoder.register_type_size::<[u8; 16]>("Kind");
-        decoder.register_type_size::<[u8; 32]>("AuthorityId");
-        decoder.register_type_size::<u8>("u8");
-        decoder.register_type_size::<u32>("u32");
-        decoder.register_type_size::<u64>("u64");
-        decoder.register_type_size::<u128>("u128");
-        decoder.register_type_size::<u32>("AccountIndex");
-        decoder.register_type_size::<u32>("SessionIndex");
-        decoder.register_type_size::<u32>("PropIndex");
-        decoder.register_type_size::<u32>("ProposalIndex");
-        decoder.register_type_size::<u32>("AuthorityIndex");
-        decoder.register_type_size::<u64>("AuthorityWeight");
-        decoder.register_type_size::<u32>("MemberCount");
-        decoder.register_type_size::<T::AccountId>("AccountId");
-        decoder.register_type_size::<T::BlockNumber>("BlockNumber");
-        decoder.register_type_size::<T::Hash>("Hash");
-        decoder.register_type_size::<u8>("VoteThreshold");
-        // Additional types
-        decoder.register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
-        decoder
-    }
-
-    /// Register a type.
-    pub fn register_type_size<U>(&mut self, name: &str) -> usize
-    where
-        U: Default + Codec + Send + 'static,
-    {
-        let size = U::default().encode().len();
-        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns the serialized
-        // type to the output stream (&mut Vec<u8>).
-        self.type_segmenters
-            .insert(name.to_string(), Box::new(TypeMarker::<U>::default()));
-        size
-    }
-
-    /// Check missing type sizes.
-    pub fn check_missing_type_sizes(&self) {
-        let mut missing = HashSet::new();
-        for module in self.metadata.modules_with_events() {
-            for event in module.events() {
-                for arg in event.arguments() {
-                    for primitive in arg.primitives() {
-                        if !self.type_segmenters.contains_key(&primitive) {
-                            missing.insert(format!(
-                                "{}::{}::{}",
-                                module.name(),
-                                event.name,
-                                primitive
-                            ));
-                        }
-                    }
-                }
-            }
+            event_type_registry,
         }
-        if !missing.is_empty() {
-            log::warn!(
-                "The following primitive types do not have registered sizes: {:?} \
-                If any of these events are received, an error will occur since we cannot decode them",
-                missing
-            );
-        }
-    }
-
-    fn decode_raw_bytes<W: Output>(
-        &self,
-        args: &[EventArg],
-        input: &mut &[u8],
-        output: &mut W,
-        errors: &mut Vec<RuntimeError>,
-    ) -> Result<(), Error> {
-        for arg in args {
-            match arg {
-                EventArg::Vec(arg) => {
-                    let len = <Compact<u32>>::decode(input)?;
-                    len.encode_to(output);
-                    for _ in 0..len.0 {
-                        self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-                    }
-                }
-                EventArg::Option(arg) => {
-                    match input.read_byte()? {
-                        0 => output.push_byte(0),
-                        1 => {
-                            output.push_byte(1);
-                            self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-                        }
-                        _ => {
-                            return Err(Error::Other(
-                                "unexpected first byte decoding Option".into(),
-                            ))
-                        }
-                    }
-                }
-                EventArg::Tuple(args) => {
-                    self.decode_raw_bytes(args, input, output, errors)?
-                }
-                EventArg::Primitive(name) => {
-                    let result = match name.as_str() {
-                        "DispatchResult" => DispatchResult::decode(input)?,
-                        "DispatchError" => Err(DispatchError::decode(input)?),
-                        _ => {
-                            if let Some(seg) = self.type_segmenters.get(name) {
-                                let mut buf = Vec::<u8>::new();
-                                seg.segment(input, &mut buf)?;
-                                output.write(&buf);
-                                Ok(())
-                            } else {
-                                return Err(Error::TypeSizeUnavailable(name.to_owned()))
-                            }
-                        }
-                    };
-                    if let Err(error) = result {
-                        // since the input may contain any number of args we propagate
-                        // runtime errors to the caller for handling
-                        errors.push(RuntimeError::from_dispatch(&self.metadata, error)?);
-                    }
-                }
-            }
-        }
-        Ok(())
     }
 
     /// Decode events.
@@ -290,7 +179,7 @@ impl<T: System> EventsDecoder<T> {
                 Err(err) => return Err(err),
             };
 
-            if event_errors.len() == 0 {
+            if event_errors.is_empty() {
                 r.push((phase.clone(), raw));
             }
 
@@ -299,6 +188,156 @@ impl<T: System> EventsDecoder<T> {
             }
         }
         Ok(r)
+    }
+
+    fn decode_raw_bytes<W: Output>(
+        &self,
+        args: &[EventArg],
+        input: &mut &[u8],
+        output: &mut W,
+        errors: &mut Vec<RuntimeError>,
+    ) -> Result<(), Error> {
+        for arg in args {
+            match arg {
+                EventArg::Vec(arg) => {
+                    let len = <Compact<u32>>::decode(input)?;
+                    len.encode_to(output);
+                    for _ in 0..len.0 {
+                        self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
+                    }
+                }
+                EventArg::Option(arg) => {
+                    match input.read_byte()? {
+                        0 => output.push_byte(0),
+                        1 => {
+                            output.push_byte(1);
+                            self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
+                        }
+                        _ => {
+                            return Err(Error::Other(
+                                "unexpected first byte decoding Option".into(),
+                            ))
+                        }
+                    }
+                }
+                EventArg::Tuple(args) => {
+                    self.decode_raw_bytes(args, input, output, errors)?
+                }
+                EventArg::Primitive(name) => {
+                    let result = match name.as_str() {
+                        "DispatchResult" => DispatchResult::decode(input)?,
+                        "DispatchError" => Err(DispatchError::decode(input)?),
+                        _ => {
+                            if let Some(seg) = self.event_type_registry.resolve(name) {
+                                let mut buf = Vec::<u8>::new();
+                                seg.segment(input, &mut buf)?;
+                                output.write(&buf);
+                                Ok(())
+                            } else {
+                                return Err(Error::TypeSizeUnavailable(name.to_owned()))
+                            }
+                        }
+                    };
+                    if let Err(error) = result {
+                        // since the input may contain any number of args we propagate
+                        // runtime errors to the caller for handling
+                        errors.push(RuntimeError::from_dispatch(&self.metadata, error)?);
+                    }
+                }
+            }
+        }
+        Ok(())
+    }
+}
+
+/// Registry for event types which cannot be directly inferred from the metadata.
+#[derive(Default)]
+pub struct EventTypeRegistry<T> {
+    segmenters: HashMap<String, Box<dyn TypeSegmenter>>,
+    marker: PhantomData<fn() -> T>,
+}
+
+impl<T> Clone for EventTypeRegistry<T> {
+    fn clone(&self) -> Self {
+        Self {
+            segmenters: self.segmenters.clone(),
+            marker: PhantomData,
+        }
+    }
+}
+
+impl<T> fmt::Debug for EventTypeRegistry<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("EventTypeRegistry")
+            .field(
+                "segmenters",
+                &self.segmenters.keys().cloned().collect::<String>(),
+            )
+            .finish()
+    }
+}
+
+impl<T: Runtime> EventTypeRegistry<T> {
+    /// Create a new [`EventTypeRegistry`].
+    pub fn new() -> Self {
+        let mut registry = Self {
+            segmenters: HashMap::new(),
+            marker: PhantomData,
+        };
+        T::register_type_sizes(&mut registry);
+        registry
+    }
+
+    /// Register a type.
+    ///
+    /// # Panics
+    ///
+    /// If there is already a type size registered with this name.
+    pub fn register_type_size<U>(&mut self, name: &str)
+    where
+        U: Codec + Send + Sync + 'static,
+    {
+        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns te serialized
+        // type to the output stream (&mut Vec<u8>).
+        match self.segmenters.entry(name.to_string()) {
+            Entry::Occupied(_) => panic!("Already a type registered with key {}", name),
+            Entry::Vacant(entry) => entry.insert(Box::new(TypeMarker::<U>::default())),
+        };
+    }
+
+    /// Check missing type sizes.
+    pub fn check_missing_type_sizes(
+        &self,
+        metadata: &Metadata,
+    ) -> Result<(), HashSet<String>> {
+        let mut missing = HashSet::new();
+        for module in metadata.modules_with_events() {
+            for event in module.events() {
+                for arg in event.arguments() {
+                    for primitive in arg.primitives() {
+                        if !self.segmenters.contains_key(&primitive) {
+                            missing.insert(format!(
+                                "{}::{}::{}",
+                                module.name(),
+                                event.name,
+                                primitive
+                            ));
+                        }
+                    }
+                }
+            }
+        }
+
+        if !missing.is_empty() {
+            Err(missing)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Resolve a segmenter for a type by its name.
+    pub fn resolve(&self, name: &str) -> Option<&Box<dyn TypeSegmenter>> {
+        self.segmenters.get(name)
     }
 }
 
@@ -331,7 +370,10 @@ mod tests {
 
     #[test]
     fn test_decode_option() {
-        let decoder = EventsDecoder::<TestRuntime>::new(Metadata::default());
+        let decoder = EventsDecoder::<TestRuntime>::new(
+            Metadata::default(),
+            EventTypeRegistry::new(),
+        );
 
         let value = Some(0u8);
         let input = value.encode();
@@ -419,6 +461,7 @@ mod tests {
                 }),
             ))
             .unwrap(),
+            EventTypeRegistry::new(),
         );
 
         // [(ApplyExtrinsic(0), Event(RawEvent { module: "System", variant: "ExtrinsicSuccess", data: "482d7c09000000000200" })), (ApplyExtrinsic(1), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" }))), (ApplyExtrinsic(2), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" })))]

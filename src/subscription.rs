@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -34,9 +34,9 @@ use crate::{
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<T: Runtime> {
+pub struct EventSubscription<'a, T: Runtime> {
     subscription: Subscription<StorageChangeSet<T::Hash>>,
-    decoder: EventsDecoder<T>,
+    decoder: &'a EventsDecoder<T>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
@@ -44,11 +44,11 @@ pub struct EventSubscription<T: Runtime> {
     finished: bool,
 }
 
-impl<T: Runtime> EventSubscription<T> {
+impl<'a, T: Runtime> EventSubscription<'a, T> {
     /// Creates a new event subscription.
     pub fn new(
         subscription: Subscription<StorageChangeSet<T::Hash>>,
-        decoder: EventsDecoder<T>,
+        decoder: &'a EventsDecoder<T>,
     ) -> Self {
         Self {
             subscription,

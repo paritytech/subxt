@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -30,10 +30,7 @@ use substrate_subxt::{
         MaybeSerialize,
         Member,
     },
-    system::{
-        System,
-        SystemEventsDecoder,
-    },
+    system::System,
     ClientBuilder,
     KusamaRuntime,
     PairSigner,
