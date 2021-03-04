@@ -129,6 +129,7 @@ use crate::{
 #[derive(Default)]
 pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
+    client: Option<RpcClient>,
     page_size: Option<u32>,
     event_type_registry: EventTypeRegistry<T>,
     skip_type_sizes_check: bool,
@@ -139,10 +140,17 @@ impl<T: Runtime> ClientBuilder<T> {
     pub fn new() -> Self {
         Self {
             url: None,
+            client: None,
             page_size: None,
             event_type_registry: EventTypeRegistry::new(),
             skip_type_sizes_check: false,
         }
+    }
+
+    /// Sets the jsonrpsee client.
+    pub fn set_client<C: Into<RpcClient>>(mut self, client: C) -> Self {
+        self.client = Some(client.into());
+        self
     }
 
     /// Set the substrate rpc address.
@@ -181,12 +189,16 @@ impl<T: Runtime> ClientBuilder<T> {
 
     /// Creates a new Client.
     pub async fn build<'a>(self) -> Result<Client<T>, Error> {
-        let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-        let client = if url.starts_with("ws://") || url.starts_with("wss://") {
-            RpcClient::WebSocket(WsClient::new(WsConfig::with_url(&url)).await?)
+        let client = if let Some(client) = self.client {
+            client
         } else {
-            let client = HttpClient::new(url, HttpConfig::default())?;
-            RpcClient::Http(Arc::new(client))
+            let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
+            if url.starts_with("ws://") || url.starts_with("wss://") {
+                RpcClient::WebSocket(WsClient::new(WsConfig::with_url(&url)).await?)
+            } else {
+                let client = HttpClient::new(url, HttpConfig::default())?;
+                RpcClient::Http(Arc::new(client))
+            }
         };
         let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
@@ -630,9 +642,13 @@ mod tests {
     pub(crate) async fn test_client_with(
         key: AccountKeyring,
     ) -> (Client<TestRuntime>, TempDir) {
+        let rpc = WsClient::new(WsConfig::with_url("ws://127.0.0.1:9944"))
+            .await
+            .unwrap();
         env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
         let client = ClientBuilder::new()
+            .set_client(rpc)
             .set_page_size(3)
             .build()
             .await

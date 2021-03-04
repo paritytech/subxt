@@ -201,6 +201,18 @@ impl RpcClient {
     }
 }
 
+impl From<WsClient> for RpcClient {
+    fn from(client: WsClient) -> Self {
+        RpcClient::WebSocket(client)
+    }
+}
+
+impl From<HttpClient> for RpcClient {
+    fn from(client: HttpClient) -> Self {
+        RpcClient::Http(Arc::new(client))
+    }
+}
+
 /// ReadProof struct returned by the RPC
 ///
 /// # Note
