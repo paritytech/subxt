@@ -157,7 +157,7 @@ pub enum TransactionStatus<Hash, BlockHash> {
 /// This is workaround because adding generic types causes the macros to fail.
 #[derive(Clone)]
 pub enum RpcClient {
-    /// JSONRPC client over WebSocket transport.
+    /// JSONRPC client WebSocket transport.
     WebSocket(WsClient),
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
