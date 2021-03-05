@@ -46,6 +46,7 @@ pub use sc_service::{
     config::{
         DatabaseConfig,
         KeystoreConfig,
+        WasmExecutionMethod,
     },
     Error as ServiceError,
 };
@@ -54,7 +55,6 @@ use sc_service::{
         NetworkConfiguration,
         TaskType,
         TelemetryEndpoints,
-        WasmExecutionMethod,
     },
     ChainSpec,
     Configuration,
