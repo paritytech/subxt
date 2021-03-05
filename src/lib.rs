@@ -627,7 +627,7 @@ impl codec::Encode for Encoded {
     }
 }
 
-#[cfg(all(test, feature = "integration-tests"))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use sp_core::storage::{
@@ -635,6 +635,13 @@ mod tests {
         StorageKey,
     };
     use sp_keyring::AccountKeyring;
+    use substrate_subxt_client::{
+        DatabaseConfig,
+        KeystoreConfig,
+        Role,
+        SubxtClient,
+        SubxtClientConfig,
+    };
     use tempdir::TempDir;
 
     pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
@@ -642,20 +649,37 @@ mod tests {
     pub(crate) async fn test_client_with(
         key: AccountKeyring,
     ) -> (Client<TestRuntime>, TempDir) {
-        let rpc = WsClient::new(WsConfig::with_url("ws://127.0.0.1:9944"))
-            .await
-            .unwrap();
         env_logger::try_init().ok();
         let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
+        let config = SubxtClientConfig {
+            impl_name: "substrate-subxt-full-client",
+            impl_version: "0.0.1",
+            author: "substrate subxt",
+            copyright_start_year: 2020,
+            db: DatabaseConfig::RocksDb {
+                path: tmp.path().join("db"),
+                cache_size: 128,
+            },
+            keystore: KeystoreConfig::Path {
+                path: tmp.path().join("keystore"),
+                password: None,
+            },
+            chain_spec: test_node::chain_spec::development_config().unwrap(),
+            role: Role::Authority(key),
+            telemetry: None,
+            wasm_method: Default::default(),
+        };
         let client = ClientBuilder::new()
-            .set_client(rpc)
+            .set_client(
+                SubxtClient::from_config(config, test_node::service::new_full)
+                    .expect("Error creating subxt client"),
+            )
             .set_page_size(3)
             .build()
             .await
             .expect("Error creating client");
         (client, tmp)
     }
-
     pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
         test_client_with(AccountKeyring::Alice).await
     }

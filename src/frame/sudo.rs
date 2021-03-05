@@ -51,7 +51,7 @@ pub struct SudoUncheckedWeightCall<'a, T: Sudo> {
     pub weight: Weight,
 }
 
-#[cfg(all(test, feature = "integration-tests"))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::{
