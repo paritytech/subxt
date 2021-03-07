@@ -147,7 +147,7 @@ pub struct TransferEvent<T: Balances> {
     pub amount: T::Balance,
 }
 
-#[cfg(all(test, feature = "integration-tests"))]
+#[cfg(test)]
 mod tests {
     use super::*;
     use crate::{

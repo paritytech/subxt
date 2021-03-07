@@ -18,9 +18,7 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
 [features]
 default = []
-
-# enable this feature to run tests which require a local dev chain node
-integration-tests = []
+client = ["substrate-subxt-client"]
 
 [dependencies]
 log = "0.4.13"
@@ -51,7 +49,7 @@ pallet-staking = "3.0.0"
 
 sp-rpc = { version = "3.0.0", package = "sp-rpc" }
 sp-core = { version = "3.0.0", package = "sp-core" }
-substrate-subxt-client = { version = "0.6.0", path = "client", optional = true }
+substrate-subxt-client = { path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.14.0", path = "proc-macro" }
 
 [dev-dependencies]
@@ -60,7 +58,7 @@ env_logger = "0.8.2"
 frame-system = "3.0.0"
 pallet-balances = "3.0.0"
 sp-keyring = "3.0.0"
-substrate-subxt-client = { version = "0.6.0", path = "client" }
+substrate-subxt-client = { path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"
