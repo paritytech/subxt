@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use jsonrpsee_types::error::Error as RpcError;
 use jsonrpsee_ws_client::WsSubscription as Subscription;
 use sp_core::storage::StorageChangeSet;
 use std::collections::VecDeque;
@@ -88,7 +89,11 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
             }
             let change_set = match self.subscription.next().await {
                 Some(c) => c,
-                None => return Some(Err(Error::Other("Subscription dropped".into()))),
+                None => {
+                    return Some(Err(
+                        RpcError::Custom("RPC subscription dropped".into()).into()
+                    ))
+                }
             };
             if let Some(hash) = self.block.as_ref() {
                 if &change_set.block == hash {

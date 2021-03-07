@@ -590,7 +590,7 @@ impl<T: Runtime> Rpc<T> {
                 }
             }
         }
-        Err("Subscription stream dropped; RPC client buffer full or RPC client terminated".into())
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
     /// Insert a key into the keystore.
