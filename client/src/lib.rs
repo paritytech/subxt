@@ -39,8 +39,8 @@ use jsonrpsee_types::{
         Subscription,
     },
     error::Error as JsonRpseeError,
-    jsonrpc,
     jsonrpc::{
+        self,
         Call,
         DeserializeOwned,
         Id,
@@ -188,6 +188,9 @@ impl SubxtClient {
                                             Output::Success(_) => {
                                                 Ok((
                                                     send_back_sub,
+                                                    // NOTE: The ID is used to unsubscribe to specific subscription
+                                                    // which the `SubxtClient` doesn't support so hardcoding it to `0`
+                                                    // is fine.
                                                     SubscriptionId::Num(0),
                                                 ))
                                             }
@@ -225,7 +228,7 @@ impl SubxtClient {
                             }
 
                             FrontToBack::SubscriptionClosed(_) => {
-                                // TODO: implement
+                                // NOTE: unsubscriptions are not supported by SubxtClient.
                             }
                         }
                     }
