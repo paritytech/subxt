@@ -78,6 +78,8 @@ use sc_service::{
 use std::marker::PhantomData;
 use thiserror::Error;
 
+const DEFAULT_CHANNEL_SIZE: usize = 16;
+
 /// Error thrown by the client.
 #[derive(Debug, Error)]
 pub enum SubxtClientError {
@@ -98,13 +100,13 @@ pub struct SubxtClient {
 impl SubxtClient {
     /// Create a new client.
     pub fn new(mut task_manager: TaskManager, rpc: RpcHandlers) -> Self {
-        let (to_back, from_front) = mpsc::channel(4);
+        let (to_back, from_front) = mpsc::channel(DEFAULT_CHANNEL_SIZE);
 
         task::spawn(
             select(
                 Box::pin(from_front.for_each(move |message: FrontToBack| {
                     let rpc = rpc.clone();
-                    let (to_front, from_back) = mpsc01::channel(4);
+                    let (to_front, from_back) = mpsc01::channel(DEFAULT_CHANNEL_SIZE);
                     let session = RpcSession::new(to_front.clone());
                     async move {
                         match message {
@@ -173,7 +175,7 @@ impl SubxtClient {
                                     }));
 
                                 let (mut send_front_sub, send_back_sub) =
-                                    mpsc::channel(4);
+                                    mpsc::channel(DEFAULT_CHANNEL_SIZE);
                                 if let Ok(message) = serde_json::to_string(&request) {
                                     if let Some(response) =
                                         rpc.rpc_query(&session, &message).await
