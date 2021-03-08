@@ -43,9 +43,6 @@
 #[macro_use]
 extern crate substrate_subxt_proc_macro;
 
-#[cfg(feature = "client")]
-pub use substrate_subxt_client as client;
-
 pub use sp_core;
 pub use sp_runtime;
 
@@ -54,7 +51,15 @@ use codec::{
     Decode,
 };
 use futures::future;
-use jsonrpsee::client::Subscription;
+use jsonrpsee_http_client::{
+    HttpClient,
+    HttpConfig,
+};
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsConfig,
+    WsSubscription as Subscription,
+};
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -65,7 +70,10 @@ use sp_core::{
 };
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    sync::Arc,
+};
 
 mod error;
 mod events;
@@ -98,6 +106,7 @@ pub use crate::{
         BlockNumber,
         ExtrinsicSuccess,
         ReadProof,
+        RpcClient,
         SystemProperties,
     },
     runtimes::*,
@@ -120,7 +129,7 @@ use crate::{
 #[derive(Default)]
 pub struct ClientBuilder<T: Runtime> {
     url: Option<String>,
-    client: Option<jsonrpsee::Client>,
+    client: Option<RpcClient>,
     page_size: Option<u32>,
     event_type_registry: EventTypeRegistry<T>,
     skip_type_sizes_check: bool,
@@ -139,7 +148,7 @@ impl<T: Runtime> ClientBuilder<T> {
     }
 
     /// Sets the jsonrpsee client.
-    pub fn set_client<P: Into<jsonrpsee::Client>>(mut self, client: P) -> Self {
+    pub fn set_client<C: Into<RpcClient>>(mut self, client: C) -> Self {
         self.client = Some(client.into());
         self
     }
@@ -185,9 +194,13 @@ impl<T: Runtime> ClientBuilder<T> {
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             if url.starts_with("ws://") || url.starts_with("wss://") {
-                jsonrpsee::ws_client(url).await?
+                let mut config = WsConfig::with_url(&url);
+                // max notifs per subscription capacity.
+                config.max_subscription_capacity = 4096;
+                RpcClient::WebSocket(WsClient::new(WsConfig::with_url(&url)).await?)
             } else {
-                jsonrpsee::http_client(url)
+                let client = HttpClient::new(url, HttpConfig::default())?;
+                RpcClient::Http(Arc::new(client))
             }
         };
         let rpc = Rpc::new(client);
@@ -670,7 +683,6 @@ mod tests {
             .expect("Error creating client");
         (client, tmp)
     }
-
     pub(crate) async fn test_client() -> (Client<TestRuntime>, TempDir) {
         test_client_with(AccountKeyring::Alice).await
     }
@@ -681,7 +693,7 @@ mod tests {
         let (client, _tmp) = test_client_with(AccountKeyring::Bob).await;
         let mut blocks = client.subscribe_blocks().await.unwrap();
         // get the genesis block.
-        assert_eq!(blocks.next().await.number, 0);
+        assert_eq!(blocks.next().await.unwrap().number, 0);
         let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
         client
             .insert_key(
@@ -696,7 +708,7 @@ mod tests {
             .await
             .unwrap());
         // Alice is an authority, so blocks should be produced.
-        assert_eq!(blocks.next().await.number, 1);
+        assert_eq!(blocks.next().await.unwrap().number, 1);
     }
 
     #[async_std::test]

@@ -20,14 +20,13 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 default = []
 client = ["substrate-subxt-client"]
 
-# enable this feature to run tests which require a local dev chain node
-integration-tests = []
-
 [dependencies]
 log = "0.4.13"
 thiserror = "1.0.23"
 futures = "0.3.10"
-jsonrpsee = { version = "0.1.0", features = ["ws"] }
+jsonrpsee-types = "0.2.0-alpha"
+jsonrpsee-ws-client = "0.2.0-alpha"
+jsonrpsee-http-client = "0.2.0-alpha"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.119", features = ["derive"] }
 serde_json = "1.0.61"
@@ -50,7 +49,7 @@ pallet-staking = "3.0.0"
 
 sp-rpc = { version = "3.0.0", package = "sp-rpc" }
 sp-core = { version = "3.0.0", package = "sp-core" }
-substrate-subxt-client = { version = "0.6.0", path = "client", optional = true }
+substrate-subxt-client = { path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.14.0", path = "proc-macro" }
 
 [dev-dependencies]
@@ -59,7 +58,7 @@ env_logger = "0.8.2"
 frame-system = "3.0.0"
 pallet-balances = "3.0.0"
 sp-keyring = "3.0.0"
-substrate-subxt-client = { version = "0.6.0", path = "client" }
+substrate-subxt-client = { path = "client" }
 tempdir = "0.3.7"
 test-node = { path = "test-node" }
 wabt = "0.10.0"

@@ -19,6 +19,8 @@
 // Related: https://github.com/paritytech/substrate-subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
+use std::sync::Arc;
+
 use codec::{
     Decode,
     Encode,
@@ -29,13 +31,22 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee::{
-    client::Subscription,
-    common::{
+use jsonrpsee_http_client::HttpClient;
+use jsonrpsee_types::{
+    error::Error as RpcError,
+    jsonrpc::{
         to_value as to_json_value,
+        DeserializeOwned,
         Params,
     },
-    Client,
+    traits::{
+        Client,
+        SubscriptionClient,
+    },
+};
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsSubscription as Subscription,
 };
 use serde::{
     Deserialize,
@@ -142,6 +153,88 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
+#[cfg(any(feature = "client", test))]
+use substrate_subxt_client::SubxtClient;
+
+/// Rpc client wrapper.
+/// This is workaround because adding generic types causes the macros to fail.
+#[derive(Clone)]
+pub enum RpcClient {
+    /// JSONRPC client WebSocket transport.
+    WebSocket(WsClient),
+    /// JSONRPC client HTTP transport.
+    // NOTE: Arc because `HttpClient` is not clone.
+    Http(Arc<HttpClient>),
+    #[cfg(any(feature = "client", test))]
+    /// Embedded substrate node.
+    Subxt(SubxtClient),
+}
+
+impl RpcClient {
+    async fn request<T: DeserializeOwned>(
+        &self,
+        method: &str,
+        params: Params,
+    ) -> Result<T, Error> {
+        match self {
+            Self::WebSocket(inner) => {
+                inner.request(method, params).await.map_err(Into::into)
+            }
+            Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
+            #[cfg(any(feature = "client", test))]
+            Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
+        }
+    }
+
+    async fn subscribe<T: DeserializeOwned>(
+        &self,
+        subscribe_method: &str,
+        params: Params,
+        unsubscribe_method: &str,
+    ) -> Result<Subscription<T>, Error> {
+        match self {
+            Self::WebSocket(inner) => {
+                inner
+                    .subscribe(subscribe_method, params, unsubscribe_method)
+                    .await
+                    .map_err(Into::into)
+            }
+            Self::Http(_) => {
+                Err(RpcError::Custom(
+                    "Subscriptions not supported on HTTP transport".to_owned(),
+                )
+                .into())
+            }
+            #[cfg(any(feature = "client", test))]
+            Self::Subxt(inner) => {
+                inner
+                    .subscribe(subscribe_method, params, unsubscribe_method)
+                    .await
+                    .map_err(Into::into)
+            }
+        }
+    }
+}
+
+impl From<WsClient> for RpcClient {
+    fn from(client: WsClient) -> Self {
+        RpcClient::WebSocket(client)
+    }
+}
+
+impl From<HttpClient> for RpcClient {
+    fn from(client: HttpClient) -> Self {
+        RpcClient::Http(Arc::new(client))
+    }
+}
+
+#[cfg(any(feature = "client", test))]
+impl From<SubxtClient> for RpcClient {
+    fn from(client: SubxtClient) -> Self {
+        RpcClient::Subxt(client)
+    }
+}
+
 /// ReadProof struct returned by the RPC
 ///
 /// # Note
@@ -159,7 +252,7 @@ pub struct ReadProof<Hash> {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Runtime> {
-    client: Client,
+    client: RpcClient,
     marker: PhantomData<T>,
 }
 
@@ -173,7 +266,7 @@ impl<T: Runtime> Clone for Rpc<T> {
 }
 
 impl<T: Runtime> Rpc<T> {
-    pub fn new(client: Client) -> Self {
+    pub fn new(client: RpcClient) -> Self {
         Self {
             client,
             marker: PhantomData,
@@ -434,7 +527,7 @@ impl<T: Runtime> Rpc<T> {
         let events_sub = self.subscribe_events().await?;
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-        while let status = xt_sub.next().await {
+        while let Some(status) = xt_sub.next().await {
             // log::info!("received status {:?}", status);
             match status {
                 // ignore in progress extrinsic for now
@@ -497,7 +590,7 @@ impl<T: Runtime> Rpc<T> {
                 }
             }
         }
-        unreachable!()
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
     /// Insert a key into the keystore.
