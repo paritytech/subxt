@@ -171,7 +171,7 @@ pub enum RpcClient {
 }
 
 impl RpcClient {
-    async fn request<T: DeserializeOwned>(
+    pub async fn request<T: DeserializeOwned>(
         &self,
         method: &str,
         params: Params,
@@ -186,7 +186,7 @@ impl RpcClient {
         }
     }
 
-    async fn subscribe<T: DeserializeOwned>(
+    pub async fn subscribe<T: DeserializeOwned>(
         &self,
         subscribe_method: &str,
         params: Params,
