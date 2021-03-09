@@ -253,7 +253,7 @@ pub struct DefaultExtra<T: System> {
     genesis_hash: T::Hash,
 }
 
-impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
+impl<T: System + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
     for DefaultExtra<T>
 {
     type Extra = (
@@ -263,7 +263,6 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
         CheckEra<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        ChargeTransactionPayment<T>,
     );
 
     fn new(
@@ -288,12 +287,11 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtra<T>
             CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeTransactionPayment(<T as Balances>::Balance::default()),
         )
     }
 }
 
-impl<T: System + Balances + Clone + Debug + Eq + Send + Sync> SignedExtension
+impl<T: System + Clone + Debug + Eq + Send + Sync> SignedExtension
     for DefaultExtra<T>
 {
     const IDENTIFIER: &'static str = "DefaultExtra";

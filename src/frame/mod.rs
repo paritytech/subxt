@@ -33,6 +33,29 @@ pub mod staking;
 pub mod sudo;
 pub mod system;
 
+/// XXX
+pub mod cash {
+    use core::marker::PhantomData;
+    use codec::Encode;
+
+    /// XXX
+    #[module]
+    pub trait Cash {
+
+    }
+
+    /// XXX
+    #[derive(Clone, Debug, PartialEq, Call, Encode)]
+    pub struct PostPriceCall<T: Cash> {
+        /// XXX
+        pub payload: Vec<u8>,
+        /// XXX
+        pub signature: Vec<u8>,
+        /// XXX
+        pub _runtime: PhantomData<T>,
+    }
+}
+
 /// Store trait.
 pub trait Store<T>: Encode {
     /// Module name.

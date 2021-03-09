@@ -127,13 +127,10 @@ pub struct AccountInfo<T: System> {
     pub nonce: T::Index,
     /// The number of other modules that currently depend on this account's existence. The account
     /// cannot be reaped until this is zero.
-    pub consumers: RefCount,
-    /// The number of other modules that allow this account to exist. The account may not be reaped
-    /// until this is zero.
-    pub providers: RefCount,
-    /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
-    /// chains.
-    pub data: T::AccountData,
+    pub refcount: RefCount,
+    ///// The additional data that belongs to this account. Used to store the balance(s) in a lot of
+    ///// chains.
+    //pub data: T::AccountData,
 }
 
 /// Account field of the `System` module.

@@ -45,14 +45,11 @@ macro_rules! default_impl {
     };
 }
 
-type IdentificationTuple<T> = (
-    <T as Session>::ValidatorId,
-    pallet_staking::Exposure<<T as System>::AccountId, <T as Balances>::Balance>,
-);
+type IdentificationTuple<T> = (<T as Session>::ValidatorId, );
 
 /// The trait needed for this module.
 #[module]
-pub trait Session: System + Balances {
+pub trait Session: System {
     #![event_alias(IdentificationTuple = IdentificationTuple<T>)]
     #![event_alias(OpaqueTimeSlot = Vec<u8>)]
     #![event_alias(SessionIndex = u32)]

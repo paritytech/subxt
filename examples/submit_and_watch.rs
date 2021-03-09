@@ -16,13 +16,13 @@
 
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
-    balances::{
-        TransferCallExt,
-        TransferEventExt,
-    },
     ClientBuilder,
     DefaultNodeRuntime,
     PairSigner,
+};
+use substrate_subxt::cash::{
+    PostPriceCall,
+    PostPriceCallExt,
 };
 
 #[async_std::main]
@@ -30,15 +30,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
-    let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let result = client.transfer_and_watch(&signer, &dest, 10_000).await?;
-
-    if let Some(event) = result.transfer()? {
-        println!("Balance transfer success: value: {:?}", event.amount);
-    } else {
-        println!("Failed to find Balances::Transfer Event");
-    }
+    let client = ClientBuilder::<DefaultNodeRuntime>::new().skip_type_sizes_check().build().await?;
+    let result = client.post_price_and_watch(&signer, vec![], vec![]).await?;
+    println!("Result: {:?}", result);
     Ok(())
 }
