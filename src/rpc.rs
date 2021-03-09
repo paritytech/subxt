@@ -171,6 +171,7 @@ pub enum RpcClient {
 }
 
 impl RpcClient {
+    /// Start a JSON-RPC request.
     pub async fn request<T: DeserializeOwned>(
         &self,
         method: &str,
@@ -186,6 +187,7 @@ impl RpcClient {
         }
     }
 
+    /// Start a JSON-RPC Subscription.
     pub async fn subscribe<T: DeserializeOwned>(
         &self,
         subscribe_method: &str,
