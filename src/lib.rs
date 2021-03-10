@@ -110,7 +110,11 @@ pub use crate::{
         SystemProperties,
     },
     runtimes::*,
-    subscription::*,
+    subscription::{
+        EventStorageSubscription,
+        EventSubscription,
+        FinalizedEventStorageSubscription,
+    },
     substrate_subxt_proc_macro::*,
 };
 use crate::{
@@ -133,6 +137,7 @@ pub struct ClientBuilder<T: Runtime> {
     page_size: Option<u32>,
     event_type_registry: EventTypeRegistry<T>,
     skip_type_sizes_check: bool,
+    accept_weak_inclusion: bool,
 }
 
 impl<T: Runtime> ClientBuilder<T> {
@@ -144,6 +149,7 @@ impl<T: Runtime> ClientBuilder<T> {
             page_size: None,
             event_type_registry: EventTypeRegistry::new(),
             skip_type_sizes_check: false,
+            accept_weak_inclusion: false,
         }
     }
 
@@ -187,6 +193,12 @@ impl<T: Runtime> ClientBuilder<T> {
         self
     }
 
+    /// Only check that transactions are InBlock on submit.
+    pub fn accept_weak_inclusion(mut self) -> Self {
+        self.accept_weak_inclusion = true;
+        self
+    }
+
     /// Creates a new Client.
     pub async fn build<'a>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
@@ -202,7 +214,10 @@ impl<T: Runtime> ClientBuilder<T> {
                 RpcClient::Http(Arc::new(client))
             }
         };
-        let rpc = Rpc::new(client);
+        let mut rpc = Rpc::new(client);
+        if self.accept_weak_inclusion {
+            rpc.accept_weak_inclusion();
+        }
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
             rpc.metadata(),
             rpc.genesis_hash(),
@@ -466,10 +481,19 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Subscribe to events.
-    pub async fn subscribe_events(
-        &self,
-    ) -> Result<Subscription<StorageChangeSet<T::Hash>>, Error> {
+    ///
+    /// *WARNING* these may not be included in the finalized chain, use
+    /// `subscribe_finalized_events` to ensure events are finalized.
+    pub async fn subscribe_events(&self) -> Result<EventStorageSubscription<T>, Error> {
         let events = self.rpc.subscribe_events().await?;
+        Ok(events)
+    }
+
+    /// Subscribe to finalized events.
+    pub async fn subscribe_finalized_events(
+        &self,
+    ) -> Result<EventStorageSubscription<T>, Error> {
+        let events = self.rpc.subscribe_finalized_events().await?;
         Ok(events)
     }
 
