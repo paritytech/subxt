@@ -85,7 +85,11 @@ mod runtimes;
 mod subscription;
 
 pub use crate::{
-    error::Error,
+    error::{
+        Error,
+        ModuleError,
+        RuntimeError,
+    },
     events::{
         EventTypeRegistry,
         EventsDecoder,
