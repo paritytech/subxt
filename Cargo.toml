@@ -3,7 +3,7 @@ members = [".", "client", "proc-macro", "test-node"]
 
 [package]
 name = "substrate-subxt"
-version = "0.14.0"
+version = "0.15.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
@@ -50,7 +50,7 @@ pallet-staking = "3.0.0"
 sp-rpc = { version = "3.0.0", package = "sp-rpc" }
 sp-core = { version = "3.0.0", package = "sp-core" }
 substrate-subxt-client = { path = "client", optional = true }
-substrate-subxt-proc-macro = { version = "0.14.0", path = "proc-macro" }
+substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
