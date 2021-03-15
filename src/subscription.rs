@@ -95,6 +95,7 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
             if self.finished {
                 return None
             }
+            // always return None if subscription has closed
             let change_set = self.subscription.next().await?;
             if let Some(hash) = self.block.as_ref() {
                 if &change_set.block == hash {
