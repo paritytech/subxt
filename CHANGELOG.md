@@ -1,3 +1,26 @@
+# Changelog
+All notable changes to this project will be documented in this file.
+
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+
+## [Unreleased]
+
+## [0.15.0] - 2021-03-15
+
+### Added
+- implement variant of subscription that returns finalized storage changes (#237)
+- implement session handling for unsubscribe in subxt-client (#242)
+
+### Changed
+- export ModuleError and RuntimeError for downstream usage (#246)
+- rpc client methods should be public for downstream usage (#240)
+- re-export WasmExecutionMethod for downstream usage (#239)
+- integration with jsonrpsee v2 (#214)
+- expose wasm execution method on subxt client config (#230)
+- Add hooks to register event types for decoding (#227)
+- Substrate 3.0 (#232)
+
 # Version 0.14.0 (2021-02-05)
 * Refactor event type decoding and declaration [#221](https://github.com/paritytech/substrate-subxt/pull/221)
 * Add Balances Locks [#197](https://github.com/paritytech/substrate-subxt/pull/197)
