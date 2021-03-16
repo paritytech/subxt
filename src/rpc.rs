@@ -165,7 +165,7 @@ use substrate_subxt_client::SubxtClient;
 #[derive(Clone)]
 pub enum RpcClient {
     /// JSONRPC client WebSocket transport.
-    WebSocket(WsClient),
+    WebSocket(Arc<WsClient>),
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
@@ -224,7 +224,7 @@ impl RpcClient {
 
 impl From<WsClient> for RpcClient {
     fn from(client: WsClient) -> Self {
-        RpcClient::WebSocket(client)
+        RpcClient::WebSocket(Arc::new(client))
     }
 }
 
