@@ -14,9 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{Client, ClientBuilder, Runtime};
-use std::{ffi::{OsStr, OsString}, process, thread, time};
+use crate::{
+    Client,
+    ClientBuilder,
+    Runtime,
+};
 use sp_keyring::AccountKeyring;
+use std::{
+    ffi::{
+        OsStr,
+        OsString,
+    },
+    process,
+    thread,
+    time,
+};
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Runtime> {
@@ -25,8 +37,8 @@ pub struct TestNodeProcess<R: Runtime> {
 }
 
 impl<R> Drop for TestNodeProcess<R>
-    where
-        R: Runtime
+where
+    R: Runtime,
 {
     fn drop(&mut self) {
         let _ = self.kill();
@@ -35,7 +47,7 @@ impl<R> Drop for TestNodeProcess<R>
 
 impl<R> TestNodeProcess<R>
 where
-    R: Runtime
+    R: Runtime,
 {
     /// Construct a builder for spawning a test node process.
     pub fn build<S>(program: S) -> TestNodeProcessBuilder
@@ -49,12 +61,11 @@ where
     pub fn kill(&mut self) -> Result<(), String> {
         log::info!("Killing contracts node process {}", self.proc.id());
         if let Err(err) = self.proc.kill() {
-            let err =
-                format!(
-                    "Error killing contracts node process {}: {}",
-                    self.proc.id(),
-                    err
-                );
+            let err = format!(
+                "Error killing contracts node process {}: {}",
+                self.proc.id(),
+                err
+            );
             log::error!("{}", err);
             return Err(err.into())
         }
@@ -76,11 +87,11 @@ pub struct TestNodeProcessBuilder {
 impl TestNodeProcessBuilder {
     pub fn new<P>(node_path: P) -> TestNodeProcessBuilder
     where
-        P: AsRef<OsStr>
+        P: AsRef<OsStr>,
     {
         Self {
             node_path: node_path.as_ref().into(),
-            authority: None
+            authority: None,
         }
     }
 
@@ -92,14 +103,11 @@ impl TestNodeProcessBuilder {
 
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
     pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
-        where
-            R: Runtime
+    where
+        R: Runtime,
     {
         let mut cmd = process::Command::new(&self.node_path);
-        cmd
-            .env("RUST_LOG", "error")
-            .arg("--dev")
-            .arg("--tmp");
+        cmd.env("RUST_LOG", "error").arg("--dev").arg("--tmp");
 
         if let Some(authority) = self.authority {
             let authority = format!("{:?}", authority);
@@ -107,9 +115,13 @@ impl TestNodeProcessBuilder {
             cmd.arg(arg);
         }
 
-        let mut proc = cmd
-            .spawn()
-            .map_err(|e| format!("Error spawning substrate node '{}': {}", self.node_path.to_string_lossy(), e))?;
+        let mut proc = cmd.spawn().map_err(|e| {
+            format!(
+                "Error spawning substrate node '{}': {}",
+                self.node_path.to_string_lossy(),
+                e
+            )
+        })?;
         // wait for rpc to be initialized
         const MAX_ATTEMPTS: u32 = 10;
         let mut attempts = 1;
@@ -120,35 +132,29 @@ impl TestNodeProcessBuilder {
                 attempts,
                 MAX_ATTEMPTS
             );
-            let result = ClientBuilder::<R>::new()
-                .build()
-                .await;
+            let result = ClientBuilder::<R>::new().build().await;
             if let Ok(client) = result {
-                break Ok(client);
+                break Ok(client)
             }
             if attempts < MAX_ATTEMPTS {
                 attempts += 1;
-                continue;
+                continue
             }
             if let Err(err) = result {
-                break Err(err);
+                break Err(err)
             }
         };
         match client {
-            Ok(client) => Ok(TestNodeProcess {
-                proc,
-                client,
-            }),
+            Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
                 let err = format!(
                     "Failed to connect to node rpc after {} attempts: {}",
-                    attempts,
-                    err
+                    attempts, err
                 );
                 log::error!("{}", err);
-                proc
-                    .kill()
-                    .map_err(|e| format!("Error killing substrate process '{}': {}", proc.id(), e))?;
+                proc.kill().map_err(|e| {
+                    format!("Error killing substrate process '{}': {}", proc.id(), e)
+                })?;
                 Err(err.into())
             }
         }

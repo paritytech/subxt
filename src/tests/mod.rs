@@ -17,12 +17,12 @@
 mod node_proc;
 
 use super::*;
+use node_proc::TestNodeProcess;
 use sp_core::storage::{
     well_known_keys,
     StorageKey,
 };
 use sp_keyring::AccountKeyring;
-use node_proc::TestNodeProcess;
 
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
