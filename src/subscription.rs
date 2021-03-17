@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee_types::error::Error as RpcError;
 use jsonrpsee_ws_client::WsSubscription as Subscription;
 use sp_core::{
     storage::{
