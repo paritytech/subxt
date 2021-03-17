@@ -25,6 +25,8 @@ use std::{
         OsStr,
         OsString,
     },
+    net::TcpListener,
+    ops::Range,
     process,
     thread,
     time,
@@ -82,6 +84,7 @@ where
 pub struct TestNodeProcessBuilder {
     node_path: OsString,
     authority: Option<AccountKeyring>,
+    scan_port_range: Option<PortRange>
 }
 
 impl TestNodeProcessBuilder {
@@ -92,12 +95,20 @@ impl TestNodeProcessBuilder {
         Self {
             node_path: node_path.as_ref().into(),
             authority: None,
+            scan_port_range: None,
         }
     }
 
     /// Set the authority dev account for a node in validator mode e.g. --alice.
     pub fn with_authority(&mut self, account: AccountKeyring) -> &mut Self {
         self.authority = Some(account);
+        self
+    }
+
+    /// Enable port scanning to scan for open ports in the given range.
+    /// Allows multiple node instances to run at once so tests can run in parallel.
+    pub fn scan_for_open_ports(&mut self, port_range: PortRange) -> &mut Self {
+        self.scan_port_range = Some(port_range);
         self
     }
 
@@ -113,6 +124,15 @@ impl TestNodeProcessBuilder {
             let authority = format!("{:?}", authority);
             let arg = format!("--{}", authority.as_str().to_lowercase());
             cmd.arg(arg);
+        }
+
+        if let Some(ref port_range) = self.scan_port_range {
+            let (p2p_port, http_port, ws_port) = port_range.next_open()
+                .ok_or("No available ports in the given port range".to_owned())?;
+
+            cmd.arg(format!("--port={}", p2p_port));
+            cmd.arg(format!("--rpc-port={}", http_port));
+            cmd.arg(format!("--ws-port={}", ws_port));
         }
 
         let mut proc = cmd.spawn().map_err(|e| {
@@ -158,5 +178,40 @@ impl TestNodeProcessBuilder {
                 Err(err.into())
             }
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct PortRange(Range<u16>);
+
+impl PortRange {
+    /// Construct a new port range.
+    pub fn new(start: u16, end: u16) -> Self {
+        Self (start..end)
+    }
+
+    /// Returns the next set of 3 open ports in the port range.
+    ///
+    /// Returns None if there are not 3 open ports available in the range.
+    pub fn next_open(&self) -> Option<(u16, u16, u16)> {
+        let mut ports = Vec::new();
+        for port in self.0.clone() {
+            match TcpListener::bind(("127.0.0.1", port)) {
+                Ok(_) => {
+                    ports.push(port);
+                    if ports.len() == 3 {
+                        return Some((ports[0], ports[1], ports[2]))
+                    }
+                },
+                Err(_) => continue,
+            }
+        }
+        return None
+    }
+}
+
+impl Default for PortRange {
+    fn default() -> Self {
+        Self::new(9900, 10100)
     }
 }

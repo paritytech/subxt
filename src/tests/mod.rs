@@ -33,6 +33,7 @@ pub(crate) async fn test_node_process_with(
 ) -> TestNodeProcess<TestRuntime> {
     let proc = TestNodeProcess::<TestRuntime>::build(SUBSTRATE_NODE_PATH)
         .with_authority(key)
+        .scan_for_open_ports(Default::default())
         .spawn::<TestRuntime>()
         .await;
     proc.unwrap()
