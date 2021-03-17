@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "client", "proc-macro", "test-node"]
+members = [".", "client", "proc-macro", "test-node", "test-node-proc"]
 
 [package]
 name = "substrate-subxt"
