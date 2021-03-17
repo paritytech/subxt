@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::{ffi::OsStr, process, thread, time};
-use substrate_subxt::{Client, ClientBuilder, Runtime};
+use crate::{Client, ClientBuilder, Runtime};
+use std::{ffi::{OsStr, OsString}, process, thread, time};
+use sp_keyring::AccountKeyring;
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Runtime> {
@@ -24,8 +25,8 @@ pub struct TestNodeProcess<R: Runtime> {
 }
 
 impl<R> Drop for TestNodeProcess<R>
-where
-    R: Runtime
+    where
+        R: Runtime
 {
     fn drop(&mut self) {
         let _ = self.kill();
@@ -36,18 +37,79 @@ impl<R> TestNodeProcess<R>
 where
     R: Runtime
 {
-    /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
-    pub async fn spawn<S>(program: S) -> Result<Self, String>
+    /// Construct a builder for spawning a test node process.
+    pub fn build<S>(program: S) -> TestNodeProcessBuilder
     where
         S: AsRef<OsStr> + Clone,
     {
-        let bin_path = program.clone().as_ref().to_string_lossy().to_string();
-        let mut proc = process::Command::new(program)
+        TestNodeProcessBuilder::new(program)
+    }
+
+    /// Attempt to kill the running substrate process.
+    pub fn kill(&mut self) -> Result<(), String> {
+        log::info!("Killing contracts node process {}", self.proc.id());
+        if let Err(err) = self.proc.kill() {
+            let err =
+                format!(
+                    "Error killing contracts node process {}: {}",
+                    self.proc.id(),
+                    err
+                );
+            log::error!("{}", err);
+            return Err(err.into())
+        }
+        Ok(())
+    }
+
+    /// Returns the subxt client connected to the running node.
+    pub fn client(&self) -> &Client<R> {
+        &self.client
+    }
+}
+
+/// Construct a test node process.
+pub struct TestNodeProcessBuilder {
+    node_path: OsString,
+    authority: Option<AccountKeyring>,
+}
+
+impl TestNodeProcessBuilder {
+    pub fn new<P>(node_path: P) -> TestNodeProcessBuilder
+    where
+        P: AsRef<OsStr>
+    {
+        Self {
+            node_path: node_path.as_ref().into(),
+            authority: None
+        }
+    }
+
+    /// Set the authority dev account for a node in validator mode e.g. --alice.
+    pub fn with_authority(&mut self, account: AccountKeyring) -> &mut Self {
+        self.authority = Some(account);
+        self
+    }
+
+    /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
+    pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
+        where
+            R: Runtime
+    {
+        let mut cmd = process::Command::new(&self.node_path);
+        cmd
             .env("RUST_LOG", "error")
             .arg("--dev")
-            .arg("--tmp")
+            .arg("--tmp");
+
+        if let Some(authority) = self.authority {
+            let authority = format!("{:?}", authority);
+            let arg = format!("--{}", authority.as_str().to_lowercase());
+            cmd.arg(arg);
+        }
+
+        let mut proc = cmd
             .spawn()
-            .map_err(|e| format!("Error spawning substrate node '{}': {}", bin_path, e))?;
+            .map_err(|e| format!("Error spawning substrate node '{}': {}", self.node_path.to_string_lossy(), e))?;
         // wait for rpc to be initialized
         const MAX_ATTEMPTS: u32 = 10;
         let mut attempts = 1;
@@ -73,7 +135,7 @@ where
             }
         };
         match client {
-            Ok(client) => Ok(Self {
+            Ok(client) => Ok(TestNodeProcess {
                 proc,
                 client,
             }),
@@ -90,26 +152,5 @@ where
                 Err(err.into())
             }
         }
-    }
-
-    /// Attempt to kill the running substrate process.
-    pub fn kill(&mut self) -> Result<(), String> {
-        log::info!("Killing contracts node process {}", self.proc.id());
-        if let Err(err) = self.proc.kill() {
-            let err =
-                format!(
-                    "Error killing contracts node process {}: {}",
-                    self.proc.id(),
-                    err
-                );
-            log::error!("{}", err);
-            return Err(err.into())
-        }
-        Ok(())
-    }
-
-    /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> &Client<R> {
-        &self.client
     }
 }
