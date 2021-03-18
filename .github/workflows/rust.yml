@@ -27,7 +27,7 @@ jobs:
       run: |
           curl "https://releases.parity.io/substrate/x86_64-debian:stretch/v3.0.0/substrate/substrate" --output substrate --location
           chmod +x ./substrate
-          mv substrate /usr/local/bin
+          mv substrate ~/.local/bin
 
     - name: fmt
       run: cargo fmt --all -- --check
