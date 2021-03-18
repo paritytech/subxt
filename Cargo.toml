@@ -58,8 +58,6 @@ env_logger = "0.8.2"
 frame-system = "3.0.0"
 pallet-balances = "3.0.0"
 sp-keyring = "3.0.0"
-substrate-subxt-client = { path = "client" }
 tempdir = "0.3.7"
-test-node = { path = "test-node" }
 wabt = "0.10.0"
 assert_matches = "1.4.0"
