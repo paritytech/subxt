@@ -45,12 +45,8 @@ pub(crate) async fn test_node_process() -> TestNodeProcess<TestRuntime> {
 
 #[async_std::test]
 async fn test_insert_key() {
-    // Bob is not an authority, so block production should be disabled.
     let test_node_process = test_node_process_with(AccountKeyring::Bob).await;
     let client = test_node_process.client();
-    let mut blocks = client.subscribe_blocks().await.unwrap();
-    // get the genesis block.
-    assert_eq!(blocks.next().await.unwrap().number, 0);
     let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
     client
         .insert_key(
@@ -64,8 +60,6 @@ async fn test_insert_key() {
         .has_key(public.clone().into(), "aura".to_string())
         .await
         .unwrap());
-    // Alice is an authority, so blocks should be produced.
-    assert_eq!(blocks.next().await.unwrap().number, 1);
 }
 
 #[async_std::test]
@@ -173,5 +167,5 @@ async fn test_iter() {
     while let Some(_) = iter.next().await.unwrap() {
         i += 1;
     }
-    assert_eq!(i, 4);
+    assert_eq!(i, 13);
 }
