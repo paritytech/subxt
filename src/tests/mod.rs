@@ -24,6 +24,7 @@ use sp_core::storage::{
 };
 use sp_keyring::AccountKeyring;
 
+/// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
 pub(crate) type TestRuntime = crate::DefaultNodeRuntime;
@@ -31,6 +32,10 @@ pub(crate) type TestRuntime = crate::DefaultNodeRuntime;
 pub(crate) async fn test_node_process_with(
     key: AccountKeyring,
 ) -> TestNodeProcess<TestRuntime> {
+    if which::which(SUBSTRATE_NODE_PATH).is_err() {
+        panic!("A substrate binary should be installed on your path for integration tests. See https://github.com/paritytech/substrate-subxt/tree/master#integration-testing")
+    }
+
     let proc = TestNodeProcess::<TestRuntime>::build(SUBSTRATE_NODE_PATH)
         .with_authority(key)
         .scan_for_open_ports()
