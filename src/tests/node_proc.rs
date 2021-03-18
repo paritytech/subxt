@@ -26,10 +26,13 @@ use std::{
         OsString,
     },
     net::TcpListener,
-    ops::Range,
     process,
     thread,
     time,
+    sync::atomic::{
+        AtomicU16,
+        Ordering,
+    },
 };
 
 /// Spawn a local substrate node for testing subxt.
@@ -84,7 +87,7 @@ where
 pub struct TestNodeProcessBuilder {
     node_path: OsString,
     authority: Option<AccountKeyring>,
-    scan_port_range: Option<PortRange>
+    scan_port_range: bool,
 }
 
 impl TestNodeProcessBuilder {
@@ -95,7 +98,7 @@ impl TestNodeProcessBuilder {
         Self {
             node_path: node_path.as_ref().into(),
             authority: None,
-            scan_port_range: None,
+            scan_port_range: false,
         }
     }
 
@@ -105,10 +108,11 @@ impl TestNodeProcessBuilder {
         self
     }
 
-    /// Enable port scanning to scan for open ports in the given range.
-    /// Allows multiple node instances to run at once so tests can run in parallel.
-    pub fn scan_for_open_ports(&mut self, port_range: PortRange) -> &mut Self {
-        self.scan_port_range = Some(port_range);
+    /// Enable port scanning to scan for open ports.
+    ///
+    /// Allows spawning multiple node instances for tests to run in parallel.
+    pub fn scan_for_open_ports(&mut self) -> &mut Self {
+        self.scan_port_range = true;
         self
     }
 
@@ -126,14 +130,21 @@ impl TestNodeProcessBuilder {
             cmd.arg(arg);
         }
 
-        if let Some(ref port_range) = self.scan_port_range {
-            let (p2p_port, http_port, ws_port) = port_range.next_open()
-                .ok_or("No available ports in the given port range".to_owned())?;
+        let ws_port =
+            if self.scan_port_range {
+                let (p2p_port, http_port, ws_port) = next_open_port()
+                    .ok_or("No available ports in the given port range".to_owned())?;
 
-            cmd.arg(format!("--port={}", p2p_port));
-            cmd.arg(format!("--rpc-port={}", http_port));
-            cmd.arg(format!("--ws-port={}", ws_port));
-        }
+                cmd.arg(format!("--port={}", p2p_port));
+                cmd.arg(format!("--rpc-port={}", http_port));
+                cmd.arg(format!("--ws-port={}", ws_port));
+                ws_port
+            } else {
+                // the default Websockets port
+                9944
+            };
+
+        let ws_url = format!("ws://127.0.0.1:{}", ws_port);
 
         let mut proc = cmd.spawn().map_err(|e| {
             format!(
@@ -152,7 +163,10 @@ impl TestNodeProcessBuilder {
                 attempts,
                 MAX_ATTEMPTS
             );
-            let result = ClientBuilder::<R>::new().build().await;
+            let result = ClientBuilder::<R>::new()
+                .set_url(ws_url.clone())
+                .build()
+                .await;
             if let Ok(client) = result {
                 break Ok(client)
             }
@@ -168,8 +182,8 @@ impl TestNodeProcessBuilder {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
                 let err = format!(
-                    "Failed to connect to node rpc after {} attempts: {}",
-                    attempts, err
+                    "Failed to connect to node rpc at {} after {} attempts: {}",
+                    ws_url, attempts, err
                 );
                 log::error!("{}", err);
                 proc.kill().map_err(|e| {
@@ -181,37 +195,36 @@ impl TestNodeProcessBuilder {
     }
 }
 
-#[derive(Debug)]
-pub struct PortRange(Range<u16>);
+/// The start of the port range to scan.
+const START_PORT: u16 = 9900;
+/// The end of the port range to scan.
+const END_PORT: u16 = 10000;
+/// The maximum number of ports to scan before giving up.
+const MAX_PORTS: u16 = 1000;
+/// Next available unclaimed port for test node endpoints.
+static PORT: AtomicU16 = AtomicU16::new(START_PORT);
 
-impl PortRange {
-    /// Construct a new port range.
-    pub fn new(start: u16, end: u16) -> Self {
-        Self (start..end)
-    }
-
-    /// Returns the next set of 3 open ports in the port range.
-    ///
-    /// Returns None if there are not 3 open ports available in the range.
-    pub fn next_open(&self) -> Option<(u16, u16, u16)> {
-        let mut ports = Vec::new();
-        for port in self.0.clone() {
-            match TcpListener::bind(("127.0.0.1", port)) {
-                Ok(_) => {
-                    ports.push(port);
-                    if ports.len() == 3 {
-                        return Some((ports[0], ports[1], ports[2]))
-                    }
-                },
-                Err(_) => continue,
-            }
+/// Returns the next set of 3 open ports.
+///
+/// Returns None if there are not 3 open ports available.
+fn next_open_port() -> Option<(u16, u16, u16)> {
+    let mut ports = Vec::new();
+    let mut ports_scanned = 0u16;
+    loop {
+        let _ = PORT.compare_exchange(END_PORT, START_PORT, Ordering::SeqCst, Ordering::SeqCst);
+        let next = PORT.fetch_add(1, Ordering::SeqCst);
+        match TcpListener::bind(("0.0.0.0", next)) {
+            Ok(_) => {
+                ports.push(next);
+                if ports.len() == 3 {
+                    return Some((ports[0], ports[1], ports[2]))
+                }
+            },
+            Err(_) => (),
         }
-        return None
-    }
-}
-
-impl Default for PortRange {
-    fn default() -> Self {
-        Self::new(9900, 10100)
+        ports_scanned += 1;
+        if ports_scanned == MAX_PORTS {
+            return None;
+        }
     }
 }
