@@ -26,7 +26,7 @@ use sp_keyring::AccountKeyring;
 
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub(crate) type TestRuntime = crate::NodeTemplateRuntime;
+pub(crate) type TestRuntime = crate::DefaultNodeRuntime;
 
 pub(crate) async fn test_node_process_with(
     key: AccountKeyring,

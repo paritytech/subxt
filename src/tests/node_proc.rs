@@ -27,12 +27,12 @@ use std::{
     },
     net::TcpListener,
     process,
-    thread,
-    time,
     sync::atomic::{
         AtomicU16,
         Ordering,
     },
+    thread,
+    time,
 };
 
 /// Spawn a local substrate node for testing subxt.
@@ -130,19 +130,18 @@ impl TestNodeProcessBuilder {
             cmd.arg(arg);
         }
 
-        let ws_port =
-            if self.scan_port_range {
-                let (p2p_port, http_port, ws_port) = next_open_port()
-                    .ok_or("No available ports in the given port range".to_owned())?;
+        let ws_port = if self.scan_port_range {
+            let (p2p_port, http_port, ws_port) = next_open_port()
+                .ok_or("No available ports in the given port range".to_owned())?;
 
-                cmd.arg(format!("--port={}", p2p_port));
-                cmd.arg(format!("--rpc-port={}", http_port));
-                cmd.arg(format!("--ws-port={}", ws_port));
-                ws_port
-            } else {
-                // the default Websockets port
-                9944
-            };
+            cmd.arg(format!("--port={}", p2p_port));
+            cmd.arg(format!("--rpc-port={}", http_port));
+            cmd.arg(format!("--ws-port={}", ws_port));
+            ws_port
+        } else {
+            // the default Websockets port
+            9944
+        };
 
         let ws_url = format!("ws://127.0.0.1:{}", ws_port);
 
@@ -167,15 +166,18 @@ impl TestNodeProcessBuilder {
                 .set_url(ws_url.clone())
                 .build()
                 .await;
-            if let Ok(client) = result {
-                break Ok(client)
-            }
-            if attempts < MAX_ATTEMPTS {
-                attempts += 1;
-                continue
-            }
-            if let Err(err) = result {
-                break Err(err)
+            match result {
+                Ok(client) => break Ok(client),
+                Err(crate::Error::MissingTypeSizes(e)) => {
+                    break Err(crate::Error::MissingTypeSizes(e))
+                }
+                Err(err) => {
+                    if attempts < MAX_ATTEMPTS {
+                        attempts += 1;
+                        continue
+                    }
+                    break Err(err)
+                }
             }
         };
         match client {
@@ -211,7 +213,12 @@ fn next_open_port() -> Option<(u16, u16, u16)> {
     let mut ports = Vec::new();
     let mut ports_scanned = 0u16;
     loop {
-        let _ = PORT.compare_exchange(END_PORT, START_PORT, Ordering::SeqCst, Ordering::SeqCst);
+        let _ = PORT.compare_exchange(
+            END_PORT,
+            START_PORT,
+            Ordering::SeqCst,
+            Ordering::SeqCst,
+        );
         let next = PORT.fetch_add(1, Ordering::SeqCst);
         match TcpListener::bind(("0.0.0.0", next)) {
             Ok(_) => {
@@ -219,7 +226,7 @@ fn next_open_port() -> Option<(u16, u16, u16)> {
                 if ports.len() == 3 {
                     return Some((ports[0], ports[1], ports[2]))
                 }
-            },
+            }
             Err(_) => (),
         }
         ports_scanned += 1;

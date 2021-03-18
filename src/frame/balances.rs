@@ -276,12 +276,13 @@ mod tests {
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
         client
-            .transfer_and_watch(&alice, &hans_address, 100_000_000_000)
+            .transfer_and_watch(&alice, &hans_address, 100_000_000_000_000_000)
             .await
             .unwrap();
         let res = client
-            .transfer_and_watch(&hans, &alice_addr, 100_000_000_000)
+            .transfer_and_watch(&hans, &alice_addr, 100_000_000_000_000_000)
             .await;
+
         if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
             let error2 = ModuleError {
                 module: "Balances".into(),
