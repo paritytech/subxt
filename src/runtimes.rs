@@ -389,7 +389,8 @@ pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry.register_type_size::<u128>("u128");
 
     event_type_registry.register_type_size::<()>("PhantomData");
-    event_type_registry.register_type_size::<()>("sp_std::marker::PhantomData<(AccountId, Event)>");
+    event_type_registry
+        .register_type_size::<()>("sp_std::marker::PhantomData<(AccountId, Event)>");
 
     // frame_support types
     event_type_registry

@@ -231,7 +231,7 @@ fn next_open_port() -> Option<(u16, u16, u16)> {
         }
         ports_scanned += 1;
         if ports_scanned == MAX_PORTS {
-            return None;
+            return None
         }
     }
 }
