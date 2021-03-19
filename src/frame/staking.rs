@@ -211,7 +211,6 @@ pub struct BondCall<T: Staking> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "integration-tests")]
 mod tests {
     use super::*;
     use crate::{
@@ -225,6 +224,7 @@ mod tests {
         ClientBuilder,
         Error,
         ExtrinsicSuccess,
+        tests::test_node_process,
     };
     use assert_matches::assert_matches;
     use sp_core::{
@@ -243,7 +243,8 @@ mod tests {
     async fn test_validate_with_controller_account() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let announce_validator = client
             .validate_and_watch(&alice, ValidatorPrefs::default())
             .await;
@@ -259,7 +260,8 @@ mod tests {
     async fn test_validate_not_possible_for_stash_account() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice_stash = PairSigner::<RT, _>::new(get_from_seed("Alice//stash"));
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let announce_validator = client
             .validate_and_watch(&alice_stash, ValidatorPrefs::default())
             .await;
@@ -275,7 +277,8 @@ mod tests {
         env_logger::try_init().ok();
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let nomination = client
             .nominate_and_watch(&alice, vec![bob.account_id().clone()])
@@ -293,7 +296,8 @@ mod tests {
         let alice_stash =
             PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Alice//stash"));
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let nomination = client
             .nominate_and_watch(&alice_stash, vec![bob.account_id().clone()])
@@ -312,7 +316,8 @@ mod tests {
             PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Alice//stash"));
         let bob_stash = PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Bob//stash"));
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         // this will fail the second time, which is why this is one test, not two
         client
@@ -342,7 +347,8 @@ mod tests {
     async fn test_bond() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let client = ClientBuilder::<RT>::new().build().await.unwrap();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let bond = client
             .bond_and_watch(
@@ -378,7 +384,8 @@ mod tests {
     #[async_std::test]
     async fn test_total_issuance_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let total_issuance = client.total_issuance(None).await?;
         assert!(total_issuance > 1u128 << 32);
         Ok(())
@@ -387,7 +394,8 @@ mod tests {
     #[async_std::test]
     async fn test_history_depth_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let history_depth = client.history_depth(None).await?;
         assert_eq!(history_depth, 84);
         Ok(())
@@ -396,7 +404,8 @@ mod tests {
     #[async_std::test]
     async fn test_current_era_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let _current_era = client
             .current_era(None)
             .await?
@@ -407,7 +416,8 @@ mod tests {
     #[async_std::test]
     async fn test_era_reward_points_is_okay() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let store = ErasRewardPointsStore {
             _phantom: PhantomData,
             index: 0,

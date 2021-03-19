@@ -226,7 +226,6 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn test_state_balance_lock() -> Result<(), crate::Error> {
         use crate::{
             frame::staking::{
@@ -239,7 +238,8 @@ mod tests {
 
         env_logger::try_init().ok();
         let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         client
             .bond_and_watch(

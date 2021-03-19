@@ -122,7 +122,6 @@ pub struct ContractExecutionEvent<T: Contracts> {
 }
 
 #[cfg(test)]
-#[cfg(feature = "integration-tests")]
 mod tests {
     use sp_keyring::AccountKeyring;
 
@@ -132,11 +131,12 @@ mod tests {
         system::*,
         Client,
         ClientBuilder,
-        ContractsTemplateRuntime,
+        TestRuntime,
         Error,
         ExtrinsicSuccess,
         PairSigner,
         Signer,
+        tests::{TestRuntime, test_node_process}
     };
     use sp_core::{
         crypto::AccountId32,
@@ -150,18 +150,16 @@ mod tests {
     static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
 
     struct TestContext {
-        client: Client<ContractsTemplateRuntime>,
-        signer: PairSigner<ContractsTemplateRuntime, Pair>,
+        client: Client<TestRuntime>,
+        signer: PairSigner<TestRuntime, Pair>,
     }
 
     impl TestContext {
         async fn init() -> Self {
             env_logger::try_init().ok();
 
-            let client = ClientBuilder::<ContractsTemplateRuntime>::new()
-                .build()
-                .await
-                .expect("Error creating client");
+            let test_node_proc = test_node_process().await;
+            let client = test_node_proc.client();
             let mut stash = PairSigner::new(AccountKeyring::Alice.pair());
             let nonce = client
                 .account(&stash.account_id(), None)
@@ -179,9 +177,9 @@ mod tests {
 
         /// generate a new keypair for an account, and fund it so it can perform smart contract operations
         async fn generate_account(
-            client: &Client<ContractsTemplateRuntime>,
-            stash: &mut PairSigner<ContractsTemplateRuntime, Pair>,
-        ) -> PairSigner<ContractsTemplateRuntime, Pair> {
+            client: &Client<TestRuntime>,
+            stash: &mut PairSigner<TestRuntime, Pair>,
+        ) -> PairSigner<TestRuntime, Pair> {
             use sp_core::Pair as _;
             let new_account = Pair::generate().0;
             let new_account_id: AccountId32 = new_account.public().into();
@@ -197,7 +195,7 @@ mod tests {
 
         async fn put_code(
             &self,
-        ) -> Result<CodeStoredEvent<ContractsTemplateRuntime>, Error> {
+        ) -> Result<CodeStoredEvent<TestRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -216,9 +214,9 @@ mod tests {
 
         async fn instantiate(
             &self,
-            code_hash: &<ContractsTemplateRuntime as System>::Hash,
+            code_hash: &<TestRuntime as System>::Hash,
             data: &[u8],
-        ) -> Result<InstantiatedEvent<ContractsTemplateRuntime>, Error> {
+        ) -> Result<InstantiatedEvent<TestRuntime>, Error> {
             // call instantiate extrinsic
             let result = self
                 .client
@@ -241,9 +239,9 @@ mod tests {
 
         async fn call(
             &self,
-            contract: &<ContractsTemplateRuntime as System>::Address,
+            contract: &<TestRuntime as System>::Address,
             input_data: &[u8],
-        ) -> Result<ExtrinsicSuccess<ContractsTemplateRuntime>, Error> {
+        ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
             let result = self
                 .client
                 .call_and_watch(
