@@ -132,6 +132,7 @@ mod tests {
         tests::{
             test_node_process,
             TestRuntime,
+            TestNodeProcess,
         },
         Client,
         Error,
@@ -151,7 +152,7 @@ mod tests {
     static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
 
     struct TestContext {
-        client: Client<TestRuntime>,
+        node_process: TestNodeProcess<TestRuntime>,
         signer: PairSigner<TestRuntime, Pair>,
     }
 
@@ -159,8 +160,8 @@ mod tests {
         async fn init() -> Self {
             env_logger::try_init().ok();
 
-            let test_node_proc = test_node_process().await;
-            let client = test_node_proc.client();
+            let node_process = test_node_process().await;
+            let client = node_process.client();
             let mut stash = PairSigner::new(AccountKeyring::Alice.pair());
             let nonce = client
                 .account(&stash.account_id(), None)
@@ -174,7 +175,7 @@ mod tests {
             let signer = Self::generate_account(&client, &mut stash).await;
 
             TestContext {
-                client: client.clone(),
+                node_process,
                 signer,
             }
         }
@@ -206,7 +207,7 @@ mod tests {
             "#;
             let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-            let result = self.client.put_code_and_watch(&self.signer, &code).await?;
+            let result = self.client().put_code_and_watch(&self.signer, &code).await?;
             let code_stored = result.code_stored()?.ok_or_else(|| {
                 Error::Other("Failed to find a CodeStored event".into())
             })?;
@@ -221,7 +222,7 @@ mod tests {
         ) -> Result<InstantiatedEvent<TestRuntime>, Error> {
             // call instantiate extrinsic
             let result = self
-                .client
+                .client()
                 .instantiate_and_watch(
                     &self.signer,
                     100_000_000_000_000, // endowment
@@ -245,7 +246,7 @@ mod tests {
             input_data: &[u8],
         ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
             let result = self
-                .client
+                .client()
                 .call_and_watch(
                     &self.signer,
                     contract,
@@ -256,6 +257,10 @@ mod tests {
                 .await?;
             log::info!("Call result: {:?}", result);
             Ok(result)
+        }
+
+        fn client(&self) -> &Client<TestRuntime> {
+            self.node_process.client()
         }
     }
 
