@@ -203,6 +203,7 @@ impl Runtime for DefaultNodeRuntime {
         event_type_registry.with_system();
         event_type_registry.with_balances();
         event_type_registry.with_session();
+        event_type_registry.with_staking();
         event_type_registry.with_contracts();
         event_type_registry.with_sudo();
         register_default_type_sizes(event_type_registry);
@@ -376,14 +377,20 @@ pub type AuthorityList = Vec<(AuthorityId, AuthorityWeight)>;
 pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry: &mut EventTypeRegistry<T>,
 ) {
+    // for types which have all variants with no data, the size is just the index byte.
+    type CLikeEnum = u8;
+
     // primitives
     event_type_registry.register_type_size::<bool>("bool");
     event_type_registry.register_type_size::<u8>("u8");
+    event_type_registry.register_type_size::<u16>("u16");
     event_type_registry.register_type_size::<u32>("u32");
     event_type_registry.register_type_size::<u64>("u64");
     event_type_registry.register_type_size::<u128>("u128");
 
     event_type_registry.register_type_size::<()>("PhantomData");
+    event_type_registry
+        .register_type_size::<()>("sp_std::marker::PhantomData<(AccountId, Event)>");
 
     // frame_support types
     event_type_registry
@@ -400,14 +407,22 @@ pub fn register_default_type_sizes<T: Runtime>(
     event_type_registry.register_type_size::<[u8; 16]>("Kind");
 
     event_type_registry.register_type_size::<u32>("AccountIndex");
+    event_type_registry.register_type_size::<u32>("AssetId");
+    event_type_registry.register_type_size::<u32>("BountyIndex");
+    event_type_registry.register_type_size::<(u8, u8)>("CallIndex");
+    event_type_registry.register_type_size::<[u8; 32]>("CallHash");
     event_type_registry.register_type_size::<u32>("PropIndex");
     event_type_registry.register_type_size::<u32>("ProposalIndex");
+    event_type_registry.register_type_size::<CLikeEnum>("ProxyType");
     event_type_registry.register_type_size::<u32>("AuthorityIndex");
     event_type_registry.register_type_size::<u32>("MemberCount");
+    event_type_registry.register_type_size::<u32>("RegistrarIndex");
 
     event_type_registry.register_type_size::<u8>("VoteThreshold");
     event_type_registry
         .register_type_size::<(T::BlockNumber, u32)>("TaskAddress<BlockNumber>");
+    event_type_registry
+        .register_type_size::<(T::BlockNumber, u32)>("Timepoint<BlockNumber>");
 
     event_type_registry.register_type_size::<AuthorityId>("AuthorityId");
     event_type_registry.register_type_size::<AuthorityWeight>("AuthorityWeight");

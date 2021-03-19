@@ -157,7 +157,7 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-#[cfg(any(feature = "client", test))]
+#[cfg(feature = "client")]
 use substrate_subxt_client::SubxtClient;
 
 /// Rpc client wrapper.
@@ -165,11 +165,11 @@ use substrate_subxt_client::SubxtClient;
 #[derive(Clone)]
 pub enum RpcClient {
     /// JSONRPC client WebSocket transport.
-    WebSocket(WsClient),
+    WebSocket(Arc<WsClient>),
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
-    #[cfg(any(feature = "client", test))]
+    #[cfg(feature = "client")]
     /// Embedded substrate node.
     Subxt(SubxtClient),
 }
@@ -186,7 +186,7 @@ impl RpcClient {
                 inner.request(method, params).await.map_err(Into::into)
             }
             Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
-            #[cfg(any(feature = "client", test))]
+            #[cfg(feature = "client")]
             Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
         }
     }
@@ -211,7 +211,7 @@ impl RpcClient {
                 )
                 .into())
             }
-            #[cfg(any(feature = "client", test))]
+            #[cfg(feature = "client")]
             Self::Subxt(inner) => {
                 inner
                     .subscribe(subscribe_method, params, unsubscribe_method)
@@ -224,7 +224,7 @@ impl RpcClient {
 
 impl From<WsClient> for RpcClient {
     fn from(client: WsClient) -> Self {
-        RpcClient::WebSocket(client)
+        RpcClient::WebSocket(Arc::new(client))
     }
 }
 
@@ -234,7 +234,7 @@ impl From<HttpClient> for RpcClient {
     }
 }
 
-#[cfg(any(feature = "client", test))]
+#[cfg(feature = "client")]
 impl From<SubxtClient> for RpcClient {
     fn from(client: SubxtClient) -> Self {
         RpcClient::Subxt(client)
