@@ -62,7 +62,7 @@ mod tests {
         extrinsic::PairSigner,
         frame::balances::TransferCall,
         tests::{
-            test_client,
+            test_node_process,
             TestRuntime,
         },
     };
@@ -73,7 +73,8 @@ mod tests {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = AccountKeyring::Bob.to_account_id().clone().into();
-        let (client, _) = test_client().await;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let call = client
             .encode(TransferCall {
@@ -97,7 +98,8 @@ mod tests {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = AccountKeyring::Bob.to_account_id().into();
-        let (client, _) = test_client().await;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let call = client
             .encode(TransferCall {
