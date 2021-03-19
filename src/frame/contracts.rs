@@ -134,12 +134,10 @@ mod tests {
             TestRuntime,
         },
         Client,
-        ClientBuilder,
         Error,
         ExtrinsicSuccess,
         PairSigner,
         Signer,
-        TestRuntime,
     };
     use sp_core::{
         crypto::AccountId32,
@@ -175,7 +173,10 @@ mod tests {
 
             let signer = Self::generate_account(&client, &mut stash).await;
 
-            TestContext { client, signer }
+            TestContext {
+                client: client.clone(),
+                signer,
+            }
         }
 
         /// generate a new keypair for an account, and fund it so it can perform smart contract operations

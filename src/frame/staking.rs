@@ -220,9 +220,10 @@ mod tests {
             Signer,
         },
         frame::balances::*,
-        runtimes::KusamaRuntime as RT,
-        tests::test_node_process,
-        ClientBuilder,
+        tests::{
+            test_node_process,
+            TestRuntime,
+        },
         Error,
         ExtrinsicSuccess,
     };
@@ -242,7 +243,7 @@ mod tests {
     #[async_std::test]
     async fn test_validate_with_controller_account() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
         let announce_validator = client
@@ -259,7 +260,8 @@ mod tests {
     #[async_std::test]
     async fn test_validate_not_possible_for_stash_account() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let alice_stash = PairSigner::<RT, _>::new(get_from_seed("Alice//stash"));
+        let alice_stash =
+            PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
         let announce_validator = client
@@ -275,8 +277,8 @@ mod tests {
     #[async_std::test]
     async fn test_nominate_with_controller_account() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
-        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
 
@@ -294,8 +296,8 @@ mod tests {
     async fn test_nominate_not_possible_for_stash_account() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice_stash =
-            PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
+            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
 
@@ -313,9 +315,10 @@ mod tests {
     async fn test_chill_works_for_controller_only() -> Result<(), Error> {
         env_logger::try_init().ok();
         let alice_stash =
-            PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-        let bob_stash = PairSigner::<RT, sr25519::Pair>::new(get_from_seed("Bob//stash"));
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+        let bob_stash =
+            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Bob//stash"));
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
 
@@ -346,7 +349,7 @@ mod tests {
     #[async_std::test]
     async fn test_bond() -> Result<(), Error> {
         env_logger::try_init().ok();
-        let alice = PairSigner::<RT, _>::new(AccountKeyring::Alice.pair());
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let test_node_proc = test_node_process().await;
         let client = test_node_proc.client();
 
