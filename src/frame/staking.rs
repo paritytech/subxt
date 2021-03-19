@@ -283,7 +283,7 @@ mod tests {
         let client = test_node_proc.client();
 
         let nomination = client
-            .nominate_and_watch(&alice, vec![bob.account_id().clone()])
+            .nominate_and_watch(&alice, vec![bob.account_id().clone().into()])
             .await;
         assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
             // TOOD: this is unsatisfying – can we do better?
@@ -302,7 +302,7 @@ mod tests {
         let client = test_node_proc.client();
 
         let nomination = client
-            .nominate_and_watch(&alice_stash, vec![bob.account_id().clone()])
+            .nominate_and_watch(&alice_stash, vec![bob.account_id().clone().into()])
             .await;
         assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
             assert_eq!(module_err.module, "Staking");
@@ -324,7 +324,7 @@ mod tests {
 
         // this will fail the second time, which is why this is one test, not two
         client
-            .nominate_and_watch(&alice, vec![bob_stash.account_id().clone()])
+            .nominate_and_watch(&alice, vec![bob_stash.account_id().clone().into()])
             .await?;
         let store = LedgerStore {
             controller: alice.account_id().clone(),
