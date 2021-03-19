@@ -127,8 +127,6 @@ mod tests {
 
     use super::*;
     use crate::{
-        balances::*,
-        system::*,
         tests::{
             test_node_process,
             TestRuntime,
@@ -138,18 +136,8 @@ mod tests {
         Error,
         ExtrinsicSuccess,
         PairSigner,
-        Signer,
     };
-    use sp_core::{
-        crypto::AccountId32,
-        sr25519::Pair,
-    };
-    use std::sync::atomic::{
-        AtomicU32,
-        Ordering,
-    };
-
-    static STASH_NONCE: std::sync::atomic::AtomicU32 = AtomicU32::new(0);
+    use sp_core::sr25519::Pair;
 
     struct TestContext {
         node_process: TestNodeProcess<TestRuntime>,
@@ -161,41 +149,12 @@ mod tests {
             env_logger::try_init().ok();
 
             let node_process = test_node_process().await;
-            let client = node_process.client();
-            let mut stash = PairSigner::new(AccountKeyring::Alice.pair());
-            let nonce = client
-                .account(&stash.account_id(), None)
-                .await
-                .unwrap()
-                .nonce;
-            let local_nonce = STASH_NONCE.fetch_add(1, Ordering::SeqCst);
-
-            stash.set_nonce(nonce + local_nonce);
-
-            let signer = Self::generate_account(&client, &mut stash).await;
+            let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
             TestContext {
                 node_process,
                 signer,
             }
-        }
-
-        /// generate a new keypair for an account, and fund it so it can perform smart contract operations
-        async fn generate_account(
-            client: &Client<TestRuntime>,
-            stash: &mut PairSigner<TestRuntime, Pair>,
-        ) -> PairSigner<TestRuntime, Pair> {
-            use sp_core::Pair as _;
-            let new_account = Pair::generate().0;
-            let new_account_id: AccountId32 = new_account.public().into();
-            // fund the account
-            let endowment = 200_000_000_000_000;
-            let _ = client
-                .transfer_and_watch(stash, &new_account_id.into(), endowment)
-                .await
-                .expect("New account balance transfer failed");
-            stash.increment_nonce();
-            PairSigner::new(new_account)
         }
 
         async fn put_code(&self) -> Result<CodeStoredEvent<TestRuntime>, Error> {
