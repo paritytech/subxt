@@ -139,8 +139,8 @@ mod tests {
     use crate::{
         tests::{
             test_node_process,
-            TestRuntime,
             TestNodeProcess,
+            TestRuntime,
         },
         Client,
         Error,
@@ -167,7 +167,9 @@ mod tests {
             }
         }
 
-        async fn instantiate_with_code(&self) -> Result<CodeStoredEvent<TestRuntime>, Error> {
+        async fn instantiate_with_code(
+            &self,
+        ) -> Result<CodeStoredEvent<TestRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -176,14 +178,17 @@ mod tests {
             "#;
             let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-            let result = self.client().instantiate_with_code_and_watch(
-                &self.signer,
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                &code,
-                &[],                 // data
-                &[]                  // salt
-            ).await?;
+            let result = self
+                .client()
+                .instantiate_with_code_and_watch(
+                    &self.signer,
+                    100_000_000_000_000_000, // endowment
+                    500_000_000_000,         // gas_limit
+                    &code,
+                    &[], // data
+                    &[], // salt
+                )
+                .await?;
             let event = result.code_stored()?.ok_or_else(|| {
                 Error::Other("Failed to find a CodeStored event".into())
             })?;
