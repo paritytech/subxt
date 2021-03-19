@@ -167,7 +167,7 @@ mod tests {
             }
         }
 
-        async fn put_code(&self) -> Result<CodeStoredEvent<TestRuntime>, Error> {
+        async fn instantiate_with_code(&self) -> Result<CodeStoredEvent<TestRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -176,28 +176,37 @@ mod tests {
             "#;
             let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-            let result = self.client().put_code_and_watch(&self.signer, &code).await?;
-            let code_stored = result.code_stored()?.ok_or_else(|| {
+            let result = self.client().instantiate_with_code_and_watch(
+                &self.signer,
+                100_000_000_000_000_000, // endowment
+                500_000_000_000,         // gas_limit
+                &code,
+                &[],                 // data
+                &[]                  // salt
+            ).await?;
+            let event = result.code_stored()?.ok_or_else(|| {
                 Error::Other("Failed to find a CodeStored event".into())
             })?;
-            log::info!("Code hash: {:?}", code_stored.code_hash);
-            Ok(code_stored)
+            log::info!("Code hash: {:?}", event.code_hash);
+            Ok(event)
         }
 
         async fn instantiate(
             &self,
             code_hash: &<TestRuntime as System>::Hash,
             data: &[u8],
+            salt: &[u8],
         ) -> Result<InstantiatedEvent<TestRuntime>, Error> {
             // call instantiate extrinsic
             let result = self
                 .client()
                 .instantiate_and_watch(
                     &self.signer,
-                    100_000_000_000_000, // endowment
-                    500_000_000,         // gas_limit
+                    100_000_000_000_000_000, // endowment
+                    500_000_000_000,         // gas_limit
                     code_hash,
                     data,
+                    salt,
                 )
                 .await?;
 
@@ -234,14 +243,14 @@ mod tests {
     }
 
     #[async_std::test]
-    async fn tx_put_code() {
+    async fn tx_instantiate_with_code() {
         let ctx = TestContext::init().await;
-        let code_stored = ctx.put_code().await;
+        let code_stored = ctx.instantiate_with_code().await;
 
         assert!(
             code_stored.is_ok(),
             format!(
-                "Error calling put_code and receiving CodeStored Event: {:?}",
+                "Error calling instantiate_with_code and receiving CodeStored Event: {:?}",
                 code_stored
             )
         );
@@ -250,9 +259,9 @@ mod tests {
     #[async_std::test]
     async fn tx_instantiate() {
         let ctx = TestContext::init().await;
-        let code_stored = ctx.put_code().await.unwrap();
+        let code_stored = ctx.instantiate_with_code().await.unwrap();
 
-        let instantiated = ctx.instantiate(&code_stored.code_hash, &[]).await;
+        let instantiated = ctx.instantiate(&code_stored.code_hash, &[], &[1u8]).await;
 
         assert!(
             instantiated.is_ok(),
@@ -263,10 +272,10 @@ mod tests {
     #[async_std::test]
     async fn tx_call() {
         let ctx = TestContext::init().await;
-        let code_stored = ctx.put_code().await.unwrap();
+        let code_stored = ctx.instantiate_with_code().await.unwrap();
 
         let instantiated = ctx
-            .instantiate(&code_stored.code_hash.into(), &[])
+            .instantiate(&code_stored.code_hash.into(), &[], &[1u8])
             .await
             .unwrap();
         let executed = ctx.call(&instantiated.contract.into(), &[]).await;
