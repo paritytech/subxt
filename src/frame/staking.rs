@@ -221,10 +221,10 @@ mod tests {
         },
         frame::balances::*,
         runtimes::KusamaRuntime as RT,
+        tests::test_node_process,
         ClientBuilder,
         Error,
         ExtrinsicSuccess,
-        tests::test_node_process,
     };
     use assert_matches::assert_matches;
     use sp_core::{

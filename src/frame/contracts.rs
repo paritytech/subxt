@@ -129,14 +129,17 @@ mod tests {
     use crate::{
         balances::*,
         system::*,
+        tests::{
+            test_node_process,
+            TestRuntime,
+        },
         Client,
         ClientBuilder,
-        TestRuntime,
         Error,
         ExtrinsicSuccess,
         PairSigner,
         Signer,
-        tests::{TestRuntime, test_node_process}
+        TestRuntime,
     };
     use sp_core::{
         crypto::AccountId32,
@@ -193,9 +196,7 @@ mod tests {
             PairSigner::new(new_account)
         }
 
-        async fn put_code(
-            &self,
-        ) -> Result<CodeStoredEvent<TestRuntime>, Error> {
+        async fn put_code(&self) -> Result<CodeStoredEvent<TestRuntime>, Error> {
             const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
