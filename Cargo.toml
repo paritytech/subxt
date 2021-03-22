@@ -49,7 +49,7 @@ pallet-staking = "3.0.0"
 
 sp-rpc = { version = "3.0.0", package = "sp-rpc" }
 sp-core = { version = "3.0.0", package = "sp-core" }
-substrate-subxt-client = { path = "client", optional = true }
+substrate-subxt-client = { version = "0.7.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
 
 [dev-dependencies]
