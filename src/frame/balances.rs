@@ -254,7 +254,7 @@ mod tests {
             locks,
             vec![BalanceLock {
                 id: *b"staking ",
-                amount: 100_000_000_000,
+                amount: 100_000_000_000_000,
                 reasons: Reasons::All,
             }]
         );

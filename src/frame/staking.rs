@@ -251,7 +251,7 @@ mod tests {
             .await;
         assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
             // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 3);
+            assert_eq!(events.len(), 2);
         });
 
         Ok(())
@@ -287,7 +287,7 @@ mod tests {
             .await;
         assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
             // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 3);
+            assert_eq!(events.len(), 2);
         });
         Ok(())
     }
@@ -341,7 +341,7 @@ mod tests {
         let chill = client.chill_and_watch(&alice).await;
         assert_matches!(chill, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
             // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 3);
+            assert_eq!(events.len(), 2);
         });
         Ok(())
     }
