@@ -17,7 +17,7 @@
 mod node_proc;
 
 use super::*;
-use node_proc::TestNodeProcess;
+pub use node_proc::TestNodeProcess;
 use sp_core::storage::{
     well_known_keys,
     StorageKey,

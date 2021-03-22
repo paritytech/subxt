@@ -226,26 +226,22 @@ mod tests {
     }
 
     #[async_std::test]
-    #[cfg(feature = "integration-tests")]
     async fn test_state_balance_lock() -> Result<(), crate::Error> {
-        use crate::{
-            frame::staking::{
-                BondCallExt,
-                RewardDestination,
-            },
-            runtimes::KusamaRuntime as RT,
-            ClientBuilder,
+        use crate::frame::staking::{
+            BondCallExt,
+            RewardDestination,
         };
 
         env_logger::try_init().ok();
-        let bob = PairSigner::<RT, _>::new(AccountKeyring::Bob.pair());
-        let client = ClientBuilder::<RT>::new().build().await?;
+        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         client
             .bond_and_watch(
                 &bob,
-                AccountKeyring::Charlie.to_account_id(),
-                100_000_000_000,
+                &AccountKeyring::Charlie.to_account_id().into(),
+                100_000_000_000_000,
                 RewardDestination::Stash,
             )
             .await?;
@@ -258,7 +254,7 @@ mod tests {
             locks,
             vec![BalanceLock {
                 id: *b"staking ",
-                amount: 100_000_000_000,
+                amount: 100_000_000_000_000,
                 reasons: Reasons::All,
             }]
         );

@@ -33,4 +33,3 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 env_logger = "0.8.2"
 substrate-subxt = { path = "..", features = ["client"] }
 tempdir = "0.3.7"
-test-node = { path = "../test-node" }
