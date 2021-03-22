@@ -21,17 +21,17 @@ default = []
 client = ["substrate-subxt-client"]
 
 [dependencies]
-log = "0.4.13"
-thiserror = "1.0.23"
-futures = "0.3.10"
+log = "0.4.14"
+thiserror = "1.0.24"
+futures = "0.3.13"
 jsonrpsee-types = "=0.2.0-alpha.3"
 jsonrpsee-ws-client = "=0.2.0-alpha.3"
 jsonrpsee-http-client = "=0.2.0-alpha.3"
 num-traits = { version = "0.2.14", default-features = false }
-serde = { version = "1.0.119", features = ["derive"] }
-serde_json = "1.0.61"
-url = "2.2.0"
-codec = { package = "parity-scale-codec", version = "2.0.0", default-features = false, features = ["derive", "full"] }
+serde = { version = "1.0.124", features = ["derive"] }
+serde_json = "1.0.64"
+url = "2.2.1"
+codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive", "full"] }
 # temporarily pinning funty via codec -> bitvec until https://github.com/myrrlyn/funty/issues/3
 # and https://github.com/bitvecto-rs/bitvec/issues/105 are resolved
 funty = "=1.1.0"
@@ -42,7 +42,7 @@ frame-support = "3.0.0"
 sp-runtime = "3.0.0"
 sp-version = "3.0.0"
 pallet-indices = "3.0.0"
-hex = "0.4.2"
+hex = "0.4.3"
 sp-std = "3.0.0"
 application-crypto = { version = "3.0.0", package = "sp-application-crypto" }
 pallet-staking = "3.0.0"
@@ -53,12 +53,12 @@ substrate-subxt-client = { version = "0.7.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
 
 [dev-dependencies]
-async-std = { version = "1.8.0", features = ["attributes"] }
-env_logger = "0.8.2"
+async-std = { version = "1.9.0", features = ["attributes"] }
+env_logger = "0.8.3"
 frame-system = "3.0.0"
 pallet-balances = "3.0.0"
 sp-keyring = "3.0.0"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-assert_matches = "1.4.0"
+assert_matches = "1.5.0"
