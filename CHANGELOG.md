@@ -13,6 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - implement session handling for unsubscribe in subxt-client - [#242](https://github.com/paritytech/substrate-subxt/pull/242)
 
 ### Changed
+- update jsonrpsee [#251](https://github.com/paritytech/substrate-subxt/pull/251)
+- return none if subscription returns early [#250](https://github.com/paritytech/substrate-subxt/pull/250)
 - export ModuleError and RuntimeError for downstream usage - [#246](https://github.com/paritytech/substrate-subxt/pull/246)
 - rpc client methods should be public for downstream usage - [#240](https://github.com/paritytech/substrate-subxt/pull/240)
 - re-export WasmExecutionMethod for downstream usage - [#239](https://github.com/paritytech/substrate-subxt/pull/239)
