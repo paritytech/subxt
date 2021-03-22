@@ -426,10 +426,12 @@ mod tests {
             index: 0,
         };
 
-        let _current_era = client
+        let current_era_result = client
             .fetch(&store, None)
-            .await?
-            .expect("current era always exists");
+            .await?;
+
+        assert_matches!(current_era_result, Some(_));
+
         Ok(())
     }
 }
