@@ -426,9 +426,7 @@ mod tests {
             index: 0,
         };
 
-        let current_era_result = client
-            .fetch(&store, None)
-            .await?;
+        let current_era_result = client.fetch(&store, None).await?;
 
         assert_matches!(current_era_result, Some(_));
 
