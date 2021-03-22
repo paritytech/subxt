@@ -200,9 +200,9 @@ pub struct NominateCall<T: Staking> {
 /// Take the origin account as a stash and lock up `value` of its balance.
 /// `controller` will be the account that controls it.
 #[derive(Call, Encode, Debug)]
-pub struct BondCall<T: Staking> {
+pub struct BondCall<'a, T: Staking> {
     /// Tٗhe controller account
-    pub contrller: T::AccountId,
+    pub controller: &'a T::Address,
     /// Lock up `value` of its balance.
     #[codec(compact)]
     pub value: T::Balance,
@@ -356,8 +356,8 @@ mod tests {
         let bond = client
             .bond_and_watch(
                 &alice,
-                AccountKeyring::Bob.to_account_id(),
-                100_000_000_000,
+                &AccountKeyring::Bob.to_account_id().into(),
+                100_000_000_000_000,
                 RewardDestination::Stash,
             )
             .await;
@@ -370,7 +370,7 @@ mod tests {
         let bond_again = client
             .bond_and_watch(
                 &alice,
-                AccountKeyring::Bob.to_account_id(),
+                &AccountKeyring::Bob.to_account_id().into(),
                 100_000_000_000,
                 RewardDestination::Stash,
             )

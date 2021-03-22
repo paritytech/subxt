@@ -240,8 +240,8 @@ mod tests {
         client
             .bond_and_watch(
                 &bob,
-                AccountKeyring::Charlie.to_account_id(),
-                100_000_000_000,
+                &AccountKeyring::Charlie.to_account_id().into(),
+                100_000_000_000_000,
                 RewardDestination::Stash,
             )
             .await?;
