@@ -273,6 +273,10 @@ impl StorageMetadata {
         StorageKey(bytes)
     }
 
+    pub fn modifier(&self) -> StorageEntryModifier {
+        self.modifier.clone()
+    }
+
     pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {
         Decode::decode(&mut &self.default[..]).map_err(MetadataError::DefaultError)
     }
