@@ -258,7 +258,7 @@ pub struct ReadProof<Hash> {
 
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Runtime> {
-    client: RpcClient,
+    pub client: RpcClient,
     marker: PhantomData<T>,
     accept_weak_inclusion: bool,
 }

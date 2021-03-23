@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(missing_docs)]
+
 use codec::{
     Codec,
     Compact,

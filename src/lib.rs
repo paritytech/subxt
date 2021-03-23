@@ -73,7 +73,7 @@ use std::{
 };
 
 mod error;
-mod events;
+pub mod events;
 pub mod extrinsic;
 mod frame;
 mod metadata;
@@ -267,7 +267,8 @@ impl<T: Runtime> ClientBuilder<T> {
 
 /// Client to interface with a substrate node.
 pub struct Client<T: Runtime> {
-    rpc: Rpc<T>,
+    /// Rpc client
+    pub rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     events_decoder: EventsDecoder<T>,
