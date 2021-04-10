@@ -46,6 +46,7 @@ extern crate substrate_subxt_proc_macro;
 pub use sp_core;
 pub use sp_runtime;
 
+pub use codec;
 use codec::{
     Codec,
     Decode,
