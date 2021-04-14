@@ -15,6 +15,7 @@ description = "Derive calls, events, storage and tests for interacting Substrate
 proc-macro = true
 
 [dependencies]
+async-trait = "0.1.49"
 heck = "0.3.2"
 proc-macro2 = "1.0.24"
 proc-macro-crate = "0.1.5"

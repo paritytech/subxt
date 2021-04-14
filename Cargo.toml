@@ -24,6 +24,7 @@ tokio02 = ["jsonrpsee-http-client/tokio02"]
 tokio1 = ["jsonrpsee-http-client/tokio1"]
 
 [dependencies]
+async-trait = "0.1.49"
 log = "0.4.14"
 thiserror = "1.0.24"
 futures = "0.3.13"
