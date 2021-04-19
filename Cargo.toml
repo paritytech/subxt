@@ -31,10 +31,7 @@ num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 url = "2.2.1"
-codec = { package = "parity-scale-codec", version = "2.0.1", default-features = false, features = ["derive", "full"] }
-# temporarily pinning funty via codec -> bitvec until https://github.com/myrrlyn/funty/issues/3
-# and https://github.com/bitvecto-rs/bitvec/issues/105 are resolved
-funty = "=1.1.0"
+codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
 dyn-clone = "1.0.4"
 
 frame-metadata = "13.0.0"
