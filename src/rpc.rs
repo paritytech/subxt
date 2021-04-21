@@ -408,10 +408,10 @@ impl<T: Runtime> Rpc<T> {
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(ListOrValue::Value);
-        let params = [to_json_value(block_number)?];
+        let params: &[_] = &[to_json_value(block_number)?];
         let list_or_value = self
             .client
-            .request("chain_getBlockHash", (&params[..]).into())
+            .request("chain_getBlockHash", params.into())
             .await?;
         match list_or_value {
             ListOrValue::Value(hash) => Ok(hash),
@@ -433,11 +433,8 @@ impl<T: Runtime> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        let params = [to_json_value(hash)?];
-        let block = self
-            .client
-            .request("chain_getBlock", (&params[..]).into())
-            .await?;
+        let params: &[_] = &[to_json_value(hash)?];
+        let block = self.client.request("chain_getBlock", params.into()).await?;
         Ok(block)
     }
 
@@ -447,10 +444,10 @@ impl<T: Runtime> Rpc<T> {
         keys: Vec<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
-        let params = [to_json_value(keys)?, to_json_value(hash)?];
+        let params: &[_] = &[to_json_value(keys)?, to_json_value(hash)?];
         let proof = self
             .client
-            .request("state_getReadProof", (&params[..]).into())
+            .request("state_getReadProof", params.into())
             .await?;
         Ok(proof)
     }
