@@ -473,7 +473,7 @@ impl<T: Runtime> Rpc<T> {
         let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
         let params: &[_] = &[to_json_value(keys)?];
 
-        let subscription: Subscription<StorageChangeSet<T::Hash>> = self
+        let subscription = self
             .client
             .subscribe(
                 "state_subscribeStorage",

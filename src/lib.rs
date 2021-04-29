@@ -503,7 +503,7 @@ impl<T: Runtime> Client<T> {
 
     /// Subscribe to new blocks.
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
-        let headers: Subscription<T::Header> = self.rpc.subscribe_blocks().await?;
+        let headers = self.rpc.subscribe_blocks().await?;
         Ok(headers)
     }
 
@@ -511,8 +511,7 @@ impl<T: Runtime> Client<T> {
     pub async fn subscribe_finalized_blocks(
         &self,
     ) -> Result<Subscription<T::Header>, Error> {
-        let headers: Subscription<T::Header> =
-            self.rpc.subscribe_finalized_blocks().await?;
+        let headers = self.rpc.subscribe_finalized_blocks().await?;
         Ok(headers)
     }
 
