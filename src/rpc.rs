@@ -34,10 +34,10 @@ use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee_http_client::{
     to_json_value,
     traits::Client,
-    v2::params::JsonRpcParams,
     DeserializeOwned,
     Error as RpcError,
     HttpClient,
+    JsonValue,
 };
 use jsonrpsee_ws_client::{
     traits::SubscriptionClient,
@@ -172,28 +172,32 @@ pub enum RpcClient {
 
 impl RpcClient {
     /// Start a JSON-RPC request.
-    pub async fn request<'a, T: DeserializeOwned>(
+    pub async fn request<'a, T: DeserializeOwned + std::fmt::Debug>(
         &self,
         method: &str,
-        params: JsonRpcParams<'a>,
+        params: &[JsonValue],
     ) -> Result<T, Error> {
-        match self {
+        let params = params.into();
+        let data = match self {
             Self::WebSocket(inner) => {
                 inner.request(method, params).await.map_err(Into::into)
             }
             Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
             #[cfg(feature = "client")]
             Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
-        }
+        };
+        log::debug!("{}: {:?}", method, data);
+        data
     }
 
     /// Start a JSON-RPC Subscription.
     pub async fn subscribe<'a, T: DeserializeOwned>(
         &self,
         subscribe_method: &str,
-        params: JsonRpcParams<'a>,
+        params: &[JsonValue],
         unsubscribe_method: &str,
     ) -> Result<Subscription<T>, Error> {
+        let params = params.into();
         match self {
             Self::WebSocket(inner) => {
                 inner
@@ -290,12 +294,8 @@ impl<T: Runtime> Rpc<T> {
         key: &StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, Error> {
-        let params: &[_] = &[to_json_value(key)?, to_json_value(hash)?];
-        let data = self
-            .client
-            .request("state_getStorage", params.into())
-            .await?;
-        log::debug!("state_getStorage {:?}", data);
+        let params = &[to_json_value(key)?, to_json_value(hash)?];
+        let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
 
@@ -309,17 +309,13 @@ impl<T: Runtime> Rpc<T> {
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
-        let params: &[_] = &[
+        let params = &[
             to_json_value(prefix)?,
             to_json_value(count)?,
             to_json_value(start_key)?,
             to_json_value(hash)?,
         ];
-        let data = self
-            .client
-            .request("state_getKeysPaged", params.into())
-            .await?;
-        log::debug!("state_getKeysPaged {:?}", data);
+        let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
 
@@ -330,13 +326,13 @@ impl<T: Runtime> Rpc<T> {
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
-        let params: &[_] = &[
+        let params = &[
             to_json_value(keys)?,
             to_json_value(from)?,
             to_json_value(to)?,
         ];
         self.client
-            .request("state_queryStorage", params.into())
+            .request("state_queryStorage", params)
             .await
             .map_err(Into::into)
     }
@@ -347,9 +343,9 @@ impl<T: Runtime> Rpc<T> {
         keys: &[StorageKey],
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
-        let params: &[_] = &[to_json_value(keys)?, to_json_value(at)?];
+        let params = &[to_json_value(keys)?, to_json_value(at)?];
         self.client
-            .request("state_queryStorageAt", params.into())
+            .request("state_queryStorageAt", params)
             .await
             .map_err(Into::into)
     }
@@ -357,11 +353,9 @@ impl<T: Runtime> Rpc<T> {
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
-        let params: &[_] = &[to_json_value(block_zero)?];
-        let list_or_value: ListOrValue<Option<T::Hash>> = self
-            .client
-            .request("chain_getBlockHash", params.into())
-            .await?;
+        let params = &[to_json_value(block_zero)?];
+        let list_or_value: ListOrValue<Option<T::Hash>> =
+            self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(genesis_hash) => {
                 genesis_hash.ok_or_else(|| "Genesis hash not found".into())
@@ -372,10 +366,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Fetch the metadata
     pub async fn metadata(&self) -> Result<Metadata, Error> {
-        let bytes: Bytes = self
-            .client
-            .request("state_getMetadata", JsonRpcParams::NoParams)
-            .await?;
+        let bytes: Bytes = self.client.request("state_getMetadata", &[]).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
@@ -383,10 +374,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
-        Ok(self
-            .client
-            .request("system_properties", JsonRpcParams::NoParams)
-            .await?)
+        Ok(self.client.request("system_properties", &[]).await?)
     }
 
     /// Get a header
@@ -394,11 +382,8 @@ impl<T: Runtime> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<T::Header>, Error> {
-        let params: &[_] = &[to_json_value(hash)?];
-        let header = self
-            .client
-            .request("chain_getHeader", params.into())
-            .await?;
+        let params = &[to_json_value(hash)?];
+        let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
     }
 
@@ -408,11 +393,8 @@ impl<T: Runtime> Rpc<T> {
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, Error> {
         let block_number = block_number.map(ListOrValue::Value);
-        let params: &[_] = &[to_json_value(block_number)?];
-        let list_or_value = self
-            .client
-            .request("chain_getBlockHash", params.into())
-            .await?;
+        let params = &[to_json_value(block_number)?];
+        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(hash) => Ok(hash),
             ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
@@ -421,10 +403,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let hash = self
-            .client
-            .request("chain_getFinalizedHead", JsonRpcParams::NoParams)
-            .await?;
+        let hash = self.client.request("chain_getFinalizedHead", &[]).await?;
         Ok(hash)
     }
 
@@ -500,11 +479,7 @@ impl<T: Runtime> Rpc<T> {
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
         let subscription = self
             .client
-            .subscribe(
-                "chain_subscribeNewHeads",
-                JsonRpcParams::NoParams,
-                "chain_unsubscribeNewHeads",
-            )
+            .subscribe("chain_subscribeNewHeads", &[], "chain_unsubscribeNewHeads")
             .await?;
 
         Ok(subscription)
@@ -518,7 +493,7 @@ impl<T: Runtime> Rpc<T> {
             .client
             .subscribe(
                 "chain_subscribeFinalizedHeads",
-                JsonRpcParams::NoParams,
+                &[],
                 "chain_unsubscribeFinalizedHeads",
             )
             .await?;
@@ -671,10 +646,7 @@ impl<T: Runtime> Rpc<T> {
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        Ok(self
-            .client
-            .request("author_rotateKeys", JsonRpcParams::NoParams)
-            .await?)
+        Ok(self.client.request("author_rotateKeys", &[]).await?)
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
