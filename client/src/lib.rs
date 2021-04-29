@@ -42,7 +42,7 @@ use futures01::sync::mpsc as mpsc01;
 use jsonrpsee_types::{
     v2::{
         error::{
-            ErrorCode,
+            JsonRpcErrorCode,
             JsonRpcErrorAlloc,
         },
         params::{
@@ -525,7 +525,7 @@ fn read_jsonrpc_response(
                 Ok(err) => {
                     let err = JsonRpcErrorAlloc {
                         jsonrpc: TwoPointZero,
-                        error: ErrorCode::InvalidParams,
+                        error: JsonRpcErrorCode::InvalidRequest.into(),
                         id: parse_request_id(err.id).ok()?,
                     };
                     Some(Err(JsonRpseeError::Request(err)))
