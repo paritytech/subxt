@@ -412,8 +412,8 @@ impl<T: Runtime> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, Error> {
-        let params: &[_] = &[to_json_value(hash)?];
-        let block = self.client.request("chain_getBlock", params.into()).await?;
+        let params = &[to_json_value(hash)?];
+        let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
     }
 
@@ -423,10 +423,10 @@ impl<T: Runtime> Rpc<T> {
         keys: Vec<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
-        let params: &[_] = &[to_json_value(keys)?, to_json_value(hash)?];
+        let params = &[to_json_value(keys)?, to_json_value(hash)?];
         let proof = self
             .client
-            .request("state_getReadProof", params.into())
+            .request("state_getReadProof", params)
             .await?;
         Ok(proof)
     }
@@ -436,10 +436,10 @@ impl<T: Runtime> Rpc<T> {
         &self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, Error> {
-        let params: &[_] = &[to_json_value(at)?];
+        let params = &[to_json_value(at)?];
         let version = self
             .client
-            .request("state_getRuntimeVersion", params.into())
+            .request("state_getRuntimeVersion", params)
             .await?;
         Ok(version)
     }
@@ -450,13 +450,13 @@ impl<T: Runtime> Rpc<T> {
     /// `subscribe_finalized_events` to ensure events are finalized.
     pub async fn subscribe_events(&self) -> Result<EventStorageSubscription<T>, Error> {
         let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
-        let params: &[_] = &[to_json_value(keys)?];
+        let params = &[to_json_value(keys)?];
 
         let subscription = self
             .client
             .subscribe(
                 "state_subscribeStorage",
-                params.into(),
+                params,
                 "state_unsubscribeStorage",
             )
             .await?;
@@ -506,10 +506,10 @@ impl<T: Runtime> Rpc<T> {
         extrinsic: E,
     ) -> Result<T::Hash, Error> {
         let bytes: Bytes = extrinsic.encode().into();
-        let params: &[_] = &[to_json_value(bytes)?];
+        let params = &[to_json_value(bytes)?];
         let xt_hash = self
             .client
-            .request("author_submitExtrinsic", params.into())
+            .request("author_submitExtrinsic", params)
             .await?;
         Ok(xt_hash)
     }
@@ -519,12 +519,12 @@ impl<T: Runtime> Rpc<T> {
         extrinsic: E,
     ) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
-        let params: &[_] = &[to_json_value(bytes)?];
+        let params = &[to_json_value(bytes)?];
         let subscription = self
             .client
             .subscribe(
                 "author_submitAndWatchExtrinsic",
-                params.into(),
+                params,
                 "author_unwatchExtrinsic",
             )
             .await?;
@@ -633,13 +633,13 @@ impl<T: Runtime> Rpc<T> {
         suri: String,
         public: Bytes,
     ) -> Result<(), Error> {
-        let params: &[_] = &[
+        let params = &[
             to_json_value(key_type)?,
             to_json_value(suri)?,
             to_json_value(public)?,
         ];
         self.client
-            .request("author_insertKey", params.into())
+            .request("author_insertKey", params)
             .await?;
         Ok(())
     }
@@ -655,10 +655,10 @@ impl<T: Runtime> Rpc<T> {
     ///
     /// Returns `true` iff all private keys could be found.
     pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
-        let params: &[_] = &[to_json_value(session_keys)?];
+        let params = &[to_json_value(session_keys)?];
         Ok(self
             .client
-            .request("author_hasSessionKeys", params.into())
+            .request("author_hasSessionKeys", params)
             .await?)
     }
 
@@ -670,7 +670,7 @@ impl<T: Runtime> Rpc<T> {
         public_key: Bytes,
         key_type: String,
     ) -> Result<bool, Error> {
-        let params: &[_] = &[to_json_value(public_key)?, to_json_value(key_type)?];
+        let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
         Ok(self.client.request("author_hasKey", params.into()).await?)
     }
 }
