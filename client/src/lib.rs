@@ -42,8 +42,8 @@ use futures01::sync::mpsc as mpsc01;
 use jsonrpsee_types::{
     v2::{
         error::{
-            JsonRpcErrorCode,
             JsonRpcErrorAlloc,
+            JsonRpcErrorCode,
         },
         params::{
             Id,
