@@ -424,10 +424,7 @@ impl<T: Runtime> Rpc<T> {
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, Error> {
         let params = &[to_json_value(keys)?, to_json_value(hash)?];
-        let proof = self
-            .client
-            .request("state_getReadProof", params)
-            .await?;
+        let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
     }
 
@@ -454,11 +451,7 @@ impl<T: Runtime> Rpc<T> {
 
         let subscription = self
             .client
-            .subscribe(
-                "state_subscribeStorage",
-                params,
-                "state_unsubscribeStorage",
-            )
+            .subscribe("state_subscribeStorage", params, "state_unsubscribeStorage")
             .await?;
         Ok(EventStorageSubscription::Imported(subscription))
     }
@@ -638,9 +631,7 @@ impl<T: Runtime> Rpc<T> {
             to_json_value(suri)?,
             to_json_value(public)?,
         ];
-        self.client
-            .request("author_insertKey", params)
-            .await?;
+        self.client.request("author_insertKey", params).await?;
         Ok(())
     }
 
@@ -656,10 +647,7 @@ impl<T: Runtime> Rpc<T> {
     /// Returns `true` iff all private keys could be found.
     pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
         let params = &[to_json_value(session_keys)?];
-        Ok(self
-            .client
-            .request("author_hasSessionKeys", params)
-            .await?)
+        Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
 
     /// Checks if the keystore has private keys for the given public key and key type.
@@ -671,7 +659,7 @@ impl<T: Runtime> Rpc<T> {
         key_type: String,
     ) -> Result<bool, Error> {
         let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
-        Ok(self.client.request("author_hasKey", params.into()).await?)
+        Ok(self.client.request("author_hasKey", params).await?)
     }
 }
 
