@@ -51,14 +51,10 @@ use codec::{
     Decode,
 };
 use futures::future;
-use jsonrpsee_http_client::{
-    HttpClient,
-    HttpConfig,
-};
+use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_ws_client::{
-    WsClient,
-    WsConfig,
-    WsSubscription as Subscription,
+    Subscription,
+    WsClientBuilder,
 };
 use sp_core::{
     storage::{
@@ -212,11 +208,13 @@ impl<T: Runtime> ClientBuilder<T> {
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             if url.starts_with("ws://") || url.starts_with("wss://") {
-                let mut config = WsConfig::with_url(&url);
-                config.max_notifs_per_subscription = 4096;
-                RpcClient::WebSocket(Arc::new(WsClient::new(config).await?))
+                let client = WsClientBuilder::default()
+                    .max_notifs_per_subscription(4096)
+                    .build(&url)
+                    .await?;
+                RpcClient::WebSocket(Arc::new(client))
             } else {
-                let client = HttpClient::new(url, HttpConfig::default())?;
+                let client = HttpClientBuilder::default().build(&url)?;
                 RpcClient::Http(Arc::new(client))
             }
         };
