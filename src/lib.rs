@@ -355,6 +355,11 @@ impl<T: Runtime> Client<T> {
         &self.properties
     }
 
+    /// Returns the rpc client.
+    pub fn rpc_client(&self) -> &RpcClient {
+        &self.rpc.client
+    }
+
     /// Fetch the value under an unhashed storage key
     pub async fn fetch_unhashed<V: Decode>(
         &self,
