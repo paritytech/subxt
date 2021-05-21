@@ -266,7 +266,7 @@ impl ModuleWithErrors {
 pub struct StorageMetadata {
     module_prefix: String,
     storage_prefix: String,
-    modifier: StorageEntryModifier,
+    pub modifier: StorageEntryModifier,
     ty: StorageEntryType,
     default: Vec<u8>,
 }
