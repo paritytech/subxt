@@ -50,7 +50,6 @@ use codec::{
     Codec,
     Decode,
 };
-use frame_metadata::StorageEntryModifier;
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_ws_client::{
@@ -365,12 +364,8 @@ impl<T: Runtime> Client<T> {
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-        modifier: StorageEntryModifier,
     ) -> Result<Option<V>, Error> {
         if let Some(mut data) = self.rpc.storage(&key, hash).await? {
-            if modifier == StorageEntryModifier::Optional {
-                data.0.insert(0, 1u8)
-            }
             Ok(Some(Decode::decode(&mut &data.0[..])?))
         } else {
             Ok(None)
@@ -384,9 +379,7 @@ impl<T: Runtime> Client<T> {
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Returns>, Error> {
         let key = store.key(&self.metadata)?;
-        let storage_meta = self.metadata.module(F::MODULE)?.storage(F::FIELD)?;
-        self.fetch_unhashed::<F::Returns>(key, hash, storage_meta.modifier())
-            .await
+        self.fetch_unhashed::<F::Returns>(key, hash).await
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
