@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -177,9 +177,19 @@ pub struct ModuleMetadata {
 
 impl ModuleMetadata {
     pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
-        self.storage
-            .get(key)
-            .ok_or(MetadataError::StorageNotFound(key))
+        if !key.starts_with("Mmr") {
+            return self
+                .storage
+                .get(key)
+                .ok_or(MetadataError::StorageNotFound(key))
+        }
+        let key_2 = key.replace("Mmr", "MMR");
+        let metadata = self.storage.get(&key_2).unwrap_or(
+            self.storage
+                .get(key)
+                .ok_or(MetadataError::StorageNotFound(key))?,
+        );
+        Ok(metadata)
     }
 
     /// Get a constant's metadata by name
@@ -271,6 +281,10 @@ impl StorageMetadata {
         let mut bytes = sp_core::twox_128(self.module_prefix.as_bytes()).to_vec();
         bytes.extend(&sp_core::twox_128(self.storage_prefix.as_bytes())[..]);
         StorageKey(bytes)
+    }
+
+    pub fn modifier(&self) -> StorageEntryModifier {
+        self.modifier.clone()
     }
 
     pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {

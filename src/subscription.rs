@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -14,8 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::client::Subscription;
-use sp_core::storage::StorageChangeSet;
+use jsonrpsee_ws_client::Subscription;
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageKey,
+    },
+    twox_128,
+};
+use sp_runtime::traits::Header;
 use std::collections::VecDeque;
 
 use crate::{
@@ -29,14 +36,15 @@ use crate::{
         system::Phase,
         Event,
     },
+    rpc::Rpc,
     runtimes::Runtime,
 };
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<T: Runtime> {
-    subscription: Subscription<StorageChangeSet<T::Hash>>,
-    decoder: EventsDecoder<T>,
+pub struct EventSubscription<'a, T: Runtime> {
+    subscription: EventStorageSubscription<T>,
+    decoder: &'a EventsDecoder<T>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
@@ -44,11 +52,11 @@ pub struct EventSubscription<T: Runtime> {
     finished: bool,
 }
 
-impl<T: Runtime> EventSubscription<T> {
+impl<'a, T: Runtime> EventSubscription<'a, T> {
     /// Creates a new event subscription.
     pub fn new(
-        subscription: Subscription<StorageChangeSet<T::Hash>>,
-        decoder: EventsDecoder<T>,
+        subscription: EventStorageSubscription<T>,
+        decoder: &'a EventsDecoder<T>,
     ) -> Self {
         Self {
             subscription,
@@ -86,7 +94,8 @@ impl<T: Runtime> EventSubscription<T> {
             if self.finished {
                 return None
             }
-            let change_set = self.subscription.next().await;
+            // always return None if subscription has closed
+            let change_set = self.subscription.next().await?;
             if let Some(hash) = self.block.as_ref() {
                 if &change_set.block == hash {
                     self.finished = true;
@@ -121,6 +130,77 @@ impl<T: Runtime> EventSubscription<T> {
                     }
                 }
             }
+        }
+    }
+}
+
+pub(crate) struct SystemEvents(StorageKey);
+
+impl SystemEvents {
+    pub(crate) fn new() -> Self {
+        let mut storage_key = twox_128(b"System").to_vec();
+        storage_key.extend(twox_128(b"Events").to_vec());
+        log::debug!("Events storage key {:?}", hex::encode(&storage_key));
+        Self(StorageKey(storage_key))
+    }
+}
+
+impl From<SystemEvents> for StorageKey {
+    fn from(key: SystemEvents) -> Self {
+        key.0
+    }
+}
+
+/// Event subscription to only fetch finalized storage changes.
+pub struct FinalizedEventStorageSubscription<T: Runtime> {
+    rpc: Rpc<T>,
+    subscription: Subscription<T::Header>,
+    storage_changes: VecDeque<StorageChangeSet<T::Hash>>,
+    storage_key: StorageKey,
+}
+
+impl<T: Runtime> FinalizedEventStorageSubscription<T> {
+    /// Creates a new finalized event storage subscription.
+    pub fn new(rpc: Rpc<T>, subscription: Subscription<T::Header>) -> Self {
+        Self {
+            rpc,
+            subscription,
+            storage_changes: Default::default(),
+            storage_key: SystemEvents::new().into(),
+        }
+    }
+
+    /// Gets the next change_set.
+    pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
+        loop {
+            if let Some(storage_change) = self.storage_changes.pop_front() {
+                return Some(storage_change)
+            }
+            let header: T::Header = self.subscription.next().await?;
+            self.storage_changes.extend(
+                self.rpc
+                    .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
+                    .await
+                    .ok()?,
+            );
+        }
+    }
+}
+
+/// Wrapper over imported and finalized event subscriptions.
+pub enum EventStorageSubscription<T: Runtime> {
+    /// Events that are InBlock
+    Imported(Subscription<StorageChangeSet<T::Hash>>),
+    /// Events that are Finalized
+    Finalized(FinalizedEventStorageSubscription<T>),
+}
+
+impl<T: Runtime> EventStorageSubscription<T> {
+    /// Gets the next change_set from the subscription.
+    pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
+        match self {
+            Self::Imported(event_sub) => event_sub.next().await,
+            Self::Finalized(event_sub) => event_sub.next().await,
         }
     }
 }

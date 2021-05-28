@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -17,10 +17,7 @@
 //! Implements support for the frame_sudo module.
 
 use crate::{
-    frame::system::{
-        System,
-        SystemEventsDecoder,
-    },
+    frame::system::System,
     Encoded,
 };
 use codec::Encode;
@@ -65,7 +62,7 @@ mod tests {
         extrinsic::PairSigner,
         frame::balances::TransferCall,
         tests::{
-            test_client,
+            test_node_process,
             TestRuntime,
         },
     };
@@ -75,11 +72,13 @@ mod tests {
     async fn test_sudo() {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let (client, _) = test_client().await;
+        let bob = AccountKeyring::Bob.to_account_id().clone().into();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let call = client
             .encode(TransferCall {
-                to: &AccountKeyring::Bob.to_account_id(),
+                to: &bob,
                 amount: 10_000,
             })
             .unwrap();
@@ -98,11 +97,13 @@ mod tests {
     async fn test_sudo_unchecked_weight() {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let (client, _) = test_client().await;
+        let bob = AccountKeyring::Bob.to_account_id().into();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let call = client
             .encode(TransferCall {
-                to: &AccountKeyring::Bob.to_account_id(),
+                to: &bob,
                 amount: 10_000,
             })
             .unwrap();

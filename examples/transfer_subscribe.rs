@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -17,7 +17,6 @@
 use sp_keyring::AccountKeyring;
 use substrate_subxt::{
     balances::{
-        BalancesEventsDecoder,
         TransferCallExt,
         TransferEvent,
     },
@@ -25,7 +24,6 @@ use substrate_subxt::{
     ClientBuilder,
     DefaultNodeRuntime,
     EventSubscription,
-    EventsDecoder,
     PairSigner,
 };
 
@@ -38,8 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
     let sub = client.subscribe_events().await?;
-    let mut decoder = EventsDecoder::<DefaultNodeRuntime>::new(client.metadata().clone());
-    decoder.with_balances();
+    let decoder = client.events_decoder();
     let mut sub = EventSubscription::<DefaultNodeRuntime>::new(sub, decoder);
     sub.filter_event::<TransferEvent<_>>();
     client.transfer(&signer, &dest, 10_000).await?;

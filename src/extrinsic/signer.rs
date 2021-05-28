@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -30,12 +30,9 @@ use sp_runtime::traits::{
     SignedExtension,
     Verify,
 };
-use std::{
-    future::Future,
-    pin::Pin,
-};
 
 /// Extrinsic signer.
+#[async_trait::async_trait]
 pub trait Signer<T: Runtime> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
@@ -47,10 +44,10 @@ pub trait Signer<T: Runtime> {
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
-    fn sign(
+    async fn sign(
         &self,
         extrinsic: SignedPayload<T>,
-    ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send>>;
+    ) -> Result<UncheckedExtrinsic<T>, String>;
 }
 
 /// Extrinsic signer using a private key.
@@ -87,7 +84,7 @@ where
 
     /// Increment the nonce.
     pub fn increment_nonce(&mut self) {
-        self.nonce = self.nonce.map(|nonce| nonce + 1.into());
+        self.nonce = self.nonce.map(|nonce| nonce + 1u32.into());
     }
 
     /// Returns the signer.
@@ -96,6 +93,7 @@ where
     }
 }
 
+#[async_trait::async_trait]
 impl<T, P> Signer<T> for PairSigner<T, P>
 where
     T: Runtime,
@@ -112,10 +110,10 @@ where
         self.nonce
     }
 
-    fn sign(
+    async fn sign(
         &self,
         extrinsic: SignedPayload<T>,
-    ) -> Pin<Box<dyn Future<Output = Result<UncheckedExtrinsic<T>, String>> + Send>> {
+    ) -> Result<UncheckedExtrinsic<T>, String> {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
         let extrinsic = UncheckedExtrinsic::<T>::new_signed(
@@ -124,6 +122,6 @@ where
             signature.into(),
             extra,
         );
-        Box::pin(async move { Ok(extrinsic) })
+        Ok(extrinsic)
     }
 }

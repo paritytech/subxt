@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -16,16 +16,16 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::frame::system::{
-    System,
-    SystemEventsDecoder,
-};
+use crate::frame::system::System;
 use codec::{
     Decode,
     Encode,
 };
 use core::marker::PhantomData;
-use frame_support::Parameter;
+use frame_support::{
+    traits::LockIdentifier,
+    Parameter,
+};
 use sp_runtime::traits::{
     AtLeast32Bit,
     MaybeSerialize,
@@ -80,6 +80,47 @@ pub struct TotalIssuanceStore<T: Balances> {
     pub _runtime: PhantomData<T>,
 }
 
+/// The locks of the balances module.
+#[derive(Clone, Debug, Eq, PartialEq, Store, Encode, Decode)]
+pub struct LocksStore<'a, T: Balances> {
+    #[store(returns = Vec<BalanceLock<T::Balance>>)]
+    /// Account to retrieve the balance locks for.
+    pub account_id: &'a T::AccountId,
+}
+
+/// A single lock on a balance. There can be many of these on an account and they "overlap", so the
+/// same balance is frozen by multiple locks.
+#[derive(Clone, PartialEq, Eq, Encode, Decode)]
+pub struct BalanceLock<Balance> {
+    /// An identifier for this lock. Only one lock may be in existence for each identifier.
+    pub id: LockIdentifier,
+    /// The amount which the free balance may not drop below when this lock is in effect.
+    pub amount: Balance,
+    /// If true, then the lock remains in effect even for payment of transaction fees.
+    pub reasons: Reasons,
+}
+
+impl<Balance: Debug> Debug for BalanceLock<Balance> {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        f.debug_struct("BalanceLock")
+            .field("id", &String::from_utf8_lossy(&self.id))
+            .field("amount", &self.amount)
+            .field("reasons", &self.reasons)
+            .finish()
+    }
+}
+
+/// Simplified reasons for withdrawing balance.
+#[derive(Encode, Decode, Clone, Copy, PartialEq, Eq, Debug)]
+pub enum Reasons {
+    /// Paying system transaction fees.
+    Fee,
+    /// Any reason other than paying system transaction fees.
+    Misc,
+    /// Any reason at all.
+    All,
+}
+
 /// Transfer some liquid free balance to another account.
 ///
 /// `transfer` will set the `FreeBalance` of the sender and receiver.
@@ -115,7 +156,6 @@ mod tests {
             ModuleError,
             RuntimeError,
         },
-        events::EventsDecoder,
         extrinsic::{
             PairSigner,
             Signer,
@@ -123,7 +163,7 @@ mod tests {
         subscription::EventSubscription,
         system::AccountStoreExt,
         tests::{
-            test_client,
+            test_node_process,
             TestRuntime,
         },
     };
@@ -138,13 +178,15 @@ mod tests {
         env_logger::try_init().ok();
         let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-        let (client, _) = test_client().await;
+        let bob_address = bob.account_id().clone().into();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
 
         let alice_pre = client.account(alice.account_id(), None).await.unwrap();
         let bob_pre = client.account(bob.account_id(), None).await.unwrap();
 
         let event = client
-            .transfer_and_watch(&alice, &bob.account_id(), 10_000)
+            .transfer_and_watch(&alice, &bob_address, 10_000)
             .await
             .expect("sending an xt works")
             .transfer()
@@ -167,7 +209,8 @@ mod tests {
     #[async_std::test]
     async fn test_state_total_issuance() {
         env_logger::try_init().ok();
-        let (client, _) = test_client().await;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let total_issuance = client.total_issuance(None).await.unwrap();
         assert_ne!(total_issuance, 0);
     }
@@ -175,25 +218,67 @@ mod tests {
     #[async_std::test]
     async fn test_state_read_free_balance() {
         env_logger::try_init().ok();
-        let (client, _) = test_client().await;
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let account = AccountKeyring::Alice.to_account_id();
         let info = client.account(&account, None).await.unwrap();
         assert_ne!(info.data.free, 0);
     }
 
     #[async_std::test]
+    async fn test_state_balance_lock() -> Result<(), crate::Error> {
+        use crate::frame::staking::{
+            BondCallExt,
+            RewardDestination,
+        };
+
+        env_logger::try_init().ok();
+        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
+
+        client
+            .bond_and_watch(
+                &bob,
+                &AccountKeyring::Charlie.to_account_id().into(),
+                100_000_000_000_000,
+                RewardDestination::Stash,
+            )
+            .await?;
+
+        let locks = client
+            .locks(&AccountKeyring::Bob.to_account_id(), None)
+            .await?;
+
+        assert_eq!(
+            locks,
+            vec![BalanceLock {
+                id: *b"staking ",
+                amount: 100_000_000_000_000,
+                reasons: Reasons::All,
+            }]
+        );
+
+        Ok(())
+    }
+
+    #[async_std::test]
     async fn test_transfer_error() {
         env_logger::try_init().ok();
-        let alice = PairSigner::new(AccountKeyring::Alice.pair());
-        let hans = PairSigner::new(Pair::generate().0);
-        let (client, _) = test_client().await;
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+        let alice_addr = alice.account_id().clone().into();
+        let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
+        let hans_address = hans.account_id().clone().into();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         client
-            .transfer_and_watch(&alice, hans.account_id(), 100_000_000_000)
+            .transfer_and_watch(&alice, &hans_address, 100_000_000_000_000_000)
             .await
             .unwrap();
         let res = client
-            .transfer_and_watch(&hans, alice.account_id(), 100_000_000_000)
+            .transfer_and_watch(&hans, &alice_addr, 100_000_000_000_000_000)
             .await;
+
         if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
             let error2 = ModuleError {
                 module: "Balances".into(),
@@ -208,15 +293,16 @@ mod tests {
     #[async_std::test]
     async fn test_transfer_subscription() {
         env_logger::try_init().ok();
-        let alice = PairSigner::new(AccountKeyring::Alice.pair());
+        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
         let bob = AccountKeyring::Bob.to_account_id();
-        let (client, _) = test_client().await;
+        let bob_addr = bob.clone().into();
+        let test_node_proc = test_node_process().await;
+        let client = test_node_proc.client();
         let sub = client.subscribe_events().await.unwrap();
-        let mut decoder = EventsDecoder::<TestRuntime>::new(client.metadata().clone());
-        decoder.with_balances();
-        let mut sub = EventSubscription::<TestRuntime>::new(sub, decoder);
+        let decoder = client.events_decoder();
+        let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
         sub.filter_event::<TransferEvent<_>>();
-        client.transfer(&alice, &bob, 10_000).await.unwrap();
+        client.transfer(&alice, &bob_addr, 10_000).await.unwrap();
         let raw = sub.next().await.unwrap().unwrap();
         let event = TransferEvent::<TestRuntime>::decode(&mut &raw.data[..]).unwrap();
         assert_eq!(

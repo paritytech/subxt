@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -211,6 +211,21 @@ impl<K: Parse, V: Parse> Parse for Attr<K, V> {
             eq: input.parse()?,
             value: input.parse()?,
         })
+    }
+}
+
+#[derive(Debug)]
+pub struct UniAttr<A> {
+    pub paren: syn::token::Paren,
+    pub attr: A,
+}
+
+impl<A: Parse> Parse for UniAttr<A> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
+        let content;
+        let paren = syn::parenthesized!(content in input);
+        let attr = content.parse()?;
+        Ok(Self { paren, attr })
     }
 }
 

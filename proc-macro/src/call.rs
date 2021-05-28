@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -32,10 +32,6 @@ pub fn call(s: Structure) -> TokenStream {
     let generics = &s.ast().generics;
     let params = utils::type_params(generics);
     let module = utils::module_name(generics);
-    let with_module = format_ident!(
-        "with_{}",
-        utils::path_to_ident(module).to_string().to_snake_case()
-    );
     let call_name = utils::ident_to_name(ident, "Call").to_snake_case();
     let bindings = utils::bindings(&s);
     let fields = utils::fields(&bindings);
@@ -51,50 +47,47 @@ pub fn call(s: Structure) -> TokenStream {
         impl#generics #subxt::Call<T> for #ident<#(#params),*> {
             const MODULE: &'static str = MODULE;
             const FUNCTION: &'static str = #call_name;
-            fn events_decoder(
-                decoder: &mut #subxt::EventsDecoder<T>,
-            ) {
-                decoder.#with_module();
-            }
         }
 
         /// Call extension trait.
+        #[async_trait::async_trait]
         pub trait #call_trait<T: #subxt::Runtime + #module> {
             /// Create and submit an extrinsic.
-            fn #call<'a>(
+            async fn #call<'a>(
                 &'a self,
                 signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
                 #args
-            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, #subxt::Error>> + Send + 'a>>;
+            ) -> Result<T::Hash, #subxt::Error>;
 
             /// Create, submit and watch an extrinsic.
-            fn #call_and_watch<'a>(
+            async fn #call_and_watch<'a>(
                 &'a self,
                 signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
                 #args
-            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error>> + Send + 'a>>;
+            ) -> Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error>;
         }
 
+        #[async_trait::async_trait]
         impl<T: #subxt::Runtime + #module> #call_trait<T> for #subxt::Client<T>
         where
             <<T::Extra as #subxt::SignedExtra<T>>::Extra as #subxt::SignedExtension>::AdditionalSigned: Send + Sync,
         {
-            fn #call<'a>(
+            async fn #call<'a>(
                 &'a self,
                 signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
                 #args
-            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, #subxt::Error>> + Send + 'a>> {
+            ) -> Result<T::Hash, #subxt::Error> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.submit(#build_struct, signer))
+                self.submit(#build_struct, signer).await
             }
 
-            fn #call_and_watch<'a>(
+            async fn #call_and_watch<'a>(
                 &'a self,
                 signer: &'a (dyn #subxt::Signer<T> + Send + Sync),
                 #args
-            ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error>> + Send + 'a>> {
+            ) -> Result<#subxt::ExtrinsicSuccess<T>, #subxt::Error> {
                 let #marker = core::marker::PhantomData::<T>;
-                Box::pin(self.watch(#build_struct, signer))
+                self.watch(#build_struct, signer).await
             }
         }
     }
@@ -118,54 +111,51 @@ mod tests {
             impl<'a, T: Balances> substrate_subxt::Call<T> for TransferCall<'a, T> {
                 const MODULE: &'static str = MODULE;
                 const FUNCTION: &'static str = "transfer";
-                fn events_decoder(
-                    decoder: &mut substrate_subxt::EventsDecoder<T>,
-                ) {
-                    decoder.with_balances();
-                }
             }
 
             /// Call extension trait.
+            #[async_trait::async_trait]
             pub trait TransferCallExt<T: substrate_subxt::Runtime + Balances> {
                 /// Create and submit an extrinsic.
-                fn transfer<'a>(
+                async fn transfer<'a>(
                     &'a self,
                     signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
-                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, substrate_subxt::Error>> + Send + 'a>>;
+                ) -> Result<T::Hash, substrate_subxt::Error>;
 
                 /// Create, submit and watch an extrinsic.
-                fn transfer_and_watch<'a>(
+                async fn transfer_and_watch<'a>(
                     &'a self,
                     signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
-                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>> + Send + 'a>>;
+                ) -> Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>;
             }
 
+            #[async_trait::async_trait]
             impl<T: substrate_subxt::Runtime + Balances> TransferCallExt<T> for substrate_subxt::Client<T>
             where
                 <<T::Extra as substrate_subxt::SignedExtra<T>>::Extra as substrate_subxt::SignedExtension>::AdditionalSigned: Send + Sync,
             {
-                fn transfer<'a>(
+                async fn transfer<'a>(
                     &'a self,
                     signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
-                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<T::Hash, substrate_subxt::Error>> + Send + 'a>> {
+                ) -> Result<T::Hash, substrate_subxt::Error> {
                     let _ = core::marker::PhantomData::<T>;
-                    Box::pin(self.submit(TransferCall { to, amount, }, signer))
+                    self.submit(TransferCall { to, amount, }, signer).await
                 }
 
-                fn transfer_and_watch<'a>(
+                async fn transfer_and_watch<'a>(
                     &'a self,
                     signer: &'a (dyn substrate_subxt::Signer<T> + Send + Sync),
                     to: &'a <T as System>::Address,
                     amount: T::Balance,
-                ) -> core::pin::Pin<Box<dyn core::future::Future<Output = Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error>> + Send + 'a>> {
+                ) -> Result<substrate_subxt::ExtrinsicSuccess<T>, substrate_subxt::Error> {
                     let _ = core::marker::PhantomData::<T>;
-                    Box::pin(self.watch(TransferCall { to, amount, }, signer))
+                    self.watch(TransferCall { to, amount, }, signer).await
                 }
             }
         };

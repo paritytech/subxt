@@ -1,4 +1,4 @@
-// Copyright 2019-2020 Parity Technologies (UK) Ltd.
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of substrate-subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -21,6 +21,13 @@ mod signer;
 
 pub use self::{
     extra::{
+        ChargeTransactionPayment,
+        CheckEra,
+        CheckGenesis,
+        CheckNonce,
+        CheckSpecVersion,
+        CheckTxVersion,
+        CheckWeight,
         DefaultExtra,
         Extra,
         SignedExtra,
