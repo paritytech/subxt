@@ -93,7 +93,7 @@ pub type EncodedJustification = Vec<u8>;
 type Justification = (ConsensusEngineId, EncodedJustification);
 type Justifications = Vec<Justification>;
 
-#[derive(PartialEq, Eq, Clone, Encode, Decode)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug)]
 #[derive(Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedBlock<Block> {
