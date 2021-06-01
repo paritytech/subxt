@@ -61,9 +61,7 @@ use sp_rpc::{
     number::NumberOrHex,
 };
 use sp_runtime::{
-    generic::{
-        Block,
-    },
+    generic::Block,
     traits::Hash,
 };
 use sp_version::RuntimeVersion;
@@ -93,8 +91,7 @@ pub type EncodedJustification = Vec<u8>;
 type Justification = (ConsensusEngineId, EncodedJustification);
 type Justifications = Vec<Justification>;
 
-#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug)]
-#[derive(Serialize, Deserialize)]
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SignedBlock<Block> {
     pub block: Block,
