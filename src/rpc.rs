@@ -61,10 +61,7 @@ use sp_rpc::{
     number::NumberOrHex,
 };
 use sp_runtime::{
-    generic::{
-        Block,
-        SignedBlock,
-    },
+    generic::Block,
     traits::Hash,
 };
 use sp_version::RuntimeVersion;
@@ -88,6 +85,18 @@ use crate::{
         SystemEvents,
     },
 };
+
+pub type ConsensusEngineId = [u8; 4];
+pub type EncodedJustification = Vec<u8>;
+type Justification = (ConsensusEngineId, EncodedJustification);
+type Justifications = Vec<Justification>;
+
+#[derive(PartialEq, Eq, Clone, Encode, Decode, Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct SignedBlock<Block> {
+    pub block: Block,
+    pub justifications: Option<Justifications>,
+}
 
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
