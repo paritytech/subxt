@@ -6727,7 +6727,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-subxt"
-version = "0.15.0"
+version = "0.15.1"
 dependencies = [
  "assert_matches",
  "async-std",

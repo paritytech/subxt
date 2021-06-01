@@ -156,7 +156,7 @@ impl TestNodeProcessBuilder {
         const MAX_ATTEMPTS: u32 = 10;
         let mut attempts = 1;
         let client = loop {
-            thread::sleep(time::Duration::from_secs(1));
+            thread::sleep(time::Duration::from_secs(3));
             log::info!(
                 "Connecting to contracts enabled node, attempt {}/{}",
                 attempts,
