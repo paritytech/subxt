@@ -184,11 +184,14 @@ impl ModuleMetadata {
                 .ok_or(MetadataError::StorageNotFound(key))
         }
         let key_2 = key.replace("Mmr", "MMR");
-        let metadata = self.storage.get(&key_2).unwrap_or(
-            self.storage
-                .get(key)
-                .ok_or(MetadataError::StorageNotFound(key))?,
-        );
+        let metadata = match self.storage.get(&key_2) {
+            Some(v) => v,
+            None => {
+                self.storage
+                    .get(key)
+                    .ok_or(MetadataError::StorageNotFound(key))?
+            }
+        };
         Ok(metadata)
     }
 

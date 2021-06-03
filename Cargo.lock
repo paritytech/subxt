@@ -6727,7 +6727,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-subxt"
-version = "0.15.1"
+version = "0.15.2"
 dependencies = [
  "assert_matches",
  "async-std",
@@ -6787,7 +6787,7 @@ dependencies = [
 
 [[package]]
 name = "substrate-subxt-proc-macro"
-version = "0.15.0"
+version = "0.15.2"
 dependencies = [
  "async-std",
  "async-trait",
