@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee_ws_client::Subscription;
+use jsonrpsee_types::{DeserializeOwned, Subscription};
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -176,8 +176,8 @@ impl<T: Runtime> FinalizedEventStorageSubscription<T> {
             if let Some(storage_change) = self.storage_changes.pop_front() {
                 return Some(storage_change)
             }
-            let header: T::Header = self.subscription.next().await?;
-            self.storage_changes.extend(
+            let header: T::Header = read_subscription_response(&mut self.subscription).await?;
+                self.storage_changes.extend(
                 self.rpc
                     .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
                     .await
@@ -199,8 +199,22 @@ impl<T: Runtime> EventStorageSubscription<T> {
     /// Gets the next change_set from the subscription.
     pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
         match self {
-            Self::Imported(event_sub) => event_sub.next().await,
+            Self::Imported(event_sub) => read_subscription_response(event_sub).await,
             Self::Finalized(event_sub) => event_sub.next().await,
+        }
+    }
+}
+
+async fn read_subscription_response<T>(sub: &mut Subscription<T>) -> Option<T>
+where
+    T: DeserializeOwned
+{
+     match sub.next().await {
+        Ok(Some(next)) => Some(next),
+        Ok(None) => return None,
+        Err(e) => {
+            log::error!("Subscription error: {:?} dropping it", e);
+            return None;
         }
     }
 }
