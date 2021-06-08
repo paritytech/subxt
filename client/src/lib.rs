@@ -57,8 +57,8 @@ use jsonrpsee_types::{
             JsonRpcNotificationSer,
         },
         response::{
-            JsonRpcSubscriptionResponseAlloc,
             JsonRpcResponse,
+            JsonRpcSubscriptionResponseAlloc,
         },
     },
     DeserializeOwned,
@@ -67,8 +67,8 @@ use jsonrpsee_types::{
     JsonValue,
     RequestMessage,
     Subscription,
-    SubscriptionMessage,
     SubscriptionKind,
+    SubscriptionMessage,
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
@@ -352,7 +352,11 @@ impl SubxtClient {
             Ok(Err(err)) => return Err(err),
             Err(err) => return Err(JsonRpseeError::Transport(Box::new(err))),
         };
-        Ok(Subscription::new(self.to_back.clone(), notifs_rx, SubscriptionKind::Subscription(id)))
+        Ok(Subscription::new(
+            self.to_back.clone(),
+            notifs_rx,
+            SubscriptionKind::Subscription(id),
+        ))
     }
 }
 

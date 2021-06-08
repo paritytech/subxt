@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee_types::{DeserializeOwned, Subscription};
+use jsonrpsee_types::{
+    DeserializeOwned,
+    Subscription,
+};
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -176,8 +179,9 @@ impl<T: Runtime> FinalizedEventStorageSubscription<T> {
             if let Some(storage_change) = self.storage_changes.pop_front() {
                 return Some(storage_change)
             }
-            let header: T::Header = read_subscription_response(&mut self.subscription).await?;
-                self.storage_changes.extend(
+            let header: T::Header =
+                read_subscription_response(&mut self.subscription).await?;
+            self.storage_changes.extend(
                 self.rpc
                     .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
                     .await
@@ -207,14 +211,14 @@ impl<T: Runtime> EventStorageSubscription<T> {
 
 async fn read_subscription_response<T>(sub: &mut Subscription<T>) -> Option<T>
 where
-    T: DeserializeOwned
+    T: DeserializeOwned,
 {
-     match sub.next().await {
+    match sub.next().await {
         Ok(Some(next)) => Some(next),
         Ok(None) => return None,
         Err(e) => {
             log::error!("Subscription error: {:?} dropping it", e);
-            return None;
+            return None
         }
     }
 }

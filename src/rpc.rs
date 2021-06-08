@@ -32,11 +32,18 @@ use core::{
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee_http_client::HttpClient;
-use jsonrpsee_ws_client::WsClient;
 use jsonrpsee_types::{
-    traits::{Client, SubscriptionClient},
-    to_json_value, DeserializeOwned, Error as RpcError, JsonValue, Subscription
+    to_json_value,
+    traits::{
+        Client,
+        SubscriptionClient,
+    },
+    DeserializeOwned,
+    Error as RpcError,
+    JsonValue,
+    Subscription,
 };
+use jsonrpsee_ws_client::WsClient;
 use serde::{
     Deserialize,
     Serialize,
