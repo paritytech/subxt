@@ -180,7 +180,7 @@ impl<T: Runtime> FinalizedEventStorageSubscription<T> {
                 return Some(storage_change)
             }
             let header: T::Header =
-                read_subscription_response(&mut self.subscription).await?;
+                read_subscription_response("HeaderSubscription", &mut self.subscription).await?;
             self.storage_changes.extend(
                 self.rpc
                     .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
@@ -203,22 +203,22 @@ impl<T: Runtime> EventStorageSubscription<T> {
     /// Gets the next change_set from the subscription.
     pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
         match self {
-            Self::Imported(event_sub) => read_subscription_response(event_sub).await,
+            Self::Imported(event_sub) => read_subscription_response("StorageChangeSetSubscription", event_sub).await,
             Self::Finalized(event_sub) => event_sub.next().await,
         }
     }
 }
 
-async fn read_subscription_response<T>(sub: &mut Subscription<T>) -> Option<T>
+async fn read_subscription_response<T>(sub_name: &str, sub: &mut Subscription<T>) -> Option<T>
 where
     T: DeserializeOwned,
 {
     match sub.next().await {
         Ok(Some(next)) => Some(next),
-        Ok(None) => return None,
+        Ok(None) => None,
         Err(e) => {
-            log::error!("Subscription error: {:?} dropping it", e);
-            return None
+            log::error!("Subscription {} failed: {:?} dropping", sub_name, e);
+            None
         }
     }
 }

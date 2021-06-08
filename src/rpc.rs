@@ -604,7 +604,7 @@ impl<T: Runtime> Rpc<T> {
                         ext_hash,
                     ))
                 })?;
-            let mut sub = EventSubscription::new(events_sub, &decoder);
+            let mut sub = EventSubscription::new(events_sub, decoder);
             sub.filter_extrinsic(block_hash, ext_index);
             let mut events = vec![];
             while let Some(event) = sub.next().await {
