@@ -210,7 +210,7 @@ impl<T: Runtime> ClientBuilder<T> {
             if url.starts_with("ws://") || url.starts_with("wss://") {
                 let client = WsClientBuilder::default()
                     .max_notifs_per_subscription(4096)
-                    .build(&url)
+                    .build(url)
                     .await?;
                 RpcClient::WebSocket(Arc::new(client))
             } else {

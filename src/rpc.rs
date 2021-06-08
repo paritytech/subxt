@@ -31,19 +31,19 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::{
+use jsonrpsee_http_client::HttpClient;
+use jsonrpsee_types::{
     to_json_value,
-    traits::Client,
+    traits::{
+        Client,
+        SubscriptionClient,
+    },
     DeserializeOwned,
     Error as RpcError,
-    HttpClient,
     JsonValue,
-};
-use jsonrpsee_ws_client::{
-    traits::SubscriptionClient,
     Subscription,
-    WsClient,
 };
+use jsonrpsee_ws_client::WsClient;
 use serde::{
     Deserialize,
     Serialize,
@@ -541,7 +541,7 @@ impl<T: Runtime> Rpc<T> {
         }?;
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-        while let Some(status) = xt_sub.next().await {
+        while let Ok(Some(status)) = xt_sub.next().await {
             log::info!("received status {:?}", status);
             match status {
                 // ignore in progress extrinsic for now
@@ -604,7 +604,7 @@ impl<T: Runtime> Rpc<T> {
                         ext_hash,
                     ))
                 })?;
-            let mut sub = EventSubscription::new(events_sub, &decoder);
+            let mut sub = EventSubscription::new(events_sub, decoder);
             sub.filter_extrinsic(block_hash, ext_index);
             let mut events = vec![];
             while let Some(event) = sub.next().await {

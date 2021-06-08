@@ -42,7 +42,7 @@ use futures01::sync::mpsc as mpsc01;
 use jsonrpsee_types::{
     v2::{
         error::{
-            JsonRpcErrorAlloc,
+            JsonRpcError,
             JsonRpcErrorCode,
         },
         params::{
@@ -51,15 +51,14 @@ use jsonrpsee_types::{
             SubscriptionId,
             TwoPointZero,
         },
-        parse_request_id,
         request::{
             JsonRpcCallSer,
             JsonRpcInvalidRequest,
             JsonRpcNotificationSer,
         },
         response::{
-            JsonRpcNotifResponse,
             JsonRpcResponse,
+            JsonRpcSubscriptionResponseAlloc,
         },
     },
     DeserializeOwned,
@@ -68,6 +67,7 @@ use jsonrpsee_types::{
     JsonValue,
     RequestMessage,
     Subscription,
+    SubscriptionKind,
     SubscriptionMessage,
 };
 use sc_network::config::TransportConfig;
@@ -94,7 +94,6 @@ use sc_service::{
 };
 use std::{
     collections::HashMap,
-    marker::PhantomData,
     sync::atomic::{
         AtomicU64,
         Ordering,
@@ -211,7 +210,7 @@ impl SubxtClient {
                                     while let Some(Ok(response)) = from_back.next().await
                                     {
                                         let notif = serde_json::from_str::<
-                                            JsonRpcNotifResponse<JsonValue>,
+                                            JsonRpcSubscriptionResponseAlloc<JsonValue>,
                                         >(
                                             &response
                                         )
@@ -241,7 +240,7 @@ impl SubxtClient {
                                     let _ = rpc.rpc_query(&session, &message).await;
                                 }
                             }
-                            FrontToBack::Batch(_) => (),
+                            _ => (),
                         }
                     }
                 })),
@@ -280,7 +279,7 @@ impl SubxtClient {
             .clone()
             .send(FrontToBack::Notification(msg))
             .await
-            .map_err(|e| JsonRpseeError::TransportError(Box::new(e)))
+            .map_err(|e| JsonRpseeError::Transport(Box::new(e)))
     }
 
     /// Send a JSONRPC request.
@@ -306,12 +305,12 @@ impl SubxtClient {
                 send_back: Some(send_back_tx),
             }))
             .await
-            .map_err(|e| JsonRpseeError::TransportError(Box::new(e)))?;
+            .map_err(|e| JsonRpseeError::Transport(Box::new(e)))?;
 
         let json_value = match send_back_rx.await {
             Ok(Ok(v)) => v,
             Ok(Err(err)) => return Err(err),
-            Err(err) => return Err(JsonRpseeError::TransportError(Box::new(err))),
+            Err(err) => return Err(JsonRpseeError::Transport(Box::new(err))),
         };
         serde_json::from_value(json_value).map_err(JsonRpseeError::ParseError)
     }
@@ -351,14 +350,13 @@ impl SubxtClient {
         let (notifs_rx, id) = match send_back_rx.await {
             Ok(Ok(val)) => val,
             Ok(Err(err)) => return Err(err),
-            Err(err) => return Err(JsonRpseeError::TransportError(Box::new(err))),
+            Err(err) => return Err(JsonRpseeError::Transport(Box::new(err))),
         };
-        Ok(Subscription {
-            to_back: self.to_back.clone(),
+        Ok(Subscription::new(
+            self.to_back.clone(),
             notifs_rx,
-            marker: PhantomData,
-            id,
-        })
+            SubscriptionKind::Subscription(id),
+        ))
     }
 }
 
@@ -512,26 +510,25 @@ fn read_jsonrpc_response(
     maybe_msg: Option<String>,
     id: Id,
 ) -> Option<Result<JsonValue, JsonRpseeError>> {
-    let msg = maybe_msg?;
-    match serde_json::from_str::<JsonRpcResponse<JsonValue>>(&msg) {
-        Ok(rp) => {
-            match parse_request_id::<Id>(rp.id) {
-                Ok(rp_id) if rp_id == id => Some(Ok(rp.result)),
-                _ => Some(Err(JsonRpseeError::InvalidRequestId)),
-            }
-        }
+    let msg: String = maybe_msg?;
+    // NOTE: `let res` is a workaround because rustc otherwise doesn't compile
+    // `msg` doesn't live long enough.
+    let res = match serde_json::from_str::<JsonRpcResponse<JsonValue>>(&msg) {
+        Ok(rp) if rp.id == id => Some(Ok(rp.result)),
+        Ok(_) => Some(Err(JsonRpseeError::InvalidRequestId)),
         Err(_) => {
             match serde_json::from_str::<JsonRpcInvalidRequest<'_>>(&msg) {
                 Ok(err) => {
-                    let err = JsonRpcErrorAlloc {
+                    let err = JsonRpcError {
                         jsonrpc: TwoPointZero,
                         error: JsonRpcErrorCode::InvalidRequest.into(),
-                        id: parse_request_id(err.id).ok()?,
+                        id: err.id,
                     };
-                    Some(Err(JsonRpseeError::Request(err)))
+                    Some(Err(JsonRpseeError::Request(err.to_string())))
                 }
                 Err(_) => None,
             }
         }
-    }
+    };
+    res
 }
