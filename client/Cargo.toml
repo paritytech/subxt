@@ -18,15 +18,16 @@ futures01 = { package = "futures", version = "0.1.29" }
 jsonrpsee-types = "=0.2.0-alpha.3"
 jsonrpsee-ws-client = "=0.2.0-alpha.3"
 log = "0.4.13"
-sc-network = { version = "0.9.0", default-features = false }
-sc-client-db = "0.9.0"
-sc-service = { version = "0.9.0", default-features = false }
 serde_json = "1.0.61"
-sp-keyring = "3.0.0"
 thiserror = "1.0.23"
 
+sc-network = { package = "sc-network", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c", default-features = false }
+sc-client-db = { package = "sc-client-db", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sc-service = { package = "sc-service", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c", default-features = false }
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+
 [target.'cfg(target_arch="x86_64")'.dependencies]
-sc-service = { version = "0.9.0", default-features = false, features = ["wasmtime"] }
+sc-service = { package = "sc-service", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c", default-features = false, features = ["wasmtime"] }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
