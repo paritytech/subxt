@@ -19,47 +19,49 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 [features]
 default = ["tokio1"]
 client = ["substrate-subxt-client"]
-# jsonrpsee http client can be configured to use tokio02 or tokio1.
-tokio02 = ["jsonrpsee-http-client/tokio02"]
-tokio1 = ["jsonrpsee-http-client/tokio1"]
+# jsonrpsee can be configured to use tokio02 or tokio1.
+tokio02 = ["jsonrpsee-http-client/tokio02", "jsonrpsee-ws-client/tokio02"]
+tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 
 [dependencies]
 async-trait = "0.1.49"
-hex = "0.4.3"
-log = "0.4.14"
-thiserror = "1.0.24"
+codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
+dyn-clone = "1.0.4"
 futures = "0.3.13"
-jsonrpsee-types = "=0.2.0-alpha.3"
-jsonrpsee-ws-client = "=0.2.0-alpha.3"
-jsonrpsee-http-client = { version = "=0.2.0-alpha.3", default-features = false }
+hex = "0.4.3"
+jsonrpsee-proc-macros = "0.2.0"
+jsonrpsee-ws-client = { version = "0.2.0", default-features = false }
+jsonrpsee-http-client = { version = "0.2.0", default-features = false }
+jsonrpsee-types = "0.2.0"
+log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
+thiserror = "1.0.24"
 url = "2.2.1"
-codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
-dyn-clone = "1.0.4"
-
-frame-metadata = { package = "frame-metadata", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-frame-support = { package = "frame-support", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-pallet-indices = { package = "pallet-indices", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-application-crypto = { package = "sp-application-crypto", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-pallet-staking = { package = "pallet-staking", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-sp-rpc = { package = "sp-rpc", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
-sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
 
 substrate-subxt-client = { version = "0.7.0", path = "client", optional = true }
 substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
 
+sp-application-crypto = { package = "sp-application-crypto", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sp-rpc = { package = "sp-rpc", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sp-std = { package = "sp-std", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+
+frame-metadata = { package = "frame-metadata", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+frame-support = { package = "frame-support", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+pallet-indices = { package = "pallet-indices", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+pallet-staking = { package = "pallet-staking", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
+
 [dev-dependencies]
-async-std = { version = "1.9.0", features = ["attributes"] }
+assert_matches = "1.5.0"
+async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-assert_matches = "1.5.0"
 
 frame-system = { package = "frame-system", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }
 pallet-balances = { package = "pallet-balances", git = "https://github.com/paritytech/substrate", rev = "eb9033b826b9e8115c20707fe66af0ceb177e99c" }

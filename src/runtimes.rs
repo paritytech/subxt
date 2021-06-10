@@ -39,7 +39,7 @@ pub struct Babe;
 /// These are redefined here to avoid dependencies on the substrate creates where they are defined.
 /// They must be identical to the definitions in the target substrate version.
 pub mod app {
-    use application_crypto::{
+    use sp_application_crypto::{
         app_crypto,
         ed25519,
         key_types,
