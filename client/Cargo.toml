@@ -17,15 +17,15 @@ futures = { version = "0.3.9", features = ["compat"], package = "futures" }
 futures01 = { package = "futures", version = "0.1.29" }
 jsonrpsee-types = "=0.2.0-alpha.6"
 log = "0.4.13"
-sc-network = { version = "0.9.0", default-features = false }
-sc-client-db = "0.9.0"
-sc-service = { version = "0.9.0", default-features = false }
+sc-network = { package = "sc-network", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false }
+sc-client-db = { package = "sc-client-db", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
+sc-service = { package = "sc-service", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false }
 serde_json = "1.0.61"
 sp-keyring = "3.0.0"
 thiserror = "1.0.23"
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
-sc-service = { version = "0.9.0", default-features = false, features = ["wasmtime"] }
+sc-service = { package = "sc-service", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false, features = ["wasmtime"] }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
