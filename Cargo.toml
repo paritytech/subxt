@@ -51,7 +51,7 @@ pallet-staking = { package = "pallet-staking", version = "3.0.0", git = "https:/
 sp-rpc = { package = "sp-rpc", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
 sp-core = { package = "sp-core", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", features = ["full_crypto"] }
 substrate-subxt-client = { version = "0.7.0", path = "client", optional = true }
-substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
+substrate-subxt-proc-macro = { version = "0.15.2-1", path = "proc-macro" }
 
 [dev-dependencies]
 async-std = { version = "1.9.0", features = ["attributes"] }
