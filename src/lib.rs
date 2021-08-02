@@ -52,10 +52,8 @@ use codec::{
 };
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_ws_client::{
-    Subscription,
-    WsClientBuilder,
-};
+use jsonrpsee_types::Subscription;
+use jsonrpsee_ws_client::WsClientBuilder;
 use sp_core::{
     storage::{
         StorageChangeSet,
