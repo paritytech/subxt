@@ -29,10 +29,10 @@ codec = { package = "parity-scale-codec", version = "2.1", default-features = fa
 dyn-clone = "1.0.4"
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee-proc-macros = "0.2.0"
-jsonrpsee-ws-client = { version = "0.2.0", default-features = false }
-jsonrpsee-http-client = { version = "0.2.0", default-features = false }
-jsonrpsee-types = "0.2.0"
+jsonrpsee-proc-macros = "0.3.0"
+jsonrpsee-ws-client = { version = "0.3.0", default-features = false }
+jsonrpsee-http-client = { version = "0.3.0", default-features = false }
+jsonrpsee-types = "0.3.0"
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }

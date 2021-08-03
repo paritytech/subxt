@@ -48,18 +48,17 @@ use jsonrpsee_types::{
         params::{
             Id,
             JsonRpcParams,
+            JsonRpcSubscriptionParams,
             SubscriptionId,
             TwoPointZero,
         },
         request::{
             JsonRpcCallSer,
             JsonRpcInvalidRequest,
+            JsonRpcNotification,
             JsonRpcNotificationSer,
         },
-        response::{
-            JsonRpcResponse,
-            JsonRpcSubscriptionResponseAlloc,
-        },
+        response::JsonRpcResponse,
     },
     DeserializeOwned,
     Error as JsonRpseeError,
@@ -210,7 +209,9 @@ impl SubxtClient {
                                     while let Some(Ok(response)) = from_back.next().await
                                     {
                                         let notif = serde_json::from_str::<
-                                            JsonRpcSubscriptionResponseAlloc<JsonValue>,
+                                            JsonRpcNotification<
+                                                JsonRpcSubscriptionParams<_>,
+                                            >,
                                         >(
                                             &response
                                         )
