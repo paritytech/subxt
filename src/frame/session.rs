@@ -72,7 +72,6 @@ pub struct ValidatorsStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
-
 /// The queued keys for the next session.
 #[derive(Encode, Store, Debug)]
 pub struct QueuedKeysStore<T: Session> {
