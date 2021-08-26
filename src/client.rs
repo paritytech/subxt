@@ -179,52 +179,6 @@ impl<T: Runtime> Clone for Client<T> {
     }
 }
 
-/// Iterates over key value pairs in a map.
-pub struct KeyIter<T: Runtime, F: Store<T>> {
-    client: Client<T>,
-    _marker: PhantomData<F>,
-    count: u32,
-    hash: T::Hash,
-    start_key: Option<StorageKey>,
-    buffer: Vec<(StorageKey, StorageData)>,
-}
-
-impl<T: Runtime, F: Store<T>> KeyIter<T, F> {
-    /// Returns the next key value pair from a map.
-    pub async fn next(&mut self) -> Result<Option<(StorageKey, F::Returns)>, Error> {
-        loop {
-            if let Some((k, v)) = self.buffer.pop() {
-                return Ok(Some((k, Decode::decode(&mut &v.0[..])?)))
-            } else {
-                let keys = self
-                    .client
-                    .fetch_keys::<F>(self.count, self.start_key.take(), Some(self.hash))
-                    .await?;
-
-                if keys.is_empty() {
-                    return Ok(None)
-                }
-
-                self.start_key = keys.last().cloned();
-
-                let change_sets = self
-                    .client
-                    .rpc
-                    .query_storage_at(&keys, Some(self.hash))
-                    .await?;
-                for change_set in change_sets {
-                    for (k, v) in change_set.changes {
-                        if let Some(v) = v {
-                            self.buffer.push((k, v));
-                        }
-                    }
-                }
-                debug_assert_eq!(self.buffer.len(), keys.len());
-            }
-        }
-    }
-}
-
 impl<T: Runtime> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
@@ -258,68 +212,6 @@ impl<T: Runtime> Client<T> {
             Ok(None)
         }
     }
-
-    // /// Fetch a StorageKey with an optional block hash.
-    // pub async fn fetch<F: Store<T>>(
-    //     &self,
-    //     store: &F,
-    //     hash: Option<T::Hash>,
-    // ) -> Result<Option<F::Returns>, Error> {
-    //     let key = store.key(&self.metadata)?;
-    //     self.fetch_unhashed::<F::Returns>(key, hash).await
-    // }
-    //
-    // /// Fetch a StorageKey that has a default value with an optional block hash.
-    // pub async fn fetch_or_default<F: Store<T>>(
-    //     &self,
-    //     store: &F,
-    //     hash: Option<T::Hash>,
-    // ) -> Result<F::Returns, Error> {
-    //     if let Some(data) = self.fetch(store, hash).await? {
-    //         Ok(data)
-    //     } else {
-    //         Ok(store.default(&self.metadata)?)
-    //     }
-    // }
-
-    /// Returns an iterator of key value pairs.
-    pub async fn iter<F: Store<T>>(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<KeyIter<T, F>, Error> {
-        let hash = if let Some(hash) = hash {
-            hash
-        } else {
-            self.block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed")
-        };
-        Ok(KeyIter {
-            client: self.clone(),
-            hash,
-            count: self.page_size,
-            start_key: None,
-            buffer: Default::default(),
-            _marker: PhantomData,
-        })
-    }
-
-    // /// Fetch up to `count` keys for a storage map in lexicographic order.
-    // ///
-    // /// Supports pagination by passing a value to `start_key`.
-    // pub async fn fetch_keys<F: Store<T>>(
-    //     &self,
-    //     count: u32,
-    //     start_key: Option<StorageKey>,
-    //     hash: Option<T::Hash>,
-    // ) -> Result<Vec<StorageKey>, Error> {
-    //     let prefix = <F as Store<T>>::prefix(&self.metadata)?;
-    //     let keys = self
-    //         .rpc
-    //         .storage_keys_paged(Some(prefix), count, start_key, hash)
-    //         .await?;
-    //     Ok(keys)
-    // }
 
     /// Query historical storage entries
     pub async fn query_storage(
