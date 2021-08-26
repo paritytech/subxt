@@ -106,6 +106,53 @@ use crate::{
     },
 };
 
+pub trait Runtime: Send + Sync + 'static {
+    /// Account index (aka nonce) type. This stores the number of previous
+    /// transactions associated with a sender account.
+    type Index: Parameter
+        + Default
+        // + MaybeDisplay
+        // + AtLeast32Bit
+        + Copy;
+
+    /// The block number type used by the runtime.
+    type BlockNumber: Parameter
+        // + Member
+        // + MaybeMallocSizeOf
+        // + MaybeSerializeDeserialize
+        // + Debug
+        // + MaybeDisplay
+        // + AtLeast32BitUnsigned
+        + Default
+        // + Bounded
+        + Copy
+        + std::hash::Hash
+        + std::str::FromStr;
+
+    /// The output of the `Hashing` function.
+    type Hash: Parameter
+        + Ord
+        + Default
+        + Copy
+        + std::hash::Hash
+        + AsRef<[u8]>
+        + AsMut<[u8]>;
+
+    /// The user account identifier type for the runtime.
+    type AccountId: Parameter; // + Member + MaybeSerialize + MaybeDisplay + Ord + Default;
+
+    // /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
+    // #[module(ignore)]
+    // type Address: Codec + Clone + PartialEq;
+    // + Debug + Send + Sync;
+
+    // /// The block header.
+    // #[module(ignore)]
+    // type Header: Parameter;
+        // + Header<Number = Self::BlockNumber, Hash = Self::Hash>
+        // + DeserializeOwned;
+}
+
 /// A phase of a block's execution.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum Phase {

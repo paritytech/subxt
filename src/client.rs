@@ -52,7 +52,7 @@ use crate::{Error, events::EventsDecoder, extrinsic::{
     EventStorageSubscription,
     EventSubscription,
     FinalizedEventStorageSubscription,
-}, BlockNumber, ReadProof};
+}, BlockNumber, ReadProof, Runtime};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -101,7 +101,7 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
-    pub async fn build<'a>(self) -> Result<Client<T>, Error> {
+    pub async fn build<T: Runtime>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
             client
         } else {
