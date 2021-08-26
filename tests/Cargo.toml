@@ -12,6 +12,4 @@ env_logger = "0.8.3"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-sp-keyring = "3.0.0"
-frame-system = "3.0.0"
-pallet-balances = "3.0.0"
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }
