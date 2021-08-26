@@ -15,7 +15,6 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{
-    Codec,
     Decode,
 };
 pub use frame_metadata::RuntimeMetadataLastVersion as Metadata;
@@ -26,7 +25,6 @@ use jsonrpsee_ws_client::WsClientBuilder;
 use sp_core::{
     storage::{
         StorageChangeSet,
-        StorageData,
         StorageKey,
     },
     Bytes,
@@ -38,27 +36,23 @@ use std::{
     sync::Arc,
 };
 
-use crate::{
-    Error,
-    events::EventsDecoder,
-    extrinsic::{
-        PairSigner,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
-    },
-    rpc::{
-        ChainBlock,
-        Rpc,
-        RpcClient,
-        SystemProperties,
-    },
-    subscription::{
-        EventStorageSubscription,
-        EventSubscription,
-        FinalizedEventStorageSubscription,
-    },
-};
+use crate::{Error, events::EventsDecoder, extrinsic::{
+    self,
+    PairSigner,
+    SignedExtra,
+    Signer,
+    UncheckedExtrinsic,
+}, rpc::{
+    ChainBlock,
+    Rpc,
+    RpcClient,
+    SystemProperties,
+    ExtrinsicSuccess,
+}, subscription::{
+    EventStorageSubscription,
+    EventSubscription,
+    FinalizedEventStorageSubscription,
+}, BlockNumber, ReadProof};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -157,7 +151,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
-    events_decoder: EventsDecoder<T>,
+    events_decoder: EventsDecoder,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
@@ -219,7 +213,7 @@ impl<T: Runtime> Client<T> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         self.rpc.query_storage(keys, from, to).await
     }
 
@@ -300,52 +294,52 @@ impl<T: Runtime> Client<T> {
         Ok(headers)
     }
 
-    /// Encodes a call.
-    pub fn encode<C: Call<T>>(&self, call: C) -> Result<Encoded, Error> {
-        Ok(self
-            .metadata()
-            .module_with_calls(C::MODULE)
-            .and_then(|module| module.call(C::FUNCTION, call))?)
-    }
+    // /// Encodes a call.
+    // pub fn encode<C: Call<T>>(&self, call: C) -> Result<Encoded, Error> {
+    //     Ok(self
+    //         .metadata()
+    //         .module_with_calls(C::MODULE)
+    //         .and_then(|module| module.call(C::FUNCTION, call))?)
+    // }
 
     /// Creates an unsigned extrinsic.
-    pub fn create_unsigned<C: Call<T> + Send + Sync>(
-        &self,
-        call: C,
-    ) -> Result<UncheckedExtrinsic<T>, Error> {
-        let call = self.encode(call)?;
-        Ok(extrinsic::create_unsigned::<T>(call))
-    }
+    // pub fn create_unsigned<C: Call<T> + Send + Sync>(
+    //     &self,
+    //     call: C,
+    // ) -> Result<UncheckedExtrinsic<T>, Error> {
+    //     let call = self.encode(call)?;
+    //     Ok(extrinsic::create_unsigned::<T>(call))
+    // }
 
     /// Creates a signed extrinsic.
-    pub async fn create_signed<C: Call<T> + Send + Sync>(
-        &self,
-        call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<UncheckedExtrinsic<T>, Error>
-        where
-            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let account_nonce = if let Some(nonce) = signer.nonce() {
-            nonce
-        } else {
-            self.account(signer.account_id(), None).await?.nonce
-        };
-        let call = self.encode(call)?;
-        let signed = extrinsic::create_signed(
-            &self.runtime_version,
-            self.genesis_hash,
-            account_nonce,
-            call,
-            signer,
-        )
-            .await?;
-        Ok(signed)
-    }
+    // pub async fn create_signed<C: Call<T> + Send + Sync>(
+    //     &self,
+    //     call: C,
+    //     signer: &(dyn Signer<T> + Send + Sync),
+    // ) -> Result<UncheckedExtrinsic<T>, Error>
+    //     where
+    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    //         Send + Sync,
+    // {
+    //     let account_nonce = if let Some(nonce) = signer.nonce() {
+    //         nonce
+    //     } else {
+    //         self.account(signer.account_id(), None).await?.nonce
+    //     };
+    //     let call = self.encode(call)?;
+    //     let signed = extrinsic::create_signed(
+    //         &self.runtime_version,
+    //         self.genesis_hash,
+    //         account_nonce,
+    //         call,
+    //         signer,
+    //     )
+    //         .await?;
+    //     Ok(signed)
+    // }
 
     /// Returns the events decoder.
-    pub fn events_decoder(&self) -> &EventsDecoder<T> {
+    pub fn events_decoder(&self) -> &EventsDecoder {
         &self.events_decoder
     }
 
@@ -368,32 +362,32 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Submits a transaction to the chain.
-    pub async fn submit<C: Call<T> + Send + Sync>(
-        &self,
-        call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<T::Hash, Error>
-        where
-            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let extrinsic = self.create_signed(call, signer).await?;
-        self.submit_extrinsic(extrinsic).await
-    }
+    // pub async fn submit<C: Call<T> + Send + Sync>(
+    //     &self,
+    //     call: C,
+    //     signer: &(dyn Signer<T> + Send + Sync),
+    // ) -> Result<T::Hash, Error>
+    //     where
+    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    //         Send + Sync,
+    // {
+    //     let extrinsic = self.create_signed(call, signer).await?;
+    //     self.submit_extrinsic(extrinsic).await
+    // }
 
     /// Submits transaction to the chain and watch for events.
-    pub async fn watch<C: Call<T> + Send + Sync>(
-        &self,
-        call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error>
-        where
-            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let extrinsic = self.create_signed(call, signer).await?;
-        self.submit_and_watch_extrinsic(extrinsic).await
-    }
+    // pub async fn watch<C: Call<T> + Send + Sync>(
+    //     &self,
+    //     call: C,
+    //     signer: &(dyn Signer<T> + Send + Sync),
+    // ) -> Result<ExtrinsicSuccess<T>, Error>
+    //     where
+    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    //         Send + Sync,
+    // {
+    //     let extrinsic = self.create_signed(call, signer).await?;
+    //     self.submit_and_watch_extrinsic(extrinsic).await
+    // }
 
     /// Insert a key into the keystore.
     pub async fn insert_key(

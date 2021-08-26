@@ -105,20 +105,12 @@ impl<T> Default for TypeMarker<T> {
 }
 
 /// Events decoder.
-#[derive(Debug)]
-pub struct EventsDecoder<T> {
+#[derive(Debug, Clone)]
+pub struct EventsDecoder {
     metadata: Metadata,
 }
 
-impl<T> Clone for EventsDecoder<T> {
-    fn clone(&self) -> Self {
-        Self {
-            metadata: self.metadata.clone(),
-        }
-    }
-}
-
-impl<T: Runtime + System> EventsDecoder<T> {
+impl EventsDecoder {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {
