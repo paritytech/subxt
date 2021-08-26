@@ -33,7 +33,3 @@ substrate-subxt = { path = ".." }
 trybuild = "1.0.38"
 
 sp-keyring = "3.0.0"
-
-[[test]]
-name = "balances"
-path = "tests/balances.rs"

@@ -72,13 +72,9 @@ use std::{
 mod error;
 mod events;
 pub mod extrinsic;
-mod frame;
 mod metadata;
 mod rpc;
-mod runtimes;
 mod subscription;
-#[cfg(test)]
-mod tests;
 
 pub use crate::{
     error::{

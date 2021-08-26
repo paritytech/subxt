@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "proc-macro"]
+members = [".", "proc-macro", "tests"]
 
 [package]
 name = "substrate-subxt"
@@ -41,17 +41,12 @@ url = "2.2.1"
 
 substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
 
-sp-application-crypto = "3.0.0"
 sp-core = "3.0.0"
 sp-rpc = "3.0.0"
 sp-runtime = "3.0.0"
-sp-std = "3.0.0"
 sp-version = "3.0.0"
 
-frame-metadata = "13.0.0"
-frame-support = "3.0.0"
-pallet-indices = "3.0.0"
-pallet-staking = "3.0.0"
+frame-metadata = "14.0.0-rc.2"
 
 [dev-dependencies]
 assert_matches = "1.5.0"
