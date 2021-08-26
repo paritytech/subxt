@@ -16,7 +16,6 @@
 
 //! Create signed or unsigned extrinsics.
 
-mod extra;
 mod signer;
 
 pub use self::{

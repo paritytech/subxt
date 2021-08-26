@@ -47,10 +47,7 @@ use crate::{
         Error,
         RuntimeError,
     },
-    metadata::{
-        EventArg,
-        Metadata,
-    },
+    Metadata,
     Phase,
     Runtime,
     System,
@@ -111,24 +108,21 @@ impl<T> Default for TypeMarker<T> {
 #[derive(Debug)]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
-    event_type_registry: EventTypeRegistry<T>,
 }
 
 impl<T> Clone for EventsDecoder<T> {
     fn clone(&self) -> Self {
         Self {
             metadata: self.metadata.clone(),
-            event_type_registry: self.event_type_registry.clone(),
         }
     }
 }
 
 impl<T: Runtime + System> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
-    pub fn new(metadata: Metadata, event_type_registry: EventTypeRegistry<T>) -> Self {
+    pub fn new(metadata: Metadata) -> Self {
         Self {
             metadata,
-            event_type_registry,
         }
     }
 
@@ -192,152 +186,62 @@ impl<T: Runtime + System> EventsDecoder<T> {
 
     fn decode_raw_bytes<W: Output>(
         &self,
-        args: &[EventArg],
-        input: &mut &[u8],
-        output: &mut W,
-        errors: &mut Vec<RuntimeError>,
+        _args: &scale_info::Variant,
+        _input: &mut &[u8],
+        _output: &mut W,
+        _errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
-        for arg in args {
-            match arg {
-                EventArg::Vec(arg) => {
-                    let len = <Compact<u32>>::decode(input)?;
-                    len.encode_to(output);
-                    for _ in 0..len.0 {
-                        self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-                    }
-                }
-                EventArg::Option(arg) => {
-                    match input.read_byte()? {
-                        0 => output.push_byte(0),
-                        1 => {
-                            output.push_byte(1);
-                            self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-                        }
-                        _ => {
-                            return Err(Error::Other(
-                                "unexpected first byte decoding Option".into(),
-                            ))
-                        }
-                    }
-                }
-                EventArg::Tuple(args) => {
-                    self.decode_raw_bytes(args, input, output, errors)?
-                }
-                EventArg::Primitive(name) => {
-                    let result = match name.as_str() {
-                        "DispatchResult" => DispatchResult::decode(input)?,
-                        "DispatchError" => Err(DispatchError::decode(input)?),
-                        _ => {
-                            if let Some(seg) = self.event_type_registry.resolve(name) {
-                                let mut buf = Vec::<u8>::new();
-                                seg.segment(input, &mut buf)?;
-                                output.write(&buf);
-                                Ok(())
-                            } else {
-                                return Err(Error::TypeSizeUnavailable(name.to_owned()))
-                            }
-                        }
-                    };
-                    if let Err(error) = result {
-                        // since the input may contain any number of args we propagate
-                        // runtime errors to the caller for handling
-                        errors.push(RuntimeError::from_dispatch(&self.metadata, error)?);
-                    }
-                }
-            }
-        }
-        Ok(())
-    }
-}
-
-/// Registry for event types which cannot be directly inferred from the metadata.
-#[derive(Default)]
-pub struct EventTypeRegistry<T> {
-    segmenters: HashMap<String, Box<dyn TypeSegmenter>>,
-    marker: PhantomData<fn() -> T>,
-}
-
-impl<T> Clone for EventTypeRegistry<T> {
-    fn clone(&self) -> Self {
-        Self {
-            segmenters: self.segmenters.clone(),
-            marker: PhantomData,
-        }
-    }
-}
-
-impl<T> fmt::Debug for EventTypeRegistry<T> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("EventTypeRegistry")
-            .field(
-                "segmenters",
-                &self.segmenters.keys().cloned().collect::<String>(),
-            )
-            .finish()
-    }
-}
-
-impl<T: Runtime> EventTypeRegistry<T> {
-    /// Create a new [`EventTypeRegistry`].
-    pub fn new() -> Self {
-        let mut registry = Self {
-            segmenters: HashMap::new(),
-            marker: PhantomData,
-        };
-        T::register_type_sizes(&mut registry);
-        registry
-    }
-
-    /// Register a type.
-    ///
-    /// # Panics
-    ///
-    /// If there is already a type size registered with this name.
-    pub fn register_type_size<U>(&mut self, name: &str)
-    where
-        U: Codec + Send + Sync + 'static,
-    {
-        // A segmenter decodes a type from an input stream (&mut &[u8]) and returns te serialized
-        // type to the output stream (&mut Vec<u8>).
-        match self.segmenters.entry(name.to_string()) {
-            Entry::Occupied(_) => panic!("Already a type registered with key {}", name),
-            Entry::Vacant(entry) => entry.insert(Box::new(TypeMarker::<U>::default())),
-        };
-    }
-
-    /// Check missing type sizes.
-    pub fn check_missing_type_sizes(
-        &self,
-        metadata: &Metadata,
-    ) -> Result<(), HashSet<String>> {
-        let mut missing = HashSet::new();
-        for module in metadata.modules_with_events() {
-            for event in module.events() {
-                for arg in event.arguments() {
-                    for primitive in arg.primitives() {
-                        if !self.segmenters.contains_key(&primitive) {
-                            missing.insert(format!(
-                                "{}::{}::{}",
-                                module.name(),
-                                event.name,
-                                primitive
-                            ));
-                        }
-                    }
-                }
-            }
-        }
-
-        if !missing.is_empty() {
-            Err(missing)
-        } else {
-            Ok(())
-        }
-    }
-
-    /// Resolve a segmenter for a type by its name.
-    pub fn resolve(&self, name: &str) -> Option<&Box<dyn TypeSegmenter>> {
-        self.segmenters.get(name)
+        todo!()
+        // for arg in args {
+        //     match arg {
+        //         EventArg::Vec(arg) => {
+        //             let len = <Compact<u32>>::decode(input)?;
+        //             len.encode_to(output);
+        //             for _ in 0..len.0 {
+        //                 self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
+        //             }
+        //         }
+        //         EventArg::Option(arg) => {
+        //             match input.read_byte()? {
+        //                 0 => output.push_byte(0),
+        //                 1 => {
+        //                     output.push_byte(1);
+        //                     self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
+        //                 }
+        //                 _ => {
+        //                     return Err(Error::Other(
+        //                         "unexpected first byte decoding Option".into(),
+        //                     ))
+        //                 }
+        //             }
+        //         }
+        //         EventArg::Tuple(args) => {
+        //             self.decode_raw_bytes(args, input, output, errors)?
+        //         }
+        //         EventArg::Primitive(name) => {
+        //             let result = match name.as_str() {
+        //                 "DispatchResult" => DispatchResult::decode(input)?,
+        //                 "DispatchError" => Err(DispatchError::decode(input)?),
+        //                 _ => {
+        //                     if let Some(seg) = self.event_type_registry.resolve(name) {
+        //                         let mut buf = Vec::<u8>::new();
+        //                         seg.segment(input, &mut buf)?;
+        //                         output.write(&buf);
+        //                         Ok(())
+        //                     } else {
+        //                         return Err(Error::TypeSizeUnavailable(name.to_owned()))
+        //                     }
+        //                 }
+        //             };
+        //             if let Err(error) = result {
+        //                 // since the input may contain any number of args we propagate
+        //                 // runtime errors to the caller for handling
+        //                 errors.push(RuntimeError::from_dispatch(&self.metadata, error)?);
+        //             }
+        //         }
+        //     }
+        // }
+        // Ok(())
     }
 }
 
@@ -353,17 +257,6 @@ pub enum Raw {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use frame_metadata::{
-        DecodeDifferent,
-        ErrorMetadata,
-        EventMetadata,
-        ExtrinsicMetadata,
-        ModuleMetadata,
-        RuntimeMetadata,
-        RuntimeMetadataPrefixed,
-        RuntimeMetadataV12,
-        META_RESERVED,
-    };
     use std::convert::TryFrom;
 
     type TestRuntime = crate::NodeTemplateRuntime;
@@ -372,7 +265,6 @@ mod tests {
     fn test_decode_option() {
         let decoder = EventsDecoder::<TestRuntime>::new(
             Metadata::default(),
-            EventTypeRegistry::new(),
         );
 
         let value = Some(0u8);
@@ -392,80 +284,5 @@ mod tests {
             .unwrap();
 
         assert_eq!(output, vec![1, 0]);
-    }
-
-    #[test]
-    fn test_decode_system_events_and_error() {
-        let decoder = EventsDecoder::<TestRuntime>::new(
-            Metadata::try_from(RuntimeMetadataPrefixed(
-                META_RESERVED,
-                RuntimeMetadata::V12(RuntimeMetadataV12 {
-                    modules: DecodeDifferent::Decoded(vec![ModuleMetadata {
-                        name: DecodeDifferent::Decoded("System".to_string()),
-                        storage: None,
-                        calls: None,
-                        event: Some(DecodeDifferent::Decoded(vec![
-                            EventMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "ExtrinsicSuccess".to_string(),
-                                ),
-                                arguments: DecodeDifferent::Decoded(vec![
-                                    "DispatchInfo".to_string()
-                                ]),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            EventMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "ExtrinsicFailed".to_string(),
-                                ),
-                                arguments: DecodeDifferent::Decoded(vec![
-                                    "DispatchError".to_string(),
-                                    "DispatchInfo".to_string(),
-                                ]),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                        ])),
-                        constants: DecodeDifferent::Decoded(vec![]),
-                        errors: DecodeDifferent::Decoded(vec![
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "InvalidSpecName".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "SpecVersionNeedsToIncrease".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "FailedToExtractRuntimeVersion".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "NonDefaultComposite".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                        ]),
-                        index: 0,
-                    }]),
-                    extrinsic: ExtrinsicMetadata {
-                        version: 0,
-                        signed_extensions: vec![],
-                    },
-                }),
-            ))
-            .unwrap(),
-            EventTypeRegistry::new(),
-        );
-
-        // [(ApplyExtrinsic(0), Event(RawEvent { module: "System", variant: "ExtrinsicSuccess", data: "482d7c09000000000200" })), (ApplyExtrinsic(1), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" }))), (ApplyExtrinsic(2), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" })))]
-        let input = hex::decode("0c00000000000000482d7c0900000000020000000100000000010300035884723300000000000000000200000000010300035884723300000000000000").unwrap();
-        decoder.decode_events(&mut &input[..]).unwrap();
     }
 }

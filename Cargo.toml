@@ -25,6 +25,7 @@ tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 [dependencies]
 async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
+scale-info = "0.12.0"
 dyn-clone = "1.0.4"
 futures = "0.3.13"
 hex = "0.4.3"
@@ -46,7 +47,7 @@ sp-rpc = "3.0.0"
 sp-runtime = "3.0.0"
 sp-version = "3.0.0"
 
-frame-metadata = "14.0.0-rc.2"
+frame-metadata = { git = "https://github.com/paritytech/frame-metadata/" }
 
 [dev-dependencies]
 assert_matches = "1.5.0"

@@ -22,11 +22,6 @@ use sp_runtime::{
 };
 use thiserror::Error;
 
-use crate::metadata::{
-    Metadata,
-    MetadataError,
-};
-
 /// Error enum.
 #[derive(Debug, Error)]
 pub enum Error {
@@ -48,19 +43,6 @@ pub enum Error {
     /// Extrinsic validity error
     #[error("Transaction Validity Error: {0:?}")]
     Invalid(TransactionValidityError),
-    /// Metadata error.
-    #[error("Metadata error: {0}")]
-    Metadata(#[from] MetadataError),
-    /// Unregistered type sizes.
-    #[error(
-        "The following types do not have a type size registered: \
-            {0:?} \
-         Use `ClientBuilder::register_type_size` to register missing type sizes."
-    )]
-    MissingTypeSizes(Vec<String>),
-    /// Type size unavailable.
-    #[error("Type size unavailable while decoding event: {0:?}")]
-    TypeSizeUnavailable(String),
     /// Runtime error.
     #[error("Runtime error: {0}")]
     Runtime(#[from] RuntimeError),
