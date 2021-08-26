@@ -80,31 +80,6 @@ impl Balances for KusamaRuntime {
     type Balance = u128;
 }
 
-subxt_test!({
-    name: transfer_test_case,
-    runtime: KusamaRuntime,
-    account: Alice,
-    step: {
-        state: {
-            alice: &AccountStore { account_id: &alice },
-            bob: &AccountStore { account_id: &bob },
-        },
-        call: TransferCall {
-            to: &bob,
-            amount: 10_000,
-        },
-        event: TransferEvent {
-            from: alice.clone(),
-            to: bob.clone(),
-            amount: 10_000,
-        },
-        assert: {
-            assert_eq!(pre.alice.free, post.alice.free - 10_000);
-            assert_eq!(pre.bob.free, post.bob.free + 10_000);
-        },
-    },
-});
-
 #[async_std::test]
 #[ignore]
 async fn transfer_balance_example() -> Result<(), Box<dyn std::error::Error>> {
