@@ -70,17 +70,14 @@ use sp_runtime::{
 use sp_version::RuntimeVersion;
 
 use crate::{
+    Event,
     error::Error,
     events::{
         EventsDecoder,
         RawEvent,
     },
-    frame::{
-        system::System,
-        Event,
-    },
-    metadata::Metadata,
-    runtimes::Runtime,
+    Metadata,
+    Runtime,
     subscription::{
         EventStorageSubscription,
         EventSubscription,
@@ -90,7 +87,7 @@ use crate::{
 };
 
 pub type ChainBlock<T> =
-    SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
+    SignedBlock<Block<<T as Runtime>::Header, <T as Runtime>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -155,6 +152,7 @@ pub enum TransactionStatus<Hash, BlockHash> {
 
 #[cfg(feature = "client")]
 use substrate_subxt_client::SubxtClient;
+use crate::metadata::{MetadataError, InvalidMetadataError};
 
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
@@ -326,7 +324,7 @@ impl<T: Runtime> Rpc<T> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let params = &[
             to_json_value(keys)?,
             to_json_value(from)?,
@@ -343,7 +341,7 @@ impl<T: Runtime> Rpc<T> {
         &self,
         keys: &[StorageKey],
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let params = &[to_json_value(keys)?, to_json_value(at)?];
         self.client
             .request("state_queryStorageAt", params)
@@ -666,7 +664,7 @@ impl<T: Runtime> Rpc<T> {
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: System> {
+pub struct ExtrinsicSuccess<T: Runtime> {
     /// Block hash.
     pub block: T::Hash,
     /// Extrinsic hash.
@@ -675,7 +673,7 @@ pub struct ExtrinsicSuccess<T: System> {
     pub events: Vec<RawEvent>,
 }
 
-impl<T: System> ExtrinsicSuccess<T> {
+impl<T: Runtime> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {

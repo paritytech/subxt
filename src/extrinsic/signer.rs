@@ -22,7 +22,7 @@ use super::{
     SignedPayload,
     UncheckedExtrinsic,
 };
-use crate::runtimes::Runtime;
+use crate::Runtime;
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{

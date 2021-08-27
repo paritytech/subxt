@@ -16,6 +16,7 @@
 
 //! Create signed or unsigned extrinsics.
 
+mod extra;
 mod signer;
 
 pub use self::{
@@ -41,15 +42,14 @@ use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 
 use crate::{
-    frame::system::System,
-    runtimes::Runtime,
+    Runtime,
     Encoded,
     Error,
 };
 
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
-    <T as System>::Address,
+    <T as Runtime>::Address,
     Encoded,
     <T as Runtime>::Signature,
     Extra<T>,

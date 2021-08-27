@@ -43,14 +43,11 @@ use std::{
 };
 
 use crate::{
-    error::{
-        Error,
-        RuntimeError,
-    },
+    Runtime,
+    Error,
+    RuntimeError,
     Metadata,
     Phase,
-    Runtime,
-    System,
 };
 
 /// Raw bytes for an Event
@@ -106,74 +103,80 @@ impl<T> Default for TypeMarker<T> {
 
 /// Events decoder.
 #[derive(Debug, Clone)]
-pub struct EventsDecoder {
+pub struct EventsDecoder<T> {
     metadata: Metadata,
+    marker: PhantomData<T>,
 }
 
-impl EventsDecoder {
+impl<T> EventsDecoder<T>
+where
+    T: Runtime
+{
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {
             metadata,
+            marker: Default::default(),
         }
     }
 
     /// Decode events.
     pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, Raw)>, Error> {
-        let compact_len = <Compact<u32>>::decode(input)?;
-        let len = compact_len.0 as usize;
-
-        let mut r = Vec::new();
-        for _ in 0..len {
-            // decode EventRecord
-            let phase = Phase::decode(input)?;
-            let module_variant = input.read_byte()?;
-
-            let module = self.metadata.module_with_events(module_variant)?;
-            let event_variant = input.read_byte()?;
-            let event_metadata = module.event(event_variant)?;
-
-            log::debug!(
-                "received event '{}::{}' ({:?})",
-                module.name(),
-                event_metadata.name,
-                event_metadata.arguments()
-            );
-
-            let mut event_data = Vec::<u8>::new();
-            let mut event_errors = Vec::<RuntimeError>::new();
-            let result = self.decode_raw_bytes(
-                &event_metadata.arguments(),
-                input,
-                &mut event_data,
-                &mut event_errors,
-            );
-            let raw = match result {
-                Ok(()) => {
-                    log::debug!("raw bytes: {}", hex::encode(&event_data),);
-
-                    let event = RawEvent {
-                        module: module.name().to_string(),
-                        variant: event_metadata.name.clone(),
-                        data: event_data,
-                    };
-
-                    // topics come after the event data in EventRecord
-                    let _topics = Vec::<T::Hash>::decode(input)?;
-                    Raw::Event(event)
-                }
-                Err(err) => return Err(err),
-            };
-
-            if event_errors.is_empty() {
-                r.push((phase.clone(), raw));
-            }
-
-            for err in event_errors {
-                r.push((phase.clone(), Raw::Error(err)));
-            }
-        }
-        Ok(r)
+        todo!()
+        // let compact_len = <Compact<u32>>::decode(input)?;
+        // let len = compact_len.0 as usize;
+        //
+        // let mut r = Vec::new();
+        // for _ in 0..len {
+        //     // decode EventRecord
+        //     let phase = Phase::decode(input)?;
+        //     let module_variant = input.read_byte()?;
+        //
+        //     let module = self.metadata.module_with_events(module_variant)?;
+        //     let event_variant = input.read_byte()?;
+        //     let event_metadata = module.event(event_variant)?;
+        //
+        //     log::debug!(
+        //         "received event '{}::{}' ({:?})",
+        //         module.name(),
+        //         event_metadata.name,
+        //         event_metadata.arguments()
+        //     );
+        //
+        //     let mut event_data = Vec::<u8>::new();
+        //     let mut event_errors = Vec::<RuntimeError>::new();
+        //     let result = self.decode_raw_bytes(
+        //         &event_metadata.arguments(),
+        //         input,
+        //         &mut event_data,
+        //         &mut event_errors,
+        //     );
+        //     let raw = match result {
+        //         Ok(()) => {
+        //             log::debug!("raw bytes: {}", hex::encode(&event_data),);
+        //
+        //             let event = RawEvent {
+        //                 module: module.name().to_string(),
+        //                 variant: event_metadata.name.clone(),
+        //                 data: event_data,
+        //             };
+        //
+        //             // topics come after the event data in EventRecord
+        //             let _topics = Vec::<T::Hash>::decode(input)?;
+        //             Raw::Event(event)
+        //         }
+        //         Err(err) => return Err(err),
+        //     };
+        //
+        //     if event_errors.is_empty() {
+        //         r.push((phase.clone(), raw));
+        //     }
+        //
+        //     for err in event_errors {
+        //         r.push((phase.clone(), Raw::Error(err)));
+        //     }
+        // }
+        // Ok(r)
     }
 
     fn decode_raw_bytes<W: Output>(
@@ -246,35 +249,35 @@ pub enum Raw {
     Error(RuntimeError),
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use std::convert::TryFrom;
-
-    type TestRuntime = crate::NodeTemplateRuntime;
-
-    #[test]
-    fn test_decode_option() {
-        let decoder = EventsDecoder::<TestRuntime>::new(
-            Metadata::default(),
-        );
-
-        let value = Some(0u8);
-        let input = value.encode();
-        let mut output = Vec::<u8>::new();
-        let mut errors = Vec::<RuntimeError>::new();
-
-        decoder
-            .decode_raw_bytes(
-                &[EventArg::Option(Box::new(EventArg::Primitive(
-                    "u8".to_string(),
-                )))],
-                &mut &input[..],
-                &mut output,
-                &mut errors,
-            )
-            .unwrap();
-
-        assert_eq!(output, vec![1, 0]);
-    }
-}
+// #[cfg(test)]
+// mod tests {
+//     use super::*;
+//     use std::convert::TryFrom;
+//
+//     type TestRuntime = crate::NodeTemplateRuntime;
+//
+//     #[test]
+//     fn test_decode_option() {
+//         let decoder = EventsDecoder::<TestRuntime>::new(
+//             Metadata::default(),
+//         );
+//
+//         let value = Some(0u8);
+//         let input = value.encode();
+//         let mut output = Vec::<u8>::new();
+//         let mut errors = Vec::<RuntimeError>::new();
+//
+//         decoder
+//             .decode_raw_bytes(
+//                 &[EventArg::Option(Box::new(EventArg::Primitive(
+//                     "u8".to_string(),
+//                 )))],
+//                 &mut &input[..],
+//                 &mut output,
+//                 &mut errors,
+//             )
+//             .unwrap();
+//
+//         assert_eq!(output, vec![1, 0]);
+//     }
+// }

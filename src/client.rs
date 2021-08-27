@@ -17,7 +17,6 @@
 use codec::{
     Decode,
 };
-pub use frame_metadata::RuntimeMetadataLastVersion as Metadata;
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_types::Subscription;
@@ -39,7 +38,6 @@ use std::{
 use crate::{Error, events::EventsDecoder, extrinsic::{
     self,
     PairSigner,
-    SignedExtra,
     Signer,
     UncheckedExtrinsic,
 }, rpc::{
@@ -52,7 +50,7 @@ use crate::{Error, events::EventsDecoder, extrinsic::{
     EventStorageSubscription,
     EventSubscription,
     FinalizedEventStorageSubscription,
-}, BlockNumber, ReadProof, Runtime};
+}, BlockNumber, Metadata, ReadProof, Runtime};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -151,7 +149,7 @@ pub struct Client<T: Runtime> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
-    events_decoder: EventsDecoder,
+    events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
@@ -339,7 +337,7 @@ impl<T: Runtime> Client<T> {
     // }
 
     /// Returns the events decoder.
-    pub fn events_decoder(&self) -> &EventsDecoder {
+    pub fn events_decoder(&self) -> &EventsDecoder<T> {
         &self.events_decoder
     }
 

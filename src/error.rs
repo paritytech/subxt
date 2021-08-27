@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::Metadata;
 use jsonrpsee_types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
@@ -21,6 +22,7 @@ use sp_runtime::{
     DispatchError,
 };
 use thiserror::Error;
+use crate::metadata::InvalidMetadataError;
 
 /// Error enum.
 #[derive(Debug, Error)]
@@ -43,6 +45,9 @@ pub enum Error {
     /// Extrinsic validity error
     #[error("Transaction Validity Error: {0:?}")]
     Invalid(TransactionValidityError),
+    /// Invalid metadata error
+    #[error("Invalid Metadata: {0}")]
+    InvalidMetadata(#[from] InvalidMetadataError),
     /// Runtime error.
     #[error("Runtime error: {0}")]
     Runtime(#[from] RuntimeError),
@@ -110,18 +115,21 @@ impl RuntimeError {
                 error,
                 message: _,
             } => {
-                let module = metadata.module_with_errors(index)?;
-                let error = module.error(error)?;
-                Ok(Self::Module(ModuleError {
-                    module: module.name().to_string(),
-                    error: error.to_string(),
-                }))
+                todo!()
+                // let module = metadata.module_with_errors(index)?;
+                // let error = module.error(error)?;
+                // Ok(Self::Module(ModuleError {
+                //     module: module.name().to_string(),
+                //     error: error.to_string(),
+                // }))
             }
             DispatchError::BadOrigin => Ok(Self::BadOrigin),
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
             DispatchError::Other(msg) => Ok(Self::Other(msg.into())),
+            DispatchError::Token(_) => todo!(),
+            DispatchError::Arithmetic(_) => todo!(),
         }
     }
 }

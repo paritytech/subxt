@@ -46,12 +46,10 @@ extern crate substrate_subxt_proc_macro;
 pub use sp_core;
 pub use sp_runtime;
 
-use codec::{
-    Codec,
-    Decode,
-};
-pub use frame_metadata::RuntimeMetadataLastVersion as Metadata;
+use codec::{Codec, Decode, EncodeLike, Encode};
+use serde::de::DeserializeOwned;
 use std::{
+    fmt::Debug,
     marker::PhantomData,
     sync::Arc,
 };
@@ -60,6 +58,7 @@ mod client;
 mod error;
 mod events;
 pub mod extrinsic;
+mod metadata;
 mod rpc;
 mod subscription;
 
@@ -79,11 +78,7 @@ pub use crate::{
         Signer,
         UncheckedExtrinsic,
     },
-    frame::*,
-    metadata::{
-        Metadata,
-        MetadataError,
-    },
+    metadata::Metadata,
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
@@ -91,7 +86,6 @@ pub use crate::{
         RpcClient,
         SystemProperties,
     },
-    runtimes::*,
     subscription::{
         EventStorageSubscription,
         EventSubscription,
@@ -105,19 +99,26 @@ use crate::{
         Rpc,
     },
 };
+use crate::sp_runtime::traits::{Verify, Extrinsic, Member, Hash, Header, AtLeast32Bit, MaybeSerializeDeserialize};
 
-pub trait Runtime: Send + Sync + 'static {
+/// Parameter trait compied from substrate::frame_support
+pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
+impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
+
+/// Runtime types.
+pub trait Runtime: Clone + Sized + Send + Sync + 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
+        + Member
         + Default
         // + MaybeDisplay
-        // + AtLeast32Bit
+        + AtLeast32Bit
         + Copy;
 
     /// The block number type used by the runtime.
     type BlockNumber: Parameter
-        // + Member
+        + Member
         // + MaybeMallocSizeOf
         // + MaybeSerializeDeserialize
         // + Debug
@@ -131,6 +132,8 @@ pub trait Runtime: Send + Sync + 'static {
 
     /// The output of the `Hashing` function.
     type Hash: Parameter
+        + Member
+        + MaybeSerializeDeserialize
         + Ord
         + Default
         + Copy
@@ -138,19 +141,37 @@ pub trait Runtime: Send + Sync + 'static {
         + AsRef<[u8]>
         + AsMut<[u8]>;
 
-    /// The user account identifier type for the runtime.
-    type AccountId: Parameter; // + Member + MaybeSerialize + MaybeDisplay + Ord + Default;
+    /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
+    type Hashing: Hash<Output = Self::Hash>;
 
-    // /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
-    // #[module(ignore)]
-    // type Address: Codec + Clone + PartialEq;
+    /// The user account identifier type for the runtime.
+    type AccountId: Parameter + Member; // + MaybeSerialize + MaybeDisplay + Ord + Default;
+
+    /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
+    type Address: Codec + Clone + PartialEq;
     // + Debug + Send + Sync;
 
-    // /// The block header.
-    // #[module(ignore)]
-    // type Header: Parameter;
-        // + Header<Number = Self::BlockNumber, Hash = Self::Hash>
-        // + DeserializeOwned;
+    /// The block header.
+    type Header: Parameter
+        + Header<Number = Self::BlockNumber, Hash = Self::Hash>
+        + DeserializeOwned;
+
+    /// Transaction extras.
+    type Extra: SignedExtra<Self> + Send + Sync + 'static;
+
+    /// Signature type.
+    type Signature: Verify + Encode + Send + Sync + 'static;
+
+    /// Extrinsic type within blocks.
+    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+}
+
+/// Event trait.
+pub trait Event<T>: Decode {
+    /// Module name.
+    const MODULE: &'static str;
+    /// Event name.
+    const EVENT: &'static str;
 }
 
 /// A phase of a block's execution.
