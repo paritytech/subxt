@@ -24,7 +24,8 @@ tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 
 [dependencies]
 async-trait = "0.1.49"
-codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full"] }
+chameleon = "0.1.0"
 scale-info = "0.12.0"
 dyn-clone = "1.0.4"
 futures = "0.3.13"
@@ -40,7 +41,7 @@ serde_json = "1.0.64"
 thiserror = "1.0.24"
 url = "2.2.1"
 
-substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
+subxt-proc-macro = { version = "0.1.0", path = "proc-macro" }
 
 sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/" }
 sp-rpc = { package = "sp-rpc", git = "https://github.com/paritytech/substrate/" }

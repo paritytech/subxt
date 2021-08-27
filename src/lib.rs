@@ -41,7 +41,7 @@
 #![allow(clippy::type_complexity)]
 
 #[macro_use]
-extern crate substrate_subxt_proc_macro;
+extern crate subxt_proc_macro;
 
 pub use sp_core;
 pub use sp_runtime;
@@ -91,7 +91,6 @@ pub use crate::{
         EventSubscription,
         FinalizedEventStorageSubscription,
     },
-    substrate_subxt_proc_macro::*,
 };
 use crate::{
     rpc::{
