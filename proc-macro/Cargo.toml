@@ -32,7 +32,7 @@ pretty_assertions = "0.6.1"
 substrate-subxt = { path = ".." }
 trybuild = "1.0.38"
 
-sp-keyring = "3.0.0"
+sp-keyring      = { git = "https://github.com/darwinia-network/substrate.git", tag = "darwinia-v0.11.3" }
 
 [[test]]
 name = "balances"

@@ -375,9 +375,10 @@ impl From<Role> for sc_service::Role {
         match role {
             Role::Light => Self::Light,
             Role::Authority(_) => {
-                Self::Authority {
-                    sentry_nodes: Default::default(),
-                }
+                // Self::Authority {
+                //     sentry_nodes: Default::default(),
+                // }
+                Self::Authority
             }
         }
     }
@@ -463,8 +464,8 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             telemetry_endpoints,
 
             telemetry_external_transport: Default::default(),
-            telemetry_handle: Default::default(),
-            telemetry_span: Default::default(),
+            // telemetry_handle: Default::default(),
+            // telemetry_span: Default::default(),
             default_heap_pages: Default::default(),
             disable_grandpa: Default::default(),
             disable_log_reloading: Default::default(),
