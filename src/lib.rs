@@ -52,10 +52,8 @@ use codec::{
 };
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_ws_client::{
-    Subscription,
-    WsClientBuilder,
-};
+use jsonrpsee_types::Subscription;
+use jsonrpsee_ws_client::WsClientBuilder;
 use sp_core::{
     storage::{
         StorageChangeSet,
@@ -210,7 +208,7 @@ impl<T: Runtime> ClientBuilder<T> {
             if url.starts_with("ws://") || url.starts_with("wss://") {
                 let client = WsClientBuilder::default()
                     .max_notifs_per_subscription(4096)
-                    .build(&url)
+                    .build(url)
                     .await?;
                 RpcClient::WebSocket(Arc::new(client))
             } else {

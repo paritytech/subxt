@@ -3,7 +3,7 @@ members = [".", "client", "proc-macro"]
 
 [package]
 name = "substrate-subxt"
-version = "0.15.3"
+version = "0.15.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
@@ -19,47 +19,49 @@ include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 [features]
 default = ["tokio1"]
 client = ["substrate-subxt-client"]
-# jsonrpsee http client can be configured to use tokio02 or tokio1.
-tokio02 = ["jsonrpsee-http-client/tokio02"]
-tokio1 = ["jsonrpsee-http-client/tokio1"]
+# jsonrpsee can be configured to use tokio02 or tokio1.
+tokio02 = ["jsonrpsee-http-client/tokio02", "jsonrpsee-ws-client/tokio02"]
+tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 
 [dependencies]
 async-trait = "0.1.49"
-log = "0.4.14"
-thiserror = "1.0.24"
+codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
+dyn-clone = "1.0.4"
 futures = "0.3.13"
-jsonrpsee-proc-macros = "=0.2.0-alpha.6"
-jsonrpsee-ws-client = "=0.2.0-alpha.6"
-jsonrpsee-http-client = { version = "=0.2.0-alpha.6", default-features = false }
+hex = "0.4.3"
+jsonrpsee-proc-macros = "0.3.0"
+jsonrpsee-ws-client = { version = "0.3.0", default-features = false }
+jsonrpsee-http-client = { version = "0.3.0", default-features = false }
+jsonrpsee-types = "0.3.0"
+log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
+thiserror = "1.0.24"
 url = "2.2.1"
-codec = { package = "parity-scale-codec", version = "2.1", default-features = false, features = ["derive", "full"] }
-dyn-clone = "1.0.4"
 
-frame-metadata = { package = "frame-metadata", version = "13.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-frame-support = { package = "frame-support", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-sp-runtime = { package = "sp-runtime", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-sp-version = { package = "sp-version", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-pallet-indices = { package = "pallet-indices", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-hex = "0.4.3"
-sp-std = { package = "sp-std", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-application-crypto = { package = "sp-application-crypto", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-pallet-staking = { package = "pallet-staking", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-
-sp-rpc = { package = "sp-rpc", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-sp-core = { package = "sp-core", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", features = ["full_crypto"] }
 substrate-subxt-client = { version = "0.7.0", path = "client", optional = true }
-substrate-subxt-proc-macro = { version = "0.15.3", path = "proc-macro" }
+substrate-subxt-proc-macro = { version = "0.15.0", path = "proc-macro" }
+
+sp-application-crypto = "3.0.0"
+sp-core = "3.0.0"
+sp-rpc = "3.0.0"
+sp-runtime = "3.0.0"
+sp-std = "3.0.0"
+sp-version = "3.0.0"
+
+frame-metadata = "13.0.0"
+frame-support = "3.0.0"
+pallet-indices = "3.0.0"
+pallet-staking = "3.0.0"
 
 [dev-dependencies]
-async-std = { version = "1.9.0", features = ["attributes"] }
+assert_matches = "1.5.0"
+async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
-frame-system = { package = "frame-system", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-pallet-balances = { package = "pallet-balances", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-sp-keyring = { package = "sp-keyring", version = "3.0.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-assert_matches = "1.5.0"
+sp-keyring = "3.0.0"
+frame-system = "3.0.0"
+pallet-balances = "3.0.0"

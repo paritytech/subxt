@@ -15,17 +15,20 @@ keywords = ["parity", "substrate", "blockchain"]
 async-std = "1.8.0"
 futures = { version = "0.3.9", features = ["compat"], package = "futures" }
 futures01 = { package = "futures", version = "0.1.29" }
-jsonrpsee-types = "=0.2.0-alpha.6"
+jsonrpsee-types = "0.3.0"
 log = "0.4.13"
-sc-network = { package = "sc-network", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false }
-sc-client-db = { package = "sc-client-db", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main" }
-sc-service = { package = "sc-service", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false }
 serde_json = "1.0.61"
-sp-keyring = "3.0.0"
 thiserror = "1.0.23"
 
+sc-client-db = "0.9.0"
+sp-keyring = "3.0.0"
+sc-network = { version = "0.9.0", default-features = false }
+sc-service = { version = "0.9.0", default-features = false }
+
+
+
 [target.'cfg(target_arch="x86_64")'.dependencies]
-sc-service = { package = "sc-service", version = "0.9.0", git = "https://github.com/darwinia-network/substrate.git", branch = "main", default-features = false, features = ["wasmtime"] }
+sc-service = { version = "0.9.0", default-features = false, features = ["wasmtime"] }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }

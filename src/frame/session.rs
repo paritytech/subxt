@@ -72,6 +72,22 @@ pub struct ValidatorsStore<T: Session> {
     pub _runtime: PhantomData<T>,
 }
 
+/// The queued keys for the next session.
+#[derive(Encode, Store, Debug)]
+pub struct QueuedKeysStore<T: Session> {
+    #[store(returns = Vec<(<T as Session>::ValidatorId, T::Keys)>)]
+    /// Marker for the runtime
+    pub _runtime: PhantomData<T>,
+}
+
+/// The next session keys for a validator.
+#[derive(Encode, Store, Debug)]
+pub struct NextKeysStore<'a, T: Session> {
+    #[store(returns = Option<<T as Session>::Keys>)]
+    /// The validator account.
+    pub validator_id: &'a <T as Session>::ValidatorId,
+}
+
 default_impl!(ValidatorsStore);
 
 /// Set the session keys for a validator.
