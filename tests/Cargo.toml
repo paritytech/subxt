@@ -1,15 +1,21 @@
 [package]
-name = "tests"
+name = "subxt-tests"
 version = "0.1.0"
 edition = "2018"
 
 [dependencies]
 subxt = { package = "substrate-subxt", path = ".." }
 
+codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
+
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/" }
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/" }
+
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
+log = "0.4.14"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }

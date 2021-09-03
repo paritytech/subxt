@@ -20,13 +20,13 @@ use frame_metadata::{
     v14::RuntimeMetadataV14, PalletCallMetadata, RuntimeMetadata, RuntimeMetadataPrefixed,
 };
 use heck::SnakeCase as _;
-use proc_macro_error::{abort, abort_call_site};
+use proc_macro_error::abort_call_site;
 use quote::{format_ident, quote};
 use scale_info::form::PortableForm;
 use scale_info::prelude::string::ToString;
 use std::{
     fs,
-    io::{self, Read},
+    io::Read,
     path,
 };
 
@@ -61,7 +61,7 @@ impl RuntimeGenerator {
     }
 
     pub fn generate_runtime(&self, mod_name: &str) -> TokenStream2 {
-        let type_gen = TypeGenerator::new(&self.metadata.types, "__runtime_types");
+        let type_gen = TypeGenerator::new(&self.metadata.types, "__types");
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let modules = self.metadata.pallets.iter().map(|pallet| {
@@ -83,7 +83,7 @@ impl RuntimeGenerator {
 
             let calls = if !calls.is_empty() {
                 quote! {
-                    mod calls {
+                    pub mod calls {
                         use super::#types_mod_ident;
                         #( #calls )*
                     }

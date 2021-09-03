@@ -63,6 +63,7 @@ mod rpc;
 mod subscription;
 
 pub use crate::{
+    client::{Client, ClientBuilder},
     error::{
         Error,
         ModuleError,
@@ -97,8 +98,9 @@ use crate::{
         ChainBlock,
         Rpc,
     },
+    sp_runtime::traits::{Verify, Extrinsic, Member, Hash, Header, AtLeast32Bit, MaybeSerializeDeserialize},
 };
-use crate::sp_runtime::traits::{Verify, Extrinsic, Member, Hash, Header, AtLeast32Bit, MaybeSerializeDeserialize};
+pub use subxt_proc_macro::runtime_types;
 
 /// Parameter trait compied from substrate::frame_support
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}

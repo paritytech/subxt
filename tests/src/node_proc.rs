@@ -162,15 +162,12 @@ impl TestNodeProcessBuilder {
                 attempts,
                 MAX_ATTEMPTS
             );
-            let result = ClientBuilder::<R>::new()
+            let result = ClientBuilder::new()
                 .set_url(ws_url.clone())
                 .build()
                 .await;
             match result {
                 Ok(client) => break Ok(client),
-                Err(crate::Error::MissingTypeSizes(e)) => {
-                    break Err(crate::Error::MissingTypeSizes(e))
-                }
                 Err(err) => {
                     if attempts < MAX_ATTEMPTS {
                         attempts += 1;

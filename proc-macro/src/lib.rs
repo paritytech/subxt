@@ -33,6 +33,8 @@ pub fn runtime_types(input: TokenStream) -> TokenStream {
     let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(input);
+    let mod_name = path.file_stem().unwrap_or_else(||
+        proc_macro_error::abort_call_site!("Expected a file path"));
 
-    generate_runtime::generate_runtime_types("runtime", path).into()
+    generate_runtime::generate_runtime_types(&mod_name.to_string_lossy(), &path).into()
 }
