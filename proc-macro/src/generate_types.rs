@@ -16,22 +16,24 @@
 
 use proc_macro2::{Ident, Span, TokenStream as TokenStream2, TokenStream};
 use quote::{format_ident, quote, ToTokens};
-use scale_info::{form::PortableForm, Field, PortableRegistry, Type, TypeDef, TypeDefPrimitive};
-use std::collections::{BTreeMap, HashSet};
+use scale_info::{form::PortableForm, Field, PortableRegistry, Type, TypeDef, TypeDefPrimitive, Path};
+use std::collections::{BTreeMap, HashMap, HashSet};
 
 #[derive(Debug)]
 pub struct TypeGenerator<'a> {
     root_mod_ident: Ident,
     type_registry: &'a PortableRegistry,
+    type_substitutes: HashMap<String, syn::TypePath>,
 }
 
 impl<'a> TypeGenerator<'a> {
     /// Construct a new [`TypeGenerator`].
-    pub fn new(type_registry: &'a PortableRegistry, root_mod: &'static str) -> Self {
+    pub fn new(type_registry: &'a PortableRegistry, root_mod: &'static str, type_substitutes: HashMap<String, syn::TypePath>) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
             root_mod_ident,
             type_registry,
+            type_substitutes,
         }
     }
 
@@ -64,6 +66,11 @@ impl<'a> TypeGenerator<'a> {
         root_mod_ident: &Ident,
         module: &mut Module<'a>,
     ) {
+        let joined_path = path.join("::");
+        if self.type_substitutes.contains_key(&joined_path) {
+            return
+        }
+
         let segment = path.first().expect("path has at least one segment");
         let mod_ident = Ident::new(segment, Span::call_site());
 
@@ -100,6 +107,12 @@ impl<'a> TypeGenerator<'a> {
         };
 
         let mut ty = resolve_type(id);
+
+        let joined_path = ty.path().segments().join("::");
+        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
+            return substitute_type_path.clone()
+        }
+
         if ty.path().ident() == Some("Cow".to_string()) {
             ty = resolve_type(
                 ty.type_params()[0]

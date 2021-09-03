@@ -28,7 +28,7 @@ use subxt::{
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 mod node_runtime {
-    #[subxt(map_type = "sp_runtime::multiaddress::MultiAddress")]
+    #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
     use sp_runtime::MultiAddress;
 }
 
