@@ -30,7 +30,7 @@ use std::{
     path,
 };
 
-pub fn generate_runtime_types<P>(mod_name: &str, path: P) -> TokenStream2
+pub fn generate_runtime_types<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
 where
     P: AsRef<path::Path>,
 {
@@ -45,7 +45,7 @@ where
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(mod_name)
+    generator.generate_runtime(item_mod)
 }
 
 pub struct RuntimeGenerator {
@@ -60,7 +60,7 @@ impl RuntimeGenerator {
         }
     }
 
-    pub fn generate_runtime(&self, mod_name: &str) -> TokenStream2 {
+    pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
         let type_gen = TypeGenerator::new(&self.metadata.types, "__types");
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
@@ -121,10 +121,10 @@ impl RuntimeGenerator {
             }
         };
 
-        let mod_name = format_ident!("{}", mod_name);
+        let mod_ident = item_mod.ident;
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
-            pub mod #mod_name {
+            pub mod #mod_ident {
                 #outer_event
                 #( #modules )*
                 #types_mod

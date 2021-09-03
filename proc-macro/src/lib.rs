@@ -19,22 +19,32 @@ extern crate proc_macro;
 mod generate_types;
 mod generate_runtime;
 
+use darling::FromMeta;
 use generate_types::TypeGenerator;
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::proc_macro_error;
+use syn::parse_macro_input;
 
-#[proc_macro]
+#[derive(Debug, FromMeta)]
+struct RuntimeMetadataArgs {
+    runtime_metadata_path: String,
+}
+
+#[proc_macro_attribute]
 #[proc_macro_error]
-pub fn runtime_types(input: TokenStream) -> TokenStream {
-    let input = input.to_string();
-    let input = input.trim_matches('"');
+pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
+    let attr_args = parse_macro_input!(args as syn::AttributeArgs);
+    let item_mod = parse_macro_input!(input as syn::ItemMod);
+
+    let args = match RuntimeMetadataArgs::from_list(&attr_args) {
+        Ok(v) => v,
+        Err(e) => { return TokenStream::from(e.write_errors()); }
+    };
 
     let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
     let root_path = std::path::Path::new(&root);
-    let path = root_path.join(input);
-    let mod_name = path.file_stem().unwrap_or_else(||
-        proc_macro_error::abort_call_site!("Expected a file path"));
+    let path = root_path.join(args.runtime_metadata_path);
 
-    generate_runtime::generate_runtime_types(&mod_name.to_string_lossy(), &path).into()
+    generate_runtime::generate_runtime_types(item_mod, &path).into()
 }

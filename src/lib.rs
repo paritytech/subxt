@@ -100,7 +100,7 @@ use crate::{
     },
     sp_runtime::traits::{Verify, Extrinsic, Member, Hash, Header, AtLeast32Bit, MaybeSerializeDeserialize},
 };
-pub use subxt_proc_macro::runtime_types;
+pub use subxt_proc_macro::subxt;
 
 /// Parameter trait compied from substrate::frame_support
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
