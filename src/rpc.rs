@@ -685,8 +685,8 @@ impl<T: Runtime> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
     /// Returns `Err` if the data fails to decode into the supplied type.
-    pub fn find_event<E: Event<T>>(&self) -> Result<Option<E>, CodecError> {
-        if let Some(event) = self.find_event_raw(E::MODULE, E::EVENT) {
+    pub fn find_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+        if let Some(event) = self.find_event_raw(E::PALLET, E::EVENT) {
             Ok(Some(E::decode(&mut &event.data[..])?))
         } else {
             Ok(None)

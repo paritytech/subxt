@@ -30,14 +30,14 @@ use codec::{
 use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed, StorageEntryModifier, StorageEntryType, StorageHasher, META_RESERVED, RuntimeMetadataLastVersion, PalletConstantMetadata};
 use sp_core::storage::StorageKey;
 
-use crate::Encoded;
+use crate::{Encoded,Call};
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
     /// Module is not in metadata.
     #[error("Module {0} not found")]
-    ModuleNotFound(String),
+    PalletNotFound(String),
     /// Module is not in metadata.
     #[error("Module index {0} not found")]
     ModuleIndexNotFound(u8),
@@ -71,19 +71,45 @@ pub enum MetadataError {
 #[derive(Clone, Debug)]
 pub struct Metadata {
     metadata: RuntimeMetadataLastVersion,
+    pallets: HashMap<String, PalletMetadata>,
 }
 
 impl Metadata {
-    /// Returns `ModuleMetadata`.
-    pub fn pallet<S>(&self, name: S) -> Result<&PalletMetadata, MetadataError>
-    where
-        S: ToString,
-    {
-        todo!()
-        // let name = name.to_string();
-        // self.modules
-        //     .get(&name)
-        //     .ok_or(MetadataError::ModuleNotFound(name))
+    /// Create a new indexed `Metadata` instance from the imported runtime metadata.
+    pub fn new(metadata: RuntimeMetadataLastVersion) -> Result<Self, InvalidMetadataError> {
+        let pallets = metadata.pallets.iter()
+            .map(|pallet| {
+                let calls = pallet.calls
+                    .as_ref()
+                    .map_or(Ok(HashMap::new()), |call| {
+                        let ty = metadata.types.resolve(call.ty.id())
+                            .ok_or(InvalidMetadataError::MissingCallType)?;
+                        if let scale_info::TypeDef::Variant(var) = ty.type_def() {
+                            let calls = var.variants().iter().map(|v| (v.name().clone(), v.index())).collect();
+                            Ok(calls)
+                        } else {
+                            Err(InvalidMetadataError::CallTypeNotVariant)
+                        }
+                    })?;
+
+                let pallet_metadata = PalletMetadata {
+                    index: pallet.index,
+                    name: pallet.name.to_string(),
+                    calls,
+                    storage: Default::default(),
+                    constants: Default::default()
+                };
+
+                Ok((pallet.name.to_string(), pallet_metadata))
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Self { metadata, pallets })
+    }
+
+    /// Returns `PalletMetadata`.
+    pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
+        self.pallets.get(name)
+                .ok_or(MetadataError::PalletNotFound(name.to_string()))
     }
 }
 
@@ -91,11 +117,21 @@ impl Metadata {
 pub struct PalletMetadata {
     index: u8,
     name: String,
+    calls: HashMap<String, u8>,
     storage: HashMap<String, StorageMetadata>,
     constants: HashMap<String, PalletConstantMetadata>,
 }
 
 impl PalletMetadata {
+    pub fn encode_call<C>(&self, call: C) -> Result<Encoded, MetadataError>
+    where C: Call
+    {
+        let fn_index = self.calls.get(C::FUNCTION).ok_or(MetadataError::CallNotFound(C::FUNCTION))?;
+        let mut bytes = vec![self.index, *fn_index];
+        bytes.extend(call.encode());
+        Ok(Encoded(bytes))
+    }
+
     pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
         self.storage
             .get(key)
@@ -258,6 +294,10 @@ pub enum InvalidMetadataError {
     InvalidPrefix,
     #[error("Invalid version")]
     InvalidVersion,
+    #[error("Call type missing from type registry")]
+    MissingCallType,
+    #[error("Call type was not a variant/enum type")]
+    CallTypeNotVariant,
 }
 
 impl TryFrom<RuntimeMetadataPrefixed> for Metadata {

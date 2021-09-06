@@ -82,8 +82,8 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
     }
 
     /// Filters events by type.
-    pub fn filter_event<E: Event<T>>(&mut self) {
-        self.event = Some((E::MODULE, E::EVENT));
+    pub fn filter_event<E: Event>(&mut self) {
+        self.event = Some((E::PALLET, E::EVENT));
     }
 
     /// Gets the next event.

@@ -39,6 +39,7 @@ use crate::{Error, events::EventsDecoder, extrinsic::{
     self,
     PairSigner,
     Signer,
+    SignedExtra,
     UncheckedExtrinsic,
 }, rpc::{
     ChainBlock,
@@ -50,7 +51,7 @@ use crate::{Error, events::EventsDecoder, extrinsic::{
     EventStorageSubscription,
     EventSubscription,
     FinalizedEventStorageSubscription,
-}, BlockNumber, Metadata, ReadProof, Runtime};
+}, BlockNumber, Metadata, ReadProof, Runtime, Call, Encoded};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -310,31 +311,40 @@ impl<T: Runtime> Client<T> {
     // }
 
     /// Creates a signed extrinsic.
-    // pub async fn create_signed<C: Call<T> + Send + Sync>(
-    //     &self,
-    //     call: C,
-    //     signer: &(dyn Signer<T> + Send + Sync),
-    // ) -> Result<UncheckedExtrinsic<T>, Error>
-    //     where
-    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-    //         Send + Sync,
-    // {
-    //     let account_nonce = if let Some(nonce) = signer.nonce() {
-    //         nonce
-    //     } else {
-    //         self.account(signer.account_id(), None).await?.nonce
-    //     };
-    //     let call = self.encode(call)?;
-    //     let signed = extrinsic::create_signed(
-    //         &self.runtime_version,
-    //         self.genesis_hash,
-    //         account_nonce,
-    //         call,
-    //         signer,
-    //     )
-    //         .await?;
-    //     Ok(signed)
-    // }
+    pub async fn create_signed<C: Call + Send + Sync>(
+        &self,
+        call: C,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<UncheckedExtrinsic<T>, Error>
+        where
+            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
+        let account_nonce = if let Some(nonce) = signer.nonce() {
+            nonce
+        } else {
+            todo!("fetch nonce if not supplied")
+            // self.account(signer.account_id(), None).await?.nonce
+        };
+        let call = self.encode(call)?;
+        let signed = extrinsic::create_signed(
+            &self.runtime_version,
+            self.genesis_hash,
+            account_nonce,
+            call,
+            signer,
+        )
+            .await?;
+        Ok(signed)
+    }
+
+    /// Encodes a call.
+    pub fn encode<C: Call>(&self, call: C) -> Result<Encoded, Error> {
+        Ok(self
+            .metadata()
+            .pallet(C::PALLET)
+            .and_then(|pallet| pallet.encode_call(call))?)
+    }
 
     /// Returns the events decoder.
     pub fn events_decoder(&self) -> &EventsDecoder<T> {
@@ -360,18 +370,18 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Submits a transaction to the chain.
-    // pub async fn submit<C: Call<T> + Send + Sync>(
-    //     &self,
-    //     call: C,
-    //     signer: &(dyn Signer<T> + Send + Sync),
-    // ) -> Result<T::Hash, Error>
-    //     where
-    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-    //         Send + Sync,
-    // {
-    //     let extrinsic = self.create_signed(call, signer).await?;
-    //     self.submit_extrinsic(extrinsic).await
-    // }
+    pub async fn submit<C: Call + Send + Sync>(
+        &self,
+        call: C,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<T::Hash, Error>
+        where
+            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
+        let extrinsic = self.create_signed(call, signer).await?;
+        self.submit_extrinsic(extrinsic).await
+    }
 
     /// Submits transaction to the chain and watch for events.
     // pub async fn watch<C: Call<T> + Send + Sync>(
@@ -420,16 +430,5 @@ impl<T: Runtime> Client<T> {
         key_type: String,
     ) -> Result<bool, Error> {
         self.rpc.has_key(public_key, key_type).await
-    }
-}
-
-/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
-/// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Encoded(pub Vec<u8>);
-
-impl codec::Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
     }
 }

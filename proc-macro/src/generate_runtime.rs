@@ -19,9 +19,7 @@ use crate::{
     TokenStream2, TypeGenerator, TypePath,
 };
 use darling::FromMeta;
-use frame_metadata::{
-    v14::RuntimeMetadataV14, PalletCallMetadata, RuntimeMetadata, RuntimeMetadataPrefixed,
-};
+use frame_metadata::{v14::RuntimeMetadataV14, PalletCallMetadata, RuntimeMetadata, RuntimeMetadataPrefixed, PalletMetadata};
 use heck::SnakeCase as _;
 use proc_macro_error::{abort, abort_call_site};
 use quote::{format_ident, quote};
@@ -88,7 +86,7 @@ impl RuntimeGenerator {
             let mod_name = format_ident!("{}", pallet.name.to_string().to_snake_case());
             let mut calls = Vec::new();
             for call in &pallet.calls {
-                let call_structs = self.generate_call_structs(&type_gen, call);
+                let call_structs = self.generate_call_structs(&type_gen, pallet, call);
                 calls.extend(call_structs)
             }
 
@@ -187,6 +185,7 @@ impl RuntimeGenerator {
     fn generate_call_structs(
         &self,
         type_gen: &TypeGenerator,
+        pallet: &PalletMetadata<PortableForm>,
         call: &PalletCallMetadata<PortableForm>,
     ) -> Vec<TokenStream2> {
         let ty = call.ty;
@@ -213,10 +212,18 @@ impl RuntimeGenerator {
                                 })
                             });
 
+                            let pallet_name = &pallet.name;
+                            let function_name = var.name().to_string();
+
                             quote! {
                                 #[derive(Debug, ::codec::Encode, ::codec::Decode)]
                                 pub struct #name {
                                     #( #args ),*
+                                }
+
+                                impl ::subxt::Call for #name {
+                                    const PALLET: &'static str = stringify!(#pallet_name);
+                                    const FUNCTION: &'static str = stringify!(#function_name);
                                 }
                             }
                         })

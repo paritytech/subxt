@@ -22,7 +22,7 @@ use sp_runtime::{
     DispatchError,
 };
 use thiserror::Error;
-use crate::metadata::InvalidMetadataError;
+use crate::metadata::{InvalidMetadataError, MetadataError};
 
 /// Error enum.
 #[derive(Debug, Error)]
@@ -48,6 +48,9 @@ pub enum Error {
     /// Invalid metadata error
     #[error("Invalid Metadata: {0}")]
     InvalidMetadata(#[from] InvalidMetadataError),
+    /// Invalid metadata error
+    #[error("Metadata: {0}")]
+    Metadata(#[from] MetadataError),
     /// Runtime error.
     #[error("Runtime error: {0}")]
     Runtime(#[from] RuntimeError),

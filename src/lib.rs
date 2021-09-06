@@ -167,10 +167,18 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
 }
 
-/// Event trait.
-pub trait Event<T>: Decode {
+/// Call trait.
+pub trait Call: Encode {
     /// Module name.
-    const MODULE: &'static str;
+    const PALLET: &'static str;
+    /// Function name.
+    const FUNCTION: &'static str;
+}
+
+/// Event trait.
+pub trait Event: Decode {
+    /// Module name.
+    const PALLET: &'static str;
     /// Event name.
     const EVENT: &'static str;
 }
