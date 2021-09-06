@@ -75,37 +75,6 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    /// Create a new indexed `Metadata` instance from the imported runtime metadata.
-    pub fn new(metadata: RuntimeMetadataLastVersion) -> Result<Self, InvalidMetadataError> {
-        let pallets = metadata.pallets.iter()
-            .map(|pallet| {
-                let calls = pallet.calls
-                    .as_ref()
-                    .map_or(Ok(HashMap::new()), |call| {
-                        let ty = metadata.types.resolve(call.ty.id())
-                            .ok_or(InvalidMetadataError::MissingCallType)?;
-                        if let scale_info::TypeDef::Variant(var) = ty.type_def() {
-                            let calls = var.variants().iter().map(|v| (v.name().clone(), v.index())).collect();
-                            Ok(calls)
-                        } else {
-                            Err(InvalidMetadataError::CallTypeNotVariant)
-                        }
-                    })?;
-
-                let pallet_metadata = PalletMetadata {
-                    index: pallet.index,
-                    name: pallet.name.to_string(),
-                    calls,
-                    storage: Default::default(),
-                    constants: Default::default()
-                };
-
-                Ok((pallet.name.to_string(), pallet_metadata))
-            })
-            .collect::<Result<_, _>>()?;
-        Ok(Self { metadata, pallets })
-    }
-
     /// Returns `PalletMetadata`.
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
         self.pallets.get(name)
@@ -304,95 +273,39 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     type Error = InvalidMetadataError;
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
-        todo!()
-        // if metadata.0 != META_RESERVED {
-        //     return Err(ConversionError::InvalidPrefix.into())
-        // }
-        // let meta = match metadata.1 {
-        //     RuntimeMetadata::V14(meta) => meta,
-        //     _ => return Err(ConversionError::InvalidVersion.into()),
-        // };
-        // let mut modules = HashMap::new();
-        // let mut modules_with_calls = HashMap::new();
-        // let mut modules_with_events = HashMap::new();
-        // let mut modules_with_errors = HashMap::new();
-        // for module in convert(meta.modules)?.into_iter() {
-        //     let module_name = convert(module.name.clone())?;
-        //
-        //     let mut constant_map = HashMap::new();
-        //     for constant in convert(module.constants)?.into_iter() {
-        //         let constant_meta = convert_constant(constant)?;
-        //         constant_map.insert(constant_meta.name.clone(), constant_meta);
-        //     }
-        //
-        //     let mut storage_map = HashMap::new();
-        //     if let Some(storage) = module.storage {
-        //         let storage = convert(storage)?;
-        //         let module_prefix = convert(storage.prefix)?;
-        //         for entry in convert(storage.entries)?.into_iter() {
-        //             let storage_prefix = convert(entry.name.clone())?;
-        //             let entry = convert_entry(
-        //                 module_prefix.clone(),
-        //                 storage_prefix.clone(),
-        //                 entry,
-        //             )?;
-        //             storage_map.insert(storage_prefix, entry);
-        //         }
-        //     }
-        //     modules.insert(
-        //         module_name.clone(),
-        //         ModuleMetadata {
-        //             index: module.index,
-        //             name: module_name.clone(),
-        //             storage: storage_map,
-        //             constants: constant_map,
-        //         },
-        //     );
-        //
-        //     if let Some(calls) = module.calls {
-        //         let mut call_map = HashMap::new();
-        //         for (index, call) in convert(calls)?.into_iter().enumerate() {
-        //             let name = convert(call.name)?;
-        //             call_map.insert(name, index as u8);
-        //         }
-        //         modules_with_calls.insert(
-        //             module_name.clone(),
-        //             ModuleWithCalls {
-        //                 index: module.index,
-        //                 calls: call_map,
-        //             },
-        //         );
-        //     }
-        //     if let Some(events) = module.event {
-        //         let mut event_map = HashMap::new();
-        //         for (index, event) in convert(events)?.into_iter().enumerate() {
-        //             event_map.insert(index as u8, convert_event(event)?);
-        //         }
-        //         modules_with_events.insert(
-        //             module_name.clone(),
-        //             ModuleWithEvents {
-        //                 index: module.index,
-        //                 name: module_name.clone(),
-        //                 events: event_map,
-        //             },
-        //         );
-        //     }
-        //     let mut error_map = HashMap::new();
-        //     for (index, error) in convert(module.errors)?.into_iter().enumerate() {
-        //         error_map.insert(index as u8, convert_error(error)?);
-        //     }
-        //     modules_with_errors.insert(
-        //         module_name.clone(),
-        //         ModuleWithErrors {
-        //             index: module.index,
-        //             name: module_name.clone(),
-        //             errors: error_map,
-        //         },
-        //     );
-        // }
-        // Ok(Metadata {
-        //     pallets,
-        //
-        // })
+        if metadata.0 != META_RESERVED {
+            return Err(InvalidMetadataError::InvalidPrefix.into())
+        }
+        let metadata = match metadata.1 {
+            RuntimeMetadata::V14(meta) => meta,
+            _ => return Err(InvalidMetadataError::InvalidVersion.into()),
+        };
+        let pallets = metadata.pallets.iter()
+            .map(|pallet| {
+                let calls = pallet.calls
+                    .as_ref()
+                    .map_or(Ok(HashMap::new()), |call| {
+                        let ty = metadata.types.resolve(call.ty.id())
+                            .ok_or(InvalidMetadataError::MissingCallType)?;
+                        if let scale_info::TypeDef::Variant(var) = ty.type_def() {
+                            let calls = var.variants().iter().map(|v| (v.name().clone(), v.index())).collect();
+                            Ok(calls)
+                        } else {
+                            Err(InvalidMetadataError::CallTypeNotVariant)
+                        }
+                    })?;
+
+                let pallet_metadata = PalletMetadata {
+                    index: pallet.index,
+                    name: pallet.name.to_string(),
+                    calls,
+                    storage: Default::default(),
+                    constants: Default::default()
+                };
+
+                Ok((pallet.name.to_string(), pallet_metadata))
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Self { metadata, pallets })
     }
 }

@@ -25,6 +25,7 @@ use subxt::{
     Runtime,
     subxt,
 };
+use sp_runtime::{AccountId32, MultiAddress};
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 mod node_runtime {
@@ -100,14 +101,15 @@ async fn test_tx_transfer_balance() {
     use crate::node_runtime::balances::calls::Transfer;
 
     let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
+    signer.set_nonce(0); // todo: auto nonce handling in client.
+    let dest: MultiAddress<AccountId32, u32> = AccountKeyring::Bob.to_account_id().into();
 
     let node_process = test_node_process().await;
     let client = node_process.client();
     client
         .submit(
             Transfer {
-                dest,
+                dest: dest.clone(), // todo: [AJ] should we make custom types borrowed to avoid clones?
                 value: 10_000,
             },
             &signer,
