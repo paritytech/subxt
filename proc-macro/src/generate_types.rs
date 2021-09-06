@@ -108,11 +108,6 @@ impl<'a> TypeGenerator<'a> {
 
         let mut ty = resolve_type(id);
 
-        let joined_path = ty.path().segments().join("::");
-        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
-            return substitute_type_path.clone()
-        }
-
         if ty.path().ident() == Some("Cow".to_string()) {
             ty = resolve_type(
                 ty.type_params()[0]
@@ -141,11 +136,20 @@ impl<'a> TypeGenerator<'a> {
             .map(|tp| self.resolve_type_path(*tp, parent_type_params))
             .collect::<Vec<_>>();
 
-        TypePath::Type(TypePathType {
-            ty,
-            params,
-            root_mod_ident: self.root_mod_ident.clone(),
-        })
+        let joined_path = ty.path().segments().join("::");
+        if let Some(substitute_type_path) = self.type_substitutes.get(&joined_path) {
+            TypePath::Substitute(TypePathSubstitute {
+                path: substitute_type_path.clone(),
+                params,
+            })
+            // todo: add tests for this type substitution
+        } else {
+            TypePath::Type(TypePathType {
+                ty,
+                params,
+                root_mod_ident: self.root_mod_ident.clone(),
+            })
+        }
     }
 }
 
@@ -444,6 +448,7 @@ impl<'a> ModuleType<'a> {
 pub enum TypePath {
     Parameter(TypeParameter),
     Type(TypePathType),
+    Substitute(TypePathSubstitute),
 }
 
 impl quote::ToTokens for TypePath {
@@ -458,6 +463,7 @@ impl TypePath {
         match self {
             TypePath::Parameter(ty_param) => syn::Type::Path(syn::parse_quote! { #ty_param }),
             TypePath::Type(ty) => ty.to_syn_type(),
+            TypePath::Substitute(sub) => sub.to_syn_type(),
         }
     }
 
@@ -476,6 +482,7 @@ impl TypePath {
                 acc.insert(type_parameter.clone());
             }
             Self::Type(type_path) => type_path.parent_type_params(acc),
+            Self::Substitute(sub) => sub.parent_type_params(acc),
         }
     }
 }
@@ -607,6 +614,44 @@ pub struct TypeParameter {
 impl quote::ToTokens for TypeParameter {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         self.name.to_tokens(tokens)
+    }
+}
+
+#[derive(Debug)]
+pub struct TypePathSubstitute {
+    path: syn::TypePath,
+    params: Vec<TypePath>,
+}
+
+impl quote::ToTokens for TypePathSubstitute {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        if self.params.is_empty() {
+            self.path.to_tokens(tokens)
+        } else {
+            let substitute_path = &self.path;
+            let params = &self.params;
+            tokens.extend(quote! {
+                #substitute_path< #( #params ),* >
+            })
+        }
+    }
+}
+
+impl TypePathSubstitute {
+    fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+        for p in &self.params {
+            p.parent_type_params(acc);
+        }
+    }
+
+    fn to_syn_type(&self) -> syn::Type {
+        if self.params.is_empty() {
+            syn::Type::Path(self.path.clone())
+        } else {
+            let substitute_path = &self.path;
+            let params = &self.params;
+            syn::parse_quote! ( #substitute_path< #( #params ),* > )
+        }
     }
 }
 

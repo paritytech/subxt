@@ -15,7 +15,9 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::Decode;
-use crate::{TokenStream2, TypeGenerator};
+use crate::{
+    TokenStream2, TypeGenerator, TypePath,
+};
 use darling::FromMeta;
 use frame_metadata::{
     v14::RuntimeMetadataV14, PalletCallMetadata, RuntimeMetadata, RuntimeMetadataPrefixed,
@@ -189,9 +191,9 @@ impl RuntimeGenerator {
     ) -> Vec<TokenStream2> {
         let ty = call.ty;
         let name = type_gen.resolve_type_path(ty.id(), &[]);
-        use crate::generate_types::TypePath;
         match name {
-            TypePath::Parameter(_) => panic!("Call type should be a Type"),
+            TypePath::Parameter(_) => panic!("Call type should be a Parameter"),
+            TypePath::Substitute(_) => panic!("Call type should not be a Substitute"),
             TypePath::Type(ref ty) => {
                 let ty = ty.ty();
 

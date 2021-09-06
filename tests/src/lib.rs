@@ -30,6 +30,8 @@ use subxt::{
 mod node_runtime {
     #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
     use sp_runtime::MultiAddress;
+    #[subxt(substitute_type = "sp_core::crypto::AccountId32")]
+    use sp_core::crypto::AccountId32;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -105,7 +107,7 @@ async fn test_tx_transfer_balance() {
     client
         .submit(
             Transfer {
-                dest: &dest,
+                dest,
                 value: 10_000,
             },
             &signer,
@@ -118,7 +120,7 @@ async fn test_tx_transfer_balance() {
     client
         .submit(
             Transfer {
-                dest: &dest,
+                dest,
                 value: 10_000,
             },
             &signer,
