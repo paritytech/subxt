@@ -222,8 +222,8 @@ impl RuntimeGenerator {
                                 }
 
                                 impl ::subxt::Call for #name {
-                                    const PALLET: &'static str = stringify!(#pallet_name);
-                                    const FUNCTION: &'static str = stringify!(#function_name);
+                                    const PALLET: &'static str = #pallet_name;
+                                    const FUNCTION: &'static str = #function_name;
                                 }
                             }
                         })
