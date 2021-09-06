@@ -16,11 +16,14 @@
 
 extern crate proc_macro;
 
-mod generate_types;
 mod generate_runtime;
+mod generate_types;
 
 use darling::FromMeta;
-use generate_types::{TypeGenerator, TypePath};
+use generate_types::{
+    TypeGenerator,
+    TypePath,
+};
 use proc_macro::TokenStream;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::proc_macro_error;
@@ -39,7 +42,9 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let args = match RuntimeMetadataArgs::from_list(&attr_args) {
         Ok(v) => v,
-        Err(e) => { return TokenStream::from(e.write_errors()); }
+        Err(e) => {
+            return TokenStream::from(e.write_errors())
+        }
     };
 
     let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());

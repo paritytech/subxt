@@ -46,7 +46,12 @@ extern crate subxt_proc_macro;
 pub use sp_core;
 pub use sp_runtime;
 
-use codec::{Codec, Decode, EncodeLike, Encode};
+use codec::{
+    Codec,
+    Decode,
+    Encode,
+    EncodeLike,
+};
 use serde::de::DeserializeOwned;
 use std::{
     fmt::Debug,
@@ -63,7 +68,10 @@ mod rpc;
 mod subscription;
 
 pub use crate::{
-    client::{Client, ClientBuilder},
+    client::{
+        Client,
+        ClientBuilder,
+    },
     error::{
         Error,
         ModuleError,
@@ -98,7 +106,15 @@ use crate::{
         ChainBlock,
         Rpc,
     },
-    sp_runtime::traits::{Verify, Extrinsic, Member, Hash, Header, AtLeast32Bit, MaybeSerializeDeserialize},
+    sp_runtime::traits::{
+        AtLeast32Bit,
+        Extrinsic,
+        Hash,
+        Header,
+        MaybeSerializeDeserialize,
+        Member,
+        Verify,
+    },
 };
 pub use subxt_proc_macro::subxt;
 

@@ -35,9 +35,9 @@ use crate::{
         Raw,
         RawEvent,
     },
-    Phase,
-    Event,
     rpc::Rpc,
+    Event,
+    Phase,
     Runtime,
 };
 

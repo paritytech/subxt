@@ -19,20 +19,23 @@ mod node_proc;
 pub use node_proc::TestNodeProcess;
 
 use sp_keyring::AccountKeyring;
-use sp_runtime::traits::BlakeTwo256;
+use sp_runtime::{
+    traits::BlakeTwo256,
+    AccountId32,
+    MultiAddress,
+};
 use subxt::{
+    subxt,
     PairSigner,
     Runtime,
-    subxt,
 };
-use sp_runtime::{AccountId32, MultiAddress};
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 mod node_runtime {
-    #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
-    use sp_runtime::MultiAddress;
     #[subxt(substitute_type = "sp_core::crypto::AccountId32")]
     use sp_core::crypto::AccountId32;
+    #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
+    use sp_runtime::MultiAddress;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

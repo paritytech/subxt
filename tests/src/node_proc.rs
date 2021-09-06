@@ -14,11 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use subxt::{
-    Client,
-    ClientBuilder,
-    Runtime,
-};
 use sp_keyring::AccountKeyring;
 use std::{
     ffi::{
@@ -33,6 +28,11 @@ use std::{
     },
     thread,
     time,
+};
+use subxt::{
+    Client,
+    ClientBuilder,
+    Runtime,
 };
 
 /// Spawn a local substrate node for testing subxt.
@@ -162,10 +162,7 @@ impl TestNodeProcessBuilder {
                 attempts,
                 MAX_ATTEMPTS
             );
-            let result = ClientBuilder::new()
-                .set_url(ws_url.clone())
-                .build()
-                .await;
+            let result = ClientBuilder::new().set_url(ws_url.clone()).build().await;
             match result {
                 Ok(client) => break Ok(client),
                 Err(err) => {

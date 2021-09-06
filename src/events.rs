@@ -43,11 +43,11 @@ use std::{
 };
 
 use crate::{
-    Runtime,
     Error,
-    RuntimeError,
     Metadata,
     Phase,
+    Runtime,
+    RuntimeError,
 };
 
 /// Raw bytes for an Event
@@ -110,7 +110,7 @@ pub struct EventsDecoder<T> {
 
 impl<T> EventsDecoder<T>
 where
-    T: Runtime
+    T: Runtime,
 {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {

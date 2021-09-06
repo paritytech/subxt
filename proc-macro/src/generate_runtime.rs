@@ -14,17 +14,33 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::Decode;
 use crate::{
-    TokenStream2, TypeGenerator, TypePath,
+    TokenStream2,
+    TypeGenerator,
+    TypePath,
 };
+use codec::Decode;
 use darling::FromMeta;
-use frame_metadata::{v14::RuntimeMetadataV14, PalletCallMetadata, RuntimeMetadata, RuntimeMetadataPrefixed, PalletMetadata};
+use frame_metadata::{
+    v14::RuntimeMetadataV14,
+    PalletCallMetadata,
+    PalletMetadata,
+    RuntimeMetadata,
+    RuntimeMetadataPrefixed,
+};
 use heck::SnakeCase as _;
-use proc_macro_error::{abort, abort_call_site};
-use quote::{format_ident, quote};
-use scale_info::form::PortableForm;
-use scale_info::prelude::string::ToString;
+use proc_macro_error::{
+    abort,
+    abort_call_site,
+};
+use quote::{
+    format_ident,
+    quote,
+};
+use scale_info::{
+    form::PortableForm,
+    prelude::string::ToString,
+};
 use std::{
     collections::HashMap,
     fs,
@@ -37,8 +53,9 @@ pub fn generate_runtime_types<P>(item_mod: syn::ItemMod, path: P) -> TokenStream
 where
     P: AsRef<path::Path>,
 {
-    let mut file = fs::File::open(&path)
-        .unwrap_or_else(|e| abort_call_site!("Failed to open {}: {}", path.as_ref().to_string_lossy(), e));
+    let mut file = fs::File::open(&path).unwrap_or_else(|e| {
+        abort_call_site!("Failed to open {}: {}", path.as_ref().to_string_lossy(), e)
+    });
 
     let mut bytes = Vec::new();
     file.read_to_end(&mut bytes)
@@ -60,7 +77,7 @@ enum Subxt {
 impl Subxt {
     fn substitute_type(&self) -> String {
         match self {
-            Self::SubstituteType(path) => path.clone()
+            Self::SubstituteType(path) => path.clone(),
         }
     }
 }
@@ -79,7 +96,8 @@ impl RuntimeGenerator {
 
     pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
         let type_substitutes = Self::parse_type_substitutes(&item_mod);
-        let type_gen = TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
+        let type_gen =
+            TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let modules = self.metadata.pallets.iter().map(|pallet| {
@@ -153,18 +171,28 @@ impl RuntimeGenerator {
 
     fn parse_type_substitutes(item_mod: &syn::ItemMod) -> HashMap<String, syn::TypePath> {
         if let Some(ref content) = item_mod.content {
-            content.1.iter()
+            content
+                .1
+                .iter()
                 .filter_map(|item| {
                     if let syn::Item::Use(use_) = item {
-                        let substitute_attrs =
-                            use_.attrs.iter().map(|attr| {
-                                let meta = attr.parse_meta().unwrap_or_else(|e|
-                                    abort!(attr.span(), "Error parsing attribute: {}", e));
-                                let substitute_type_args = Subxt::from_meta(&meta).unwrap(); // todo
+                        let substitute_attrs = use_
+                            .attrs
+                            .iter()
+                            .map(|attr| {
+                                let meta = attr.parse_meta().unwrap_or_else(|e| {
+                                    abort!(attr.span(), "Error parsing attribute: {}", e)
+                                });
+                                let substitute_type_args =
+                                    Subxt::from_meta(&meta).unwrap(); // todo
                                 substitute_type_args
-                            }).collect::<Vec<_>>();
+                            })
+                            .collect::<Vec<_>>();
                         if substitute_attrs.len() > 1 {
-                            abort!(use_.attrs[0].span(), "Duplicate `substitute_type` attributes")
+                            abort!(
+                                use_.attrs[0].span(),
+                                "Duplicate `substitute_type` attributes"
+                            )
                         }
                         substitute_attrs.iter().next().map(|attr| {
                             let substitute_type = attr.substitute_type();
@@ -203,11 +231,15 @@ impl RuntimeGenerator {
                         .iter()
                         .map(|var| {
                             use heck::CamelCase;
-                            let name = format_ident!("{}", var.name().to_string().to_camel_case());
+                            let name = format_ident!(
+                                "{}",
+                                var.name().to_string().to_camel_case()
+                            );
                             let args = var.fields().iter().filter_map(|field| {
                                 field.name().map(|name| {
                                     let name = format_ident!("{}", name);
-                                    let ty = type_gen.resolve_type_path(field.ty().id(), &[]);
+                                    let ty =
+                                        type_gen.resolve_type_path(field.ty().id(), &[]);
                                     quote! { pub #name: #ty }
                                 })
                             });

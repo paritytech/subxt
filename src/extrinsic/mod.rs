@@ -42,9 +42,9 @@ use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 
 use crate::{
-    Runtime,
     Encoded,
     Error,
+    Runtime,
 };
 
 /// UncheckedExtrinsic type.

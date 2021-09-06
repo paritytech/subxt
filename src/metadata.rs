@@ -27,10 +27,22 @@ use codec::{
     Error as CodecError,
 };
 
-use frame_metadata::{RuntimeMetadata, RuntimeMetadataPrefixed, StorageEntryModifier, StorageEntryType, StorageHasher, META_RESERVED, RuntimeMetadataLastVersion, PalletConstantMetadata};
+use frame_metadata::{
+    PalletConstantMetadata,
+    RuntimeMetadata,
+    RuntimeMetadataLastVersion,
+    RuntimeMetadataPrefixed,
+    StorageEntryModifier,
+    StorageEntryType,
+    StorageHasher,
+    META_RESERVED,
+};
 use sp_core::storage::StorageKey;
 
-use crate::{Encoded,Call};
+use crate::{
+    Call,
+    Encoded,
+};
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
@@ -77,8 +89,9 @@ pub struct Metadata {
 impl Metadata {
     /// Returns `PalletMetadata`.
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
-        self.pallets.get(name)
-                .ok_or(MetadataError::PalletNotFound(name.to_string()))
+        self.pallets
+            .get(name)
+            .ok_or(MetadataError::PalletNotFound(name.to_string()))
     }
 }
 
@@ -93,9 +106,13 @@ pub struct PalletMetadata {
 
 impl PalletMetadata {
     pub fn encode_call<C>(&self, call: C) -> Result<Encoded, MetadataError>
-    where C: Call
+    where
+        C: Call,
     {
-        let fn_index = self.calls.get(C::FUNCTION).ok_or(MetadataError::CallNotFound(C::FUNCTION))?;
+        let fn_index = self
+            .calls
+            .get(C::FUNCTION)
+            .ok_or(MetadataError::CallNotFound(C::FUNCTION))?;
         let mut bytes = vec![self.index, *fn_index];
         bytes.extend(call.encode());
         Ok(Encoded(bytes))
@@ -280,27 +297,33 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             RuntimeMetadata::V14(meta) => meta,
             _ => return Err(InvalidMetadataError::InvalidVersion.into()),
         };
-        let pallets = metadata.pallets.iter()
+        let pallets = metadata
+            .pallets
+            .iter()
             .map(|pallet| {
-                let calls = pallet.calls
-                    .as_ref()
-                    .map_or(Ok(HashMap::new()), |call| {
-                        let ty = metadata.types.resolve(call.ty.id())
-                            .ok_or(InvalidMetadataError::MissingCallType)?;
-                        if let scale_info::TypeDef::Variant(var) = ty.type_def() {
-                            let calls = var.variants().iter().map(|v| (v.name().clone(), v.index())).collect();
-                            Ok(calls)
-                        } else {
-                            Err(InvalidMetadataError::CallTypeNotVariant)
-                        }
-                    })?;
+                let calls = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
+                    let ty = metadata
+                        .types
+                        .resolve(call.ty.id())
+                        .ok_or(InvalidMetadataError::MissingCallType)?;
+                    if let scale_info::TypeDef::Variant(var) = ty.type_def() {
+                        let calls = var
+                            .variants()
+                            .iter()
+                            .map(|v| (v.name().clone(), v.index()))
+                            .collect();
+                        Ok(calls)
+                    } else {
+                        Err(InvalidMetadataError::CallTypeNotVariant)
+                    }
+                })?;
 
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
                     calls,
                     storage: Default::default(),
-                    constants: Default::default()
+                    constants: Default::default(),
                 };
 
                 Ok((pallet.name.to_string(), pallet_metadata))

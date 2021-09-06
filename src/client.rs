@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Decode,
-};
+use codec::Decode;
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_types::Subscription;
@@ -35,23 +33,35 @@ use std::{
     sync::Arc,
 };
 
-use crate::{Error, events::EventsDecoder, extrinsic::{
-    self,
-    PairSigner,
-    Signer,
-    SignedExtra,
-    UncheckedExtrinsic,
-}, rpc::{
-    ChainBlock,
-    Rpc,
-    RpcClient,
-    SystemProperties,
-    ExtrinsicSuccess,
-}, subscription::{
-    EventStorageSubscription,
-    EventSubscription,
-    FinalizedEventStorageSubscription,
-}, BlockNumber, Metadata, ReadProof, Runtime, Call, Encoded};
+use crate::{
+    events::EventsDecoder,
+    extrinsic::{
+        self,
+        PairSigner,
+        SignedExtra,
+        Signer,
+        UncheckedExtrinsic,
+    },
+    rpc::{
+        ChainBlock,
+        ExtrinsicSuccess,
+        Rpc,
+        RpcClient,
+        SystemProperties,
+    },
+    subscription::{
+        EventStorageSubscription,
+        EventSubscription,
+        FinalizedEventStorageSubscription,
+    },
+    BlockNumber,
+    Call,
+    Encoded,
+    Error,
+    Metadata,
+    ReadProof,
+    Runtime,
+};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -126,11 +136,10 @@ impl ClientBuilder {
             rpc.runtime_version(None),
             rpc.system_properties(),
         )
-            .await;
+        .await;
         let metadata = metadata?;
 
-        let events_decoder =
-            EventsDecoder::new(metadata.clone());
+        let events_decoder = EventsDecoder::new(metadata.clone());
 
         Ok(Client {
             rpc,
@@ -218,8 +227,8 @@ impl<T: Runtime> Client<T> {
 
     /// Get a header
     pub async fn header<H>(&self, hash: Option<H>) -> Result<Option<T::Header>, Error>
-        where
-            H: Into<T::Hash> + 'static,
+    where
+        H: Into<T::Hash> + 'static,
     {
         let header = self.rpc.header(hash.map(|h| h.into())).await?;
         Ok(header)
@@ -242,8 +251,8 @@ impl<T: Runtime> Client<T> {
 
     /// Get a block
     pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
-        where
-            H: Into<T::Hash> + 'static,
+    where
+        H: Into<T::Hash> + 'static,
     {
         let block = self.rpc.block(hash.map(|h| h.into())).await?;
         Ok(block)
@@ -255,8 +264,8 @@ impl<T: Runtime> Client<T> {
         keys: Vec<StorageKey>,
         hash: Option<H>,
     ) -> Result<ReadProof<T::Hash>, Error>
-        where
-            H: Into<T::Hash> + 'static,
+    where
+        H: Into<T::Hash> + 'static,
     {
         let proof = self.rpc.read_proof(keys, hash.map(|h| h.into())).await?;
         Ok(proof)
@@ -316,8 +325,8 @@ impl<T: Runtime> Client<T> {
         call: C,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<UncheckedExtrinsic<T>, Error>
-        where
-            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
@@ -334,7 +343,7 @@ impl<T: Runtime> Client<T> {
             call,
             signer,
         )
-            .await?;
+        .await?;
         Ok(signed)
     }
 
@@ -375,8 +384,8 @@ impl<T: Runtime> Client<T> {
         call: C,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, Error>
-        where
-            <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;

@@ -14,10 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use proc_macro2::{Ident, Span, TokenStream as TokenStream2, TokenStream};
-use quote::{format_ident, quote, ToTokens};
-use scale_info::{form::PortableForm, Field, PortableRegistry, Type, TypeDef, TypeDefPrimitive, Path};
-use std::collections::{BTreeMap, HashMap, HashSet};
+use proc_macro2::{
+    Ident,
+    Span,
+    TokenStream as TokenStream2,
+    TokenStream,
+};
+use quote::{
+    format_ident,
+    quote,
+    ToTokens,
+};
+use scale_info::{
+    form::PortableForm,
+    Field,
+    Path,
+    PortableRegistry,
+    Type,
+    TypeDef,
+    TypeDefPrimitive,
+};
+use std::collections::{
+    BTreeMap,
+    HashMap,
+    HashSet,
+};
 
 #[derive(Debug)]
 pub struct TypeGenerator<'a> {
@@ -28,7 +49,11 @@ pub struct TypeGenerator<'a> {
 
 impl<'a> TypeGenerator<'a> {
     /// Construct a new [`TypeGenerator`].
-    pub fn new(type_registry: &'a PortableRegistry, root_mod: &'static str, type_substitutes: HashMap<String, syn::TypePath>) -> Self {
+    pub fn new(
+        type_registry: &'a PortableRegistry,
+        root_mod: &'static str,
+        type_substitutes: HashMap<String, syn::TypePath>,
+    ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
             root_mod_ident,
@@ -39,12 +64,13 @@ impl<'a> TypeGenerator<'a> {
 
     /// Generate a module containing all types defined in the supplied type registry.
     pub fn generate_types_mod(&'a self) -> Module<'a> {
-        let mut root_mod = Module::new(self.root_mod_ident.clone(), self.root_mod_ident.clone());
+        let mut root_mod =
+            Module::new(self.root_mod_ident.clone(), self.root_mod_ident.clone());
 
         for (id, ty) in self.type_registry.types().iter().enumerate() {
             if ty.ty().path().namespace().is_empty() {
                 // prelude types e.g. Option/Result have no namespace, so we don't generate them
-                continue;
+                continue
             }
             self.insert_type(
                 ty.ty().clone(),
@@ -91,12 +117,16 @@ impl<'a> TypeGenerator<'a> {
     /// # Panics
     ///
     /// If no type with the given id found in the type registry.
-    pub fn resolve_type_path(&self, id: u32, parent_type_params: &[TypeParameter]) -> TypePath {
+    pub fn resolve_type_path(
+        &self,
+        id: u32,
+        parent_type_params: &[TypeParameter],
+    ) -> TypePath {
         if let Some(parent_type_param) = parent_type_params
             .iter()
             .find(|tp| tp.concrete_type_id == id)
         {
-            return TypePath::Parameter(parent_type_param.clone());
+            return TypePath::Parameter(parent_type_param.clone())
         }
 
         let resolve_type = |id| {
@@ -122,13 +152,16 @@ impl<'a> TypeGenerator<'a> {
             TypeDef::Sequence(seq) => vec![seq.type_param().id()],
             TypeDef::Tuple(tuple) => tuple.fields().iter().map(|f| f.id()).collect(),
             TypeDef::Compact(compact) => vec![compact.type_param().id()],
-            TypeDef::BitSequence(seq) => vec![seq.bit_order_type().id(), seq.bit_store_type().id()],
+            TypeDef::BitSequence(seq) => {
+                vec![seq.bit_order_type().id(), seq.bit_store_type().id()]
+            }
             TypeDef::Range(range) => vec![range.index_type().id()],
-            _ => ty
-                .type_params()
-                .iter()
-                .filter_map(|f| f.ty().map(|f| f.id()))
-                .collect(),
+            _ => {
+                ty.type_params()
+                    .iter()
+                    .filter_map(|f| f.ty().map(|f| f.id()))
+                    .collect()
+            }
         };
 
         let params = params_type_ids
@@ -220,15 +253,17 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
             .type_params()
             .iter()
             .enumerate()
-            .filter_map(|(i, tp)| match tp.ty() {
-                Some(ty) => {
-                    let tp_name = format_ident!("_{}", i);
-                    Some(TypeParameter {
-                        concrete_type_id: ty.id(),
-                        name: tp_name,
-                    })
+            .filter_map(|(i, tp)| {
+                match tp.ty() {
+                    Some(ty) => {
+                        let tp_name = format_ident!("_{}", i);
+                        Some(TypeParameter {
+                            concrete_type_id: ty.id(),
+                            name: tp_name,
+                        })
+                    }
+                    None => None,
                 }
-                None => None,
             })
             .collect::<Vec<_>>();
 
@@ -246,7 +281,8 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
         match self.ty.type_def() {
             TypeDef::Composite(composite) => {
                 let type_name = type_name.expect("structs should have a name");
-                let (fields, _) = self.composite_fields(composite.fields(), &type_params, true);
+                let (fields, _) =
+                    self.composite_fields(composite.fields(), &type_params, true);
                 let ty_toks = quote! {
                     #[derive(Debug, ::codec::Encode, ::codec::Decode)]
                     pub struct #type_name #fields
@@ -343,8 +379,10 @@ impl<'a> ModuleType<'a> {
             let fields = fields
                 .iter()
                 .map(|field| {
-                    let name =
-                        format_ident!("{}", field.name().expect("named field without a name"));
+                    let name = format_ident!(
+                        "{}",
+                        field.name().expect("named field without a name")
+                    );
                     let ty = self
                         .type_gen
                         .resolve_type_path(field.ty().id(), type_params);
@@ -354,22 +392,25 @@ impl<'a> ModuleType<'a> {
 
             let mut fields_tokens = fields
                 .iter()
-                .map(|(name, ty, ty_name)| match ty_name {
-                    Some(ty_name) => {
-                        let ty = ty_toks(ty_name, ty);
-                        if is_struct {
-                            quote! { pub #name: #ty }
-                        } else {
+                .map(|(name, ty, ty_name)| {
+                    match ty_name {
+                        Some(ty_name) => {
+                            let ty = ty_toks(ty_name, ty);
+                            if is_struct {
+                                quote! { pub #name: #ty }
+                            } else {
+                                quote! { #name: #ty }
+                            }
+                        }
+                        None => {
                             quote! { #name: #ty }
                         }
-                    }
-                    None => {
-                        quote! { #name: #ty }
                     }
                 })
                 .collect::<Vec<_>>();
 
-            let unused_params = unused_type_params(type_params, fields.iter().map(|(_, ty, _)| ty));
+            let unused_params =
+                unused_type_params(type_params, fields.iter().map(|(_, ty, _)| ty));
 
             if is_struct && !unused_params.is_empty() {
                 let phantom = Self::phantom_data(&unused_params);
@@ -396,17 +437,19 @@ impl<'a> ModuleType<'a> {
                 .collect::<Vec<_>>();
             let mut fields_tokens = type_paths
                 .iter()
-                .map(|(ty, ty_name)| match ty_name {
-                    Some(ty_name) => {
-                        let ty = ty_toks(ty_name, ty);
-                        if is_struct {
-                            quote! { pub #ty }
-                        } else {
+                .map(|(ty, ty_name)| {
+                    match ty_name {
+                        Some(ty_name) => {
+                            let ty = ty_toks(ty_name, ty);
+                            if is_struct {
+                                quote! { pub #ty }
+                            } else {
+                                quote! { #ty }
+                            }
+                        }
+                        None => {
                             quote! { #ty }
                         }
-                    }
-                    None => {
-                        quote! { #ty }
                     }
                 })
                 .collect::<Vec<_>>();
@@ -461,7 +504,9 @@ impl quote::ToTokens for TypePath {
 impl TypePath {
     pub(crate) fn to_syn_type(&self) -> syn::Type {
         match self {
-            TypePath::Parameter(ty_param) => syn::Type::Path(syn::parse_quote! { #ty_param }),
+            TypePath::Parameter(ty_param) => {
+                syn::Type::Path(syn::parse_quote! { #ty_param })
+            }
             TypePath::Type(ty) => ty.to_syn_type(),
             TypePath::Substitute(sub) => sub.to_syn_type(),
         }
@@ -512,7 +557,8 @@ impl TypePathType {
                     .collect::<syn::punctuated::Punctuated<syn::PathSegment, syn::Token![::]>>();
                 if !self.ty.path().namespace().is_empty() {
                     // types without a namespace are assumed to be globally in scope e.g. `Option`s
-                    ty_path.insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
+                    ty_path
+                        .insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
                 }
 
                 let params = &self.params;
@@ -570,8 +616,10 @@ impl TypePathType {
                 let bit_order_type = &self.params[0];
                 let bit_store_type = &self.params[1];
 
-                let mut type_path: syn::punctuated::Punctuated<syn::PathSegment, syn::Token![::]> =
-                    syn::parse_quote! { bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
+                let mut type_path: syn::punctuated::Punctuated<
+                    syn::PathSegment,
+                    syn::Token![::],
+                > = syn::parse_quote! { bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
                 type_path.insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
                 let type_path = syn::parse_quote! { #type_path };
 
@@ -659,9 +707,14 @@ impl TypePathSubstitute {
 mod tests {
     use super::*;
     use pretty_assertions::assert_eq;
-    use scale_info::{meta_type, Registry, TypeInfo};
+    use scale_info::{
+        meta_type,
+        Registry,
+        TypeInfo,
+    };
 
-    const MOD_PATH: &'static [&'static str] = &["chameleon_core", "generate_types", "tests"];
+    const MOD_PATH: &'static [&'static str] =
+        &["chameleon_core", "generate_types", "tests"];
 
     #[test]
     fn generate_struct_with_primitives() {
@@ -1074,7 +1127,10 @@ mod tests {
     #[test]
     fn generate_bitvec() {
         use bitvec::{
-            order::{Lsb0, Msb0},
+            order::{
+                Lsb0,
+                Msb0,
+            },
             vec::BitVec,
         };
 

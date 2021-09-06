@@ -14,7 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::Metadata;
+use crate::{
+    metadata::{
+        InvalidMetadataError,
+        MetadataError,
+    },
+    Metadata,
+};
 use jsonrpsee_types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
@@ -22,7 +28,6 @@ use sp_runtime::{
     DispatchError,
 };
 use thiserror::Error;
-use crate::metadata::{InvalidMetadataError, MetadataError};
 
 /// Error enum.
 #[derive(Debug, Error)]

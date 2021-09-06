@@ -70,20 +70,20 @@ use sp_runtime::{
 use sp_version::RuntimeVersion;
 
 use crate::{
-    Event,
     error::Error,
     events::{
         EventsDecoder,
         RawEvent,
     },
-    Metadata,
-    Runtime,
     subscription::{
         EventStorageSubscription,
         EventSubscription,
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
+    Event,
+    Metadata,
+    Runtime,
 };
 
 pub type ChainBlock<T> =
@@ -150,9 +150,12 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
+use crate::metadata::{
+    InvalidMetadataError,
+    MetadataError,
+};
 #[cfg(feature = "client")]
 use substrate_subxt_client::SubxtClient;
-use crate::metadata::{MetadataError, InvalidMetadataError};
 
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
