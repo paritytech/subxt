@@ -24,11 +24,7 @@ use sp_runtime::{
     AccountId32,
     MultiAddress,
 };
-use subxt::{
-    subxt,
-    PairSigner,
-    Runtime,
-};
+use subxt::{subxt, PairSigner, Runtime, StorageEntry};
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 mod node_runtime {
@@ -52,7 +48,20 @@ impl Runtime for TestRuntime {
     type Extra = subxt::extrinsic::DefaultExtra<Self>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    type AccountData = subxt::AccountInfo<Self::Index, u128>; // todo: [AJ] possibly replace this with a trait for GetNonce because we require the Balance type here which is not necessarily constant
+    type AccountData = Self; // todo: [AJ] possibly replace this with a trait for GetNonce because we require the Balance type here which is not necessarily constant
+}
+
+impl subxt::AccountData<TestRuntime> for TestRuntime {
+    // todo: impl on actual storage Type rather than assoc type here?
+    type StorageEntryType = node_runtime::__types::frame_system::storage::Account;
+
+    fn storage_entry(account_id: &<TestRuntime as Runtime>::AccountId) -> Self::StorageEntryType {
+        <Self as subxt::AccountData<TestRuntime>>::StorageEntryType (account_id)
+    }
+
+    fn nonce(result: &<Self::StorageEntryType as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
+        result.nonce
+    }
 }
 
 /// substrate node should be installed on the $PATH
@@ -104,8 +113,7 @@ pub(crate) async fn test_node_process() -> TestNodeProcess<TestRuntime> {
 async fn test_tx_transfer_balance() {
     use crate::node_runtime::balances::calls::Transfer;
 
-    let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
-    signer.set_nonce(0); // todo: auto nonce handling in client.
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest: MultiAddress<AccountId32, u32> = AccountKeyring::Bob.to_account_id().into();
 
     let node_process = test_node_process().await;

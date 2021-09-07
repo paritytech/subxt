@@ -152,6 +152,7 @@ impl RuntimeGenerator {
                     use super::#types_mod_ident;
                     #calls
                     #event
+                    #storage
                 }
             }
         });
@@ -317,6 +318,7 @@ impl RuntimeGenerator {
                         StorageHasher::Twox64Concat => "Twox64Concat",
                         StorageHasher::Identity => "Identity",
                     };
+                    let hasher = format_ident!("{}", hasher);
                     quote!( ::subxt::StorageHasher::#hasher )
                 }).collect::<Vec<_>>();
                 match key_ty.type_def() {
