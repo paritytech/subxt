@@ -42,9 +42,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
 
     let args = match RuntimeMetadataArgs::from_list(&attr_args) {
         Ok(v) => v,
-        Err(e) => {
-            return TokenStream::from(e.write_errors())
-        }
+        Err(e) => return TokenStream::from(e.write_errors()),
     };
 
     let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());

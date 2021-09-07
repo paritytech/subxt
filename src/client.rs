@@ -215,6 +215,29 @@ impl<T: Runtime> Client<T> {
         }
     }
 
+    /// Fetch a StorageKey with an optional block hash.
+    pub async fn fetch<F: Store<T>>(
+        &self,
+        store: &F,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<F::Returns>, Error> {
+        let key = store.key(&self.metadata)?;
+        self.fetch_unhashed::<F::Returns>(key, hash).await
+    }
+
+    /// Fetch a StorageKey that has a default value with an optional block hash.
+    pub async fn fetch_or_default<F: Store<T>>(
+        &self,
+        store: &F,
+        hash: Option<T::Hash>,
+    ) -> Result<F::Returns, Error> {
+        if let Some(data) = self.fetch(store, hash).await? {
+            Ok(data)
+        } else {
+            Ok(store.default(&self.metadata)?)
+        }
+    }
+
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
@@ -302,14 +325,6 @@ impl<T: Runtime> Client<T> {
         Ok(headers)
     }
 
-    // /// Encodes a call.
-    // pub fn encode<C: Call<T>>(&self, call: C) -> Result<Encoded, Error> {
-    //     Ok(self
-    //         .metadata()
-    //         .module_with_calls(C::MODULE)
-    //         .and_then(|module| module.call(C::FUNCTION, call))?)
-    // }
-
     /// Creates an unsigned extrinsic.
     // pub fn create_unsigned<C: Call<T> + Send + Sync>(
     //     &self,
@@ -332,6 +347,8 @@ impl<T: Runtime> Client<T> {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
+            self.fetch_or_default(&AccountStore { account_id }, None)
+                .await;
             todo!("fetch nonce if not supplied")
             // self.account(signer.account_id(), None).await?.nonce
         };

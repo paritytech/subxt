@@ -25,8 +25,12 @@ use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletCallMetadata,
     PalletMetadata,
+    PalletStorageMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
+    StorageEntryMetadata,
+    StorageEntryType,
+    StorageHasher,
 };
 use heck::SnakeCase as _;
 use proc_macro_error::{
@@ -40,6 +44,7 @@ use quote::{
 use scale_info::{
     form::PortableForm,
     prelude::string::ToString,
+    TypeDef,
 };
 use std::{
     collections::HashMap,
@@ -102,11 +107,18 @@ impl RuntimeGenerator {
         let types_mod_ident = types_mod.ident();
         let modules = self.metadata.pallets.iter().map(|pallet| {
             let mod_name = format_ident!("{}", pallet.name.to_string().to_snake_case());
-            let mut calls = Vec::new();
-            for call in &pallet.calls {
-                let call_structs = self.generate_call_structs(&type_gen, pallet, call);
-                calls.extend(call_structs)
-            }
+
+            let calls = if let Some(ref calls) = pallet.calls {
+                let call_structs = self.generate_call_structs(&type_gen, pallet, calls);
+                quote! {
+                    pub mod calls {
+                        use super::#types_mod_ident;
+                        #( #call_structs )*
+                    }
+                }
+            } else {
+                quote!()
+            };
 
             let event = if let Some(ref event) = pallet.event {
                 let event_type = type_gen.resolve_type_path(event.ty.id(), &[]);
@@ -114,18 +126,25 @@ impl RuntimeGenerator {
                     pub type Event = #event_type;
                 }
             } else {
-                quote! {}
+                quote!()
             };
 
-            let calls = if !calls.is_empty() {
+            let storage = if let Some(ref storage) = pallet.storage {
+                let storage_types = storage
+                    .entries
+                    .iter()
+                    .map(|entry| {
+                        self.generate_storage_entry_types(&type_gen, &pallet, entry)
+                    })
+                    .collect::<Vec<_>>();
                 quote! {
-                    pub mod calls {
+                    pub mod storage {
                         use super::#types_mod_ident;
-                        #( #calls )*
+                        #( #storage_types )*
                     }
                 }
             } else {
-                quote! {}
+                quote!()
             };
 
             quote! {
@@ -261,7 +280,153 @@ impl RuntimeGenerator {
                         })
                         .collect::<Vec<_>>()
                 } else {
-                    panic!("Call type should be an variant/enum type")
+                    abort_call_site!("Call type should be an variant/enum type")
+                }
+            }
+        }
+    }
+
+    fn generate_storage_entry_types(
+        &self,
+        type_gen: &TypeGenerator,
+        pallet: &PalletMetadata<PortableForm>,
+        storage_entry: &StorageEntryMetadata<PortableForm>,
+    ) -> TokenStream2 {
+        let entry_struct_ident = format_ident!("{}", storage_entry.name);
+        let (entry_struct, key_impl) = match storage_entry.ty {
+            StorageEntryType::Plain(_) => {
+                let entry_struct = quote!( pub struct #entry_struct_ident; );
+                let key_impl = quote!(::subxt::StorageKey::Plain);
+                (entry_struct, key_impl)
+            }
+            StorageEntryType::Map {
+                ref key,
+                ref hashers,
+                ..
+            } => {
+                let key_ty = self.metadata.types.resolve(key.id()).unwrap_or_else(|| {
+                    abort_call_site!("Failed to resolve storage key type")
+                });
+                let hashers = hashers.iter().map(|hasher| {
+                    let hasher = match hasher {
+                        StorageHasher::Blake2_128 => "Blake2_128",
+                        StorageHasher::Blake2_256 => "Blake2_256",
+                        StorageHasher::Blake2_128Concat => "Blake2_128Concat",
+                        StorageHasher::Twox128 => "Twox128",
+                        StorageHasher::Twox256 => "Twox256",
+                        StorageHasher::Twox64Concat => "Twox64Concat",
+                        StorageHasher::Identity => "Identity",
+                    };
+                    format_ident!("::subxt::StorageHasher::{}", hasher)
+                });
+                match key_ty.type_def() {
+                    TypeDef::Tuple(tuple) => {
+                        let fields = tuple
+                            .fields()
+                            .iter()
+                            .map(|f| type_gen.resolve_type_path(f.id(), &[]));
+                        let entry_struct = quote! {
+                            pub struct #entry_struct_ident( #( #fields ),* );
+                        };
+                        let keys = (0..tuple.fields().len())
+                            .into_iter()
+                            .zip(hashers)
+                            .map(|(field, hasher)| {
+                                quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                            });
+                        let key_impl = quote! {
+                            ::subxt::StorageKey::Map(
+                                vec![ #( #keys ),* ]
+                            )
+                        };
+                        (entry_struct, key_impl)
+                    }
+                    TypeDef::Composite(composite) => {
+                        // todo: [AJ] extract this pattern also used in ModuleType::composite_fields?
+                        let named = composite.fields().iter().all(|f| f.name().is_some());
+                        let unnamed =
+                            composite.fields().iter().all(|f| f.name().is_none());
+
+                        if named {
+                            let fields = composite
+                                .fields()
+                                .iter()
+                                .map(|f| {
+                                    let field_name = format_ident!(
+                                        "{}",
+                                        f.name().expect("field is named")
+                                    );
+                                    let field_type =
+                                        type_gen.resolve_type_path(f.ty().id(), &[]);
+                                    (field_name, field_type)
+                                })
+                                .collect::<Vec<_>>();
+                            let fields_def =
+                                fields.iter().map(|(name, ty)| quote!( pub #name: #ty));
+                            let entry_struct = quote! {
+                                pub struct #entry_struct_ident (
+                                    #( #fields_def, )*
+                                )
+                            };
+                            let keys = fields
+                                .iter()
+                                .zip(hashers)
+                                .map(|((field, _), hasher)| {
+                                    quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                                });
+                            let key_impl = quote! {
+                                ::subxt::StorageKey::Map(
+                                    vec![ #( #keys ),* ]
+                                )
+                            };
+                            (entry_struct, key_impl)
+                        } else if unnamed {
+                            let fields = composite.fields().iter().map(|f| {
+                                let field_type =
+                                    type_gen.resolve_type_path(f.ty().id(), &[]);
+                                quote!( pub #field_type )
+                            });
+                            let entry_struct = quote! {
+                                pub struct #entry_struct_ident {
+                                    #( #fields, )*
+                                }
+                            };
+                            let key_impl = quote! {
+                                todo!()
+                            };
+                            (entry_struct, key_impl)
+                        } else {
+                            abort_call_site!(
+                                "Fields must be either all named or all unnamed"
+                            )
+                        }
+                    }
+                    _ => {
+                        abort_call_site!(
+                            "Storage key for entry {} must be a Tuple or Composite type",
+                            storage_entry.name
+                        )
+                    }
+                }
+            }
+        };
+        let pallet_name = &pallet.name;
+        let storage_name = &storage_entry.name;
+        let value_ty = match storage_entry.ty {
+            StorageEntryType::Plain(ref ty) => ty,
+            StorageEntryType::Map { ref value, .. } => value,
+        };
+        let value_ty_path = type_gen.resolve_type_path(value_ty.id(), &[]);
+
+        quote! {
+            #entry_struct
+
+            impl ::subxt::StorageEntry for #entry_struct_ident {
+                const PALLET: &'static str = #pallet_name;
+                const STORAGE: &'static str = #storage_name;
+                type Value = #value_ty_path;
+                fn key(&self) -> ::subxt::StorageKey {
+                    #key_impl
                 }
             }
         }

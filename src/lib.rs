@@ -116,6 +116,7 @@ use crate::{
         Verify,
     },
 };
+pub use frame_metadata::StorageHasher;
 pub use subxt_proc_macro::subxt;
 
 /// Parameter trait compied from substrate::frame_support
@@ -168,6 +169,10 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
     type Address: Codec + Clone + PartialEq;
     // + Debug + Send + Sync;
 
+    /// Data to be associated with an account (other than nonce/transaction counter, which this
+    /// pallet does regardless).
+    type AccountData: Member + Clone + Default;
+
     /// The block header.
     type Header: Parameter
         + Header<Number = Self::BlockNumber, Hash = Self::Hash>
@@ -185,7 +190,7 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
 
 /// Call trait.
 pub trait Call: Encode {
-    /// Module name.
+    /// Pallet name.
     const PALLET: &'static str;
     /// Function name.
     const FUNCTION: &'static str;
@@ -193,10 +198,43 @@ pub trait Call: Encode {
 
 /// Event trait.
 pub trait Event: Decode {
-    /// Module name.
+    /// Pallet name.
     const PALLET: &'static str;
     /// Event name.
     const EVENT: &'static str;
+}
+
+/// Storage entry trait.
+pub trait StorageEntry {
+    /// Pallet name.
+    const PALLET: &'static str;
+    /// Storage name.
+    const STORAGE: &'static str;
+    /// Type of the storage entry value.
+    type Value: Decode;
+    /// Get the key data for the storage.
+    fn key(&self) -> StorageKey;
+}
+
+/// Storage key.
+pub enum StorageKey {
+    Plain,
+    Map(Vec<StorageMapKey>),
+}
+
+/// Storage key for a Map.
+pub struct StorageMapKey {
+    value: Vec<u8>,
+    hasher: StorageHasher,
+}
+
+impl StorageMapKey {
+    pub fn new<T: Encode>(value: T, hasher: StorageHasher) -> Self {
+        Self {
+            value: value.encode(),
+            hasher,
+        }
+    }
 }
 
 /// A phase of a block's execution.
@@ -208,6 +246,25 @@ pub enum Phase {
     Finalization,
     /// Initializing the block.
     Initialization,
+}
+
+/// Information of an account. COPIED FROM SUBSTRATE system: todo: collect all these types into a common module, could also impl TypeInfo and check against Metadata for validity
+#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
+pub struct AccountInfo<Index, AccountData> {
+    /// The number of transactions this account has sent.
+    pub nonce: Index,
+    /// The number of other modules that currently depend on this account's existence. The account
+    /// cannot be reaped until this is zero.
+    pub consumers: RefCount,
+    /// The number of other modules that allow this account to exist. The account may not be reaped
+    /// until this and `sufficients` are both zero.
+    pub providers: RefCount,
+    /// The number of modules that allow this account to exist for their own purposes only. The
+    /// account may not be reaped until this and `providers` are both zero.
+    pub sufficients: RefCount,
+    /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
+    /// chains.
+    pub data: AccountData,
 }
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
