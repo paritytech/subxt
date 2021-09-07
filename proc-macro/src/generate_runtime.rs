@@ -317,8 +317,8 @@ impl RuntimeGenerator {
                         StorageHasher::Twox64Concat => "Twox64Concat",
                         StorageHasher::Identity => "Identity",
                     };
-                    format_ident!("::subxt::StorageHasher::{}", hasher)
-                });
+                    quote!( ::subxt::StorageHasher::#hasher )
+                }).collect::<Vec<_>>();
                 match key_ty.type_def() {
                     TypeDef::Tuple(tuple) => {
                         let fields = tuple
@@ -382,17 +382,24 @@ impl RuntimeGenerator {
                             (entry_struct, key_impl)
                         } else if unnamed {
                             let fields = composite.fields().iter().map(|f| {
-                                let field_type =
-                                    type_gen.resolve_type_path(f.ty().id(), &[]);
-                                quote!( pub #field_type )
-                            });
+                                type_gen.resolve_type_path(f.ty().id(), &[])
+                            }).collect::<Vec<_>>();
+                            let fields_def = fields.iter().map(|field_type| quote!( pub #field_type ));
                             let entry_struct = quote! {
                                 pub struct #entry_struct_ident {
                                     #( #fields, )*
                                 }
                             };
+                            let keys = fields
+                                .iter()
+                                .zip(hashers)
+                                .map(|(field, hasher)| {
+                                    quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                                });
                             let key_impl = quote! {
-                                todo!()
+                                ::subxt::StorageKey::Map(
+                                    vec![ #( #keys ),* ]
+                                )
                             };
                             (entry_struct, key_impl)
                         } else {
@@ -402,10 +409,17 @@ impl RuntimeGenerator {
                         }
                     }
                     _ => {
-                        abort_call_site!(
-                            "Storage key for entry {} must be a Tuple or Composite type",
-                            storage_entry.name
-                        )
+                        let ty_path = type_gen.resolve_type_path(key.id(), &[]);
+                        let entry_struct = quote! {
+                            pub struct #entry_struct_ident(#ty_path);
+                        };
+                        let hasher = hashers.get(0).unwrap_or_else(|| abort_call_site!("No hasher found for single key"));
+                        let key_impl = quote! {
+                            ::subxt::StorageKey::Map(
+                                vec![ ::subxt::StorageMapKey::new(self.0, #hasher) ]
+                            )
+                        };
+                        (entry_struct, key_impl)
                     }
                 }
             }
