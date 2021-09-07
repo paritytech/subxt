@@ -171,7 +171,7 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
 
     /// Data to be associated with an account (other than nonce/transaction counter, which this
     /// pallet does regardless).
-    type AccountData: Member + Clone + Default;
+    type AccountData: AccountData<Self>;
 
     /// The block header.
     type Header: Parameter
@@ -186,6 +186,18 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
 
     /// Extrinsic type within blocks.
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+}
+
+/// Trait to fetch data about an account.
+pub trait AccountData<T: Runtime> {
+    /// The storage entry type.
+    type StorageEntryType: StorageEntry;
+
+    /// Construct a storage entry type with the account id for the key.
+    fn storage_entry(account_id: &T::AccountId) -> Self::StorageEntryType;
+
+    /// Get the nonce from the storage entry value.
+    fn nonce(result: &<Self::StorageEntryType as StorageEntry>::Value) -> T::Index;
 }
 
 /// Call trait.
@@ -218,7 +230,9 @@ pub trait StorageEntry {
 
 /// Storage key.
 pub enum StorageKey {
+    /// Plain key.
     Plain,
+    /// Map key(s).
     Map(Vec<StorageMapKey>),
 }
 
@@ -229,6 +243,7 @@ pub struct StorageMapKey {
 }
 
 impl StorageMapKey {
+    /// Create a new [`StorageMapKey`] with the encoded data and the hasher.
     pub fn new<T: Encode>(value: T, hasher: StorageHasher) -> Self {
         Self {
             value: value.encode(),
@@ -246,25 +261,6 @@ pub enum Phase {
     Finalization,
     /// Initializing the block.
     Initialization,
-}
-
-/// Information of an account. COPIED FROM SUBSTRATE system: todo: collect all these types into a common module, could also impl TypeInfo and check against Metadata for validity
-#[derive(Clone, Eq, PartialEq, Default, RuntimeDebug, Encode, Decode)]
-pub struct AccountInfo<Index, AccountData> {
-    /// The number of transactions this account has sent.
-    pub nonce: Index,
-    /// The number of other modules that currently depend on this account's existence. The account
-    /// cannot be reaped until this is zero.
-    pub consumers: RefCount,
-    /// The number of other modules that allow this account to exist. The account may not be reaped
-    /// until this and `sufficients` are both zero.
-    pub providers: RefCount,
-    /// The number of modules that allow this account to exist for their own purposes only. The
-    /// account may not be reaped until this and `providers` are both zero.
-    pub sufficients: RefCount,
-    /// The additional data that belongs to this account. Used to store the balance(s) in a lot of
-    /// chains.
-    pub data: AccountData,
 }
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of

@@ -33,35 +33,23 @@ use std::{
     sync::Arc,
 };
 
-use crate::{
-    events::EventsDecoder,
-    extrinsic::{
-        self,
-        PairSigner,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
-    },
-    rpc::{
-        ChainBlock,
-        ExtrinsicSuccess,
-        Rpc,
-        RpcClient,
-        SystemProperties,
-    },
-    subscription::{
-        EventStorageSubscription,
-        EventSubscription,
-        FinalizedEventStorageSubscription,
-    },
-    BlockNumber,
-    Call,
-    Encoded,
-    Error,
-    Metadata,
-    ReadProof,
-    Runtime,
-};
+use crate::{events::EventsDecoder, extrinsic::{
+    self,
+    PairSigner,
+    SignedExtra,
+    Signer,
+    UncheckedExtrinsic,
+}, rpc::{
+    ChainBlock,
+    ExtrinsicSuccess,
+    Rpc,
+    RpcClient,
+    SystemProperties,
+}, subscription::{
+    EventStorageSubscription,
+    EventSubscription,
+    FinalizedEventStorageSubscription,
+}, BlockNumber, Call, Encoded, Error, Metadata, ReadProof, Runtime, StorageEntry, AccountData};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -216,26 +204,28 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Fetch a StorageKey with an optional block hash.
-    pub async fn fetch<F: Store<T>>(
+    pub async fn fetch<F: StorageEntry>(
         &self,
         store: &F,
         hash: Option<T::Hash>,
-    ) -> Result<Option<F::Returns>, Error> {
-        let key = store.key(&self.metadata)?;
-        self.fetch_unhashed::<F::Returns>(key, hash).await
+    ) -> Result<Option<F::Value>, Error> {
+        todo!("fetch")
+        // let key = store.key(&self.metadata)?;
+        // self.fetch_unhashed::<F::Returns>(key, hash).await
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub async fn fetch_or_default<F: Store<T>>(
+    pub async fn fetch_or_default<F: StorageEntry>(
         &self,
         store: &F,
         hash: Option<T::Hash>,
-    ) -> Result<F::Returns, Error> {
-        if let Some(data) = self.fetch(store, hash).await? {
-            Ok(data)
-        } else {
-            Ok(store.default(&self.metadata)?)
-        }
+    ) -> Result<F::Value, Error> {
+        // if let Some(data) = self.fetch(store, hash).await? {
+        //     Ok(data)
+        // } else {
+        //     Ok(store.default(&self.metadata)?)
+        // }
+        todo!("fetch_or_default")
     }
 
     /// Query historical storage entries
@@ -347,10 +337,10 @@ impl<T: Runtime> Client<T> {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            self.fetch_or_default(&AccountStore { account_id }, None)
-                .await;
-            todo!("fetch nonce if not supplied")
-            // self.account(signer.account_id(), None).await?.nonce
+            let account_storage_entry = <T::AccountData as AccountData<T>>::storage_entry(signer.account_id());
+            let account_data = self.fetch_or_default(&account_storage_entry, None)
+                .await?;
+            <T::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self.encode(call)?;
         let signed = extrinsic::create_signed(
