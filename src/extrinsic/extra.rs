@@ -136,7 +136,7 @@ where
 /// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
 /// valid forever)
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
-pub struct CheckEra<T: Runtime>(
+pub struct CheckMortality<T: Runtime>(
     /// The default structure for the Extra encoding
     pub (Era, PhantomData<T>),
     /// Local genesis hash to be used for `AdditionalSigned`
@@ -144,11 +144,11 @@ pub struct CheckEra<T: Runtime>(
     pub T::Hash,
 );
 
-impl<T> SignedExtension for CheckEra<T>
+impl<T> SignedExtension for CheckMortality<T>
 where
     T: Runtime + Clone + Debug + Eq + Send + Sync,
 {
-    const IDENTIFIER: &'static str = "CheckEra";
+    const IDENTIFIER: &'static str = "CheckMortality";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = T::Hash;
@@ -249,7 +249,7 @@ impl<T: Runtime + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultEx
         CheckSpecVersion<T>,
         CheckTxVersion<T>,
         CheckGenesis<T>,
-        CheckEra<T>,
+        CheckMortality<T>,
         CheckNonce<T>,
         CheckWeight<T>,
         ChargeTransactionPayment,
@@ -274,7 +274,7 @@ impl<T: Runtime + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultEx
             CheckSpecVersion(PhantomData, self.spec_version),
             CheckTxVersion(PhantomData, self.tx_version),
             CheckGenesis(PhantomData, self.genesis_hash),
-            CheckEra((Era::Immortal, PhantomData), self.genesis_hash),
+            CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             ChargeTransactionPayment(u128::default()),
