@@ -143,6 +143,7 @@ impl RuntimeGenerator {
                     }
                 }
             } else {
+                println!("No storage for {}", mod_name);
                 quote!()
             };
 

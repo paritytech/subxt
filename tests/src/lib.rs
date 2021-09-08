@@ -48,18 +48,15 @@ impl Runtime for TestRuntime {
     type Extra = subxt::extrinsic::DefaultExtra<Self>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    type AccountData = Self;
+    type AccountData = node_runtime::system::storage::Account;
 }
 
-impl subxt::AccountData<TestRuntime> for TestRuntime {
-    // todo: impl on actual storage Type rather than assoc type here?
-    type StorageEntryType = node_runtime::__types::frame_system::storage::Account;
-
-    fn storage_entry(account_id: &<TestRuntime as Runtime>::AccountId) -> Self::StorageEntryType {
-        <Self as subxt::AccountData<TestRuntime>>::StorageEntryType (account_id)
+impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
+    fn new(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
+        Self(account_id)
     }
 
-    fn nonce(result: &<Self::StorageEntryType as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
+    fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
         result.nonce
     }
 }

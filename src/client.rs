@@ -337,7 +337,7 @@ impl<T: Runtime> Client<T> {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            let account_storage_entry = <T::AccountData as AccountData<T>>::storage_entry(signer.account_id());
+            let account_storage_entry = <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
             let account_data = self.fetch_or_default(&account_storage_entry, None)
                 .await?;
             <T::AccountData as AccountData<T>>::nonce(&account_data)
