@@ -296,7 +296,7 @@ impl RuntimeGenerator {
         let (entry_struct, key_impl) = match storage_entry.ty {
             StorageEntryType::Plain(_) => {
                 let entry_struct = quote!( pub struct #entry_struct_ident; );
-                let key_impl = quote!(::subxt::StorageKey::Plain);
+                let key_impl = quote!(::subxt::StorageEntryKey::Plain);
                 (entry_struct, key_impl)
             }
             StorageEntryType::Map {
@@ -337,7 +337,7 @@ impl RuntimeGenerator {
                                 quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
                             });
                         let key_impl = quote! {
-                            ::subxt::StorageKey::Map(
+                            ::subxt::StorageEntryKey::Map(
                                 vec![ #( #keys ),* ]
                             )
                         };
@@ -377,7 +377,7 @@ impl RuntimeGenerator {
                                     quote!( ::subxt::StorageMapKey::new(&self.#field, #hasher) )
                                 });
                             let key_impl = quote! {
-                                ::subxt::StorageKey::Map(
+                                ::subxt::StorageEntryKey::Map(
                                     vec![ #( #keys ),* ]
                                 )
                             };
@@ -398,7 +398,7 @@ impl RuntimeGenerator {
                                     quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
                                 });
                             let key_impl = quote! {
-                                ::subxt::StorageKey::Map(
+                                ::subxt::StorageEntryKey::Map(
                                     vec![ #( #keys ),* ]
                                 )
                             };
@@ -416,7 +416,7 @@ impl RuntimeGenerator {
                         };
                         let hasher = hashers.get(0).unwrap_or_else(|| abort_call_site!("No hasher found for single key"));
                         let key_impl = quote! {
-                            ::subxt::StorageKey::Map(
+                            ::subxt::StorageEntryKey::Map(
                                 vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
                             )
                         };
@@ -440,7 +440,7 @@ impl RuntimeGenerator {
                 const PALLET: &'static str = #pallet_name;
                 const STORAGE: &'static str = #storage_name;
                 type Value = #value_ty_path;
-                fn key(&self) -> ::subxt::StorageKey {
+                fn key(&self) -> ::subxt::StorageEntryKey {
                     #key_impl
                 }
             }

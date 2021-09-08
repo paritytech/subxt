@@ -209,9 +209,8 @@ impl<T: Runtime> Client<T> {
         store: &F,
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Value>, Error> {
-        todo!("fetch")
-        // let key = store.key(&self.metadata)?;
-        // self.fetch_unhashed::<F::Returns>(key, hash).await
+        let key = store.key().final_key::<F>();
+        self.fetch_unhashed::<F::Value>(key, hash).await
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
@@ -220,12 +219,14 @@ impl<T: Runtime> Client<T> {
         store: &F,
         hash: Option<T::Hash>,
     ) -> Result<F::Value, Error> {
-        // if let Some(data) = self.fetch(store, hash).await? {
-        //     Ok(data)
-        // } else {
-        //     Ok(store.default(&self.metadata)?)
-        // }
-        todo!("fetch_or_default")
+        if let Some(data) = self.fetch(store, hash).await? {
+            Ok(data)
+        } else {
+            let pallet_metadata = self.metadata.pallet(F::PALLET)?;
+            let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
+            let default = storage_metadata.default()?;
+            Ok(default)
+        }
     }
 
     /// Query historical storage entries

@@ -106,18 +106,19 @@ use crate::{
         ChainBlock,
         Rpc,
     },
-    sp_runtime::traits::{
-        AtLeast32Bit,
-        Extrinsic,
-        Hash,
-        Header,
-        MaybeSerializeDeserialize,
-        Member,
-        Verify,
-    },
 };
 pub use frame_metadata::StorageHasher;
 pub use subxt_proc_macro::subxt;
+
+use sp_runtime::traits::{
+    AtLeast32Bit,
+    Extrinsic,
+    Hash,
+    Header,
+    MaybeSerializeDeserialize,
+    Member,
+    Verify,
+};
 
 /// Parameter trait compied from substrate::frame_support
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
@@ -222,15 +223,54 @@ pub trait StorageEntry {
     /// Type of the storage entry value.
     type Value: Decode;
     /// Get the key data for the storage.
-    fn key(&self) -> StorageKey;
+    fn key(&self) -> StorageEntryKey;
 }
 
 /// Storage key.
-pub enum StorageKey {
+pub enum StorageEntryKey {
     /// Plain key.
     Plain,
     /// Map key(s).
     Map(Vec<StorageMapKey>),
+}
+
+impl StorageEntryKey {
+    /// Construct the final [`sp_core::storage::StorageKey`] for the storage entry.
+    pub fn final_key<T: StorageEntry>(&self) -> sp_core::storage::StorageKey {
+        let mut bytes = sp_core::twox_128(T::PALLET.as_bytes()).to_vec();
+        bytes.extend(&sp_core::twox_128(T::STORAGE.as_bytes())[..]);
+        if let Self::Map(map_keys) = self {
+            for map_key in map_keys {
+                bytes.extend(Self::hash(&map_key.hasher, &map_key.value))
+            }
+        }
+        sp_core::storage::StorageKey(bytes)
+    }
+
+    fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {
+        match hasher {
+            StorageHasher::Identity => bytes.to_vec(),
+            StorageHasher::Blake2_128 => sp_core::blake2_128(bytes).to_vec(),
+            StorageHasher::Blake2_128Concat => {
+                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
+                sp_core::blake2_128(bytes)
+                    .iter()
+                    .chain(bytes)
+                    .cloned()
+                    .collect()
+            }
+            StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
+            StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
+            StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
+            StorageHasher::Twox64Concat => {
+                sp_core::twox_64(bytes)
+                    .iter()
+                    .chain(bytes)
+                    .cloned()
+                    .collect()
+            }
+        }
+    }
 }
 
 /// Storage key for a Map.
