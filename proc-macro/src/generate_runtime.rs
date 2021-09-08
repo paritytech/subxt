@@ -25,7 +25,6 @@ use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletCallMetadata,
     PalletMetadata,
-    PalletStorageMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
     StorageEntryMetadata,
@@ -334,7 +333,8 @@ impl RuntimeGenerator {
                             .into_iter()
                             .zip(hashers)
                             .map(|(field, hasher)| {
-                                quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                                let index = syn::Index::from(field);
+                                quote!( ::subxt::StorageMapKey::new(self.#index, #hasher) )
                             });
                         let key_impl = quote! {
                             ::subxt::StorageKey::Map(
@@ -366,9 +366,9 @@ impl RuntimeGenerator {
                             let fields_def =
                                 fields.iter().map(|(name, ty)| quote!( pub #name: #ty));
                             let entry_struct = quote! {
-                                pub struct #entry_struct_ident (
+                                pub struct #entry_struct_ident {
                                     #( #fields_def, )*
-                                )
+                                }
                             };
                             let keys = fields
                                 .iter()
@@ -388,15 +388,14 @@ impl RuntimeGenerator {
                             }).collect::<Vec<_>>();
                             let fields_def = fields.iter().map(|field_type| quote!( pub #field_type ));
                             let entry_struct = quote! {
-                                pub struct #entry_struct_ident {
-                                    #( #fields, )*
-                                }
+                                pub struct #entry_struct_ident( #( #fields_def, )* );
                             };
-                            let keys = fields
-                                .iter()
+                            let keys = (0..fields.len())
+                                .into_iter()
                                 .zip(hashers)
                                 .map(|(field, hasher)| {
-                                    quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                                    let index = syn::Index::from(field);
+                                    quote!( ::subxt::StorageMapKey::new(self.#index, #hasher) )
                                 });
                             let key_impl = quote! {
                                 ::subxt::StorageKey::Map(

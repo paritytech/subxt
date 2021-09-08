@@ -28,7 +28,6 @@ use quote::{
 use scale_info::{
     form::PortableForm,
     Field,
-    Path,
     PortableRegistry,
     Type,
     TypeDef,

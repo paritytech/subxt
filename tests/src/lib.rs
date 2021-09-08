@@ -48,7 +48,7 @@ impl Runtime for TestRuntime {
     type Extra = subxt::extrinsic::DefaultExtra<Self>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    type AccountData = Self; // todo: [AJ] possibly replace this with a trait for GetNonce because we require the Balance type here which is not necessarily constant
+    type AccountData = Self;
 }
 
 impl subxt::AccountData<TestRuntime> for TestRuntime {
