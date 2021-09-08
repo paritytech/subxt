@@ -259,7 +259,11 @@ impl RuntimeGenerator {
                                     let name = format_ident!("{}", name);
                                     let ty =
                                         type_gen.resolve_type_path(field.ty().id(), &[]);
-                                    quote! { pub #name: #ty }
+                                    if ty.is_compact() {
+                                        quote! { #[codec(compact)] pub #name: #ty }
+                                    } else {
+                                        quote! { pub #name: #ty }
+                                    }
                                 })
                             });
 

@@ -8,6 +8,7 @@ subxt = { package = "substrate-subxt", path = ".." }
 
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
 
+sp-arithmetic = { package = "sp-arithmetic", git = "https://github.com/paritytech/substrate/" }
 sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/" }
 sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }
 sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/" }
