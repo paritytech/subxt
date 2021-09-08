@@ -53,7 +53,7 @@ impl Runtime for TestRuntime {
 
 impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
     fn new(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
-        Self(account_id)
+        Self(account_id.into()) // todo: [AJ] why is Account.0 a [u8;32] and not AccountId32?
     }
 
     fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
@@ -110,7 +110,7 @@ pub(crate) async fn test_node_process() -> TestNodeProcess<TestRuntime> {
 async fn test_tx_transfer_balance() {
     use crate::node_runtime::balances::calls::Transfer;
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest: MultiAddress<AccountId32, u32> = AccountKeyring::Bob.to_account_id().into();
 
     let node_process = test_node_process().await;

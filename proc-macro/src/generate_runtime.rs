@@ -143,7 +143,6 @@ impl RuntimeGenerator {
                     }
                 }
             } else {
-                println!("No storage for {}", mod_name);
                 quote!()
             };
 
@@ -335,7 +334,7 @@ impl RuntimeGenerator {
                             .zip(hashers)
                             .map(|(field, hasher)| {
                                 let index = syn::Index::from(field);
-                                quote!( ::subxt::StorageMapKey::new(self.#index, #hasher) )
+                                quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
                             });
                         let key_impl = quote! {
                             ::subxt::StorageKey::Map(
@@ -375,7 +374,7 @@ impl RuntimeGenerator {
                                 .iter()
                                 .zip(hashers)
                                 .map(|((field, _), hasher)| {
-                                    quote!( ::subxt::StorageMapKey::new(self.#field, #hasher) )
+                                    quote!( ::subxt::StorageMapKey::new(&self.#field, #hasher) )
                                 });
                             let key_impl = quote! {
                                 ::subxt::StorageKey::Map(
@@ -396,7 +395,7 @@ impl RuntimeGenerator {
                                 .zip(hashers)
                                 .map(|(field, hasher)| {
                                     let index = syn::Index::from(field);
-                                    quote!( ::subxt::StorageMapKey::new(self.#index, #hasher) )
+                                    quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
                                 });
                             let key_impl = quote! {
                                 ::subxt::StorageKey::Map(
@@ -418,7 +417,7 @@ impl RuntimeGenerator {
                         let hasher = hashers.get(0).unwrap_or_else(|| abort_call_site!("No hasher found for single key"));
                         let key_impl = quote! {
                             ::subxt::StorageKey::Map(
-                                vec![ ::subxt::StorageMapKey::new(self.0, #hasher) ]
+                                vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
                             )
                         };
                         (entry_struct, key_impl)

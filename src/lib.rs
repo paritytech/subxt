@@ -241,7 +241,7 @@ pub struct StorageMapKey {
 
 impl StorageMapKey {
     /// Create a new [`StorageMapKey`] with the encoded data and the hasher.
-    pub fn new<T: Encode>(value: T, hasher: StorageHasher) -> Self {
+    pub fn new<T: Encode>(value: &T, hasher: StorageHasher) -> Self {
         Self {
             value: value.encode(),
             hasher,
