@@ -154,6 +154,12 @@ impl<'a> TypeGenerator<'a> {
             TypeDef::BitSequence(seq) => {
                 vec![seq.bit_order_type().id(), seq.bit_store_type().id()]
             }
+            _ => {
+                ty.type_params()
+                    .iter()
+                    .filter_map(|f| f.ty().map(|f| f.id()))
+                    .collect()
+            }
         };
 
         let params = params_type_ids
