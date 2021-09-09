@@ -122,7 +122,7 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
                                 Raw::Error(err) => return Some(Err(err.into())),
                             };
                             if let Some((module, variant)) = self.event {
-                                if event.module != module || event.variant != variant {
+                                if event.pallet != module || event.variant != variant {
                                     continue
                                 }
                             }

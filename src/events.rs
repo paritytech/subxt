@@ -43,6 +43,7 @@ use std::{
 };
 
 use crate::{
+    metadata::EventMetadata,
     Error,
     Metadata,
     Phase,
@@ -52,8 +53,8 @@ use crate::{
 
 /// Raw bytes for an Event
 pub struct RawEvent {
-    /// The name of the module from whence the Event originated
-    pub module: String,
+    /// The name of the pallet from whence the Event originated
+    pub pallet: String,
     /// The name of the Event
     pub variant: String,
     /// The raw Event data
@@ -63,7 +64,7 @@ pub struct RawEvent {
 impl std::fmt::Debug for RawEvent {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
         f.debug_struct("RawEvent")
-            .field("module", &self.module)
+            .field("module", &self.pallet)
             .field("variant", &self.variant)
             .field("data", &hex::encode(&self.data))
             .finish()
@@ -122,66 +123,63 @@ where
 
     /// Decode events.
     pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, Raw)>, Error> {
-        todo!()
-        // let compact_len = <Compact<u32>>::decode(input)?;
-        // let len = compact_len.0 as usize;
-        //
-        // let mut r = Vec::new();
-        // for _ in 0..len {
-        //     // decode EventRecord
-        //     let phase = Phase::decode(input)?;
-        //     let module_variant = input.read_byte()?;
-        //
-        //     let module = self.metadata.module_with_events(module_variant)?;
-        //     let event_variant = input.read_byte()?;
-        //     let event_metadata = module.event(event_variant)?;
-        //
-        //     log::debug!(
-        //         "received event '{}::{}' ({:?})",
-        //         module.name(),
-        //         event_metadata.name,
-        //         event_metadata.arguments()
-        //     );
-        //
-        //     let mut event_data = Vec::<u8>::new();
-        //     let mut event_errors = Vec::<RuntimeError>::new();
-        //     let result = self.decode_raw_bytes(
-        //         &event_metadata.arguments(),
-        //         input,
-        //         &mut event_data,
-        //         &mut event_errors,
-        //     );
-        //     let raw = match result {
-        //         Ok(()) => {
-        //             log::debug!("raw bytes: {}", hex::encode(&event_data),);
-        //
-        //             let event = RawEvent {
-        //                 module: module.name().to_string(),
-        //                 variant: event_metadata.name.clone(),
-        //                 data: event_data,
-        //             };
-        //
-        //             // topics come after the event data in EventRecord
-        //             let _topics = Vec::<T::Hash>::decode(input)?;
-        //             Raw::Event(event)
-        //         }
-        //         Err(err) => return Err(err),
-        //     };
-        //
-        //     if event_errors.is_empty() {
-        //         r.push((phase.clone(), raw));
-        //     }
-        //
-        //     for err in event_errors {
-        //         r.push((phase.clone(), Raw::Error(err)));
-        //     }
-        // }
-        // Ok(r)
+        let compact_len = <Compact<u32>>::decode(input)?;
+        let len = compact_len.0 as usize;
+
+        let mut r = Vec::new();
+        for _ in 0..len {
+            // decode EventRecord
+            let phase = Phase::decode(input)?;
+            let pallet_index = input.read_byte()?;
+            let event_variant = input.read_byte()?;
+
+            let event_metadata = self.metadata.event(pallet_index, event_variant)?;
+
+            log::debug!(
+                "received event '{}::{}'",
+                event_metadata.pallet(),
+                event_metadata.event(),
+            );
+
+            let mut event_data = Vec::<u8>::new();
+            let mut event_errors = Vec::<RuntimeError>::new();
+            let result = self.decode_raw_bytes(
+                &event_metadata,
+                input,
+                &mut event_data,
+                &mut event_errors,
+            );
+            let raw = match result {
+                Ok(()) => {
+                    log::debug!("raw bytes: {}", hex::encode(&event_data),);
+
+                    let event = RawEvent {
+                        pallet: event_metadata.pallet().to_string(),
+                        variant: event_metadata.event().to_string(),
+                        data: event_data,
+                    };
+
+                    // topics come after the event data in EventRecord
+                    let _topics = Vec::<T::Hash>::decode(input)?;
+                    Raw::Event(event)
+                }
+                Err(err) => return Err(err),
+            };
+
+            if event_errors.is_empty() {
+                r.push((phase.clone(), raw));
+            }
+
+            for err in event_errors {
+                r.push((phase.clone(), Raw::Error(err)));
+            }
+        }
+        Ok(r)
     }
 
     fn decode_raw_bytes<W: Output>(
         &self,
-        _args: &scale_info::Variant,
+        _event_metadata: &EventMetadata,
         _input: &mut &[u8],
         _output: &mut W,
         _errors: &mut Vec<RuntimeError>,

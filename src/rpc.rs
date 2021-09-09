@@ -682,7 +682,7 @@ impl<T: Runtime> ExtrinsicSuccess<T> {
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
         self.events
             .iter()
-            .find(|raw| raw.module == module && raw.variant == variant)
+            .find(|raw| raw.pallet == module && raw.variant == variant)
     }
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
