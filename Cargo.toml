@@ -48,4 +48,4 @@ sp-rpc = { package = "sp-rpc", git = "https://github.com/paritytech/substrate/" 
 sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/" }
 sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/" }
 
-frame-metadata = { git = "https://github.com/paritytech/frame-metadata/" }
+frame-metadata = "14.0.0"
