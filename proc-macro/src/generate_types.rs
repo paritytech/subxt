@@ -154,13 +154,6 @@ impl<'a> TypeGenerator<'a> {
             TypeDef::BitSequence(seq) => {
                 vec![seq.bit_order_type().id(), seq.bit_store_type().id()]
             }
-            TypeDef::Range(range) => vec![range.index_type().id()],
-            _ => {
-                ty.type_params()
-                    .iter()
-                    .filter_map(|f| f.ty().map(|f| f.id()))
-                    .collect()
-            }
         };
 
         let params = params_type_ids
@@ -636,15 +629,6 @@ impl TypePathType {
                 type_path.insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
                 let type_path = syn::parse_quote! { #type_path };
 
-                syn::Type::Path(type_path)
-            }
-            TypeDef::Range(range) => {
-                let idx = &self.params[0];
-                let type_path = if range.inclusive() {
-                    syn::parse_quote! { ::core::ops::RangeInclusive<#idx> }
-                } else {
-                    syn::parse_quote! { ::core::ops::Range<#idx> }
-                };
                 syn::Type::Path(type_path)
             }
         }
