@@ -33,23 +33,37 @@ use std::{
     sync::Arc,
 };
 
-use crate::{events::EventsDecoder, extrinsic::{
-    self,
-    PairSigner,
-    SignedExtra,
-    Signer,
-    UncheckedExtrinsic,
-}, rpc::{
-    ChainBlock,
-    ExtrinsicSuccess,
-    Rpc,
-    RpcClient,
-    SystemProperties,
-}, subscription::{
-    EventStorageSubscription,
-    EventSubscription,
-    FinalizedEventStorageSubscription,
-}, BlockNumber, Call, Encoded, Error, Metadata, ReadProof, Runtime, StorageEntry, AccountData};
+use crate::{
+    events::EventsDecoder,
+    extrinsic::{
+        self,
+        PairSigner,
+        SignedExtra,
+        Signer,
+        UncheckedExtrinsic,
+    },
+    rpc::{
+        ChainBlock,
+        ExtrinsicSuccess,
+        Rpc,
+        RpcClient,
+        SystemProperties,
+    },
+    subscription::{
+        EventStorageSubscription,
+        EventSubscription,
+        FinalizedEventStorageSubscription,
+    },
+    AccountData,
+    BlockNumber,
+    Call,
+    Encoded,
+    Error,
+    Metadata,
+    ReadProof,
+    Runtime,
+    StorageEntry,
+};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -338,9 +352,10 @@ impl<T: Runtime> Client<T> {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            let account_storage_entry = <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
-            let account_data = self.fetch_or_default(&account_storage_entry, None)
-                .await?;
+            let account_storage_entry =
+                <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
+            let account_data =
+                self.fetch_or_default(&account_storage_entry, None).await?;
             <T::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self.encode(call)?;

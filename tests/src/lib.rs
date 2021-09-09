@@ -24,7 +24,12 @@ use sp_runtime::{
     AccountId32,
     MultiAddress,
 };
-use subxt::{subxt, PairSigner, Runtime, StorageEntry};
+use subxt::{
+    subxt,
+    PairSigner,
+    Runtime,
+    StorageEntry,
+};
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 mod node_runtime {
@@ -33,10 +38,10 @@ mod node_runtime {
     #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
     use sp_runtime::MultiAddress;
 
-    #[subxt(substitute_type = "sp_arithmetic::per_things::Perquintill")]
-    use sp_arithmetic::per_things::Perquintill;
     #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
     use sp_arithmetic::per_things::Perbill;
+    #[subxt(substitute_type = "sp_arithmetic::per_things::Perquintill")]
+    use sp_arithmetic::per_things::Perquintill;
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]

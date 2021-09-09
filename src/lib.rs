@@ -67,6 +67,10 @@ mod metadata;
 mod rpc;
 mod subscription;
 
+use crate::rpc::{
+    ChainBlock,
+    Rpc,
+};
 pub use crate::{
     client::{
         Client,
@@ -99,12 +103,6 @@ pub use crate::{
         EventStorageSubscription,
         EventSubscription,
         FinalizedEventStorageSubscription,
-    },
-};
-use crate::{
-    rpc::{
-        ChainBlock,
-        Rpc,
     },
 };
 pub use frame_metadata::StorageHasher;

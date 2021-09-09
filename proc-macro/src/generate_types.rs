@@ -392,20 +392,19 @@ impl<'a> ModuleType<'a> {
             let mut fields_tokens = fields
                 .iter()
                 .map(|(name, ty, ty_name)| {
-                    let field_type =
-                        match ty_name {
-                            Some(ty_name) => {
-                                let ty = ty_toks(ty_name, ty);
-                                if is_struct {
-                                    quote! ( pub #name: #ty )
-                                } else {
-                                    quote! ( #name: #ty )
-                                }
-                            }
-                            None => {
+                    let field_type = match ty_name {
+                        Some(ty_name) => {
+                            let ty = ty_toks(ty_name, ty);
+                            if is_struct {
+                                quote! ( pub #name: #ty )
+                            } else {
                                 quote! ( #name: #ty )
                             }
-                        };
+                        }
+                        None => {
+                            quote! ( #name: #ty )
+                        }
+                    };
                     if ty.is_compact() {
                         // todo: [AJ] figure out way to ensure AsCompact generated for target type in scale_info.
                         quote!( #[codec(compact)] #field_type  )

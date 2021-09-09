@@ -311,19 +311,22 @@ impl RuntimeGenerator {
                 let key_ty = self.metadata.types.resolve(key.id()).unwrap_or_else(|| {
                     abort_call_site!("Failed to resolve storage key type")
                 });
-                let hashers = hashers.iter().map(|hasher| {
-                    let hasher = match hasher {
-                        StorageHasher::Blake2_128 => "Blake2_128",
-                        StorageHasher::Blake2_256 => "Blake2_256",
-                        StorageHasher::Blake2_128Concat => "Blake2_128Concat",
-                        StorageHasher::Twox128 => "Twox128",
-                        StorageHasher::Twox256 => "Twox256",
-                        StorageHasher::Twox64Concat => "Twox64Concat",
-                        StorageHasher::Identity => "Identity",
-                    };
-                    let hasher = format_ident!("{}", hasher);
-                    quote!( ::subxt::StorageHasher::#hasher )
-                }).collect::<Vec<_>>();
+                let hashers = hashers
+                    .iter()
+                    .map(|hasher| {
+                        let hasher = match hasher {
+                            StorageHasher::Blake2_128 => "Blake2_128",
+                            StorageHasher::Blake2_256 => "Blake2_256",
+                            StorageHasher::Blake2_128Concat => "Blake2_128Concat",
+                            StorageHasher::Twox128 => "Twox128",
+                            StorageHasher::Twox256 => "Twox256",
+                            StorageHasher::Twox64Concat => "Twox64Concat",
+                            StorageHasher::Identity => "Identity",
+                        };
+                        let hasher = format_ident!("{}", hasher);
+                        quote!( ::subxt::StorageHasher::#hasher )
+                    })
+                    .collect::<Vec<_>>();
                 match key_ty.type_def() {
                     TypeDef::Tuple(tuple) => {
                         let fields = tuple
@@ -387,10 +390,13 @@ impl RuntimeGenerator {
                             };
                             (entry_struct, key_impl)
                         } else if unnamed {
-                            let fields = composite.fields().iter().map(|f| {
-                                type_gen.resolve_type_path(f.ty().id(), &[])
-                            }).collect::<Vec<_>>();
-                            let fields_def = fields.iter().map(|field_type| quote!( pub #field_type ));
+                            let fields = composite
+                                .fields()
+                                .iter()
+                                .map(|f| type_gen.resolve_type_path(f.ty().id(), &[]))
+                                .collect::<Vec<_>>();
+                            let fields_def =
+                                fields.iter().map(|field_type| quote!( pub #field_type ));
                             let entry_struct = quote! {
                                 pub struct #entry_struct_ident( #( #fields_def, )* );
                             };
@@ -418,7 +424,9 @@ impl RuntimeGenerator {
                         let entry_struct = quote! {
                             pub struct #entry_struct_ident(#ty_path);
                         };
-                        let hasher = hashers.get(0).unwrap_or_else(|| abort_call_site!("No hasher found for single key"));
+                        let hasher = hashers.get(0).unwrap_or_else(|| {
+                            abort_call_site!("No hasher found for single key")
+                        });
                         let key_impl = quote! {
                             ::subxt::StorageEntryKey::Map(
                                 vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]

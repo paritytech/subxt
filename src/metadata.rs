@@ -148,7 +148,6 @@ impl StorageMetadata {
     pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {
         Decode::decode(&mut &self.default[..]).map_err(MetadataError::DefaultError)
     }
-
 }
 
 #[derive(Debug, thiserror::Error)]
