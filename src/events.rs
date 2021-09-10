@@ -43,13 +43,17 @@ use std::{
 };
 
 use crate::{
-    metadata::EventMetadata,
+    metadata::{
+        EventMetadata,
+        MetadataError,
+    },
     Error,
     Metadata,
     Phase,
     Runtime,
     RuntimeError,
 };
+use scale_info::{form::PortableForm, TypeDef, TypeDefPrimitive};
 
 /// Raw bytes for an Event
 pub struct RawEvent {
@@ -143,7 +147,7 @@ where
 
             let mut event_data = Vec::<u8>::new();
             let mut event_errors = Vec::<RuntimeError>::new();
-            let result = self.decode_raw_bytes(
+            let result = self.decode_raw_event(
                 &event_metadata,
                 input,
                 &mut event_data,
@@ -177,14 +181,17 @@ where
         Ok(r)
     }
 
-    fn decode_raw_bytes<W: Output>(
+    fn decode_raw_event(
         &self,
-        _event_metadata: &EventMetadata,
-        _input: &mut &[u8],
-        _output: &mut W,
+        event_metadata: &EventMetadata,
+        input: &mut &[u8],
+        output: &mut Vec<u8>,
         _errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
-        todo!()
+        for arg in event_metadata.variant().fields() {
+            self.decode_type(arg.ty().id(), input, output)?
+        }
+        Ok(())
         // for arg in args {
         //     match arg {
         //         EventArg::Vec(arg) => {
@@ -235,6 +242,114 @@ where
         //     }
         // }
         // Ok(())
+    }
+
+    fn decode_type(
+        &self,
+        type_id: u32,
+        input: &mut &[u8],
+        output: &mut Vec<u8>,
+    ) -> Result<(), Error> {
+        let ty = self.metadata.resolve_type(type_id)
+            .ok_or(MetadataError::TypeNotFound(type_id))?;
+
+        fn decode_raw<T: Codec>(
+            input: &mut &[u8],
+            output: &mut Vec<u8>,
+        ) -> Result<(), Error> {
+            let decoded = T::decode(input)?;
+            decoded.encode_to(output);
+            Ok(())
+        }
+
+        match ty.type_def() {
+            TypeDef::Composite(composite) => {
+                for field in composite.fields() {
+                    self.decode_type(field.ty().id(), input, output)?
+                }
+                Ok(())
+            }
+            TypeDef::Variant(variant) => {
+                // todo: [AJ] handle if variant is DispatchError?
+                for v in variant.variants() {
+                    for field in v.fields() {
+                        self.decode_type(field.ty().id(), input, output)?;
+                    }
+                }
+                Ok(())
+            }
+            TypeDef::Sequence(seq) => {
+                let len = <Compact<u32>>::decode(input)?;
+                len.encode_to(output);
+                for _ in 0..len.0 {
+                    self.decode_type(seq.type_param().id(), input, output)?;
+                }
+                Ok(())
+            }
+            TypeDef::Array(arr) => {
+                for _ in 0..arr.len() {
+                    self.decode_type(arr.type_param().id(), input, output)?;
+                }
+                Ok(())
+            }
+            TypeDef::Tuple(tuple) => {
+                for field in tuple.fields() {
+                    self.decode_type(field.id(), input, output)?;
+                }
+                Ok(())
+            }
+            TypeDef::Primitive(primitive) => {
+                match primitive {
+                    TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
+                    TypeDefPrimitive::Char => todo!("Err: scale codec not implemented for char"),
+                    TypeDefPrimitive::Str => decode_raw::<String>(input, output),
+                    TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
+                    TypeDefPrimitive::U16 => decode_raw::<u16>(input, output),
+                    TypeDefPrimitive::U32 => decode_raw::<u32>(input, output),
+                    TypeDefPrimitive::U64 => decode_raw::<u64>(input, output),
+                    TypeDefPrimitive::U128 => decode_raw::<u128>(input, output),
+                    TypeDefPrimitive::U256 => todo!("Err: U256 currently not supported"),
+                    TypeDefPrimitive::I8 => decode_raw::<i8>(input, output),
+                    TypeDefPrimitive::I16 => decode_raw::<i16>(input, output),
+                    TypeDefPrimitive::I32 => decode_raw::<i32>(input, output),
+                    TypeDefPrimitive::I64 => decode_raw::<i64>(input, output),
+                    TypeDefPrimitive::I128 => decode_raw::<i128>(input, output),
+                    TypeDefPrimitive::I256 => todo!("Err(I256 currently not supported)"),
+                }
+            }
+            TypeDef::Compact(compact) => {
+                let inner = self.metadata.resolve_type(type_id)
+                    .ok_or(MetadataError::TypeNotFound(type_id))?;
+                match inner.type_def() {
+                    TypeDef::Primitive(primitive) => {
+                        match primitive {
+                            TypeDefPrimitive::U8 => decode_raw::<Compact<u8>>(input, output),
+                            TypeDefPrimitive::U16 => decode_raw::<Compact<u16>>(input, output),
+                            TypeDefPrimitive::U32 => decode_raw::<Compact<u32>>(input, output),
+                            TypeDefPrimitive::U64 => decode_raw::<Compact<u64>>(input, output),
+                            TypeDefPrimitive::U128 => decode_raw::<Compact<u128>>(input, output),
+                            _ => todo!("Add custom err: Compact only supported for unsigned int primitives"),
+                        }
+                    }
+                    // todo: [AJ] single field struct with primitive?, extract primitive decoding as above
+                    _ => todo!("Add custom err: Compact only supported for unsigned int primitives"),
+                }
+            },
+            TypeDef::BitSequence(_bitseq) => {
+                // decode_raw::<bitvec::BitVec>
+                todo!()
+            },
+        }
+    }
+
+    fn decode_raw<C: Codec>(
+        &self,
+        input: &mut &[u8],
+        output: &mut Vec<u8>,
+    ) -> Result<(), Error> {
+        let decoded = C::decode(input)?;
+        decoded.encode_to(output);
+        Ok(())
     }
 }
 

@@ -49,6 +49,7 @@ use scale_info::{
         Form,
         PortableForm,
     },
+    Type,
     Variant,
 };
 
@@ -56,11 +57,11 @@ use scale_info::{
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
     /// Module is not in metadata.
-    #[error("Module {0} not found")]
+    #[error("Pallet {0} not found")]
     PalletNotFound(String),
-    /// Module is not in metadata.
-    #[error("Module index {0} not found")]
-    ModuleIndexNotFound(u8),
+    /// Pallet is not in metadata.
+    #[error("Pallet index {0} not found")]
+    PalletIndexNotFound(u8),
     /// Call is not in metadata.
     #[error("Call {0} not found")]
     CallNotFound(&'static str),
@@ -85,6 +86,8 @@ pub enum MetadataError {
     /// Constant is not in metadata.
     #[error("Constant {0} not found")]
     ConstantNotFound(&'static str),
+    #[error("Type {0} missing from type registry")]
+    TypeNotFound(u32),
 }
 
 /// Runtime metadata.
@@ -114,6 +117,11 @@ impl Metadata {
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
         Ok(event)
+    }
+
+    /// Resolve a type definition.
+    pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
+        self.metadata.types.resolve(id)
     }
 }
 
@@ -173,6 +181,11 @@ impl EventMetadata {
     /// Get the name of the pallet event which was emitted.
     pub fn event(&self) -> &str {
         &self.event
+    }
+
+    /// Get the type def variant for the pallet event.
+    pub fn variant(&self) -> &Variant<PortableForm> {
+        &self.variant
     }
 }
 
