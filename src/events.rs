@@ -53,7 +53,11 @@ use crate::{
     Runtime,
     RuntimeError,
 };
-use scale_info::{form::PortableForm, TypeDef, TypeDefPrimitive};
+use scale_info::{
+    form::PortableForm,
+    TypeDef,
+    TypeDefPrimitive,
+};
 
 /// Raw bytes for an Event
 pub struct RawEvent {
@@ -250,7 +254,9 @@ where
         input: &mut &[u8],
         output: &mut Vec<u8>,
     ) -> Result<(), Error> {
-        let ty = self.metadata.resolve_type(type_id)
+        let ty = self
+            .metadata
+            .resolve_type(type_id)
             .ok_or(MetadataError::TypeNotFound(type_id))?;
 
         fn decode_raw<T: Codec>(
@@ -301,7 +307,9 @@ where
             TypeDef::Primitive(primitive) => {
                 match primitive {
                     TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
-                    TypeDefPrimitive::Char => todo!("Err: scale codec not implemented for char"),
+                    TypeDefPrimitive::Char => {
+                        todo!("Err: scale codec not implemented for char")
+                    }
                     TypeDefPrimitive::Str => decode_raw::<String>(input, output),
                     TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
                     TypeDefPrimitive::U16 => decode_raw::<u16>(input, output),
@@ -318,7 +326,9 @@ where
                 }
             }
             TypeDef::Compact(compact) => {
-                let inner = self.metadata.resolve_type(type_id)
+                let inner = self
+                    .metadata
+                    .resolve_type(type_id)
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
                 match inner.type_def() {
                     TypeDef::Primitive(primitive) => {
@@ -334,11 +344,11 @@ where
                     // todo: [AJ] single field struct with primitive?, extract primitive decoding as above
                     _ => todo!("Add custom err: Compact only supported for unsigned int primitives"),
                 }
-            },
+            }
             TypeDef::BitSequence(_bitseq) => {
                 // decode_raw::<bitvec::BitVec>
                 todo!()
-            },
+            }
         }
     }
 
