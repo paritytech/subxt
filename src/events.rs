@@ -23,10 +23,6 @@ use codec::{
     Output,
 };
 use dyn_clone::DynClone;
-use sp_runtime::{
-    DispatchError,
-    DispatchResult,
-};
 use std::{
     collections::{
         hash_map::{
@@ -190,62 +186,18 @@ where
         event_metadata: &EventMetadata,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-        _errors: &mut Vec<RuntimeError>,
+        errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
         for arg in event_metadata.variant().fields() {
-            self.decode_type(arg.ty().id(), input, output)?
+            if event_metadata.pallet() == "System" && event_metadata.event() == "ExtrinsicFailed" {
+                let dispatch_error = sp_runtime::DispatchError::decode(input)?;
+                let runtime_error = RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
+                errors.push(runtime_error)
+            } else {
+                self.decode_type(arg.ty().id(), input, output)?
+            }
         }
         Ok(())
-        // for arg in args {
-        //     match arg {
-        //         EventArg::Vec(arg) => {
-        //             let len = <Compact<u32>>::decode(input)?;
-        //             len.encode_to(output);
-        //             for _ in 0..len.0 {
-        //                 self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-        //             }
-        //         }
-        //         EventArg::Option(arg) => {
-        //             match input.read_byte()? {
-        //                 0 => output.push_byte(0),
-        //                 1 => {
-        //                     output.push_byte(1);
-        //                     self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-        //                 }
-        //                 _ => {
-        //                     return Err(Error::Other(
-        //                         "unexpected first byte decoding Option".into(),
-        //                     ))
-        //                 }
-        //             }
-        //         }
-        //         EventArg::Tuple(args) => {
-        //             self.decode_raw_bytes(args, input, output, errors)?
-        //         }
-        //         EventArg::Primitive(name) => {
-        //             let result = match name.as_str() {
-        //                 "DispatchResult" => DispatchResult::decode(input)?,
-        //                 "DispatchError" => Err(DispatchError::decode(input)?),
-        //                 _ => {
-        //                     if let Some(seg) = self.event_type_registry.resolve(name) {
-        //                         let mut buf = Vec::<u8>::new();
-        //                         seg.segment(input, &mut buf)?;
-        //                         output.write(&buf);
-        //                         Ok(())
-        //                     } else {
-        //                         return Err(Error::TypeSizeUnavailable(name.to_owned()))
-        //                     }
-        //                 }
-        //             };
-        //             if let Err(error) = result {
-        //                 // since the input may contain any number of args we propagate
-        //                 // runtime errors to the caller for handling
-        //                 errors.push(RuntimeError::from_dispatch(&self.metadata, error)?);
-        //             }
-        //         }
-        //     }
-        // }
-        // Ok(())
     }
 
     fn decode_type(
@@ -347,7 +299,7 @@ where
             }
             TypeDef::BitSequence(_bitseq) => {
                 // decode_raw::<bitvec::BitVec>
-                todo!()
+                todo!("BitVec")
             }
         }
     }

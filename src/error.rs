@@ -123,13 +123,12 @@ impl RuntimeError {
                 error,
                 message: _,
             } => {
-                todo!()
-                // let module = metadata.module_with_errors(index)?;
-                // let error = module.error(error)?;
-                // Ok(Self::Module(ModuleError {
-                //     module: module.name().to_string(),
-                //     error: error.to_string(),
-                // }))
+                let error = metadata.error(index, error)?;
+                Ok(Self::Module(ModuleError {
+                    pallet: error.pallet().to_string(),
+                    error: error.error().to_string(),
+                    description: error.description().to_vec(),
+                }))
             }
             DispatchError::BadOrigin => Ok(Self::BadOrigin),
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
@@ -144,10 +143,12 @@ impl RuntimeError {
 
 /// Module error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
-#[error("{error} from {module}")]
+#[error("{error} from {pallet}")]
 pub struct ModuleError {
     /// The module where the error originated.
-    pub module: String,
+    pub pallet: String,
     /// The actual error code.
     pub error: String,
+    /// The error description.
+    pub description: Vec<String>,
 }

@@ -69,8 +69,8 @@ pub enum MetadataError {
     #[error("Pallet {0}, Event {0} not found")]
     EventNotFound(u8, u8),
     /// Event is not in metadata.
-    #[error("Error {0} not found")]
-    ErrorNotFound(u8),
+    #[error("Pallet {0}, Error {0} not found")]
+    ErrorNotFound(u8, u8),
     /// Storage is not in metadata.
     #[error("Storage {0} not found")]
     StorageNotFound(&'static str),
@@ -96,6 +96,7 @@ pub struct Metadata {
     metadata: RuntimeMetadataLastVersion,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
+    errors: HashMap<(u8, u8), ErrorMetadata>,
 }
 
 impl Metadata {
@@ -106,7 +107,7 @@ impl Metadata {
             .ok_or(MetadataError::PalletNotFound(name.to_string()))
     }
 
-    /// Returns the variant for the event at the given pallet and event indices.
+    /// Returns the metadata for the event at the given pallet and event indices.
     pub fn event(
         &self,
         pallet_index: u8,
@@ -117,6 +118,19 @@ impl Metadata {
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
         Ok(event)
+    }
+
+    /// Returns the metadata for the error at the given pallet and error indices.
+    pub fn error(
+        &self,
+        pallet_index: u8,
+        error_index: u8,
+    ) -> Result<&ErrorMetadata, MetadataError> {
+        let error = self
+            .errors
+            .get(&(pallet_index, error_index))
+            .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
+        Ok(error)
     }
 
     /// Resolve a type definition.
@@ -188,6 +202,31 @@ impl EventMetadata {
         &self.variant
     }
 }
+
+#[derive(Clone, Debug)]
+pub struct ErrorMetadata {
+    pallet: String,
+    error: String,
+    variant: Variant<PortableForm>,
+}
+
+impl ErrorMetadata {
+    /// Get the name of the pallet from which the error originates.
+    pub fn pallet(&self) -> &str {
+        &self.pallet
+    }
+
+    /// Get the name of the specific pallet error.
+    pub fn error(&self) -> &str {
+        &self.error
+    }
+
+    /// Get the description of the specific pallet error.
+    pub fn description(&self) -> &[String] {
+        self.variant.docs()
+    }
+}
+
 
 #[derive(Clone, Debug)]
 pub struct StorageMetadata {
@@ -264,6 +303,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 Ok((pallet.name.to_string(), pallet_metadata))
             })
             .collect::<Result<_, _>>()?;
+
         let pallet_events = metadata
             .pallets
             .iter()
@@ -274,7 +314,6 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 })
             })
             .collect::<Result<Vec<_>, _>>()?;
-
         let events = pallet_events
             .iter()
             .flat_map(|(pallet, type_def_variant)| {
@@ -289,10 +328,37 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 })
             })
             .collect();
+
+        let pallet_errors = metadata
+            .pallets
+            .iter()
+            .filter_map(|pallet| {
+                pallet.error.as_ref().map(|error| {
+                    let type_def_variant = get_type_def_variant(error.ty.id())?;
+                    Ok((pallet, type_def_variant))
+                })
+            })
+            .collect::<Result<Vec<_>, _>>()?;
+        let errors = pallet_errors
+            .iter()
+            .flat_map(|(pallet, type_def_variant)| {
+                type_def_variant.variants().iter().map(move |var| {
+                    let key = (pallet.index, var.index());
+                    let value = ErrorMetadata {
+                        pallet: pallet.name.clone(),
+                        error: var.name().clone(),
+                        variant: var.clone(),
+                    };
+                    (key, value)
+                })
+            })
+            .collect();
+
         Ok(Self {
             metadata,
             pallets,
             events,
+            errors,
         })
     }
 }
