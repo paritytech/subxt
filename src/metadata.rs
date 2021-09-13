@@ -34,15 +34,12 @@ use frame_metadata::{
     META_RESERVED,
 };
 
-
 use crate::{
     Call,
     Encoded,
 };
 use scale_info::{
-    form::{
-        PortableForm,
-    },
+    form::PortableForm,
     Type,
     Variant,
 };
@@ -220,7 +217,6 @@ impl ErrorMetadata {
         self.variant.docs()
     }
 }
-
 
 #[derive(Clone, Debug)]
 pub struct StorageMetadata {

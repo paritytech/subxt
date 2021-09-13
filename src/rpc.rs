@@ -150,7 +150,6 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-
 #[cfg(feature = "client")]
 use substrate_subxt_client::SubxtClient;
 
