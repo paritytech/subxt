@@ -120,7 +120,7 @@ pub(crate) async fn test_node_process() -> TestNodeProcess<TestRuntime> {
 async fn test_tx_transfer_balance() {
     use crate::node_runtime::balances::calls::Transfer;
 
-    let mut signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest: MultiAddress<AccountId32, u32> = AccountKeyring::Bob.to_account_id().into();
 
     let node_process = test_node_process().await;

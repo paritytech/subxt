@@ -20,18 +20,9 @@ use codec::{
     Decode,
     Encode,
     Input,
-    Output,
 };
 use dyn_clone::DynClone;
 use std::{
-    collections::{
-        hash_map::{
-            Entry,
-            HashMap,
-        },
-        HashSet,
-    },
-    fmt,
     marker::{
         PhantomData,
         Send,
@@ -302,16 +293,6 @@ where
                 todo!("BitVec")
             }
         }
-    }
-
-    fn decode_raw<C: Codec>(
-        &self,
-        input: &mut &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
-        let decoded = C::decode(input)?;
-        decoded.encode_to(output);
-        Ok(())
     }
 }
 

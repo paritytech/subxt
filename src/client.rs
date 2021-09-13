@@ -71,7 +71,6 @@ pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
-    skip_type_sizes_check: bool,
     accept_weak_inclusion: bool,
 }
 
@@ -82,7 +81,6 @@ impl ClientBuilder {
             url: None,
             client: None,
             page_size: None,
-            skip_type_sizes_check: false,
             accept_weak_inclusion: false,
         }
     }
