@@ -142,25 +142,35 @@ impl RuntimeGenerator {
                 (Vec::new(), Vec::new())
             };
 
+            let storage_mod = if !storage_structs.is_empty() {
+                quote! {
+                    pub mod storage {
+                        use super::#types_mod_ident;
+                        #( #storage_structs )*
+
+                        pub struct StorageClient<'a, T: ::subxt::Runtime> {
+                            client: &'a ::subxt::Client<T>,
+                        }
+
+                        impl<'a, T: ::subxt::Runtime> StorageClient<'a, T> {
+                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
+                                Self { client }
+                            }
+
+                            #( #storage_fns )*
+                        }
+                    }
+                }
+            } else {
+                quote!()
+            };
+
             quote! {
                 pub mod #mod_name {
                     use super::#types_mod_ident;
                     #calls
                     #event
-
-                    #( #storage_structs )*
-
-                    pub struct StorageClient<'a, T: ::subxt::Runtime> {
-                        client: &'a ::subxt::Client<T>,
-                    }
-
-                    impl<'a, T: ::subxt::Runtime> StorageClient<'a, T> {
-                        pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                            Self { client }
-                        }
-
-                        #( #storage_fns )*
-                    }
+                    #storage_mod
                 }
             }
         });
@@ -494,7 +504,7 @@ impl RuntimeGenerator {
                 impl ::subxt::StorageEntry for #entry_struct_ident {
                     const PALLET: &'static str = #pallet_name;
                     const STORAGE: &'static str = #storage_name;
-                    type Value = #return_ty_path;
+                    type Value = #return_ty;
                     fn key(&self) -> ::subxt::StorageEntryKey {
                         #key_impl
                     }
@@ -511,7 +521,7 @@ impl RuntimeGenerator {
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
                     let entry = #constructor;
-                    self.client.fetch_or_default(&entry, hash)
+                    self.client.fetch_or_default(&entry, hash).await
                 }
             };
 
