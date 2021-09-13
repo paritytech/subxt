@@ -135,34 +135,21 @@ async fn test_tx_transfer_balance() {
         )
         .await
         .unwrap();
-
-    // check that nonce is handled correctly
-    // signer.increment_nonce();
-    // client
-    //     .submit(
-    //         Transfer {
-    //             dest,
-    //             value: 10_000,
-    //         },
-    //         &signer,
-    //     )
-    //     .await
-    //     .unwrap();
 }
 
-// #[async_std::test]
-// async fn test_getting_hash() {
-//     let node_process = test_node_process().await;
-//     node_process.client().block_hash(None).await.unwrap();
-// }
-//
-// #[async_std::test]
-// async fn test_getting_block() {
-//     let node_process = test_node_process().await;
-//     let client = node_process.client();
-//     let block_hash = client.block_hash(None).await.unwrap();
-//     client.block(block_hash).await.unwrap();
-// }
+#[async_std::test]
+async fn test_getting_hash() {
+    let node_process = test_node_process().await;
+    node_process.client().block_hash(None).await.unwrap();
+}
+
+#[async_std::test]
+async fn test_getting_block() {
+    let node_process = test_node_process().await;
+    let client = node_process.client();
+    let block_hash = client.block_hash(None).await.unwrap();
+    client.block(block_hash).await.unwrap();
+}
 //
 // #[async_std::test]
 // async fn test_getting_read_proof() {
@@ -180,22 +167,22 @@ async fn test_tx_transfer_balance() {
 //         .await
 //         .unwrap();
 // }
-//
-// #[async_std::test]
-// async fn test_chain_subscribe_blocks() {
-//     let node_process = test_node_process().await;
-//     let client = node_process.client();
-//     let mut blocks = client.subscribe_blocks().await.unwrap();
-//     blocks.next().await.unwrap();
-// }
-//
-// #[async_std::test]
-// async fn test_chain_subscribe_finalized_blocks() {
-//     let node_process = test_node_process().await;
-//     let client = node_process.client();
-//     let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
-//     blocks.next().await.unwrap();
-// }
+
+#[async_std::test]
+async fn test_chain_subscribe_blocks() {
+    let node_process = test_node_process().await;
+    let client = node_process.client();
+    let mut blocks = client.subscribe_blocks().await.unwrap();
+    blocks.next().await.unwrap();
+}
+
+#[async_std::test]
+async fn test_chain_subscribe_finalized_blocks() {
+    let node_process = test_node_process().await;
+    let client = node_process.client();
+    let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
+    blocks.next().await.unwrap();
+}
 //
 // #[async_std::test]
 // async fn test_fetch_keys() {
