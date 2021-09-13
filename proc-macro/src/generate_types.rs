@@ -479,7 +479,7 @@ impl<'a> ModuleType<'a> {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub enum TypePath {
     Parameter(TypeParameter),
     Type(TypePathType),
@@ -528,7 +528,7 @@ impl TypePath {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TypePathType {
     ty: Type<PortableForm>,
     params: Vec<TypePath>,
@@ -656,7 +656,7 @@ impl quote::ToTokens for TypeParameter {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct TypePathSubstitute {
     path: syn::TypePath,
     params: Vec<TypePath>,
