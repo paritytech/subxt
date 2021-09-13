@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+mod frame;
 mod node_proc;
 
 pub use node_proc::TestNodeProcess;
@@ -74,9 +75,7 @@ impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub async fn test_node_process_with(
-    key: AccountKeyring,
-) -> TestNodeProcess<TestRuntime> {
+pub async fn test_node_process_with(key: AccountKeyring) -> TestNodeProcess<TestRuntime> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
@@ -150,7 +149,6 @@ async fn test_getting_block() {
     let block_hash = client.block_hash(None).await.unwrap();
     client.block(block_hash).await.unwrap();
 }
-//
 // #[async_std::test]
 // async fn test_getting_read_proof() {
 //     let node_process = test_node_process().await;
@@ -183,7 +181,6 @@ async fn test_chain_subscribe_finalized_blocks() {
     let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
     blocks.next().await.unwrap();
 }
-//
 // #[async_std::test]
 // async fn test_fetch_keys() {
 //     let node_process = test_node_process().await;
