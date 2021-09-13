@@ -40,11 +40,9 @@
 )]
 #![allow(clippy::type_complexity)]
 
-#[macro_use]
-extern crate subxt_proc_macro;
-
 pub use sp_core;
 pub use sp_runtime;
+pub use subxt_proc_macro::subxt;
 
 use codec::{
     Codec,
@@ -53,11 +51,7 @@ use codec::{
     EncodeLike,
 };
 use serde::de::DeserializeOwned;
-use std::{
-    fmt::Debug,
-    marker::PhantomData,
-    sync::Arc,
-};
+use std::fmt::Debug;
 
 mod client;
 mod error;
@@ -67,10 +61,6 @@ mod metadata;
 mod rpc;
 mod subscription;
 
-use crate::rpc::{
-    ChainBlock,
-    Rpc,
-};
 pub use crate::{
     client::{
         Client,
@@ -106,7 +96,6 @@ pub use crate::{
     },
 };
 pub use frame_metadata::StorageHasher;
-pub use subxt_proc_macro::subxt;
 
 use sp_runtime::traits::{
     AtLeast32Bit,
