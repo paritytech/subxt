@@ -22,11 +22,9 @@ use codec::{
     Input,
 };
 use dyn_clone::DynClone;
-use std::{
-    marker::{
-        PhantomData,
-        Send,
-    },
+use std::marker::{
+    PhantomData,
+    Send,
 };
 
 use crate::{
@@ -179,9 +177,12 @@ where
         errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
         for arg in event_metadata.variant().fields() {
-            if event_metadata.pallet() == "System" && event_metadata.event() == "ExtrinsicFailed" {
+            if event_metadata.pallet() == "System"
+                && event_metadata.event() == "ExtrinsicFailed"
+            {
                 let dispatch_error = sp_runtime::DispatchError::decode(input)?;
-                let runtime_error = RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
+                let runtime_error =
+                    RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
                 errors.push(runtime_error)
             } else {
                 self.decode_type(arg.ty().id(), input, output)?
