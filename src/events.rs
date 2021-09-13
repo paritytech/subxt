@@ -41,7 +41,6 @@ use crate::{
     RuntimeError,
 };
 use scale_info::{
-    form::PortableForm,
     TypeDef,
     TypeDefPrimitive,
 };
@@ -268,7 +267,7 @@ where
                     TypeDefPrimitive::I256 => todo!("Err(I256 currently not supported)"),
                 }
             }
-            TypeDef::Compact(compact) => {
+            TypeDef::Compact(_compact) => {
                 let inner = self
                     .metadata
                     .resolve_type(type_id)

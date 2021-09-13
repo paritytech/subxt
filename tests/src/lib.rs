@@ -45,7 +45,7 @@ mod node_runtime {
 }
 
 #[derive(Clone, Debug, Eq, PartialEq)]
-struct TestRuntime;
+pub struct TestRuntime;
 
 impl Runtime for TestRuntime {
     type Index = u32;
@@ -74,7 +74,7 @@ impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub(crate) async fn test_node_process_with(
+pub async fn test_node_process_with(
     key: AccountKeyring,
 ) -> TestNodeProcess<TestRuntime> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
@@ -93,7 +93,7 @@ pub(crate) async fn test_node_process_with(
     proc.unwrap()
 }
 
-pub(crate) async fn test_node_process() -> TestNodeProcess<TestRuntime> {
+pub async fn test_node_process() -> TestNodeProcess<TestRuntime> {
     test_node_process_with(AccountKeyring::Alice).await
 }
 

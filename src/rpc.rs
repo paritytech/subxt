@@ -150,10 +150,7 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-use crate::metadata::{
-    InvalidMetadataError,
-    MetadataError,
-};
+
 #[cfg(feature = "client")]
 use substrate_subxt_client::SubxtClient;
 
