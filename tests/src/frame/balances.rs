@@ -55,8 +55,8 @@ async fn test_basic_transfer() {
     let client = test_node_proc.client();
     let api = crate::node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
 
-    let alice_pre = api.storage.system.account(alice.account_id(), None).await.unwrap();
-    let bob_pre = api.storage.system.account(bob.account_id(), None).await.unwrap();
+    let alice_pre = api.storage.system.account(alice.account_id().clone().into(), None).await.unwrap();
+    let bob_pre = api.storage.system.account(bob.account_id().clone().into(), None).await.unwrap();
 
     let event = client
         .transfer_and_watch(&alice, &bob_address, 10_000)
@@ -72,8 +72,8 @@ async fn test_basic_transfer() {
     };
     assert_eq!(event, expected_event);
 
-    let alice_post = client.account(alice.account_id(), None).await.unwrap();
-    let bob_post = client.account(bob.account_id(), None).await.unwrap();
+    let alice_post = api.storage.system.account(alice.account_id().clone().into(), None).await.unwrap();
+    let bob_post = api.storage.system.account(bob.account_id().clone().into(), None).await.unwrap();
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
@@ -109,7 +109,7 @@ async fn test_basic_transfer() {
 //     client
 //         .bond_and_watch(
 //             &bob,
-//             &AccountKeyring::Charlie.to_account_id().into(),
+//             &AccountKeyring::Charlie.to_account_id().clone().into(),
 //             100_000_000_000_000,
 //             RewardDestination::Stash,
 //         )
