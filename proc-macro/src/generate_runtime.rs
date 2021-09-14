@@ -105,8 +105,8 @@ impl RuntimeGenerator {
             TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
-        let pallet_mod_names = self.metadata.pallets.iter().map(|pallet| format_ident!("{}", pallet.name.to_string().to_snake_case())).collect::<Vec<_>>();
-        let modules = self.metadata.pallets.iter().zip(pallet_mod_names.iter()).map(|(pallet, mod_name)| {
+        let pallets_with_mod_names = self.metadata.pallets.iter().map(|pallet| (pallet, format_ident!("{}", pallet.name.to_string().to_snake_case()))).collect::<Vec<_>>();
+        let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
                 let (call_structs, call_fns) = self.generate_call_structs(&type_gen, pallet, calls);
                 quote! {
@@ -123,7 +123,7 @@ impl RuntimeGenerator {
                                 Self { client }
                             }
 
-                            #( #call_fns )*
+                            // #( #call_fns )*
                         }
                     }
                 }
@@ -205,17 +205,27 @@ impl RuntimeGenerator {
 
         // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod.ident;
-        let pallet_storage_cli_fields = pallet_mod_names.iter().map(|pallet_mod_name| quote! {
-            pub #pallet_mod_name: #pallet_mod_name::storage::StorageApi<T>
-        });
-        let pallet_storage_cli_fields_init = pallet_mod_names.iter().map(|pallet_mod_name| quote! {
-            #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone())
-        });
-        let (pallet_calls_cli_fields, pallet_calls_cli_fields_init): (Vec<_>, Vec<_>) = pallet_mod_names.iter().map(|pallet_mod_name| {
-            let cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::calls::TransactionApi<T> );
-            let cli_field_init = quote!( #pallet_mod_name::calls::TransactionApi::new(client.clone()) );
-            (cli_field, cli_field_init)
+        let (pallet_storage_cli_fields, pallet_storage_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names.iter().filter_map(|(pallet, pallet_mod_name)| {
+            if pallet.storage.is_some() {
+                let pallet_storage_cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::storage::StorageApi<T> );
+                let pallet_storage_cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone()) );
+                Some((pallet_storage_cli_field, pallet_storage_cli_field_init))
+            } else {
+                None
+            }
         }).unzip();
+        let (pallet_calls_cli_fields, pallet_calls_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                if pallet.calls.is_some() {
+                    let cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::calls::TransactionApi<T> );
+                    let cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::calls::TransactionApi::new(client.clone()) );
+                    Some((cli_field, cli_field_init))
+                } else {
+                    None
+                }
+            })
+            .unzip();
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -252,7 +262,7 @@ impl RuntimeGenerator {
                 }
 
                 pub struct TransactionApi<T: ::subxt::Runtime> {
-                    client: ::std::sync::Arg<::subxt::Client<T>>,
+                    client: ::std::sync::Arc<::subxt::Client<T>>,
                     #( #pallet_calls_cli_fields, )*
                 }
             }
@@ -346,7 +356,7 @@ impl RuntimeGenerator {
 
                             let pallet_name = &pallet.name;
                             let function_name = var.name().to_string();
-                            let fn_name = function_name.to_camel_case();
+                            let fn_name = format_ident!("{}", function_name.to_snake_case());
 
                             let call_struct =
                                 quote! {
