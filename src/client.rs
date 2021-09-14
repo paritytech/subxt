@@ -462,3 +462,32 @@ impl<T: Runtime> Client<T> {
         self.rpc.has_key(public_key, key_type).await
     }
 }
+
+pub struct SubmittableExtrinsic<T: Runtime, C: Call> {
+    client: Arc<Client<T>>,
+    call: C,
+}
+
+impl<T, C> SubmittableExtrinsic<T, C>
+where
+    T: Runtime,
+    C: Call + Send + Sync,
+    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+{
+    pub fn new(client: Arc<Client<T>>, call: C) -> Self {
+        Self { client, call }
+    }
+
+    /// Create and submit an extrinsic and return corresponding Event if successful
+    /// todo: [AJ] could do a type builder interface like `xt.sign(&signer).watch_events().submit()`
+    pub async fn sign_and_submit_then_watch(self, signer: &(dyn Signer<T> + Send + Sync)) -> Result<ExtrinsicSuccess<T>, Error> {
+        let extrinsic= self.client.create_signed(self.call, signer).await?;
+        self.client.submit_and_watch_extrinsic(extrinsic).await
+    }
+
+    /// Submits a transaction to the chain.
+    pub async fn sign_and_submit(self, signer: &(dyn Signer<T> + Send + Sync)) -> Result<T::Hash, Error> {
+        let extrinsic= self.client.create_signed(self.call, signer).await?;
+        self.client.submit_extrinsic(extrinsic).await
+    }
+}

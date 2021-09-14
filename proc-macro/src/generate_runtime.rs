@@ -108,11 +108,23 @@ impl RuntimeGenerator {
         let pallet_mod_names = self.metadata.pallets.iter().map(|pallet| format_ident!("{}", pallet.name.to_string().to_snake_case())).collect::<Vec<_>>();
         let modules = self.metadata.pallets.iter().zip(pallet_mod_names.iter()).map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
-                let call_structs = self.generate_call_structs(&type_gen, pallet, calls);
+                let (call_structs, call_fns) = self.generate_call_structs(&type_gen, pallet, calls);
                 quote! {
                     pub mod calls {
                         use super::#types_mod_ident;
                         #( #call_structs )*
+
+                        pub struct TransactionApi<T: ::subxt::Runtime> {
+                            client: ::std::sync::Arc<::subxt::Client<T>>,
+                        }
+
+                        impl<T: ::subxt::Runtime> TransactionApi<T> {
+                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
+                                Self { client }
+                            }
+
+                            #( #call_fns )*
+                        }
                     }
                 }
             } else {
@@ -199,6 +211,11 @@ impl RuntimeGenerator {
         let pallet_storage_cli_fields_init = pallet_mod_names.iter().map(|pallet_mod_name| quote! {
             #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone())
         });
+        let (pallet_calls_cli_fields, pallet_calls_cli_fields_init): (Vec<_>, Vec<_>) = pallet_mod_names.iter().map(|pallet_mod_name| {
+            let cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::calls::TransactionApi<T> );
+            let cli_field_init = quote!( #pallet_mod_name::calls::TransactionApi::new(client.clone()) );
+            (cli_field, cli_field_init)
+        }).unzip();
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -209,6 +226,7 @@ impl RuntimeGenerator {
                 pub struct RuntimeApi<T: ::subxt::Runtime> {
                     pub client: ::std::sync::Arc<::subxt::Client<T>>,
                     pub storage: StorageApi<T>,
+                    pub tx: TransactionApi<T>,
                 }
 
                 impl<T: ::subxt::Runtime> RuntimeApi<T> {
@@ -220,6 +238,10 @@ impl RuntimeGenerator {
                                 client: client.clone(),
                                 #( #pallet_storage_cli_fields_init, )*
                             },
+                            tx: TransactionApi {
+                                client: client.clone(),
+                                #( #pallet_calls_cli_fields_init, )*
+                            }
                         }
                     }
                 }
@@ -227,6 +249,11 @@ impl RuntimeGenerator {
                 pub struct StorageApi<T: ::subxt::Runtime> {
                     client: ::std::sync::Arc<::subxt::Client<T>>,
                     #( #pallet_storage_cli_fields, )*
+                }
+
+                pub struct TransactionApi<T: ::subxt::Runtime> {
+                    client: ::std::sync::Arg<::subxt::Client<T>>,
+                    #( #pallet_calls_cli_fields, )*
                 }
             }
         }
@@ -278,7 +305,7 @@ impl RuntimeGenerator {
         type_gen: &TypeGenerator,
         pallet: &PalletMetadata<PortableForm>,
         call: &PalletCallMetadata<PortableForm>,
-    ) -> Vec<TokenStream2> {
+    ) -> (Vec<TokenStream2>, Vec<TokenStream2>) {
         let ty = call.ty;
         let name = type_gen.resolve_type_path(ty.id(), &[]);
         match name {
@@ -298,35 +325,54 @@ impl RuntimeGenerator {
                                 "{}",
                                 var.name().to_string().to_camel_case()
                             );
-                            let args = var.fields().iter().filter_map(|field| {
+                            let args_name_and_type = var.fields().iter().filter_map(|field| {
                                 field.name().map(|name| {
                                     let name = format_ident!("{}", name);
                                     let ty =
                                         type_gen.resolve_type_path(field.ty().id(), &[]);
-                                    if ty.is_compact() {
-                                        quote! { #[codec(compact)] pub #name: #ty }
-                                    } else {
-                                        quote! { pub #name: #ty }
-                                    }
+                                    (name, ty)
                                 })
+                            }).collect::<Vec<_>>();
+                            let args = args_name_and_type.iter().map(|(name, ty)| {
+                                if ty.is_compact() {
+                                    quote! { #[codec(compact)] pub #name: #ty }
+                                } else {
+                                    quote! { pub #name: #ty }
+                                }
                             });
+                            let call_fn_args = args_name_and_type.iter().map(|(name, ty)| {
+                                quote!( #name: #ty )
+                            }).collect::<Vec<_>>();
 
                             let pallet_name = &pallet.name;
                             let function_name = var.name().to_string();
+                            let fn_name = function_name.to_camel_case();
 
-                            quote! {
-                                #[derive(Debug, ::codec::Encode, ::codec::Decode)]
-                                pub struct #name {
-                                    #( #args ),*
-                                }
+                            let call_struct =
+                                quote! {
+                                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                                    pub struct #name {
+                                        #( #args ),*
+                                    }
 
-                                impl ::subxt::Call for #name {
-                                    const PALLET: &'static str = #pallet_name;
-                                    const FUNCTION: &'static str = #function_name;
-                                }
-                            }
+                                    impl ::subxt::Call for #name {
+                                        const PALLET: &'static str = #pallet_name;
+                                        const FUNCTION: &'static str = #function_name;
+                                    }
+                                };
+                            let client_fn =
+                                quote! {
+                                    pub async fn #fn_name(
+                                        &self,
+                                        #( #call_fn_args, )*
+                                    ) -> ::subxt::SubmittableExtrinsic<T, #name> {
+                                        let call = #name { #( #call_fn_args, )* };
+                                        ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
+                                    }
+                                };
+                            (call_struct, client_fn)
                         })
-                        .collect::<Vec<_>>()
+                        .unzip()
                 } else {
                     abort_call_site!("Call type should be an variant/enum type")
                 }
@@ -386,6 +432,7 @@ impl RuntimeGenerator {
                                 (field_name, field_type)
                             })
                             .collect::<Vec<_>>();
+                        // toddo: [AJ] use unzip here?
                         let tuple_struct_fields = fields
                             .iter()
                             .map(|(_, field_type)| field_type);

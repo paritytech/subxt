@@ -16,7 +16,9 @@
 
 //! Implements support for the pallet_balances module.
 
-use crate::{test_node_process, TestRuntime, node_runtime};
+use crate::{
+    test_node_process, TestRuntime, node_runtime::{RuntimeApi, balances},
+};
 use codec::{
     Decode,
     Encode,
@@ -58,14 +60,10 @@ async fn test_basic_transfer() {
     let alice_pre = api.storage.system.account(alice.account_id().clone().into(), None).await.unwrap();
     let bob_pre = api.storage.system.account(bob.account_id().clone().into(), None).await.unwrap();
 
-    let event = client
-        .transfer_and_watch(&alice, &bob_address, 10_000)
-        .await
-        .expect("sending an xt works")
-        .transfer()
-        .unwrap()
-        .unwrap();
-    let expected_event = TransferEvent {
+    let extrinsic = api.tx.balances.transfer(&bob_address, 10_000).await.unwrap();
+    let result = extrinsic.sign_and_submit_then_watch(&alice).await.unwrap();
+    let event = result.find_event::<balances::events::Transfer>().unwrap().unwrap();
+    let expected_event = balances::events::Transfer {
         from: alice.account_id().clone(),
         to: bob.account_id().clone(),
         amount: 10_000,
