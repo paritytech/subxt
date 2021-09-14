@@ -53,9 +53,10 @@ async fn test_basic_transfer() {
     let bob_address = bob.account_id().clone().into();
     let test_node_proc = test_node_process().await;
     let client = test_node_proc.client();
+    let api = crate::node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
 
-    let alice_pre = client.account(alice.account_id(), None).await.unwrap();
-    let bob_pre = client.account(bob.account_id(), None).await.unwrap();
+    let alice_pre = api.storage.system.account(alice.account_id(), None).await.unwrap();
+    let bob_pre = api.storage.system.account(bob.account_id(), None).await.unwrap();
 
     let event = client
         .transfer_and_watch(&alice, &bob_address, 10_000)

@@ -105,9 +105,8 @@ impl RuntimeGenerator {
             TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
-        let modules = self.metadata.pallets.iter().map(|pallet| {
-            let mod_name = format_ident!("{}", pallet.name.to_string().to_snake_case());
-
+        let pallet_mod_names = self.metadata.pallets.iter().map(|pallet| format_ident!("{}", pallet.name.to_string().to_snake_case())).collect::<Vec<_>>();
+        let modules = self.metadata.pallets.iter().zip(pallet_mod_names.iter()).map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
                 let call_structs = self.generate_call_structs(&type_gen, pallet, calls);
                 quote! {
@@ -142,28 +141,25 @@ impl RuntimeGenerator {
                 (Vec::new(), Vec::new())
             };
 
-            let storage_mod = if !storage_structs.is_empty() {
+            let storage_mod =
                 quote! {
                     pub mod storage {
                         use super::#types_mod_ident;
                         #( #storage_structs )*
 
-                        pub struct StorageClient<'a, T: ::subxt::Runtime> {
-                            client: &'a ::subxt::Client<T>,
+                        pub struct StorageApi<T: ::subxt::Runtime> {
+                            client: ::std::sync::Arc<::subxt::Client<T>>,
                         }
 
-                        impl<'a, T: ::subxt::Runtime> StorageClient<'a, T> {
-                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
+                        impl<T: ::subxt::Runtime> StorageApi<T> {
+                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
                                 Self { client }
                             }
 
                             #( #storage_fns )*
                         }
                     }
-                }
-            } else {
-                quote!()
-            };
+                };
 
             quote! {
                 pub mod #mod_name {
@@ -197,12 +193,41 @@ impl RuntimeGenerator {
 
         // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod.ident;
+        let pallet_storage_cli_fields = pallet_mod_names.iter().map(|pallet_mod_name| quote! {
+            pub #pallet_mod_name: #pallet_mod_name::storage::StorageApi<T>
+        });
+        let pallet_storage_cli_fields_init = pallet_mod_names.iter().map(|pallet_mod_name| quote! {
+            #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone())
+        });
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
                 #outer_event
                 #( #modules )*
                 #types_mod
+
+                pub struct RuntimeApi<T: ::subxt::Runtime> {
+                    pub client: ::std::sync::Arc<::subxt::Client<T>>,
+                    pub storage: StorageApi<T>,
+                }
+
+                impl<T: ::subxt::Runtime> RuntimeApi<T> {
+                    pub fn new(client: ::subxt::Client<T>) -> Self {
+                        let client = ::std::sync::Arc::new(client);
+                        Self {
+                            client: client.clone(),
+                            storage: StorageApi {
+                                client: client.clone(),
+                                #( #pallet_storage_cli_fields_init, )*
+                            },
+                        }
+                    }
+                }
+
+                pub struct StorageApi<T: ::subxt::Runtime> {
+                    client: ::std::sync::Arc<::subxt::Client<T>>,
+                    #( #pallet_storage_cli_fields, )*
+                }
             }
         }
     }
