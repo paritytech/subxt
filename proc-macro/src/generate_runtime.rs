@@ -105,7 +105,17 @@ impl RuntimeGenerator {
             TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
-        let pallets_with_mod_names = self.metadata.pallets.iter().map(|pallet| (pallet, format_ident!("{}", pallet.name.to_string().to_snake_case()))).collect::<Vec<_>>();
+        let pallets_with_mod_names = self
+            .metadata
+            .pallets
+            .iter()
+            .map(|pallet| {
+                (
+                    pallet,
+                    format_ident!("{}", pallet.name.to_string().to_snake_case()),
+                )
+            })
+            .collect::<Vec<_>>();
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
                 let (call_structs, call_fns) = self.generate_call_structs(&type_gen, pallet, calls);
@@ -437,22 +447,21 @@ impl RuntimeGenerator {
                             .iter()
                             .enumerate()
                             .map(|(i, f)| {
-                                let field_name = format_ident!("_{}", syn::Index::from(i));
+                                let field_name =
+                                    format_ident!("_{}", syn::Index::from(i));
                                 let field_type = type_gen.resolve_type_path(f.id(), &[]);
                                 (field_name, field_type)
                             })
                             .collect::<Vec<_>>();
                         // toddo: [AJ] use unzip here?
-                        let tuple_struct_fields = fields
-                            .iter()
-                            .map(|(_, field_type)| field_type);
-                        let field_names = fields
-                            .iter()
-                            .map(|(field_name, _)| field_name);
+                        let tuple_struct_fields =
+                            fields.iter().map(|(_, field_type)| field_type);
+                        let field_names = fields.iter().map(|(field_name, _)| field_name);
                         let entry_struct = quote! {
                             pub struct #entry_struct_ident( #( #tuple_struct_fields ),* );
                         };
-                        let constructor = quote!( #entry_struct_ident( #( #field_names ),* ) );
+                        let constructor =
+                            quote!( #entry_struct_ident( #( #field_names ),* ) );
                         let keys = (0..tuple.fields().len())
                             .into_iter()
                             .zip(hashers)
@@ -495,7 +504,8 @@ impl RuntimeGenerator {
                                 }
                             };
                             let field_names = fields.iter().map(|(name, _)| name);
-                            let constructor = quote!( #entry_struct_ident { #( #field_names ),* } );
+                            let constructor =
+                                quote!( #entry_struct_ident { #( #field_names ),* } );
                             let keys = fields
                                 .iter()
                                 .zip(hashers)
@@ -514,18 +524,22 @@ impl RuntimeGenerator {
                                 .iter()
                                 .enumerate()
                                 .map(|(i, f)| {
-                                    let field_name = format_ident!("_{}", syn::Index::from(i));
-                                    let field_type = type_gen.resolve_type_path(f.ty().id(), &[]);
+                                    let field_name =
+                                        format_ident!("_{}", syn::Index::from(i));
+                                    let field_type =
+                                        type_gen.resolve_type_path(f.ty().id(), &[]);
                                     (field_name, field_type)
                                 })
                                 .collect::<Vec<_>>();
-                            let fields_def =
-                                fields.iter().map(|(_, field_type) | quote!( pub #field_type ));
+                            let fields_def = fields
+                                .iter()
+                                .map(|(_, field_type)| quote!( pub #field_type ));
                             let entry_struct = quote! {
                                 pub struct #entry_struct_ident( #( #fields_def, )* );
                             };
                             let field_names = fields.iter().map(|(name, _)| name);
-                            let constructor = quote!( #entry_struct_ident( #( #field_names ),* ) );
+                            let constructor =
+                                quote!( #entry_struct_ident( #( #field_names ),* ) );
 
                             let keys = (0..fields.len())
                                 .into_iter()
@@ -579,33 +593,32 @@ impl RuntimeGenerator {
             StorageEntryModifier::Optional => quote!( Option<#return_ty_path> ),
         };
 
-        let storage_entry_type =
-            quote! {
-                #entry_struct
+        let storage_entry_type = quote! {
+            #entry_struct
 
-                impl ::subxt::StorageEntry for #entry_struct_ident {
-                    const PALLET: &'static str = #pallet_name;
-                    const STORAGE: &'static str = #storage_name;
-                    type Value = #return_ty;
-                    fn key(&self) -> ::subxt::StorageEntryKey {
-                        #key_impl
-                    }
+            impl ::subxt::StorageEntry for #entry_struct_ident {
+                const PALLET: &'static str = #pallet_name;
+                const STORAGE: &'static str = #storage_name;
+                type Value = #return_ty;
+                fn key(&self) -> ::subxt::StorageEntryKey {
+                    #key_impl
                 }
-            };
+            }
+        };
 
-        let key_args =
-            fields.iter().map(|(field_name, field_type)| quote!( #field_name: #field_type )); // todo: [AJ] borrow non build-inf types?
-        let client_fn =
-            quote! {
-                pub async fn #fn_name(
-                    &self,
-                    #( #key_args, )*
-                    hash: ::core::option::Option<T::Hash>,
-                ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
-                    let entry = #constructor;
-                    self.client.fetch_or_default(&entry, hash).await
-                }
-            };
+        let key_args = fields
+            .iter()
+            .map(|(field_name, field_type)| quote!( #field_name: #field_type )); // todo: [AJ] borrow non build-inf types?
+        let client_fn = quote! {
+            pub async fn #fn_name(
+                &self,
+                #( #key_args, )*
+                hash: ::core::option::Option<T::Hash>,
+            ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
+                let entry = #constructor;
+                self.client.fetch_or_default(&entry, hash).await
+            }
+        };
 
         (storage_entry_type, client_fn)
     }

@@ -17,7 +17,12 @@
 //! Implements support for the pallet_balances module.
 
 use crate::{
-    test_node_process, TestRuntime, node_runtime::{RuntimeApi, balances},
+    node_runtime::{
+        balances,
+        RuntimeApi,
+    },
+    test_node_process,
+    TestRuntime,
 };
 use codec::{
     Decode,
@@ -31,21 +36,21 @@ use sp_runtime::traits::{
 };
 use std::fmt::Debug;
 
-use subxt::{
-    Error,
-    ModuleError,
-    RuntimeError,
-    extrinsic::{
-        PairSigner,
-        Signer,
-    },
-    EventSubscription,
-};
 use sp_core::{
     sr25519::Pair,
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
+use subxt::{
+    extrinsic::{
+        PairSigner,
+        Signer,
+    },
+    Error,
+    EventSubscription,
+    ModuleError,
+    RuntimeError,
+};
 
 #[async_std::test]
 async fn test_basic_transfer() {
@@ -57,12 +62,30 @@ async fn test_basic_transfer() {
     let client = test_node_proc.client();
     let api = crate::node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
 
-    let alice_pre = api.storage.system.account(alice.account_id().clone().into(), None).await.unwrap();
-    let bob_pre = api.storage.system.account(bob.account_id().clone().into(), None).await.unwrap();
+    let alice_pre = api
+        .storage
+        .system
+        .account(alice.account_id().clone().into(), None)
+        .await
+        .unwrap();
+    let bob_pre = api
+        .storage
+        .system
+        .account(bob.account_id().clone().into(), None)
+        .await
+        .unwrap();
 
-    let extrinsic = api.tx.balances.transfer(&bob_address, 10_000).await.unwrap();
+    let extrinsic = api
+        .tx
+        .balances
+        .transfer(&bob_address, 10_000)
+        .await
+        .unwrap();
     let result = extrinsic.sign_and_submit_then_watch(&alice).await.unwrap();
-    let event = result.find_event::<balances::events::Transfer>().unwrap().unwrap();
+    let event = result
+        .find_event::<balances::events::Transfer>()
+        .unwrap()
+        .unwrap();
     let expected_event = balances::events::Transfer {
         from: alice.account_id().clone(),
         to: bob.account_id().clone(),
@@ -70,8 +93,18 @@ async fn test_basic_transfer() {
     };
     assert_eq!(event, expected_event);
 
-    let alice_post = api.storage.system.account(alice.account_id().clone().into(), None).await.unwrap();
-    let bob_post = api.storage.system.account(bob.account_id().clone().into(), None).await.unwrap();
+    let alice_post = api
+        .storage
+        .system
+        .account(alice.account_id().clone().into(), None)
+        .await
+        .unwrap();
+    let bob_post = api
+        .storage
+        .system
+        .account(bob.account_id().clone().into(), None)
+        .await
+        .unwrap();
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
