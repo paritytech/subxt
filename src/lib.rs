@@ -65,6 +65,7 @@ pub use crate::{
     client::{
         Client,
         ClientBuilder,
+        SubmittableExtrinsic,
     },
     error::{
         Error,

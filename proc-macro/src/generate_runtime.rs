@@ -123,7 +123,7 @@ impl RuntimeGenerator {
                                 Self { client }
                             }
 
-                            // #( #call_fns )*
+                            #( #call_fns )*
                         }
                     }
                 }
@@ -350,9 +350,9 @@ impl RuntimeGenerator {
                                     quote! { pub #name: #ty }
                                 }
                             });
-                            let call_fn_args = args_name_and_type.iter().map(|(name, ty)| {
-                                quote!( #name: #ty )
-                            }).collect::<Vec<_>>();
+                            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = args_name_and_type.iter().map(|(name, ty)| {
+                                (quote!( #name: #ty ), name)
+                            }).unzip();
 
                             let pallet_name = &pallet.name;
                             let function_name = var.name().to_string();
@@ -376,7 +376,7 @@ impl RuntimeGenerator {
                                         &self,
                                         #( #call_fn_args, )*
                                     ) -> ::subxt::SubmittableExtrinsic<T, #name> {
-                                        let call = #name { #( #call_fn_args, )* };
+                                        let call = #name { #( #call_args, )* };
                                         ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
                                     }
                                 };
