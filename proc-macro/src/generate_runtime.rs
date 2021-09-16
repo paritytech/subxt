@@ -24,6 +24,7 @@ use darling::FromMeta;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletCallMetadata,
+    PalletEventMetadata,
     PalletMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
@@ -32,7 +33,10 @@ use frame_metadata::{
     StorageEntryType,
     StorageHasher,
 };
-use heck::SnakeCase as _;
+use heck::{
+    CamelCase as _,
+    SnakeCase as _,
+};
 use proc_macro_error::{
     abort,
     abort_call_site,
@@ -118,7 +122,7 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
-                let (call_structs, call_fns) = self.generate_call_structs(&type_gen, pallet, calls);
+                let (call_structs, call_fns) = self.generate_calls(&type_gen, pallet, calls);
                 quote! {
                     pub mod calls {
                         use super::#types_mod_ident;
@@ -128,7 +132,11 @@ impl RuntimeGenerator {
                             client: ::std::sync::Arc<::subxt::Client<T>>,
                         }
 
-                        impl<T: ::subxt::Runtime> TransactionApi<T> {
+                        impl<T: ::subxt::Runtime> TransactionApi<T>
+                        where
+                            <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
+                                Send + Sync
+                        {
                             pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
                                 Self { client }
                             }
@@ -143,8 +151,13 @@ impl RuntimeGenerator {
 
             let event = if let Some(ref event) = pallet.event {
                 let event_type = type_gen.resolve_type_path(event.ty.id(), &[]);
+                let event_structs = self.generate_event_structs(&type_gen, pallet, event);
                 quote! {
                     pub type Event = #event_type;
+                    pub mod events {
+                        use super::#types_mod_ident;
+                        #( #event_structs )*
+                    }
                 }
             } else {
                 quote!()
@@ -249,7 +262,11 @@ impl RuntimeGenerator {
                     pub tx: TransactionApi<T>,
                 }
 
-                impl<T: ::subxt::Runtime> RuntimeApi<T> {
+                impl<T: ::subxt::Runtime> RuntimeApi<T>
+                where
+                    <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
+                        Send + Sync
+                {
                     pub fn new(client: ::subxt::Client<T>) -> Self {
                         let client = ::std::sync::Arc::new(client);
                         Self {
@@ -320,83 +337,98 @@ impl RuntimeGenerator {
         }
     }
 
-    fn generate_call_structs(
+    fn generate_calls(
         &self,
         type_gen: &TypeGenerator,
         pallet: &PalletMetadata<PortableForm>,
         call: &PalletCallMetadata<PortableForm>,
     ) -> (Vec<TokenStream2>, Vec<TokenStream2>) {
-        let ty = call.ty;
-        let name = type_gen.resolve_type_path(ty.id(), &[]);
-        match name {
-            TypePath::Parameter(_) => panic!("Call type should be a Parameter"),
-            TypePath::Substitute(_) => panic!("Call type should not be a Substitute"),
-            TypePath::Type(ref ty) => {
-                let ty = ty.ty();
+        let struct_defs =
+            self.generate_structs_from_variants(type_gen, call.ty.id(), "Call");
+        struct_defs
+            .iter()
+            .map(|struct_def| {
+                let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
+                    .fields
+                    .iter()
+                    .map(|(name, ty)| (quote!( #name: #ty ), name))
+                    .unzip();
 
-                let type_def = ty.type_def();
-                if let scale_info::TypeDef::Variant(variant) = type_def {
-                    variant
-                        .variants()
-                        .iter()
-                        .map(|var| {
-                            use heck::CamelCase;
-                            let name = format_ident!(
-                                "{}",
-                                var.name().to_string().to_camel_case()
-                            );
-                            let args_name_and_type = var.fields().iter().filter_map(|field| {
-                                field.name().map(|name| {
-                                    let name = format_ident!("{}", name);
-                                    let ty =
-                                        type_gen.resolve_type_path(field.ty().id(), &[]);
-                                    (name, ty)
-                                })
-                            }).collect::<Vec<_>>();
-                            let args = args_name_and_type.iter().map(|(name, ty)| {
-                                if ty.is_compact() {
-                                    quote! { #[codec(compact)] pub #name: #ty }
-                                } else {
-                                    quote! { pub #name: #ty }
-                                }
-                            });
-                            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = args_name_and_type.iter().map(|(name, ty)| {
-                                (quote!( #name: #ty ), name)
-                            }).unzip();
+                let pallet_name = &pallet.name;
+                let call_struct_name = &struct_def.name;
+                let function_name = struct_def.name.to_string();
+                let fn_name = format_ident!("{}", function_name.to_snake_case());
 
-                            let pallet_name = &pallet.name;
-                            let function_name = var.name().to_string();
-                            let fn_name = format_ident!("{}", function_name.to_snake_case());
+                let call_struct = quote! {
+                    #struct_def
 
-                            let call_struct =
-                                quote! {
-                                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
-                                    pub struct #name {
-                                        #( #args ),*
-                                    }
+                    impl ::subxt::Call for #call_struct_name {
+                        const PALLET: &'static str = #pallet_name;
+                        const FUNCTION: &'static str = #function_name;
+                    }
+                };
+                let client_fn = quote! {
+                    pub async fn #fn_name(
+                        &self,
+                        #( #call_fn_args, )*
+                    ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
+                        let call = #call_struct_name { #( #call_args, )* };
+                        ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
+                    }
+                };
+                (call_struct, client_fn)
+            })
+            .unzip()
+    }
 
-                                    impl ::subxt::Call for #name {
-                                        const PALLET: &'static str = #pallet_name;
-                                        const FUNCTION: &'static str = #function_name;
-                                    }
-                                };
-                            let client_fn =
-                                quote! {
-                                    pub async fn #fn_name(
-                                        &self,
-                                        #( #call_fn_args, )*
-                                    ) -> ::subxt::SubmittableExtrinsic<T, #name> {
-                                        let call = #name { #( #call_args, )* };
-                                        ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
-                                    }
-                                };
-                            (call_struct, client_fn)
-                        })
-                        .unzip()
-                } else {
-                    abort_call_site!("Call type should be an variant/enum type")
-                }
-            }
+    fn generate_event_structs(
+        &self,
+        type_gen: &TypeGenerator,
+        pallet: &PalletMetadata<PortableForm>,
+        event: &PalletEventMetadata<PortableForm>,
+    ) -> Vec<TokenStream2> {
+        let struct_defs =
+            self.generate_structs_from_variants(type_gen, event.ty.id(), "Event");
+        struct_defs
+            .iter()
+            .map(|struct_def| {
+                let pallet_name = &pallet.name;
+                let event_struct = &struct_def.name;
+                let event_name = struct_def.name.to_string();
+
+                let event_struct = quote! {
+                    #struct_def
+
+                    impl ::subxt::Event for #event_struct {
+                        const PALLET: &'static str = #pallet_name;
+                        const EVENT: &'static str = #event_name;
+                    }
+                };
+                event_struct
+            })
+            .collect()
+    }
+
+    fn generate_structs_from_variants(
+        &self,
+        type_gen: &TypeGenerator,
+        type_id: u32,
+        error_message_type_name: &str,
+    ) -> Vec<StructDef> {
+        let ty = self.metadata.types.resolve(type_id).unwrap_or_else(|| {
+            abort_call_site!("Failed to resolve {} type", error_message_type_name)
+        });
+        if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
+            variant
+                .variants()
+                .iter()
+                .map(|var| StructDef::from_variant(var, type_gen))
+                .collect()
+        } else {
+            abort_call_site!(
+                "{} type should be an variant/enum type",
+                error_message_type_name
+            )
         }
     }
 
@@ -621,5 +653,51 @@ impl RuntimeGenerator {
         };
 
         (storage_entry_type, client_fn)
+    }
+}
+
+#[derive(Debug)]
+pub struct StructDef {
+    name: syn::Ident,
+    fields: Vec<(syn::Ident, TypePath)>,
+}
+
+impl StructDef {
+    pub fn from_variant(
+        variant: &scale_info::Variant<PortableForm>,
+        type_gen: &TypeGenerator,
+    ) -> Self {
+        let name = format_ident!("{}", variant.name().to_string().to_camel_case());
+        let fields = variant
+            .fields()
+            .iter()
+            .filter_map(|field| {
+                field.name().map(|name| {
+                    let name = format_ident!("{}", name);
+                    let ty = type_gen.resolve_type_path(field.ty().id(), &[]);
+                    (name, ty)
+                })
+            })
+            .collect::<Vec<_>>();
+        Self { name, fields }
+    }
+}
+
+impl quote::ToTokens for StructDef {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let fields = self.fields.iter().map(|(name, ty)| {
+            if ty.is_compact() {
+                quote! { #[codec(compact)] pub #name: #ty }
+            } else {
+                quote! { pub #name: #ty }
+            }
+        });
+        let name = &self.name;
+        tokens.extend(quote! {
+            #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+            pub struct #name {
+                #( #fields ),*
+            }
+        })
     }
 }

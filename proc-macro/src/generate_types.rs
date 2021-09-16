@@ -536,10 +536,6 @@ pub struct TypePathType {
 }
 
 impl TypePathType {
-    pub(crate) fn ty(&self) -> &Type<PortableForm> {
-        &self.ty
-    }
-
     pub(crate) fn is_compact(&self) -> bool {
         matches!(self.ty.type_def(), TypeDef::Compact(_))
     }
