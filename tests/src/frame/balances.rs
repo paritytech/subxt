@@ -78,9 +78,7 @@ async fn test_basic_transfer() {
     let extrinsic = api
         .tx
         .balances
-        .transfer(&bob_address, 10_000)
-        .await
-        .unwrap();
+        .transfer(bob_address, 10_000);
     let result = extrinsic.sign_and_submit_then_watch(&alice).await.unwrap();
     let event = result
         .find_event::<balances::events::Transfer>()

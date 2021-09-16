@@ -368,7 +368,7 @@ impl RuntimeGenerator {
                     }
                 };
                 let client_fn = quote! {
-                    pub async fn #fn_name(
+                    pub fn #fn_name(
                         &self,
                         #( #call_fn_args, )*
                     ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
