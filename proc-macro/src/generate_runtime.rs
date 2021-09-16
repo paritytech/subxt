@@ -220,7 +220,7 @@ impl RuntimeGenerator {
         });
 
         let outer_event = quote! {
-            #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
             pub enum Event {
                 #( #outer_event_variants )*
             }
@@ -694,7 +694,7 @@ impl quote::ToTokens for StructDef {
         });
         let name = &self.name;
         tokens.extend(quote! {
-            #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
             pub struct #name {
                 #( #fields ),*
             }

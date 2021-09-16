@@ -270,7 +270,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 let (fields, _) =
                     self.composite_fields(composite.fields(), &type_params, true);
                 let ty_toks = quote! {
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct #type_name #fields
                 };
                 tokens.extend(ty_toks);
@@ -310,7 +310,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 }
 
                 let ty_toks = quote! {
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub enum #type_name {
                         #( #variants, )*
                     }
@@ -727,7 +727,7 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: bool,
                         pub b: u32,
@@ -768,12 +768,12 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Child {
                         pub a: i32,
                     }
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Parent {
                         pub a: bool,
                         pub b: root::chameleon_core::generate_types::tests::Child,
@@ -808,10 +808,10 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Child(pub i32,);
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Parent(pub bool, pub root::chameleon_core::generate_types::tests::Child,);
                 }
             }
@@ -842,7 +842,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub enum E {
                         A,
                         B (bool,),
@@ -875,7 +875,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: [u8; 32usize],
                     }
@@ -907,7 +907,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: Option<bool>,
                         pub b: Option<u32>,
@@ -944,7 +944,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: std::boxed::Box<bool>,
                         pub b: std::boxed::Box<u32>,
@@ -979,7 +979,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub enum E {
                         A(std::boxed::Box<bool>,),
                         B { a: std::boxed::Box<u32>, },
@@ -1012,7 +1012,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: ::core::ops::Range<u32>,
                         pub b: ::core::ops::RangeInclusive<u32>,
@@ -1051,12 +1051,12 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Bar {
                         pub b: root::chameleon_core::generate_types::tests::Foo<u32>,
                         pub c: root::chameleon_core::generate_types::tests::Foo<u8>,
                     }
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Foo<_0> {
                         pub a: _0,
                     }
@@ -1094,12 +1094,12 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Bar<_0> {
                         pub b: root::chameleon_core::generate_types::tests::Foo<_0, u32>,
                     }
 
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Foo<_0, _1> {
                         pub a: _0,
                         pub b: Option<(_0, _1,)>,
@@ -1141,7 +1141,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub lsb: root::bitvec::vec::BitVec<root::bitvec::order::Lsb0, u8>,
                         pub msb: root::bitvec::vec::BitVec<root::bitvec::order::Msb0, u16>,
@@ -1189,12 +1189,12 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct NamedFields<_0> {
                         pub b: u32,
                         pub __chameleon_unused_type_params: ::core::marker::PhantomData<_0>,
                     }
-                    #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (u32, u32,),
                         pub ::core::marker::PhantomData<(_0, _1)>,
@@ -1252,20 +1252,20 @@ mod tests {
                             pub mod b {
                                 use super::root;
 
-                                #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                                #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                                 pub struct Bar {
                                     pub a: root::chameleon_core::generate_types::tests::modules::a::Foo,
                                 }
                             }
 
-                            #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                             pub struct Foo {}
                         }
 
                         pub mod c {
                             use super::root;
 
-                            #[derive(Debug, ::codec::Encode, ::codec::Decode)]
+                            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                             pub struct Foo {
                                 pub a: root::chameleon_core::generate_types::tests::modules::a::b::Bar,
                             }
