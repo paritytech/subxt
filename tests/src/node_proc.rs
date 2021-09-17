@@ -153,10 +153,11 @@ impl TestNodeProcessBuilder {
             )
         })?;
         // wait for rpc to be initialized
-        const MAX_ATTEMPTS: u32 = 10;
+        const MAX_ATTEMPTS: u32 = 6;
         let mut attempts = 1;
+        let mut wait_secs = 1;
         let client = loop {
-            thread::sleep(time::Duration::from_secs(1));
+            thread::sleep(time::Duration::from_secs(wait_secs));
             log::info!(
                 "Connecting to contracts enabled node, attempt {}/{}",
                 attempts,
@@ -168,6 +169,7 @@ impl TestNodeProcessBuilder {
                 Err(err) => {
                     if attempts < MAX_ATTEMPTS {
                         attempts += 1;
+                        wait_secs = wait_secs * 2; // backoff
                         continue
                     }
                     break Err(err)
