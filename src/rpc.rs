@@ -175,6 +175,7 @@ impl RpcClient {
         params: &[JsonValue],
     ) -> Result<T, Error> {
         let params = params.into();
+        log::debug!("request {}: {:?}", method, params);
         let data = match self {
             Self::WebSocket(inner) => {
                 inner.request(method, params).await.map_err(Into::into)
@@ -183,7 +184,6 @@ impl RpcClient {
             #[cfg(feature = "client")]
             Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
         };
-        log::debug!("{}: {:?}", method, data);
         data
     }
 

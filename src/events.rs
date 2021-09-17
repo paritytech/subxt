@@ -117,6 +117,7 @@ where
     pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, Raw)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
+        log::debug!("decoding {} events", len);
 
         let mut r = Vec::new();
         for _ in 0..len {
@@ -128,7 +129,7 @@ where
             let event_metadata = self.metadata.event(pallet_index, event_variant)?;
 
             log::debug!(
-                "received event '{}::{}'",
+                "decoding event '{}::{}'",
                 event_metadata.pallet(),
                 event_metadata.event(),
             );
@@ -220,10 +221,10 @@ where
             }
             TypeDef::Variant(variant) => {
                 // todo: [AJ] handle if variant is DispatchError?
-                for v in variant.variants() {
-                    for field in v.fields() {
-                        self.decode_type(field.ty().id(), input, output)?;
-                    }
+                let variant_index = u8::decode(input)?;
+                let variant = variant.variants().get(variant_index as usize).unwrap(); // todo: ok_or
+                for field in variant.fields() {
+                    self.decode_type(field.ty().id(), input, output)?;
                 }
                 Ok(())
             }
