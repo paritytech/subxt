@@ -37,7 +37,6 @@ use crate::{
     events::EventsDecoder,
     extrinsic::{
         self,
-        PairSigner,
         SignedExtra,
         Signer,
         UncheckedExtrinsic,
@@ -49,11 +48,7 @@ use crate::{
         RpcClient,
         SystemProperties,
     },
-    subscription::{
-        EventStorageSubscription,
-        EventSubscription,
-        FinalizedEventStorageSubscription,
-    },
+    subscription::EventStorageSubscription,
     AccountData,
     BlockNumber,
     Call,
