@@ -362,8 +362,8 @@ impl RuntimeGenerator {
 
                 let pallet_name = &pallet.name;
                 let call_struct_name = &struct_def.name;
-                let function_name = struct_def.name.to_string();
-                let fn_name = format_ident!("{}", function_name.to_snake_case());
+                let function_name = struct_def.name.to_string().to_snake_case();
+                let fn_name = format_ident!("{}", function_name);
 
                 let call_struct = quote! {
                     #struct_def
