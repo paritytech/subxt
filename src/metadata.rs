@@ -14,27 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    marker::PhantomData,
-    str::FromStr,
-};
+use std::{collections::HashMap, convert::TryFrom, marker::PhantomData, str::FromStr};
 
-use codec::{
-    Decode,
-    Encode,
-    Error as CodecError,
-};
+use codec::{Decode, Encode, Error as CodecError};
 
 use frame_metadata::{
-    DecodeDifferent,
-    RuntimeMetadata,
-    RuntimeMetadataPrefixed,
-    StorageEntryModifier,
-    StorageEntryType,
-    StorageHasher,
-    META_RESERVED,
+    DecodeDifferent, RuntimeMetadata, RuntimeMetadataPrefixed, StorageEntryModifier,
+    StorageEntryType, StorageHasher, META_RESERVED,
 };
 use sp_core::storage::StorageKey;
 
@@ -292,13 +278,11 @@ impl StorageMetadata {
             StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
             StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
             StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
-            StorageHasher::Twox64Concat => {
-                sp_core::twox_64(bytes)
-                    .iter()
-                    .chain(bytes)
-                    .cloned()
-                    .collect()
-            }
+            StorageHasher::Twox64Concat => sp_core::twox_64(bytes)
+                .iter()
+                .chain(bytes)
+                .cloned()
+                .collect(),
         }
     }
 
@@ -308,24 +292,20 @@ impl StorageMetadata {
 
     pub fn plain(&self) -> Result<StoragePlain, MetadataError> {
         match &self.ty {
-            StorageEntryType::Plain(_) => {
-                Ok(StoragePlain {
-                    prefix: self.prefix().0,
-                })
-            }
+            StorageEntryType::Plain(_) => Ok(StoragePlain {
+                prefix: self.prefix().0,
+            }),
             _ => Err(MetadataError::StorageTypeError),
         }
     }
 
     pub fn map<K: Encode>(&self) -> Result<StorageMap<K>, MetadataError> {
         match &self.ty {
-            StorageEntryType::Map { hasher, .. } => {
-                Ok(StorageMap {
-                    _marker: PhantomData,
-                    prefix: self.prefix().0,
-                    hasher: hasher.clone(),
-                })
-            }
+            StorageEntryType::Map { hasher, .. } => Ok(StorageMap {
+                _marker: PhantomData,
+                prefix: self.prefix().0,
+                hasher: hasher.clone(),
+            }),
             _ => Err(MetadataError::StorageTypeError),
         }
     }
@@ -338,14 +318,12 @@ impl StorageMetadata {
                 hasher,
                 key2_hasher,
                 ..
-            } => {
-                Ok(StorageDoubleMap {
-                    _marker: PhantomData,
-                    prefix: self.prefix().0,
-                    hasher1: hasher.clone(),
-                    hasher2: key2_hasher.clone(),
-                })
-            }
+            } => Ok(StorageDoubleMap {
+                _marker: PhantomData,
+                prefix: self.prefix().0,
+                hasher1: hasher.clone(),
+                hasher2: key2_hasher.clone(),
+            }),
             _ => Err(MetadataError::StorageTypeError),
         }
     }
@@ -526,10 +504,10 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(ConversionError::InvalidPrefix.into())
+            return Err(ConversionError::InvalidPrefix.into());
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V12(meta) => meta,
+            RuntimeMetadata::V13(meta) => meta,
             _ => return Err(ConversionError::InvalidVersion.into()),
         };
         let mut modules = HashMap::new();

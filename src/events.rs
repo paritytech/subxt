@@ -14,46 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Input,
-    Output,
-};
+use codec::{Codec, Compact, Decode, Encode, Input, Output};
 use dyn_clone::DynClone;
-use sp_runtime::{
-    DispatchError,
-    DispatchResult,
-};
+use sp_runtime::{DispatchError, DispatchResult};
 use std::{
     collections::{
-        hash_map::{
-            Entry,
-            HashMap,
-        },
+        hash_map::{Entry, HashMap},
         HashSet,
     },
     fmt,
-    marker::{
-        PhantomData,
-        Send,
-    },
+    marker::{PhantomData, Send},
 };
 
 use crate::{
-    error::{
-        Error,
-        RuntimeError,
-    },
-    metadata::{
-        EventArg,
-        Metadata,
-    },
-    Phase,
-    Runtime,
-    System,
+    error::{Error, RuntimeError},
+    metadata::{EventArg, Metadata},
+    Phase, Runtime, System,
 };
 
 /// Raw bytes for an Event
@@ -206,20 +182,18 @@ impl<T: Runtime + System> EventsDecoder<T> {
                         self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
                     }
                 }
-                EventArg::Option(arg) => {
-                    match input.read_byte()? {
-                        0 => output.push_byte(0),
-                        1 => {
-                            output.push_byte(1);
-                            self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
-                        }
-                        _ => {
-                            return Err(Error::Other(
-                                "unexpected first byte decoding Option".into(),
-                            ))
-                        }
+                EventArg::Option(arg) => match input.read_byte()? {
+                    0 => output.push_byte(0),
+                    1 => {
+                        output.push_byte(1);
+                        self.decode_raw_bytes(&[*arg.clone()], input, output, errors)?
                     }
-                }
+                    _ => {
+                        return Err(Error::Other(
+                            "unexpected first byte decoding Option".into(),
+                        ))
+                    }
+                },
                 EventArg::Tuple(args) => {
                     self.decode_raw_bytes(args, input, output, errors)?
                 }
@@ -234,7 +208,7 @@ impl<T: Runtime + System> EventsDecoder<T> {
                                 output.write(&buf);
                                 Ok(())
                             } else {
-                                return Err(Error::TypeSizeUnavailable(name.to_owned()))
+                                return Err(Error::TypeSizeUnavailable(name.to_owned()));
                             }
                         }
                     };
@@ -354,15 +328,8 @@ pub enum Raw {
 mod tests {
     use super::*;
     use frame_metadata::{
-        DecodeDifferent,
-        ErrorMetadata,
-        EventMetadata,
-        ExtrinsicMetadata,
-        ModuleMetadata,
-        RuntimeMetadata,
-        RuntimeMetadataPrefixed,
-        RuntimeMetadataV12,
-        META_RESERVED,
+        DecodeDifferent, ErrorMetadata, EventMetadata, ExtrinsicMetadata, ModuleMetadata,
+        RuntimeMetadata, RuntimeMetadataPrefixed, RuntimeMetadataV13, META_RESERVED,
     };
     use std::convert::TryFrom;
 
@@ -399,7 +366,7 @@ mod tests {
         let decoder = EventsDecoder::<TestRuntime>::new(
             Metadata::try_from(RuntimeMetadataPrefixed(
                 META_RESERVED,
-                RuntimeMetadata::V12(RuntimeMetadataV12 {
+                RuntimeMetadata::V13(RuntimeMetadataV13 {
                     modules: DecodeDifferent::Decoded(vec![ModuleMetadata {
                         name: DecodeDifferent::Decoded("System".to_string()),
                         storage: None,

@@ -1,7 +1,10 @@
 [package]
 name = "substrate-subxt-proc-macro"
 version = "0.15.0"
-authors = ["David Craven <david@craven.ch>", "Parity Technologies <admin@parity.io>"]
+authors = [
+    "David Craven <david@craven.ch>",
+    "Parity Technologies <admin@parity.io>",
+]
 edition = "2018"
 autotests = false
 
@@ -26,13 +29,15 @@ synstructure = "0.12.4"
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
-codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
+codec = { package = "parity-scale-codec", version = "2.0.0", features = [
+    "derive",
+] }
 env_logger = "0.8.2"
 pretty_assertions = "0.6.1"
 substrate-subxt = { path = ".." }
 trybuild = "1.0.38"
 
-sp-keyring = "3.0.0"
+sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
 
 [[test]]
 name = "balances"

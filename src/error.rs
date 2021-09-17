@@ -16,16 +16,10 @@
 
 use jsonrpsee_types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
-use sp_runtime::{
-    transaction_validity::TransactionValidityError,
-    DispatchError,
-};
+use sp_runtime::{transaction_validity::TransactionValidityError, DispatchError};
 use thiserror::Error;
 
-use crate::metadata::{
-    Metadata,
-    MetadataError,
-};
+use crate::metadata::{Metadata, MetadataError};
 
 /// Error enum.
 #[derive(Debug, Error)]
@@ -139,7 +133,11 @@ impl RuntimeError {
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
-            DispatchError::Other(msg) => Ok(Self::Other(msg.into())),
+            DispatchError::Arithmetic(_math_error) => {
+                Ok(Self::Other("math_error".into()))
+            }
+            DispatchError::Token(_token_error) => Ok(Self::Other("token error".into())),
+            DispatchError::Other(msg) => Ok(Self::Other(msg.to_string())),
         }
     }
 }
