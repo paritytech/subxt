@@ -119,9 +119,9 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
     type Index: Parameter
         + Member
         + Default
-        // + MaybeDisplay
         + AtLeast32Bit
-        + Copy;
+        + Copy
+        + scale_info::TypeInfo;
 
     /// The block number type used by the runtime.
     type BlockNumber: Parameter
@@ -146,7 +146,8 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
         + Copy
         + std::hash::Hash
         + AsRef<[u8]>
-        + AsMut<[u8]>;
+        + AsMut<[u8]>
+        + scale_info::TypeInfo;
 
     /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
     type Hashing: Hash<Output = Self::Hash>;

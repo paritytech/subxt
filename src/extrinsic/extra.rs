@@ -22,6 +22,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
 };
+use scale_info::TypeInfo;
 use sp_runtime::{
     generic::Era,
     traits::SignedExtension,
@@ -44,7 +45,8 @@ pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
 /// returned via `additional_signed()`.
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckSpecVersion<T: Runtime>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
@@ -74,7 +76,8 @@ where
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckTxVersion<T: Runtime>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
@@ -104,7 +107,8 @@ where
 ///
 /// This is modified from the substrate version to allow passing in of the genesis hash, which is
 /// returned via `additional_signed()`.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckGenesis<T: Runtime>(
     pub PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
@@ -135,7 +139,8 @@ where
 /// This is modified from the substrate version to allow passing in of the genesis hash, which is
 /// returned via `additional_signed()`. It assumes therefore `Era::Immortal` (The transaction is
 /// valid forever)
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckMortality<T: Runtime>(
     /// The default structure for the Extra encoding
     pub (Era, PhantomData<T>),
@@ -161,7 +166,8 @@ where
 }
 
 /// Nonce check and increment to give replay protection for transactions.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckNonce<T: Runtime>(#[codec(compact)] pub T::Index);
 
 impl<T> SignedExtension for CheckNonce<T>
@@ -181,7 +187,8 @@ where
 }
 
 /// Resource limit check.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct CheckWeight<T: Runtime>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckWeight<T>
@@ -202,7 +209,8 @@ where
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct ChargeTransactionPayment(#[codec(compact)] pub u128);
 
 impl SignedExtension for ChargeTransactionPayment {
@@ -236,7 +244,8 @@ pub trait SignedExtra<T: Runtime>: SignedExtension {
 }
 
 /// Default `SignedExtra` for substrate runtimes.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug)]
+#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
 pub struct DefaultExtra<T: Runtime> {
     spec_version: u32,
     tx_version: u32,
