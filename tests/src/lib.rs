@@ -36,6 +36,8 @@ use subxt::{
 mod node_runtime {
     #[subxt(substitute_type = "sp_core::crypto::AccountId32")]
     use sp_core::crypto::AccountId32;
+    #[subxt(substitute_type = "primitive_types::H256")]
+    use sp_core::H256;
     #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
     use sp_runtime::MultiAddress;
 

@@ -15,3 +15,4 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod balances;
+mod contracts;
