@@ -81,7 +81,7 @@ async fn test_basic_transfer() {
         .find_event::<balances::events::Transfer>()
         .unwrap()
         .unwrap();
-    let expected_event = balances::events::Transfer (
+    let expected_event = balances::events::Transfer(
         alice.account_id().clone(),
         bob.account_id().clone(),
         10_000,
