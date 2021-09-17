@@ -21,8 +21,8 @@ use crate::{
         balances,
         RuntimeApi,
     },
-    test_node_process,
     TestRuntime,
+    test_context,
 };
 use codec::{
     Decode,
@@ -58,9 +58,8 @@ async fn test_basic_transfer() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
-    let test_node_proc = test_node_process().await;
-    let client = test_node_proc.client();
-    let api = crate::node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
+    let cxt = test_context().await;
+    let api = &cxt.api;
 
     let alice_pre = api
         .storage
@@ -105,15 +104,14 @@ async fn test_basic_transfer() {
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
 }
 
-// #[async_std::test]
-// async fn test_state_total_issuance() {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let total_issuance = client.total_issuance(None).await.unwrap();
-//     assert_ne!(total_issuance, 0);
-// }
-//
+#[async_std::test]
+async fn test_state_total_issuance() {
+    env_logger::try_init().ok();
+    let cxt = test_context().await;
+    let total_issuance = cxt.api.storage.balances.total_issuance(None).await.unwrap();
+    assert_ne!(total_issuance, 0);
+}
+
 // #[async_std::test]
 // async fn test_state_read_free_balance() {
 //     env_logger::try_init().ok();

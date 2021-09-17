@@ -446,13 +446,11 @@ impl RuntimeGenerator {
     ) -> (TokenStream2, TokenStream2) {
         let entry_struct_ident = format_ident!("{}", storage_entry.name);
         let (fields, entry_struct, constructor, key_impl) = match storage_entry.ty {
-            StorageEntryType::Plain(ty) => {
-                let ty_path = type_gen.resolve_type_path(ty.id(), &[]);
-                let fields = vec![(format_ident!("_0"), ty_path)];
+            StorageEntryType::Plain(_) => {
                 let entry_struct = quote!( pub struct #entry_struct_ident; );
                 let constructor = quote!( #entry_struct_ident );
                 let key_impl = quote!(::subxt::StorageEntryKey::Plain);
-                (fields, entry_struct, constructor, key_impl)
+                (vec![], entry_struct, constructor, key_impl)
             }
             StorageEntryType::Map {
                 ref key,

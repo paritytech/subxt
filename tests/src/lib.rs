@@ -96,6 +96,16 @@ pub async fn test_node_process() -> TestNodeProcess<TestRuntime> {
     test_node_process_with(AccountKeyring::Alice).await
 }
 
+pub struct TestContext {
+    node_proc: TestNodeProcess<TestRuntime>,
+    api: node_runtime::RuntimeApi<TestRuntime>,
+}
+
+pub async fn test_context() -> TestContext {
+    let node_proc = test_node_process_with(AccountKeyring::Alice).await;
+    let api = node_runtime::RuntimeApi::<TestRuntime>::new(node_proc.client().clone());
+    TestContext { node_proc, api }
+}
 // #[async_std::test]
 // async fn test_insert_key() {
 //     let test_node_process = test_node_process_with(AccountKeyring::Bob).await;
