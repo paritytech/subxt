@@ -349,7 +349,13 @@ impl RuntimeGenerator {
             .iter()
             .map(|struct_def| {
                 let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
-                    .fields
+                    .named_fields()
+                    .unwrap_or_else(|| {
+                        abort_call_site!(
+                            "Call variant for type {} must have all named fields",
+                            call.ty.id()
+                        )
+                    })
                     .iter()
                     .map(|(name, ty)| (quote!( #name: #ty ), name))
                     .unzip();
@@ -659,7 +665,13 @@ impl RuntimeGenerator {
 #[derive(Debug)]
 pub struct StructDef {
     name: syn::Ident,
-    fields: Vec<(syn::Ident, TypePath)>,
+    fields: StructDefFields,
+}
+
+#[derive(Debug)]
+pub enum StructDefFields {
+    Named(Vec<(syn::Ident, TypePath)>),
+    Unnamed(Vec<TypePath>),
 }
 
 impl StructDef {
@@ -667,36 +679,88 @@ impl StructDef {
         variant: &scale_info::Variant<PortableForm>,
         type_gen: &TypeGenerator,
     ) -> Self {
-        let name = format_ident!("{}", variant.name().to_string().to_camel_case());
-        let fields = variant
+        let name = format_ident!("{}", variant.name().to_camel_case());
+        let variant_fields = variant
             .fields()
             .iter()
-            .filter_map(|field| {
-                field.name().map(|name| {
-                    let name = format_ident!("{}", name);
-                    let ty = type_gen.resolve_type_path(field.ty().id(), &[]);
-                    (name, ty)
-                })
+            .map(|field| {
+                let name = field.name().map(|f| format_ident!("{}", f));
+                let ty = type_gen.resolve_type_path(field.ty().id(), &[]);
+                (name, ty)
             })
             .collect::<Vec<_>>();
+
+        let named = variant_fields.iter().all(|(name, _)| name.is_some());
+        let unnamed = variant_fields.iter().all(|(name, _)| name.is_none());
+
+        let fields = if named {
+            StructDefFields::Named(
+                variant_fields
+                    .iter()
+                    .map(|(name, field)| {
+                        let name = name.as_ref().unwrap_or_else(|| {
+                            abort_call_site!("All fields should have a name")
+                        });
+                        (name.clone(), field.clone())
+                    })
+                    .collect(),
+            )
+        } else if unnamed {
+            StructDefFields::Unnamed(
+                variant_fields
+                    .iter()
+                    .map(|(_, field)| field.clone())
+                    .collect(),
+            )
+        } else {
+            abort_call_site!(
+                "Variant '{}': Fields should either be all named or all unnamed.",
+                variant.name()
+            )
+        };
+
         Self { name, fields }
+    }
+
+    fn named_fields(&self) -> Option<&[(syn::Ident, TypePath)]> {
+        if let StructDefFields::Named(ref fields) = self.fields {
+            Some(fields)
+        } else {
+            None
+        }
     }
 }
 
 impl quote::ToTokens for StructDef {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
-        let fields = self.fields.iter().map(|(name, ty)| {
-            if ty.is_compact() {
-                quote! { #[codec(compact)] pub #name: #ty }
-            } else {
-                quote! { pub #name: #ty }
+        tokens.extend(match self.fields {
+            StructDefFields::Named(ref named_fields) => {
+                let fields = named_fields.iter().map(|(name, ty)| {
+                    let compact_attr =
+                        ty.is_compact().then(|| quote!( #[codec(compact)] ));
+                    quote! { #compact_attr pub #name: #ty }
+                });
+                let name = &self.name;
+                quote! {
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    pub struct #name {
+                        #( #fields ),*
+                    }
+                }
             }
-        });
-        let name = &self.name;
-        tokens.extend(quote! {
-            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
-            pub struct #name {
-                #( #fields ),*
+            StructDefFields::Unnamed(ref unnamed_fields) => {
+                let fields = unnamed_fields.iter().map(|ty| {
+                    let compact_attr =
+                        ty.is_compact().then(|| quote!( #[codec(compact)] ));
+                    quote! { #compact_attr pub #ty }
+                });
+                let name = &self.name;
+                quote! {
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    pub struct #name (
+                        #( #fields ),*
+                    );
+                }
             }
         })
     }

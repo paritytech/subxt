@@ -75,20 +75,17 @@ async fn test_basic_transfer() {
         .await
         .unwrap();
 
-    let extrinsic = api
-        .tx
-        .balances
-        .transfer(bob_address, 10_000);
+    let extrinsic = api.tx.balances.transfer(bob_address, 10_000);
     let result = extrinsic.sign_and_submit_then_watch(&alice).await.unwrap();
     let event = result
         .find_event::<balances::events::Transfer>()
         .unwrap()
         .unwrap();
-    let expected_event = balances::events::Transfer {
-        from: alice.account_id().clone(),
-        to: bob.account_id().clone(),
-        amount: 10_000,
-    };
+    let expected_event = balances::events::Transfer (
+        alice.account_id().clone(),
+        bob.account_id().clone(),
+        10_000,
+    );
     assert_eq!(event, expected_event);
 
     let alice_post = api
