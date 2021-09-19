@@ -16,10 +16,16 @@
 
 use jsonrpsee_types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
-use sp_runtime::{transaction_validity::TransactionValidityError, DispatchError};
+use sp_runtime::{
+    transaction_validity::TransactionValidityError,
+    DispatchError,
+};
 use thiserror::Error;
 
-use crate::metadata::{Metadata, MetadataError};
+use crate::metadata::{
+    Metadata,
+    MetadataError,
+};
 
 /// Error enum.
 #[derive(Debug, Error)]
