@@ -139,7 +139,11 @@ impl RuntimeError {
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
-            DispatchError::Other(msg) => Ok(Self::Other(msg.into())),
+            DispatchError::Arithmetic(_math_error) => {
+                Ok(Self::Other("math_error".into()))
+            }
+            DispatchError::Token(_token_error) => Ok(Self::Other("token error".into())),
+            DispatchError::Other(msg) => Ok(Self::Other(msg.to_string())),
         }
     }
 }
