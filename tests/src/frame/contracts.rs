@@ -24,9 +24,12 @@ use codec::{
 use sp_keyring::AccountKeyring;
 
 use crate::{
-    node_runtime::contracts::{
-        calls::TransactionApi,
-        events,
+    node_runtime::{
+        contracts::{
+            calls::TransactionApi,
+            events,
+        },
+        RuntimeApi,
     },
     test_context,
     Runtime,
@@ -61,13 +64,16 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
+    fn api(&self) -> &RuntimeApi<TestRuntime> {
+        &self.cxt.api
+    }
+
     fn contracts_tx(&self) -> &TransactionApi<TestRuntime> {
         &self.cxt.api.tx.contracts
     }
 
-    async fn instantiate_with_code(
-        &self,
-    ) -> Result<(Hash, AccountId), Error> {
+    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
+        log::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -91,7 +97,9 @@ impl ContractsTestContext {
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
-        log::info!("Code hash: {:?}, Contract address: {:?}", code_stored.0, instantiated.0);
+        log::info!("  Block hash: {:?}", result.block);
+        log::info!("  Code hash: {:?}", code_stored.0);
+        log::info!("  Contract address: {:?}", instantiated.0);
         Ok((code_stored.0, instantiated.0))
     }
 
@@ -124,6 +132,7 @@ impl ContractsTestContext {
         contract: AccountId,
         input_data: Vec<u8>,
     ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
+        log::info!("call: {:?}", contract);
         let extrinsic = self.contracts_tx().call(
             contract.into(),
             0,           // value
@@ -167,7 +176,15 @@ async fn tx_call() {
     let ctx = ContractsTestContext::init().await;
     let (_, contract) = ctx.instantiate_with_code().await.unwrap();
 
-    let executed = ctx.call(contract.into(), vec![]).await;
+    let contract_info = ctx
+        .api()
+        .storage
+        .contracts
+        .contract_info_of(contract.clone().into(), None)
+        .await;
+    assert!(contract_info.is_ok());
+
+    let executed = ctx.call(contract, vec![]).await;
 
     assert!(executed.is_ok(), "Error calling contract: {:?}", executed);
 }
