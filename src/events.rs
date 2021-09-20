@@ -128,12 +128,6 @@ where
 
             let event_metadata = self.metadata.event(pallet_index, event_variant)?;
 
-            log::debug!(
-                "decoding event '{}::{}'",
-                event_metadata.pallet(),
-                event_metadata.event(),
-            );
-
             let mut event_data = Vec::<u8>::new();
             let mut event_errors = Vec::<RuntimeError>::new();
             let result = self.decode_raw_event(
@@ -177,17 +171,28 @@ where
         output: &mut Vec<u8>,
         errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
+        log::debug!("Decoding Event '{}::{}'", event_metadata.pallet(), event_metadata.event());
         for arg in event_metadata.variant().fields() {
+            let type_id = arg.ty().id();
             if event_metadata.pallet() == "System"
                 && event_metadata.event() == "ExtrinsicFailed"
             {
-                let dispatch_error = sp_runtime::DispatchError::decode(input)?;
-                let runtime_error =
-                    RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
-                errors.push(runtime_error)
-            } else {
-                self.decode_type(arg.ty().id(), input, output)?
+                let ty = self
+                    .metadata
+                    .resolve_type(type_id)
+                    .ok_or(MetadataError::TypeNotFound(type_id))?;
+
+                if ty.path().ident() == Some("DispatchError".to_string()) {
+                    let dispatch_error = sp_runtime::DispatchError::decode(input)?;
+                    log::info!("Dispatch Error {:?}", dispatch_error);
+                    dispatch_error.encode_to(output);
+                    let runtime_error =
+                        RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
+                    errors.push(runtime_error);
+                    continue
+                }
             }
+            self.decode_type(type_id, input, output)?
         }
         Ok(())
     }
