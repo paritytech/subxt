@@ -47,6 +47,10 @@ struct ContractsTestContext {
     signer: PairSigner<TestRuntime, Pair>,
 }
 
+type Hash = <TestRuntime as Runtime>::Hash;
+type Address = <TestRuntime as Runtime>::Address;
+type AccountId = <TestRuntime as Runtime>::AccountId;
+
 impl ContractsTestContext {
     async fn init() -> Self {
         env_logger::try_init().ok();
@@ -63,7 +67,7 @@ impl ContractsTestContext {
 
     async fn instantiate_with_code(
         &self,
-    ) -> Result<<TestRuntime as Runtime>::Hash, Error> {
+    ) -> Result<(Hash, AccountId), Error> {
         const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -80,20 +84,23 @@ impl ContractsTestContext {
             vec![], // salt
         );
         let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
-        let event = result
+        let code_stored = result
             .find_event::<events::CodeStored>()?
             .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
+        let instantiated = result
+            .find_event::<events::Instantiated>()?
+            .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
-        log::info!("Code hash: {:?}", event.0);
-        Ok(event.0)
+        log::info!("Code hash: {:?}, Contract address: {:?}", code_stored.0, instantiated.0);
+        Ok((code_stored.0, instantiated.0))
     }
 
     async fn instantiate(
         &self,
-        code_hash: <TestRuntime as Runtime>::Hash,
+        code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<events::Instantiated, Error> {
+    ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
         let extrinsic = self.contracts_tx().instantiate(
             100_000_000_000_000_000, // endowment
@@ -109,16 +116,16 @@ impl ContractsTestContext {
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
-        Ok(instantiated)
+        Ok(instantiated.0)
     }
 
     async fn call(
         &self,
-        contract: <TestRuntime as Runtime>::Address,
+        contract: AccountId,
         input_data: Vec<u8>,
     ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
         let extrinsic = self.contracts_tx().call(
-            contract,
+            contract.into(),
             0,           // value
             500_000_000, // gas_limit
             input_data,
@@ -132,20 +139,19 @@ impl ContractsTestContext {
 #[async_std::test]
 async fn tx_instantiate_with_code() {
     let ctx = ContractsTestContext::init().await;
-    let code_stored = ctx.instantiate_with_code().await;
+    let result = ctx.instantiate_with_code().await;
 
     assert!(
-        code_stored.is_ok(),
-        "Error calling instantiate_with_code and receiving CodeStored Event: {:?}",
-        code_stored
+        result.is_ok(),
+        "Error calling instantiate_with_code and receiving CodeStored and Instantiated Events: {:?}",
+        result
     );
 }
 
 #[async_std::test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
-    let code_stored = ctx.instantiate_with_code().await.unwrap();
-    let code_hash = code_stored.0;
+    let (code_hash, _) = ctx.instantiate_with_code().await.unwrap();
 
     let instantiated = ctx.instantiate(code_hash.into(), vec![], vec![1u8]).await;
 
@@ -159,13 +165,8 @@ async fn tx_instantiate() {
 #[async_std::test]
 async fn tx_call() {
     let ctx = ContractsTestContext::init().await;
-    let code_hash = ctx.instantiate_with_code().await.unwrap();
+    let (_, contract) = ctx.instantiate_with_code().await.unwrap();
 
-    let instantiated = ctx
-        .instantiate(code_hash.into(), vec![], vec![1u8])
-        .await
-        .unwrap();
-    let contract = instantiated.0;
     let executed = ctx.call(contract.into(), vec![]).await;
 
     assert!(executed.is_ok(), "Error calling contract: {:?}", executed);
