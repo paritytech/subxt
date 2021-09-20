@@ -136,10 +136,8 @@ async fn tx_instantiate_with_code() {
 
     assert!(
         code_stored.is_ok(),
-        format!(
-            "Error calling instantiate_with_code and receiving CodeStored Event: {:?}",
-            code_stored
-        )
+        "Error calling instantiate_with_code and receiving CodeStored Event: {:?}",
+        code_stored
     );
 }
 
@@ -153,7 +151,8 @@ async fn tx_instantiate() {
 
     assert!(
         instantiated.is_ok(),
-        format!("Error instantiating contract: {:?}", instantiated)
+        "Error instantiating contract: {:?}",
+        instantiated
     );
 }
 
@@ -169,8 +168,5 @@ async fn tx_call() {
     let contract = instantiated.0;
     let executed = ctx.call(contract.into(), vec![]).await;
 
-    assert!(
-        executed.is_ok(),
-        format!("Error calling contract: {:?}", executed)
-    );
+    assert!(executed.is_ok(), "Error calling contract: {:?}", executed);
 }
