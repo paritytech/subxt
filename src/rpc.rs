@@ -150,8 +150,6 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-#[cfg(feature = "client")]
-use substrate_subxt_client::SubxtClient;
 
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
@@ -162,9 +160,6 @@ pub enum RpcClient {
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
-    #[cfg(feature = "client")]
-    /// Embedded substrate node.
-    Subxt(SubxtClient),
 }
 
 impl RpcClient {
@@ -181,8 +176,6 @@ impl RpcClient {
                 inner.request(method, params).await.map_err(Into::into)
             }
             Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
-            #[cfg(feature = "client")]
-            Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
         };
         data
     }
@@ -208,13 +201,6 @@ impl RpcClient {
                 )
                 .into())
             }
-            #[cfg(feature = "client")]
-            Self::Subxt(inner) => {
-                inner
-                    .subscribe(subscribe_method, params, unsubscribe_method)
-                    .await
-                    .map_err(Into::into)
-            }
         }
     }
 }
@@ -228,13 +214,6 @@ impl From<WsClient> for RpcClient {
 impl From<HttpClient> for RpcClient {
     fn from(client: HttpClient) -> Self {
         RpcClient::Http(Arc::new(client))
-    }
-}
-
-#[cfg(feature = "client")]
-impl From<SubxtClient> for RpcClient {
-    fn from(client: SubxtClient) -> Self {
-        RpcClient::Subxt(client)
     }
 }
 
