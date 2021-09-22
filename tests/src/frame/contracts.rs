@@ -29,6 +29,7 @@ use crate::{
             calls::TransactionApi,
             events,
         },
+        system,
         RuntimeApi,
     },
     test_context,
@@ -96,6 +97,9 @@ impl ContractsTestContext {
         let instantiated = result
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
+        let _extrinsic_success = result
+            .find_event::<system::events::ExtrinsicSuccess>()?
+            .ok_or_else(|| Error::Other("Failed to find a ExtrinsicSuccess event".into()))?;
 
         log::info!("  Block hash: {:?}", result.block);
         log::info!("  Code hash: {:?}", code_stored.0);

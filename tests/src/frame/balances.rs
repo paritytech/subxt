@@ -19,6 +19,7 @@
 use crate::{
     node_runtime::{
         balances,
+        system,
         RuntimeApi,
     },
     test_context,
@@ -80,6 +81,11 @@ async fn test_basic_transfer() {
         .find_event::<balances::events::Transfer>()
         .unwrap()
         .unwrap();
+    let _extrinsic_success = result
+        .find_event::<system::events::ExtrinsicSuccess>()
+        .expect("Failed to decode ExtrinisicSuccess".into())
+        .expect("Failed to find ExtrinisicSuccess");
+
     let expected_event = balances::events::Transfer(
         alice.account_id().clone(),
         bob.account_id().clone(),

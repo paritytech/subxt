@@ -125,6 +125,8 @@ where
             let phase = Phase::decode(input)?;
             let pallet_index = input.read_byte()?;
             let event_variant = input.read_byte()?;
+            log::debug!("phase {:?}, pallet_index {}, event_variant: {}", phase, pallet_index, event_variant);
+            log::debug!("remaining input: {}", hex::encode(&input));
 
             let event_metadata = self.metadata.event(pallet_index, event_variant)?;
 
@@ -147,7 +149,9 @@ where
                     };
 
                     // topics come after the event data in EventRecord
-                    let _topics = Vec::<T::Hash>::decode(input)?;
+                    let topics = Vec::<T::Hash>::decode(input)?;
+                    log::debug!("topics: {:?}", topics);
+
                     Raw::Event(event)
                 }
                 Err(err) => return Err(err),
@@ -227,6 +231,7 @@ where
             TypeDef::Variant(variant) => {
                 // todo: [AJ] handle if variant is DispatchError?
                 let variant_index = u8::decode(input)?;
+                variant_index.encode_to(output);
                 let variant = variant.variants().get(variant_index as usize).unwrap(); // todo: ok_or
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
