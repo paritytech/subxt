@@ -116,12 +116,7 @@ impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + std::fmt::Deb
 pub trait Runtime: Clone + Sized + Send + Sync + 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
-    type Index: Parameter
-        + Member
-        + Default
-        + AtLeast32Bit
-        + Copy
-        + scale_info::TypeInfo;
+    type Index: Parameter + Member + Default + AtLeast32Bit + Copy + scale_info::TypeInfo;
 
     /// The block number type used by the runtime.
     type BlockNumber: Parameter

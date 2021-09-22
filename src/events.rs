@@ -125,7 +125,12 @@ where
             let phase = Phase::decode(input)?;
             let pallet_index = input.read_byte()?;
             let event_variant = input.read_byte()?;
-            log::debug!("phase {:?}, pallet_index {}, event_variant: {}", phase, pallet_index, event_variant);
+            log::debug!(
+                "phase {:?}, pallet_index {}, event_variant: {}",
+                phase,
+                pallet_index,
+                event_variant
+            );
             log::debug!("remaining input: {}", hex::encode(&input));
 
             let event_metadata = self.metadata.event(pallet_index, event_variant)?;
@@ -175,7 +180,11 @@ where
         output: &mut Vec<u8>,
         errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
-        log::debug!("Decoding Event '{}::{}'", event_metadata.pallet(), event_metadata.event());
+        log::debug!(
+            "Decoding Event '{}::{}'",
+            event_metadata.pallet(),
+            event_metadata.event()
+        );
         for arg in event_metadata.variant().fields() {
             let type_id = arg.ty().id();
             if event_metadata.pallet() == "System"

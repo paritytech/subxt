@@ -150,7 +150,6 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
 #[derive(Clone)]
