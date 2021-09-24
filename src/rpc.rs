@@ -55,10 +55,7 @@ use sp_core::{
         StorageKey,
     },
     Bytes,
-};
-use sp_rpc::{
-    list::ListOrValue,
-    number::NumberOrHex,
+    U256,
 };
 use sp_runtime::{
     generic::{
@@ -85,6 +82,33 @@ use crate::{
     Metadata,
     Runtime,
 };
+
+/// A number type that can be serialized both as a number or a string that encodes a number in a
+/// string.
+///
+/// We allow two representations of the block number as input. Either we deserialize to the type
+/// that is specified in the block type or we attempt to parse given hex value.
+///
+/// The primary motivation for having this type is to avoid overflows when using big integers in
+/// JavaScript (which we consider as an important RPC API consumer).
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(untagged)]
+pub enum NumberOrHex {
+    /// The number represented directly.
+    Number(u64),
+    /// Hex representation of the number.
+    Hex(U256),
+}
+
+/// RPC list or value wrapper.
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(untagged)]
+pub enum ListOrValue<T> {
+    /// A list of values of given type.
+    List(Vec<T>),
+    /// A single value of given type.
+    Value(T),
+}
 
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as Runtime>::Header, <T as Runtime>::Extrinsic>>;
