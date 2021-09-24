@@ -39,6 +39,7 @@ use crate::{
     TestRuntime,
 };
 use sp_core::sr25519::Pair;
+use sp_runtime::MultiAddress;
 use subxt::{
     Client,
     Error,
@@ -140,7 +141,7 @@ impl ContractsTestContext {
     ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
         log::info!("call: {:?}", contract);
         let extrinsic = self.contracts_tx().call(
-            contract.into(),
+            MultiAddress::Id(contract),
             0,           // value
             500_000_000, // gas_limit
             input_data,
@@ -186,7 +187,7 @@ async fn tx_call() {
         .api()
         .storage
         .contracts
-        .contract_info_of(contract.clone().into(), None)
+        .contract_info_of(contract.clone(), None)
         .await;
     assert!(contract_info.is_ok());
 

@@ -66,7 +66,7 @@ impl Runtime for TestRuntime {
 
 impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
     fn new(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
-        Self(account_id.into()) // todo: [AJ] why is Account.0 a [u8;32] and not AccountId32?
+        Self(account_id)
     }
 
     fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {

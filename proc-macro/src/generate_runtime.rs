@@ -512,95 +512,11 @@ impl RuntimeGenerator {
                         };
                         (fields, entry_struct, constructor, key_impl)
                     }
-                    TypeDef::Composite(composite) => {
-                        // todo: [AJ] extract this pattern also used in ModuleType::composite_fields?
-                        let named = composite.fields().iter().all(|f| f.name().is_some());
-                        let unnamed =
-                            composite.fields().iter().all(|f| f.name().is_none());
-
-                        if named {
-                            let fields = composite
-                                .fields()
-                                .iter()
-                                .map(|f| {
-                                    let field_name = format_ident!(
-                                        "{}",
-                                        f.name().expect("field is named")
-                                    );
-                                    let field_type =
-                                        type_gen.resolve_type_path(f.ty().id(), &[]);
-                                    (field_name, field_type)
-                                })
-                                .collect::<Vec<_>>();
-                            let fields_def =
-                                fields.iter().map(|(name, ty)| quote!( pub #name: #ty));
-                            let entry_struct = quote! {
-                                pub struct #entry_struct_ident {
-                                    #( #fields_def, )*
-                                }
-                            };
-                            let field_names = fields.iter().map(|(name, _)| name);
-                            let constructor =
-                                quote!( #entry_struct_ident { #( #field_names ),* } );
-                            let keys = fields
-                                .iter()
-                                .zip(hashers)
-                                .map(|((field, _), hasher)| {
-                                    quote!( ::subxt::StorageMapKey::new(&self.#field, #hasher) )
-                                });
-                            let key_impl = quote! {
-                                ::subxt::StorageEntryKey::Map(
-                                    vec![ #( #keys ),* ]
-                                )
-                            };
-                            (fields, entry_struct, constructor, key_impl)
-                        } else if unnamed {
-                            let fields = composite
-                                .fields()
-                                .iter()
-                                .enumerate()
-                                .map(|(i, f)| {
-                                    let field_name =
-                                        format_ident!("_{}", syn::Index::from(i));
-                                    let field_type =
-                                        type_gen.resolve_type_path(f.ty().id(), &[]);
-                                    (field_name, field_type)
-                                })
-                                .collect::<Vec<_>>();
-                            let fields_def = fields
-                                .iter()
-                                .map(|(_, field_type)| quote!( pub #field_type ));
-                            let entry_struct = quote! {
-                                pub struct #entry_struct_ident( #( #fields_def, )* );
-                            };
-                            let field_names = fields.iter().map(|(name, _)| name);
-                            let constructor =
-                                quote!( #entry_struct_ident( #( #field_names ),* ) );
-
-                            let keys = (0..fields.len())
-                                .into_iter()
-                                .zip(hashers)
-                                .map(|(field, hasher)| {
-                                    let index = syn::Index::from(field);
-                                    quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
-                                });
-                            let key_impl = quote! {
-                                ::subxt::StorageEntryKey::Map(
-                                    vec![ #( #keys ),* ]
-                                )
-                            };
-                            (fields, entry_struct, constructor, key_impl)
-                        } else {
-                            abort_call_site!(
-                                "Fields must be either all named or all unnamed"
-                            )
-                        }
-                    }
                     _ => {
                         let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                         let fields = vec![(format_ident!("_0"), ty_path.clone())];
                         let entry_struct = quote! {
-                            pub struct #entry_struct_ident( #ty_path );
+                            pub struct #entry_struct_ident( pub #ty_path );
                         };
                         let constructor = quote!( #entry_struct_ident(_0) );
                         let hasher = hashers.get(0).unwrap_or_else(|| {
