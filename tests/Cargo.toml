@@ -8,10 +8,10 @@ subxt = { package = "substrate-subxt", path = ".." }
 
 codec = { package = "parity-scale-codec", version = "2.0.0", features = ["derive"] }
 
-sp-arithmetic = { package = "sp-arithmetic", git = "https://github.com/paritytech/substrate/" }
-sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/" }
-sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/" }
+sp-arithmetic = { package = "sp-arithmetic", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
 
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
