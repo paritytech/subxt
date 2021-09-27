@@ -106,8 +106,8 @@ impl ContractsTestContext {
 
         log::info!("  Block hash: {:?}", result.block);
         log::info!("  Code hash: {:?}", code_stored.0);
-        log::info!("  Contract address: {:?}", instantiated.0);
-        Ok((code_stored.0, instantiated.0))
+        log::info!("  Contract address: {:?}", instantiated.1);
+        Ok((code_stored.0, instantiated.1))
     }
 
     async fn instantiate(
