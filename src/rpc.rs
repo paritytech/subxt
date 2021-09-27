@@ -82,6 +82,7 @@ use crate::{
     Metadata,
     Runtime,
 };
+use crate::storage::StorageKeyPrefix;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -316,11 +317,12 @@ impl<T: Runtime> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKey>,
+        prefix: Option<StorageKeyPrefix>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
+        let prefix = prefix.map(|p| p.to_storage_key());
         let params = &[
             to_json_value(prefix)?,
             to_json_value(count)?,

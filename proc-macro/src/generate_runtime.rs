@@ -568,7 +568,7 @@ impl RuntimeGenerator {
                 hash: ::core::option::Option<T::Hash>,
             ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
                 let entry = #constructor;
-                self.client.fetch_or_default(&entry, hash).await
+                self.client.storage().fetch_or_default(&entry, hash).await
             }
         };
 

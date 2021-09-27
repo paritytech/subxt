@@ -59,6 +59,7 @@ mod events;
 pub mod extrinsic;
 mod metadata;
 mod rpc;
+pub mod storage;
 mod subscription;
 
 pub use crate::{
@@ -89,6 +90,11 @@ pub use crate::{
         ReadProof,
         RpcClient,
         SystemProperties,
+    },
+    storage::{
+        StorageEntry,
+        StorageEntryKey,
+        StorageMapKey,
     },
     subscription::{
         EventStorageSubscription,
@@ -196,81 +202,6 @@ pub trait Event: Decode {
     const PALLET: &'static str;
     /// Event name.
     const EVENT: &'static str;
-}
-
-/// Storage entry trait.
-pub trait StorageEntry {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Storage name.
-    const STORAGE: &'static str;
-    /// Type of the storage entry value.
-    type Value: Decode;
-    /// Get the key data for the storage.
-    fn key(&self) -> StorageEntryKey;
-}
-
-/// Storage key.
-pub enum StorageEntryKey {
-    /// Plain key.
-    Plain,
-    /// Map key(s).
-    Map(Vec<StorageMapKey>),
-}
-
-impl StorageEntryKey {
-    /// Construct the final [`sp_core::storage::StorageKey`] for the storage entry.
-    pub fn final_key<T: StorageEntry>(&self) -> sp_core::storage::StorageKey {
-        let mut bytes = sp_core::twox_128(T::PALLET.as_bytes()).to_vec();
-        bytes.extend(&sp_core::twox_128(T::STORAGE.as_bytes())[..]);
-        if let Self::Map(map_keys) = self {
-            for map_key in map_keys {
-                bytes.extend(Self::hash(&map_key.hasher, &map_key.value))
-            }
-        }
-        sp_core::storage::StorageKey(bytes)
-    }
-
-    fn hash(hasher: &StorageHasher, bytes: &[u8]) -> Vec<u8> {
-        match hasher {
-            StorageHasher::Identity => bytes.to_vec(),
-            StorageHasher::Blake2_128 => sp_core::blake2_128(bytes).to_vec(),
-            StorageHasher::Blake2_128Concat => {
-                // copied from substrate Blake2_128Concat::hash since StorageHasher is not public
-                sp_core::blake2_128(bytes)
-                    .iter()
-                    .chain(bytes)
-                    .cloned()
-                    .collect()
-            }
-            StorageHasher::Blake2_256 => sp_core::blake2_256(bytes).to_vec(),
-            StorageHasher::Twox128 => sp_core::twox_128(bytes).to_vec(),
-            StorageHasher::Twox256 => sp_core::twox_256(bytes).to_vec(),
-            StorageHasher::Twox64Concat => {
-                sp_core::twox_64(bytes)
-                    .iter()
-                    .chain(bytes)
-                    .cloned()
-                    .collect()
-            }
-        }
-    }
-}
-
-/// Storage key for a Map.
-pub struct StorageMapKey {
-    value: Vec<u8>,
-    hasher: StorageHasher,
-}
-
-impl StorageMapKey {
-    /// Create a new [`StorageMapKey`] with the encoded data and the hasher.
-    pub fn new<T: Encode>(value: &T, hasher: StorageHasher) -> Self {
-        Self {
-            value: value.encode(),
-            hasher,
-        }
-    }
 }
 
 /// A phase of a block's execution.

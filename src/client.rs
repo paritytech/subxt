@@ -48,6 +48,7 @@ use crate::{
         RpcClient,
         SystemProperties,
     },
+    storage::{StorageEntry, StorageClient},
     subscription::EventStorageSubscription,
     AccountData,
     BlockNumber,
@@ -57,7 +58,6 @@ use crate::{
     Metadata,
     ReadProof,
     Runtime,
-    StorageEntry,
 };
 
 /// ClientBuilder for constructing a Client.
@@ -197,55 +197,6 @@ impl<T: Runtime> Client<T> {
         &self.rpc.client
     }
 
-    /// Fetch the value under an unhashed storage key
-    pub async fn fetch_unhashed<V: Decode>(
-        &self,
-        key: StorageKey,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<V>, Error> {
-        if let Some(data) = self.rpc.storage(&key, hash).await? {
-            Ok(Some(Decode::decode(&mut &data.0[..])?))
-        } else {
-            Ok(None)
-        }
-    }
-
-    /// Fetch a StorageKey with an optional block hash.
-    pub async fn fetch<F: StorageEntry>(
-        &self,
-        store: &F,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<F::Value>, Error> {
-        let key = store.key().final_key::<F>();
-        self.fetch_unhashed::<F::Value>(key, hash).await
-    }
-
-    /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub async fn fetch_or_default<F: StorageEntry>(
-        &self,
-        store: &F,
-        hash: Option<T::Hash>,
-    ) -> Result<F::Value, Error> {
-        if let Some(data) = self.fetch(store, hash).await? {
-            Ok(data)
-        } else {
-            let pallet_metadata = self.metadata.pallet(F::PALLET)?;
-            let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
-            let default = storage_metadata.default()?;
-            Ok(default)
-        }
-    }
-
-    /// Query historical storage entries
-    pub async fn query_storage(
-        &self,
-        keys: Vec<StorageKey>,
-        from: T::Hash,
-        to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
-        self.rpc.query_storage(keys, from, to).await
-    }
-
     /// Get a header
     pub async fn header<H>(&self, hash: Option<H>) -> Result<Option<T::Header>, Error>
     where
@@ -323,14 +274,10 @@ impl<T: Runtime> Client<T> {
         Ok(headers)
     }
 
-    /// Creates an unsigned extrinsic.
-    // pub fn create_unsigned<C: Call<T> + Send + Sync>(
-    //     &self,
-    //     call: C,
-    // ) -> Result<UncheckedExtrinsic<T>, Error> {
-    //     let call = self.encode(call)?;
-    //     Ok(extrinsic::create_unsigned::<T>(call))
-    // }
+    /// Create a client for accessing runtime storage
+    pub fn storage(&self) -> StorageClient<T> {
+        StorageClient::new(&self.rpc, &self.metadata)
+    }
 
     /// Creates a signed extrinsic.
     pub async fn create_signed<C: Call + Send + Sync>(
@@ -348,7 +295,7 @@ impl<T: Runtime> Client<T> {
             let account_storage_entry =
                 <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
             let account_data =
-                self.fetch_or_default(&account_storage_entry, None).await?;
+                self.storage().fetch_or_default(&account_storage_entry, None).await?;
             <T::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self.encode(call)?;
@@ -407,20 +354,6 @@ impl<T: Runtime> Client<T> {
         let extrinsic = self.create_signed(call, signer).await?;
         self.submit_extrinsic(extrinsic).await
     }
-
-    /// Submits transaction to the chain and watch for events.
-    // pub async fn watch<C: Call<T> + Send + Sync>(
-    //     &self,
-    //     call: C,
-    //     signer: &(dyn Signer<T> + Send + Sync),
-    // ) -> Result<ExtrinsicSuccess<T>, Error>
-    //     where
-    //         <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-    //         Send + Sync,
-    // {
-    //     let extrinsic = self.create_signed(call, signer).await?;
-    //     self.submit_and_watch_extrinsic(extrinsic).await
-    // }
 
     /// Insert a key into the keystore.
     pub async fn insert_key(
