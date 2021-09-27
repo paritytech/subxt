@@ -183,13 +183,13 @@ async fn tx_call() {
     let ctx = ContractsTestContext::init().await;
     let (_, contract) = ctx.instantiate_with_code().await.unwrap();
 
-    let contract_info = ctx
-        .api()
-        .storage
-        .contracts
-        .contract_info_of(contract.clone(), None)
-        .await;
-    assert!(contract_info.is_ok());
+    // let contract_info = ctx
+    //     .api()
+    //     .storage
+    //     .contracts
+    //     .contract_info_of(contract.clone(), None)
+    //     .await;
+    // assert!(contract_info.is_ok());
 
     let executed = ctx.call(contract, vec![]).await;
 
