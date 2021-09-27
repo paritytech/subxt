@@ -181,13 +181,22 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
         }
     }
 
+    /// Fetch the raw encoded value under the raw storage key.
+    pub async fn fetch_raw(
+        &self,
+        key: StorageKey,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<StorageData>, Error> {
+        self.rpc.storage(&key, hash).await
+    }
+
     /// Fetch a StorageKey with an optional block hash.
     pub async fn fetch<F: StorageEntry>(
         &self,
         store: &F,
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Value>, Error> {
-        let key = store.key().final_key::<F>();
+        let key = store.key().final_key::<F>(); // todo: [AJ] can we factor this type param on final key out
         self.fetch_unhashed::<F::Value>(key, hash).await
     }
 

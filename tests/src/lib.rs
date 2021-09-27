@@ -27,6 +27,7 @@ use sp_runtime::{
 };
 use subxt::{
     subxt,
+    Client,
     PairSigner,
     Runtime,
     StorageEntry,
@@ -101,12 +102,14 @@ pub async fn test_node_process() -> TestNodeProcess<TestRuntime> {
 pub struct TestContext {
     node_proc: TestNodeProcess<TestRuntime>,
     api: node_runtime::RuntimeApi<TestRuntime>,
+    client: Client<TestRuntime>,
 }
 
 pub async fn test_context() -> TestContext {
     let node_proc = test_node_process_with(AccountKeyring::Alice).await;
-    let api = node_runtime::RuntimeApi::<TestRuntime>::new(node_proc.client().clone());
-    TestContext { node_proc, api }
+    let client = node_proc.client().clone();
+    let api = node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
+    TestContext { node_proc, api, client }
 }
 // #[async_std::test]
 // async fn test_insert_key() {

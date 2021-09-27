@@ -16,6 +16,7 @@ sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/subs
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
+hex = "0.4.3"
 log = "0.4.14"
 tempdir = "0.3.7"
 wabt = "0.10.0"
