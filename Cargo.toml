@@ -43,8 +43,8 @@ url = "2.2.1"
 
 subxt-proc-macro = { version = "0.1.0", path = "proc-macro" }
 
-sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
-sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "aj-unused-dependency" }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "master" }
+sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "master" }
 
 frame-metadata = "14.0.0"
