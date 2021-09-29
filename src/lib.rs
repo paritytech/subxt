@@ -58,7 +58,7 @@ mod error;
 mod events;
 pub mod extrinsic;
 mod metadata;
-mod rpc;
+pub mod rpc;
 pub mod storage;
 mod subscription;
 

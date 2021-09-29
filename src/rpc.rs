@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! RPC types and client for interacting with a substrate node.
+
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
 // Related: https://github.com/paritytech/substrate-subxt/issues/66
@@ -111,6 +113,7 @@ pub enum ListOrValue<T> {
     Value(T),
 }
 
+/// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as Runtime>::Header, <T as Runtime>::Extrinsic>>;
 
@@ -287,6 +290,7 @@ impl<T: Runtime> Clone for Rpc<T> {
 }
 
 impl<T: Runtime> Rpc<T> {
+    /// Create a new [`Rpc`] for a given runtime.
     pub fn new(client: RpcClient) -> Self {
         Self {
             client,
@@ -521,6 +525,7 @@ impl<T: Runtime> Rpc<T> {
         Ok(xt_hash)
     }
 
+    /// Create and submit an extrinsic and return a subscription to the events triggered.
     pub async fn watch_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
