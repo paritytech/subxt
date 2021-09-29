@@ -21,11 +21,7 @@ use codec::{
     Encode,
     Input,
 };
-use dyn_clone::DynClone;
-use std::marker::{
-    PhantomData,
-    Send,
-};
+use std::marker::PhantomData;
 
 use crate::{
     metadata::{
@@ -60,37 +56,6 @@ impl std::fmt::Debug for RawEvent {
             .field("variant", &self.variant)
             .field("data", &hex::encode(&self.data))
             .finish()
-    }
-}
-
-pub trait TypeSegmenter: DynClone + Send + Sync {
-    /// Consumes an object from an input stream, and output the serialized bytes.
-    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error>;
-}
-
-// derive object safe Clone impl for `Box<dyn TypeSegmenter>`
-dyn_clone::clone_trait_object!(TypeSegmenter);
-
-struct TypeMarker<T>(PhantomData<T>);
-impl<T> TypeSegmenter for TypeMarker<T>
-where
-    T: Codec + Send + Sync,
-{
-    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error> {
-        T::decode(input).map_err(Error::from)?.encode_to(output);
-        Ok(())
-    }
-}
-
-impl<T> Clone for TypeMarker<T> {
-    fn clone(&self) -> Self {
-        Self(Default::default())
-    }
-}
-
-impl<T> Default for TypeMarker<T> {
-    fn default() -> Self {
-        Self(Default::default())
     }
 }
 
