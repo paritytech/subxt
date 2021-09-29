@@ -128,10 +128,10 @@ impl Metadata {
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
         self.metadata.types.resolve(id)
     }
-    
+
     /// Return the runtime metadata.
     pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
-        &self.runtime_metadata
+        &self.metadata
     }
 }
 

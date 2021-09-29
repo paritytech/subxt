@@ -41,10 +41,14 @@ use scale_info::{
 
 /// Raw bytes for an Event
 pub struct RawEvent {
-    /// The name of the pallet from whence the Event originated
+    /// The name of the pallet from whence the Event originated.
     pub pallet: String,
-    /// The name of the Event
+    /// The index of the pallet from whence the Event originated.
+    pub pallet_index: u8,
+    /// The name of the pallet Event variant.
     pub variant: String,
+    /// The index of the pallet Event variant.
+    pub variant_index: u8,
     /// The raw Event data
     pub data: Vec<u8>,
 }
@@ -89,16 +93,16 @@ where
             // decode EventRecord
             let phase = Phase::decode(input)?;
             let pallet_index = input.read_byte()?;
-            let event_variant = input.read_byte()?;
+            let variant_index = input.read_byte()?;
             log::debug!(
                 "phase {:?}, pallet_index {}, event_variant: {}",
                 phase,
                 pallet_index,
-                event_variant
+                variant_index
             );
             log::debug!("remaining input: {}", hex::encode(&input));
 
-            let event_metadata = self.metadata.event(pallet_index, event_variant)?;
+            let event_metadata = self.metadata.event(pallet_index, variant_index)?;
 
             let mut event_data = Vec::<u8>::new();
             let mut event_errors = Vec::<RuntimeError>::new();
@@ -114,7 +118,9 @@ where
 
                     let event = RawEvent {
                         pallet: event_metadata.pallet().to_string(),
+                        pallet_index,
                         variant: event_metadata.event().to_string(),
+                        variant_index,
                         data: event_data,
                     };
 
