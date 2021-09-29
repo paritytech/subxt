@@ -14,16 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::Decode;
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_types::Subscription;
 use jsonrpsee_ws_client::WsClientBuilder;
 use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
+    storage::StorageKey,
     Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
@@ -48,7 +44,7 @@ use crate::{
         RpcClient,
         SystemProperties,
     },
-    storage::{StorageEntry, StorageClient},
+    storage::StorageClient,
     subscription::EventStorageSubscription,
     AccountData,
     BlockNumber,
