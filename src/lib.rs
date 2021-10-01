@@ -194,6 +194,10 @@ pub trait Call: Encode {
     const PALLET: &'static str;
     /// Function name.
     const FUNCTION: &'static str;
+
+    fn is_call(pallet: &str, function: &str) -> bool {
+        Self::PALLET == pallet && Self::FUNCTION == function
+    }
 }
 
 /// Event trait.
@@ -202,6 +206,10 @@ pub trait Event: Decode {
     const PALLET: &'static str;
     /// Event name.
     const EVENT: &'static str;
+
+    fn is_event(pallet: &str, event: &str) -> bool {
+        Self::PALLET == pallet && Self::EVENT == event
+    }
 }
 
 /// A phase of a block's execution.
