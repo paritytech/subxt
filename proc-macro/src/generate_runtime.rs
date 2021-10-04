@@ -128,16 +128,16 @@ impl RuntimeGenerator {
                         use super::#types_mod_ident;
                         #( #call_structs )*
 
-                        pub struct TransactionApi<T: ::subxt::Runtime> {
-                            client: ::std::sync::Arc<::subxt::Client<T>>,
+                        pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                            client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<T: ::subxt::Runtime> TransactionApi<T>
+                        impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T>
                         where
                             <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
                                 Send + Sync
                         {
-                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
+                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
 
@@ -182,12 +182,12 @@ impl RuntimeGenerator {
                         use super::#types_mod_ident;
                         #( #storage_structs )*
 
-                        pub struct StorageApi<T: ::subxt::Runtime> {
-                            client: ::std::sync::Arc<::subxt::Client<T>>,
+                        pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                            client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<T: ::subxt::Runtime> StorageApi<T> {
-                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
+                        impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
 
@@ -228,27 +228,17 @@ impl RuntimeGenerator {
 
         // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod.ident;
-        let (pallet_storage_cli_fields, pallet_storage_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names.iter().filter_map(|(pallet, pallet_mod_name)| {
-            if pallet.storage.is_some() {
-                let pallet_storage_cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::storage::StorageApi<T> );
-                let pallet_storage_cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone()) );
-                Some((pallet_storage_cli_field, pallet_storage_cli_field_init))
-            } else {
-                None
-            }
-        }).unzip();
-        let (pallet_calls_cli_fields, pallet_calls_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names
+        let pallets_with_storage = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
-                if pallet.calls.is_some() {
-                    let cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::calls::TransactionApi<T> );
-                    let cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::calls::TransactionApi::new(client.clone()) );
-                    Some((cli_field, cli_field_init))
-                } else {
-                    None
-                }
-            })
-            .unzip();
+                pallet.storage.as_ref().map(|_| pallet_mod_name)
+            });
+        let pallets_with_calls = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.calls.as_ref().map(|_| pallet_mod_name)
+            });
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -257,9 +247,7 @@ impl RuntimeGenerator {
                 #types_mod
 
                 pub struct RuntimeApi<T: ::subxt::Runtime> {
-                    pub client: ::std::sync::Arc<::subxt::Client<T>>,
-                    pub storage: StorageApi<T>,
-                    pub tx: TransactionApi<T>,
+                    pub client: ::subxt::Client<T>,
                 }
 
                 impl<T: ::subxt::Runtime> RuntimeApi<T>
@@ -268,29 +256,40 @@ impl RuntimeGenerator {
                         Send + Sync
                 {
                     pub fn new(client: ::subxt::Client<T>) -> Self {
-                        let client = ::std::sync::Arc::new(client);
-                        Self {
-                            client: client.clone(),
-                            storage: StorageApi {
-                                client: client.clone(),
-                                #( #pallet_storage_cli_fields_init, )*
-                            },
-                            tx: TransactionApi {
-                                client: client.clone(),
-                                #( #pallet_calls_cli_fields_init, )*
-                            }
-                        }
+                        Self { client }
+                    }
+
+                    pub fn storage<'a>(&'a self) -> StorageApi<'a, T> {
+                        StorageApi { client: &self.client }
+                    }
+
+                    pub fn tx<'a>(&'a self) -> TransactionApi<'a, T> {
+                        TransactionApi { client: &self.client }
                     }
                 }
 
-                pub struct StorageApi<T: ::subxt::Runtime> {
-                    client: ::std::sync::Arc<::subxt::Client<T>>,
-                    #( #pallet_storage_cli_fields, )*
+                pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                    client: &'a ::subxt::Client<T>,
                 }
 
-                pub struct TransactionApi<T: ::subxt::Runtime> {
-                    client: ::std::sync::Arc<::subxt::Client<T>>,
-                    #( #pallet_calls_cli_fields, )*
+                impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                    #(
+                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
+                            #pallets_with_storage::storage::StorageApi::new(self.client)
+                        }
+                    )*
+                }
+
+                pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
+                    #(
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T> {
+                            #pallets_with_calls::calls::TransactionApi::new(self.client)
+                        }
+                    )*
                 }
             }
         }
@@ -379,7 +378,7 @@ impl RuntimeGenerator {
                         #( #call_fn_args, )*
                     ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
                         let call = #call_struct_name { #( #call_args, )* };
-                        ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
+                        ::subxt::SubmittableExtrinsic::new(self.client, call)
                     }
                 };
                 (call_struct, client_fn)

@@ -390,12 +390,12 @@ impl<T: Runtime> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<T: Runtime, C: Call> {
-    client: Arc<Client<T>>,
+pub struct SubmittableExtrinsic<'a, T: Runtime, C: Call> {
+    client: &'a Client<T>,
     call: C,
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
     T: Runtime,
     C: Call + Send + Sync,
@@ -403,7 +403,7 @@ where
         Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: Arc<Client<T>>, call: C) -> Self {
+    pub fn new(client: &'a Client<T>, call: C) -> Self {
         Self { client, call }
     }
 
