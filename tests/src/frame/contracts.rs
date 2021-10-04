@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the pallet_contracts module.
-
-use codec::{
-    Decode,
-    Encode,
-};
-
 use sp_keyring::AccountKeyring;
 
 use crate::{
@@ -31,17 +24,14 @@ use crate::{
             storage,
         },
         system,
-        RuntimeApi,
     },
     test_context,
-    Runtime,
     TestContext,
-    TestNodeProcess,
     TestRuntime,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
-use subxt::{Client, Error, ExtrinsicSuccess, PairSigner, StorageEntryKey, StorageEntry};
+use subxt::{Client, Error, ExtrinsicSuccess, PairSigner, Runtime, StorageEntry};
 
 struct ContractsTestContext {
     cxt: TestContext,
@@ -49,7 +39,6 @@ struct ContractsTestContext {
 }
 
 type Hash = <TestRuntime as Runtime>::Hash;
-type Address = <TestRuntime as Runtime>::Address;
 type AccountId = <TestRuntime as Runtime>::AccountId;
 
 impl ContractsTestContext {
@@ -60,10 +49,6 @@ impl ContractsTestContext {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
         Self { cxt, signer }
-    }
-
-    fn api(&self) -> &RuntimeApi<TestRuntime> {
-        &self.cxt.api
     }
 
     fn client(&self) -> &Client<TestRuntime> {

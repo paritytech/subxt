@@ -20,26 +20,9 @@ use crate::{
     node_runtime::{
         balances,
         system,
-        RuntimeApi,
     },
     test_context,
     TestRuntime,
-};
-use codec::{
-    Decode,
-    Encode,
-};
-use core::marker::PhantomData;
-use sp_runtime::traits::{
-    AtLeast32Bit,
-    MaybeSerialize,
-    Member,
-};
-use std::fmt::Debug;
-
-use sp_core::{
-    sr25519::Pair,
-    Pair as _,
 };
 use sp_keyring::AccountKeyring;
 use subxt::{
@@ -47,10 +30,6 @@ use subxt::{
         PairSigner,
         Signer,
     },
-    Error,
-    EventSubscription,
-    ModuleError,
-    RuntimeError,
 };
 
 #[async_std::test]

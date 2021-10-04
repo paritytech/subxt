@@ -14,13 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod runtime;
-mod utils;
+mod node_proc;
+mod context;
 
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod frame;
-
-pub use utils::*;
-pub use runtime::{TestRuntime, node_runtime};
+pub use node_proc::TestNodeProcess;
+pub use context::*;
