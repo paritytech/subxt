@@ -14,7 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{runtime::node_runtime::system, test_node_process, test_node_process_with};
+use crate::{
+    runtime::node_runtime::system,
+    test_node_process,
+    test_node_process_with,
+};
 
 use sp_core::storage::{
     well_known_keys,
@@ -104,7 +108,11 @@ async fn fetch_keys() {
 async fn test_iter() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    let mut iter = client.storage().iter::<system::storage::Account>(None).await.unwrap();
+    let mut iter = client
+        .storage()
+        .iter::<system::storage::Account>(None)
+        .await
+        .unwrap();
     let mut i = 0;
     while let Some(_) = iter.next().await.unwrap() {
         i += 1;

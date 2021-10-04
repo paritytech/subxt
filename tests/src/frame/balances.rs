@@ -25,11 +25,9 @@ use crate::{
     TestRuntime,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
-    extrinsic::{
-        PairSigner,
-        Signer,
-    },
+use subxt::extrinsic::{
+    PairSigner,
+    Signer,
 };
 
 #[async_std::test]

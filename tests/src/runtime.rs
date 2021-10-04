@@ -15,7 +15,11 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_runtime::traits::BlakeTwo256;
-use subxt::{Runtime, StorageEntry, subxt};
+use subxt::{
+    subxt,
+    Runtime,
+    StorageEntry,
+};
 
 #[subxt(runtime_metadata_path = "node_runtime.scale")]
 pub mod node_runtime {

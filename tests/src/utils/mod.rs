@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod node_proc;
 mod context;
+mod node_proc;
 
-pub use node_proc::TestNodeProcess;
 pub use context::*;
+pub use node_proc::TestNodeProcess;

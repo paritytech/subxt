@@ -15,7 +15,9 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    TestNodeProcess, TestRuntime, node_runtime,
+    node_runtime,
+    TestNodeProcess,
+    TestRuntime,
 };
 
 use sp_keyring::AccountKeyring;
@@ -55,5 +57,9 @@ pub async fn test_context() -> TestContext {
     let node_proc = test_node_process_with(AccountKeyring::Alice).await;
     let client = node_proc.client().clone();
     let api = node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
-    TestContext { node_proc, api, client }
+    TestContext {
+        node_proc,
+        api,
+        client,
+    }
 }
