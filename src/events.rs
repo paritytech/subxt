@@ -38,8 +38,10 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
+use sp_core::Bytes;
 
 /// Raw bytes for an Event
+#[derive(Debug)]
 pub struct RawEvent {
     /// The name of the pallet from whence the Event originated.
     pub pallet: String,
@@ -50,17 +52,7 @@ pub struct RawEvent {
     /// The index of the pallet Event variant.
     pub variant_index: u8,
     /// The raw Event data
-    pub data: Vec<u8>,
-}
-
-impl std::fmt::Debug for RawEvent {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.debug_struct("RawEvent")
-            .field("module", &self.pallet)
-            .field("variant", &self.variant)
-            .field("data", &hex::encode(&self.data))
-            .finish()
-    }
+    pub data: Bytes,
 }
 
 /// Events decoder.
@@ -121,7 +113,7 @@ where
                         pallet_index,
                         variant: event_metadata.event().to_string(),
                         variant_index,
-                        data: event_data,
+                        data: event_data.into(),
                     };
 
                     // topics come after the event data in EventRecord
