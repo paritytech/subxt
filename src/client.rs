@@ -399,8 +399,6 @@ impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
     T: Runtime,
     C: Call + Send + Sync,
-    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-        Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
     pub fn new(client: &'a Client<T>, call: C) -> Self {
@@ -412,7 +410,11 @@ where
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
+    ) -> Result<ExtrinsicSuccess<T>, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
         self.client.submit_and_watch_extrinsic(extrinsic).await
     }
@@ -421,7 +423,11 @@ where
     pub async fn sign_and_submit(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<T::Hash, Error> {
+    ) -> Result<T::Hash, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
         self.client.submit_extrinsic(extrinsic).await
     }

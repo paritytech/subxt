@@ -40,20 +40,25 @@ async fn test_basic_transfer() {
     let api = &cxt.api;
 
     let alice_pre = api
-        .storage
-        .system
+        .storage()
+        .system()
         .account(alice.account_id().clone().into(), None)
         .await
         .unwrap();
     let bob_pre = api
-        .storage
-        .system
+        .storage()
+        .system()
         .account(bob.account_id().clone().into(), None)
         .await
         .unwrap();
 
-    let extrinsic = api.tx.balances.transfer(bob_address, 10_000);
-    let result = extrinsic.sign_and_submit_then_watch(&alice).await.unwrap();
+    let result = api
+        .tx()
+        .balances()
+        .transfer(bob_address, 10_000)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
     let event = result
         .find_event::<balances::events::Transfer>()
         .unwrap()
@@ -71,14 +76,14 @@ async fn test_basic_transfer() {
     assert_eq!(event, expected_event);
 
     let alice_post = api
-        .storage
-        .system
+        .storage()
+        .system()
         .account(alice.account_id().clone().into(), None)
         .await
         .unwrap();
     let bob_post = api
-        .storage
-        .system
+        .storage()
+        .system()
         .account(bob.account_id().clone().into(), None)
         .await
         .unwrap();
@@ -91,7 +96,13 @@ async fn test_basic_transfer() {
 async fn test_state_total_issuance() {
     env_logger::try_init().ok();
     let cxt = test_context().await;
-    let total_issuance = cxt.api.storage.balances.total_issuance(None).await.unwrap();
+    let total_issuance = cxt
+        .api
+        .storage()
+        .balances()
+        .total_issuance(None)
+        .await
+        .unwrap();
     assert_ne!(total_issuance, 0);
 }
 

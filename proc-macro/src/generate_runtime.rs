@@ -122,7 +122,8 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
-                let (call_structs, call_fns) = self.generate_calls(&type_gen, pallet, calls);
+                let (call_structs, call_fns) =
+                    self.generate_calls(&type_gen, pallet, calls);
                 quote! {
                     pub mod calls {
                         use super::#types_mod_ident;
@@ -132,11 +133,7 @@ impl RuntimeGenerator {
                             client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T>
-                        where
-                            <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
-                                Send + Sync
-                        {
+                        impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
                             pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
@@ -163,7 +160,8 @@ impl RuntimeGenerator {
                 quote!()
             };
 
-            let (storage_structs, storage_fns) = if let Some(ref storage) = pallet.storage {
+            let (storage_structs, storage_fns) = if let Some(ref storage) = pallet.storage
+            {
                 let (storage_structs, storage_fns) = storage
                     .entries
                     .iter()
@@ -176,25 +174,24 @@ impl RuntimeGenerator {
                 (Vec::new(), Vec::new())
             };
 
-            let storage_mod =
-                quote! {
-                    pub mod storage {
-                        use super::#types_mod_ident;
-                        #( #storage_structs )*
+            let storage_mod = quote! {
+                pub mod storage {
+                    use super::#types_mod_ident;
+                    #( #storage_structs )*
 
-                        pub struct StorageApi<'a, T: ::subxt::Runtime> {
-                            client: &'a ::subxt::Client<T>,
-                        }
-
-                        impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
-                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                                Self { client }
-                            }
-
-                            #( #storage_fns )*
-                        }
+                    pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                        client: &'a ::subxt::Client<T>,
                     }
-                };
+
+                    impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                        pub fn new(client: &'a ::subxt::Client<T>) -> Self {
+                            Self { client }
+                        }
+
+                        #( #storage_fns )*
+                    }
+                }
+            };
 
             quote! {
                 pub mod #mod_name {
@@ -228,16 +225,18 @@ impl RuntimeGenerator {
 
         // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod.ident;
-        let pallets_with_storage = pallets_with_mod_names
-            .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                pallet.storage.as_ref().map(|_| pallet_mod_name)
-            });
-        let pallets_with_calls = pallets_with_mod_names
-            .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                pallet.calls.as_ref().map(|_| pallet_mod_name)
-            });
+        let pallets_with_storage =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    pallet.storage.as_ref().map(|_| pallet_mod_name)
+                });
+        let pallets_with_calls =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    pallet.calls.as_ref().map(|_| pallet_mod_name)
+                });
 
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
@@ -250,11 +249,7 @@ impl RuntimeGenerator {
                     pub client: ::subxt::Client<T>,
                 }
 
-                impl<T: ::subxt::Runtime> RuntimeApi<T>
-                where
-                    <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
-                        Send + Sync
-                {
+                impl<T: ::subxt::Runtime> RuntimeApi<T> {
                     pub fn new(client: ::subxt::Client<T>) -> Self {
                         Self { client }
                     }

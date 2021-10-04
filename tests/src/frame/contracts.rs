@@ -62,8 +62,8 @@ impl ContractsTestContext {
         &self.cxt.client
     }
 
-    fn contracts_tx(&self) -> &TransactionApi<TestRuntime> {
-        &self.cxt.api.tx.contracts
+    fn contracts_tx(&self) -> TransactionApi<TestRuntime> {
+        self.cxt.api.tx().contracts()
     }
 
     async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
@@ -76,14 +76,21 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let extrinsic = self.contracts_tx().instantiate_with_code(
-            100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
-            code,
-            vec![], // data
-            vec![], // salt
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .cxt
+            .api
+            .tx()
+            .contracts()
+            .instantiate_with_code(
+                100_000_000_000_000_000, // endowment
+                500_000_000_000,         // gas_limit
+                code,
+                vec![], // data
+                vec![], // salt
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
+
         let code_stored = result
             .find_event::<events::CodeStored>()?
             .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
@@ -109,14 +116,17 @@ impl ContractsTestContext {
         salt: Vec<u8>,
     ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
-        let extrinsic = self.contracts_tx().instantiate(
-            100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
-            code_hash,
-            data,
-            salt,
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .contracts_tx()
+            .instantiate(
+                100_000_000_000_000_000, // endowment
+                500_000_000_000,         // gas_limit
+                code_hash,
+                data,
+                salt,
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
 
         log::info!("Instantiate result: {:?}", result);
         let instantiated = result
@@ -132,13 +142,17 @@ impl ContractsTestContext {
         input_data: Vec<u8>,
     ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
         log::info!("call: {:?}", contract);
-        let extrinsic = self.contracts_tx().call(
-            MultiAddress::Id(contract),
-            0,           // value
-            500_000_000, // gas_limit
-            input_data,
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .contracts_tx()
+            .call(
+                MultiAddress::Id(contract),
+                0,           // value
+                500_000_000, // gas_limit
+                input_data,
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
+
         log::info!("Call result: {:?}", result);
         Ok(result)
     }
