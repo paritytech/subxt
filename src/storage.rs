@@ -129,15 +129,17 @@ impl StorageMapKey {
 }
 
 /// Client for querying runtime storage.
+#[derive(Clone)]
 pub struct StorageClient<'a, T: Runtime> {
     rpc: &'a Rpc<T>,
     metadata: &'a Metadata,
+    iter_page_size: u32,
 }
 
 impl<'a, T: Runtime> StorageClient<'a, T> {
     /// Create a new [`StorageClient`]
-    pub fn new(rpc: &'a Rpc<T>, metadata: &'a Metadata) -> Self {
-        Self { rpc, metadata }
+    pub fn new(rpc: &'a Rpc<T>, metadata: &'a Metadata, iter_page_size: u32) -> Self {
+        Self { rpc, metadata, iter_page_size }
     }
 
     /// Fetch the value under an unhashed storage key
@@ -213,6 +215,28 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
             .storage_keys_paged(Some(prefix), count, start_key, hash)
             .await?;
         Ok(keys)
+    }
+
+    /// Returns an iterator of key value pairs.
+    pub async fn iter<F: StorageEntry>(
+        &self,
+        hash: Option<T::Hash>,
+    ) -> Result<KeyIter<'a, T, F>, Error> {
+        let hash = if let Some(hash) = hash {
+            hash
+        } else {
+            self.rpc.block_hash(None)
+                .await?
+                .expect("didn't pass a block number; qed")
+        };
+        Ok(KeyIter {
+            client: self.clone(),
+            hash,
+            count: self.iter_page_size,
+            start_key: None,
+            buffer: Default::default(),
+            _marker: PhantomData,
+        })
     }
 }
 

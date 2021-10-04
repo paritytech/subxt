@@ -140,7 +140,7 @@ impl ClientBuilder {
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
-            page_size: self.page_size.unwrap_or(10),
+            iter_page_size: self.page_size.unwrap_or(10),
         })
     }
 }
@@ -154,7 +154,7 @@ pub struct Client<T: Runtime> {
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
-    page_size: u32,
+    iter_page_size: u32,
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -167,7 +167,7 @@ impl<T: Runtime> Clone for Client<T> {
             properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
-            page_size: self.page_size,
+            iter_page_size: self.iter_page_size,
         }
     }
 }
@@ -272,7 +272,7 @@ impl<T: Runtime> Client<T> {
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.rpc, &self.metadata)
+        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
     /// Creates a signed extrinsic.
