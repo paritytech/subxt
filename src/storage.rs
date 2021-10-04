@@ -16,7 +16,10 @@
 
 //! For querying runtime storage.
 
-use codec::{Encode, Decode};
+use codec::{
+    Decode,
+    Encode,
+};
 use sp_core::storage::{
     StorageChangeSet,
     StorageData,
@@ -24,9 +27,7 @@ use sp_core::storage::{
 };
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::{
-    marker::PhantomData,
-};
+use std::marker::PhantomData;
 
 use crate::{
     rpc::Rpc,
@@ -139,7 +140,11 @@ pub struct StorageClient<'a, T: Runtime> {
 impl<'a, T: Runtime> StorageClient<'a, T> {
     /// Create a new [`StorageClient`]
     pub fn new(rpc: &'a Rpc<T>, metadata: &'a Metadata, iter_page_size: u32) -> Self {
-        Self { rpc, metadata, iter_page_size }
+        Self {
+            rpc,
+            metadata,
+            iter_page_size,
+        }
     }
 
     /// Fetch the value under an unhashed storage key
@@ -225,7 +230,8 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
         let hash = if let Some(hash) = hash {
             hash
         } else {
-            self.rpc.block_hash(None)
+            self.rpc
+                .block_hash(None)
                 .await?
                 .expect("didn't pass a block number; qed")
         };

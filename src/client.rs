@@ -290,8 +290,10 @@ impl<T: Runtime> Client<T> {
         } else {
             let account_storage_entry =
                 <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
-            let account_data =
-                self.storage().fetch_or_default(&account_storage_entry, None).await?;
+            let account_data = self
+                .storage()
+                .fetch_or_default(&account_storage_entry, None)
+                .await?;
             <T::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self.encode(call)?;

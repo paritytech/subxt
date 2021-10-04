@@ -74,6 +74,7 @@ use crate::{
         EventsDecoder,
         RawEvent,
     },
+    storage::StorageKeyPrefix,
     subscription::{
         EventStorageSubscription,
         EventSubscription,
@@ -84,7 +85,6 @@ use crate::{
     Metadata,
     Runtime,
 };
-use crate::storage::StorageKeyPrefix;
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
