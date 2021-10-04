@@ -195,6 +195,7 @@ pub trait Call: Encode {
     /// Function name.
     const FUNCTION: &'static str;
 
+    /// Returns true if the given pallet and function names match this call.
     fn is_call(pallet: &str, function: &str) -> bool {
         Self::PALLET == pallet && Self::FUNCTION == function
     }
@@ -207,6 +208,7 @@ pub trait Event: Decode {
     /// Event name.
     const EVENT: &'static str;
 
+    /// Returns true if the given pallet and event names match this event.
     fn is_event(pallet: &str, event: &str) -> bool {
         Self::PALLET == pallet && Self::EVENT == event
     }
