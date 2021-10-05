@@ -114,24 +114,24 @@ async fn nominate_with_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-// #[async_std::test]
-// async fn test_nominate_not_possible_for_stash_account() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let alice_stash =
-//         PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-//     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//
-//     let nomination = client
-//         .nominate_and_watch(&alice_stash, vec![bob.account_id().clone().into()])
-//         .await;
-//     assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-//         assert_eq!(module_err.module, "Staking");
-//         assert_eq!(module_err.error, "NotController");
-//     });
-//     Ok(())
-// }
+#[async_std::test]
+async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
+    let alice_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let cxt = test_context().await;
+
+    let nomination = cxt.api.tx().staking()
+        .nominate(vec![bob.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
+
+    assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
+    Ok(())
+}
 //
 // #[async_std::test]
 // async fn test_chill_works_for_controller_only() -> Result<(), Error> {
