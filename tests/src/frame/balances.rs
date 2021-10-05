@@ -25,10 +25,19 @@ use crate::{
     test_context,
     TestRuntime,
 };
+use sp_core::{
+    sr25519::Pair,
+    Pair as _,
+};
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::{
-    PairSigner,
-    Signer,
+use subxt::{
+    extrinsic::{
+        PairSigner,
+        Signer,
+    },
+    Error,
+    RuntimeError,
+    PalletError,
 };
 
 #[async_std::test]
@@ -136,34 +145,38 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     Ok(())
 }
 
-//
-// #[async_std::test]
-// async fn test_transfer_error() {
-//     env_logger::try_init().ok();
-//     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-//     let alice_addr = alice.account_id().clone().into();
-//     let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
-//     let hans_address = hans.account_id().clone().into();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     client
-//         .transfer_and_watch(&alice, &hans_address, 100_000_000_000_000_000)
-//         .await
-//         .unwrap();
-//     let res = client
-//         .transfer_and_watch(&hans, &alice_addr, 100_000_000_000_000_000)
-//         .await;
-//
-//     if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
-//         let error2 = ModuleError {
-//             module: "Balances".into(),
-//             error: "InsufficientBalance".into(),
-//         };
-//         assert_eq!(error, error2);
-//     } else {
-//         panic!("expected an error");
-//     }
-// }
+#[async_std::test]
+async fn test_transfer_error() {
+    env_logger::try_init().ok();
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice_addr = alice.account_id().clone().into();
+    let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
+    let hans_address = hans.account_id().clone().into();
+    let cxt = test_context().await;
+
+    cxt.api.tx().balances()
+        .transfer(hans_address, 100_000_000_000_000_000)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
+
+    let res = cxt.api.tx().balances()
+        .transfer(alice_addr, 100_000_000_000_000_000)
+        .sign_and_submit_then_watch(&hans)
+        .await;
+
+    if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
+        let error2 = PalletError {
+            pallet: "Balances".into(),
+            error: "InsufficientBalance".into(),
+            description: vec!["Balance too low to send value".to_string()],
+        };
+        assert_eq!(error, error2);
+    } else {
+        panic!("expected an error");
+    }
+}
+
 //
 // #[async_std::test]
 // async fn test_transfer_subscription() {

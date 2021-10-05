@@ -70,7 +70,7 @@ pub use crate::{
     },
     error::{
         Error,
-        ModuleError,
+        PalletError,
         RuntimeError,
     },
     events::{
