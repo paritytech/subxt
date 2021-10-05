@@ -62,13 +62,16 @@ fn get_from_seed(seed: &str) -> sr25519::Pair {
         .expect("static values are valid; qed")
 }
 
+fn default_validator_prefs() -> ValidatorPrefs {
+    ValidatorPrefs { commission: sp_runtime::Perbill::default(), blocked: false }
+}
+
 #[async_std::test]
 async fn validate_with_controller_account() -> Result<(), Error> {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
     let announce_validator = cxt.api.tx().staking()
-        .validate(ValidatorPrefs { commission: sp_runtime::Perbill::default(), blocked: false })
-
+        .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice)
         .await;
     assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
@@ -79,21 +82,20 @@ async fn validate_with_controller_account() -> Result<(), Error> {
     Ok(())
 }
 
-// #[async_std::test]
-// async fn test_validate_not_possible_for_stash_account() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let alice_stash = PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let announce_validator = client
-//         .validate_and_watch(&alice_stash, ValidatorPrefs::default())
-//         .await;
-//     assert_matches!(announce_validator, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-//         assert_eq!(module_err.module, "Staking");
-//         assert_eq!(module_err.error, "NotController");
-//     });
-//     Ok(())
-// }
+#[async_std::test]
+async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
+    let alice_stash = PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
+    let cxt = test_context().await;
+    let announce_validator = cxt.api.tx().staking()
+        .validate(default_validator_prefs())
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
+    assert_matches!(announce_validator, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
+    Ok(())
+}
 //
 // #[async_std::test]
 // async fn test_nominate_with_controller_account() -> Result<(), Error> {
