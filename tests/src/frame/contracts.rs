@@ -104,9 +104,9 @@ impl ContractsTestContext {
             })?;
 
         log::info!("  Block hash: {:?}", result.block);
-        log::info!("  Code hash: {:?}", code_stored.0);
-        log::info!("  Contract address: {:?}", instantiated.1);
-        Ok((code_stored.0, instantiated.1))
+        log::info!("  Code hash: {:?}", code_stored.code_hash);
+        log::info!("  Contract address: {:?}", instantiated.contract);
+        Ok((code_stored.code_hash, instantiated.contract))
     }
 
     async fn instantiate(
@@ -133,7 +133,7 @@ impl ContractsTestContext {
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
-        Ok(instantiated.0)
+        Ok(instantiated.contract)
     }
 
     async fn call(
