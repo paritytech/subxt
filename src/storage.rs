@@ -30,9 +30,12 @@ pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
 use crate::{
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
     rpc::Rpc,
     Error,
-    metadata::{Metadata, MetadataError},
     Runtime,
     StorageHasher,
 };
@@ -190,7 +193,8 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
         } else {
             let pallet_metadata = self.metadata.pallet(F::PALLET)?;
             let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
-            let default = Decode::decode(&mut &storage_metadata.default[..]).map_err(MetadataError::DefaultError)?;
+            let default = Decode::decode(&mut &storage_metadata.default[..])
+                .map_err(MetadataError::DefaultError)?;
             Ok(default)
         }
     }

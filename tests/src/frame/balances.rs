@@ -36,8 +36,8 @@ use subxt::{
         Signer,
     },
     Error,
-    RuntimeError,
     PalletError,
+    RuntimeError,
 };
 
 #[async_std::test]
@@ -120,16 +120,25 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
-    let result =
-        cxt.api.tx().staking()
-            .bond(charlie.into(), 100_000_000_000_000, runtime_types::pallet_staking::RewardDestination::Stash)
-            .sign_and_submit_then_watch(&bob)
-            .await?;
+    let result = cxt
+        .api
+        .tx()
+        .staking()
+        .bond(
+            charlie.into(),
+            100_000_000_000_000,
+            runtime_types::pallet_staking::RewardDestination::Stash,
+        )
+        .sign_and_submit_then_watch(&bob)
+        .await?;
 
     let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
     assert!(success.is_some(), "No ExtrinsicSuccess Event found");
 
-    let locks = cxt.api.storage().balances()
+    let locks = cxt
+        .api
+        .storage()
+        .balances()
         .locks(AccountKeyring::Bob.to_account_id(), None)
         .await?;
 
@@ -154,13 +163,18 @@ async fn test_transfer_error() {
     let hans_address = hans.account_id().clone().into();
     let cxt = test_context().await;
 
-    cxt.api.tx().balances()
+    cxt.api
+        .tx()
+        .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
 
-    let res = cxt.api.tx().balances()
+    let res = cxt
+        .api
+        .tx()
+        .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&hans)
         .await;
@@ -177,7 +191,6 @@ async fn test_transfer_error() {
     }
 }
 
-//
 // #[async_std::test]
 // async fn test_transfer_subscription() {
 //     env_logger::try_init().ok();

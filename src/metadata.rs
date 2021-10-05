@@ -19,9 +19,7 @@ use std::{
     convert::TryFrom,
 };
 
-use codec::{
-    Error as CodecError,
-};
+use codec::Error as CodecError;
 
 use frame_metadata::{
     PalletConstantMetadata,
@@ -156,7 +154,10 @@ impl PalletMetadata {
         Ok(Encoded(bytes))
     }
 
-    pub fn storage(&self, key: &'static str) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
+    pub fn storage(
+        &self,
+        key: &'static str,
+    ) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
         self.storage
             .get(key)
             .ok_or(MetadataError::StorageNotFound(key))
@@ -271,9 +272,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 })?;
 
                 let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
-                        storage.entries.iter().map(|entry| {
-                            (entry.name.clone(), entry.clone())
-                        }).collect()
+                    storage
+                        .entries
+                        .iter()
+                        .map(|entry| (entry.name.clone(), entry.clone()))
+                        .collect()
                 });
 
                 let pallet_metadata = PalletMetadata {
