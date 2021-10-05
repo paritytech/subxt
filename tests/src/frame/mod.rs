@@ -16,3 +16,4 @@
 
 mod balances;
 mod contracts;
+mod staking;
