@@ -25,6 +25,7 @@ use crate::{
     test_context,
     TestRuntime,
 };
+use codec::Decode;
 use sp_core::{
     sr25519::Pair,
     Pair as _,
@@ -36,6 +37,7 @@ use subxt::{
         Signer,
     },
     Error,
+    EventSubscription,
     PalletError,
     RuntimeError,
 };
@@ -155,7 +157,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 }
 
 #[async_std::test]
-async fn test_transfer_error() {
+async fn transfer_error() {
     env_logger::try_init().ok();
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
@@ -191,27 +193,30 @@ async fn test_transfer_error() {
     }
 }
 
-// #[async_std::test]
-// async fn test_transfer_subscription() {
-//     env_logger::try_init().ok();
-//     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-//     let bob = AccountKeyring::Bob.to_account_id();
-//     let bob_addr = bob.clone().into();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let sub = client.subscribe_events().await.unwrap();
-//     let decoder = client.events_decoder();
-//     let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
-//     sub.filter_event::<TransferEvent<_>>();
-//     client.transfer(&alice, &bob_addr, 10_000).await.unwrap();
-//     let raw = sub.next().await.unwrap().unwrap();
-//     let event = TransferEvent::<TestRuntime>::decode(&mut &raw.data[..]).unwrap();
-//     assert_eq!(
-//         event,
-//         TransferEvent {
-//             from: alice.account_id().clone(),
-//             to: bob.clone(),
-//             amount: 10_000,
-//         }
-//     );
-// }
+#[async_std::test]
+async fn transfer_subscription() {
+    env_logger::try_init().ok();
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id();
+    let bob_addr = bob.clone().into();
+    let cxt = test_context().await;
+    let sub = cxt.client.subscribe_events().await.unwrap();
+    let decoder = cxt.client.events_decoder();
+    let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
+    sub.filter_event::<balances::events::Transfer>();
+
+    cxt.api
+        .tx()
+        .balances()
+        .transfer(bob_addr, 10_000)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
+
+    let raw = sub.next().await.unwrap().unwrap();
+    let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
+    assert_eq!(
+        event,
+        balances::events::Transfer(alice.account_id().clone(), bob.clone(), 10_000,)
+    );
+}
