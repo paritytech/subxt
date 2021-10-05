@@ -31,8 +31,7 @@ use subxt::extrinsic::{
 };
 
 #[async_std::test]
-async fn test_basic_transfer() {
-    env_logger::try_init().ok();
+async fn tx_basic_transfer() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
@@ -93,8 +92,7 @@ async fn test_basic_transfer() {
 }
 
 #[async_std::test]
-async fn test_state_total_issuance() {
-    env_logger::try_init().ok();
+async fn storage_total_issuance() {
     let cxt = test_context().await;
     let total_issuance = cxt
         .api
@@ -106,18 +104,21 @@ async fn test_state_total_issuance() {
     assert_ne!(total_issuance, 0);
 }
 
+#[async_std::test]
+async fn storage_read_free_balance() {
+    let cxt = test_context().await;
+    let account = AccountKeyring::Alice.to_account_id();
+    let info = cxt
+        .api
+        .storage()
+        .balances()
+        .account(account, None)
+        .await
+        .unwrap();
+    assert_ne!(info.free, 0);
+}
 // #[async_std::test]
-// async fn test_state_read_free_balance() {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let account = AccountKeyring::Alice.to_account_id();
-//     let info = client.account(&account, None).await.unwrap();
-//     assert_ne!(info.data.free, 0);
-// }
-//
-// #[async_std::test]
-// async fn test_state_balance_lock() -> Result<(), crate::Error> {
+// async fn storage_balance_lock() -> Result<(), crate::Error> {
 //
 //     env_logger::try_init().ok();
 //     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());

@@ -54,6 +54,7 @@ pub struct TestContext {
 }
 
 pub async fn test_context() -> TestContext {
+    env_logger::try_init().ok();
     let node_proc = test_node_process_with(AccountKeyring::Alice).await;
     let client = node_proc.client().clone();
     let api = node_runtime::RuntimeApi::<TestRuntime>::new(client.clone());
