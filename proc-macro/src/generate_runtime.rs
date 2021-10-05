@@ -106,7 +106,7 @@ impl RuntimeGenerator {
     pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
         let type_substitutes = Self::parse_type_substitutes(&item_mod);
         let type_gen =
-            TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
+            TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self

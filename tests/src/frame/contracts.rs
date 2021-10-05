@@ -50,8 +50,6 @@ type AccountId = <TestRuntime as Runtime>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        env_logger::try_init().ok();
-
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 

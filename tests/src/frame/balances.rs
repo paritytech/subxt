@@ -19,6 +19,7 @@
 use crate::{
     node_runtime::{
         balances,
+        runtime_types,
         system,
     },
     test_context,
@@ -105,50 +106,36 @@ async fn storage_total_issuance() {
 }
 
 #[async_std::test]
-async fn storage_read_free_balance() {
+async fn storage_balance_lock() -> Result<(), subxt::Error> {
+    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
-    let account = AccountKeyring::Alice.to_account_id();
-    let info = cxt
-        .api
-        .storage()
-        .balances()
-        .account(account, None)
-        .await
-        .unwrap();
-    assert_ne!(info.free, 0);
+
+    let result =
+        cxt.api.tx().staking()
+            .bond(charlie.into(), 100_000_000_000_000, runtime_types::pallet_staking::RewardDestination::Stash)
+            .sign_and_submit_then_watch(&bob)
+            .await?;
+
+    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
+    assert!(success.is_some(), "No ExtrinsicSuccess Event found");
+
+    let locks = cxt.api.storage().balances()
+        .locks(AccountKeyring::Bob.to_account_id(), None)
+        .await?;
+
+    assert_eq!(
+        locks.0,
+        vec![runtime_types::pallet_balances::BalanceLock {
+            id: *b"staking ",
+            amount: 100_000_000_000_000,
+            reasons: runtime_types::pallet_balances::Reasons::All,
+        }]
+    );
+
+    Ok(())
 }
-// #[async_std::test]
-// async fn storage_balance_lock() -> Result<(), crate::Error> {
-//
-//     env_logger::try_init().ok();
-//     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//
-//     client
-//         .bond_and_watch(
-//             &bob,
-//             &AccountKeyring::Charlie.to_account_id().clone().into(),
-//             100_000_000_000_000,
-//             RewardDestination::Stash,
-//         )
-//         .await?;
-//
-//     let locks = client
-//         .locks(&AccountKeyring::Bob.to_account_id(), None)
-//         .await?;
-//
-//     assert_eq!(
-//         locks,
-//         vec![BalanceLock {
-//             id: *b"staking ",
-//             amount: 100_000_000_000_000,
-//             reasons: Reasons::All,
-//         }]
-//     );
-//
-//     Ok(())
-// }
+
 //
 // #[async_std::test]
 // async fn test_transfer_error() {
