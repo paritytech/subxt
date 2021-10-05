@@ -96,25 +96,24 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
     });
     Ok(())
 }
-//
-// #[async_std::test]
-// async fn test_nominate_with_controller_account() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-//     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//
-//     let nomination = client
-//         .nominate_and_watch(&alice, vec![bob.account_id().clone().into()])
-//         .await;
-//     assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-//         // TOOD: this is unsatisfying – can we do better?
-//         assert_eq!(events.len(), 2);
-//     });
-//     Ok(())
-// }
-//
+
+#[async_std::test]
+async fn nominate_with_controller_account() -> Result<(), Error> {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let cxt = test_context().await;
+
+    let nomination = cxt.api.tx().staking()
+        .nominate(vec![bob.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice)
+        .await;
+    assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+        // TOOD: this is unsatisfying – can we do better?
+        assert_eq!(events.len(), 2);
+    });
+    Ok(())
+}
+
 // #[async_std::test]
 // async fn test_nominate_not_possible_for_stash_account() -> Result<(), Error> {
 //     env_logger::try_init().ok();
