@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the pallet_staking module.
-
 use codec::{
     Decode,
     Encode,
@@ -25,13 +23,16 @@ use assert_matches::assert_matches;
 use crate::{
     test_context,
     TestRuntime,
-    node_runtime::runtime_types::pallet_staking::{
-        ActiveEraInfo,
-        Exposure,
-        Nominations,
-        RewardDestination,
-        StakingLedger,
-        ValidatorPrefs,
+    node_runtime::{
+        runtime_types::pallet_staking::{
+            ActiveEraInfo,
+            Exposure,
+            Nominations,
+            RewardDestination,
+            StakingLedger,
+            ValidatorPrefs,
+        },
+        staking,
     }
 };
 use sp_core::{
@@ -132,41 +133,35 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
     });
     Ok(())
 }
-//
-// #[async_std::test]
-// async fn test_chill_works_for_controller_only() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let alice_stash =
-//         PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-//     let bob_stash =
-//         PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Bob//stash"));
-//     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//
-//     // this will fail the second time, which is why this is one test, not two
-//     client
-//         .nominate_and_watch(&alice, vec![bob_stash.account_id().clone().into()])
-//         .await?;
-//     let store = LedgerStore {
-//         controller: alice.account_id().clone(),
-//     };
-//     let StakingLedger { stash, .. } = client.fetch(&store, None).await?.unwrap();
-//     assert_eq!(alice_stash.account_id(), &stash);
-//     let chill = client.chill_and_watch(&alice_stash).await;
-//
-//     assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-//         assert_eq!(module_err.module, "Staking");
-//         assert_eq!(module_err.error, "NotController");
-//     });
-//
-//     let chill = client.chill_and_watch(&alice).await;
-//     assert_matches!(chill, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-//         // TOOD: this is unsatisfying – can we do better?
-//         assert_eq!(events.len(), 2);
-//     });
-//     Ok(())
-// }
+
+#[async_std::test]
+async fn chill_works_for_controller_only() -> Result<(), Error> {
+    let alice_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+    let bob_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Bob//stash"));
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let cxt = test_context().await;
+
+    // this will fail the second time, which is why this is one test, not two
+    cxt.api.tx().staking()
+        .nominate(vec![bob_stash.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice)
+        .await;
+    // let ledger = cxt.api.storage().staking().ledger(alice.account_id().clone(), None).await?.unwrap();
+    // assert_eq!(alice_stash.account_id(), &ledger.stash);
+    let chill = cxt.api.tx().staking().chill().sign_and_submit_then_watch(&alice_stash).await;
+
+    assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
+
+    let result = cxt.api.tx().staking().chill().sign_and_submit_then_watch(&alice).await?;
+    let chill = result.find_event::<staking::events::Chilled>()?;
+    assert!(chill.is_some());
+    Ok(())
+}
 //
 // #[async_std::test]
 // async fn test_bond() -> Result<(), Error> {
