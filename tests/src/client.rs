@@ -32,6 +32,7 @@ async fn insert_key() {
     let client = test_node_process.client();
     let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
     client
+        .rpc()
         .insert_key(
             "aura".to_string(),
             "//Alice".to_string(),
@@ -40,6 +41,7 @@ async fn insert_key() {
         .await
         .unwrap();
     assert!(client
+        .rpc()
         .has_key(public.clone().into(), "aura".to_string())
         .await
         .unwrap());

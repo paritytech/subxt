@@ -17,9 +17,6 @@
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
 use jsonrpsee_ws_client::WsClientBuilder;
-use sp_core::{
-    Bytes,
-};
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
 use std::{
@@ -268,41 +265,6 @@ impl<T: Runtime> Client<T> {
     {
         let extrinsic = self.create_signed(call, signer).await?;
         self.submit_extrinsic(extrinsic).await
-    }
-
-    /// Insert a key into the keystore.
-    pub async fn insert_key(
-        &self,
-        key_type: String,
-        suri: String,
-        public: Bytes,
-    ) -> Result<(), Error> {
-        self.rpc.insert_key(key_type, suri, public).await
-    }
-
-    /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        self.rpc.rotate_keys().await
-    }
-
-    /// Checks if the keystore has private keys for the given session public keys.
-    ///
-    /// `session_keys` is the SCALE encoded session keys object from the runtime.
-    ///
-    /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
-        self.rpc.has_session_keys(session_keys).await
-    }
-
-    /// Checks if the keystore has private keys for the given public key and key type.
-    ///
-    /// Returns `true` if a private key could be found.
-    pub async fn has_key(
-        &self,
-        public_key: Bytes,
-        key_type: String,
-    ) -> Result<bool, Error> {
-        self.rpc.has_key(public_key, key_type).await
     }
 }
 
