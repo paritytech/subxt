@@ -234,7 +234,10 @@ async fn storage_history_depth() -> Result<(), Error> {
 #[async_std::test]
 async fn storage_current_era() -> Result<(), Error> {
     let cxt = test_context().await;
-    let _current_era = cxt.api.storage().staking()
+    let _current_era = cxt
+        .api
+        .storage()
+        .staking()
         .current_era(None)
         .await?
         .expect("current era always exists");
@@ -244,7 +247,12 @@ async fn storage_current_era() -> Result<(), Error> {
 #[async_std::test]
 async fn storage_era_reward_points() -> Result<(), Error> {
     let cxt = test_context().await;
-    let current_era_result = cxt.api.storage().staking().eras_reward_points(0, None).await;
+    let current_era_result = cxt
+        .api
+        .storage()
+        .staking()
+        .eras_reward_points(0, None)
+        .await;
     assert!(current_era_result.is_ok());
 
     Ok(())
