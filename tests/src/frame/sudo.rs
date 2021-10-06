@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use assert_matches::assert_matches;
 use crate::{
-    TestRuntime,
-    test_context,
     node_runtime::{
         runtime_types,
         sudo,
     },
+    test_context,
+    TestRuntime,
 };
-use subxt::extrinsic::PairSigner;
+use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
+use subxt::extrinsic::PairSigner;
 
 // todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;
@@ -42,7 +42,14 @@ async fn test_sudo() {
         value: 10_000,
     });
 
-    let res = cxt.api.tx().sudo().sudo(call).sign_and_submit_then_watch(&alice).await.unwrap();
+    let res = cxt
+        .api
+        .tx()
+        .sudo()
+        .sudo(call)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
     let sudid = res.find_event::<sudo::events::Sudid>();
     assert_matches!(sudid, Ok(Some(_)))
 }
@@ -58,8 +65,14 @@ async fn test_sudo_unchecked_weight() {
         value: 10_000,
     });
 
-    let res = cxt.api.tx().sudo().sudo_unchecked_weight(call, 0)
-        .sign_and_submit_then_watch(&alice).await.unwrap();
+    let res = cxt
+        .api
+        .tx()
+        .sudo()
+        .sudo_unchecked_weight(call, 0)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
 
     let sudid = res.find_event::<sudo::events::Sudid>();
     assert_matches!(sudid, Ok(Some(_)))

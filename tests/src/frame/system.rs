@@ -14,18 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use assert_matches::assert_matches;
 use crate::{
     node_runtime::system,
     test_context,
     TestRuntime,
 };
+use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::{
-    extrinsic::{
-        PairSigner,
-        Signer,
-    },
+use subxt::extrinsic::{
+    PairSigner,
+    Signer,
 };
 
 #[async_std::test]
@@ -33,7 +31,8 @@ async fn storage_account() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
 
     let cxt = test_context().await;
-    let account_info = cxt.api
+    let account_info = cxt
+        .api
         .storage()
         .system()
         .account(alice.account_id().clone().into(), None)
@@ -46,7 +45,12 @@ async fn tx_remark_with_event() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
-    let result = cxt.api.tx().system().remark_with_event(b"remarkable".to_vec()).sign_and_submit_then_watch(&alice)
+    let result = cxt
+        .api
+        .tx()
+        .system()
+        .remark_with_event(b"remarkable".to_vec())
+        .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
 
