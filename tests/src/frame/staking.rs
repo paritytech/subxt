@@ -19,10 +19,7 @@ use codec::{
     Encode,
 };
 
-use assert_matches::assert_matches;
 use crate::{
-    test_context,
-    TestRuntime,
     node_runtime::{
         runtime_types::pallet_staking::{
             ActiveEraInfo,
@@ -33,8 +30,11 @@ use crate::{
             ValidatorPrefs,
         },
         staking,
-    }
+    },
+    test_context,
+    TestRuntime,
 };
+use assert_matches::assert_matches;
 use sp_core::{
     sr25519,
     Pair,
@@ -48,13 +48,13 @@ use std::{
 };
 
 use subxt::{
-    RuntimeError,
     extrinsic::{
         PairSigner,
         Signer,
     },
     Error,
     ExtrinsicSuccess,
+    RuntimeError,
 };
 
 /// Helper function to generate a crypto pair from seed
@@ -64,14 +64,20 @@ fn get_from_seed(seed: &str) -> sr25519::Pair {
 }
 
 fn default_validator_prefs() -> ValidatorPrefs {
-    ValidatorPrefs { commission: sp_runtime::Perbill::default(), blocked: false }
+    ValidatorPrefs {
+        commission: sp_runtime::Perbill::default(),
+        blocked: false,
+    }
 }
 
 #[async_std::test]
 async fn validate_with_controller_account() -> Result<(), Error> {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
-    let announce_validator = cxt.api.tx().staking()
+    let announce_validator = cxt
+        .api
+        .tx()
+        .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice)
         .await;
@@ -87,7 +93,10 @@ async fn validate_with_controller_account() -> Result<(), Error> {
 async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
     let alice_stash = PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
     let cxt = test_context().await;
-    let announce_validator = cxt.api.tx().staking()
+    let announce_validator = cxt
+        .api
+        .tx()
+        .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice_stash)
         .await;
@@ -104,7 +113,10 @@ async fn nominate_with_controller_account() -> Result<(), Error> {
     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    let nomination = cxt.api.tx().staking()
+    let nomination = cxt
+        .api
+        .tx()
+        .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
         .await;
@@ -122,7 +134,10 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
     let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    let nomination = cxt.api.tx().staking()
+    let nomination = cxt
+        .api
+        .tx()
+        .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice_stash)
         .await;
@@ -144,25 +159,46 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     let cxt = test_context().await;
 
     // this will fail the second time, which is why this is one test, not two
-    cxt.api.tx().staking()
+    cxt.api
+        .tx()
+        .staking()
         .nominate(vec![bob_stash.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
         .await;
-    // let ledger = cxt.api.storage().staking().ledger(alice.account_id().clone(), None).await?.unwrap();
-    // assert_eq!(alice_stash.account_id(), &ledger.stash);
-    let chill = cxt.api.tx().staking().chill().sign_and_submit_then_watch(&alice_stash).await;
+
+    let ledger = cxt
+        .api
+        .storage()
+        .staking()
+        .ledger(alice.account_id().clone(), None)
+        .await?
+        .unwrap();
+    assert_eq!(alice_stash.account_id(), &ledger.stash);
+
+    let chill = cxt
+        .api
+        .tx()
+        .staking()
+        .chill()
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
 
     assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
         assert_eq!(module_err.pallet, "Staking");
         assert_eq!(module_err.error, "NotController");
     });
 
-    let result = cxt.api.tx().staking().chill().sign_and_submit_then_watch(&alice).await?;
+    let result = cxt
+        .api
+        .tx()
+        .staking()
+        .chill()
+        .sign_and_submit_then_watch(&alice)
+        .await?;
     let chill = result.find_event::<staking::events::Chilled>()?;
     assert!(chill.is_some());
     Ok(())
 }
-//
 // #[async_std::test]
 // async fn test_bond() -> Result<(), Error> {
 //     env_logger::try_init().ok();

@@ -529,14 +529,22 @@ impl RuntimeGenerator {
         let pallet_name = &pallet.name;
         let storage_name = &storage_entry.name;
         let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
-        let return_ty = match storage_entry.ty {
+        let storage_entry_ty = match storage_entry.ty {
             StorageEntryType::Plain(ref ty) => ty,
             StorageEntryType::Map { ref value, .. } => value,
         };
-        let return_ty_path = type_gen.resolve_type_path(return_ty.id(), &[]);
-        let return_ty = match storage_entry.modifier {
-            StorageEntryModifier::Default => quote!( #return_ty_path ),
-            StorageEntryModifier::Optional => quote!( Option<#return_ty_path> ),
+        let storage_entry_value_ty =
+            type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
+        let (return_ty, fetch) = match storage_entry.modifier {
+            StorageEntryModifier::Default => {
+                (quote!( #storage_entry_value_ty ), quote!(fetch_or_default))
+            }
+            StorageEntryModifier::Optional => {
+                (
+                    quote!( ::core::option::Option<#storage_entry_value_ty> ),
+                    quote!(fetch),
+                )
+            }
         };
 
         let storage_entry_type = quote! {
@@ -545,7 +553,7 @@ impl RuntimeGenerator {
             impl ::subxt::StorageEntry for #entry_struct_ident {
                 const PALLET: &'static str = #pallet_name;
                 const STORAGE: &'static str = #storage_name;
-                type Value = #return_ty;
+                type Value = #storage_entry_value_ty;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     #key_impl
                 }
@@ -562,7 +570,7 @@ impl RuntimeGenerator {
                 hash: ::core::option::Option<T::Hash>,
             ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
                 let entry = #constructor;
-                self.client.storage().fetch_or_default(&entry, hash).await
+                self.client.storage().#fetch(&entry, hash).await
             }
         };
 

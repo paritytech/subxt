@@ -156,6 +156,7 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
         key: StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<V>, Error> {
+        // todo: handle Optional?
         if let Some(data) = self.rpc.storage(&key, hash).await? {
             Ok(Some(Decode::decode(&mut &data.0[..])?))
         } else {
