@@ -164,7 +164,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob_stash.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
-        .await;
+        .await?;
 
     let ledger = cxt
         .api
@@ -199,43 +199,45 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
     assert!(chill.is_some());
     Ok(())
 }
-// #[async_std::test]
-// async fn test_bond() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//
-//     let bond = client
-//         .bond_and_watch(
-//             &alice,
-//             &AccountKeyring::Bob.to_account_id().into(),
-//             100_000_000_000_000,
-//             RewardDestination::Stash,
-//         )
-//         .await;
-//
-//     assert_matches!(bond, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-//         // TOOD: this is unsatisfying – can we do better?
-//         assert_eq!(events.len(), 3);
-//     });
-//
-//     let bond_again = client
-//         .bond_and_watch(
-//             &alice,
-//             &AccountKeyring::Bob.to_account_id().into(),
-//             100_000_000_000,
-//             RewardDestination::Stash,
-//         )
-//         .await;
-//
-//     assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-//         assert_eq!(module_err.module, "Staking");
-//         assert_eq!(module_err.error, "AlreadyBonded");
-//     });
-//
-//     Ok(())
-// }
+
+#[async_std::test]
+async fn bond() -> Result<(), Error> {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let cxt = test_context().await;
+
+    let bond = cxt
+        .api
+        .tx()
+        .staking()
+        .bond(
+            AccountKeyring::Bob.to_account_id().into(),
+            100_000_000_000_000,
+            RewardDestination::Stash,
+        )
+        .sign_and_submit_then_watch(&alice)
+        .await;
+
+    assert!(bond.is_ok());
+
+    let bond_again = cxt
+        .api
+        .tx()
+        .staking()
+        .bond(
+            AccountKeyring::Bob.to_account_id().into(),
+            100_000_000_000_000,
+            RewardDestination::Stash,
+        )
+        .sign_and_submit_then_watch(&alice)
+        .await;
+
+    assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "AlreadyBonded");
+    });
+
+    Ok(())
+}
 //
 // #[async_std::test]
 // async fn test_total_issuance_is_okay() -> Result<(), Error> {
