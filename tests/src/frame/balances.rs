@@ -198,7 +198,7 @@ async fn transfer_subscription() {
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
     let cxt = test_context().await;
-    let sub = cxt.client.subscribe_events().await.unwrap();
+    let sub = cxt.client.rpc().subscribe_events().await.unwrap();
     let decoder = cxt.client.events_decoder();
     let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
     sub.filter_event::<balances::events::Transfer>();

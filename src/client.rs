@@ -16,10 +16,8 @@
 
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_types::Subscription;
 use jsonrpsee_ws_client::WsClientBuilder;
 use sp_core::{
-    storage::StorageKey,
     Bytes,
 };
 pub use sp_runtime::traits::SignedExtension;
@@ -38,21 +36,17 @@ use crate::{
         UncheckedExtrinsic,
     },
     rpc::{
-        ChainBlock,
         ExtrinsicSuccess,
         Rpc,
         RpcClient,
         SystemProperties,
     },
     storage::StorageClient,
-    subscription::EventStorageSubscription,
     AccountData,
-    BlockNumber,
     Call,
     Encoded,
     Error,
     Metadata,
-    ReadProof,
     Runtime,
 };
 
@@ -189,85 +183,8 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Returns the rpc client.
-    pub fn rpc_client(&self) -> &RpcClient {
-        &self.rpc.client
-    }
-
-    /// Get a header
-    pub async fn header<H>(&self, hash: Option<H>) -> Result<Option<T::Header>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let header = self.rpc.header(hash.map(|h| h.into())).await?;
-        Ok(header)
-    }
-
-    /// Get a block hash. By default returns the latest block hash
-    pub async fn block_hash(
-        &self,
-        block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, Error> {
-        let hash = self.rpc.block_hash(block_number).await?;
-        Ok(hash)
-    }
-
-    /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let head = self.rpc.finalized_head().await?;
-        Ok(head)
-    }
-
-    /// Get a block
-    pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let block = self.rpc.block(hash.map(|h| h.into())).await?;
-        Ok(block)
-    }
-
-    /// Get proof of storage entries at a specific block's state.
-    pub async fn read_proof<H>(
-        &self,
-        keys: Vec<StorageKey>,
-        hash: Option<H>,
-    ) -> Result<ReadProof<T::Hash>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let proof = self.rpc.read_proof(keys, hash.map(|h| h.into())).await?;
-        Ok(proof)
-    }
-
-    /// Subscribe to events.
-    ///
-    /// *WARNING* these may not be included in the finalized chain, use
-    /// `subscribe_finalized_events` to ensure events are finalized.
-    pub async fn subscribe_events(&self) -> Result<EventStorageSubscription<T>, Error> {
-        let events = self.rpc.subscribe_events().await?;
-        Ok(events)
-    }
-
-    /// Subscribe to finalized events.
-    pub async fn subscribe_finalized_events(
-        &self,
-    ) -> Result<EventStorageSubscription<T>, Error> {
-        let events = self.rpc.subscribe_finalized_events().await?;
-        Ok(events)
-    }
-
-    /// Subscribe to new blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
-        let headers = self.rpc.subscribe_blocks().await?;
-        Ok(headers)
-    }
-
-    /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
-        let headers = self.rpc.subscribe_finalized_blocks().await?;
-        Ok(headers)
+    pub fn rpc(&self) -> &Rpc<T> {
+        &self.rpc
     }
 
     /// Create a client for accessing runtime storage

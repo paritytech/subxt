@@ -48,23 +48,24 @@ async fn insert_key() {
 #[async_std::test]
 async fn fetch_block_hash() {
     let node_process = test_node_process().await;
-    node_process.client().block_hash(None).await.unwrap();
+    node_process.client().rpc().block_hash(None).await.unwrap();
 }
 
 #[async_std::test]
 async fn fetch_block() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    let block_hash = client.block_hash(None).await.unwrap();
-    client.block(block_hash).await.unwrap();
+    let block_hash = client.rpc().block_hash(None).await.unwrap();
+    client.rpc().block(block_hash).await.unwrap();
 }
 
 #[async_std::test]
 async fn fetch_read_proof() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    let block_hash = client.block_hash(None).await.unwrap();
+    let block_hash = client.rpc().block_hash(None).await.unwrap();
     client
+        .rpc()
         .read_proof(
             vec![
                 StorageKey(well_known_keys::HEAP_PAGES.to_vec()),
@@ -80,7 +81,7 @@ async fn fetch_read_proof() {
 async fn chain_subscribe_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    let mut blocks = client.subscribe_blocks().await.unwrap();
+    let mut blocks = client.rpc().subscribe_blocks().await.unwrap();
     blocks.next().await.unwrap();
 }
 
@@ -88,7 +89,7 @@ async fn chain_subscribe_blocks() {
 async fn chain_subscribe_finalized_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    let mut blocks = client.subscribe_finalized_blocks().await.unwrap();
+    let mut blocks = client.rpc().subscribe_finalized_blocks().await.unwrap();
     blocks.next().await.unwrap();
 }
 
