@@ -14,19 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Decode,
-    Encode,
-};
-
 use crate::{
     node_runtime::{
         runtime_types::pallet_staking::{
-            ActiveEraInfo,
-            Exposure,
-            Nominations,
             RewardDestination,
-            StakingLedger,
             ValidatorPrefs,
         },
         staking,
@@ -40,13 +31,6 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-
-use std::{
-    collections::BTreeMap,
-    fmt::Debug,
-    marker::PhantomData,
-};
-
 use subxt::{
     extrinsic::{
         PairSigner,
@@ -201,7 +185,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 }
 
 #[async_std::test]
-async fn bond() -> Result<(), Error> {
+async fn tx_bond() -> Result<(), Error> {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
@@ -238,52 +222,30 @@ async fn bond() -> Result<(), Error> {
 
     Ok(())
 }
-//
-// #[async_std::test]
-// async fn test_total_issuance_is_okay() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let total_issuance = client.total_issuance(None).await?;
-//     assert!(total_issuance > 1u128 << 32);
-//     Ok(())
-// }
-//
-// #[async_std::test]
-// async fn test_history_depth_is_okay() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let history_depth = client.history_depth(None).await?;
-//     assert_eq!(history_depth, 84);
-//     Ok(())
-// }
-//
-// #[async_std::test]
-// async fn test_current_era_is_okay() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let _current_era = client
-//         .current_era(None)
-//         .await?
-//         .expect("current era always exists");
-//     Ok(())
-// }
-//
-// #[async_std::test]
-// async fn test_era_reward_points_is_okay() -> Result<(), Error> {
-//     env_logger::try_init().ok();
-//     let test_node_proc = test_node_process().await;
-//     let client = test_node_proc.client();
-//     let store = ErasRewardPointsStore {
-//         _phantom: PhantomData,
-//         index: 0,
-//     };
-//
-//     let current_era_result = client.fetch(&store, None).await?;
-//
-//     assert_matches!(current_era_result, Some(_));
-//
-//     Ok(())
-// }
+
+#[async_std::test]
+async fn storage_history_depth() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let history_depth = cxt.api.storage().staking().history_depth(None).await?;
+    assert_eq!(history_depth, 84);
+    Ok(())
+}
+
+#[async_std::test]
+async fn storage_current_era() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let _current_era = cxt.api.storage().staking()
+        .current_era(None)
+        .await?
+        .expect("current era always exists");
+    Ok(())
+}
+
+#[async_std::test]
+async fn storage_era_reward_points() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let current_era_result = cxt.api.storage().staking().eras_reward_points(0, None).await;
+    assert!(current_era_result.is_ok());
+
+    Ok(())
+}
