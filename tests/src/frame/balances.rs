@@ -14,8 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the pallet_balances module.
-
 use crate::{
     node_runtime::{
         balances,
