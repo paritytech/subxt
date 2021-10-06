@@ -304,8 +304,14 @@ impl RuntimeGenerator {
                                 let meta = attr.parse_meta().unwrap_or_else(|e| {
                                     abort!(attr.span(), "Error parsing attribute: {}", e)
                                 });
-                                let substitute_type_args =
-                                    Subxt::from_meta(&meta).unwrap(); // todo
+                                let substitute_type_args = Subxt::from_meta(&meta)
+                                    .unwrap_or_else(|e| {
+                                        abort!(
+                                            attr.span(),
+                                            "Error parsing attribute meta: {}",
+                                            e
+                                        )
+                                    });
                                 substitute_type_args
                             })
                             .collect::<Vec<_>>();
