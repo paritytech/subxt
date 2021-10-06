@@ -235,24 +235,6 @@ impl<T: Runtime> Client<T> {
         &self.events_decoder
     }
 
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic(
-        &self,
-        extrinsic: UncheckedExtrinsic<T>,
-    ) -> Result<T::Hash, Error> {
-        self.rpc.submit_extrinsic(extrinsic).await
-    }
-
-    /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic(
-        &self,
-        extrinsic: UncheckedExtrinsic<T>,
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
-        self.rpc
-            .submit_and_watch_extrinsic(extrinsic, &self.events_decoder)
-            .await
-    }
-
     /// Submits a transaction to the chain.
     pub async fn submit<C: Call + Send + Sync>(
         &self,
@@ -264,7 +246,7 @@ impl<T: Runtime> Client<T> {
             Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
-        self.submit_extrinsic(extrinsic).await
+        self.rpc().submit_extrinsic(extrinsic).await
     }
 }
 
@@ -295,7 +277,7 @@ where
             Send + Sync,
     {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
-        self.client.submit_and_watch_extrinsic(extrinsic).await
+        self.client.rpc().submit_and_watch_extrinsic(extrinsic, self.client.events_decoder()).await
     }
 
     /// Submits a transaction to the chain.
@@ -308,6 +290,6 @@ where
             Send + Sync,
     {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
-        self.client.submit_extrinsic(extrinsic).await
+        self.client.rpc().submit_extrinsic(extrinsic).await
     }
 }
