@@ -287,7 +287,10 @@ where
             Send + Sync,
     {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
-        self.client.rpc().submit_and_watch_extrinsic(extrinsic, self.client.events_decoder()).await
+        self.client
+            .rpc()
+            .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
+            .await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.
