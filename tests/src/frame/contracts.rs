@@ -57,7 +57,7 @@ impl ContractsTestContext {
     }
 
     fn client(&self) -> &Client<TestRuntime> {
-        &self.cxt.client
+        &self.cxt.client()
     }
 
     fn contracts_tx(&self) -> TransactionApi<TestRuntime> {

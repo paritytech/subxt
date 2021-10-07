@@ -189,6 +189,14 @@ impl<T: Runtime> Client<T> {
         StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
+    /// Convert the client to a runtime api wrapper for custom runtime access.
+    ///
+    /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
+    /// to the target runtime.
+    pub fn to_runtime_api<R: From<Self>>(self) -> R {
+        self.into()
+    }
+
     /// Creates a signed extrinsic.
     pub async fn create_signed<C: Call + Send + Sync>(
         &self,

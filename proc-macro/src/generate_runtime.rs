@@ -249,16 +249,18 @@ impl RuntimeGenerator {
                     pub client: ::subxt::Client<T>,
                 }
 
-                impl<T: ::subxt::Runtime> RuntimeApi<T> {
-                    pub fn new(client: ::subxt::Client<T>) -> Self {
+                impl<T: ::subxt::Runtime> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T> {
+                    fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client }
                     }
+                }
 
-                    pub fn storage<'a>(&'a self) -> StorageApi<'a, T> {
+                impl<'a, T: ::subxt::Runtime> RuntimeApi<T> {
+                    pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
 
-                    pub fn tx<'a>(&'a self) -> TransactionApi<'a, T> {
+                    pub fn tx(&'a self) -> TransactionApi<'a, T> {
                         TransactionApi { client: &self.client }
                     }
                 }
