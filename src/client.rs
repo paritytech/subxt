@@ -266,8 +266,10 @@ where
         Self { client, call }
     }
 
-    /// Create and submit an extrinsic and return corresponding Event if successful
-    /// todo: [AJ] could do a type builder interface like `xt.sign(&signer).watch_events().submit()`
+    /// Creates and signs an extrinsic and submits to the chain.
+    ///
+    /// Returns when the extrinsic has successfully been included in the block, together with any
+    /// events which were triggered by the extrinsic.
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
@@ -280,7 +282,14 @@ where
         self.client.rpc().submit_and_watch_extrinsic(extrinsic, self.client.events_decoder()).await
     }
 
-    /// Submits a transaction to the chain.
+    /// Creates and signs an extrinsic and submits to the chain for block inclusion.
+    ///
+    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
