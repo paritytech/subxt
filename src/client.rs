@@ -211,7 +211,7 @@ impl<T: Runtime> Client<T> {
             nonce
         } else {
             let account_storage_entry =
-                <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
+                <T::AccountData as AccountData<T>>::from(signer.account_id().clone());
             let account_data = self
                 .storage()
                 .fetch_or_default(&account_storage_entry, None)

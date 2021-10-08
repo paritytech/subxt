@@ -180,10 +180,7 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
 }
 
 /// Trait to fetch data about an account.
-pub trait AccountData<T: Runtime>: StorageEntry {
-    /// Construct a storage entry type with the account id for the key.
-    fn new(account_id: T::AccountId) -> Self;
-
+pub trait AccountData<T: Runtime>: StorageEntry + From<T::AccountId> {
     /// Get the nonce from the storage entry value.
     fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
 }

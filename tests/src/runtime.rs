@@ -53,11 +53,13 @@ impl Runtime for TestRuntime {
     type AccountData = node_runtime::system::storage::Account;
 }
 
-impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
-    fn new(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
-        Self(account_id)
+impl From<node_runtime::system::storage::Account> for node_runtime::system::storage::Account {
+    fn from(account: node_runtime::system::storage::Account) -> Self {
+        Self(account)
     }
+}
 
+impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
     fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
         result.nonce
     }
