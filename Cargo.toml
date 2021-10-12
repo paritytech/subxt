@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "proc-macro", "tests"]
+members = [".", "macro", "tests"]
 
 [package]
 name = "substrate-subxt"
@@ -40,7 +40,7 @@ serde_json = "1.0.64"
 thiserror = "1.0.24"
 url = "2.2.1"
 
-subxt-proc-macro = { version = "0.1.0", path = "proc-macro" }
+subxt-macro = { version = "0.1.0", path = "macro" }
 
 sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
 sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "master" }

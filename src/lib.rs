@@ -42,7 +42,7 @@
 
 pub use sp_core;
 pub use sp_runtime;
-pub use subxt_proc_macro::subxt;
+pub use subxt_macro::subxt;
 
 use codec::{
     Codec,
