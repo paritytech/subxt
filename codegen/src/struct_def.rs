@@ -14,8 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    types::{TypePath, TypeGenerator},
+use crate::types::{
+    TypeGenerator,
+    TypePath,
 };
 use heck::CamelCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -30,6 +31,7 @@ use scale_info::form::PortableForm;
 pub struct StructDef {
     pub name: syn::Ident,
     pub fields: StructDefFields,
+    pub field_visibility: Option<syn::Visibility>,
 }
 
 #[derive(Debug)]
@@ -39,13 +41,14 @@ pub enum StructDefFields {
 }
 
 impl StructDef {
-    pub fn from_variant(
-        variant: &scale_info::Variant<PortableForm>,
+    pub fn new(
+        ident: &str,
+        fields: &[scale_info::Field<PortableForm>],
+        field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
     ) -> Self {
-        let name = format_ident!("{}", variant.name().to_camel_case());
-        let variant_fields = variant
-            .fields()
+        let name = format_ident!("{}", ident.to_camel_case());
+        let fields = fields
             .iter()
             .map(|field| {
                 let name = field.name().map(|f| format_ident!("{}", f));
@@ -54,12 +57,12 @@ impl StructDef {
             })
             .collect::<Vec<_>>();
 
-        let named = variant_fields.iter().all(|(name, _)| name.is_some());
-        let unnamed = variant_fields.iter().all(|(name, _)| name.is_none());
+        let named = fields.iter().all(|(name, _)| name.is_some());
+        let unnamed = fields.iter().all(|(name, _)| name.is_none());
 
         let fields = if named {
             StructDefFields::Named(
-                variant_fields
+                fields
                     .iter()
                     .map(|(name, field)| {
                         let name = name.as_ref().unwrap_or_else(|| {
@@ -71,19 +74,20 @@ impl StructDef {
             )
         } else if unnamed {
             StructDefFields::Unnamed(
-                variant_fields
-                    .iter()
-                    .map(|(_, field)| field.clone())
-                    .collect(),
+                fields.iter().map(|(_, field)| field.clone()).collect(),
             )
         } else {
             abort_call_site!(
-                "Variant '{}': Fields should either be all named or all unnamed.",
-                variant.name()
+                "Struct '{}': Fields should either be all named or all unnamed.",
+                name,
             )
         };
 
-        Self { name, fields }
+        Self {
+            name,
+            fields,
+            field_visibility,
+        }
     }
 
     pub fn named_fields(&self) -> Option<&[(syn::Ident, TypePath)]> {
@@ -97,12 +101,13 @@ impl StructDef {
 
 impl quote::ToTokens for StructDef {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
+        let visibility = &self.field_visibility;
         tokens.extend(match self.fields {
             StructDefFields::Named(ref named_fields) => {
                 let fields = named_fields.iter().map(|(name, ty)| {
                     let compact_attr =
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
-                    quote! { #compact_attr pub #name: #ty }
+                    quote! { #compact_attr #visibility #name: #ty }
                 });
                 let name = &self.name;
                 quote! {
@@ -116,7 +121,7 @@ impl quote::ToTokens for StructDef {
                 let fields = unnamed_fields.iter().map(|ty| {
                     let compact_attr =
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
-                    quote! { #compact_attr pub #ty }
+                    quote! { #compact_attr #visibility #ty }
                 });
                 let name = &self.name;
                 quote! {

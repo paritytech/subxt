@@ -427,7 +427,14 @@ impl RuntimeGenerator {
             variant
                 .variants()
                 .iter()
-                .map(|var| StructDef::from_variant(var, type_gen))
+                .map(|var| {
+                    StructDef::new(
+                        var.name(),
+                        var.fields(),
+                        Some(syn::parse_quote!(pub)),
+                        type_gen,
+                    )
+                })
                 .collect()
         } else {
             abort_call_site!(
@@ -582,5 +589,3 @@ impl RuntimeGenerator {
         (storage_entry_type, client_fn)
     }
 }
-
-
