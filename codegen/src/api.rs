@@ -36,11 +36,11 @@ use heck::{
     CamelCase as _,
     SnakeCase as _,
 };
+use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::{
     abort,
     abort_call_site,
 };
-use proc_macro2::TokenStream as TokenStream2;
 use quote::{
     format_ident,
     quote,
