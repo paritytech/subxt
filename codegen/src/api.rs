@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    TokenStream2,
+use crate::types::{
     TypeGenerator,
     TypePath,
 };
@@ -41,6 +40,7 @@ use proc_macro_error::{
     abort,
     abort_call_site,
 };
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{
     format_ident,
     quote,
