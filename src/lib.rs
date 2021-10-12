@@ -42,7 +42,7 @@
 
 pub use sp_core;
 pub use sp_runtime;
-pub use subxt_proc_macro::subxt;
+pub use subxt_macro::subxt;
 
 use codec::{
     Codec,
@@ -58,7 +58,7 @@ mod error;
 mod events;
 pub mod extrinsic;
 mod metadata;
-mod rpc;
+pub mod rpc;
 pub mod storage;
 mod subscription;
 
@@ -70,7 +70,7 @@ pub use crate::{
     },
     error::{
         Error,
-        ModuleError,
+        PalletError,
         RuntimeError,
     },
     events::{
@@ -180,10 +180,7 @@ pub trait Runtime: Clone + Sized + Send + Sync + 'static {
 }
 
 /// Trait to fetch data about an account.
-pub trait AccountData<T: Runtime>: StorageEntry {
-    /// Construct a storage entry type with the account id for the key.
-    fn new(account_id: T::AccountId) -> Self;
-
+pub trait AccountData<T: Runtime>: StorageEntry + From<T::AccountId> {
     /// Get the nonce from the storage entry value.
     fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
 }
@@ -194,6 +191,11 @@ pub trait Call: Encode {
     const PALLET: &'static str;
     /// Function name.
     const FUNCTION: &'static str;
+
+    /// Returns true if the given pallet and function names match this call.
+    fn is_call(pallet: &str, function: &str) -> bool {
+        Self::PALLET == pallet && Self::FUNCTION == function
+    }
 }
 
 /// Event trait.
@@ -202,6 +204,11 @@ pub trait Event: Decode {
     const PALLET: &'static str;
     /// Event name.
     const EVENT: &'static str;
+
+    /// Returns true if the given pallet and event names match this event.
+    fn is_event(pallet: &str, event: &str) -> bool {
+        Self::PALLET == pallet && Self::EVENT == event
+    }
 }
 
 /// A phase of a block's execution.

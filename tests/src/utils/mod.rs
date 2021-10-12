@@ -14,10 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Test interactions with some built-in FRAME pallets.
+mod context;
+mod node_proc;
 
-mod balances;
-mod contracts;
-mod staking;
-mod sudo;
-mod system;
+pub use context::*;
+pub use node_proc::TestNodeProcess;

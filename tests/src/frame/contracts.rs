@@ -14,13 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the pallet_contracts module.
-
-use codec::{
-    Decode,
-    Encode,
-};
-
 use sp_keyring::AccountKeyring;
 
 use crate::{
@@ -31,17 +24,21 @@ use crate::{
             storage,
         },
         system,
-        RuntimeApi,
     },
     test_context,
-    Runtime,
     TestContext,
-    TestNodeProcess,
     TestRuntime,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
-use subxt::{Client, Error, ExtrinsicSuccess, PairSigner, StorageEntryKey, StorageEntry};
+use subxt::{
+    Client,
+    Error,
+    ExtrinsicSuccess,
+    PairSigner,
+    Runtime,
+    StorageEntry,
+};
 
 struct ContractsTestContext {
     cxt: TestContext,
@@ -49,29 +46,22 @@ struct ContractsTestContext {
 }
 
 type Hash = <TestRuntime as Runtime>::Hash;
-type Address = <TestRuntime as Runtime>::Address;
 type AccountId = <TestRuntime as Runtime>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        env_logger::try_init().ok();
-
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
         Self { cxt, signer }
     }
 
-    fn api(&self) -> &RuntimeApi<TestRuntime> {
-        &self.cxt.api
-    }
-
     fn client(&self) -> &Client<TestRuntime> {
-        &self.cxt.client
+        &self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> &TransactionApi<TestRuntime> {
-        &self.cxt.api.tx.contracts
+    fn contracts_tx(&self) -> TransactionApi<TestRuntime> {
+        self.cxt.api.tx().contracts()
     }
 
     async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
@@ -84,14 +74,21 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let extrinsic = self.contracts_tx().instantiate_with_code(
-            100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
-            code,
-            vec![], // data
-            vec![], // salt
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .cxt
+            .api
+            .tx()
+            .contracts()
+            .instantiate_with_code(
+                100_000_000_000_000_000, // endowment
+                500_000_000_000,         // gas_limit
+                code,
+                vec![], // data
+                vec![], // salt
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
+
         let code_stored = result
             .find_event::<events::CodeStored>()?
             .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
@@ -105,9 +102,9 @@ impl ContractsTestContext {
             })?;
 
         log::info!("  Block hash: {:?}", result.block);
-        log::info!("  Code hash: {:?}", code_stored.0);
-        log::info!("  Contract address: {:?}", instantiated.1);
-        Ok((code_stored.0, instantiated.1))
+        log::info!("  Code hash: {:?}", code_stored.code_hash);
+        log::info!("  Contract address: {:?}", instantiated.contract);
+        Ok((code_stored.code_hash, instantiated.contract))
     }
 
     async fn instantiate(
@@ -117,21 +114,24 @@ impl ContractsTestContext {
         salt: Vec<u8>,
     ) -> Result<AccountId, Error> {
         // call instantiate extrinsic
-        let extrinsic = self.contracts_tx().instantiate(
-            100_000_000_000_000_000, // endowment
-            500_000_000_000,         // gas_limit
-            code_hash,
-            data,
-            salt,
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .contracts_tx()
+            .instantiate(
+                100_000_000_000_000_000, // endowment
+                500_000_000_000,         // gas_limit
+                code_hash,
+                data,
+                salt,
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
 
         log::info!("Instantiate result: {:?}", result);
         let instantiated = result
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
-        Ok(instantiated.0)
+        Ok(instantiated.contract)
     }
 
     async fn call(
@@ -140,13 +140,17 @@ impl ContractsTestContext {
         input_data: Vec<u8>,
     ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
         log::info!("call: {:?}", contract);
-        let extrinsic = self.contracts_tx().call(
-            MultiAddress::Id(contract),
-            0,           // value
-            500_000_000, // gas_limit
-            input_data,
-        );
-        let result = extrinsic.sign_and_submit_then_watch(&self.signer).await?;
+        let result = self
+            .contracts_tx()
+            .call(
+                MultiAddress::Id(contract),
+                0,           // value
+                500_000_000, // gas_limit
+                input_data,
+            )
+            .sign_and_submit_then_watch(&self.signer)
+            .await?;
+
         log::info!("Call result: {:?}", result);
         Ok(result)
     }
@@ -192,14 +196,22 @@ async fn tx_call() {
     // assert!(contract_info.is_ok());
 
     let contract_info_of = storage::ContractInfoOf(contract.clone());
-    let storage_entry_key = <storage::ContractInfoOf as StorageEntry>::key(&contract_info_of);
+    let storage_entry_key =
+        <storage::ContractInfoOf as StorageEntry>::key(&contract_info_of);
     let final_key = storage_entry_key.final_key::<storage::ContractInfoOf>();
     println!("contract_info_key key {:?}", hex::encode(&final_key.0));
 
-    let res = ctx.client().storage().fetch_raw(final_key, None).await.unwrap();
+    let res = ctx
+        .client()
+        .storage()
+        .fetch_raw(final_key, None)
+        .await
+        .unwrap();
     println!("Result {:?}", res);
 
-    let keys = ctx.client().storage()
+    let keys = ctx
+        .client()
+        .storage()
         .fetch_keys::<storage::ContractInfoOf>(5, None, None)
         .await
         .unwrap()

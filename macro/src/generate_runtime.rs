@@ -106,7 +106,7 @@ impl RuntimeGenerator {
     pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
         let type_substitutes = Self::parse_type_substitutes(&item_mod);
         let type_gen =
-            TypeGenerator::new(&self.metadata.types, "__types", type_substitutes);
+            TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
@@ -122,22 +122,19 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
-                let (call_structs, call_fns) = self.generate_calls(&type_gen, pallet, calls);
+                let (call_structs, call_fns) =
+                    self.generate_calls(&type_gen, pallet, calls);
                 quote! {
                     pub mod calls {
                         use super::#types_mod_ident;
                         #( #call_structs )*
 
-                        pub struct TransactionApi<T: ::subxt::Runtime> {
-                            client: ::std::sync::Arc<::subxt::Client<T>>,
+                        pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                            client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<T: ::subxt::Runtime> TransactionApi<T>
-                        where
-                            <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
-                                Send + Sync
-                        {
-                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
+                        impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
+                            pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
 
@@ -163,7 +160,8 @@ impl RuntimeGenerator {
                 quote!()
             };
 
-            let (storage_structs, storage_fns) = if let Some(ref storage) = pallet.storage {
+            let (storage_structs, storage_fns) = if let Some(ref storage) = pallet.storage
+            {
                 let (storage_structs, storage_fns) = storage
                     .entries
                     .iter()
@@ -176,25 +174,24 @@ impl RuntimeGenerator {
                 (Vec::new(), Vec::new())
             };
 
-            let storage_mod =
-                quote! {
-                    pub mod storage {
-                        use super::#types_mod_ident;
-                        #( #storage_structs )*
+            let storage_mod = quote! {
+                pub mod storage {
+                    use super::#types_mod_ident;
+                    #( #storage_structs )*
 
-                        pub struct StorageApi<T: ::subxt::Runtime> {
-                            client: ::std::sync::Arc<::subxt::Client<T>>,
-                        }
-
-                        impl<T: ::subxt::Runtime> StorageApi<T> {
-                            pub fn new(client: ::std::sync::Arc<::subxt::Client<T>>) -> Self {
-                                Self { client }
-                            }
-
-                            #( #storage_fns )*
-                        }
+                    pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                        client: &'a ::subxt::Client<T>,
                     }
-                };
+
+                    impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                        pub fn new(client: &'a ::subxt::Client<T>) -> Self {
+                            Self { client }
+                        }
+
+                        #( #storage_fns )*
+                    }
+                }
+            };
 
             quote! {
                 pub mod #mod_name {
@@ -228,27 +225,19 @@ impl RuntimeGenerator {
 
         // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod.ident;
-        let (pallet_storage_cli_fields, pallet_storage_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names.iter().filter_map(|(pallet, pallet_mod_name)| {
-            if pallet.storage.is_some() {
-                let pallet_storage_cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::storage::StorageApi<T> );
-                let pallet_storage_cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::storage::StorageApi::new(client.clone()) );
-                Some((pallet_storage_cli_field, pallet_storage_cli_field_init))
-            } else {
-                None
-            }
-        }).unzip();
-        let (pallet_calls_cli_fields, pallet_calls_cli_fields_init): (Vec<_>, Vec<_>) = pallets_with_mod_names
-            .iter()
-            .filter_map(|(pallet, pallet_mod_name)| {
-                if pallet.calls.is_some() {
-                    let cli_field = quote!( pub #pallet_mod_name: #pallet_mod_name::calls::TransactionApi<T> );
-                    let cli_field_init = quote!( #pallet_mod_name: #pallet_mod_name::calls::TransactionApi::new(client.clone()) );
-                    Some((cli_field, cli_field_init))
-                } else {
-                    None
-                }
-            })
-            .unzip();
+        let pallets_with_storage =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    pallet.storage.as_ref().map(|_| pallet_mod_name)
+                });
+        let pallets_with_calls =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    pallet.calls.as_ref().map(|_| pallet_mod_name)
+                });
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -257,40 +246,47 @@ impl RuntimeGenerator {
                 #types_mod
 
                 pub struct RuntimeApi<T: ::subxt::Runtime> {
-                    pub client: ::std::sync::Arc<::subxt::Client<T>>,
-                    pub storage: StorageApi<T>,
-                    pub tx: TransactionApi<T>,
+                    pub client: ::subxt::Client<T>,
                 }
 
-                impl<T: ::subxt::Runtime> RuntimeApi<T>
-                where
-                    <<T::Extra as ::subxt::SignedExtra<T>>::Extra as ::subxt::sp_runtime::traits::SignedExtension>::AdditionalSigned:
-                        Send + Sync
-                {
-                    pub fn new(client: ::subxt::Client<T>) -> Self {
-                        let client = ::std::sync::Arc::new(client);
-                        Self {
-                            client: client.clone(),
-                            storage: StorageApi {
-                                client: client.clone(),
-                                #( #pallet_storage_cli_fields_init, )*
-                            },
-                            tx: TransactionApi {
-                                client: client.clone(),
-                                #( #pallet_calls_cli_fields_init, )*
-                            }
-                        }
+                impl<T: ::subxt::Runtime> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T> {
+                    fn from(client: ::subxt::Client<T>) -> Self {
+                        Self { client }
                     }
                 }
 
-                pub struct StorageApi<T: ::subxt::Runtime> {
-                    client: ::std::sync::Arc<::subxt::Client<T>>,
-                    #( #pallet_storage_cli_fields, )*
+                impl<'a, T: ::subxt::Runtime> RuntimeApi<T> {
+                    pub fn storage(&'a self) -> StorageApi<'a, T> {
+                        StorageApi { client: &self.client }
+                    }
+
+                    pub fn tx(&'a self) -> TransactionApi<'a, T> {
+                        TransactionApi { client: &self.client }
+                    }
                 }
 
-                pub struct TransactionApi<T: ::subxt::Runtime> {
-                    client: ::std::sync::Arc<::subxt::Client<T>>,
-                    #( #pallet_calls_cli_fields, )*
+                pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                    #(
+                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
+                            #pallets_with_storage::storage::StorageApi::new(self.client)
+                        }
+                    )*
+                }
+
+                pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
+                    #(
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T> {
+                            #pallets_with_calls::calls::TransactionApi::new(self.client)
+                        }
+                    )*
                 }
             }
         }
@@ -310,8 +306,14 @@ impl RuntimeGenerator {
                                 let meta = attr.parse_meta().unwrap_or_else(|e| {
                                     abort!(attr.span(), "Error parsing attribute: {}", e)
                                 });
-                                let substitute_type_args =
-                                    Subxt::from_meta(&meta).unwrap(); // todo
+                                let substitute_type_args = Subxt::from_meta(&meta)
+                                    .unwrap_or_else(|e| {
+                                        abort!(
+                                            attr.span(),
+                                            "Error parsing attribute meta: {}",
+                                            e
+                                        )
+                                    });
                                 substitute_type_args
                             })
                             .collect::<Vec<_>>();
@@ -379,7 +381,7 @@ impl RuntimeGenerator {
                         #( #call_fn_args, )*
                     ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
                         let call = #call_struct_name { #( #call_args, )* };
-                        ::subxt::SubmittableExtrinsic::new(self.client.clone(), call)
+                        ::subxt::SubmittableExtrinsic::new(self.client, call)
                     }
                 };
                 (call_struct, client_fn)
@@ -535,14 +537,22 @@ impl RuntimeGenerator {
         let pallet_name = &pallet.name;
         let storage_name = &storage_entry.name;
         let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
-        let return_ty = match storage_entry.ty {
+        let storage_entry_ty = match storage_entry.ty {
             StorageEntryType::Plain(ref ty) => ty,
             StorageEntryType::Map { ref value, .. } => value,
         };
-        let return_ty_path = type_gen.resolve_type_path(return_ty.id(), &[]);
-        let return_ty = match storage_entry.modifier {
-            StorageEntryModifier::Default => quote!( #return_ty_path ),
-            StorageEntryModifier::Optional => quote!( Option<#return_ty_path> ),
+        let storage_entry_value_ty =
+            type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
+        let (return_ty, fetch) = match storage_entry.modifier {
+            StorageEntryModifier::Default => {
+                (quote!( #storage_entry_value_ty ), quote!(fetch_or_default))
+            }
+            StorageEntryModifier::Optional => {
+                (
+                    quote!( ::core::option::Option<#storage_entry_value_ty> ),
+                    quote!(fetch),
+                )
+            }
         };
 
         let storage_entry_type = quote! {
@@ -551,7 +561,7 @@ impl RuntimeGenerator {
             impl ::subxt::StorageEntry for #entry_struct_ident {
                 const PALLET: &'static str = #pallet_name;
                 const STORAGE: &'static str = #storage_name;
-                type Value = #return_ty;
+                type Value = #storage_entry_value_ty;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     #key_impl
                 }
@@ -568,7 +578,7 @@ impl RuntimeGenerator {
                 hash: ::core::option::Option<T::Hash>,
             ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
                 let entry = #constructor;
-                self.client.storage().fetch_or_default(&entry, hash).await
+                self.client.storage().#fetch(&entry, hash).await
             }
         };
 

@@ -93,7 +93,7 @@ impl From<String> for Error {
 pub enum RuntimeError {
     /// Module error.
     #[error("Runtime module error: {0}")]
-    Module(ModuleError),
+    Module(PalletError),
     /// At least one consumer is remaining so the account cannot be destroyed.
     #[error("At least one consumer is remaining so the account cannot be destroyed.")]
     ConsumerRemaining,
@@ -124,7 +124,7 @@ impl RuntimeError {
                 message: _,
             } => {
                 let error = metadata.error(index, error)?;
-                Ok(Self::Module(ModuleError {
+                Ok(Self::Module(PalletError {
                     pallet: error.pallet().to_string(),
                     error: error.error().to_string(),
                     description: error.description().to_vec(),
@@ -146,7 +146,7 @@ impl RuntimeError {
 /// Module error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 #[error("{error} from {pallet}")]
-pub struct ModuleError {
+pub struct PalletError {
     /// The module where the error originated.
     pub pallet: String,
     /// The actual error code.

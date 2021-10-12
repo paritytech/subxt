@@ -14,18 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::Decode;
 use futures::future;
 use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_types::Subscription;
 use jsonrpsee_ws_client::WsClientBuilder;
-use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageKey,
-    },
-    Bytes,
-};
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
 use std::{
@@ -42,21 +33,17 @@ use crate::{
         UncheckedExtrinsic,
     },
     rpc::{
-        ChainBlock,
         ExtrinsicSuccess,
         Rpc,
         RpcClient,
         SystemProperties,
     },
-    storage::{StorageEntry, StorageClient},
-    subscription::EventStorageSubscription,
+    storage::StorageClient,
     AccountData,
-    BlockNumber,
     Call,
     Encoded,
     Error,
     Metadata,
-    ReadProof,
     Runtime,
 };
 
@@ -144,7 +131,7 @@ impl ClientBuilder {
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             _marker: PhantomData,
-            page_size: self.page_size.unwrap_or(10),
+            iter_page_size: self.page_size.unwrap_or(10),
         })
     }
 }
@@ -158,7 +145,7 @@ pub struct Client<T: Runtime> {
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
-    page_size: u32,
+    iter_page_size: u32,
 }
 
 impl<T: Runtime> Clone for Client<T> {
@@ -171,7 +158,7 @@ impl<T: Runtime> Clone for Client<T> {
             properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
             _marker: PhantomData,
-            page_size: self.page_size,
+            iter_page_size: self.iter_page_size,
         }
     }
 }
@@ -193,90 +180,21 @@ impl<T: Runtime> Client<T> {
     }
 
     /// Returns the rpc client.
-    pub fn rpc_client(&self) -> &RpcClient {
-        &self.rpc.client
-    }
-
-    /// Get a header
-    pub async fn header<H>(&self, hash: Option<H>) -> Result<Option<T::Header>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let header = self.rpc.header(hash.map(|h| h.into())).await?;
-        Ok(header)
-    }
-
-    /// Get a block hash. By default returns the latest block hash
-    pub async fn block_hash(
-        &self,
-        block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, Error> {
-        let hash = self.rpc.block_hash(block_number).await?;
-        Ok(hash)
-    }
-
-    /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
-        let head = self.rpc.finalized_head().await?;
-        Ok(head)
-    }
-
-    /// Get a block
-    pub async fn block<H>(&self, hash: Option<H>) -> Result<Option<ChainBlock<T>>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let block = self.rpc.block(hash.map(|h| h.into())).await?;
-        Ok(block)
-    }
-
-    /// Get proof of storage entries at a specific block's state.
-    pub async fn read_proof<H>(
-        &self,
-        keys: Vec<StorageKey>,
-        hash: Option<H>,
-    ) -> Result<ReadProof<T::Hash>, Error>
-    where
-        H: Into<T::Hash> + 'static,
-    {
-        let proof = self.rpc.read_proof(keys, hash.map(|h| h.into())).await?;
-        Ok(proof)
-    }
-
-    /// Subscribe to events.
-    ///
-    /// *WARNING* these may not be included in the finalized chain, use
-    /// `subscribe_finalized_events` to ensure events are finalized.
-    pub async fn subscribe_events(&self) -> Result<EventStorageSubscription<T>, Error> {
-        let events = self.rpc.subscribe_events().await?;
-        Ok(events)
-    }
-
-    /// Subscribe to finalized events.
-    pub async fn subscribe_finalized_events(
-        &self,
-    ) -> Result<EventStorageSubscription<T>, Error> {
-        let events = self.rpc.subscribe_finalized_events().await?;
-        Ok(events)
-    }
-
-    /// Subscribe to new blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
-        let headers = self.rpc.subscribe_blocks().await?;
-        Ok(headers)
-    }
-
-    /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, Error> {
-        let headers = self.rpc.subscribe_finalized_blocks().await?;
-        Ok(headers)
+    pub fn rpc(&self) -> &Rpc<T> {
+        &self.rpc
     }
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.rpc, &self.metadata)
+        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
+    }
+
+    /// Convert the client to a runtime api wrapper for custom runtime access.
+    ///
+    /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
+    /// to the target runtime.
+    pub fn to_runtime_api<R: From<Self>>(self) -> R {
+        self.into()
     }
 
     /// Creates a signed extrinsic.
@@ -293,9 +211,11 @@ impl<T: Runtime> Client<T> {
             nonce
         } else {
             let account_storage_entry =
-                <T::AccountData as AccountData<T>>::new(signer.account_id().clone());
-            let account_data =
-                self.storage().fetch_or_default(&account_storage_entry, None).await?;
+                <T::AccountData as From<T::AccountId>>::from(signer.account_id().clone());
+            let account_data = self
+                .storage()
+                .fetch_or_default(&account_storage_entry, None)
+                .await?;
             <T::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self.encode(call)?;
@@ -323,24 +243,6 @@ impl<T: Runtime> Client<T> {
         &self.events_decoder
     }
 
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic(
-        &self,
-        extrinsic: UncheckedExtrinsic<T>,
-    ) -> Result<T::Hash, Error> {
-        self.rpc.submit_extrinsic(extrinsic).await
-    }
-
-    /// Create and submit an extrinsic and return corresponding Event if successful
-    pub async fn submit_and_watch_extrinsic(
-        &self,
-        extrinsic: UncheckedExtrinsic<T>,
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
-        self.rpc
-            .submit_and_watch_extrinsic(extrinsic, &self.events_decoder)
-            .await
-    }
-
     /// Submits a transaction to the chain.
     pub async fn submit<C: Call + Send + Sync>(
         &self,
@@ -352,79 +254,62 @@ impl<T: Runtime> Client<T> {
             Send + Sync,
     {
         let extrinsic = self.create_signed(call, signer).await?;
-        self.submit_extrinsic(extrinsic).await
-    }
-
-    /// Insert a key into the keystore.
-    pub async fn insert_key(
-        &self,
-        key_type: String,
-        suri: String,
-        public: Bytes,
-    ) -> Result<(), Error> {
-        self.rpc.insert_key(key_type, suri, public).await
-    }
-
-    /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
-        self.rpc.rotate_keys().await
-    }
-
-    /// Checks if the keystore has private keys for the given session public keys.
-    ///
-    /// `session_keys` is the SCALE encoded session keys object from the runtime.
-    ///
-    /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
-        self.rpc.has_session_keys(session_keys).await
-    }
-
-    /// Checks if the keystore has private keys for the given public key and key type.
-    ///
-    /// Returns `true` if a private key could be found.
-    pub async fn has_key(
-        &self,
-        public_key: Bytes,
-        key_type: String,
-    ) -> Result<bool, Error> {
-        self.rpc.has_key(public_key, key_type).await
+        self.rpc().submit_extrinsic(extrinsic).await
     }
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<T: Runtime, C: Call> {
-    client: Arc<Client<T>>,
+pub struct SubmittableExtrinsic<'a, T: Runtime, C: Call> {
+    client: &'a Client<T>,
     call: C,
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
     T: Runtime,
     C: Call + Send + Sync,
-    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-        Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: Arc<Client<T>>, call: C) -> Self {
+    pub fn new(client: &'a Client<T>, call: C) -> Self {
         Self { client, call }
     }
 
-    /// Create and submit an extrinsic and return corresponding Event if successful
-    /// todo: [AJ] could do a type builder interface like `xt.sign(&signer).watch_events().submit()`
+    /// Creates and signs an extrinsic and submits to the chain.
+    ///
+    /// Returns when the extrinsic has successfully been included in the block, together with any
+    /// events which were triggered by the extrinsic.
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error> {
+    ) -> Result<ExtrinsicSuccess<T>, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
-        self.client.submit_and_watch_extrinsic(extrinsic).await
+        self.client
+            .rpc()
+            .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
+            .await
     }
 
-    /// Submits a transaction to the chain.
+    /// Creates and signs an extrinsic and submits to the chain for block inclusion.
+    ///
+    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<T::Hash, Error> {
+    ) -> Result<T::Hash, Error>
+    where
+        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync,
+    {
         let extrinsic = self.client.create_signed(self.call, signer).await?;
-        self.client.submit_extrinsic(extrinsic).await
+        self.client.rpc().submit_extrinsic(extrinsic).await
     }
 }

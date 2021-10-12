@@ -19,18 +19,14 @@ use std::{
     convert::TryFrom,
 };
 
-use codec::{
-    Decode,
-    Error as CodecError,
-};
+use codec::Error as CodecError;
 
 use frame_metadata::{
     PalletConstantMetadata,
     RuntimeMetadata,
     RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
-    StorageEntryModifier,
-    StorageEntryType,
+    StorageEntryMetadata,
     META_RESERVED,
 };
 
@@ -128,6 +124,11 @@ impl Metadata {
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
         self.metadata.types.resolve(id)
     }
+
+    /// Return the runtime metadata.
+    pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
+        &self.metadata
+    }
 }
 
 #[derive(Clone, Debug)]
@@ -135,7 +136,7 @@ pub struct PalletMetadata {
     index: u8,
     name: String,
     calls: HashMap<String, u8>,
-    storage: HashMap<String, StorageMetadata>,
+    storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
     constants: HashMap<String, PalletConstantMetadata<PortableForm>>,
 }
 
@@ -153,7 +154,10 @@ impl PalletMetadata {
         Ok(Encoded(bytes))
     }
 
-    pub fn storage(&self, key: &'static str) -> Result<&StorageMetadata, MetadataError> {
+    pub fn storage(
+        &self,
+        key: &'static str,
+    ) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
         self.storage
             .get(key)
             .ok_or(MetadataError::StorageNotFound(key))
@@ -218,21 +222,6 @@ impl ErrorMetadata {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct StorageMetadata {
-    module_prefix: String,
-    storage_prefix: String,
-    modifier: StorageEntryModifier,
-    ty: StorageEntryType<PortableForm>,
-    default: Vec<u8>,
-}
-
-impl StorageMetadata {
-    pub fn default<V: Decode>(&self) -> Result<V, MetadataError> {
-        Decode::decode(&mut &self.default[..]).map_err(MetadataError::DefaultError)
-    }
-}
-
 #[derive(Debug, thiserror::Error)]
 pub enum InvalidMetadataError {
     #[error("Invalid prefix")]
@@ -282,12 +271,20 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                     Ok(calls)
                 })?;
 
+                let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
+                    storage
+                        .entries
+                        .iter()
+                        .map(|entry| (entry.name.clone(), entry.clone()))
+                        .collect()
+                });
+
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
                     calls,
-                    storage: Default::default(),
-                    constants: Default::default(),
+                    storage,
+                    constants: Default::default(), // todo: [AJ] constants
                 };
 
                 Ok((pallet.name.to_string(), pallet_metadata))

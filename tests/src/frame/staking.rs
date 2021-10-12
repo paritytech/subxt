@@ -14,422 +14,246 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the pallet_staking module.
-
-use super::balances::Balances;
-use codec::{
-    Decode,
-    Encode,
-};
-
-use std::{
-    collections::BTreeMap,
-    fmt::Debug,
-    marker::PhantomData,
-};
-
-pub use pallet_staking::{
-    ActiveEraInfo,
-    EraIndex,
-    Exposure,
-    Nominations,
-    RewardDestination,
-    RewardPoint,
-    StakingLedger,
-    ValidatorPrefs,
-};
-
-/// Rewards for the last `HISTORY_DEPTH` eras.
-/// If reward hasn't been set or has been removed then 0 reward is returned.
-#[derive(Clone, Encode, Decode, Debug, Store)]
-pub struct ErasRewardPointsStore<T: Staking> {
-    #[store(returns = EraRewardPoints<T::AccountId>)]
-    /// Era index
-    pub index: EraIndex,
-    /// Marker for the runtime
-    pub _phantom: PhantomData<T>,
-}
-
-/// Preference of what happens regarding validation.
-#[derive(Clone, Encode, Decode, Debug, Call)]
-pub struct SetPayeeCall<T: Staking> {
-    /// The payee
-    pub payee: RewardDestination<T::AccountId>,
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// The subset of the `frame::Trait` that a client must implement.
-#[module]
-#[rustfmt::skip]
-pub trait Staking: Balances {
-    #![event_alias(ElectionCompute = u8)]
-    #![event_type(EraIndex)]
-}
-
-/// Number of eras to keep in history.
-///
-/// Information is kept for eras in `[current_era - history_depth; current_era]`.
-///
-/// Must be more than the number of eras delayed by session otherwise.
-/// I.e. active era must always be in history.
-/// I.e. `active_era > current_era - history_depth` must be guaranteed.
-#[derive(Encode, Decode, Copy, Clone, Debug, Default, Store)]
-pub struct HistoryDepthStore<T: Staking> {
-    #[store(returns = u32)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Map from all locked "stash" accounts to the controller account.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct BondedStore<T: Staking> {
-    #[store(returns = Option<T::AccountId>)]
-    /// Tٗhe stash account
-    pub stash: T::AccountId,
-}
-
-/// Map from all (unlocked) "controller" accounts to the info regarding the staking.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct LedgerStore<T: Staking> {
-    #[store(returns = Option<StakingLedger<T::AccountId, T::Balance>>)]
-    /// The controller account
-    pub controller: T::AccountId,
-}
-
-/// Where the reward payment should be made. Keyed by stash.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct PayeeStore<T: Staking> {
-    #[store(returns = RewardDestination<T::AccountId>)]
-    /// Tٗhe stash account
-    pub stash: T::AccountId,
-}
-
-/// The map from (wannabe) validator stash key to the preferences of that validator.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, Ord, PartialOrd, Store)]
-pub struct ValidatorsStore<T: Staking> {
-    #[store(returns = ValidatorPrefs)]
-    /// Tٗhe stash account
-    pub stash: T::AccountId,
-}
-
-/// The map from nominator stash key to the set of stash keys of all validators to nominate.
-#[derive(Encode, Copy, Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord, Store)]
-pub struct NominatorsStore<T: Staking> {
-    #[store(returns = Option<Nominations<T::AccountId>>)]
-    /// Tٗhe stash account
-    pub stash: T::AccountId,
-}
-
-/// The current era index.
-///
-/// This is the latest planned era, depending on how the Session pallet queues the validator
-/// set, it might be active or not.
-#[derive(Encode, Copy, Clone, Debug, Store)]
-pub struct CurrentEraStore<T: Staking> {
-    #[store(returns = Option<EraIndex>)]
-    /// Marker for the runtime
-    pub _runtime: PhantomData<T>,
-}
-
-/// Reward points of an era. Used to split era total payout between validators.
-///
-/// This points will be used to reward validators and their respective nominators.
-#[derive(PartialEq, Encode, Decode, Default, Debug)]
-pub struct EraRewardPoints<AccountId: Ord> {
-    /// Total number of points. Equals the sum of reward points for each validator.
-    pub total: RewardPoint,
-    /// The reward points earned by a given validator.
-    pub individual: BTreeMap<AccountId, RewardPoint>,
-}
-
-/// Declare no desire to either validate or nominate.
-///
-/// Effective at the beginning of the next era.
-///
-/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// Can only be called when [`EraElectionStatus`] is `Closed`.
-#[derive(Debug, Call, Encode)]
-pub struct ChillCall<T: Staking> {
-    /// Runtime marker
-    pub _runtime: PhantomData<T>,
-}
-
-impl<T: Staking> Default for ChillCall<T> {
-    fn default() -> Self {
-        Self {
-            _runtime: PhantomData,
-        }
-    }
-}
-impl<T: Staking> Clone for ChillCall<T> {
-    fn clone(&self) -> Self {
-        Self {
-            _runtime: self._runtime,
-        }
-    }
-}
-impl<T: Staking> Copy for ChillCall<T> {}
-
-/// Declare the desire to validate for the origin controller.
-///
-/// Effective at the beginning of the next era.
-///
-/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// Can only be called when [`EraElectionStatus`] is `Closed`.
-#[derive(Clone, Debug, PartialEq, Call, Encode)]
-pub struct ValidateCall<T: Staking> {
-    /// Runtime marker
-    pub _runtime: PhantomData<T>,
-    /// Validation preferences
-    pub prefs: ValidatorPrefs,
-}
-
-/// Declare the desire to nominate `targets` for the origin controller.
-///
-/// Effective at the beginning of the next era.
-///
-/// The dispatch origin for this call must be _Signed_ by the controller, not the stash.
-/// Can only be called when [`EraElectionStatus`] is `Closed`.
-#[derive(Call, Encode, Debug)]
-pub struct NominateCall<T: Staking> {
-    /// The targets that are being nominated
-    pub targets: Vec<T::Address>,
-}
-
-/// Take the origin account as a stash and lock up `value` of its balance.
-/// `controller` will be the account that controls it.
-#[derive(Call, Encode, Debug)]
-pub struct BondCall<'a, T: Staking> {
-    /// Tٗhe controller account
-    pub controller: &'a T::Address,
-    /// Lock up `value` of its balance.
-    #[codec(compact)]
-    pub value: T::Balance,
-    /// Destination of Staking reward.
-    pub payee: RewardDestination<T::AccountId>,
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{
-        error::RuntimeError,
-        extrinsic::{
-            PairSigner,
-            Signer,
+use crate::{
+    node_runtime::{
+        runtime_types::pallet_staking::{
+            RewardDestination,
+            ValidatorPrefs,
         },
-        frame::balances::*,
-        tests::{
-            test_node_process,
-            TestRuntime,
-        },
-        Error,
-        ExtrinsicSuccess,
-    };
-    use assert_matches::assert_matches;
-    use sp_core::{
-        sr25519,
-        Pair,
-    };
-    use sp_keyring::AccountKeyring;
+        staking,
+    },
+    test_context,
+    TestRuntime,
+};
+use assert_matches::assert_matches;
+use sp_core::{
+    sr25519,
+    Pair,
+};
+use sp_keyring::AccountKeyring;
+use subxt::{
+    extrinsic::{
+        PairSigner,
+        Signer,
+    },
+    Error,
+    ExtrinsicSuccess,
+    RuntimeError,
+};
 
-    /// Helper function to generate a crypto pair from seed
-    fn get_from_seed(seed: &str) -> sr25519::Pair {
-        sr25519::Pair::from_string(&format!("//{}", seed), None)
-            .expect("static values are valid; qed")
+/// Helper function to generate a crypto pair from seed
+fn get_from_seed(seed: &str) -> sr25519::Pair {
+    sr25519::Pair::from_string(&format!("//{}", seed), None)
+        .expect("static values are valid; qed")
+}
+
+fn default_validator_prefs() -> ValidatorPrefs {
+    ValidatorPrefs {
+        commission: sp_runtime::Perbill::default(),
+        blocked: false,
     }
+}
 
-    #[async_std::test]
-    async fn test_validate_with_controller_account() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let announce_validator = client
-            .validate_and_watch(&alice, ValidatorPrefs::default())
-            .await;
-        assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-            // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 2);
-        });
+#[async_std::test]
+async fn validate_with_controller_account() -> Result<(), Error> {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let cxt = test_context().await;
+    let announce_validator = cxt
+        .api
+        .tx()
+        .staking()
+        .validate(default_validator_prefs())
+        .sign_and_submit_then_watch(&alice)
+        .await;
+    assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+        // TOOD: this is unsatisfying – can we do better?
+        assert_eq!(events.len(), 2);
+    });
 
-        Ok(())
-    }
+    Ok(())
+}
 
-    #[async_std::test]
-    async fn test_validate_not_possible_for_stash_account() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice_stash =
-            PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let announce_validator = client
-            .validate_and_watch(&alice_stash, ValidatorPrefs::default())
-            .await;
-        assert_matches!(announce_validator, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-            assert_eq!(module_err.module, "Staking");
-            assert_eq!(module_err.error, "NotController");
-        });
-        Ok(())
-    }
+#[async_std::test]
+async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
+    let alice_stash = PairSigner::<TestRuntime, _>::new(get_from_seed("Alice//stash"));
+    let cxt = test_context().await;
+    let announce_validator = cxt
+        .api
+        .tx()
+        .staking()
+        .validate(default_validator_prefs())
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
+    assert_matches!(announce_validator, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
+    Ok(())
+}
 
-    #[async_std::test]
-    async fn test_nominate_with_controller_account() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
+#[async_std::test]
+async fn nominate_with_controller_account() -> Result<(), Error> {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let cxt = test_context().await;
 
-        let nomination = client
-            .nominate_and_watch(&alice, vec![bob.account_id().clone().into()])
-            .await;
-        assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-            // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 2);
-        });
-        Ok(())
-    }
+    let nomination = cxt
+        .api
+        .tx()
+        .staking()
+        .nominate(vec![bob.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice)
+        .await;
+    assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
+        // TOOD: this is unsatisfying – can we do better?
+        assert_eq!(events.len(), 2);
+    });
+    Ok(())
+}
 
-    #[async_std::test]
-    async fn test_nominate_not_possible_for_stash_account() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice_stash =
-            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-        let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
+#[async_std::test]
+async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
+    let alice_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let cxt = test_context().await;
 
-        let nomination = client
-            .nominate_and_watch(&alice_stash, vec![bob.account_id().clone().into()])
-            .await;
-        assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-            assert_eq!(module_err.module, "Staking");
-            assert_eq!(module_err.error, "NotController");
-        });
-        Ok(())
-    }
+    let nomination = cxt
+        .api
+        .tx()
+        .staking()
+        .nominate(vec![bob.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
 
-    #[async_std::test]
-    async fn test_chill_works_for_controller_only() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice_stash =
-            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-        let bob_stash =
-            PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Bob//stash"));
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
+    assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
+    Ok(())
+}
 
-        // this will fail the second time, which is why this is one test, not two
-        client
-            .nominate_and_watch(&alice, vec![bob_stash.account_id().clone().into()])
-            .await?;
-        let store = LedgerStore {
-            controller: alice.account_id().clone(),
-        };
-        let StakingLedger { stash, .. } = client.fetch(&store, None).await?.unwrap();
-        assert_eq!(alice_stash.account_id(), &stash);
-        let chill = client.chill_and_watch(&alice_stash).await;
+#[async_std::test]
+async fn chill_works_for_controller_only() -> Result<(), Error> {
+    let alice_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Alice//stash"));
+    let bob_stash =
+        PairSigner::<TestRuntime, sr25519::Pair>::new(get_from_seed("Bob//stash"));
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let cxt = test_context().await;
 
-        assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-            assert_eq!(module_err.module, "Staking");
-            assert_eq!(module_err.error, "NotController");
-        });
+    // this will fail the second time, which is why this is one test, not two
+    cxt.api
+        .tx()
+        .staking()
+        .nominate(vec![bob_stash.account_id().clone().into()])
+        .sign_and_submit_then_watch(&alice)
+        .await?;
 
-        let chill = client.chill_and_watch(&alice).await;
-        assert_matches!(chill, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-            // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 2);
-        });
-        Ok(())
-    }
+    let ledger = cxt
+        .api
+        .storage()
+        .staking()
+        .ledger(alice.account_id().clone(), None)
+        .await?
+        .unwrap();
+    assert_eq!(alice_stash.account_id(), &ledger.stash);
 
-    #[async_std::test]
-    async fn test_bond() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
+    let chill = cxt
+        .api
+        .tx()
+        .staking()
+        .chill()
+        .sign_and_submit_then_watch(&alice_stash)
+        .await;
 
-        let bond = client
-            .bond_and_watch(
-                &alice,
-                &AccountKeyring::Bob.to_account_id().into(),
-                100_000_000_000_000,
-                RewardDestination::Stash,
-            )
-            .await;
+    assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "NotController");
+    });
 
-        assert_matches!(bond, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-            // TOOD: this is unsatisfying – can we do better?
-            assert_eq!(events.len(), 3);
-        });
+    let result = cxt
+        .api
+        .tx()
+        .staking()
+        .chill()
+        .sign_and_submit_then_watch(&alice)
+        .await?;
+    let chill = result.find_event::<staking::events::Chilled>()?;
+    assert!(chill.is_some());
+    Ok(())
+}
 
-        let bond_again = client
-            .bond_and_watch(
-                &alice,
-                &AccountKeyring::Bob.to_account_id().into(),
-                100_000_000_000,
-                RewardDestination::Stash,
-            )
-            .await;
+#[async_std::test]
+async fn tx_bond() -> Result<(), Error> {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let cxt = test_context().await;
 
-        assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
-            assert_eq!(module_err.module, "Staking");
-            assert_eq!(module_err.error, "AlreadyBonded");
-        });
+    let bond = cxt
+        .api
+        .tx()
+        .staking()
+        .bond(
+            AccountKeyring::Bob.to_account_id().into(),
+            100_000_000_000_000,
+            RewardDestination::Stash,
+        )
+        .sign_and_submit_then_watch(&alice)
+        .await;
 
-        Ok(())
-    }
+    assert!(bond.is_ok());
 
-    #[async_std::test]
-    async fn test_total_issuance_is_okay() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let total_issuance = client.total_issuance(None).await?;
-        assert!(total_issuance > 1u128 << 32);
-        Ok(())
-    }
+    let bond_again = cxt
+        .api
+        .tx()
+        .staking()
+        .bond(
+            AccountKeyring::Bob.to_account_id().into(),
+            100_000_000_000_000,
+            RewardDestination::Stash,
+        )
+        .sign_and_submit_then_watch(&alice)
+        .await;
 
-    #[async_std::test]
-    async fn test_history_depth_is_okay() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let history_depth = client.history_depth(None).await?;
-        assert_eq!(history_depth, 84);
-        Ok(())
-    }
+    assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
+        assert_eq!(module_err.pallet, "Staking");
+        assert_eq!(module_err.error, "AlreadyBonded");
+    });
 
-    #[async_std::test]
-    async fn test_current_era_is_okay() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let _current_era = client
-            .current_era(None)
-            .await?
-            .expect("current era always exists");
-        Ok(())
-    }
+    Ok(())
+}
 
-    #[async_std::test]
-    async fn test_era_reward_points_is_okay() -> Result<(), Error> {
-        env_logger::try_init().ok();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-        let store = ErasRewardPointsStore {
-            _phantom: PhantomData,
-            index: 0,
-        };
+#[async_std::test]
+async fn storage_history_depth() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let history_depth = cxt.api.storage().staking().history_depth(None).await?;
+    assert_eq!(history_depth, 84);
+    Ok(())
+}
 
-        let current_era_result = client.fetch(&store, None).await?;
+#[async_std::test]
+async fn storage_current_era() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let _current_era = cxt
+        .api
+        .storage()
+        .staking()
+        .current_era(None)
+        .await?
+        .expect("current era always exists");
+    Ok(())
+}
 
-        assert_matches!(current_era_result, Some(_));
+#[async_std::test]
+async fn storage_era_reward_points() -> Result<(), Error> {
+    let cxt = test_context().await;
+    let current_era_result = cxt
+        .api
+        .storage()
+        .staking()
+        .eras_reward_points(0, None)
+        .await;
+    assert!(current_era_result.is_ok());
 
-        Ok(())
-    }
+    Ok(())
 }

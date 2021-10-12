@@ -703,6 +703,20 @@ mod tests {
     const MOD_PATH: &'static [&'static str] =
         &["chameleon_core", "generate_types", "tests"];
 
+    fn get_mod<'a>(
+        module: &'a Module,
+        path_segs: &[&'static str],
+    ) -> Option<&'a Module<'a>> {
+        let (mod_name, rest) = path_segs.split_first()?;
+        let mod_ident = Ident::new(mod_name, Span::call_site());
+        let module = module.children.get(&mod_ident)?;
+        if rest.is_empty() {
+            Some(module)
+        } else {
+            get_mod(module, rest)
+        }
+    }
+
     #[test]
     fn generate_struct_with_primitives() {
         #[allow(unused)]
@@ -717,9 +731,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -758,9 +772,9 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -798,9 +812,9 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -833,9 +847,9 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -866,9 +880,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -898,9 +912,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -935,9 +949,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -970,9 +984,9 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1003,9 +1017,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1042,9 +1056,9 @@ mod tests {
         registry.register_type(&meta_type::<Bar>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1085,9 +1099,9 @@ mod tests {
         registry.register_type(&meta_type::<Bar<bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1132,9 +1146,9 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1180,9 +1194,9 @@ mod tests {
         registry.register_type(&meta_type::<UnnamedFields<bool, bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),
@@ -1235,9 +1249,9 @@ mod tests {
         registry.register_type(&meta_type::<modules::c::Foo>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root");
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
         let types = type_gen.generate_types_mod();
-        let tests_mod = types.get_mod(MOD_PATH).unwrap();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
         assert_eq!(
             tests_mod.into_token_stream().to_string(),

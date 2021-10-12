@@ -14,109 +14,66 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Implements support for the frame_sudo module.
-
 use crate::{
-    frame::system::System,
-    Encoded,
+    node_runtime::{
+        runtime_types,
+        sudo,
+    },
+    test_context,
+    TestRuntime,
 };
-use codec::Encode;
-use core::marker::PhantomData;
-use frame_support::weights::Weight;
+use assert_matches::assert_matches;
+use sp_keyring::AccountKeyring;
+use subxt::extrinsic::PairSigner;
 
-/// The subset of the `frame_sudo::Trait` that a client must implement.
-#[module]
-pub trait Sudo: System {}
+// todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
+type Call = runtime_types::node_runtime::Call;
+type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
-/// Execute a transaction with sudo permissions.
-#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
-pub struct SudoCall<'a, T: Sudo> {
-    /// Runtime marker.
-    pub _runtime: PhantomData<T>,
-    /// Encoded transaction.
-    pub call: &'a Encoded,
+#[async_std::test]
+async fn test_sudo() {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id().clone().into();
+    let cxt = test_context().await;
+
+    // todo: [AJ] allow encoded call to be constructed dynamically
+    let call = Call::Balances(BalancesCall::transfer {
+        dest: bob,
+        value: 10_000,
+    });
+
+    let res = cxt
+        .api
+        .tx()
+        .sudo()
+        .sudo(call)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
+    let sudid = res.find_event::<sudo::events::Sudid>();
+    assert_matches!(sudid, Ok(Some(_)))
 }
 
-/// Execute a transaction with sudo permissions without checking the call weight.
-#[derive(Clone, Debug, Eq, PartialEq, Call, Encode)]
-pub struct SudoUncheckedWeightCall<'a, T: Sudo> {
-    /// Runtime marker.
-    pub _runtime: PhantomData<T>,
-    /// Encoded transaction.
-    pub call: &'a Encoded,
-    /// Call weight.
-    ///
-    /// This argument is actually unused in runtime, you can pass any value of
-    /// `Weight` type when using this call.
-    pub weight: Weight,
-}
+#[async_std::test]
+async fn test_sudo_unchecked_weight() {
+    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id().into();
+    let cxt = test_context().await;
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-    use crate::{
-        error::{
-            Error,
-            RuntimeError,
-        },
-        extrinsic::PairSigner,
-        frame::balances::TransferCall,
-        tests::{
-            test_node_process,
-            TestRuntime,
-        },
-    };
-    use sp_keyring::AccountKeyring;
+    let call = Call::Balances(BalancesCall::transfer {
+        dest: bob,
+        value: 10_000,
+    });
 
-    #[async_std::test]
-    async fn test_sudo() {
-        env_logger::try_init().ok();
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let bob = AccountKeyring::Bob.to_account_id().clone().into();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
+    let res = cxt
+        .api
+        .tx()
+        .sudo()
+        .sudo_unchecked_weight(call, 0)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
 
-        let call = client
-            .encode(TransferCall {
-                to: &bob,
-                amount: 10_000,
-            })
-            .unwrap();
-
-        let res = client.sudo_and_watch(&alice, &call).await;
-        assert!(
-            if let Err(Error::Runtime(RuntimeError::BadOrigin)) = res {
-                true
-            } else {
-                false
-            }
-        );
-    }
-
-    #[async_std::test]
-    async fn test_sudo_unchecked_weight() {
-        env_logger::try_init().ok();
-        let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-        let bob = AccountKeyring::Bob.to_account_id().into();
-        let test_node_proc = test_node_process().await;
-        let client = test_node_proc.client();
-
-        let call = client
-            .encode(TransferCall {
-                to: &bob,
-                amount: 10_000,
-            })
-            .unwrap();
-
-        let res = client
-            .sudo_unchecked_weight_and_watch(&alice, &call, 0u64)
-            .await;
-        assert!(
-            if let Err(Error::Runtime(RuntimeError::BadOrigin)) = res {
-                true
-            } else {
-                false
-            }
-        );
-    }
+    let sudid = res.find_event::<sudo::events::Sudid>();
+    assert_matches!(sudid, Ok(Some(_)))
 }

@@ -21,11 +21,7 @@ use codec::{
     Encode,
     Input,
 };
-use dyn_clone::DynClone;
-use std::marker::{
-    PhantomData,
-    Send,
-};
+use std::marker::PhantomData;
 
 use crate::{
     metadata::{
@@ -42,56 +38,21 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
+use sp_core::Bytes;
 
 /// Raw bytes for an Event
+#[derive(Debug)]
 pub struct RawEvent {
-    /// The name of the pallet from whence the Event originated
+    /// The name of the pallet from whence the Event originated.
     pub pallet: String,
-    /// The name of the Event
+    /// The index of the pallet from whence the Event originated.
+    pub pallet_index: u8,
+    /// The name of the pallet Event variant.
     pub variant: String,
+    /// The index of the pallet Event variant.
+    pub variant_index: u8,
     /// The raw Event data
-    pub data: Vec<u8>,
-}
-
-impl std::fmt::Debug for RawEvent {
-    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        f.debug_struct("RawEvent")
-            .field("module", &self.pallet)
-            .field("variant", &self.variant)
-            .field("data", &hex::encode(&self.data))
-            .finish()
-    }
-}
-
-pub trait TypeSegmenter: DynClone + Send + Sync {
-    /// Consumes an object from an input stream, and output the serialized bytes.
-    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error>;
-}
-
-// derive object safe Clone impl for `Box<dyn TypeSegmenter>`
-dyn_clone::clone_trait_object!(TypeSegmenter);
-
-struct TypeMarker<T>(PhantomData<T>);
-impl<T> TypeSegmenter for TypeMarker<T>
-where
-    T: Codec + Send + Sync,
-{
-    fn segment(&self, input: &mut &[u8], output: &mut Vec<u8>) -> Result<(), Error> {
-        T::decode(input).map_err(Error::from)?.encode_to(output);
-        Ok(())
-    }
-}
-
-impl<T> Clone for TypeMarker<T> {
-    fn clone(&self) -> Self {
-        Self(Default::default())
-    }
-}
-
-impl<T> Default for TypeMarker<T> {
-    fn default() -> Self {
-        Self(Default::default())
-    }
+    pub data: Bytes,
 }
 
 /// Events decoder.
@@ -124,16 +85,16 @@ where
             // decode EventRecord
             let phase = Phase::decode(input)?;
             let pallet_index = input.read_byte()?;
-            let event_variant = input.read_byte()?;
+            let variant_index = input.read_byte()?;
             log::debug!(
                 "phase {:?}, pallet_index {}, event_variant: {}",
                 phase,
                 pallet_index,
-                event_variant
+                variant_index
             );
             log::debug!("remaining input: {}", hex::encode(&input));
 
-            let event_metadata = self.metadata.event(pallet_index, event_variant)?;
+            let event_metadata = self.metadata.event(pallet_index, variant_index)?;
 
             let mut event_data = Vec::<u8>::new();
             let mut event_errors = Vec::<RuntimeError>::new();
@@ -149,8 +110,10 @@ where
 
                     let event = RawEvent {
                         pallet: event_metadata.pallet().to_string(),
+                        pallet_index,
                         variant: event_metadata.event().to_string(),
-                        data: event_data,
+                        variant_index,
+                        data: event_data.into(),
                     };
 
                     // topics come after the event data in EventRecord
