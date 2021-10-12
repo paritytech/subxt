@@ -21,7 +21,7 @@ pub use crate::{
 };
 
 use sp_keyring::AccountKeyring;
-use subxt::Client;
+use substrate_subxt::Client;
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";

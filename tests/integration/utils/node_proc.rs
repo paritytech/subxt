@@ -29,7 +29,7 @@ use std::{
     thread,
     time,
 };
-use subxt::{
+use substrate_subxt::{
     Client,
     ClientBuilder,
     Runtime,

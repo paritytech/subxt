@@ -15,7 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_runtime::traits::BlakeTwo256;
-use subxt::{
+use substrate_subxt::{
     subxt,
     Runtime,
     StorageEntry,

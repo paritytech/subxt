@@ -29,7 +29,7 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
+use substrate_subxt::{
     extrinsic::{
         PairSigner,
         Signer,

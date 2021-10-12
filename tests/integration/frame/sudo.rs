@@ -15,45 +15,65 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::system,
+    node_runtime::{
+        runtime_types,
+        sudo,
+    },
     test_context,
     TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::{
-    PairSigner,
-    Signer,
-};
+use substrate_subxt::extrinsic::PairSigner;
+
+// todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
+type Call = runtime_types::node_runtime::Call;
+type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::test]
-async fn storage_account() {
+async fn test_sudo() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-
+    let bob = AccountKeyring::Bob.to_account_id().clone().into();
     let cxt = test_context().await;
-    let account_info = cxt
+
+    // todo: [AJ] allow encoded call to be constructed dynamically
+    let call = Call::Balances(BalancesCall::transfer {
+        dest: bob,
+        value: 10_000,
+    });
+
+    let res = cxt
         .api
-        .storage()
-        .system()
-        .account(alice.account_id().clone().into(), None)
-        .await;
-    assert_matches!(account_info, Ok(_))
+        .tx()
+        .sudo()
+        .sudo(call)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap();
+    let sudid = res.find_event::<sudo::events::Sudid>();
+    assert_matches!(sudid, Ok(Some(_)))
 }
 
 #[async_std::test]
-async fn tx_remark_with_event() {
+async fn test_sudo_unchecked_weight() {
     let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 
-    let result = cxt
+    let call = Call::Balances(BalancesCall::transfer {
+        dest: bob,
+        value: 10_000,
+    });
+
+    let res = cxt
         .api
         .tx()
-        .system()
-        .remark_with_event(b"remarkable".to_vec())
+        .sudo()
+        .sudo_unchecked_weight(call, 0)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
 
-    let remarked = result.find_event::<system::events::Remarked>();
-    assert_matches!(remarked, Ok(Some(_)));
+    let sudid = res.find_event::<sudo::events::Sudid>();
+    assert_matches!(sudid, Ok(Some(_)))
 }

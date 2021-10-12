@@ -31,7 +31,7 @@ use crate::{
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
-use subxt::{
+use substrate_subxt::{
     Client,
     Error,
     ExtrinsicSuccess,
