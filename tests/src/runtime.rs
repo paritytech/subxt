@@ -53,9 +53,11 @@ impl Runtime for TestRuntime {
     type AccountData = node_runtime::system::storage::Account;
 }
 
-impl From<node_runtime::system::storage::Account> for node_runtime::system::storage::Account {
-    fn from(account: node_runtime::system::storage::Account) -> Self {
-        Self(account)
+impl From<<TestRuntime as Runtime>::AccountId>
+    for node_runtime::system::storage::Account
+{
+    fn from(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
+        Self(account_id)
     }
 }
 
