@@ -21,7 +21,7 @@ use subxt::{
     StorageEntry,
 };
 
-#[subxt(runtime_metadata_path = "node_runtime.scale")]
+#[subxt(runtime_metadata_path = "tests/integration/node_runtime.scale")]
 pub mod node_runtime {
     #[subxt(substitute_type = "sp_core::crypto::AccountId32")]
     use sp_core::crypto::AccountId32;
