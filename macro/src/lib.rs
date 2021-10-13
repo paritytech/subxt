@@ -16,16 +16,8 @@
 
 extern crate proc_macro;
 
-mod generate_runtime;
-mod generate_types;
-
 use darling::FromMeta;
-use generate_types::{
-    TypeGenerator,
-    TypePath,
-};
 use proc_macro::TokenStream;
-use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::proc_macro_error;
 use syn::parse_macro_input;
 
@@ -49,5 +41,5 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    generate_runtime::generate_runtime_types(item_mod, &path).into()
+    subxt_codegen::generate_runtime_types(item_mod, &path).into()
 }

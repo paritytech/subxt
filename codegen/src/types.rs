@@ -407,7 +407,7 @@ impl<'a> ModuleType<'a> {
             if is_struct && !unused_params.is_empty() {
                 let phantom = Self::phantom_data(&unused_params);
                 fields_tokens.push(quote! {
-                    pub __chameleon_unused_type_params: #phantom
+                    pub __subxt_unused_type_params: #phantom
                 })
             }
 
@@ -1206,7 +1206,7 @@ mod tests {
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct NamedFields<_0> {
                         pub b: u32,
-                        pub __chameleon_unused_type_params: ::core::marker::PhantomData<_0>,
+                        pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
                     }
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct UnnamedFields<_0, _1> (

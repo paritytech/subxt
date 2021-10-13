@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "macro", "tests"]
+members = [".", "codegen", "macro", "tests"]
 
 [package]
 name = "substrate-subxt"
