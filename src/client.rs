@@ -39,7 +39,7 @@ use crate::{
     Encoded,
     Error,
     Metadata,
-    Runtime,
+    Config,
 };
 
 /// ClientBuilder for constructing a Client.
@@ -87,7 +87,7 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Runtime>(self) -> Result<Client<T>, Error> {
+    pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -123,7 +123,7 @@ impl ClientBuilder {
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: Runtime> {
+pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
@@ -134,7 +134,7 @@ pub struct Client<T: Runtime> {
     iter_page_size: u32,
 }
 
-impl<T: Runtime> Clone for Client<T> {
+impl<T: Config> Clone for Client<T> {
     fn clone(&self) -> Self {
         Self {
             rpc: self.rpc.clone(),
@@ -149,7 +149,7 @@ impl<T: Runtime> Clone for Client<T> {
     }
 }
 
-impl<T: Runtime> Client<T> {
+impl<T: Config> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -245,14 +245,14 @@ impl<T: Runtime> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'a, T: Runtime, C: Call> {
+pub struct SubmittableExtrinsic<'a, T: Config, C: Call> {
     client: &'a Client<T>,
     call: C,
 }
 
 impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
-    T: Runtime,
+    T: Config,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].

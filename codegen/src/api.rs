@@ -126,11 +126,11 @@ impl RuntimeGenerator {
                         use super::#types_mod_ident;
                         #( #call_structs )*
 
-                        pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                        pub struct TransactionApi<'a, T: ::subxt::Config> {
                             client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
+                        impl<'a, T: ::subxt::Config> TransactionApi<'a, T> {
                             pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
@@ -176,11 +176,11 @@ impl RuntimeGenerator {
                     use super::#types_mod_ident;
                     #( #storage_structs )*
 
-                    pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                    pub struct StorageApi<'a, T: ::subxt::Config> {
                         client: &'a ::subxt::Client<T>,
                     }
 
-                    impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                    impl<'a, T: ::subxt::Config> StorageApi<'a, T> {
                         pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                             Self { client }
                         }
@@ -242,17 +242,17 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                pub struct RuntimeApi<T: ::subxt::Runtime> {
+                pub struct RuntimeApi<T: ::subxt::Config> {
                     pub client: ::subxt::Client<T>,
                 }
 
-                impl<T: ::subxt::Runtime> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T> {
+                impl<T: ::subxt::Config> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T> {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client }
                     }
                 }
 
-                impl<'a, T: ::subxt::Runtime> RuntimeApi<T> {
+                impl<'a, T: ::subxt::Config> RuntimeApi<T> {
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
@@ -262,11 +262,11 @@ impl RuntimeGenerator {
                     }
                 }
 
-                pub struct StorageApi<'a, T: ::subxt::Runtime> {
+                pub struct StorageApi<'a, T: ::subxt::Config> {
                     client: &'a ::subxt::Client<T>,
                 }
 
-                impl<'a, T: ::subxt::Runtime> StorageApi<'a, T> {
+                impl<'a, T: ::subxt::Config> StorageApi<'a, T> {
                     #(
                         pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
                             #pallets_with_storage::storage::StorageApi::new(self.client)
@@ -274,11 +274,11 @@ impl RuntimeGenerator {
                     )*
                 }
 
-                pub struct TransactionApi<'a, T: ::subxt::Runtime> {
+                pub struct TransactionApi<'a, T: ::subxt::Config> {
                     client: &'a ::subxt::Client<T>,
                 }
 
-                impl<'a, T: ::subxt::Runtime> TransactionApi<'a, T> {
+                impl<'a, T: ::subxt::Config> TransactionApi<'a, T> {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T> {
                             #pallets_with_calls::calls::TransactionApi::new(self.client)

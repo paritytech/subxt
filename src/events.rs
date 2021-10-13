@@ -31,7 +31,7 @@ use crate::{
     Error,
     Metadata,
     Phase,
-    Runtime,
+    Config,
     RuntimeError,
 };
 use scale_info::{
@@ -64,7 +64,7 @@ pub struct EventsDecoder<T> {
 
 impl<T> EventsDecoder<T>
 where
-    T: Runtime,
+    T: Config,
 {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {

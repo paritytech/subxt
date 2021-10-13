@@ -83,7 +83,7 @@ use crate::{
     },
     Event,
     Metadata,
-    Runtime,
+    Config,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -115,7 +115,7 @@ pub enum ListOrValue<T> {
 
 /// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
-    SignedBlock<Block<<T as Runtime>::Header, <T as Runtime>::Extrinsic>>;
+    SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -290,14 +290,14 @@ pub struct ReadProof<Hash> {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Runtime> {
+pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
     marker: PhantomData<T>,
     accept_weak_inclusion: bool,
 }
 
-impl<T: Runtime> Clone for Rpc<T> {
+impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -307,7 +307,7 @@ impl<T: Runtime> Clone for Rpc<T> {
     }
 }
 
-impl<T: Runtime> Rpc<T> {
+impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
@@ -704,7 +704,7 @@ impl<T: Runtime> Rpc<T> {
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: Runtime> {
+pub struct ExtrinsicSuccess<T: Config> {
     /// Block hash.
     pub block: T::Hash,
     /// Extrinsic hash.
@@ -713,7 +713,7 @@ pub struct ExtrinsicSuccess<T: Runtime> {
     pub events: Vec<RawEvent>,
 }
 
-impl<T: Runtime> ExtrinsicSuccess<T> {
+impl<T: Config> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {

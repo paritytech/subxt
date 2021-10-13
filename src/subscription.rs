@@ -38,12 +38,12 @@ use crate::{
     rpc::Rpc,
     Event,
     Phase,
-    Runtime,
+    Config,
 };
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Runtime> {
+pub struct EventSubscription<'a, T: Config> {
     subscription: EventStorageSubscription<T>,
     decoder: &'a EventsDecoder<T>,
     block: Option<T::Hash>,
@@ -53,7 +53,7 @@ pub struct EventSubscription<'a, T: Runtime> {
     finished: bool,
 }
 
-impl<'a, T: Runtime> EventSubscription<'a, T> {
+impl<'a, T: Config> EventSubscription<'a, T> {
     /// Creates a new event subscription.
     pub fn new(
         subscription: EventStorageSubscription<T>,
@@ -153,14 +153,14 @@ impl From<SystemEvents> for StorageKey {
 }
 
 /// Event subscription to only fetch finalized storage changes.
-pub struct FinalizedEventStorageSubscription<T: Runtime> {
+pub struct FinalizedEventStorageSubscription<T: Config> {
     rpc: Rpc<T>,
     subscription: Subscription<T::Header>,
     storage_changes: VecDeque<StorageChangeSet<T::Hash>>,
     storage_key: StorageKey,
 }
 
-impl<T: Runtime> FinalizedEventStorageSubscription<T> {
+impl<T: Config> FinalizedEventStorageSubscription<T> {
     /// Creates a new finalized event storage subscription.
     pub fn new(rpc: Rpc<T>, subscription: Subscription<T::Header>) -> Self {
         Self {
@@ -191,14 +191,14 @@ impl<T: Runtime> FinalizedEventStorageSubscription<T> {
 }
 
 /// Wrapper over imported and finalized event subscriptions.
-pub enum EventStorageSubscription<T: Runtime> {
+pub enum EventStorageSubscription<T: Config> {
     /// Events that are InBlock
     Imported(Subscription<StorageChangeSet<T::Hash>>),
     /// Events that are Finalized
     Finalized(FinalizedEventStorageSubscription<T>),
 }
 
-impl<T: Runtime> EventStorageSubscription<T> {
+impl<T: Config> EventStorageSubscription<T> {
     /// Gets the next change_set from the subscription.
     pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
         match self {

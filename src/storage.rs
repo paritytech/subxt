@@ -36,7 +36,7 @@ use crate::{
     },
     rpc::Rpc,
     Error,
-    Runtime,
+    Config,
     StorageHasher,
 };
 
@@ -134,13 +134,13 @@ impl StorageMapKey {
 
 /// Client for querying runtime storage.
 #[derive(Clone)]
-pub struct StorageClient<'a, T: Runtime> {
+pub struct StorageClient<'a, T: Config> {
     rpc: &'a Rpc<T>,
     metadata: &'a Metadata,
     iter_page_size: u32,
 }
 
-impl<'a, T: Runtime> StorageClient<'a, T> {
+impl<'a, T: Config> StorageClient<'a, T> {
     /// Create a new [`StorageClient`]
     pub fn new(rpc: &'a Rpc<T>, metadata: &'a Metadata, iter_page_size: u32) -> Self {
         Self {
@@ -251,7 +251,7 @@ impl<'a, T: Runtime> StorageClient<'a, T> {
 }
 
 /// Iterates over key value pairs in a map.
-pub struct KeyIter<'a, T: Runtime, F: StorageEntry> {
+pub struct KeyIter<'a, T: Config, F: StorageEntry> {
     client: StorageClient<'a, T>,
     _marker: PhantomData<F>,
     count: u32,
@@ -260,7 +260,7 @@ pub struct KeyIter<'a, T: Runtime, F: StorageEntry> {
     buffer: Vec<(StorageKey, StorageData)>,
 }
 
-impl<'a, T: Runtime, F: StorageEntry> KeyIter<'a, T, F> {
+impl<'a, T: Config, F: StorageEntry> KeyIter<'a, T, F> {
     /// Returns the next key value pair from a map.
     pub async fn next(&mut self) -> Result<Option<(StorageKey, F::Value)>, Error> {
         loop {

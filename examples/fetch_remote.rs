@@ -16,7 +16,7 @@
 
 use subxt::{
     ClientBuilder,
-    Runtime,
+    Config,
 };
 use sp_runtime::traits::BlakeTwo256;
 
@@ -38,7 +38,7 @@ pub mod node_runtime {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct KusamaRuntime;
 
-impl Runtime for KusamaRuntime {
+impl Config for KusamaRuntime {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = sp_core::H256;

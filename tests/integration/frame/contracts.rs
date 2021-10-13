@@ -36,7 +36,7 @@ use subxt::{
     Error,
     ExtrinsicSuccess,
     PairSigner,
-    Runtime,
+    Config,
     StorageEntry,
 };
 
@@ -45,8 +45,8 @@ struct ContractsTestContext {
     signer: PairSigner<TestRuntime, Pair>,
 }
 
-type Hash = <TestRuntime as Runtime>::Hash;
-type AccountId = <TestRuntime as Runtime>::AccountId;
+type Hash = <TestRuntime as Config>::Hash;
+type AccountId = <TestRuntime as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {

@@ -17,7 +17,7 @@
 use sp_runtime::traits::BlakeTwo256;
 use subxt::{
     subxt,
-    Runtime,
+    Config,
     StorageEntry,
 };
 
@@ -40,7 +40,7 @@ pub mod node_runtime {
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct TestRuntime;
 
-impl Runtime for TestRuntime {
+impl Config for TestRuntime {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = sp_core::H256;
@@ -54,16 +54,16 @@ impl Runtime for TestRuntime {
     type AccountData = node_runtime::system::storage::Account;
 }
 
-impl From<<TestRuntime as Runtime>::AccountId>
+impl From<<TestRuntime as Config>::AccountId>
     for node_runtime::system::storage::Account
 {
-    fn from(account_id: <TestRuntime as Runtime>::AccountId) -> Self {
+    fn from(account_id: <TestRuntime as Config>::AccountId) -> Self {
         Self(account_id)
     }
 }
 
 impl subxt::AccountData<TestRuntime> for node_runtime::system::storage::Account {
-    fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Runtime>::Index {
+    fn nonce(result: &<Self as StorageEntry>::Value) -> <TestRuntime as Config>::Index {
         result.nonce
     }
 }

@@ -22,7 +22,7 @@ use super::{
     SignedPayload,
     UncheckedExtrinsic,
 };
-use crate::Runtime;
+use crate::Config;
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
@@ -33,7 +33,7 @@ use sp_runtime::traits::{
 
 /// Extrinsic signer.
 #[async_trait::async_trait]
-pub trait Signer<T: Runtime> {
+pub trait Signer<T: Config> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -52,7 +52,7 @@ pub trait Signer<T: Runtime> {
 
 /// Extrinsic signer using a private key.
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: Runtime, P: Pair> {
+pub struct PairSigner<T: Config, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
@@ -60,7 +60,7 @@ pub struct PairSigner<T: Runtime, P: Pair> {
 
 impl<T, P> PairSigner<T, P>
 where
-    T: Runtime,
+    T: Config,
     T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
@@ -96,7 +96,7 @@ where
 #[async_trait::async_trait]
 impl<T, P> Signer<T> for PairSigner<T, P>
 where
-    T: Runtime,
+    T: Config,
     T::AccountId: Into<T::Address> + 'static,
     <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send,
     P: Pair + 'static,

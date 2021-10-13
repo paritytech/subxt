@@ -44,14 +44,14 @@ use sp_version::RuntimeVersion;
 use crate::{
     Encoded,
     Error,
-    Runtime,
+    Config,
 };
 
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
-    <T as Runtime>::Address,
+    <T as Config>::Address,
     Encoded,
-    <T as Runtime>::Signature,
+    <T as Config>::Signature,
     Extra<T>,
 >;
 
@@ -67,7 +67,7 @@ pub async fn create_signed<T>(
     signer: &(dyn Signer<T> + Send + Sync),
 ) -> Result<UncheckedExtrinsic<T>, Error>
 where
-    T: Runtime,
+    T: Config,
     <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
         Send + Sync,
 {
@@ -82,7 +82,7 @@ where
 /// Creates an unsigned extrinsic
 pub fn create_unsigned<T>(call: Encoded) -> UncheckedExtrinsic<T>
 where
-    T: Runtime,
+    T: Config,
 {
     UncheckedExtrinsic::<T>::new_unsigned(call)
 }
