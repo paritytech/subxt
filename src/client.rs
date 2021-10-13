@@ -15,14 +15,9 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_ws_client::WsClientBuilder;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::{
-    marker::PhantomData,
-    sync::Arc,
-};
+use std::marker::PhantomData;
 
 use crate::{
     events::EventsDecoder,
@@ -97,16 +92,7 @@ impl ClientBuilder {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            if url.starts_with("ws://") || url.starts_with("wss://") {
-                let client = WsClientBuilder::default()
-                    .max_notifs_per_subscription(4096)
-                    .build(url)
-                    .await?;
-                RpcClient::WebSocket(Arc::new(client))
-            } else {
-                let client = HttpClientBuilder::default().build(&url)?;
-                RpcClient::Http(Arc::new(client))
-            }
+            RpcClient::try_from_url(url).await?
         };
         let mut rpc = Rpc::new(client);
         if self.accept_weak_inclusion {

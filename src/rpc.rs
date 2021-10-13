@@ -33,7 +33,7 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::HttpClient;
+use jsonrpsee_http_client::{HttpClient, HttpClientBuilder};
 use jsonrpsee_types::{
     to_json_value,
     traits::{
@@ -45,7 +45,7 @@ use jsonrpsee_types::{
     JsonValue,
     Subscription,
 };
-use jsonrpsee_ws_client::WsClient;
+use jsonrpsee_ws_client::{WsClient, WsClientBuilder};
 use serde::{
     Deserialize,
     Serialize,
@@ -190,6 +190,24 @@ pub enum RpcClient {
 }
 
 impl RpcClient {
+    /// Create a new [`RpcClient`] from the given URL.
+    ///
+    /// Infers the protocol from the URL, supports:
+    ///     - Websockets (`ws://`, `wss://`)
+    ///     - Http (`http://`, `https://`)
+    pub async fn try_from_url(url: &str) -> Result<Self, Error> {
+        if url.starts_with("ws://") || url.starts_with("wss://") {
+            let client = WsClientBuilder::default()
+                .max_notifs_per_subscription(4096)
+                .build(url)
+                .await?;
+            Ok(RpcClient::WebSocket(Arc::new(client)))
+        } else {
+            let client = HttpClientBuilder::default().build(&url)?;
+            Ok(RpcClient::Http(Arc::new(client)))
+        }
+    }
+
     /// Start a JSON-RPC request.
     pub async fn request<'a, T: DeserializeOwned + std::fmt::Debug>(
         &self,
@@ -290,7 +308,7 @@ impl<T: Runtime> Clone for Rpc<T> {
 }
 
 impl<T: Runtime> Rpc<T> {
-    /// Create a new [`Rpc`] for a given runtime.
+    /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
             client,
@@ -298,6 +316,8 @@ impl<T: Runtime> Rpc<T> {
             accept_weak_inclusion: false,
         }
     }
+
+
 
     /// Configure the Rpc to accept non-finalized blocks
     /// in `submit_and_watch_extrinsic`
