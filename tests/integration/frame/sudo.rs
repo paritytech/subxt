@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
     node_runtime::{
@@ -24,7 +24,7 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use substrate_subxt::extrinsic::PairSigner;
+use subxt::extrinsic::PairSigner;
 
 // todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;

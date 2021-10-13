@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
     node_runtime,
@@ -21,7 +21,7 @@ pub use crate::{
 };
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::Client;
+use subxt::Client;
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
@@ -30,7 +30,7 @@ pub async fn test_node_process_with(key: AccountKeyring) -> TestNodeProcess<Test
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
-            See https://github.com/paritytech/substrate-subxt/tree/master#integration-testing")
+            See https://github.com/paritytech/subxt/tree/master#integration-testing")
         }
         SUBSTRATE_NODE_PATH.to_string()
     });

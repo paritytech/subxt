@@ -2,15 +2,15 @@
 members = [".", "codegen", "macro"]
 
 [package]
-name = "substrate-subxt"
+name = "subxt"
 version = "0.15.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2018"
 
 license = "GPL-3.0"
 readme = "README.md"
-repository = "https://github.com/paritytech/substrate-subxt"
-documentation = "https://docs.rs/substrate-subxt"
+repository = "https://github.com/paritytech/subxt"
+documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]

@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! RPC types and client for interacting with a substrate node.
 
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/substrate-subxt/issues/66
+// Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
 use std::sync::Arc;

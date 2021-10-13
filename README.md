@@ -1,4 +1,4 @@
-# subxt &middot; ![build](https://github.com/paritytech/substrate-subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/substrate-subxt.svg)](https://crates.io/crates/substrate-subxt) [![Documentation](https://docs.rs/substrate-subxt/badge.svg)](https://docs.rs/substrate-subxt)
+# subxt &middot; ![build](https://github.com/paritytech/subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/subxt.svg)](https://crates.io/crates/subxt) [![Documentation](https://docs.rs/subxt/badge.svg)](https://docs.rs/subxt)
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
