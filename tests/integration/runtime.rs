@@ -30,6 +30,7 @@ pub mod node_runtime {
     #[subxt(substitute_type = "sp_runtime::multiaddress::MultiAddress")]
     use sp_runtime::MultiAddress;
 
+    // todo: [AJ] remove the requirement for these by implementing Compact handling properly
     #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
     use sp_arithmetic::per_things::Perbill;
     #[subxt(substitute_type = "sp_arithmetic::per_things::Perquintill")]
