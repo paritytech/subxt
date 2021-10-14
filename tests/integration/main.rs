@@ -22,8 +22,5 @@ mod client;
 #[cfg(test)]
 mod frame;
 
-pub use runtime::{
-    node_runtime,
-    TestRuntime,
-};
+pub use runtime::node_runtime;
 pub use utils::*;

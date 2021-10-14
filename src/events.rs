@@ -293,11 +293,11 @@ pub enum Raw {
 //     use super::*;
 //     use std::convert::TryFrom;
 //
-//     type TestRuntime = crate::NodeTemplateRuntime;
+//     type DefaultConfig = crate::NodeTemplateRuntime;
 //
 //     #[test]
 //     fn test_decode_option() {
-//         let decoder = EventsDecoder::<TestRuntime>::new(
+//         let decoder = EventsDecoder::<DefaultConfig>::new(
 //             Metadata::default(),
 //         );
 //

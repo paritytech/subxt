@@ -20,7 +20,7 @@ use crate::{
         sudo,
     },
     test_context,
-    TestRuntime,
+    DefaultConfig,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
@@ -32,7 +32,7 @@ type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::test]
 async fn test_sudo() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().clone().into();
     let cxt = test_context().await;
 
@@ -56,7 +56,7 @@ async fn test_sudo() {
 
 #[async_std::test]
 async fn test_sudo_unchecked_weight() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 

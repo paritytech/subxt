@@ -64,6 +64,7 @@ mod subscription;
 pub use crate::{
     config::{
         Config,
+        DefaultConfig,
         AccountData,
     },
     client::{

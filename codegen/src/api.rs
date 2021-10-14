@@ -242,6 +242,30 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
+                fn id() {
+                    let _: <DefaultConfig as ::subxt::Config>::AccountId = sp_runtime::AccountId32::default();
+                }
+
+                pub type DefaultConfig = ::subxt::DefaultConfig<AccountData>;
+                pub type DefaultAccountId = <::subxt::DefaultConfig<AccountData> as ::subxt::Config>::AccountId;
+
+                // todo: [AJ] check for this type's existence or allow config
+                pub type AccountData = self::system::storage::Account;
+
+                // todo: [AJ] is there a simpler way to implment this, or at least clean up the generics
+                impl From<<DefaultConfig as ::subxt::Config>::AccountId> for self::system::storage::Account
+                {
+                    fn from(account_id: <DefaultConfig as ::subxt::Config>::AccountId) -> self::system::storage::Account {
+                        self::system::storage::Account(account_id)
+                    }
+                }
+
+                impl ::subxt::AccountData<DefaultConfig> for AccountData {
+                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig<Self> as ::subxt::Config>::Index {
+                        result.nonce
+                    }
+                }
+
                 pub struct RuntimeApi<T: ::subxt::Config> {
                     pub client: ::subxt::Client<T>,
                 }

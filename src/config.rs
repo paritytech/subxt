@@ -19,6 +19,7 @@ use codec::{
     Encode,
     EncodeLike,
 };
+use core::fmt::Debug;
 use crate::{
     SignedExtra,
     StorageEntry,
@@ -91,15 +92,56 @@ pub trait Config: Clone + Sized + Send + Sync + 'static {
     type Signature: Verify + Encode + Send + Sync + 'static;
 
     /// Extrinsic type within blocks.
-    type Extrinsic: Parameter + Extrinsic + core::fmt::Debug + MaybeSerializeDeserialize;
+    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
 }
 
 /// Parameter trait compied from substrate::frame_support
-pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
-impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
+pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
+impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
 /// Trait to fetch data about an account.
 pub trait AccountData<T: Config>: StorageEntry + From<T::AccountId> {
     /// Get the nonce from the storage entry value.
     fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
+}
+
+/// Default configuration of common types for a target Substrate runtime.
+pub struct DefaultConfig<T>(core::marker::PhantomData<fn() -> T>);
+
+impl<T> Clone for DefaultConfig<T> {
+    fn clone(&self) -> Self {
+        Self(Default::default())
+    }
+}
+
+impl<T> Debug for DefaultConfig<T> {
+    fn fmt(&self, f: &mut core::fmt::Formatter<'_>) -> core::fmt::Result {
+        self.0.fmt(f)
+    }
+}
+
+impl<T> core::cmp::PartialEq for DefaultConfig<T> {
+    fn eq(&self, _: &Self) -> bool {
+        true
+    }
+}
+
+impl<T> core::cmp::Eq for DefaultConfig<T> {
+}
+
+impl<T> Config for DefaultConfig<T>
+where
+    T: AccountData<Self> + 'static
+{
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = sp_runtime::traits::BlakeTwo256;
+    type AccountId = sp_runtime::AccountId32;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
+    type Header = sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
+    type Extra = crate::extrinsic::DefaultExtra<Self>;
+    type Signature = sp_runtime::MultiSignature;
+    type Extrinsic = sp_runtime::OpaqueExtrinsic;
+    type AccountData = T;
 }

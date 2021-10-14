@@ -27,7 +27,7 @@ use crate::{
     },
     test_context,
     TestContext,
-    TestRuntime,
+    DefaultConfig,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
@@ -42,11 +42,11 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<TestRuntime, Pair>,
+    signer: PairSigner<DefaultConfig, Pair>,
 }
 
-type Hash = <TestRuntime as Config>::Hash;
-type AccountId = <TestRuntime as Config>::AccountId;
+type Hash = <DefaultConfig as Config>::Hash;
+type AccountId = <DefaultConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
@@ -56,11 +56,11 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<TestRuntime> {
+    fn client(&self) -> &Client<DefaultConfig> {
         &self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<TestRuntime> {
+    fn contracts_tx(&self) -> TransactionApi<DefaultConfig> {
         self.cxt.api.tx().contracts()
     }
 
@@ -138,7 +138,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
+    ) -> Result<ExtrinsicSuccess<DefaultConfig>, Error> {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()
