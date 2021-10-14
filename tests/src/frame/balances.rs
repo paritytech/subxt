@@ -218,3 +218,18 @@ async fn transfer_subscription() {
         balances::events::Transfer(alice.account_id().clone(), bob.clone(), 10_000,)
     );
 }
+
+#[async_std::test]
+async fn constant_existential_deposit() {
+    let cxt = test_context().await;
+    let balances_metadata = cxt
+        .client()
+        .metadata()
+        .pallet("Balances").unwrap();
+    let constant_metadata = balances_metadata
+        .constant("ExistentialDeposit")
+        .unwrap();
+    let existential_deposit = u128::decode(&mut &constant_metadata.value[..])
+        .unwrap();
+    assert_eq!(existential_deposit, 10_000_000_000);
+}
