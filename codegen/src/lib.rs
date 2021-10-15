@@ -17,6 +17,7 @@
 //! Library to generate an API for a Substrate runtime from its metadata.
 
 mod api;
+mod ir;
 mod struct_def;
 mod types;
 

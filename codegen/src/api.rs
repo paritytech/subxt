@@ -15,11 +15,11 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    ir,
     struct_def::StructDef,
     types::TypeGenerator,
 };
 use codec::Decode;
-use darling::FromMeta;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletCallMetadata,
@@ -35,7 +35,6 @@ use frame_metadata::{
 use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::{
-    abort,
     abort_call_site,
 };
 use quote::{
@@ -48,12 +47,10 @@ use scale_info::{
     TypeDef,
 };
 use std::{
-    collections::HashMap,
     fs,
     io::Read,
     path,
 };
-use syn::spanned::Spanned as _;
 
 pub fn generate_runtime_types<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
 where
@@ -74,20 +71,6 @@ where
     generator.generate_runtime(item_mod)
 }
 
-#[derive(Debug, FromMeta)]
-#[darling(rename_all = "snake_case")]
-enum Subxt {
-    SubstituteType(String),
-}
-
-impl Subxt {
-    fn substitute_type(&self) -> String {
-        match self {
-            Self::SubstituteType(path) => path.clone(),
-        }
-    }
-}
-
 pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV14,
 }
@@ -101,7 +84,8 @@ impl RuntimeGenerator {
     }
 
     pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
-        let type_substitutes = Self::parse_type_substitutes(&item_mod);
+        let item_mod_ir = ir::ItemMod::from(item_mod);
+        let type_substitutes = item_mod_ir.type_substitutes();
         let type_gen =
             TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();
@@ -224,7 +208,7 @@ impl RuntimeGenerator {
         };
 
         // todo: [AJ] keep all other code items from decorated mod?
-        let mod_ident = item_mod.ident;
+        let mod_ident = item_mod_ir.ident;
         let pallets_with_storage =
             pallets_with_mod_names
                 .iter()
@@ -341,53 +325,6 @@ impl RuntimeGenerator {
                     )*
                 }
             }
-        }
-    }
-
-    fn parse_type_substitutes(item_mod: &syn::ItemMod) -> HashMap<String, syn::TypePath> {
-        if let Some(ref content) = item_mod.content {
-            content
-                .1
-                .iter()
-                .filter_map(|item| {
-                    if let syn::Item::Use(use_) = item {
-                        let substitute_attrs = use_
-                            .attrs
-                            .iter()
-                            .map(|attr| {
-                                let meta = attr.parse_meta().unwrap_or_else(|e| {
-                                    abort!(attr.span(), "Error parsing attribute: {}", e)
-                                });
-                                let substitute_type_args = Subxt::from_meta(&meta)
-                                    .unwrap_or_else(|e| {
-                                        abort!(
-                                            attr.span(),
-                                            "Error parsing attribute meta: {}",
-                                            e
-                                        )
-                                    });
-                                substitute_type_args
-                            })
-                            .collect::<Vec<_>>();
-                        if substitute_attrs.len() > 1 {
-                            abort!(
-                                use_.attrs[0].span(),
-                                "Duplicate `substitute_type` attributes"
-                            )
-                        }
-                        substitute_attrs.iter().next().map(|attr| {
-                            let substitute_type = attr.substitute_type();
-                            let use_path = &use_.tree;
-                            let use_type_path = syn::parse_quote!( #use_path );
-                            (substitute_type.to_string(), use_type_path)
-                        })
-                    } else {
-                        None
-                    }
-                })
-                .collect()
-        } else {
-            HashMap::new()
         }
     }
 
