@@ -16,6 +16,7 @@
 
 use crate::{
     node_runtime::{
+        DefaultConfig,
         runtime_types::pallet_staking::{
             RewardDestination,
             ValidatorPrefs,
@@ -35,7 +36,6 @@ use subxt::{
         PairSigner,
         Signer,
     },
-    DefaultConfig,
     Error,
     ExtrinsicSuccess,
     RuntimeError,

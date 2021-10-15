@@ -126,11 +126,14 @@ impl RuntimeGenerator {
                         use super::#types_mod_ident;
                         #( #call_structs )*
 
-                        pub struct TransactionApi<'a, T: ::subxt::Config> {
+                        pub struct TransactionApi<'a, T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
                             client: &'a ::subxt::Client<T>,
                         }
 
-                        impl<'a, T: ::subxt::Config> TransactionApi<'a, T> {
+                        impl<'a, T: ::subxt::Config> TransactionApi<'a, T>
+                        where
+                            T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                        {
                             pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                                 Self { client }
                             }
@@ -242,40 +245,60 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
+                /// Default configuration of common types for a target Substrate runtime.
+                // todo: allow to define/override this as part of the annotated mod
+                #[derive(Clone, Debug, Default, Eq, PartialEq)]
+                pub struct DefaultConfig;
+
+                impl ::subxt::Config for DefaultConfig {
+                    type Index = u32;
+                    type BlockNumber = u32;
+                    type Hash = ::subxt::sp_core::H256;
+                    type Hashing = ::subxt::sp_runtime::traits::BlakeTwo256;
+                    type AccountId = ::subxt::sp_runtime::AccountId32;
+                    type Address = ::subxt::sp_runtime::MultiAddress<Self::AccountId, u32>;
+                    type Header = ::subxt::sp_runtime::generic::Header<
+                        Self::BlockNumber, ::subxt::sp_runtime::traits::BlakeTwo256
+                    >;
+                    type Signature = ::subxt::sp_runtime::MultiSignature;
+                    type Extrinsic = ::subxt::sp_runtime::OpaqueExtrinsic;
+                }
+
+                impl ::subxt::ExtrinsicExtraData<DefaultConfig> for DefaultConfig {
+                    type AccountData = AccountData;
+                    // todo: [AJ] make this configurable or auto-generated from metadata
+                    type Extra = ::subxt::DefaultExtra<DefaultConfig>;
+                }
+
                 // todo: [AJ] check for this type's existence or allow config
                 pub type AccountData = self::system::storage::Account;
 
-                // todo: [AJ] make this configurable or auto-generated from metadata
-                pub type Extra = ::subxt::DefaultExtra<::subxt::DefaultConfig>;
-
-                impl ::subxt::AccountData<::subxt::DefaultConfig> for AccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
+                impl ::subxt::AccountData<DefaultConfig> for AccountData {
+                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <DefaultConfig as ::subxt::Config>::Index {
                         result.nonce
                     }
-                    fn storage_entry(account_id: <::subxt::DefaultConfig as ::subxt::Config>::AccountId) -> Self {
+                    fn storage_entry(account_id: <DefaultConfig as ::subxt::Config>::AccountId) -> Self {
                         Self(account_id)
                     }
                 }
 
-                #[derive(Debug)]
-                pub struct ExtrinsicExtra;
-
-                impl ::subxt::ExtrinsicExtraData<::subxt::DefaultConfig> for ExtrinsicExtra {
-                    type AccountData = AccountData;
-                    type Extra = Extra;
-                }
-
-                pub struct RuntimeApi<T: ::subxt::Config> {
+                pub struct RuntimeApi<T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
                     pub client: ::subxt::Client<T>,
                 }
 
-                impl<T: ::subxt::Config> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T> {
+                impl<T> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T>
+                where
+                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client }
                     }
                 }
 
-                impl<'a, T: ::subxt::Config> RuntimeApi<T> {
+                impl<'a, T> RuntimeApi<T>
+                where
+                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                {
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
@@ -285,11 +308,17 @@ impl RuntimeGenerator {
                     }
                 }
 
-                pub struct StorageApi<'a, T: ::subxt::Config> {
+                pub struct StorageApi<'a, T>
+                where
+                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                {
                     client: &'a ::subxt::Client<T>,
                 }
 
-                impl<'a, T: ::subxt::Config> StorageApi<'a, T> {
+                impl<'a, T> StorageApi<'a, T>
+                where
+                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                {
                     #(
                         pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
                             #pallets_with_storage::storage::StorageApi::new(self.client)
@@ -297,11 +326,14 @@ impl RuntimeGenerator {
                     )*
                 }
 
-                pub struct TransactionApi<'a, T: ::subxt::Config> {
+                pub struct TransactionApi<'a, T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
                     client: &'a ::subxt::Client<T>,
                 }
 
-                impl<'a, T: ::subxt::Config> TransactionApi<'a, T> {
+                impl<'a, T> TransactionApi<'a, T>
+                where
+                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T> {
                             #pallets_with_calls::calls::TransactionApi::new(self.client)
@@ -365,7 +397,6 @@ impl RuntimeGenerator {
         pallet: &PalletMetadata<PortableForm>,
         call: &PalletCallMetadata<PortableForm>,
     ) -> (Vec<TokenStream2>, Vec<TokenStream2>) {
-        let extra_type = quote!( super::super::ExtrinsicExtra );
         let struct_defs =
             self.generate_structs_from_variants(type_gen, call.ty.id(), "Call");
         struct_defs
@@ -400,7 +431,7 @@ impl RuntimeGenerator {
                     pub fn #fn_name(
                         &self,
                         #( #call_fn_args, )*
-                    ) -> ::subxt::SubmittableExtrinsic<T, #extra_type, #call_struct_name> {
+                    ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
                         let call = #call_struct_name { #( #call_args, )* };
                         ::subxt::SubmittableExtrinsic::new(self.client, call)
                     }

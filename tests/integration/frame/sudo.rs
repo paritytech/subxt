@@ -16,6 +16,7 @@
 
 use crate::{
     node_runtime::{
+        DefaultConfig,
         runtime_types,
         sudo,
     },
@@ -23,10 +24,7 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::{
-    DefaultConfig,
-    extrinsic::PairSigner
-};
+use subxt::extrinsic::PairSigner;
 
 // todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;

@@ -15,13 +15,15 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::system,
+    node_runtime::{
+        DefaultConfig,
+        system,
+    },
     test_context,
-    DefaultConfig,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::{
+use subxt::{
     PairSigner,
     Signer,
 };

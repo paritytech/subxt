@@ -16,6 +16,7 @@
 
 use crate::{
     node_runtime::{
+        DefaultConfig,
         balances,
         runtime_types,
         system,
@@ -33,7 +34,6 @@ use subxt::{
         PairSigner,
         Signer,
     },
-    DefaultConfig,
     Error,
     EventSubscription,
     PalletError,

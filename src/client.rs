@@ -17,7 +17,6 @@
 use futures::future;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::marker::PhantomData;
 
 use crate::{
     events::EventsDecoder,
@@ -188,21 +187,19 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'a, T: Config, E, C> {
+pub struct SubmittableExtrinsic<'a, T: Config, C> {
     client: &'a Client<T>,
     call: C,
-    marker: PhantomData<fn() -> E>
 }
 
-impl<'a, T, E, C> SubmittableExtrinsic<'a, T, E, C>
+impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
-    T: Config,
-    E: ExtrinsicExtraData<T>,
+    T: Config + ExtrinsicExtraData<T>,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
     pub fn new(client: &'a Client<T>, call: C) -> Self {
-        Self { client, call, marker: PhantomData }
+        Self { client, call }
     }
 
     /// Creates and signs an extrinsic and submits to the chain.
@@ -211,11 +208,10 @@ where
     /// events which were triggered by the extrinsic.
     pub async fn sign_and_submit_then_watch(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
+        signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<ExtrinsicSuccess<T>, Error>
     where
-        <<E::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
         let extrinsic = self.create_signed(signer).await?;
         self.client
@@ -234,11 +230,10 @@ where
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
+        signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, Error>
     where
-        <<E::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
         let extrinsic = self.create_signed(signer).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -247,23 +242,22 @@ where
     /// Creates a signed extrinsic.
     pub async fn create_signed(
         &self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<UncheckedExtrinsic<T, E>, Error>
-        where
-            <<E::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<UncheckedExtrinsic<T>, Error>
+    where
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
             let account_storage_entry =
-                <E::AccountData as AccountData<T>>::storage_entry(signer.account_id().clone());
+                <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::storage_entry(signer.account_id().clone());
             let account_data = self
                 .client
                 .storage()
                 .fetch_or_default(&account_storage_entry, None)
                 .await?;
-            <E::AccountData as AccountData<T>>::nonce(&account_data)
+            <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::nonce(&account_data)
         };
         let call = self
             .client

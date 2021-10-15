@@ -48,34 +48,33 @@ use crate::{
 };
 
 /// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T, E> = sp_runtime::generic::UncheckedExtrinsic<
+pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
     <T as Config>::Address,
     Encoded,
     <T as Config>::Signature,
-    <<E as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra,
+    <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra,
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T, E> = sp_runtime::generic::SignedPayload<Encoded, <<E as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra>;
+pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra>;
 
 /// Creates a signed extrinsic
-pub async fn create_signed<T, E>(
+pub async fn create_signed<T>(
     runtime_version: &RuntimeVersion,
     genesis_hash: T::Hash,
     nonce: T::Index,
     call: Encoded,
-    signer: &(dyn Signer<T, E> + Send + Sync),
-) -> Result<UncheckedExtrinsic<T, E>, Error>
+    signer: &(dyn Signer<T> + Send + Sync),
+) -> Result<UncheckedExtrinsic<T>, Error>
 where
-    T: Config,
-    E: ExtrinsicExtraData<T>,
-    <<E::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    T: Config + ExtrinsicExtraData<T>,
+    <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
         Send + Sync,
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let extra: E::Extra = E::Extra::new(spec_version, tx_version, nonce, genesis_hash);
-    let payload = SignedPayload::<T, E>::new(call, extra.extra())?;
+    let extra = <T as ExtrinsicExtraData<T>>::Extra::new(spec_version, tx_version, nonce, genesis_hash);
+    let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
 }

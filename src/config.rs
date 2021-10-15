@@ -103,19 +103,3 @@ pub trait ExtrinsicExtraData<T: Config> {
     /// The type of extra data and additional signed data to be included in a transaction.
     type Extra: SignedExtra<T> + Send + Sync + 'static;
 }
-
-/// Default configuration of common types for a target Substrate runtime.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct DefaultConfig;
-
-impl Config for DefaultConfig {
-    type Index = u32;
-    type BlockNumber = u32;
-    type Hash = sp_core::H256;
-    type Hashing = sp_runtime::traits::BlakeTwo256;
-    type AccountId = sp_runtime::AccountId32;
-    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-    type Header = sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
-    type Signature = sp_runtime::MultiSignature;
-    type Extrinsic = sp_runtime::OpaqueExtrinsic;
-}
