@@ -54,32 +54,3 @@ async fn tx_remark_with_event() {
     let remarked = result.find_event::<system::events::Remarked>();
     assert_matches!(remarked, Ok(Some(_)));
 }
-
-#[async_std::test]
-async fn tx_batch_remarks() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-    let cxt = test_context().await;
-
-    let remark_a = Call::remark {
-        remark: b"cool remark".to_vec(),
-    };
-    let remark_b = Call::remark {
-        remark: b"awesome remark".to_vec(),
-    };
-
-    let call_a = System(remark_a);
-
-    let call_b = System(remark_b);
-
-    let result = cxt
-        .api
-        .tx()
-        .utility()
-        .batch(vec![call_a, call_b])
-        .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-
-    let batch_completed = result.find_event::<utility::events::BatchCompleted>();
-    assert_matches!(batch_completed, Ok(Some(_)));
-}
