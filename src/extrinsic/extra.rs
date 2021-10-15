@@ -32,7 +32,7 @@ use sp_runtime::{
 use crate::Config;
 
 /// Extra type.
-pub type Extra<T> = <<T as Config>::Extra as SignedExtra<T>>::Extra;
+// pub type Extra<T> = <<T as Config>::Extra as SignedExtra<T>>::Extra;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `frame_system::Trait`

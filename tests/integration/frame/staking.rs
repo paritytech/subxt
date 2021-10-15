@@ -23,7 +23,6 @@ use crate::{
         staking,
     },
     test_context,
-    DefaultConfig,
 };
 use assert_matches::assert_matches;
 use sp_core::{
@@ -36,6 +35,7 @@ use subxt::{
         PairSigner,
         Signer,
     },
+    DefaultConfig,
     Error,
     ExtrinsicSuccess,
     RuntimeError,

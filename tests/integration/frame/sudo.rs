@@ -20,11 +20,13 @@ use crate::{
         sudo,
     },
     test_context,
-    DefaultConfig,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::PairSigner;
+use subxt::{
+    DefaultConfig,
+    extrinsic::PairSigner
+};
 
 // todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;

@@ -242,28 +242,27 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                fn id() {
-                    let _: <DefaultConfig as ::subxt::Config>::AccountId = sp_runtime::AccountId32::default();
-                }
-
-                pub type DefaultConfig = ::subxt::DefaultConfig<AccountData>;
-                pub type DefaultAccountId = <::subxt::DefaultConfig<AccountData> as ::subxt::Config>::AccountId;
-
                 // todo: [AJ] check for this type's existence or allow config
                 pub type AccountData = self::system::storage::Account;
 
-                // todo: [AJ] is there a simpler way to implment this, or at least clean up the generics
-                impl From<<DefaultConfig as ::subxt::Config>::AccountId> for self::system::storage::Account
-                {
-                    fn from(account_id: <DefaultConfig as ::subxt::Config>::AccountId) -> self::system::storage::Account {
-                        self::system::storage::Account(account_id)
+                // todo: [AJ] make this configurable or auto-generated from metadata
+                pub type Extra = ::subxt::DefaultExtra<::subxt::DefaultConfig>;
+
+                impl ::subxt::AccountData<::subxt::DefaultConfig> for AccountData {
+                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
+                        result.nonce
+                    }
+                    fn storage_entry(account_id: <::subxt::DefaultConfig as ::subxt::Config>::AccountId) -> Self {
+                        Self(account_id)
                     }
                 }
 
-                impl ::subxt::AccountData<DefaultConfig> for AccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig<Self> as ::subxt::Config>::Index {
-                        result.nonce
-                    }
+                #[derive(Debug)]
+                pub struct ExtrinsicExtra;
+
+                impl ::subxt::ExtrinsicExtraData<::subxt::DefaultConfig> for ExtrinsicExtra {
+                    type AccountData = AccountData;
+                    type Extra = Extra;
                 }
 
                 pub struct RuntimeApi<T: ::subxt::Config> {
@@ -366,6 +365,7 @@ impl RuntimeGenerator {
         pallet: &PalletMetadata<PortableForm>,
         call: &PalletCallMetadata<PortableForm>,
     ) -> (Vec<TokenStream2>, Vec<TokenStream2>) {
+        let extra_type = quote!( super::super::ExtrinsicExtra );
         let struct_defs =
             self.generate_structs_from_variants(type_gen, call.ty.id(), "Call");
         struct_defs
@@ -400,7 +400,7 @@ impl RuntimeGenerator {
                     pub fn #fn_name(
                         &self,
                         #( #call_fn_args, )*
-                    ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
+                    ) -> ::subxt::SubmittableExtrinsic<T, #extra_type, #call_struct_name> {
                         let call = #call_struct_name { #( #call_args, )* };
                         ::subxt::SubmittableExtrinsic::new(self.client, call)
                     }

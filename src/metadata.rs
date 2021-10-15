@@ -141,7 +141,7 @@ pub struct PalletMetadata {
 }
 
 impl PalletMetadata {
-    pub fn encode_call<C>(&self, call: C) -> Result<Encoded, MetadataError>
+    pub fn encode_call<C>(&self, call: &C) -> Result<Encoded, MetadataError>
     where
         C: Call,
     {

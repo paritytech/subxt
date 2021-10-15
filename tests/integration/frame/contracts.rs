@@ -18,6 +18,7 @@ use sp_keyring::AccountKeyring;
 
 use crate::{
     node_runtime::{
+        ExtrinsicExtra,
         contracts::{
             calls::TransactionApi,
             events,
@@ -27,12 +28,12 @@ use crate::{
     },
     test_context,
     TestContext,
-    DefaultConfig,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
     Client,
+    DefaultConfig,
     Error,
     ExtrinsicSuccess,
     PairSigner,
@@ -42,7 +43,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<DefaultConfig, ExtrinsicExtra, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;

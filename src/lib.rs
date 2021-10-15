@@ -66,6 +66,7 @@ pub use crate::{
         Config,
         DefaultConfig,
         AccountData,
+        ExtrinsicExtraData,
     },
     client::{
         Client,
@@ -82,6 +83,7 @@ pub use crate::{
         RawEvent,
     },
     extrinsic::{
+        DefaultExtra,
         PairSigner,
         SignedExtra,
         Signer,

@@ -21,7 +21,6 @@ use crate::{
         system,
     },
     test_context,
-    DefaultConfig,
 };
 use codec::Decode;
 use sp_core::{
@@ -34,6 +33,7 @@ use subxt::{
         PairSigner,
         Signer,
     },
+    DefaultConfig,
     Error,
     EventSubscription,
     PalletError,

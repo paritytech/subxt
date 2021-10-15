@@ -15,12 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    node_runtime::{self, DefaultConfig},
+    node_runtime,
     TestNodeProcess,
 };
 
 use sp_keyring::AccountKeyring;
-use subxt::Client;
+use subxt::{Client, DefaultConfig};
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
