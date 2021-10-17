@@ -15,9 +15,8 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::runtime_types::frame_system::pallet::Call,
-    node_runtime::runtime_types::node_runtime::Call::System, node_runtime::system,
-    node_runtime::utility, test_context, TestRuntime,
+    node_runtime::system,
+    test_context, TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;

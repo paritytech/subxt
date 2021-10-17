@@ -16,8 +16,6 @@
 
 use crate::{
     node_runtime::runtime_types,
-    // node_runtime::runtime_types::frame_system::pallet::Call,
-    // node_runtime::runtime_types::node_runtime::Call::System, node_runtime::system,
     node_runtime::utility, test_context, TestRuntime,
 };
 use assert_matches::assert_matches;
