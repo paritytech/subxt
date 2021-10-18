@@ -34,7 +34,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-    let hash = api.tx().transfer(&dest, 10_000)
+    let hash = api
+        .tx()
+        .transfer(&dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
 

@@ -279,8 +279,10 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                         .collect()
                 });
 
-                let constants = pallet.constants.iter().map(|constant| 
-                    (constant.name.clone(), constant.clone()))
+                let constants = pallet
+                    .constants
+                    .iter()
+                    .map(|constant| (constant.name.clone(), constant.clone()))
                     .collect();
 
                 let pallet_metadata = PalletMetadata {
