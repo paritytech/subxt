@@ -116,6 +116,16 @@ impl<'a> TypeGenerator<'a> {
     /// # Panics
     ///
     /// If no type with the given id found in the type registry.
+    pub fn resolve_type(&self, id: u32) -> Type<PortableForm> {
+        self.type_registry
+            .resolve(id)
+            .unwrap_or_else(|| panic!("No type with id {} found", id))
+            .clone()
+    }
+
+    /// # Panics
+    ///
+    /// If no type with the given id found in the type registry.
     pub fn resolve_type_path(
         &self,
         id: u32,
@@ -128,17 +138,10 @@ impl<'a> TypeGenerator<'a> {
             return TypePath::Parameter(parent_type_param.clone())
         }
 
-        let resolve_type = |id| {
-            self.type_registry
-                .resolve(id)
-                .unwrap_or_else(|| panic!("No type with id {} found", id))
-                .clone()
-        };
-
-        let mut ty = resolve_type(id);
+        let mut ty = self.resolve_type(id);
 
         if ty.path().ident() == Some("Cow".to_string()) {
-            ty = resolve_type(
+            ty = self.resolve_type(
                 ty.type_params()[0]
                     .ty()
                     .expect("type parameters to Cow are not expected to be skipped; qed")
