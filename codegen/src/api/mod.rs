@@ -39,11 +39,13 @@ use quote::{
     quote,
 };
 use std::{
+    collections::HashMap,
     fs,
     io::Read,
     path,
     string::ToString,
 };
+use syn::parse_quote;
 
 pub fn generate_runtime_types<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
 where
@@ -78,8 +80,23 @@ impl RuntimeGenerator {
 
     pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
-        let type_substitutes = item_mod_ir.type_substitutes();
-        // todo: [AJ] add hardcoded type subs as per test runtime...
+
+        // some hardcoded default type substitutes, can be overridden by user
+        let mut type_substitutes = [
+            ("sp_core::crypto::AccountId32", parse_quote!( ::subxt::sp_core::crypto::AccountId32 )),
+            ("primitive_types::H256", parse_quote!( ::subxt::sp_core::H256 )),
+            ("sp_runtime::multiaddress::MultiAddress", parse_quote!( ::subxt::sp_runtime::MultiAddress )),
+            // todo: [AJ] remove the requirement for these by implementing Compact handling properly
+            ("sp_arithmetic::per_things::Perbill", parse_quote!( ::subxt::sp_arithmetic::per_things::Perbill )),
+            ("sp_arithmetic::per_things::Perquintill", parse_quote!( ::subxt::sp_arithmetic::per_things::Perquintill )),
+        ]
+            .iter()
+            .map(|(path, substitute): &(&str, syn::TypePath)| (path.to_string(), substitute.clone())).collect::<HashMap<_, _>>();
+
+        for (path, substitute) in item_mod_ir.type_substitutes().iter() {
+            type_substitutes.insert(path.to_string(), substitute.clone());
+        };
+
         let type_gen =
             TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
         let types_mod = type_gen.generate_types_mod();

@@ -41,9 +41,11 @@
 #![allow(clippy::type_complexity)]
 
 pub use frame_metadata::StorageHasher;
+pub use subxt_macro::subxt;
+
+pub use sp_arithmetic;
 pub use sp_core;
 pub use sp_runtime;
-pub use subxt_macro::subxt;
 
 use codec::{
     Decode,
