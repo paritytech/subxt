@@ -270,7 +270,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 let (fields, _) =
                     self.composite_fields(composite.fields(), &type_params, true);
                 let ty_toks = quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, ::codec::Encode, ::codec::Decode)]
                     pub struct #type_name #fields
                 };
                 tokens.extend(ty_toks);
@@ -310,7 +310,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 }
 
                 let ty_toks = quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, Ord, PartialOrd, ::codec::Encode, ::codec::Decode)]
                     pub enum #type_name {
                         #( #variants, )*
                     }
