@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "codegen", "macro"]
+members = [".", "cli", "codegen", "macro"]
 
 [package]
 name = "subxt"
