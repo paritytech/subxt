@@ -16,11 +16,12 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    balances::*,
     ClientBuilder,
-    KusamaRuntime,
     PairSigner,
 };
+
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,8 +30,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
-    let hash = client.transfer(&signer, &dest, 10_000).await?;
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+    let hash = api.tx().transfer(&dest, 10_000)
+        .sign_and_submit(&signer)
+        .await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 
