@@ -16,15 +16,11 @@
 
 use crate::{
     node_runtime::system,
-    test_context,
-    TestRuntime,
+    test_context, TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::{
-    PairSigner,
-    Signer,
-};
+use subxt::extrinsic::{PairSigner, Signer};
 
 #[async_std::test]
 async fn storage_account() {
