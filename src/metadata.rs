@@ -279,12 +279,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                         .collect()
                 });
 
+                let constants = pallet.constants.iter().map(|constant| 
+                    (constant.name.clone(), constant.clone()))
+                    .collect();
+
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
                     calls,
                     storage,
-                    constants: Default::default(), // todo: [AJ] constants
+                    constants,
                 };
 
                 Ok((pallet.name.to_string(), pallet_metadata))

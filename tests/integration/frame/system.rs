@@ -15,18 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::{
-        system,
-        DefaultConfig,
-    },
-    test_context,
+    node_runtime::system,
+    test_context, TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::{
-    PairSigner,
-    Signer,
-};
+use subxt::extrinsic::{PairSigner, Signer};
 
 #[async_std::test]
 async fn storage_account() {
