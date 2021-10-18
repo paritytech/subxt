@@ -41,9 +41,9 @@ use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 
 use crate::{
+    Config,
     Encoded,
     Error,
-    Config,
     ExtrinsicExtraData,
 };
 
@@ -56,7 +56,10 @@ pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<Encoded, <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra>;
+pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<
+    Encoded,
+    <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra,
+>;
 
 /// Creates a signed extrinsic
 pub async fn create_signed<T>(
@@ -73,7 +76,12 @@ where
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let extra = <T as ExtrinsicExtraData<T>>::Extra::new(spec_version, tx_version, nonce, genesis_hash);
+    let extra = <T as ExtrinsicExtraData<T>>::Extra::new(
+        spec_version,
+        tx_version,
+        nonce,
+        genesis_hash,
+    );
     let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)

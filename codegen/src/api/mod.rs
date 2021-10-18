@@ -31,9 +31,7 @@ use frame_metadata::{
 };
 use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use proc_macro_error::{
-    abort_call_site,
-};
+use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
@@ -83,19 +81,37 @@ impl RuntimeGenerator {
 
         // some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
-            ("sp_core::crypto::AccountId32", parse_quote!( ::subxt::sp_core::crypto::AccountId32 )),
-            ("primitive_types::H256", parse_quote!( ::subxt::sp_core::H256 )),
-            ("sp_runtime::multiaddress::MultiAddress", parse_quote!( ::subxt::sp_runtime::MultiAddress )),
+            (
+                "sp_core::crypto::AccountId32",
+                parse_quote!(::subxt::sp_core::crypto::AccountId32),
+            ),
+            (
+                "primitive_types::H256",
+                parse_quote!(::subxt::sp_core::H256),
+            ),
+            (
+                "sp_runtime::multiaddress::MultiAddress",
+                parse_quote!(::subxt::sp_runtime::MultiAddress),
+            ),
             // todo: [AJ] remove the requirement for these by implementing Compact handling properly
-            ("sp_arithmetic::per_things::Perbill", parse_quote!( ::subxt::sp_arithmetic::per_things::Perbill )),
-            ("sp_arithmetic::per_things::Perquintill", parse_quote!( ::subxt::sp_arithmetic::per_things::Perquintill )),
+            (
+                "sp_arithmetic::per_things::Perbill",
+                parse_quote!(::subxt::sp_arithmetic::per_things::Perbill),
+            ),
+            (
+                "sp_arithmetic::per_things::Perquintill",
+                parse_quote!(::subxt::sp_arithmetic::per_things::Perquintill),
+            ),
         ]
-            .iter()
-            .map(|(path, substitute): &(&str, syn::TypePath)| (path.to_string(), substitute.clone())).collect::<HashMap<_, _>>();
+        .iter()
+        .map(|(path, substitute): &(&str, syn::TypePath)| {
+            (path.to_string(), substitute.clone())
+        })
+        .collect::<HashMap<_, _>>();
 
         for (path, substitute) in item_mod_ir.type_substitutes().iter() {
             type_substitutes.insert(path.to_string(), substitute.clone());
-        };
+        }
 
         let type_gen =
             TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
@@ -281,7 +297,6 @@ impl RuntimeGenerator {
             }
         }
     }
-
 }
 
 pub fn generate_structs_from_variants(
@@ -310,6 +325,3 @@ pub fn generate_structs_from_variants(
         )
     }
 }
-
-
-

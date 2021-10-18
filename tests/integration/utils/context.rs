@@ -15,7 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    node_runtime::{self, DefaultConfig},
+    node_runtime::{
+        self,
+        DefaultConfig,
+    },
     TestNodeProcess,
 };
 
@@ -25,7 +28,9 @@ use subxt::Client;
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub async fn test_node_process_with(key: AccountKeyring) -> TestNodeProcess<DefaultConfig> {
+pub async fn test_node_process_with(
+    key: AccountKeyring,
+) -> TestNodeProcess<DefaultConfig> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \

@@ -22,9 +22,9 @@ use crate::{
     events::EventsDecoder,
     extrinsic::{
         self,
+        SignedExtra,
         Signer,
         UncheckedExtrinsic,
-        SignedExtra,
     },
     rpc::{
         ExtrinsicSuccess,
@@ -35,10 +35,10 @@ use crate::{
     storage::StorageClient,
     AccountData,
     Call,
+    Config,
     Error,
     ExtrinsicExtraData,
     Metadata,
-    Config,
 };
 
 /// ClientBuilder for constructing a Client.
@@ -257,7 +257,9 @@ where
                 .storage()
                 .fetch_or_default(&account_storage_entry, None)
                 .await?;
-            <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::nonce(&account_data)
+            <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::nonce(
+                &account_data,
+            )
         };
         let call = self
             .client
@@ -272,7 +274,7 @@ where
             call,
             signer,
         )
-            .await?;
+        .await?;
         Ok(signed)
     }
 }

@@ -16,10 +16,10 @@
 
 use crate::{
     node_runtime::{
-        DefaultConfig,
         balances,
         runtime_types,
         system,
+        DefaultConfig,
     },
     test_context,
 };

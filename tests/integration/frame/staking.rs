@@ -16,12 +16,12 @@
 
 use crate::{
     node_runtime::{
-        DefaultConfig,
         runtime_types::pallet_staking::{
             RewardDestination,
             ValidatorPrefs,
         },
         staking,
+        DefaultConfig,
     },
     test_context,
 };

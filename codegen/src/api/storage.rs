@@ -14,10 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    types::TypeGenerator,
+use crate::types::TypeGenerator;
+use frame_metadata::{
+    PalletMetadata,
+    PalletStorageMetadata,
+    StorageEntryMetadata,
+    StorageEntryModifier,
+    StorageEntryType,
+    StorageHasher,
 };
-use frame_metadata::{StorageEntryMetadata, StorageEntryType, StorageEntryModifier, StorageHasher, PalletMetadata, PalletStorageMetadata};
 use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
@@ -39,9 +44,7 @@ pub fn generate_storage(
     let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
         .entries
         .iter()
-        .map(|entry| {
-            generate_storage_entry_fns(&type_gen, &pallet, entry)
-        })
+        .map(|entry| generate_storage_entry_fns(&type_gen, &pallet, entry))
         .unzip();
 
     quote! {
@@ -106,8 +109,7 @@ fn generate_storage_entry_fns(
                         .iter()
                         .enumerate()
                         .map(|(i, f)| {
-                            let field_name =
-                                format_ident!("_{}", syn::Index::from(i));
+                            let field_name = format_ident!("_{}", syn::Index::from(i));
                             let field_type = type_gen.resolve_type_path(f.id(), &[]);
                             (field_name, field_type)
                         })
@@ -117,39 +119,38 @@ fn generate_storage_entry_fns(
                         fields.iter().map(|(_, field_type)| field_type);
                     let field_names = fields.iter().map(|(field_name, _)| field_name);
                     let entry_struct = quote! {
-                            pub struct #entry_struct_ident( #( #tuple_struct_fields ),* );
-                        };
+                        pub struct #entry_struct_ident( #( #tuple_struct_fields ),* );
+                    };
                     let constructor =
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
-                    let keys = (0..tuple.fields().len())
-                        .into_iter()
-                        .zip(hashers)
-                        .map(|(field, hasher)| {
+                    let keys = (0..tuple.fields().len()).into_iter().zip(hashers).map(
+                        |(field, hasher)| {
                             let index = syn::Index::from(field);
                             quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
-                        });
+                        },
+                    );
                     let key_impl = quote! {
-                            ::subxt::StorageEntryKey::Map(
-                                vec![ #( #keys ),* ]
-                            )
-                        };
+                        ::subxt::StorageEntryKey::Map(
+                            vec![ #( #keys ),* ]
+                        )
+                    };
                     (fields, entry_struct, constructor, key_impl)
                 }
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
                     let entry_struct = quote! {
-                            pub struct #entry_struct_ident( pub #ty_path );
-                        };
+                        pub struct #entry_struct_ident( pub #ty_path );
+                    };
                     let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                            ::subxt::StorageEntryKey::Map(
-                                vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
-                            )
-                        };
+                        ::subxt::StorageEntryKey::Map(
+                            vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
+                        )
+                    };
                     (fields, entry_struct, constructor, key_impl)
                 }
             }
@@ -162,8 +163,7 @@ fn generate_storage_entry_fns(
         StorageEntryType::Plain(ref ty) => ty,
         StorageEntryType::Map { ref value, .. } => value,
     };
-    let storage_entry_value_ty =
-        type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
+    let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
     let (return_ty, fetch) = match storage_entry.modifier {
         StorageEntryModifier::Default => {
             (quote!( #storage_entry_value_ty ), quote!(fetch_or_default))
@@ -177,31 +177,31 @@ fn generate_storage_entry_fns(
     };
 
     let storage_entry_type = quote! {
-            #entry_struct
+        #entry_struct
 
-            impl ::subxt::StorageEntry for #entry_struct_ident {
-                const PALLET: &'static str = #pallet_name;
-                const STORAGE: &'static str = #storage_name;
-                type Value = #storage_entry_value_ty;
-                fn key(&self) -> ::subxt::StorageEntryKey {
-                    #key_impl
-                }
+        impl ::subxt::StorageEntry for #entry_struct_ident {
+            const PALLET: &'static str = #pallet_name;
+            const STORAGE: &'static str = #storage_name;
+            type Value = #storage_entry_value_ty;
+            fn key(&self) -> ::subxt::StorageEntryKey {
+                #key_impl
             }
-        };
+        }
+    };
 
     let key_args = fields
         .iter()
         .map(|(field_name, field_type)| quote!( #field_name: #field_type )); // todo: [AJ] borrow non build-inf types?
     let client_fn = quote! {
-            pub async fn #fn_name(
-                &self,
-                #( #key_args, )*
-                hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
-                let entry = #constructor;
-                self.client.storage().#fetch(&entry, hash).await
-            }
-        };
+        pub async fn #fn_name(
+            &self,
+            #( #key_args, )*
+            hash: ::core::option::Option<T::Hash>,
+        ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
+            let entry = #constructor;
+            self.client.storage().#fetch(&entry, hash).await
+        }
+    };
 
     (storage_entry_type, client_fn)
 }

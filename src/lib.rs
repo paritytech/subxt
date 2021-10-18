@@ -64,15 +64,15 @@ pub mod storage;
 mod subscription;
 
 pub use crate::{
-    config::{
-        Config,
-        AccountData,
-        ExtrinsicExtraData,
-    },
     client::{
         Client,
         ClientBuilder,
         SubmittableExtrinsic,
+    },
+    config::{
+        AccountData,
+        Config,
+        ExtrinsicExtraData,
     },
     error::{
         Error,

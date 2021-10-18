@@ -18,13 +18,13 @@ use sp_keyring::AccountKeyring;
 
 use crate::{
     node_runtime::{
-        DefaultConfig,
         contracts::{
             calls::TransactionApi,
             events,
             storage,
         },
         system,
+        DefaultConfig,
     },
     test_context,
     TestContext,
@@ -33,10 +33,10 @@ use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
     Client,
+    Config,
     Error,
     ExtrinsicSuccess,
     PairSigner,
-    Config,
     StorageEntry,
 };
 

@@ -16,9 +16,9 @@
 
 use crate::{
     node_runtime::{
-        DefaultConfig,
         runtime_types,
         sudo,
+        DefaultConfig,
     },
     test_context,
 };

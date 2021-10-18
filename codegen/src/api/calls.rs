@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    types::TypeGenerator,
-};
+use crate::types::TypeGenerator;
 use frame_metadata::{
     PalletCallMetadata,
-    PalletMetadata
+    PalletMetadata,
 };
 use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -38,47 +36,46 @@ pub fn generate_calls(
 ) -> TokenStream2 {
     let struct_defs =
         super::generate_structs_from_variants(type_gen, call.ty.id(), "Call");
-    let (call_structs, call_fns): (Vec<_>, Vec<_>) =
-        struct_defs
-            .iter()
-            .map(|struct_def| {
-                let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
-                    .named_fields()
-                    .unwrap_or_else(|| {
-                        abort_call_site!(
-                                "Call variant for type {} must have all named fields",
-                                call.ty.id()
-                            )
-                    })
-                    .iter()
-                    .map(|(name, ty)| (quote!( #name: #ty ), name))
-                    .unzip();
+    let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
+        .iter()
+        .map(|struct_def| {
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
+                .named_fields()
+                .unwrap_or_else(|| {
+                    abort_call_site!(
+                        "Call variant for type {} must have all named fields",
+                        call.ty.id()
+                    )
+                })
+                .iter()
+                .map(|(name, ty)| (quote!( #name: #ty ), name))
+                .unzip();
 
-                let pallet_name = &pallet.name;
-                let call_struct_name = &struct_def.name;
-                let function_name = struct_def.name.to_string().to_snake_case();
-                let fn_name = format_ident!("{}", function_name);
+            let pallet_name = &pallet.name;
+            let call_struct_name = &struct_def.name;
+            let function_name = struct_def.name.to_string().to_snake_case();
+            let fn_name = format_ident!("{}", function_name);
 
-                let call_struct = quote! {
-                        #struct_def
+            let call_struct = quote! {
+                #struct_def
 
-                        impl ::subxt::Call for #call_struct_name {
-                            const PALLET: &'static str = #pallet_name;
-                            const FUNCTION: &'static str = #function_name;
-                        }
-                    };
-                let client_fn = quote! {
-                        pub fn #fn_name(
-                            &self,
-                            #( #call_fn_args, )*
-                        ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
-                            let call = #call_struct_name { #( #call_args, )* };
-                            ::subxt::SubmittableExtrinsic::new(self.client, call)
-                        }
-                    };
-                (call_struct, client_fn)
-            })
-            .unzip();
+                impl ::subxt::Call for #call_struct_name {
+                    const PALLET: &'static str = #pallet_name;
+                    const FUNCTION: &'static str = #function_name;
+                }
+            };
+            let client_fn = quote! {
+                pub fn #fn_name(
+                    &self,
+                    #( #call_fn_args, )*
+                ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
+                    let call = #call_struct_name { #( #call_args, )* };
+                    ::subxt::SubmittableExtrinsic::new(self.client, call)
+                }
+            };
+            (call_struct, client_fn)
+        })
+        .unzip();
 
     quote! {
         pub mod calls {

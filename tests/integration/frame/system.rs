@@ -16,8 +16,8 @@
 
 use crate::{
     node_runtime::{
-        DefaultConfig,
         system,
+        DefaultConfig,
     },
     test_context,
 };

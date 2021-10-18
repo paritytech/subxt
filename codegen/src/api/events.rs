@@ -14,12 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    types::TypeGenerator,
-};
+use crate::types::TypeGenerator;
 use frame_metadata::{
     PalletEventMetadata,
-    PalletMetadata
+    PalletMetadata,
 };
 use proc_macro2::TokenStream as TokenStream2;
 use quote::quote;
@@ -33,23 +31,20 @@ pub fn generate_events(
 ) -> TokenStream2 {
     let struct_defs =
         super::generate_structs_from_variants(type_gen, event.ty.id(), "Event");
-    let event_structs =
-        struct_defs
-            .iter()
-            .map(|struct_def| {
-                let pallet_name = &pallet.name;
-                let event_struct = &struct_def.name;
-                let event_name = struct_def.name.to_string();
+    let event_structs = struct_defs.iter().map(|struct_def| {
+        let pallet_name = &pallet.name;
+        let event_struct = &struct_def.name;
+        let event_name = struct_def.name.to_string();
 
-                quote! {
-                    #struct_def
+        quote! {
+            #struct_def
 
-                    impl ::subxt::Event for #event_struct {
-                        const PALLET: &'static str = #pallet_name;
-                        const EVENT: &'static str = #event_name;
-                    }
-                }
-            });
+            impl ::subxt::Event for #event_struct {
+                const PALLET: &'static str = #pallet_name;
+                const EVENT: &'static str = #event_name;
+            }
+        }
+    });
     let event_type = type_gen.resolve_type_path(event.ty.id(), &[]);
 
     quote! {

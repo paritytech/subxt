@@ -33,7 +33,10 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::{HttpClient, HttpClientBuilder};
+use jsonrpsee_http_client::{
+    HttpClient,
+    HttpClientBuilder,
+};
 use jsonrpsee_types::{
     to_json_value,
     traits::{
@@ -45,7 +48,10 @@ use jsonrpsee_types::{
     JsonValue,
     Subscription,
 };
-use jsonrpsee_ws_client::{WsClient, WsClientBuilder};
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsClientBuilder,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -81,9 +87,9 @@ use crate::{
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
+    Config,
     Event,
     Metadata,
-    Config,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -316,8 +322,6 @@ impl<T: Config> Rpc<T> {
             accept_weak_inclusion: false,
         }
     }
-
-
 
     /// Configure the Rpc to accept non-finalized blocks
     /// in `submit_and_watch_extrinsic`

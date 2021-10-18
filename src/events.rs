@@ -28,10 +28,10 @@ use crate::{
         EventMetadata,
         MetadataError,
     },
+    Config,
     Error,
     Metadata,
     Phase,
-    Config,
     RuntimeError,
 };
 use scale_info::{

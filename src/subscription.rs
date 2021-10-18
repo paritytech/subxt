@@ -36,9 +36,9 @@ use crate::{
         RawEvent,
     },
     rpc::Rpc,
+    Config,
     Event,
     Phase,
-    Config,
 };
 
 /// Event subscription simplifies filtering a storage change set stream for

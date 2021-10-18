@@ -35,8 +35,8 @@ use crate::{
         MetadataError,
     },
     rpc::Rpc,
-    Error,
     Config,
+    Error,
     StorageHasher,
 };
 

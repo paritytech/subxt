@@ -14,14 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use std::{
-    collections::HashMap,
-};
-use syn::{
-    token,
-    spanned::Spanned as _,
-};
 use proc_macro_error::abort;
+use std::collections::HashMap;
+use syn::{
+    spanned::Spanned as _,
+    token,
+};
 
 // todo: [AJ] implement ToTokens for this to generate the actual mod
 // todo: [AJ] figure out how to incorporate the types and api codegen here...
@@ -40,10 +38,7 @@ impl From<syn::ItemMod> for ItemMod {
         let (brace, items) = match module.content {
             Some((brace, items)) => (brace, items),
             None => {
-                abort!(
-                    module,
-                    "out-of-line subxt modules are not supported",
-                )
+                abort!(module, "out-of-line subxt modules are not supported",)
             }
         };
         let items = items
@@ -62,13 +57,20 @@ impl From<syn::ItemMod> for ItemMod {
 
 impl ItemMod {
     pub fn type_substitutes(&self) -> HashMap<String, syn::TypePath> {
-        self.items.iter().filter_map(|item|
-            if let Item::Subxt(SubxtItem::TypeSubstitute { generated_type_path, substitute_with: substitute_type }) = item {
-                Some((generated_type_path.clone(), substitute_type.clone()))
-            } else {
-                None
-            }
-        ).collect()
+        self.items
+            .iter()
+            .filter_map(|item| {
+                if let Item::Subxt(SubxtItem::TypeSubstitute {
+                    generated_type_path,
+                    substitute_with: substitute_type,
+                }) = item
+                {
+                    Some((generated_type_path.clone(), substitute_type.clone()))
+                } else {
+                    None
+                }
+            })
+            .collect()
     }
 }
 
@@ -88,14 +90,11 @@ impl From<syn::Item> for Item {
                     let meta = attr.parse_meta().unwrap_or_else(|e| {
                         abort!(attr.span(), "Error parsing attribute: {}", e)
                     });
-                    let substitute_type_args = <attrs::Subxt as darling::FromMeta>::from_meta(&meta)
-                        .unwrap_or_else(|e| {
-                            abort!(
-                                attr.span(),
-                                "Error parsing attribute meta: {}",
-                                e
-                            )
-                        });
+                    let substitute_type_args =
+                        <attrs::Subxt as darling::FromMeta>::from_meta(&meta)
+                            .unwrap_or_else(|e| {
+                                abort!(attr.span(), "Error parsing attribute meta: {}", e)
+                            });
                     substitute_type_args
                 })
                 .collect::<Vec<_>>();
@@ -110,7 +109,7 @@ impl From<syn::Item> for Item {
                 let substitute_with: syn::TypePath = syn::parse_quote!( #use_path );
                 let type_substitute = SubxtItem::TypeSubstitute {
                     generated_type_path: attr.substitute_type().to_string(),
-                    substitute_with
+                    substitute_with,
                 };
                 Self::Subxt(type_substitute)
             } else {
@@ -127,7 +126,7 @@ pub enum SubxtItem {
     TypeSubstitute {
         generated_type_path: String,
         substitute_with: syn::TypePath,
-    }
+    },
 }
 
 mod attrs {
