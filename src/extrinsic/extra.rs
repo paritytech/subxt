@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{
     Decode,
@@ -29,10 +29,10 @@ use sp_runtime::{
     transaction_validity::TransactionValidityError,
 };
 
-use crate::Runtime;
+use crate::Config;
 
 /// Extra type.
-pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
+// pub type Extra<T> = <<T as Config>::Extra as SignedExtra<T>>::Extra;
 
 /// SignedExtra checks copied from substrate, in order to remove requirement to implement
 /// substrate's `frame_system::Trait`
@@ -47,7 +47,7 @@ pub type Extra<T> = <<T as Runtime>::Extra as SignedExtra<T>>::Extra;
 /// Ensure the runtime version registered in the transaction is the same as at present.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckSpecVersion<T: Runtime>(
+pub struct CheckSpecVersion<T: Config>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
@@ -56,7 +56,7 @@ pub struct CheckSpecVersion<T: Runtime>(
 
 impl<T> SignedExtension for CheckSpecVersion<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckSpecVersion";
     type AccountId = u64;
@@ -78,7 +78,7 @@ where
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckTxVersion<T: Runtime>(
+pub struct CheckTxVersion<T: Config>(
     pub PhantomData<T>,
     /// Local version to be used for `AdditionalSigned`
     #[codec(skip)]
@@ -87,7 +87,7 @@ pub struct CheckTxVersion<T: Runtime>(
 
 impl<T> SignedExtension for CheckTxVersion<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckTxVersion";
     type AccountId = u64;
@@ -109,7 +109,7 @@ where
 /// returned via `additional_signed()`.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckGenesis<T: Runtime>(
+pub struct CheckGenesis<T: Config>(
     pub PhantomData<T>,
     /// Local genesis hash to be used for `AdditionalSigned`
     #[codec(skip)]
@@ -118,7 +118,7 @@ pub struct CheckGenesis<T: Runtime>(
 
 impl<T> SignedExtension for CheckGenesis<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckGenesis";
     type AccountId = u64;
@@ -141,7 +141,7 @@ where
 /// valid forever)
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckMortality<T: Runtime>(
+pub struct CheckMortality<T: Config>(
     /// The default structure for the Extra encoding
     pub (Era, PhantomData<T>),
     /// Local genesis hash to be used for `AdditionalSigned`
@@ -151,7 +151,7 @@ pub struct CheckMortality<T: Runtime>(
 
 impl<T> SignedExtension for CheckMortality<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckMortality";
     type AccountId = u64;
@@ -168,11 +168,11 @@ where
 /// Nonce check and increment to give replay protection for transactions.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckNonce<T: Runtime>(#[codec(compact)] pub T::Index);
+pub struct CheckNonce<T: Config>(#[codec(compact)] pub T::Index);
 
 impl<T> SignedExtension for CheckNonce<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckNonce";
     type AccountId = u64;
@@ -189,11 +189,11 @@ where
 /// Resource limit check.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct CheckWeight<T: Runtime>(pub PhantomData<T>);
+pub struct CheckWeight<T: Config>(pub PhantomData<T>);
 
 impl<T> SignedExtension for CheckWeight<T>
 where
-    T: Runtime + Clone + Debug + Eq + Send + Sync,
+    T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckWeight";
     type AccountId = u64;
@@ -227,7 +227,7 @@ impl SignedExtension for ChargeTransactionPayment {
 }
 
 /// Trait for implementing transaction extras for a runtime.
-pub trait SignedExtra<T: Runtime>: SignedExtension {
+pub trait SignedExtra<T: Config>: SignedExtension {
     /// The type the extras.
     type Extra: SignedExtension + Send + Sync;
 
@@ -246,14 +246,14 @@ pub trait SignedExtra<T: Runtime>: SignedExtension {
 /// Default `SignedExtra` for substrate runtimes.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct DefaultExtra<T: Runtime> {
+pub struct DefaultExtra<T: Config> {
     spec_version: u32,
     tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
 }
 
-impl<T: Runtime + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
+impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
     type Extra = (
         CheckSpecVersion<T>,
         CheckTxVersion<T>,
@@ -291,7 +291,7 @@ impl<T: Runtime + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultEx
     }
 }
 
-impl<T: Runtime + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultExtra<T> {
+impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultExtra<T> {
     const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;
     type Call = ();

@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 extern crate proc_macro;
 
@@ -41,5 +41,5 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    subxt_codegen::generate_runtime_types(item_mod, &path).into()
+    subxt_codegen::generate_runtime_api(item_mod, &path).into()
 }

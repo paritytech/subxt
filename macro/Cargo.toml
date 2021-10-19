@@ -6,8 +6,8 @@ edition = "2018"
 autotests = false
 
 license = "GPL-3.0"
-repository = "https://github.com/paritytech/substrate-subxt"
-documentation = "https://docs.rs/substrate-subxt"
+repository = "https://github.com/paritytech/subxt"
+documentation = "https://docs.rs/subxt"
 homepage = "https://www.parity.io/"
 description = "Generate types and helpers for interacting with Substrate runtimes."
 
@@ -31,7 +31,7 @@ subxt-codegen = { version = "0.1.0", path = "../codegen" }
 
 [dev-dependencies]
 pretty_assertions = "0.6.1"
-substrate-subxt = { path = ".." }
+subxt = { path = ".." }
 trybuild = "1.0.38"
 
 sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }

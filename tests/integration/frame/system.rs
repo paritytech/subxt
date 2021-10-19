@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,12 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::system,
+    node_runtime::{
+        system,
+        DefaultConfig,
+    },
     test_context,
-    TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
@@ -28,7 +30,7 @@ use subxt::extrinsic::{
 
 #[async_std::test]
 async fn storage_account() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
 
     let cxt = test_context().await;
     let account_info = cxt
@@ -42,7 +44,7 @@ async fn storage_account() {
 
 #[async_std::test]
 async fn tx_remark_with_event() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
     let result = cxt

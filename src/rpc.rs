@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,13 +12,13 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! RPC types and client for interacting with a substrate node.
 
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/substrate-subxt/issues/66
+// Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
 use std::sync::Arc;
@@ -33,7 +33,10 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::HttpClient;
+use jsonrpsee_http_client::{
+    HttpClient,
+    HttpClientBuilder,
+};
 use jsonrpsee_types::{
     to_json_value,
     traits::{
@@ -45,7 +48,10 @@ use jsonrpsee_types::{
     JsonValue,
     Subscription,
 };
-use jsonrpsee_ws_client::WsClient;
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsClientBuilder,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -81,9 +87,9 @@ use crate::{
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
+    Config,
     Event,
     Metadata,
-    Runtime,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -115,7 +121,7 @@ pub enum ListOrValue<T> {
 
 /// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
-    SignedBlock<Block<<T as Runtime>::Header, <T as Runtime>::Extrinsic>>;
+    SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -190,6 +196,24 @@ pub enum RpcClient {
 }
 
 impl RpcClient {
+    /// Create a new [`RpcClient`] from the given URL.
+    ///
+    /// Infers the protocol from the URL, supports:
+    ///     - Websockets (`ws://`, `wss://`)
+    ///     - Http (`http://`, `https://`)
+    pub async fn try_from_url(url: &str) -> Result<Self, Error> {
+        if url.starts_with("ws://") || url.starts_with("wss://") {
+            let client = WsClientBuilder::default()
+                .max_notifs_per_subscription(4096)
+                .build(url)
+                .await?;
+            Ok(RpcClient::WebSocket(Arc::new(client)))
+        } else {
+            let client = HttpClientBuilder::default().build(&url)?;
+            Ok(RpcClient::Http(Arc::new(client)))
+        }
+    }
+
     /// Start a JSON-RPC request.
     pub async fn request<'a, T: DeserializeOwned + std::fmt::Debug>(
         &self,
@@ -272,14 +296,14 @@ pub struct ReadProof<Hash> {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Runtime> {
+pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
     marker: PhantomData<T>,
     accept_weak_inclusion: bool,
 }
 
-impl<T: Runtime> Clone for Rpc<T> {
+impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -289,8 +313,8 @@ impl<T: Runtime> Clone for Rpc<T> {
     }
 }
 
-impl<T: Runtime> Rpc<T> {
-    /// Create a new [`Rpc`] for a given runtime.
+impl<T: Config> Rpc<T> {
+    /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
             client,
@@ -684,7 +708,7 @@ impl<T: Runtime> Rpc<T> {
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: Runtime> {
+pub struct ExtrinsicSuccess<T: Config> {
     /// Block hash.
     pub block: T::Hash,
     /// Extrinsic hash.
@@ -693,7 +717,7 @@ pub struct ExtrinsicSuccess<T: Runtime> {
     pub events: Vec<RawEvent>,
 }
 
-impl<T: Runtime> ExtrinsicSuccess<T> {
+impl<T: Config> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {

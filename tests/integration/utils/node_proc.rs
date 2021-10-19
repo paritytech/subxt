@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
 use std::{
@@ -32,18 +32,18 @@ use std::{
 use subxt::{
     Client,
     ClientBuilder,
-    Runtime,
+    Config,
 };
 
 /// Spawn a local substrate node for testing subxt.
-pub struct TestNodeProcess<R: Runtime> {
+pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
     client: Client<R>,
 }
 
 impl<R> Drop for TestNodeProcess<R>
 where
-    R: Runtime,
+    R: Config,
 {
     fn drop(&mut self) {
         let _ = self.kill();
@@ -52,7 +52,7 @@ where
 
 impl<R> TestNodeProcess<R>
 where
-    R: Runtime,
+    R: Config,
 {
     /// Construct a builder for spawning a test node process.
     pub fn build<S>(program: S) -> TestNodeProcessBuilder
@@ -119,7 +119,7 @@ impl TestNodeProcessBuilder {
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
     pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
     where
-        R: Runtime,
+        R: Config,
     {
         let mut cmd = process::Command::new(&self.node_path);
         cmd.env("RUST_LOG", "error").arg("--dev").arg("--tmp");

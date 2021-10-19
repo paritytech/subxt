@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,12 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    node_runtime,
+    node_runtime::{
+        self,
+        DefaultConfig,
+    },
     TestNodeProcess,
-    TestRuntime,
 };
 
 use sp_keyring::AccountKeyring;
@@ -26,34 +28,36 @@ use subxt::Client;
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub async fn test_node_process_with(key: AccountKeyring) -> TestNodeProcess<TestRuntime> {
+pub async fn test_node_process_with(
+    key: AccountKeyring,
+) -> TestNodeProcess<DefaultConfig> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
-            See https://github.com/paritytech/substrate-subxt/tree/master#integration-testing")
+            See https://github.com/paritytech/subxt/tree/master#integration-testing")
         }
         SUBSTRATE_NODE_PATH.to_string()
     });
 
-    let proc = TestNodeProcess::<TestRuntime>::build(path.as_str())
+    let proc = TestNodeProcess::<DefaultConfig>::build(path.as_str())
         .with_authority(key)
         .scan_for_open_ports()
-        .spawn::<TestRuntime>()
+        .spawn::<DefaultConfig>()
         .await;
     proc.unwrap()
 }
 
-pub async fn test_node_process() -> TestNodeProcess<TestRuntime> {
+pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
     test_node_process_with(AccountKeyring::Alice).await
 }
 
 pub struct TestContext {
-    pub node_proc: TestNodeProcess<TestRuntime>,
-    pub api: node_runtime::RuntimeApi<TestRuntime>,
+    pub node_proc: TestNodeProcess<DefaultConfig>,
+    pub api: node_runtime::RuntimeApi<DefaultConfig>,
 }
 
 impl TestContext {
-    pub fn client(&self) -> &Client<TestRuntime> {
+    pub fn client(&self) -> &Client<DefaultConfig> {
         &self.api.client
     }
 }

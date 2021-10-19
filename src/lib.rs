@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
@@ -40,20 +40,21 @@
 )]
 #![allow(clippy::type_complexity)]
 
-pub use sp_core;
-pub use sp_runtime;
+pub use frame_metadata::StorageHasher;
 pub use subxt_macro::subxt;
 
+pub use sp_arithmetic;
+pub use sp_core;
+pub use sp_runtime;
+
 use codec::{
-    Codec,
     Decode,
     Encode,
-    EncodeLike,
 };
-use serde::de::DeserializeOwned;
-use std::fmt::Debug;
+use core::fmt::Debug;
 
 mod client;
+mod config;
 mod error;
 mod events;
 pub mod extrinsic;
@@ -68,6 +69,11 @@ pub use crate::{
         ClientBuilder,
         SubmittableExtrinsic,
     },
+    config::{
+        AccountData,
+        Config,
+        ExtrinsicExtraData,
+    },
     error::{
         Error,
         PalletError,
@@ -78,6 +84,7 @@ pub use crate::{
         RawEvent,
     },
     extrinsic::{
+        DefaultExtra,
         PairSigner,
         SignedExtra,
         Signer,
@@ -102,88 +109,6 @@ pub use crate::{
         FinalizedEventStorageSubscription,
     },
 };
-pub use frame_metadata::StorageHasher;
-
-use sp_runtime::traits::{
-    AtLeast32Bit,
-    Extrinsic,
-    Hash,
-    Header,
-    MaybeSerializeDeserialize,
-    Member,
-    Verify,
-};
-
-/// Parameter trait compied from substrate::frame_support
-pub trait Parameter: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
-impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + std::fmt::Debug {}
-
-/// Runtime types.
-pub trait Runtime: Clone + Sized + Send + Sync + 'static {
-    /// Account index (aka nonce) type. This stores the number of previous
-    /// transactions associated with a sender account.
-    type Index: Parameter + Member + Default + AtLeast32Bit + Copy + scale_info::TypeInfo;
-
-    /// The block number type used by the runtime.
-    type BlockNumber: Parameter
-        + Member
-        // + MaybeMallocSizeOf
-        // + MaybeSerializeDeserialize
-        // + Debug
-        // + MaybeDisplay
-        // + AtLeast32BitUnsigned
-        + Default
-        // + Bounded
-        + Copy
-        + std::hash::Hash
-        + std::str::FromStr;
-
-    /// The output of the `Hashing` function.
-    type Hash: Parameter
-        + Member
-        + MaybeSerializeDeserialize
-        + Ord
-        + Default
-        + Copy
-        + std::hash::Hash
-        + AsRef<[u8]>
-        + AsMut<[u8]>
-        + scale_info::TypeInfo;
-
-    /// The hashing system (algorithm) being used in the runtime (e.g. Blake2).
-    type Hashing: Hash<Output = Self::Hash>;
-
-    /// The user account identifier type for the runtime.
-    type AccountId: Parameter + Member; // + MaybeSerialize + MaybeDisplay + Ord + Default;
-
-    /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
-    type Address: Codec + Clone + PartialEq;
-    // + Debug + Send + Sync;
-
-    /// Data to be associated with an account (other than nonce/transaction counter, which this
-    /// pallet does regardless).
-    type AccountData: AccountData<Self>;
-
-    /// The block header.
-    type Header: Parameter
-        + Header<Number = Self::BlockNumber, Hash = Self::Hash>
-        + DeserializeOwned;
-
-    /// Transaction extras.
-    type Extra: SignedExtra<Self> + Send + Sync + 'static;
-
-    /// Signature type.
-    type Signature: Verify + Encode + Send + Sync + 'static;
-
-    /// Extrinsic type within blocks.
-    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
-}
-
-/// Trait to fetch data about an account.
-pub trait AccountData<T: Runtime>: StorageEntry + From<T::AccountId> {
-    /// Get the nonce from the storage entry value.
-    fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
-}
 
 /// Call trait.
 pub trait Call: Encode {

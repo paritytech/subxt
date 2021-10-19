@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,15 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
     node_runtime::{
         runtime_types,
         sudo,
+        DefaultConfig,
     },
     test_context,
-    TestRuntime,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
@@ -32,7 +32,7 @@ type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::test]
 async fn test_sudo() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().clone().into();
     let cxt = test_context().await;
 
@@ -56,7 +56,7 @@ async fn test_sudo() {
 
 #[async_std::test]
 async fn test_sudo_unchecked_weight() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 

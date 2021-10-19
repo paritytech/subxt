@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,15 +12,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
-use substrate_subxt::{
-    balances::*,
+use subxt::{
     ClientBuilder,
-    KusamaRuntime,
     PairSigner,
 };
+
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -29,8 +30,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let client = ClientBuilder::<KusamaRuntime>::new().build().await?;
-    let hash = client.transfer(&signer, &dest, 10_000).await?;
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+    let hash = api
+        .tx()
+        .transfer(&dest, 10_000)
+        .sign_and_submit(&signer)
+        .await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 

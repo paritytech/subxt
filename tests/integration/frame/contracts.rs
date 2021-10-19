@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use sp_keyring::AccountKeyring;
 
@@ -24,29 +24,29 @@ use crate::{
             storage,
         },
         system,
+        DefaultConfig,
     },
     test_context,
     TestContext,
-    TestRuntime,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
     Client,
+    Config,
     Error,
     ExtrinsicSuccess,
     PairSigner,
-    Runtime,
     StorageEntry,
 };
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<TestRuntime, Pair>,
+    signer: PairSigner<DefaultConfig, Pair>,
 }
 
-type Hash = <TestRuntime as Runtime>::Hash;
-type AccountId = <TestRuntime as Runtime>::AccountId;
+type Hash = <DefaultConfig as Config>::Hash;
+type AccountId = <DefaultConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
@@ -56,11 +56,11 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<TestRuntime> {
+    fn client(&self) -> &Client<DefaultConfig> {
         &self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<TestRuntime> {
+    fn contracts_tx(&self) -> TransactionApi<DefaultConfig> {
         self.cxt.api.tx().contracts()
     }
 
@@ -138,7 +138,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<ExtrinsicSuccess<TestRuntime>, Error> {
+    ) -> Result<ExtrinsicSuccess<DefaultConfig>, Error> {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()

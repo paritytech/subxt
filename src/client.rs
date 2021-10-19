@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,17 +12,11 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use jsonrpsee_http_client::HttpClientBuilder;
-use jsonrpsee_ws_client::WsClientBuilder;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use std::{
-    marker::PhantomData,
-    sync::Arc,
-};
 
 use crate::{
     events::EventsDecoder,
@@ -41,10 +35,10 @@ use crate::{
     storage::StorageClient,
     AccountData,
     Call,
-    Encoded,
+    Config,
     Error,
+    ExtrinsicExtraData,
     Metadata,
-    Runtime,
 };
 
 /// ClientBuilder for constructing a Client.
@@ -92,21 +86,12 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Runtime>(self) -> Result<Client<T>, Error> {
+    pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            if url.starts_with("ws://") || url.starts_with("wss://") {
-                let client = WsClientBuilder::default()
-                    .max_notifs_per_subscription(4096)
-                    .build(url)
-                    .await?;
-                RpcClient::WebSocket(Arc::new(client))
-            } else {
-                let client = HttpClientBuilder::default().build(&url)?;
-                RpcClient::Http(Arc::new(client))
-            }
+            RpcClient::try_from_url(url).await?
         };
         let mut rpc = Rpc::new(client);
         if self.accept_weak_inclusion {
@@ -130,25 +115,24 @@ impl ClientBuilder {
             events_decoder,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
-            _marker: PhantomData,
             iter_page_size: self.page_size.unwrap_or(10),
         })
     }
 }
 
 /// Client to interface with a substrate node.
-pub struct Client<T: Runtime> {
+pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Metadata,
     events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
-    _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
+    // _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     iter_page_size: u32,
 }
 
-impl<T: Runtime> Clone for Client<T> {
+impl<T: Config> Clone for Client<T> {
     fn clone(&self) -> Self {
         Self {
             rpc: self.rpc.clone(),
@@ -157,13 +141,12 @@ impl<T: Runtime> Clone for Client<T> {
             events_decoder: self.events_decoder.clone(),
             properties: self.properties.clone(),
             runtime_version: self.runtime_version.clone(),
-            _marker: PhantomData,
             iter_page_size: self.iter_page_size,
         }
     }
 }
 
-impl<T: Runtime> Client<T> {
+impl<T: Config> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -197,76 +180,21 @@ impl<T: Runtime> Client<T> {
         self.into()
     }
 
-    /// Creates a signed extrinsic.
-    pub async fn create_signed<C: Call + Send + Sync>(
-        &self,
-        call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<UncheckedExtrinsic<T>, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let account_nonce = if let Some(nonce) = signer.nonce() {
-            nonce
-        } else {
-            let account_storage_entry =
-                <T::AccountData as From<T::AccountId>>::from(signer.account_id().clone());
-            let account_data = self
-                .storage()
-                .fetch_or_default(&account_storage_entry, None)
-                .await?;
-            <T::AccountData as AccountData<T>>::nonce(&account_data)
-        };
-        let call = self.encode(call)?;
-        let signed = extrinsic::create_signed(
-            &self.runtime_version,
-            self.genesis_hash,
-            account_nonce,
-            call,
-            signer,
-        )
-        .await?;
-        Ok(signed)
-    }
-
-    /// Encodes a call.
-    pub fn encode<C: Call>(&self, call: C) -> Result<Encoded, Error> {
-        Ok(self
-            .metadata()
-            .pallet(C::PALLET)
-            .and_then(|pallet| pallet.encode_call(call))?)
-    }
-
     /// Returns the events decoder.
     pub fn events_decoder(&self) -> &EventsDecoder<T> {
         &self.events_decoder
     }
-
-    /// Submits a transaction to the chain.
-    pub async fn submit<C: Call + Send + Sync>(
-        &self,
-        call: C,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<T::Hash, Error>
-    where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
-    {
-        let extrinsic = self.create_signed(call, signer).await?;
-        self.rpc().submit_extrinsic(extrinsic).await
-    }
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'a, T: Runtime, C: Call> {
+pub struct SubmittableExtrinsic<'a, T: Config, C> {
     client: &'a Client<T>,
     call: C,
 }
 
 impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
 where
-    T: Runtime,
+    T: Config + ExtrinsicExtraData<T>,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
@@ -283,10 +211,9 @@ where
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<ExtrinsicSuccess<T>, Error>
     where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
-        let extrinsic = self.client.create_signed(self.call, signer).await?;
+        let extrinsic = self.create_signed(signer).await?;
         self.client
             .rpc()
             .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
@@ -306,10 +233,48 @@ where
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, Error>
     where
-        <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync,
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
-        let extrinsic = self.client.create_signed(self.call, signer).await?;
+        let extrinsic = self.create_signed(signer).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
+    }
+
+    /// Creates a signed extrinsic.
+    pub async fn create_signed(
+        &self,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<UncheckedExtrinsic<T>, Error>
+    where
+        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
+    {
+        let account_nonce = if let Some(nonce) = signer.nonce() {
+            nonce
+        } else {
+            let account_storage_entry =
+                <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::storage_entry(signer.account_id().clone());
+            let account_data = self
+                .client
+                .storage()
+                .fetch_or_default(&account_storage_entry, None)
+                .await?;
+            <<T as ExtrinsicExtraData<T>>::AccountData as AccountData<T>>::nonce(
+                &account_data,
+            )
+        };
+        let call = self
+            .client
+            .metadata()
+            .pallet(C::PALLET)
+            .and_then(|pallet| pallet.encode_call(&self.call))?;
+
+        let signed = extrinsic::create_signed(
+            &self.client.runtime_version,
+            self.client.genesis_hash,
+            account_nonce,
+            call,
+            signer,
+        )
+        .await?;
+        Ok(signed)
     }
 }

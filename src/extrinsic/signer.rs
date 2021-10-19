@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,17 +12,20 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 use super::{
-    SignedExtra,
     SignedPayload,
     UncheckedExtrinsic,
 };
-use crate::Runtime;
+use crate::{
+    Config,
+    ExtrinsicExtraData,
+    SignedExtra,
+};
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
@@ -33,7 +36,7 @@ use sp_runtime::traits::{
 
 /// Extrinsic signer.
 #[async_trait::async_trait]
-pub trait Signer<T: Runtime> {
+pub trait Signer<T: Config + ExtrinsicExtraData<T>> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -52,7 +55,7 @@ pub trait Signer<T: Runtime> {
 
 /// Extrinsic signer using a private key.
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: Runtime, P: Pair> {
+pub struct PairSigner<T: Config, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
@@ -60,7 +63,7 @@ pub struct PairSigner<T: Runtime, P: Pair> {
 
 impl<T, P> PairSigner<T, P>
 where
-    T: Runtime,
+    T: Config + ExtrinsicExtraData<T>,
     T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
@@ -96,9 +99,9 @@ where
 #[async_trait::async_trait]
 impl<T, P> Signer<T> for PairSigner<T, P>
 where
-    T: Runtime,
+    T: Config + ExtrinsicExtraData<T>,
     T::AccountId: Into<T::Address> + 'static,
-    <<T::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send,
+    <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static,
     P: Pair + 'static,
     P::Signature: Into<T::Signature> + 'static,
 {

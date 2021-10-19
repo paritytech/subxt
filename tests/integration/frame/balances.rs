@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,16 +12,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
     node_runtime::{
         balances,
         runtime_types,
         system,
+        DefaultConfig,
     },
     test_context,
-    TestRuntime,
 };
 use codec::Decode;
 use sp_core::{
@@ -42,8 +42,8 @@ use subxt::{
 
 #[async_std::test]
 async fn tx_basic_transfer() {
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
-    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
     let cxt = test_context().await;
     let api = &cxt.api;
@@ -116,7 +116,7 @@ async fn storage_total_issuance() {
 
 #[async_std::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob = PairSigner::<TestRuntime, _>::new(AccountKeyring::Bob.pair());
+    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
@@ -157,9 +157,9 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 #[async_std::test]
 async fn transfer_error() {
     env_logger::try_init().ok();
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
-    let hans = PairSigner::<TestRuntime, _>::new(Pair::generate().0);
+    let hans = PairSigner::<DefaultConfig, _>::new(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
     let cxt = test_context().await;
 
@@ -194,13 +194,13 @@ async fn transfer_error() {
 #[async_std::test]
 async fn transfer_subscription() {
     env_logger::try_init().ok();
-    let alice = PairSigner::<TestRuntime, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
     let cxt = test_context().await;
     let sub = cxt.client().rpc().subscribe_events().await.unwrap();
     let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<TestRuntime>::new(sub, &decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, &decoder);
     sub.filter_event::<balances::events::Transfer>();
 
     cxt.api
@@ -222,14 +222,8 @@ async fn transfer_subscription() {
 #[async_std::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
-    let balances_metadata = cxt
-        .client()
-        .metadata()
-        .pallet("Balances").unwrap();
-    let constant_metadata = balances_metadata
-        .constant("ExistentialDeposit")
-        .unwrap();
-    let existential_deposit = u128::decode(&mut &constant_metadata.value[..])
-        .unwrap();
+    let balances_metadata = cxt.client().metadata().pallet("Balances").unwrap();
+    let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
+    let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 10_000_000_000);
 }
