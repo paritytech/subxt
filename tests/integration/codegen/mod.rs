@@ -14,14 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod codegen;
-mod runtime;
-mod utils;
-
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod frame;
-
-pub use runtime::node_runtime;
-pub use utils::*;
+/// generate by:
+///
+/// - run `polkadot --dev --tmp` node locally
+/// - `cargo run --release -p subxt-cli -- codegen | rustfmt --edition=2018 --emit=stdout > tests/integration/codegen/polkadot.rs`
+mod polkadot;
