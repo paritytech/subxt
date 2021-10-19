@@ -41,5 +41,5 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    subxt_codegen::generate_runtime_types(item_mod, &path).into()
+    subxt_codegen::generate_runtime_api(item_mod, &path).into()
 }

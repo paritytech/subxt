@@ -21,4 +21,7 @@ mod ir;
 mod struct_def;
 mod types;
 
-pub use self::api::generate_runtime_types;
+pub use self::api::{
+    generate_runtime_api,
+    RuntimeGenerator,
+};

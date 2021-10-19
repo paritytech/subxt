@@ -45,7 +45,7 @@ use std::{
 };
 use syn::parse_quote;
 
-pub fn generate_runtime_types<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
+pub fn generate_runtime_api<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
 where
     P: AsRef<path::Path>,
 {
