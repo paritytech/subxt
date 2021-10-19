@@ -21,44 +21,70 @@ use frame_metadata::{
 };
 use std::io::{self, Write};
 
-#[derive(FromArgs)]
+#[derive(FromArgs, PartialEq, Debug)]
 /// Utilities for working with substrate metadata for subxt.
 struct SubXt {
+    #[argh(subcommand)]
+    command: Command,
+}
+
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand)]
+enum Command {
+    Metadata(MetadataCommand),
+    Codegen(CodegenCommand),
+}
+
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "metadata")]
+/// Download metadata from a substrate node, for use with `subxt` codegen.
+struct MetadataCommand {
     /// the url of the substrate node to query for metadata
     #[argh(option, default = "String::from(\"http://localhost:9933\")")]
     url: String,
-    /// the name of a pallet to display metadata for, otherwise displays all
-    #[argh(option, short = 'p')]
-    pallet: Option<String>,
     /// the format of the metadata to display: `json`, `hex` or `bytes`
     #[argh(option, short = 'f', default = "\"json\".to_string()")]
     format: String,
+}
+
+#[derive(FromArgs, PartialEq, Debug)]
+#[argh(subcommand, name = "codegen")]
+/// Invoke subxt codegen from metadata.
+struct CodegenCommand {
+    // todo: from file or download directly from node
 }
 
 fn main() -> color_eyre::Result<()> {
     color_eyre::install()?;
     let args: SubXt = argh::from_env();
 
-    let json = fetch_metadata(&args.url)?;
-    let hex_data = json["result"]
-        .as_str()
-        .ok_or(eyre::eyre!("metadata result field should be a string"))?;
-    let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
+    match args.command {
+        Command::Metadata(args) => {
+            let json = fetch_metadata(&args.url)?;
+            let hex_data = json["result"]
+                .as_str()
+                .ok_or(eyre::eyre!("metadata result field should be a string"))?;
+            let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
 
-    match args.format.as_str() {
-        "json" => {
-            let metadata = scale::Decode::decode(&mut &bytes[..])?;
-            display_metadata_json(metadata, &args)
-        }
-        "hex" => {
-            println!("{}", hex_data);
-            Ok(())
-        }
-        "bytes" => Ok(io::stdout().write_all(&bytes)?),
-        _ => Err(eyre::eyre!(
-            "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
-            args.format
-        )),
+            match args.format.as_str() {
+                "json" => {
+                    let metadata = scale::Decode::decode(&mut &bytes[..])?;
+                    let json = serde_json::to_string_pretty(&metadata)?;
+                    println!("{}", json);
+                    Ok(())
+                }
+                "hex" => {
+                    println!("{}", hex_data);
+                    Ok(())
+                }
+                "bytes" => Ok(io::stdout().write_all(&bytes)?),
+                _ => Err(eyre::eyre!(
+                        "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
+                        args.format
+                    )),
+            }
+        },
+        Command::Codegen(_codegen) => todo!()
     }
 }
 
@@ -73,27 +99,4 @@ fn fetch_metadata(url: &str) -> color_eyre::Result<serde_json::Value> {
         .context("error fetching metadata from the substrate node")?;
 
     Ok(resp.into_json()?)
-}
-
-fn display_metadata_json(
-    metadata: RuntimeMetadataPrefixed,
-    args: &SubXt,
-) -> color_eyre::Result<()> {
-    let serialized = if let Some(ref pallet) = args.pallet {
-        match metadata.1 {
-            RuntimeMetadata::V14(v14) => {
-                let pallet = v14
-                    .pallets
-                    .iter()
-                    .find(|m| &m.name == pallet)
-                    .ok_or_else(|| eyre::eyre!("pallet not found in metadata"))?;
-                serde_json::to_string_pretty(&pallet)?
-            }
-            _ => return Err(eyre::eyre!("Unsupported metadata version")),
-        }
-    } else {
-        serde_json::to_string_pretty(&metadata)?
-    };
-    println!("{}", serialized);
-    Ok(())
 }
