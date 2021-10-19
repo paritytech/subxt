@@ -14,18 +14,25 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use color_eyre::eyre::{self, WrapErr};
-use frame_metadata::{
-    RuntimeMetadataPrefixed,
+use color_eyre::eyre::{
+    self,
+    WrapErr,
 };
-use scale::{Decode, Input};
+use frame_metadata::RuntimeMetadataPrefixed;
+use scale::{
+    Decode,
+    Input,
+};
 use std::{
-    io::{self, Write},
     fs,
+    io::{
+        self,
+        Read,
+        Write,
+    },
     path::PathBuf,
 };
 use structopt::StructOpt;
-use std::io::Read;
 
 /// Utilities for working with substrate metadata for subxt.
 #[derive(Debug, StructOpt)]
@@ -58,11 +65,7 @@ enum Command {
     /// `subxt-cli codegen | rustfmt --edition=2018 --emit=stdout`
     Codegen {
         /// the url of the substrate node to query for metadata for codegen.
-        #[structopt(
-            name = "url",
-            long,
-            parse(try_from_str),
-        )]
+        #[structopt(name = "url", long, parse(try_from_str))]
         url: Option<url::Url>,
         /// the path to the encoded metadata file.
         #[structopt(short, long, parse(from_os_str))]
@@ -75,12 +78,13 @@ fn main() -> color_eyre::Result<()> {
     let args = Opts::from_args();
 
     match args.command {
-        Command::Metadata { url, format} => {
+        Command::Metadata { url, format } => {
             let (hex_data, bytes) = fetch_metadata(&url)?;
 
             match format.as_str() {
                 "json" => {
-                    let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+                    let metadata =
+                        <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
                     let json = serde_json::to_string_pretty(&metadata)?;
                     println!("{}", json);
                     Ok(())
@@ -90,12 +94,14 @@ fn main() -> color_eyre::Result<()> {
                     Ok(())
                 }
                 "bytes" => Ok(io::stdout().write_all(&bytes)?),
-                _ => Err(eyre::eyre!(
-                    "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
-                    format
-                )),
+                _ => {
+                    Err(eyre::eyre!(
+                        "Unsupported format `{}`, expected `json`, `hex` or `bytes`",
+                        format
+                    ))
+                }
             }
-        },
+        }
         Command::Codegen { url, file } => {
             if let Some(file) = file.as_ref() {
                 if url.is_some() {
@@ -109,7 +115,9 @@ fn main() -> color_eyre::Result<()> {
                 return Ok(())
             }
 
-            let url = url.unwrap_or_else(|| url::Url::parse("http://localhost:9933").expect("default url is valid"));
+            let url = url.unwrap_or_else(|| {
+                url::Url::parse("http://localhost:9933").expect("default url is valid")
+            });
             let (_, bytes) = fetch_metadata(&url)?;
             codegen(&mut &bytes[..])?;
             return Ok(())
@@ -140,7 +148,9 @@ fn fetch_metadata(url: &url::Url) -> color_eyre::Result<(String, Vec<u8>)> {
 fn codegen<I: Input>(encoded: &mut I) -> color_eyre::Result<()> {
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
     let generator = subxt_codegen::RuntimeGenerator::new(metadata);
-    let item_mod = syn::parse_quote!( pub mod api {} );
+    let item_mod = syn::parse_quote!(
+        pub mod api {}
+    );
     let runtime_api = generator.generate_runtime(item_mod);
     println!("{}", runtime_api);
     Ok(())
