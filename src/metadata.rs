@@ -536,7 +536,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         let mut modules_with_calls = HashMap::new();
         let mut modules_with_events = HashMap::new();
         let mut modules_with_errors = HashMap::new();
-        for module in convert(meta.modules)?.into_iter() {
+        for module in convert(meta.pallets)?.into_iter() {
             let module_name = convert(module.name.clone())?;
 
             let mut constant_map = HashMap::new();
@@ -598,7 +598,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 );
             }
             let mut error_map = HashMap::new();
-            for (index, error) in convert(module.errors)?.into_iter().enumerate() {
+            for (index, error) in convert(module.error)?.into_iter().enumerate() {
                 error_map.insert(index as u8, convert_error(error)?);
             }
             modules_with_errors.insert(
@@ -619,13 +619,19 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     }
 }
 
-fn convert<B: 'static, O: 'static>(
-    dd: DecodeDifferent<B, O>,
-) -> Result<O, ConversionError> {
-    match dd {
-        DecodeDifferent::Decoded(value) => Ok(value),
-        _ => Err(ConversionError::ExpectedDecoded),
-    }
+// fn convert<B: 'static, O: 'static>(
+//     dd: DecodeDifferent<B, O>,
+// ) -> Result<O, ConversionError> {
+//     match dd {
+//         DecodeDifferent::Decoded(value) => Ok(value),
+//         _ => Err(ConversionError::ExpectedDecoded),
+//     }
+// }
+
+fn convert<T>(
+    dd: T,
+) -> Result<T, ConversionError> {
+    Ok(dd)
 }
 
 fn convert_event(
