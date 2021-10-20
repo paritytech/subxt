@@ -37,7 +37,7 @@ pretty_assertions = "0.6.1"
 substrate-subxt = { path = ".." }
 trybuild = "1.0.38"
 
-sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.10" }
+sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 
 [[test]]
 name = "balances"

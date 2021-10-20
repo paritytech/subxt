@@ -9,12 +9,12 @@ See [examples](./examples).
 ## Integration Testing
 
 Most tests require a running substrate node to communicate with. This is done by spawning an instance of the
-substrate node per test. It requires an executable binary `substrate` at [`polkadot-v0.9.10`](https://github.com/paritytech/substrate/releases/tag/polkadot-v0.9.10) on your path.
+substrate node per test. It requires an executable binary `substrate` at [`polkadot-v0.9.11`](https://github.com/paritytech/substrate/releases/tag/polkadot-v0.9.11) on your path.
 
 This can be installed from source via cargo:
 
 ```bash
-cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.10 --force
+cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.11 --force
 ```
 
 **Alternatives**
