@@ -354,7 +354,6 @@ pub enum Raw {
 mod tests {
     use super::*;
     use frame_metadata::{
-        DecodeDifferent,
         PalletErrorMetadata,
         PalletEventMetadata,
         ExtrinsicMetadata,
@@ -400,61 +399,53 @@ mod tests {
             Metadata::try_from(RuntimeMetadataPrefixed(
                 META_RESERVED,
                 RuntimeMetadata::V14(RuntimeMetadataV14 {
-                    modules: DecodeDifferent::Decoded(vec![ModuleMetadata {
-                        name: DecodeDifferent::Decoded("System".to_string()),
+                    types:(),
+                    ty:(),
+                    pallets: vec![PalletMetadata {
+                        name: "System".to_string(),
                         storage: None,
                         calls: None,
-                        event: Some(DecodeDifferent::Decoded(vec![
+                        event: Some(vec![
                             EventMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "ExtrinsicSuccess".to_string(),
-                                ),
-                                arguments: DecodeDifferent::Decoded(vec![
+                                name: "ExtrinsicSuccess".to_string(),
+                                arguments: vec![
                                     "DispatchInfo".to_string()
-                                ]),
-                                documentation: DecodeDifferent::Decoded(vec![]),
+                                ],
+                                documentation: vec![],
                             },
                             EventMetadata {
-                                name: DecodeDifferent::Decoded(
+                                name: 
                                     "ExtrinsicFailed".to_string(),
-                                ),
-                                arguments: DecodeDifferent::Decoded(vec![
+                                arguments: vec![
                                     "DispatchError".to_string(),
                                     "DispatchInfo".to_string(),
-                                ]),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                        ])),
-                        constants: DecodeDifferent::Decoded(vec![]),
-                        errors: DecodeDifferent::Decoded(vec![
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "InvalidSpecName".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "SpecVersionNeedsToIncrease".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "FailedToExtractRuntimeVersion".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
-                            },
-                            ErrorMetadata {
-                                name: DecodeDifferent::Decoded(
-                                    "NonDefaultComposite".to_string(),
-                                ),
-                                documentation: DecodeDifferent::Decoded(vec![]),
+                                ],
+                                documentation: vec![],
                             },
                         ]),
+                        constants: vec![],
+                        error: vec![
+                            ErrorMetadata {
+                                name: "InvalidSpecName".to_string(),
+                                documentation: vec![],
+                            },
+                            ErrorMetadata {
+                                name: "SpecVersionNeedsToIncrease".to_string(),
+                                documentation: vec![],
+                            },
+                            ErrorMetadata {
+                                name: "FailedToExtractRuntimeVersion".to_string(),
+                                documentation: vec![],
+                            },
+                            ErrorMetadata {
+                                name: "NonDefaultComposite".to_string(),
+                                documentation: vec![],
+                            },
+                        ],
                         index: 0,
-                    }]),
+                    }],
                     extrinsic: ExtrinsicMetadata {
+                        ty: (),
                         version: 0,
                         signed_extensions: vec![],
                     },

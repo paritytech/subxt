@@ -28,7 +28,6 @@ use codec::{
 };
 
 use frame_metadata::{
-    DecodeDifferent,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
     StorageEntryModifier,
