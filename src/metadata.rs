@@ -172,7 +172,7 @@ pub struct ModuleMetadata {
     index: u8,
     name: String,
     storage: HashMap<String, StorageMetadata>,
-    constants: HashMap<String, ModuleConstantMetadata>,
+    constants: HashMap<String, PalletConstantMetadata>,
 }
 
 impl ModuleMetadata {
@@ -186,7 +186,7 @@ impl ModuleMetadata {
     pub fn constant(
         &self,
         key: &'static str,
-    ) -> Result<&ModuleConstantMetadata, MetadataError> {
+    ) -> Result<&PalletConstantMetadata, MetadataError> {
         self.constants
             .get(key)
             .ok_or(MetadataError::ConstantNotFound(key))
@@ -480,14 +480,14 @@ impl EventArg {
 }
 
 #[derive(Clone, Debug)]
-pub struct ModuleConstantMetadata {
+pub struct PalletConstantMetadata {
     name: String,
     ty: String,
     value: Vec<u8>,
     documentation: Vec<String>,
 }
 
-impl ModuleConstantMetadata {
+impl PalletConstantMetadata {
     /// Name
     pub fn name(&self) -> &String {
         &self.name
@@ -529,7 +529,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             return Err(ConversionError::InvalidPrefix.into())
         }
         let meta = match metadata.1 {
-            RuntimeMetadata::V13(meta) => meta,
+            RuntimeMetadata::V14(meta) => meta,
             _ => return Err(ConversionError::InvalidVersion.into()),
         };
         let mut modules = HashMap::new();
@@ -629,7 +629,7 @@ fn convert<B: 'static, O: 'static>(
 }
 
 fn convert_event(
-    event: frame_metadata::EventMetadata,
+    event: frame_metadata::PalletEventMetadata,
 ) -> Result<ModuleEventMetadata, ConversionError> {
     let name = convert(event.name)?;
     let mut arguments = Vec::new();
@@ -656,19 +656,19 @@ fn convert_entry(
 }
 
 fn convert_error(
-    error: frame_metadata::ErrorMetadata,
+    error: frame_metadata::PalletErrorMetadata,
 ) -> Result<String, ConversionError> {
     convert(error.name)
 }
 
 fn convert_constant(
-    constant: frame_metadata::ModuleConstantMetadata,
-) -> Result<ModuleConstantMetadata, ConversionError> {
+    constant: frame_metadata::PalletConstantMetadata,
+) -> Result<PalletConstantMetadata, ConversionError> {
     let name = convert(constant.name)?;
     let ty = convert(constant.ty)?;
     let value = convert(constant.value)?;
     let documentation = convert(constant.documentation)?;
-    Ok(ModuleConstantMetadata {
+    Ok(PalletConstantMetadata {
         name,
         ty,
         value,

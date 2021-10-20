@@ -355,13 +355,13 @@ mod tests {
     use super::*;
     use frame_metadata::{
         DecodeDifferent,
-        ErrorMetadata,
-        EventMetadata,
+        PalletErrorMetadata,
+        PalletEventMetadata,
         ExtrinsicMetadata,
-        ModuleMetadata,
+        PalletMetadata,
         RuntimeMetadata,
         RuntimeMetadataPrefixed,
-        RuntimeMetadataV13,
+        RuntimeMetadataV14,
         META_RESERVED,
     };
     use std::convert::TryFrom;
@@ -399,7 +399,7 @@ mod tests {
         let decoder = EventsDecoder::<TestRuntime>::new(
             Metadata::try_from(RuntimeMetadataPrefixed(
                 META_RESERVED,
-                RuntimeMetadata::V13(RuntimeMetadataV13 {
+                RuntimeMetadata::V14(RuntimeMetadataV14 {
                     modules: DecodeDifferent::Decoded(vec![ModuleMetadata {
                         name: DecodeDifferent::Decoded("System".to_string()),
                         storage: None,
