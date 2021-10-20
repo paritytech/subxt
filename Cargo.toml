@@ -53,7 +53,7 @@ sp-runtime = { git = "https://github.com/paritytech/substrate.git", branch = "po
 sp-std = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 sp-version = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 
-frame-metadata = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
+frame-metadata = { git = "https://github.com/paritytech/frame-metadata.git", tag = "v14.0.0" }
 frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 pallet-indices = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 pallet-staking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
