@@ -327,10 +327,32 @@ impl StorageMetadata {
     pub fn map<K: Encode>(&self) -> Result<StorageMap<K>, MetadataError> {
         match &self.ty {
             StorageEntryType::Map { hashers, .. } => {
+                if hashers.len() != 1 {
+                    return Err(MetadataError::StorageTypeError)
+                }
                 Ok(StorageMap {
                     _marker: PhantomData,
                     prefix: self.prefix().0,
-                    hasher: hashers.clone(),
+                    hasher: hashers.get(0).expect("It must be ok; qed").clone(),
+                })
+            }
+            _ => Err(MetadataError::StorageTypeError),
+        }
+    }
+
+    pub fn double_map<K1: Encode, K2: Encode>(
+        &self,
+    ) -> Result<StorageDoubleMap<K1, K2>, MetadataError> {
+        match &self.ty {
+            StorageEntryType::Map { hashers, .. } => {
+                if hashers.len() != 2 {
+                    return Err(MetadataError::StorageTypeError)
+                }
+                Ok(StorageDoubleMap {
+                    _marker: PhantomData,
+                    prefix: self.prefix().0,
+                    hasher1: hashers.get(0).expect("It must be ok; qed").clone(),
+                    hasher2: hashers.get(1).expect("It must be ok; qed").clone(),
                 })
             }
             _ => Err(MetadataError::StorageTypeError),
@@ -353,13 +375,30 @@ impl StoragePlain {
 pub struct StorageMap<K> {
     _marker: PhantomData<K>,
     prefix: Vec<u8>,
-    hasher: Vec<StorageHasher>,
+    hasher: StorageHasher,
 }
 
 impl<K: Encode> StorageMap<K> {
     pub fn key(&self, key: &K) -> StorageKey {
         let mut bytes = self.prefix.clone();
-        bytes.extend(StorageMetadata::hash_key(&self.hasher.get(0).unwrap(), key));
+        bytes.extend(StorageMetadata::hash_key(&self.hasher, key));
+        StorageKey(bytes)
+    }
+}
+
+#[derive(Clone, Debug)]
+pub struct StorageDoubleMap<K1, K2> {
+    _marker: PhantomData<(K1, K2)>,
+    prefix: Vec<u8>,
+    hasher1: StorageHasher,
+    hasher2: StorageHasher,
+}
+
+impl<K1: Encode, K2: Encode> StorageDoubleMap<K1, K2> {
+    pub fn key(&self, key1: &K1, key2: &K2) -> StorageKey {
+        let mut bytes = self.prefix.clone();
+        bytes.extend(StorageMetadata::hash_key(&self.hasher1, key1));
+        bytes.extend(StorageMetadata::hash_key(&self.hasher2, key2));
         StorageKey(bytes)
     }
 }
