@@ -27,7 +27,7 @@ use sp_runtime::{
     OpaqueExtrinsic,
 };
 use sp_std::prelude::*;
-
+use scale_info::TypeInfo;
 /// BABE marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Babe;
@@ -190,7 +190,7 @@ pub trait Runtime: System + Sized + Send + Sync + 'static {
 ///
 /// If the concrete types in the target substrate runtime differ from these, a custom Runtime
 /// definition MUST be used to ensure type compatibility.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, TypeInfo)]
 pub struct DefaultNodeRuntime;
 
 impl Staking for DefaultNodeRuntime {}
@@ -241,7 +241,7 @@ impl Sudo for DefaultNodeRuntime {}
 ///
 /// Main difference is `type Address = AccountId`.
 /// Also the contracts module is not part of the node template runtime.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, TypeInfo)]
 pub struct NodeTemplateRuntime;
 
 impl Runtime for NodeTemplateRuntime {
@@ -285,7 +285,7 @@ impl Sudo for NodeTemplateRuntime {}
 ///
 /// Inherits types from [`NodeTemplateRuntime`], but adds an implementation for
 /// the contracts pallet trait.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, TypeInfo)]
 pub struct ContractsTemplateRuntime;
 
 impl Runtime for ContractsTemplateRuntime {
@@ -327,7 +327,7 @@ impl Sudo for ContractsTemplateRuntime {}
 ///
 /// Main difference is `type Address = AccountId`.
 /// Also the contracts module is not part of the kusama runtime.
-#[derive(Debug, Clone, Eq, PartialEq)]
+#[derive(Debug, Clone, Eq, PartialEq, TypeInfo)]
 pub struct KusamaRuntime;
 
 impl Runtime for KusamaRuntime {

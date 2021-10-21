@@ -20,6 +20,7 @@ use codec::{
     Codec,
     Decode,
     Encode,
+    EncodeLike,
 };
 use core::marker::PhantomData;
 use frame_support::{
@@ -110,7 +111,7 @@ pub trait System {
 
     /// Extrinsic type within blocks.
     #[module(ignore)]
-    type Extrinsic: Parameter + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
+    type Extrinsic: Codec + EncodeLike + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
 
     /// Data to be associated with an account (other than nonce/transaction counter, which this
     /// module does regardless).
