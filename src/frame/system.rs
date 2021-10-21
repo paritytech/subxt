@@ -111,7 +111,12 @@ pub trait System {
 
     /// Extrinsic type within blocks.
     #[module(ignore)]
-    type Extrinsic: Codec + EncodeLike + Member + Extrinsic + Debug + MaybeSerializeDeserialize;
+    type Extrinsic: Codec
+        + EncodeLike
+        + Member
+        + Extrinsic
+        + Debug
+        + MaybeSerializeDeserialize;
 
     /// Data to be associated with an account (other than nonce/transaction counter, which this
     /// module does regardless).

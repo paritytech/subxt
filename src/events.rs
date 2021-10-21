@@ -354,9 +354,9 @@ pub enum Raw {
 mod tests {
     use super::*;
     use frame_metadata::{
+        ExtrinsicMetadata,
         PalletErrorMetadata,
         PalletEventMetadata,
-        ExtrinsicMetadata,
         PalletMetadata,
         RuntimeMetadata,
         RuntimeMetadataPrefixed,
@@ -391,72 +391,5 @@ mod tests {
             .unwrap();
 
         assert_eq!(output, vec![1, 0]);
-    }
-
-    #[test]
-    fn test_decode_system_events_and_error() {
-        let decoder = EventsDecoder::<TestRuntime>::new(
-            Metadata::try_from(RuntimeMetadataPrefixed(
-                META_RESERVED,
-                RuntimeMetadata::V14(RuntimeMetadataV14 {
-                    types:(),
-                    ty:(),
-                    pallets: vec![PalletMetadata {
-                        name: "System".to_string(),
-                        storage: None,
-                        calls: None,
-                        event: Some(vec![
-                            EventMetadata {
-                                name: "ExtrinsicSuccess".to_string(),
-                                arguments: vec![
-                                    "DispatchInfo".to_string()
-                                ],
-                                documentation: vec![],
-                            },
-                            EventMetadata {
-                                name: 
-                                    "ExtrinsicFailed".to_string(),
-                                arguments: vec![
-                                    "DispatchError".to_string(),
-                                    "DispatchInfo".to_string(),
-                                ],
-                                documentation: vec![],
-                            },
-                        ]),
-                        constants: vec![],
-                        error: vec![
-                            ErrorMetadata {
-                                name: "InvalidSpecName".to_string(),
-                                documentation: vec![],
-                            },
-                            ErrorMetadata {
-                                name: "SpecVersionNeedsToIncrease".to_string(),
-                                documentation: vec![],
-                            },
-                            ErrorMetadata {
-                                name: "FailedToExtractRuntimeVersion".to_string(),
-                                documentation: vec![],
-                            },
-                            ErrorMetadata {
-                                name: "NonDefaultComposite".to_string(),
-                                documentation: vec![],
-                            },
-                        ],
-                        index: 0,
-                    }],
-                    extrinsic: ExtrinsicMetadata {
-                        ty: (),
-                        version: 0,
-                        signed_extensions: vec![],
-                    },
-                }),
-            ))
-            .unwrap(),
-            EventTypeRegistry::new(),
-        );
-
-        // [(ApplyExtrinsic(0), Event(RawEvent { module: "System", variant: "ExtrinsicSuccess", data: "482d7c09000000000200" })), (ApplyExtrinsic(1), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" }))), (ApplyExtrinsic(2), Error(Module(ModuleError { module: "System", error: "NonDefaultComposite" })))]
-        let input = hex::decode("0c00000000000000482d7c0900000000020000000100000000010300035884723300000000000000000200000000010300035884723300000000000000").unwrap();
-        decoder.decode_events(&mut &input[..]).unwrap();
     }
 }

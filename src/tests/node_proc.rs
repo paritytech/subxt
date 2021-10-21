@@ -164,6 +164,7 @@ impl TestNodeProcessBuilder {
             );
             let result = ClientBuilder::<R>::new()
                 .set_url(ws_url.clone())
+                .skip_type_sizes_check()
                 .build()
                 .await;
             match result {

@@ -27,6 +27,7 @@ use codec::{
     Error as CodecError,
 };
 
+use crate::Encoded;
 use frame_metadata::{
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
@@ -35,9 +36,13 @@ use frame_metadata::{
     StorageHasher,
     META_RESERVED,
 };
+use scale_info::{
+    form::PortableForm,
+    PortableRegistry,
+    TypeDef,
+    Variant,
+};
 use sp_core::storage::StorageKey;
-use scale_info::{form::PortableForm,PortableRegistry,TypeDef,Variant};
-use crate::Encoded;
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
@@ -534,37 +539,33 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
             if let Some(calls) = module.calls {
                 let mut call_map = HashMap::new();
-                    let calls = types_registrty.resolve(calls.ty.id()).unwrap().type_def();
+                let calls = types_registrty.resolve(calls.ty.id()).unwrap().type_def();
 
-                    if let TypeDef::Variant(x) = calls {
-                        for v in x.variants().iter() {
-                            call_map.insert(v.name().to_string(), v.index());
-                        }
-                        // for (index, call) in convert(calls.into())?.into_iter().enumerate() {
+                if let TypeDef::Variant(x) = calls {
+                    for v in x.variants().iter() {
+                        call_map.insert(v.name().to_string(), v.index());
+                    }
+                    // for (index, call) in convert(calls.into())?.into_iter().enumerate() {
                     //     let name = convert(call.name)?;
                     //     call_map.insert(name, index as u8);
                     // }
-                modules_with_calls.insert(
-                    module_name.clone(),
-                    ModuleWithCalls {
-                        index: module.index,
-                        calls: call_map,
-                    },
-                );
-
-                    }
-                    
+                    modules_with_calls.insert(
+                        module_name.clone(),
+                        ModuleWithCalls {
+                            index: module.index,
+                            calls: call_map,
+                        },
+                    );
+                }
             }
             if let Some(events) = module.event {
                 let mut event_map = HashMap::new();
 
                 let events = types_registrty.resolve(events.ty.id()).unwrap().type_def();
 
-
                 if let TypeDef::Variant(x) = events {
                     for v in x.variants().iter() {
-                        
-                        event_map.insert(v.index(),convert_event(v)?);
+                        event_map.insert(v.index(), convert_event(v)?);
                     }
                     // for (index, event) in convert(events)?.into_iter().enumerate() {
                     //     event_map.insert(index as u8, convert_event(event)?);
@@ -601,7 +602,6 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                     );
                 }
             }
-            
         }
         Ok(Metadata {
             modules,
@@ -621,9 +621,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 //     }
 // }
 
-fn convert<T>(
-    dd: T,
-) -> Result<T, ConversionError> {
+fn convert<T>(dd: T) -> Result<T, ConversionError> {
     Ok(dd)
 }
 

@@ -255,8 +255,8 @@ pub struct DefaultExtra<T: System> {
     genesis_hash: T::Hash,
 }
 
-impl<T: System + Balances + Clone + Debug + Eq + Send + Sync + TypeInfo + 'static> SignedExtra<T>
-    for DefaultExtra<T>
+impl<T: System + Balances + Clone + Debug + Eq + Send + Sync + TypeInfo + 'static>
+    SignedExtra<T> for DefaultExtra<T>
 {
     type Extra = (
         CheckSpecVersion<T>,
@@ -295,8 +295,8 @@ impl<T: System + Balances + Clone + Debug + Eq + Send + Sync + TypeInfo + 'stati
     }
 }
 
-impl<T: System + Balances + Clone + Debug + Eq + Send + Sync + TypeInfo + 'static> SignedExtension
-    for DefaultExtra<T>
+impl<T: System + Balances + Clone + Debug + Eq + Send + Sync + TypeInfo + 'static>
+    SignedExtension for DefaultExtra<T>
 {
     const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;

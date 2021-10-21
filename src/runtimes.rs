@@ -15,6 +15,7 @@
 // along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::Encode;
+use scale_info::TypeInfo;
 use sp_runtime::{
     generic::Header,
     impl_opaque_keys,
@@ -27,7 +28,6 @@ use sp_runtime::{
     OpaqueExtrinsic,
 };
 use sp_std::prelude::*;
-use scale_info::TypeInfo;
 /// BABE marker struct
 #[derive(Copy, Clone, Debug, Default, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct Babe;
