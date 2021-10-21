@@ -80,6 +80,9 @@ pub enum MetadataError {
     /// Constant is not in metadata.
     #[error("Constant {0} not found")]
     ConstantNotFound(&'static str),
+    /// Type id not found in registry.
+    #[error("Type id {0} not found")]
+    TypeIdNotFound(u32),
 }
 
 /// Runtime metadata.
@@ -539,16 +542,15 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
             if let Some(calls) = module.calls {
                 let mut call_map = HashMap::new();
-                let calls = types_registrty.resolve(calls.ty.id()).unwrap().type_def();
+                let calls = types_registrty
+                    .resolve(calls.ty.id())
+                    .ok_or(MetadataError::TypeIdNotFound(calls.ty.id()))?
+                    .type_def();
 
                 if let TypeDef::Variant(x) = calls {
                     for v in x.variants().iter() {
                         call_map.insert(v.name().to_string(), v.index());
                     }
-                    // for (index, call) in convert(calls.into())?.into_iter().enumerate() {
-                    //     let name = convert(call.name)?;
-                    //     call_map.insert(name, index as u8);
-                    // }
                     modules_with_calls.insert(
                         module_name.clone(),
                         ModuleWithCalls {
@@ -561,15 +563,15 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             if let Some(events) = module.event {
                 let mut event_map = HashMap::new();
 
-                let events = types_registrty.resolve(events.ty.id()).unwrap().type_def();
+                let events = types_registrty
+                    .resolve(events.ty.id())
+                    .ok_or(MetadataError::TypeIdNotFound(calls.ty.id()))?
+                    .type_def();
 
                 if let TypeDef::Variant(x) = events {
                     for v in x.variants().iter() {
                         event_map.insert(v.index(), convert_event(v)?);
                     }
-                    // for (index, event) in convert(events)?.into_iter().enumerate() {
-                    //     event_map.insert(index as u8, convert_event(event)?);
-                    // }
                     modules_with_events.insert(
                         module_name.clone(),
                         ModuleWithEvents {
@@ -582,16 +584,14 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             }
             if let Some(errors) = module.error {
                 let mut error_map = HashMap::new();
-                let errors = types_registrty.resolve(errors.ty.id()).unwrap().type_def();
+                let errors = types_registrty
+                    .resolve(errors.ty.id())
+                    .ok_or(MetadataError::TypeIdNotFound(calls.ty.id()))?
+                    .type_def();
                 if let TypeDef::Variant(x) = errors {
                     for v in x.variants().iter() {
                         error_map.insert(v.index(), v.name().to_string());
                     }
-
-                    // for (index, error) in convert(module.error)?.into_iter().enumerate() {
-                    //     let error = types_registrty.resolve(error.ty.id()).unwrap().type_def();
-                    //     error_map.insert(index as u8, convert_error(error)?);
-                    // }
                     modules_with_errors.insert(
                         module_name.clone(),
                         ModuleWithErrors {
@@ -631,7 +631,13 @@ fn convert_event(
     let name = convert(event.name())?.to_string();
     let mut arguments = Vec::new();
     for arg in convert(event.fields())?.iter() {
-        let arg = arg.type_name().unwrap().parse::<EventArg>()?;
+        let arg = arg
+            .type_name()
+            .ok_or(ConversionError::InvalidEventArg(
+                arg.ty().id().to_string(),
+                "Type name not exists",
+            ))?
+            .parse::<EventArg>()?;
         arguments.push(arg);
     }
     Ok(ModuleEventMetadata { name, arguments })
