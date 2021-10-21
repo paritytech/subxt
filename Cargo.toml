@@ -5,7 +5,7 @@ members = [".", "cli", "codegen", "macro"]
 name = "subxt"
 version = "0.15.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+edition = "2021"
 
 license = "GPL-3.0"
 readme = "README.md"
