@@ -43,6 +43,7 @@
 pub use frame_metadata::StorageHasher;
 pub use subxt_macro::subxt;
 
+pub use bitvec;
 pub use sp_arithmetic;
 pub use sp_core;
 pub use sp_runtime;

@@ -644,12 +644,7 @@ impl TypePathType {
                 let bit_order_type = &self.params[0];
                 let bit_store_type = &self.params[1];
 
-                let mut type_path: syn::punctuated::Punctuated<
-                    syn::PathSegment,
-                    syn::Token![::],
-                > = syn::parse_quote! { bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
-                type_path.insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
-                let type_path = syn::parse_quote! { #type_path };
+                let type_path = syn::parse_quote! { ::subxt::bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
 
                 syn::Type::Path(type_path)
             }
@@ -1256,7 +1251,6 @@ mod tests {
         )
     }
 
-    #[cfg(feature = "bit-vec")]
     #[test]
     fn generate_bitvec() {
         use bitvec::{
@@ -1289,8 +1283,8 @@ mod tests {
                     use super::root;
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct S {
-                        pub lsb: root::bitvec::vec::BitVec<root::bitvec::order::Lsb0, u8>,
-                        pub msb: root::bitvec::vec::BitVec<root::bitvec::order::Msb0, u16>,
+                        pub lsb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Lsb0, u8>,
+                        pub msb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Msb0, u16>,
                     }
                 }
             }
