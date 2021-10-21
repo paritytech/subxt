@@ -272,8 +272,37 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 let type_name = type_name.expect("structs should have a name");
                 let (fields, _) =
                     self.composite_fields(composite.fields(), &type_params, true);
+                let derive_as_compact = if composite.fields().len() == 1 {
+                    // any single field wrapper struct with a concrete unsigned int type can derive
+                    // CompactAs.
+                    let field = &composite.fields()[0];
+                    if !self.ty.type_params()
+                        .iter()
+                        .any(|tp| Some(tp.name()) == field.type_name())
+                    {
+                        let ty = self.type_gen.resolve_type(field.ty().id());
+                        if matches!(
+                            ty.type_def(),
+                            TypeDef::Primitive(
+                                TypeDefPrimitive::U8
+                                    | TypeDefPrimitive::U16
+                                    | TypeDefPrimitive::U32
+                                    | TypeDefPrimitive::U64
+                                    | TypeDefPrimitive::U128
+                            )
+                        ) {
+                            Some(quote!( , ::codec::CompactAs ))
+                        } else {
+                            None
+                        }
+                    } else {
+                        None
+                    }
+                } else {
+                    None
+                };
                 let ty_toks = quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode #derive_as_compact)]
                     pub struct #type_name #fields
                 };
                 tokens.extend(ty_toks);
@@ -410,7 +439,7 @@ impl<'a> ModuleType<'a> {
             if is_struct && !unused_params.is_empty() {
                 let phantom = Self::phantom_data(&unused_params);
                 fields_tokens.push(quote! {
-                    pub __subxt_unused_type_params: #phantom
+                    #[codec(skip)] pub __subxt_unused_type_params: #phantom
                 })
             }
 
@@ -454,7 +483,7 @@ impl<'a> ModuleType<'a> {
 
             if is_struct && !unused_params.is_empty() {
                 let phantom_data = Self::phantom_data(&unused_params);
-                fields_tokens.push(quote! { pub #phantom_data })
+                fields_tokens.push(quote! { #[codec(skip)] pub #phantom_data })
             }
 
             let fields = quote! { ( #( #fields_tokens, )* ) };
@@ -703,8 +732,7 @@ mod tests {
         TypeInfo,
     };
 
-    const MOD_PATH: &'static [&'static str] =
-        &["chameleon_core", "generate_types", "tests"];
+    const MOD_PATH: &'static [&'static str] = &["subxt_codegen", "types", "tests"];
 
     fn get_mod<'a>(
         module: &'a Module,
@@ -793,7 +821,7 @@ mod tests {
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Parent {
                         pub a: bool,
-                        pub b: root::chameleon_core::generate_types::tests::Child,
+                        pub b: root::subxt_codegen::types::tests::Child,
                     }
                 }
             }
@@ -829,10 +857,111 @@ mod tests {
                     pub struct Child(pub i32,);
 
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
-                    pub struct Parent(pub bool, pub root::chameleon_core::generate_types::tests::Child,);
+                    pub struct Parent(pub bool, pub root::subxt_codegen::types::tests::Child,);
                 }
             }
             .to_string()
+        )
+    }
+
+    #[test]
+    fn derive_compact_as_for_uint_wrapper_structs() {
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct Su8 {
+            a: u8,
+        }
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct TSu8(u8);
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct Su16 {
+            a: u16,
+        }
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct TSu16(u16);
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct Su32 {
+            a: u32,
+        }
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct TSu32(u32);
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct Su64 {
+            a: u64,
+        }
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct TSu64(u64);
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct Su128 {
+            a: u128,
+        }
+        #[allow(unused)]
+        #[derive(TypeInfo)]
+        struct TSu128(u128);
+
+        let mut registry = Registry::new();
+        registry.register_type(&meta_type::<Su8>());
+        registry.register_type(&meta_type::<TSu8>());
+        registry.register_type(&meta_type::<Su16>());
+        registry.register_type(&meta_type::<TSu16>());
+        registry.register_type(&meta_type::<Su32>());
+        registry.register_type(&meta_type::<TSu32>());
+        registry.register_type(&meta_type::<Su64>());
+        registry.register_type(&meta_type::<TSu64>());
+        registry.register_type(&meta_type::<Su128>());
+        registry.register_type(&meta_type::<TSu128>());
+        let portable_types: PortableRegistry = registry.into();
+
+        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let types = type_gen.generate_types_mod();
+        let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+        assert_eq!(
+            tests_mod.into_token_stream().to_string(),
+            quote! {
+                pub mod tests {
+                    use super::root;
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct Su128 { pub a: u128, }
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct Su16 { pub a: u16, }
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct Su32 { pub a: u32, }
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct Su64 { pub a: u64, }
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct Su8 { pub a: u8, }
+
+                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct TSu128(pub u128,);
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct TSu16(pub u16,);
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct TSu32(pub u32,);
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct TSu64(pub u64,);
+
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
+                    pub struct TSu8(pub u8,);
+                }
+            }
+                .to_string()
         )
     }
 
@@ -1070,8 +1199,8 @@ mod tests {
                     use super::root;
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Bar {
-                        pub b: root::chameleon_core::generate_types::tests::Foo<u32>,
-                        pub c: root::chameleon_core::generate_types::tests::Foo<u8>,
+                        pub b: root::subxt_codegen::types::tests::Foo<u32>,
+                        pub c: root::subxt_codegen::types::tests::Foo<u8>,
                     }
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Foo<_0> {
@@ -1113,7 +1242,7 @@ mod tests {
                     use super::root;
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct Bar<_0> {
-                        pub b: root::chameleon_core::generate_types::tests::Foo<_0, u32>,
+                        pub b: root::subxt_codegen::types::tests::Foo<_0, u32>,
                     }
 
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
@@ -1206,15 +1335,15 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode, ::codec::CompactAs)]
                     pub struct NamedFields<_0> {
                         pub b: u32,
-                        pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
+                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
                     }
                     #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (u32, u32,),
-                        pub ::core::marker::PhantomData<(_0, _1)>,
+                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>,
                     );
                 }
             }
@@ -1271,7 +1400,7 @@ mod tests {
 
                                 #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                                 pub struct Bar {
-                                    pub a: root::chameleon_core::generate_types::tests::modules::a::Foo,
+                                    pub a: root::subxt_codegen::types::tests::modules::a::Foo,
                                 }
                             }
 
@@ -1284,7 +1413,7 @@ mod tests {
 
                             #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
                             pub struct Foo {
-                                pub a: root::chameleon_core::generate_types::tests::modules::a::b::Bar,
+                                pub a: root::subxt_codegen::types::tests::modules::a::b::Bar,
                             }
                         }
                     }
