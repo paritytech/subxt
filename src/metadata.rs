@@ -38,7 +38,6 @@ use frame_metadata::{
 };
 use scale_info::{
     form::PortableForm,
-    PortableRegistry,
     TypeDef,
     Variant,
 };
