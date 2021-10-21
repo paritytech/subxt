@@ -57,7 +57,7 @@ frame-metadata = { git = "https://github.com/paritytech/frame-metadata.git", tag
 frame-support = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 pallet-indices = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
 pallet-staking = { git = "https://github.com/paritytech/substrate.git", branch = "polkadot-v0.9.11" }
-scale-info    = { version = '1.0', default-features = false, features = ['derive','std'] }
+scale-info    = { version = '1.0', default-features = false, features = ['derive'] }
 
 [dev-dependencies]
 assert_matches = "1.5.0"

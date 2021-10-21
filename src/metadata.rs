@@ -507,21 +507,20 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         let mut modules_with_calls = HashMap::new();
         let mut modules_with_events = HashMap::new();
         let mut modules_with_errors = HashMap::new();
-        for module in convert(meta.pallets)?.into_iter() {
-            let module_name = convert(module.name.clone())?;
+        for module in meta.pallets.into_iter() {
+            let module_name = module.name.clone();
 
             let mut constant_map = HashMap::new();
-            for constant in convert(module.constants)?.into_iter() {
-                let constant_meta = convert_constant(constant)?;
+            for constant in module.constants.into_iter() {
+                let constant_meta = convert_constant(constant);
                 constant_map.insert(constant_meta.name.clone(), constant_meta);
             }
 
             let mut storage_map = HashMap::new();
             if let Some(storage) = module.storage {
-                let storage = convert(storage)?;
-                let module_prefix = convert(storage.prefix)?;
-                for entry in convert(storage.entries)?.into_iter() {
-                    let storage_prefix = convert(entry.name.clone())?;
+                let module_prefix = storage.prefix;
+                for entry in storage.entries.into_iter() {
+                    let storage_prefix = entry.name.clone();
                     let entry = convert_entry(
                         module_prefix.clone(),
                         storage_prefix.clone(),
@@ -565,7 +564,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
                 let events = types_registrty
                     .resolve(events.ty.id())
-                    .ok_or(MetadataError::TypeIdNotFound(calls.ty.id()))?
+                    .ok_or(MetadataError::TypeIdNotFound(events.ty.id()))?
                     .type_def();
 
                 if let TypeDef::Variant(x) = events {
@@ -586,7 +585,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let mut error_map = HashMap::new();
                 let errors = types_registrty
                     .resolve(errors.ty.id())
-                    .ok_or(MetadataError::TypeIdNotFound(calls.ty.id()))?
+                    .ok_or(MetadataError::TypeIdNotFound(errors.ty.id()))?
                     .type_def();
                 if let TypeDef::Variant(x) = errors {
                     for v in x.variants().iter() {
@@ -612,25 +611,12 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
     }
 }
 
-// fn convert<B: 'static, O: 'static>(
-//     dd: DecodeDifferent<B, O>,
-// ) -> Result<O, ConversionError> {
-//     match dd {
-//         DecodeDifferent::Decoded(value) => Ok(value),
-//         _ => Err(ConversionError::ExpectedDecoded),
-//     }
-// }
-
-fn convert<T>(dd: T) -> Result<T, ConversionError> {
-    Ok(dd)
-}
-
 fn convert_event(
     event: &Variant<PortableForm>,
 ) -> Result<ModuleEventMetadata, ConversionError> {
-    let name = convert(event.name())?.to_string();
+    let name = event.name().to_string();
     let mut arguments = Vec::new();
-    for arg in convert(event.fields())?.iter() {
+    for arg in event.fields().iter() {
         let arg = arg
             .type_name()
             .ok_or(ConversionError::InvalidEventArg(
@@ -648,33 +634,22 @@ fn convert_entry(
     storage_prefix: String,
     entry: frame_metadata::StorageEntryMetadata<PortableForm>,
 ) -> Result<StorageMetadata, ConversionError> {
-    let default = convert(entry.default)?;
     Ok(StorageMetadata {
         module_prefix,
         storage_prefix,
         modifier: entry.modifier,
         ty: entry.ty,
-        default,
+        default: entry.default,
     })
 }
 
-// fn convert_error(
-//     error: frame_metadata::PalletErrorMetadata<PortableForm>,
-// ) -> Result<String, ConversionError> {
-//     convert(error.name)
-// }
-
 fn convert_constant(
     constant: frame_metadata::PalletConstantMetadata<PortableForm>,
-) -> Result<PalletConstantMetadata, ConversionError> {
-    let name = convert(constant.name)?;
-    let ty = convert(constant.ty)?;
-    let value = convert(constant.value)?;
-    let documentation = convert(constant.docs)?;
-    Ok(PalletConstantMetadata {
-        name,
-        ty: ty.id(),
-        value,
-        documentation,
-    })
+) -> PalletConstantMetadata {
+    PalletConstantMetadata {
+        name: constant.name,
+        ty: constant.ty.id(),
+        value: constant.value,
+        documentation: constant.docs,
+    }
 }
