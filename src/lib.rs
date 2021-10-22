@@ -100,6 +100,7 @@ pub use crate::{
         SystemProperties,
     },
     storage::{
+        KeyIter,
         StorageEntry,
         StorageEntryKey,
         StorageMapKey,
