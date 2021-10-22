@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! To run this example, a local polkadot node should be running.
+//!
+//! E.g.
+//! ```bash
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.11/polkadot" --output /usr/local/bin/polkadot --location
+//! polkadot --dev --tmp
+//! ```
+
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
@@ -36,7 +44,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
     let hash = api
         .tx()
-        .transfer(&dest, 10_000)
+        .balances()
+        .transfer(dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
 

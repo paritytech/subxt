@@ -159,6 +159,7 @@ fn generate_storage_entry_fns(
     let pallet_name = &pallet.name;
     let storage_name = &storage_entry.name;
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
+    let fn_name_iter = format_ident!("{}_iter", fn_name);
     let storage_entry_ty = match storage_entry.ty {
         StorageEntryType::Plain(ref ty) => ty,
         StorageEntryType::Map { ref value, .. } => value,
@@ -189,10 +190,23 @@ fn generate_storage_entry_fns(
         }
     };
 
+    let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
+        quote! (
+            pub async fn #fn_name_iter(
+                &self,
+                hash: ::core::option::Option<T::Hash>,
+            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::Error> {
+                self.client.storage().iter(hash).await
+            }
+        )
+    } else {
+        quote!()
+    };
+
     let key_args = fields
         .iter()
         .map(|(field_name, field_type)| quote!( #field_name: #field_type )); // todo: [AJ] borrow non build-inf types?
-    let client_fn = quote! {
+    let client_fns = quote! {
         pub async fn #fn_name(
             &self,
             #( #key_args, )*
@@ -201,7 +215,9 @@ fn generate_storage_entry_fns(
             let entry = #constructor;
             self.client.storage().#fetch(&entry, hash).await
         }
+
+        #client_iter_fn
     };
 
-    (storage_entry_type, client_fn)
+    (storage_entry_type, client_fns)
 }

@@ -13800,7 +13800,12 @@ pub mod api {
                 )]
                 pub struct PriorLock<_0, _1>(pub _0, pub _1);
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct Vote(u8);
                 #[derive(
@@ -14231,9 +14236,17 @@ pub mod api {
             pub mod types {
                 use super::runtime_types;
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
-                pub struct BitFlags<_0>(pub u64, pub ::core::marker::PhantomData<_0>);
+                pub struct BitFlags<_0>(
+                    pub u64,
+                    #[codec(skip)] pub ::core::marker::PhantomData<_0>,
+                );
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                 )]
@@ -14795,6 +14808,7 @@ pub mod api {
                 pub call: _0,
                 pub maybe_periodic: Option<(_1, _1)>,
                 pub origin: _2,
+                #[codec(skip)]
                 pub __subxt_unused_type_params: ::core::marker::PhantomData<_3>,
             }
         }
@@ -15411,7 +15425,12 @@ pub mod api {
                     pub recipient: runtime_types::polkadot_parachain::primitives::Id,
                 }
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct Id(pub u32);
                 #[derive(
@@ -15451,7 +15470,12 @@ pub mod api {
                     pub struct Signature(pub runtime_types::sp_core::sr25519::Signature);
                 }
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct ValidatorIndex(pub u32);
                 #[derive(
@@ -15480,16 +15504,13 @@ pub mod api {
                     #[derive(
                         Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                     )]
-                    pub struct UncheckedSigned < _0 , _1 > { pub payload : _0 , pub validator_index : runtime_types :: polkadot_primitives :: v0 :: ValidatorIndex , pub signature : runtime_types :: polkadot_primitives :: v0 :: validator_app :: Signature , pub __subxt_unused_type_params : :: core :: marker :: PhantomData < _1 > , }
+                    pub struct UncheckedSigned < _0 , _1 > { pub payload : _0 , pub validator_index : runtime_types :: polkadot_primitives :: v0 :: ValidatorIndex , pub signature : runtime_types :: polkadot_primitives :: v0 :: validator_app :: Signature , # [codec (skip)] pub __subxt_unused_type_params : :: core :: marker :: PhantomData < _1 > , }
                 }
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                 )]
                 pub struct AvailabilityBitfield(
-                    pub  runtime_types::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                 );
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
@@ -15501,10 +15522,8 @@ pub mod api {
                         >,
                     pub validity_votes:
                         Vec<runtime_types::polkadot_primitives::v0::ValidityAttestation>,
-                    pub validator_indices: runtime_types::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub validator_indices:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                 }
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
@@ -15559,7 +15578,12 @@ pub mod api {
                         runtime_types::polkadot_primitives::v1::CandidateCommitments<u32>,
                 }
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct CoreIndex(pub u32);
                 #[derive(
@@ -15588,7 +15612,12 @@ pub mod api {
                     )>,
                 }
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct GroupIndex(pub u32);
                 #[derive(
@@ -16050,7 +16079,7 @@ pub mod api {
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                 )]
-                pub struct FundInfo < _0 , _1 , _2 , _3 > { pub depositor : _0 , pub verifier : Option < runtime_types :: sp_runtime :: MultiSigner > , pub deposit : _1 , pub raised : _1 , pub end : _2 , pub cap : _1 , pub last_contribution : runtime_types :: polkadot_runtime_common :: crowdloan :: LastContribution < _2 > , pub first_period : _2 , pub last_period : _2 , pub trie_index : _2 , pub __subxt_unused_type_params : :: core :: marker :: PhantomData < _3 > , }
+                pub struct FundInfo < _0 , _1 , _2 , _3 > { pub depositor : _0 , pub verifier : Option < runtime_types :: sp_runtime :: MultiSigner > , pub deposit : _1 , pub raised : _1 , pub end : _2 , pub cap : _1 , pub last_contribution : runtime_types :: polkadot_runtime_common :: crowdloan :: LastContribution < _2 > , pub first_period : _2 , pub last_period : _2 , pub trie_index : _2 , # [codec (skip)] pub __subxt_unused_type_params : :: core :: marker :: PhantomData < _3 > , }
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                 )]
@@ -16435,14 +16464,10 @@ pub mod api {
                     pub hash: runtime_types::polkadot_core_primitives::CandidateHash,
                     pub descriptor:
                         runtime_types::polkadot_primitives::v1::CandidateDescriptor<_0>,
-                    pub availability_votes: runtime_types::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
-                    pub backers: runtime_types::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub availability_votes:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
+                    pub backers:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                     pub relay_parent_number: _1,
                     pub backed_in_number: _1,
                     pub backing_group: runtime_types::polkadot_primitives::v1::GroupIndex,
@@ -16676,26 +16701,51 @@ pub mod api {
             pub mod fixed_point {
                 use super::runtime_types;
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct FixedU128(pub u128);
             }
             pub mod per_things {
                 use super::runtime_types;
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct PerU16(pub u16);
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct Perbill(pub u32);
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct Percent(pub u8);
                 #[derive(
-                    Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
+                    Debug,
+                    Eq,
+                    PartialEq,
+                    :: codec :: Encode,
+                    :: codec :: Decode,
+                    :: codec :: CompactAs,
                 )]
                 pub struct Permill(pub u32);
             }
@@ -16752,7 +16802,14 @@ pub mod api {
                 pub first_header: _0,
                 pub second_header: _0,
             }
-            #[derive(Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode)]
+            #[derive(
+                Debug,
+                Eq,
+                PartialEq,
+                :: codec :: Encode,
+                :: codec :: Decode,
+                :: codec :: CompactAs,
+            )]
             pub struct Slot(pub u64);
         }
         pub mod sp_core {
@@ -17188,6 +17245,7 @@ pub mod api {
                         pub digest: runtime_types::sp_runtime::generic::digest::Digest<
                             ::subxt::sp_core::H256,
                         >,
+                        #[codec(skip)]
                         pub __subxt_unused_type_params: ::core::marker::PhantomData<_1>,
                     }
                 }
@@ -17198,7 +17256,7 @@ pub mod api {
                     )]
                     pub struct UncheckedExtrinsic<_0, _1, _2, _3>(
                         Vec<u8>,
-                        pub ::core::marker::PhantomData<(_1, _0, _2, _3)>,
+                        #[codec(skip)] pub ::core::marker::PhantomData<(_1, _0, _2, _3)>,
                     );
                 }
             }

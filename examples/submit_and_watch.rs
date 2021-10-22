@@ -14,16 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! To run this example, a local polkadot node should be running.
+//!
+//! E.g.
+//! ```bash
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.11/polkadot" --output /usr/local/bin/polkadot --location
+//! polkadot --dev --tmp
+//! ```
+
 use sp_keyring::AccountKeyring;
 use subxt::{
-    balances::{
-        TransferCallExt,
-        TransferEventExt,
-    },
     ClientBuilder,
-    DefaultNodeRuntime,
     PairSigner,
 };
+
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -32,11 +38,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let result = client.transfer_and_watch(&signer, &dest, 10_000).await?;
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+    let result = api
+        .tx()
+        .balances()
+        .transfer(dest, 10_000)
+        .sign_and_submit_then_watch(&signer)
+        .await?;
 
-    if let Some(event) = result.transfer()? {
-        println!("Balance transfer success: value: {:?}", event.amount);
+    if let Some(event) = result.find_event::<polkadot::balances::events::Transfer>()? {
+        println!("Balance transfer success: value: {:?}", event.2);
     } else {
         println!("Failed to find Balances::Transfer Event");
     }

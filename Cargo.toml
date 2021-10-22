@@ -5,7 +5,7 @@ members = [".", "cli", "codegen", "macro"]
 name = "subxt"
 version = "0.15.0"
 authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2018"
+edition = "2021"
 
 license = "GPL-3.0"
 readme = "README.md"
@@ -24,9 +24,10 @@ tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 
 [dependencies]
 async-trait = "0.1.49"
-codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full"] }
+bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
+codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 chameleon = "0.1.0"
-scale-info = "1.0.0"
+scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
 jsonrpsee-proc-macros = "0.3.0"
