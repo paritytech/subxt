@@ -36,10 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
 
-    let mut iter = api
-        .storage()
-        .system()
-        .account_iter(None).await?;
+    let mut iter = api.storage().system().account_iter(None).await?;
 
     while let Some((key, account)) = iter.next().await? {
         println!("{}: {}", hex::encode(key), account.data.free);

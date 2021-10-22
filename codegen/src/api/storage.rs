@@ -200,7 +200,7 @@ fn generate_storage_entry_fns(
             }
         )
     } else {
-        quote! ()
+        quote!()
     };
 
     let key_args = fields
