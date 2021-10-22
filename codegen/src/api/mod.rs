@@ -82,6 +82,14 @@ impl RuntimeGenerator {
         // some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
             (
+                "bitvec::order::Lsb0",
+                parse_quote!(::subxt::bitvec::order::Lsb0),
+            ),
+            (
+                "bitvec::order::Msb0",
+                parse_quote!(::subxt::bitvec::order::Msb0),
+            ),
+            (
                 "sp_core::crypto::AccountId32",
                 parse_quote!(::subxt::sp_core::crypto::AccountId32),
             ),

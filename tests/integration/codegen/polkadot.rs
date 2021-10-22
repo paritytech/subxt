@@ -15510,10 +15510,7 @@ pub mod api {
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
                 )]
                 pub struct AvailabilityBitfield(
-                    pub  ::subxt::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                 );
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
@@ -15525,10 +15522,8 @@ pub mod api {
                         >,
                     pub validity_votes:
                         Vec<runtime_types::polkadot_primitives::v0::ValidityAttestation>,
-                    pub validator_indices: ::subxt::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub validator_indices:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                 }
                 #[derive(
                     Debug, Eq, PartialEq, :: codec :: Encode, :: codec :: Decode,
@@ -16469,14 +16464,10 @@ pub mod api {
                     pub hash: runtime_types::polkadot_core_primitives::CandidateHash,
                     pub descriptor:
                         runtime_types::polkadot_primitives::v1::CandidateDescriptor<_0>,
-                    pub availability_votes: ::subxt::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
-                    pub backers: ::subxt::bitvec::vec::BitVec<
-                        runtime_types::bitvec::order::Lsb0,
-                        u8,
-                    >,
+                    pub availability_votes:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
+                    pub backers:
+                        ::subxt::bitvec::vec::BitVec<::subxt::bitvec::order::Lsb0, u8>,
                     pub relay_parent_number: _1,
                     pub backed_in_number: _1,
                     pub backing_group: runtime_types::polkadot_primitives::v1::GroupIndex,

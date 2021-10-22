@@ -25,7 +25,7 @@ tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
 [dependencies]
 async-trait = "0.1.49"
 bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
-codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full"] }
+codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
