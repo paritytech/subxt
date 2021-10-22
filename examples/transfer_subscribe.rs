@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let raw = sub.next().await.unwrap().unwrap();
     let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(&mut &raw.data[..]);
     if let Ok(e) = event {
-        println!("Balance transfer success: value: {:?}", e.1);
+        println!("Balance transfer success: value: {:?}", e.2);
     } else {
         println!("Failed to subscribe to Balances::Transfer Event");
     }
