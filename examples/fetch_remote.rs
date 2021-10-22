@@ -31,7 +31,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let block_number = 1;
 
-    let block_hash = api.client.rpc().block_hash(Some(block_number.into())).await?;
+    let block_hash = api
+        .client
+        .rpc()
+        .block_hash(Some(block_number.into()))
+        .await?;
 
     if let Some(hash) = block_hash {
         println!("Block hash for block number {}: {}", block_number, hash);

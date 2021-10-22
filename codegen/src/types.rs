@@ -276,7 +276,9 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                     // any single field wrapper struct with a concrete unsigned int type can derive
                     // CompactAs.
                     let field = &composite.fields()[0];
-                    if !self.ty.type_params()
+                    if !self
+                        .ty
+                        .type_params()
                         .iter()
                         .any(|tp| Some(tp.name()) == field.type_name())
                     {

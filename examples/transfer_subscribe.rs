@@ -49,15 +49,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut sub = EventSubscription::<polkadot::DefaultConfig>::new(sub, decoder);
     sub.filter_event::<polkadot::balances::events::Transfer>();
 
-    api
-        .tx()
+    api.tx()
         .balances()
         .transfer(dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
 
     let raw = sub.next().await.unwrap().unwrap();
-    let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(&mut &raw.data[..]);
+    let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(
+        &mut &raw.data[..],
+    );
     if let Ok(e) = event {
         println!("Balance transfer success: value: {:?}", e.2);
     } else {
