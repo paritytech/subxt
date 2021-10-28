@@ -16,7 +16,7 @@
 
 #[subxt::subxt(
     runtime_metadata_path = "examples/polkadot_metadata.scale",
-    generated_type_derives = "Clone, Debug",
+    generated_type_derives = "Clone, Debug"
 )]
 pub mod polkadot {}
 

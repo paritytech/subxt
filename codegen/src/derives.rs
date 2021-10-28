@@ -18,7 +18,7 @@ use syn::punctuated::Punctuated;
 
 #[derive(Debug, Clone)]
 pub struct GeneratedTypeDerives {
-    derives: Punctuated<syn::Path, syn::Token![,]>
+    derives: Punctuated<syn::Path, syn::Token![,]>,
 }
 
 impl GeneratedTypeDerives {
@@ -36,8 +36,8 @@ impl GeneratedTypeDerives {
 impl Default for GeneratedTypeDerives {
     fn default() -> Self {
         let mut derives = Punctuated::new();
-        derives.push(syn::parse_quote!( ::subxt::codec::Encode ));
-        derives.push(syn::parse_quote!( ::subxt::codec::Decode ));
+        derives.push(syn::parse_quote!(::subxt::codec::Encode));
+        derives.push(syn::parse_quote!(::subxt::codec::Decode));
         Self::new(derives)
     }
 }

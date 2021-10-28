@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::GeneratedTypeDerives;
 use crate::types::{
     TypeGenerator,
     TypePath,
@@ -26,7 +27,6 @@ use quote::{
     quote,
 };
 use scale_info::form::PortableForm;
-use super::GeneratedTypeDerives;
 
 #[derive(Debug)]
 pub struct StructDef {

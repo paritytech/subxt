@@ -21,7 +21,7 @@ use proc_macro::TokenStream;
 use proc_macro_error::proc_macro_error;
 use syn::{
     parse_macro_input,
-    punctuated::Punctuated
+    punctuated::Punctuated,
 };
 
 #[derive(Debug, FromMeta)]
@@ -32,9 +32,7 @@ struct RuntimeMetadataArgs {
 }
 
 #[derive(Debug, FromMeta)]
-struct GeneratedTypeDerives (
-    Punctuated<syn::Path, syn::Token![,]>,
-);
+struct GeneratedTypeDerives(Punctuated<syn::Path, syn::Token![,]>);
 
 #[proc_macro_attribute]
 #[proc_macro_error]

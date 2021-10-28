@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::GeneratedTypeDerives;
 use proc_macro2::{
     Ident,
     Span,
@@ -38,7 +39,6 @@ use std::collections::{
     HashMap,
     HashSet,
 };
-use super::GeneratedTypeDerives;
 
 #[derive(Debug)]
 pub struct TypeGenerator<'a> {
@@ -772,7 +772,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -813,7 +818,12 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -853,7 +863,12 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -930,7 +945,12 @@ mod tests {
         registry.register_type(&meta_type::<TSu128>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -989,7 +1009,12 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1022,7 +1047,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1054,7 +1084,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1091,7 +1126,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1126,7 +1166,12 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1159,7 +1204,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1198,7 +1248,12 @@ mod tests {
         registry.register_type(&meta_type::<Bar>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1241,7 +1296,12 @@ mod tests {
         registry.register_type(&meta_type::<Bar<bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1287,7 +1347,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1335,7 +1400,12 @@ mod tests {
         registry.register_type(&meta_type::<UnnamedFields<bool, bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1390,7 +1460,12 @@ mod tests {
         registry.register_type(&meta_type::<modules::c::Foo>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default(), Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
