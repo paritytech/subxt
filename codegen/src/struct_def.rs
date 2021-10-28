@@ -26,12 +26,14 @@ use quote::{
     quote,
 };
 use scale_info::form::PortableForm;
+use super::GeneratedTypeDerives;
 
 #[derive(Debug)]
 pub struct StructDef {
     pub name: syn::Ident,
     pub fields: StructDefFields,
     pub field_visibility: Option<syn::Visibility>,
+    pub derives: GeneratedTypeDerives,
 }
 
 #[derive(Debug)]
@@ -83,10 +85,13 @@ impl StructDef {
             )
         };
 
+        let derives = type_gen.derives().clone();
+
         Self {
             name,
             fields,
             field_visibility,
+            derives,
         }
     }
 
@@ -102,6 +107,7 @@ impl StructDef {
 impl quote::ToTokens for StructDef {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let visibility = &self.field_visibility;
+        let derives = &self.derives;
         tokens.extend(match self.fields {
             StructDefFields::Named(ref named_fields) => {
                 let fields = named_fields.iter().map(|(name, ty)| {
@@ -111,7 +117,7 @@ impl quote::ToTokens for StructDef {
                 });
                 let name = &self.name;
                 quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #derives
                     pub struct #name {
                         #( #fields ),*
                     }
@@ -125,7 +131,7 @@ impl quote::ToTokens for StructDef {
                 });
                 let name = &self.name;
                 quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #derives
                     pub struct #name (
                         #( #fields ),*
                     );

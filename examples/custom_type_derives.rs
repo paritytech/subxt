@@ -14,18 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Library to generate an API for a Substrate runtime from its metadata.
+#[subxt::subxt(
+    runtime_metadata_path = "examples/polkadot_metadata.scale",
+    generated_type_derives = "Clone, Debug",
+)]
+pub mod polkadot {}
 
-mod api;
-mod derives;
-mod ir;
-mod struct_def;
-mod types;
+use polkadot::runtime_types::frame_support::PalletId;
 
-pub use self::{
-    api::{
-        generate_runtime_api,
-        RuntimeGenerator,
-    },
-    derives::GeneratedTypeDerives,
-};
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let pallet_id = PalletId([1u8; 8]);
+    let _ = <PalletId as Clone>::clone(&pallet_id);
+    Ok(())
+}

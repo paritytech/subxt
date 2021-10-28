@@ -151,7 +151,7 @@ fn codegen<I: Input>(encoded: &mut I) -> color_eyre::Result<()> {
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let runtime_api = generator.generate_runtime(item_mod);
+    let runtime_api = generator.generate_runtime(item_mod, Default::default());
     println!("{}", runtime_api);
     Ok(())
 }
