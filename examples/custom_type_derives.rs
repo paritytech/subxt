@@ -15,7 +15,16 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 #[subxt::subxt(
-    runtime_metadata_path = "tests/integration/node_runtime.scale",
-    generated_type_derives = "Debug, Eq, PartialEq",
+    runtime_metadata_path = "examples/polkadot_metadata.scale",
+    generated_type_derives = "Clone, Debug"
 )]
-pub mod node_runtime {}
+pub mod polkadot {}
+
+use polkadot::runtime_types::frame_support::PalletId;
+
+#[async_std::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let pallet_id = PalletId([1u8; 8]);
+    let _ = <PalletId as Clone>::clone(&pallet_id);
+    Ok(())
+}

@@ -18,6 +18,7 @@ mod calls;
 mod events;
 mod storage;
 
+use super::GeneratedTypeDerives;
 use crate::{
     ir,
     struct_def::StructDef,
@@ -43,9 +44,16 @@ use std::{
     path,
     string::ToString,
 };
-use syn::parse_quote;
+use syn::{
+    parse_quote,
+    punctuated::Punctuated,
+};
 
-pub fn generate_runtime_api<P>(item_mod: syn::ItemMod, path: P) -> TokenStream2
+pub fn generate_runtime_api<P>(
+    item_mod: syn::ItemMod,
+    path: P,
+    generated_type_derives: Option<Punctuated<syn::Path, syn::Token![,]>>,
+) -> TokenStream2
 where
     P: AsRef<path::Path>,
 {
@@ -60,8 +68,13 @@ where
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
+    let mut derives = GeneratedTypeDerives::default();
+    if let Some(user_derives) = generated_type_derives {
+        derives.append(user_derives.iter().cloned())
+    }
+
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod)
+    generator.generate_runtime(item_mod, derives)
 }
 
 pub struct RuntimeGenerator {
@@ -76,7 +89,11 @@ impl RuntimeGenerator {
         }
     }
 
-    pub fn generate_runtime(&self, item_mod: syn::ItemMod) -> TokenStream2 {
+    pub fn generate_runtime(
+        &self,
+        item_mod: syn::ItemMod,
+        derives: GeneratedTypeDerives,
+    ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
 
         // some hardcoded default type substitutes, can be overridden by user
@@ -121,8 +138,12 @@ impl RuntimeGenerator {
             type_substitutes.insert(path.to_string(), substitute.clone());
         }
 
-        let type_gen =
-            TypeGenerator::new(&self.metadata.types, "runtime_types", type_substitutes);
+        let type_gen = TypeGenerator::new(
+            &self.metadata.types,
+            "runtime_types",
+            type_substitutes,
+            derives.clone(),
+        );
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
@@ -179,7 +200,7 @@ impl RuntimeGenerator {
         });
 
         let outer_event = quote! {
-            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+            #derives
             pub enum Event {
                 #( #outer_event_variants )*
             }

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::GeneratedTypeDerives;
 use proc_macro2::{
     Ident,
     Span,
@@ -44,6 +45,7 @@ pub struct TypeGenerator<'a> {
     root_mod_ident: Ident,
     type_registry: &'a PortableRegistry,
     type_substitutes: HashMap<String, syn::TypePath>,
+    derives: GeneratedTypeDerives,
 }
 
 impl<'a> TypeGenerator<'a> {
@@ -52,12 +54,14 @@ impl<'a> TypeGenerator<'a> {
         type_registry: &'a PortableRegistry,
         root_mod: &'static str,
         type_substitutes: HashMap<String, syn::TypePath>,
+        derives: GeneratedTypeDerives,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
             root_mod_ident,
             type_registry,
             type_substitutes,
+            derives,
         }
     }
 
@@ -185,6 +189,11 @@ impl<'a> TypeGenerator<'a> {
             })
         }
     }
+
+    /// Returns the derives with which all generated type will be decorated.
+    pub fn derives(&self) -> &GeneratedTypeDerives {
+        &self.derives
+    }
 }
 
 #[derive(Debug)]
@@ -267,6 +276,8 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
             syn::Type::Path(path)
         });
 
+        let derives = self.type_gen.derives();
+
         match self.ty.type_def() {
             TypeDef::Composite(composite) => {
                 let type_name = type_name.expect("structs should have a name");
@@ -293,7 +304,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                                     | TypeDefPrimitive::U128
                             )
                         ) {
-                            Some(quote!( , ::codec::CompactAs ))
+                            Some(quote!( #[derive(::codec::CompactAs)] ))
                         } else {
                             None
                         }
@@ -303,8 +314,10 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 } else {
                     None
                 };
+
                 let ty_toks = quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode #derive_as_compact)]
+                    #derive_as_compact
+                    #derives
                     pub struct #type_name #fields
                 };
                 tokens.extend(ty_toks);
@@ -344,7 +357,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 }
 
                 let ty_toks = quote! {
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #derives
                     pub enum #type_name {
                         #( #variants, )*
                     }
@@ -759,7 +772,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -769,7 +787,7 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: bool,
                         pub b: u32,
@@ -800,7 +818,12 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -810,12 +833,12 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Child {
                         pub a: i32,
                     }
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Parent {
                         pub a: bool,
                         pub b: root::subxt_codegen::types::tests::Child,
@@ -840,7 +863,12 @@ mod tests {
         registry.register_type(&meta_type::<Parent>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -850,10 +878,10 @@ mod tests {
                 pub mod tests {
                     use super::root;
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Child(pub i32,);
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Parent(pub bool, pub root::subxt_codegen::types::tests::Child,);
                 }
             }
@@ -917,7 +945,12 @@ mod tests {
         registry.register_type(&meta_type::<TSu128>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -976,7 +1009,12 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -985,7 +1023,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub enum E {
                         A,
                         B (bool,),
@@ -1009,7 +1047,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1018,7 +1061,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: [u8; 32usize],
                     }
@@ -1041,7 +1084,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1050,7 +1098,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: Option<bool>,
                         pub b: Option<u32>,
@@ -1078,7 +1126,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1087,7 +1140,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: std::boxed::Box<bool>,
                         pub b: std::boxed::Box<u32>,
@@ -1113,7 +1166,12 @@ mod tests {
         registry.register_type(&meta_type::<E>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1122,7 +1180,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub enum E {
                         A(std::boxed::Box<bool>,),
                         B { a: std::boxed::Box<u32>, },
@@ -1146,7 +1204,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1155,7 +1218,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub a: ::core::ops::Range<u32>,
                         pub b: ::core::ops::RangeInclusive<u32>,
@@ -1185,7 +1248,12 @@ mod tests {
         registry.register_type(&meta_type::<Bar>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1194,12 +1262,12 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Bar {
                         pub b: root::subxt_codegen::types::tests::Foo<u32>,
                         pub c: root::subxt_codegen::types::tests::Foo<u8>,
                     }
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Foo<_0> {
                         pub a: _0,
                     }
@@ -1228,7 +1296,12 @@ mod tests {
         registry.register_type(&meta_type::<Bar<bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1237,12 +1310,12 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Bar<_0> {
                         pub b: root::subxt_codegen::types::tests::Foo<_0, u32>,
                     }
 
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct Foo<_0, _1> {
                         pub a: _0,
                         pub b: Option<(_0, _1,)>,
@@ -1274,7 +1347,12 @@ mod tests {
         registry.register_type(&meta_type::<S>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1283,7 +1361,7 @@ mod tests {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct S {
                         pub lsb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Lsb0, u8>,
                         pub msb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Msb0, u16>,
@@ -1322,7 +1400,12 @@ mod tests {
         registry.register_type(&meta_type::<UnnamedFields<bool, bool>>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1336,7 +1419,7 @@ mod tests {
                         pub b: u32,
                         #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
                     }
-                    #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                    #[derive(::codec::Encode, ::codec::Decode)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (u32, u32,),
                         #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>,
@@ -1377,7 +1460,12 @@ mod tests {
         registry.register_type(&meta_type::<modules::c::Foo>());
         let portable_types: PortableRegistry = registry.into();
 
-        let type_gen = TypeGenerator::new(&portable_types, "root", Default::default());
+        let type_gen = TypeGenerator::new(
+            &portable_types,
+            "root",
+            Default::default(),
+            Default::default(),
+        );
         let types = type_gen.generate_types_mod();
         let tests_mod = get_mod(&types, MOD_PATH).unwrap();
 
@@ -1394,20 +1482,20 @@ mod tests {
                             pub mod b {
                                 use super::root;
 
-                                #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                                #[derive(::codec::Encode, ::codec::Decode)]
                                 pub struct Bar {
                                     pub a: root::subxt_codegen::types::tests::modules::a::Foo,
                                 }
                             }
 
-                            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                            #[derive(::codec::Encode, ::codec::Decode)]
                             pub struct Foo {}
                         }
 
                         pub mod c {
                             use super::root;
 
-                            #[derive(Debug, Eq, PartialEq, ::codec::Encode, ::codec::Decode)]
+                            #[derive(::codec::Encode, ::codec::Decode)]
                             pub struct Foo {
                                 pub a: root::subxt_codegen::types::tests::modules::a::b::Bar,
                             }

@@ -21,6 +21,7 @@ use crate::{
             ValidatorPrefs,
         },
         staking,
+        system,
         DefaultConfig,
     },
     test_context,
@@ -37,7 +38,6 @@ use subxt::{
         Signer,
     },
     Error,
-    ExtrinsicSuccess,
     RuntimeError,
 };
 
@@ -58,17 +58,16 @@ fn default_validator_prefs() -> ValidatorPrefs {
 async fn validate_with_controller_account() -> Result<(), Error> {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
-    let announce_validator = cxt
+    let result = cxt
         .api
         .tx()
         .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice)
-        .await;
-    assert_matches!(announce_validator, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-        // TOOD: this is unsatisfying – can we do better?
-        assert_eq!(events.len(), 2);
-    });
+        .await?;
+
+    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
+    assert!(success.is_some());
 
     Ok(())
 }
@@ -97,17 +96,17 @@ async fn nominate_with_controller_account() -> Result<(), Error> {
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    let nomination = cxt
+    let result = cxt
         .api
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
-        .await;
-    assert_matches!(nomination, Ok(ExtrinsicSuccess {block: _, extrinsic: _, events}) => {
-        // TOOD: this is unsatisfying – can we do better?
-        assert_eq!(events.len(), 2);
-    });
+        .await?;
+
+    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
+    assert!(success.is_some());
+
     Ok(())
 }
 
