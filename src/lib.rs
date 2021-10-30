@@ -55,8 +55,8 @@ use codec::{
     Encode,
 };
 use core::{
-    marker::PhantomData,
     fmt::Debug,
+    marker::PhantomData,
 };
 
 mod client;
@@ -197,6 +197,9 @@ impl<T: Decode> WrapperKeepOpaque<T> {
 
     /// Create from the given encoded `data`.
     pub fn from_encoded(data: Vec<u8>) -> Self {
-        Self { data, _phantom: PhantomData }
+        Self {
+            data,
+            _phantom: PhantomData,
+        }
     }
 }
