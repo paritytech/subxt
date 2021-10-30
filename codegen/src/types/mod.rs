@@ -44,11 +44,16 @@ use syn::parse_quote;
 #[cfg(test)]
 mod tests;
 
+/// Generate a Rust module containing all types defined in the supplied [`PortableRegistry`].
 #[derive(Debug)]
 pub struct TypeGenerator<'a> {
-    root_mod_ident: Ident,
+    /// The name of the module which will contain the generated types.
+    types_mod_ident: Ident,
+    /// Registry of type definitions to be transformed into Rust type definitions.
     type_registry: &'a PortableRegistry,
+    /// User defined overrides for generated types.
     type_substitutes: HashMap<String, syn::TypePath>,
+    /// Set of derives with which to annotate generated types.
     derives: GeneratedTypeDerives,
 }
 
@@ -62,7 +67,7 @@ impl<'a> TypeGenerator<'a> {
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
-            root_mod_ident,
+            types_mod_ident: root_mod_ident,
             type_registry,
             type_substitutes,
             derives,
@@ -72,7 +77,7 @@ impl<'a> TypeGenerator<'a> {
     /// Generate a module containing all types defined in the supplied type registry.
     pub fn generate_types_mod(&'a self) -> Module<'a> {
         let mut root_mod =
-            Module::new(self.root_mod_ident.clone(), self.root_mod_ident.clone());
+            Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
         for (id, ty) in self.type_registry.types().iter().enumerate() {
             if ty.ty().path().namespace().is_empty() {
@@ -83,7 +88,7 @@ impl<'a> TypeGenerator<'a> {
                 ty.ty().clone(),
                 id as u32,
                 ty.ty().path().namespace().to_vec(),
-                &self.root_mod_ident,
+                &self.types_mod_ident,
                 &mut root_mod,
             )
         }
@@ -189,7 +194,7 @@ impl<'a> TypeGenerator<'a> {
             TypePath::Type(TypePathType {
                 ty,
                 params,
-                root_mod_ident: self.root_mod_ident.clone(),
+                root_mod_ident: self.types_mod_ident.clone(),
             })
         }
     }
