@@ -21,4 +21,5 @@
 ///
 /// - run `polkadot --dev --tmp` node locally
 /// - `cargo run --release -p subxt-cli -- codegen | rustfmt --edition=2018 --emit=stdout > tests/integration/codegen/polkadot.rs`
+#[rustfmt::skip]
 mod polkadot;

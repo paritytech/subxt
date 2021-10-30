@@ -21,4 +21,3 @@ mod contracts;
 mod staking;
 mod sudo;
 mod system;
-mod utility;
