@@ -39,6 +39,7 @@ use std::collections::{
     HashMap,
     HashSet,
 };
+use syn::parse_quote;
 
 #[cfg(test)]
 mod tests;
@@ -275,7 +276,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
                 quote! {}
             };
             let ty = format_ident!("{}", ident);
-            let path = syn::parse_quote! { #ty #type_params};
+            let path = parse_quote! { #ty #type_params};
             syn::Type::Path(path)
         });
 
@@ -546,9 +547,7 @@ impl quote::ToTokens for TypePath {
 impl TypePath {
     pub(crate) fn to_syn_type(&self) -> syn::Type {
         match self {
-            TypePath::Parameter(ty_param) => {
-                syn::Type::Path(syn::parse_quote! { #ty_param })
-            }
+            TypePath::Parameter(ty_param) => syn::Type::Path(parse_quote! { #ty_param }),
             TypePath::Type(ty) => ty.to_syn_type(),
             TypePath::Substitute(sub) => sub.to_syn_type(),
         }
@@ -594,75 +593,94 @@ impl TypePathType {
         let params = &self.params;
         match self.ty.type_def() {
             TypeDef::Composite(_) | TypeDef::Variant(_) => {
-                let mut ty_path = self
-                    .ty
-                    .path()
-                    .segments()
-                    .iter()
-                    .map(|s| syn::PathSegment::from(format_ident!("{}", s)))
-                    .collect::<syn::punctuated::Punctuated<syn::PathSegment, syn::Token![::]>>();
-                if !self.ty.path().namespace().is_empty() {
-                    // types without a namespace are assumed to be globally in scope e.g. `Option`s
-                    ty_path
-                        .insert(0, syn::PathSegment::from(self.root_mod_ident.clone()));
-                }
+                let path_segments = self.ty.path().segments();
+
+                let ty_path: syn::TypePath = match path_segments {
+                    [] => panic!("Type has no ident"),
+                    [ident] => {
+                        // paths to prelude types
+                        match ident.as_str() {
+                            "Option" => parse_quote!(::core::option::Option),
+                            "Result" => parse_quote!(::core::result::Result),
+                            "Cow" => parse_quote!(::alloc::borrow::Cow),
+                            "BTreeMap" => parse_quote!(::alloc::collections::BTreeMap),
+                            "BTreeSet" => parse_quote!(::alloc::collections::BTreeSet),
+                            "Range" => parse_quote!(::core::ops::Range),
+                            "RangeInclusive" => parse_quote!(::core::ops::RangeInclusive),
+                            ident => panic!("Unknown prelude type '{}'", ident),
+                        }
+                    }
+                    _ => {
+                        // paths to generated types in the root types module
+                        let mut ty_path = path_segments
+                            .iter()
+                            .map(|s| syn::PathSegment::from(format_ident!("{}", s)))
+                            .collect::<syn::punctuated::Punctuated<
+                                syn::PathSegment,
+                                syn::Token![::],
+                            >>();
+                        ty_path.insert(
+                            0,
+                            syn::PathSegment::from(self.root_mod_ident.clone()),
+                        );
+                        parse_quote!( #ty_path )
+                    }
+                };
 
                 let params = &self.params;
                 let path = if params.is_empty() {
-                    syn::parse_quote! { #ty_path }
+                    parse_quote! { #ty_path }
                 } else {
-                    syn::parse_quote! { #ty_path< #( #params ),* > }
+                    parse_quote! { #ty_path< #( #params ),* > }
                 };
                 syn::Type::Path(path)
             }
             TypeDef::Sequence(_) => {
                 let type_param = &self.params[0];
-                let type_path = syn::parse_quote! { Vec<#type_param> };
+                let type_path = parse_quote! { Vec<#type_param> };
                 syn::Type::Path(type_path)
             }
             TypeDef::Array(array) => {
                 let array_type = &self.params[0];
                 let array_len = array.len() as usize;
-                let array = syn::parse_quote! { [#array_type; #array_len] };
+                let array = parse_quote! { [#array_type; #array_len] };
                 syn::Type::Array(array)
             }
             TypeDef::Tuple(_) => {
-                let tuple = syn::parse_quote! { (#( # params, )* ) };
+                let tuple = parse_quote! { (#( # params, )* ) };
                 syn::Type::Tuple(tuple)
             }
             TypeDef::Primitive(primitive) => {
-                let primitive = match primitive {
-                    TypeDefPrimitive::Bool => "bool",
-                    TypeDefPrimitive::Char => "char",
-                    TypeDefPrimitive::Str => "String",
-                    TypeDefPrimitive::U8 => "u8",
-                    TypeDefPrimitive::U16 => "u16",
-                    TypeDefPrimitive::U32 => "u32",
-                    TypeDefPrimitive::U64 => "u64",
-                    TypeDefPrimitive::U128 => "u128",
+                let path = match primitive {
+                    TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
+                    TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
+                    TypeDefPrimitive::Str => parse_quote!(::alloc::string::String),
+                    TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
+                    TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
+                    TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),
+                    TypeDefPrimitive::U64 => parse_quote!(::core::primitive::u64),
+                    TypeDefPrimitive::U128 => parse_quote!(::core::primitive::u128),
                     TypeDefPrimitive::U256 => unimplemented!("not a rust primitive"),
-                    TypeDefPrimitive::I8 => "i8",
-                    TypeDefPrimitive::I16 => "i16",
-                    TypeDefPrimitive::I32 => "i32",
-                    TypeDefPrimitive::I64 => "i64",
-                    TypeDefPrimitive::I128 => "i128",
+                    TypeDefPrimitive::I8 => parse_quote!(::core::primitive::i8),
+                    TypeDefPrimitive::I16 => parse_quote!(::core::primitive::i16),
+                    TypeDefPrimitive::I32 => parse_quote!(::core::primitive::i32),
+                    TypeDefPrimitive::I64 => parse_quote!(::core::primitive::i64),
+                    TypeDefPrimitive::I128 => parse_quote!(::core::primitive::i128),
                     TypeDefPrimitive::I256 => unimplemented!("not a rust primitive"),
                 };
-                let ident = format_ident!("{}", primitive);
-                let path = syn::parse_quote! { #ident };
                 syn::Type::Path(path)
             }
             TypeDef::Compact(_) => {
                 // todo: change the return type of this method to include info that it is compact
                 // and should be annotated with #[compact] for fields
                 let compact_type = &self.params[0];
-                syn::Type::Path(syn::parse_quote! ( #compact_type ))
+                syn::Type::Path(parse_quote! ( #compact_type ))
             }
             TypeDef::BitSequence(_) => {
                 let bit_order_type = &self.params[0];
                 let bit_store_type = &self.params[1];
 
-                let type_path = syn::parse_quote! { ::subxt::bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
+                let type_path = parse_quote! { ::subxt::bitvec::vec::BitVec<#bit_order_type, #bit_store_type> };
 
                 syn::Type::Path(type_path)
             }
@@ -730,7 +748,7 @@ impl TypePathSubstitute {
         } else {
             let substitute_path = &self.path;
             let params = &self.params;
-            syn::parse_quote! ( #substitute_path< #( #params ),* > )
+            parse_quote! ( #substitute_path< #( #params ),* > )
         }
     }
 }
