@@ -127,6 +127,10 @@ impl RuntimeGenerator {
                 "sp_arithmetic::per_things::Perquintill",
                 parse_quote!(::subxt::sp_arithmetic::per_things::Perquintill),
             ),
+            (
+                "frame_support::traits::misc::WrapperKeepOpaque",
+                parse_quote!(::subxt::WrapperKeepOpaque),
+            ),
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {

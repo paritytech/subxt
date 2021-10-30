@@ -16,6 +16,6 @@
 
 #[subxt::subxt(
     runtime_metadata_path = "tests/integration/node_runtime.scale",
-    generated_type_derives = "Debug, Eq, PartialEq",
+    generated_type_derives = "Debug, Eq, PartialEq"
 )]
 pub mod node_runtime {}
