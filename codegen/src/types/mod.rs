@@ -16,8 +16,8 @@
 
 #[cfg(test)]
 mod tests;
-mod type_path;
 mod type_def;
+mod type_path;
 
 use super::GeneratedTypeDerives;
 use proc_macro2::{
@@ -43,11 +43,11 @@ use std::collections::{
 pub use self::{
     type_def::TypeDefGen,
     type_path::{
-        TypePath,
-        TypePathType,
         TypeParameter,
+        TypePath,
         TypePathSubstitute,
-    }
+        TypePathType,
+    },
 };
 
 /// Generate a Rust module containing all types defined in the supplied [`PortableRegistry`].

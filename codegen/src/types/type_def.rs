@@ -16,13 +16,10 @@
 
 use super::{
     TypeGenerator,
-    TypePath,
     TypeParameter,
+    TypePath,
 };
-use proc_macro2::{
-    TokenStream as TokenStream2,
-    TokenStream,
-};
+use proc_macro2::TokenStream as TokenStream2;
 use quote::{
     format_ident,
     quote,

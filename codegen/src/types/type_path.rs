@@ -15,8 +15,8 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use proc_macro2::{
-    TokenStream,
     Ident,
+    TokenStream,
 };
 use quote::{
     format_ident,
@@ -28,9 +28,7 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
-use std::collections::{
-    HashSet,
-};
+use std::collections::HashSet;
 use syn::parse_quote;
 
 #[derive(Clone, Debug)]
