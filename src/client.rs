@@ -202,7 +202,7 @@ where
         Self { client, call }
     }
 
-    /// Creates and signs an extrinsic and submits to the chain.
+    /// Creates and signs an extrinsic and submits it to the chain.
     ///
     /// Returns when the extrinsic has successfully been included in the block, together with any
     /// events which were triggered by the extrinsic.
