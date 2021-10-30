@@ -51,9 +51,13 @@ pub use sp_runtime;
 
 use codec::{
     Decode,
+    DecodeAll,
     Encode,
 };
-use core::fmt::Debug;
+use core::{
+    marker::PhantomData,
+    fmt::Debug,
+};
 
 mod client;
 mod config;
@@ -139,6 +143,17 @@ pub trait Event: Decode {
     }
 }
 
+/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
+/// the transaction payload
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct Encoded(pub Vec<u8>);
+
+impl codec::Encode for Encoded {
+    fn encode(&self) -> Vec<u8> {
+        self.0.to_owned()
+    }
+}
+
 /// A phase of a block's execution.
 #[derive(Clone, Debug, Eq, PartialEq, Decode)]
 pub enum Phase {
@@ -150,13 +165,38 @@ pub enum Phase {
     Initialization,
 }
 
-/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
-/// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Encoded(pub Vec<u8>);
+/// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
+///
+/// This type is similar to [`WrapperOpaque`], but it differs in the way it stores the type `T`.
+/// While [`WrapperOpaque`] stores the decoded type, the [`WrapperKeepOpaque`] stores the type only
+/// in its opaque format, aka as a `Vec<u8>`. To access the real type `T` [`Self::try_decode`] needs
+/// to be used.
+#[derive(Debug, Eq, PartialEq, Default, Clone, Decode, Encode)]
+pub struct WrapperKeepOpaque<T> {
+    data: Vec<u8>,
+    _phantom: PhantomData<T>,
+}
 
-impl codec::Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
+impl<T: Decode> WrapperKeepOpaque<T> {
+    /// Try to decode the wrapped type from the inner `data`.
+    ///
+    /// Returns `None` if the decoding failed.
+    pub fn try_decode(&self) -> Option<T> {
+        T::decode_all(&mut &self.data[..]).ok()
+    }
+
+    /// Returns the length of the encoded `T`.
+    pub fn encoded_len(&self) -> usize {
+        self.data.len()
+    }
+
+    /// Returns the encoded data.
+    pub fn encoded(&self) -> &[u8] {
+        &self.data
+    }
+
+    /// Create from the given encoded `data`.
+    pub fn from_encoded(data: Vec<u8>) -> Self {
+        Self { data, _phantom: PhantomData }
     }
 }
