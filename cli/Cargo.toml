@@ -3,6 +3,10 @@ name = "subxt-cli"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "subxt"
+path = "src/main.rs"
+
 [dependencies]
 # perform subxt codegen
 subxt-codegen = { version = "0.1.0", path = "../codegen" }
