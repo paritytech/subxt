@@ -37,13 +37,20 @@ use scale_info::{
 use std::collections::HashSet;
 use syn::parse_quote;
 
+/// Generates a Rust `struct` or `enum` definition based on the supplied [`scale-info::Type`].
+///
+/// Field type paths are resolved via the `TypeGenerator`, which contains the registry of all
+/// generated types in the module.
 #[derive(Debug)]
-pub struct ModuleType<'a> {
+pub struct TypeDefGen<'a> {
+    /// The type generation context, allows resolving of type paths for the fields of the
+    /// generated type.
     pub(super) type_gen: &'a TypeGenerator<'a>,
+    /// Contains the definition of the type to be generated.
     pub(super) ty: Type<PortableForm>,
 }
 
-impl<'a> quote::ToTokens for ModuleType<'a> {
+impl<'a> quote::ToTokens for TypeDefGen<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let type_params = self
             .ty
@@ -168,7 +175,7 @@ impl<'a> quote::ToTokens for ModuleType<'a> {
     }
 }
 
-impl<'a> ModuleType<'a> {
+impl<'a> TypeDefGen<'a> {
     fn composite_fields(
         &self,
         fields: &'a [Field<PortableForm>],

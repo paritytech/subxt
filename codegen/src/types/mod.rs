@@ -41,7 +41,7 @@ use std::collections::{
 };
 
 pub use self::{
-    type_def::ModuleType,
+    type_def::TypeDefGen,
     type_path::{
         TypePath,
         TypePathType,
@@ -126,7 +126,7 @@ impl<'a> TypeGenerator<'a> {
         if path.len() == 1 {
             child_mod
                 .types
-                .insert(ty.path().clone(), ModuleType { ty, type_gen: self });
+                .insert(ty.path().clone(), TypeDefGen { ty, type_gen: self });
         } else {
             self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
         }
@@ -216,7 +216,7 @@ pub struct Module<'a> {
     name: Ident,
     root_mod: Ident,
     children: BTreeMap<Ident, Module<'a>>,
-    types: BTreeMap<scale_info::Path<scale_info::form::PortableForm>, ModuleType<'a>>,
+    types: BTreeMap<scale_info::Path<scale_info::form::PortableForm>, TypeDefGen<'a>>,
 }
 
 impl<'a> ToTokens for Module<'a> {
