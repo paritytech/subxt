@@ -58,7 +58,7 @@ enum Command {
         #[structopt(long, short, default_value = "json")]
         format: String,
     },
-    /// Generate runtime API code from metadata.
+    /// Generate runtime API client code from metadata.
     ///
     /// # Example (with code formatting)
     ///
