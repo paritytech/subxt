@@ -403,10 +403,7 @@ impl<'a> ModuleType<'a> {
         let ty_toks = |ty_name: &str, ty_path: &TypePath| {
             if ty_name.contains("Box<") {
                 // todo [AJ] remove this hack once scale-info can represent Box somehow
-                quote! { std::boxed::Box<#ty_path> }
-            } else if ty_name.contains("BTreeMap<") {
-                // todo [AJ] remove this hack and add namespaces or import prelude types
-                quote! { std::collections::#ty_path }
+                quote! { ::std::boxed::Box<#ty_path> }
             } else {
                 quote! { #ty_path }
             }
@@ -602,9 +599,9 @@ impl TypePathType {
                         match ident.as_str() {
                             "Option" => parse_quote!(::core::option::Option),
                             "Result" => parse_quote!(::core::result::Result),
-                            "Cow" => parse_quote!(::alloc::borrow::Cow),
-                            "BTreeMap" => parse_quote!(::alloc::collections::BTreeMap),
-                            "BTreeSet" => parse_quote!(::alloc::collections::BTreeSet),
+                            "Cow" => parse_quote!(::std::borrow::Cow),
+                            "BTreeMap" => parse_quote!(::std::collections::BTreeMap),
+                            "BTreeSet" => parse_quote!(::std::collections::BTreeSet),
                             "Range" => parse_quote!(::core::ops::Range),
                             "RangeInclusive" => parse_quote!(::core::ops::RangeInclusive),
                             ident => panic!("Unknown prelude type '{}'", ident),

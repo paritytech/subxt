@@ -398,8 +398,6 @@ fn option_fields() {
 
 #[test]
 fn box_fields_struct() {
-    // todo: [AJ] remove hack for Box and make no_std compatible using `alloc::Box`
-
     use std::boxed::Box;
 
     #[allow(unused)]
@@ -429,8 +427,8 @@ fn box_fields_struct() {
                 use super::root;
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub struct S {
-                    pub a: std::boxed::Box<::core::primitive::bool>,
-                    pub b: std::boxed::Box<::core::primitive::u32>,
+                    pub a: ::std::boxed::Box<::core::primitive::bool>,
+                    pub b: ::std::boxed::Box<::core::primitive::u32>,
                 }
             }
         }
@@ -469,8 +467,8 @@ fn box_fields_enum() {
                 use super::root;
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub enum E {
-                    A(std::boxed::Box<::core::primitive::bool>,),
-                    B { a: std::boxed::Box<::core::primitive::u32>, },
+                    A(::std::boxed::Box<::core::primitive::bool>,),
+                    B { a: ::std::boxed::Box<::core::primitive::u32>, },
                 }
             }
         }
