@@ -201,10 +201,10 @@ where
                 Ok(())
             }
             TypeDef::Variant(variant) => {
-                // todo: [AJ] handle if variant is DispatchError?
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant = variant.variants().get(variant_index as usize).unwrap(); // todo: ok_or
+                let variant = variant.variants().get(variant_index as usize)
+                    .ok_or(Error::Other(format!("Variant {} not found", variant_index)))?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
