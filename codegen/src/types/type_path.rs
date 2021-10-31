@@ -138,7 +138,7 @@ impl TypePathType {
             }
             TypeDef::Sequence(_) => {
                 let type_param = &self.params[0];
-                let type_path = parse_quote! { Vec<#type_param> };
+                let type_path = parse_quote! { ::std::vec::Vec<#type_param> };
                 syn::Type::Path(type_path)
             }
             TypeDef::Array(array) => {
@@ -155,7 +155,7 @@ impl TypePathType {
                 let path = match primitive {
                     TypeDefPrimitive::Bool => parse_quote!(::core::primitive::bool),
                     TypeDefPrimitive::Char => parse_quote!(::core::primitive::char),
-                    TypeDefPrimitive::Str => parse_quote!(::alloc::string::String),
+                    TypeDefPrimitive::Str => parse_quote!(::std::string::String),
                     TypeDefPrimitive::U8 => parse_quote!(::core::primitive::u8),
                     TypeDefPrimitive::U16 => parse_quote!(::core::primitive::u16),
                     TypeDefPrimitive::U32 => parse_quote!(::core::primitive::u32),

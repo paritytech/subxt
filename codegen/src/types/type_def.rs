@@ -19,7 +19,7 @@ use super::{
     TypeParameter,
     TypePath,
 };
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::TokenStream;
 use quote::{
     format_ident,
     quote,
@@ -178,7 +178,7 @@ impl<'a> TypeDefGen<'a> {
         fields: &'a [Field<PortableForm>],
         type_params: &'a [TypeParameter],
         is_struct: bool,
-    ) -> (TokenStream2, Vec<TypeParameter>) {
+    ) -> (TokenStream, Vec<TypeParameter>) {
         let named = fields.iter().all(|f| f.name().is_some());
         let unnamed = fields.iter().all(|f| f.name().is_none());
 
@@ -315,7 +315,7 @@ impl<'a> TypeDefGen<'a> {
         }
     }
 
-    fn phantom_data(params: &[TypeParameter]) -> TokenStream2 {
+    fn phantom_data(params: &[TypeParameter]) -> TokenStream {
         let params = if params.len() == 1 {
             let param = &params[0];
             quote! { #param }
