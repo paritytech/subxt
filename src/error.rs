@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    events::EventsDecodingError,
     metadata::{
         InvalidMetadataError,
         MetadataError,
@@ -59,6 +60,9 @@ pub enum Error {
     /// Runtime error.
     #[error("Runtime error: {0}")]
     Runtime(#[from] RuntimeError),
+    /// Events decoding error.
+    #[error("Events decoding error: {0}")]
+    EventsDecoding(#[from] EventsDecodingError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),

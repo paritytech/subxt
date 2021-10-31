@@ -79,8 +79,7 @@ pub enum StorageEntryKey {
 
 impl StorageEntryKey {
     /// Construct the final [`sp_core::storage::StorageKey`] for the storage entry.
-    pub fn final_key<T: StorageEntry>(&self) -> sp_core::storage::StorageKey {
-        let prefix = StorageKeyPrefix::new::<T>();
+    pub fn final_key(&self, prefix: StorageKeyPrefix) -> sp_core::storage::StorageKey {
         let mut bytes = prefix.0;
         if let Self::Map(map_keys) = self {
             for map_key in map_keys {
@@ -178,7 +177,8 @@ impl<'a, T: Config> StorageClient<'a, T> {
         store: &F,
         hash: Option<T::Hash>,
     ) -> Result<Option<F::Value>, Error> {
-        let key = store.key().final_key::<F>(); // todo: [AJ] can we factor this type param on final key out
+        let prefix = StorageKeyPrefix::new::<F>();
+        let key = store.key().final_key(prefix);
         self.fetch_unhashed::<F::Value>(key, hash).await
     }
 
