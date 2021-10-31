@@ -235,9 +235,7 @@ where
                 match primitive {
                     TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
                     TypeDefPrimitive::Char => {
-                        return Err(Error::Other(
-                            "scale codec not implemented for char".to_string(),
-                        ))
+                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::Char).into())
                     }
                     TypeDefPrimitive::Str => decode_raw::<String>(input, output),
                     TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
@@ -246,9 +244,7 @@ where
                     TypeDefPrimitive::U64 => decode_raw::<u64>(input, output),
                     TypeDefPrimitive::U128 => decode_raw::<u128>(input, output),
                     TypeDefPrimitive::U256 => {
-                        return Err(Error::Other(
-                            "U256 currently not supported".to_string(),
-                        ))
+                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::U256).into())
                     }
                     TypeDefPrimitive::I8 => decode_raw::<i8>(input, output),
                     TypeDefPrimitive::I16 => decode_raw::<i16>(input, output),
@@ -256,9 +252,7 @@ where
                     TypeDefPrimitive::I64 => decode_raw::<i64>(input, output),
                     TypeDefPrimitive::I128 => decode_raw::<i128>(input, output),
                     TypeDefPrimitive::I256 => {
-                        return Err(Error::Other(
-                            "I256 currently not supported".to_string(),
-                        ))
+                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::I256).into())
                     }
                 }
             }
@@ -297,6 +291,16 @@ pub enum Raw {
     Event(RawEvent),
     /// Error
     Error(RuntimeError),
+}
+
+#[derive(Debug, thiserror::Error)]
+pub enum EventsDecodingError {
+    /// Unsupported primitive type
+    #[error("Unsupported primitive type {0:?}")]
+    UnsupportedPrimitive(TypeDefPrimitive),
+    /// Invalid compact type, must be an unsigned int.
+    #[error("Invalid compact primitive {0:?}")]
+    InvalidCompactPrimitive(TypeDefPrimitive),
 }
 
 // #[cfg(test)]
