@@ -235,7 +235,10 @@ where
                 match primitive {
                     TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
                     TypeDefPrimitive::Char => {
-                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::Char).into())
+                        Err(EventsDecodingError::UnsupportedPrimitive(
+                            TypeDefPrimitive::Char,
+                        )
+                        .into())
                     }
                     TypeDefPrimitive::Str => decode_raw::<String>(input, output),
                     TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
@@ -244,7 +247,10 @@ where
                     TypeDefPrimitive::U64 => decode_raw::<u64>(input, output),
                     TypeDefPrimitive::U128 => decode_raw::<u128>(input, output),
                     TypeDefPrimitive::U256 => {
-                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::U256).into())
+                        Err(EventsDecodingError::UnsupportedPrimitive(
+                            TypeDefPrimitive::U256,
+                        )
+                        .into())
                     }
                     TypeDefPrimitive::I8 => decode_raw::<i8>(input, output),
                     TypeDefPrimitive::I16 => decode_raw::<i16>(input, output),
@@ -252,7 +258,10 @@ where
                     TypeDefPrimitive::I64 => decode_raw::<i64>(input, output),
                     TypeDefPrimitive::I128 => decode_raw::<i128>(input, output),
                     TypeDefPrimitive::I256 => {
-                        Err(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::I256).into())
+                        Err(EventsDecodingError::UnsupportedPrimitive(
+                            TypeDefPrimitive::I256,
+                        )
+                        .into())
                     }
                 }
             }
@@ -261,19 +270,48 @@ where
                     .metadata
                     .resolve_type(type_id)
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
-                match inner.type_def() {
-                    TypeDef::Primitive(primitive) => {
-                        match primitive {
-                            TypeDefPrimitive::U8 => decode_raw::<Compact<u8>>(input, output),
-                            TypeDefPrimitive::U16 => decode_raw::<Compact<u16>>(input, output),
-                            TypeDefPrimitive::U32 => decode_raw::<Compact<u32>>(input, output),
-                            TypeDefPrimitive::U64 => decode_raw::<Compact<u64>>(input, output),
-                            TypeDefPrimitive::U128 => decode_raw::<Compact<u128>>(input, output),
-                            _ => todo!("Add custom err: Compact only supported for unsigned int primitives"),
+                let decode_compact_primitive = |primitive| {
+                    match primitive {
+                        TypeDefPrimitive::U8 => decode_raw::<Compact<u8>>(input, output),
+                        TypeDefPrimitive::U16 => {
+                            decode_raw::<Compact<u16>>(input, output)
+                        }
+                        TypeDefPrimitive::U32 => {
+                            decode_raw::<Compact<u32>>(input, output)
+                        }
+                        TypeDefPrimitive::U64 => {
+                            decode_raw::<Compact<u64>>(input, output)
+                        }
+                        TypeDefPrimitive::U128 => {
+                            decode_raw::<Compact<u128>>(input, output)
+                        }
+                        prim => {
+                            Err(EventsDecodingError::InvalidCompactPrimitive(
+                                prim.clone(),
+                            )
+                            .into())
                         }
                     }
-                    // todo: [AJ] single field struct with primitive?, extract primitive decoding as above
-                    _ => todo!("Add custom err: Compact only supported for unsigned int primitives"),
+                };
+                match inner.type_def() {
+                    TypeDef::Primitive(primitive) => decode_compact_primitive(primitive),
+                    TypeDef::Composite(composite) => {
+                        match composite.fields() {
+                            [field] => {
+                                let field_ty = self
+                                    .metadata
+                                    .resolve_type(field.ty().id())
+                                    .ok_or(MetadataError::TypeNotFound(field.ty().id()))?;
+                                if let TypeDef::Primitive(primitive) = field_ty.type_def()  {
+                                    decode_compact_primitive(primitive)
+                                } else {
+                                    Err(EventsDecodingError::InvalidCompactType("Composite type must have a single primitive field".into()).into())
+                                }
+                            }
+                            _ => Err(EventsDecodingError::InvalidCompactType("Composite type must have a single field".into()).into())
+                        }
+                    }
+                    _ => Err(EventsDecodingError::InvalidCompactType("Compact type must be a primitive or a composite type".into()).into()),
                 }
             }
             TypeDef::BitSequence(_bitseq) => {
@@ -301,6 +339,8 @@ pub enum EventsDecodingError {
     /// Invalid compact type, must be an unsigned int.
     #[error("Invalid compact primitive {0:?}")]
     InvalidCompactPrimitive(TypeDefPrimitive),
+    #[error("Invalid compact composite type {0}")]
+    InvalidCompactType(String),
 }
 
 // #[cfg(test)]
