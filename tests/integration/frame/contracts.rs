@@ -37,7 +37,6 @@ use subxt::{
     Error,
     ExtrinsicSuccess,
     PairSigner,
-    StorageEntry,
 };
 
 struct ContractsTestContext {
@@ -184,32 +183,19 @@ async fn tx_instantiate() {
 
 #[async_std::test]
 async fn tx_call() {
-    let ctx = ContractsTestContext::init().await;
-    let (_, contract) = ctx.instantiate_with_code().await.unwrap();
+    let cxt = ContractsTestContext::init().await;
+    let (_, contract) = cxt.instantiate_with_code().await.unwrap();
 
-    // let contract_info = ctx
-    //     .api()
-    //     .storage
-    //     .contracts
-    //     .contract_info_of(contract.clone(), None)
-    //     .await;
-    // assert!(contract_info.is_ok());
-
-    let contract_info_of = storage::ContractInfoOf(contract.clone());
-    let storage_entry_key =
-        <storage::ContractInfoOf as StorageEntry>::key(&contract_info_of);
-    let final_key = storage_entry_key.final_key::<storage::ContractInfoOf>();
-    println!("contract_info_key key {:?}", hex::encode(&final_key.0));
-
-    let res = ctx
-        .client()
+    let contract_info = cxt
+        .cxt
+        .api
         .storage()
-        .fetch_raw(final_key, None)
-        .await
-        .unwrap();
-    println!("Result {:?}", res);
+        .contracts()
+        .contract_info_of(contract.clone(), None)
+        .await;
+    assert!(contract_info.is_ok());
 
-    let keys = ctx
+    let keys = cxt
         .client()
         .storage()
         .fetch_keys::<storage::ContractInfoOf>(5, None, None)
@@ -220,7 +206,7 @@ async fn tx_call() {
         .collect::<Vec<_>>();
     println!("keys post: {:?}", keys);
 
-    let executed = ctx.call(contract, vec![]).await;
+    let executed = cxt.call(contract, vec![]).await;
 
     assert!(executed.is_ok(), "Error calling contract: {:?}", executed);
 }
