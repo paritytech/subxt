@@ -203,8 +203,9 @@ where
             TypeDef::Variant(variant) => {
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant = variant.variants().get(variant_index as usize)
-                    .ok_or(Error::Other(format!("Variant {} not found", variant_index)))?;
+                let variant = variant.variants().get(variant_index as usize).ok_or(
+                    Error::Other(format!("Variant {} not found", variant_index)),
+                )?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
@@ -234,7 +235,9 @@ where
                 match primitive {
                     TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
                     TypeDefPrimitive::Char => {
-                        todo!("Err: scale codec not implemented for char")
+                        return Err(Error::Other(
+                            "scale codec not implemented for char".to_string(),
+                        ))
                     }
                     TypeDefPrimitive::Str => decode_raw::<String>(input, output),
                     TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
@@ -242,13 +245,21 @@ where
                     TypeDefPrimitive::U32 => decode_raw::<u32>(input, output),
                     TypeDefPrimitive::U64 => decode_raw::<u64>(input, output),
                     TypeDefPrimitive::U128 => decode_raw::<u128>(input, output),
-                    TypeDefPrimitive::U256 => todo!("Err: U256 currently not supported"),
+                    TypeDefPrimitive::U256 => {
+                        return Err(Error::Other(
+                            "U256 currently not supported".to_string(),
+                        ))
+                    }
                     TypeDefPrimitive::I8 => decode_raw::<i8>(input, output),
                     TypeDefPrimitive::I16 => decode_raw::<i16>(input, output),
                     TypeDefPrimitive::I32 => decode_raw::<i32>(input, output),
                     TypeDefPrimitive::I64 => decode_raw::<i64>(input, output),
                     TypeDefPrimitive::I128 => decode_raw::<i128>(input, output),
-                    TypeDefPrimitive::I256 => todo!("Err(I256 currently not supported)"),
+                    TypeDefPrimitive::I256 => {
+                        return Err(Error::Other(
+                            "I256 currently not supported".to_string(),
+                        ))
+                    }
                 }
             }
             TypeDef::Compact(_compact) => {
