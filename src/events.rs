@@ -270,7 +270,7 @@ where
                     .metadata
                     .resolve_type(type_id)
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
-                let decode_compact_primitive = |primitive| {
+                let mut decode_compact_primitive = |primitive: &TypeDefPrimitive| {
                     match primitive {
                         TypeDefPrimitive::U8 => decode_raw::<Compact<u8>>(input, output),
                         TypeDefPrimitive::U16 => {
