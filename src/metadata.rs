@@ -87,7 +87,7 @@ pub struct Metadata {
 }
 
 impl Metadata {
-    /// Returns `PalletMetadata`.
+    /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
         self.pallets
             .get(name)
