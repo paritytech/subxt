@@ -242,7 +242,6 @@ impl RuntimeGenerator {
 
                 impl ::subxt::ExtrinsicExtraData<DefaultConfig> for DefaultConfig {
                     type AccountData = AccountData;
-                    // todo: [AJ] make this configurable or auto-generated from metadata
                     type Extra = ::subxt::DefaultExtra<DefaultConfig>;
                 }
 
