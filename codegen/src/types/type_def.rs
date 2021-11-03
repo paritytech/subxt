@@ -239,7 +239,6 @@ impl<'a> TypeDefGen<'a> {
                         }
                     };
                     if ty.is_compact() {
-                        // todo: [AJ] figure out way to ensure AsCompact generated for target type in scale_info.
                         quote!( #[codec(compact)] #field_type  )
                     } else {
                         quote!( #field_type  )
