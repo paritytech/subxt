@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,11 +12,13 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+
+//! RPC types and client for interacting with a substrate node.
 
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
-// Related: https://github.com/paritytech/substrate-subxt/issues/66
+// Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
 use std::sync::Arc;
@@ -31,7 +33,10 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::HttpClient;
+use jsonrpsee_http_client::{
+    HttpClient,
+    HttpClientBuilder,
+};
 use jsonrpsee_types::{
     to_json_value,
     traits::{
@@ -43,7 +48,10 @@ use jsonrpsee_types::{
     JsonValue,
     Subscription,
 };
-use jsonrpsee_ws_client::WsClient;
+use jsonrpsee_ws_client::{
+    WsClient,
+    WsClientBuilder,
+};
 use serde::{
     Deserialize,
     Serialize,
@@ -55,10 +63,7 @@ use sp_core::{
         StorageKey,
     },
     Bytes,
-};
-use sp_rpc::{
-    list::ListOrValue,
-    number::NumberOrHex,
+    U256,
 };
 use sp_runtime::{
     generic::{
@@ -75,22 +80,48 @@ use crate::{
         EventsDecoder,
         RawEvent,
     },
-    frame::{
-        system::System,
-        Event,
-    },
-    metadata::Metadata,
-    runtimes::Runtime,
+    storage::StorageKeyPrefix,
     subscription::{
         EventStorageSubscription,
         EventSubscription,
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
+    Config,
+    Event,
+    Metadata,
 };
 
+/// A number type that can be serialized both as a number or a string that encodes a number in a
+/// string.
+///
+/// We allow two representations of the block number as input. Either we deserialize to the type
+/// that is specified in the block type or we attempt to parse given hex value.
+///
+/// The primary motivation for having this type is to avoid overflows when using big integers in
+/// JavaScript (which we consider as an important RPC API consumer).
+#[derive(Copy, Clone, Serialize, Deserialize, Debug, PartialEq)]
+#[serde(untagged)]
+pub enum NumberOrHex {
+    /// The number represented directly.
+    Number(u64),
+    /// Hex representation of the number.
+    Hex(U256),
+}
+
+/// RPC list or value wrapper.
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[serde(untagged)]
+pub enum ListOrValue<T> {
+    /// A list of values of given type.
+    List(Vec<T>),
+    /// A single value of given type.
+    Value(T),
+}
+
+/// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
-    SignedBlock<Block<<T as System>::Header, <T as System>::Extrinsic>>;
+    SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
 
 /// Wrapper for NumberOrHex to allow custom From impls
 #[derive(Serialize)]
@@ -153,9 +184,6 @@ pub enum TransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
-#[cfg(feature = "client")]
-use substrate_subxt_client::SubxtClient;
-
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
 #[derive(Clone)]
@@ -165,12 +193,27 @@ pub enum RpcClient {
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
-    #[cfg(feature = "client")]
-    /// Embedded substrate node.
-    Subxt(SubxtClient),
 }
 
 impl RpcClient {
+    /// Create a new [`RpcClient`] from the given URL.
+    ///
+    /// Infers the protocol from the URL, supports:
+    ///     - Websockets (`ws://`, `wss://`)
+    ///     - Http (`http://`, `https://`)
+    pub async fn try_from_url(url: &str) -> Result<Self, Error> {
+        if url.starts_with("ws://") || url.starts_with("wss://") {
+            let client = WsClientBuilder::default()
+                .max_notifs_per_subscription(4096)
+                .build(url)
+                .await?;
+            Ok(RpcClient::WebSocket(Arc::new(client)))
+        } else {
+            let client = HttpClientBuilder::default().build(&url)?;
+            Ok(RpcClient::Http(Arc::new(client)))
+        }
+    }
+
     /// Start a JSON-RPC request.
     pub async fn request<'a, T: DeserializeOwned + std::fmt::Debug>(
         &self,
@@ -178,15 +221,13 @@ impl RpcClient {
         params: &[JsonValue],
     ) -> Result<T, Error> {
         let params = params.into();
+        log::debug!("request {}: {:?}", method, params);
         let data = match self {
             Self::WebSocket(inner) => {
                 inner.request(method, params).await.map_err(Into::into)
             }
             Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
-            #[cfg(feature = "client")]
-            Self::Subxt(inner) => inner.request(method, params).await.map_err(Into::into),
         };
-        log::debug!("{}: {:?}", method, data);
         data
     }
 
@@ -210,13 +251,6 @@ impl RpcClient {
                     "Subscriptions not supported on HTTP transport".to_owned(),
                 )
                 .into())
-            }
-            #[cfg(feature = "client")]
-            Self::Subxt(inner) => {
-                inner
-                    .subscribe(subscribe_method, params, unsubscribe_method)
-                    .await
-                    .map_err(Into::into)
             }
         }
     }
@@ -246,13 +280,6 @@ impl From<Arc<HttpClient>> for RpcClient {
     }
 }
 
-#[cfg(feature = "client")]
-impl From<SubxtClient> for RpcClient {
-    fn from(client: SubxtClient) -> Self {
-        RpcClient::Subxt(client)
-    }
-}
-
 /// ReadProof struct returned by the RPC
 ///
 /// # Note
@@ -269,14 +296,14 @@ pub struct ReadProof<Hash> {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Runtime> {
+pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
     marker: PhantomData<T>,
     accept_weak_inclusion: bool,
 }
 
-impl<T: Runtime> Clone for Rpc<T> {
+impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -286,7 +313,8 @@ impl<T: Runtime> Clone for Rpc<T> {
     }
 }
 
-impl<T: Runtime> Rpc<T> {
+impl<T: Config> Rpc<T> {
+    /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
             client,
@@ -317,11 +345,12 @@ impl<T: Runtime> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKey>,
+        prefix: Option<StorageKeyPrefix>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, Error> {
+        let prefix = prefix.map(|p| p.to_storage_key());
         let params = &[
             to_json_value(prefix)?,
             to_json_value(count)?,
@@ -338,7 +367,7 @@ impl<T: Runtime> Rpc<T> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let params = &[
             to_json_value(keys)?,
             to_json_value(from)?,
@@ -355,7 +384,7 @@ impl<T: Runtime> Rpc<T> {
         &self,
         keys: &[StorageKey],
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<<T as System>::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
         let params = &[to_json_value(keys)?, to_json_value(at)?];
         self.client
             .request("state_queryStorageAt", params)
@@ -520,6 +549,7 @@ impl<T: Runtime> Rpc<T> {
         Ok(xt_hash)
     }
 
+    /// Create and submit an extrinsic and return a subscription to the events triggered.
     pub async fn watch_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
@@ -678,7 +708,7 @@ impl<T: Runtime> Rpc<T> {
 
 /// Captures data for when an extrinsic is successfully included in a block
 #[derive(Debug)]
-pub struct ExtrinsicSuccess<T: System> {
+pub struct ExtrinsicSuccess<T: Config> {
     /// Block hash.
     pub block: T::Hash,
     /// Extrinsic hash.
@@ -687,20 +717,20 @@ pub struct ExtrinsicSuccess<T: System> {
     pub events: Vec<RawEvent>,
 }
 
-impl<T: System> ExtrinsicSuccess<T> {
+impl<T: Config> ExtrinsicSuccess<T> {
     /// Find the Event for the given module/variant, with raw encoded event data.
     /// Returns `None` if the Event is not found.
     pub fn find_event_raw(&self, module: &str, variant: &str) -> Option<&RawEvent> {
         self.events
             .iter()
-            .find(|raw| raw.module == module && raw.variant == variant)
+            .find(|raw| raw.pallet == module && raw.variant == variant)
     }
 
     /// Find the Event for the given module/variant, attempting to decode the event data.
     /// Returns `None` if the Event is not found.
     /// Returns `Err` if the data fails to decode into the supplied type.
-    pub fn find_event<E: Event<T>>(&self) -> Result<Option<E>, CodecError> {
-        if let Some(event) = self.find_event_raw(E::MODULE, E::EVENT) {
+    pub fn find_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+        if let Some(event) = self.find_event_raw(E::PALLET, E::EVENT) {
             Ok(Some(E::decode(&mut &event.data[..])?))
         } else {
             Ok(None)

@@ -1,0 +1,37 @@
+[package]
+name = "subxt-macro"
+version = "0.1.0"
+authors = ["Parity Technologies <admin@parity.io>"]
+edition = "2021"
+autotests = false
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/subxt"
+documentation = "https://docs.rs/subxt"
+homepage = "https://www.parity.io/"
+description = "Generate types and helpers for interacting with Substrate runtimes."
+
+[lib]
+proc-macro = true
+
+[dependencies]
+async-trait = "0.1.49"
+codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full"] }
+darling = "0.13.0"
+frame-metadata = "14.0"
+heck = "0.3.2"
+proc-macro2 = "1.0.24"
+proc-macro-crate = "0.1.5"
+proc-macro-error = "1.0.4"
+quote = "1.0.8"
+syn = "1.0.58"
+scale-info = "1.0.0"
+
+subxt-codegen = { version = "0.1.0", path = "../codegen" }
+
+[dev-dependencies]
+pretty_assertions = "0.6.1"
+subxt = { path = ".." }
+trybuild = "1.0.38"
+
+sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }

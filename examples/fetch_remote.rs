@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,25 +12,30 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use substrate_subxt::{
-    ClientBuilder,
-    KusamaRuntime,
-};
+use subxt::ClientBuilder;
+
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let client = ClientBuilder::<KusamaRuntime>::new()
-        .set_url("wss://kusama-rpc.polkadot.io")
+    let api = ClientBuilder::new()
+        .set_url("wss://rpc.polkadot.io")
         .build()
-        .await?;
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
 
     let block_number = 1;
 
-    let block_hash = client.block_hash(Some(block_number.into())).await?;
+    let block_hash = api
+        .client
+        .rpc()
+        .block_hash(Some(block_number.into()))
+        .await?;
 
     if let Some(hash) = block_hash {
         println!("Block hash for block number {}: {}", block_number, hash);

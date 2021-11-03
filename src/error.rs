@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,8 +12,16 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::{
+    events::EventsDecodingError,
+    metadata::{
+        InvalidMetadataError,
+        MetadataError,
+    },
+    Metadata,
+};
 use jsonrpsee_types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
@@ -21,11 +29,6 @@ use sp_runtime::{
     DispatchError,
 };
 use thiserror::Error;
-
-use crate::metadata::{
-    Metadata,
-    MetadataError,
-};
 
 /// Error enum.
 #[derive(Debug, Error)]
@@ -48,22 +51,18 @@ pub enum Error {
     /// Extrinsic validity error
     #[error("Transaction Validity Error: {0:?}")]
     Invalid(TransactionValidityError),
-    /// Metadata error.
-    #[error("Metadata error: {0}")]
+    /// Invalid metadata error
+    #[error("Invalid Metadata: {0}")]
+    InvalidMetadata(#[from] InvalidMetadataError),
+    /// Invalid metadata error
+    #[error("Metadata: {0}")]
     Metadata(#[from] MetadataError),
-    /// Unregistered type sizes.
-    #[error(
-        "The following types do not have a type size registered: \
-            {0:?} \
-         Use `ClientBuilder::register_type_size` to register missing type sizes."
-    )]
-    MissingTypeSizes(Vec<String>),
-    /// Type size unavailable.
-    #[error("Type size unavailable while decoding event: {0:?}")]
-    TypeSizeUnavailable(String),
     /// Runtime error.
     #[error("Runtime error: {0}")]
     Runtime(#[from] RuntimeError),
+    /// Events decoding error.
+    #[error("Events decoding error: {0}")]
+    EventsDecoding(#[from] EventsDecodingError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -98,7 +97,7 @@ impl From<String> for Error {
 pub enum RuntimeError {
     /// Module error.
     #[error("Runtime module error: {0}")]
-    Module(ModuleError),
+    Module(PalletError),
     /// At least one consumer is remaining so the account cannot be destroyed.
     #[error("At least one consumer is remaining so the account cannot be destroyed.")]
     ConsumerRemaining,
@@ -128,11 +127,11 @@ impl RuntimeError {
                 error,
                 message: _,
             } => {
-                let module = metadata.module_with_errors(index)?;
-                let error = module.error(error)?;
-                Ok(Self::Module(ModuleError {
-                    module: module.name().to_string(),
-                    error: error.to_string(),
+                let error = metadata.error(index, error)?;
+                Ok(Self::Module(PalletError {
+                    pallet: error.pallet().to_string(),
+                    error: error.error().to_string(),
+                    description: error.description().to_vec(),
                 }))
             }
             DispatchError::BadOrigin => Ok(Self::BadOrigin),
@@ -150,10 +149,12 @@ impl RuntimeError {
 
 /// Module error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
-#[error("{error} from {module}")]
-pub struct ModuleError {
+#[error("{error} from {pallet}")]
+pub struct PalletError {
     /// The module where the error originated.
-    pub module: String,
+    pub pallet: String,
     /// The actual error code.
     pub error: String,
+    /// The error description.
+    pub description: Vec<String>,
 }

@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use jsonrpsee_types::{
     DeserializeOwned,
@@ -35,17 +35,15 @@ use crate::{
         Raw,
         RawEvent,
     },
-    frame::{
-        system::Phase,
-        Event,
-    },
     rpc::Rpc,
-    runtimes::Runtime,
+    Config,
+    Event,
+    Phase,
 };
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Runtime> {
+pub struct EventSubscription<'a, T: Config> {
     subscription: EventStorageSubscription<T>,
     decoder: &'a EventsDecoder<T>,
     block: Option<T::Hash>,
@@ -55,7 +53,7 @@ pub struct EventSubscription<'a, T: Runtime> {
     finished: bool,
 }
 
-impl<'a, T: Runtime> EventSubscription<'a, T> {
+impl<'a, T: Config> EventSubscription<'a, T> {
     /// Creates a new event subscription.
     pub fn new(
         subscription: EventStorageSubscription<T>,
@@ -84,8 +82,8 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
     }
 
     /// Filters events by type.
-    pub fn filter_event<E: Event<T>>(&mut self) {
-        self.event = Some((E::MODULE, E::EVENT));
+    pub fn filter_event<E: Event>(&mut self) {
+        self.event = Some((E::PALLET, E::EVENT));
     }
 
     /// Gets the next event.
@@ -124,7 +122,7 @@ impl<'a, T: Runtime> EventSubscription<'a, T> {
                                 Raw::Error(err) => return Some(Err(err.into())),
                             };
                             if let Some((module, variant)) = self.event {
-                                if event.module != module || event.variant != variant {
+                                if event.pallet != module || event.variant != variant {
                                     continue
                                 }
                             }
@@ -155,14 +153,14 @@ impl From<SystemEvents> for StorageKey {
 }
 
 /// Event subscription to only fetch finalized storage changes.
-pub struct FinalizedEventStorageSubscription<T: Runtime> {
+pub struct FinalizedEventStorageSubscription<T: Config> {
     rpc: Rpc<T>,
     subscription: Subscription<T::Header>,
     storage_changes: VecDeque<StorageChangeSet<T::Hash>>,
     storage_key: StorageKey,
 }
 
-impl<T: Runtime> FinalizedEventStorageSubscription<T> {
+impl<T: Config> FinalizedEventStorageSubscription<T> {
     /// Creates a new finalized event storage subscription.
     pub fn new(rpc: Rpc<T>, subscription: Subscription<T::Header>) -> Self {
         Self {
@@ -193,14 +191,14 @@ impl<T: Runtime> FinalizedEventStorageSubscription<T> {
 }
 
 /// Wrapper over imported and finalized event subscriptions.
-pub enum EventStorageSubscription<T: Runtime> {
+pub enum EventStorageSubscription<T: Config> {
     /// Events that are InBlock
     Imported(Subscription<StorageChangeSet<T::Hash>>),
     /// Events that are Finalized
     Finalized(FinalizedEventStorageSubscription<T>),
 }
 
-impl<T: Runtime> EventStorageSubscription<T> {
+impl<T: Config> EventStorageSubscription<T> {
     /// Gets the next change_set from the subscription.
     pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
         match self {

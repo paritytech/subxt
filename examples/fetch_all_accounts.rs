@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,22 +12,34 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use substrate_subxt::{
-    system::AccountStoreExt,
-    ClientBuilder,
-    DefaultNodeRuntime,
-};
+//! To run this example, a local polkadot node should be running.
+//!
+//! E.g.
+//! ```bash
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.11/polkadot" --output /usr/local/bin/polkadot --location
+//! polkadot --dev --tmp
+//! ```
+
+use subxt::ClientBuilder;
+
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+pub mod polkadot {}
 
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let client = ClientBuilder::<DefaultNodeRuntime>::new().build().await?;
-    let mut iter = client.account_iter(None).await?;
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+
+    let mut iter = api.storage().system().account_iter(None).await?;
+
     while let Some((key, account)) = iter.next().await? {
-        println!("{:?}: {}", key, account.data.free);
+        println!("{}: {}", hex::encode(key), account.data.free);
     }
     Ok(())
 }
