@@ -118,15 +118,6 @@ impl RuntimeGenerator {
                 "sp_runtime::multiaddress::MultiAddress",
                 parse_quote!(::subxt::sp_runtime::MultiAddress),
             ),
-            // todo: [AJ] remove the requirement for these by implementing Compact handling properly
-            (
-                "sp_arithmetic::per_things::Perbill",
-                parse_quote!(::subxt::sp_arithmetic::per_things::Perbill),
-            ),
-            (
-                "sp_arithmetic::per_things::Perquintill",
-                parse_quote!(::subxt::sp_arithmetic::per_things::Perquintill),
-            ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
