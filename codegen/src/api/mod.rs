@@ -223,7 +223,6 @@ impl RuntimeGenerator {
                 #types_mod
 
                 /// Default configuration of common types for a target Substrate runtime.
-                // todo: allow to define/override this as part of the annotated mod
                 #[derive(Clone, Debug, Default, Eq, PartialEq)]
                 pub struct DefaultConfig;
 
