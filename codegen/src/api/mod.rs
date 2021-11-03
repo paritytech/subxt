@@ -245,7 +245,6 @@ impl RuntimeGenerator {
                     type Extra = ::subxt::DefaultExtra<DefaultConfig>;
                 }
 
-                // todo: [AJ] check for this type's existence or allow config
                 pub type AccountData = self::system::storage::Account;
 
                 impl ::subxt::AccountData<DefaultConfig> for AccountData {
