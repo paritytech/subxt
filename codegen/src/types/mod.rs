@@ -195,7 +195,6 @@ impl<'a> TypeGenerator<'a> {
                 path: substitute_type_path.clone(),
                 params,
             })
-            // todo: add tests for this type substitution
         } else {
             TypePath::Type(TypePathType {
                 ty,

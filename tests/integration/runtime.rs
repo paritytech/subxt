@@ -18,4 +18,7 @@
     runtime_metadata_path = "tests/integration/node_runtime.scale",
     generated_type_derives = "Debug, Eq, PartialEq"
 )]
-pub mod node_runtime {}
+pub mod node_runtime {
+    #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
+    use sp_runtime::Perbill;
+}

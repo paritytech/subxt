@@ -21,11 +21,9 @@ use syn::{
     token,
 };
 
-// todo: [AJ] implement ToTokens for this to generate the actual mod
-// todo: [AJ] figure out how to incorporate the types and api codegen here...
 #[derive(Debug, PartialEq, Eq)]
 pub struct ItemMod {
-    // attrs: Vec<syn::Attribute>, // todo: [AJ] partition attributes between subxt and non-subxt
+    // attrs: Vec<syn::Attribute>,
     vis: syn::Visibility,
     mod_token: token::Mod,
     pub ident: syn::Ident,

@@ -172,8 +172,6 @@ impl TypePathType {
                 syn::Type::Path(path)
             }
             TypeDef::Compact(_) => {
-                // todo: change the return type of this method to include info that it is compact
-                // and should be annotated with #[compact] for fields
                 let compact_type = &self.params[0];
                 syn::Type::Path(parse_quote! ( #compact_type ))
             }
