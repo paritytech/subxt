@@ -312,8 +312,11 @@ fn generate_enum() {
                 use super::root;
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub enum E {
+                    # [codec (index = 0)]
                     A,
+                    # [codec (index = 1)]
                     B (::core::primitive::bool,),
+                    # [codec (index = 2)]
                     C { a: ::core::primitive::u32, },
                 }
             }
@@ -467,7 +470,9 @@ fn box_fields_enum() {
                 use super::root;
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub enum E {
+                    # [codec (index = 0)]
                     A(::std::boxed::Box<::core::primitive::bool>,),
+                    # [codec (index = 1)]
                     B { a: ::std::boxed::Box<::core::primitive::u32>, },
                 }
             }

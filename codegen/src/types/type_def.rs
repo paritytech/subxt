@@ -139,7 +139,11 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                     } else {
                         self.composite_fields(v.fields(), &type_params, false)
                     };
-                    variants.push(quote! { #variant_name #fields });
+                    let index = proc_macro2::Literal::u8_unsuffixed(v.index());
+                    variants.push(quote! {
+                        #[codec(index = #index)]
+                        #variant_name #fields
+                    });
                     let unused_params_set = unused_type_params.iter().cloned().collect();
                     let used_params = type_params_set.difference(&unused_params_set);
 
