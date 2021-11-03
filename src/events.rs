@@ -298,20 +298,31 @@ where
                     TypeDef::Composite(composite) => {
                         match composite.fields() {
                             [field] => {
-                                let field_ty = self
-                                    .metadata
-                                    .resolve_type(field.ty().id())
-                                    .ok_or(MetadataError::TypeNotFound(field.ty().id()))?;
-                                if let TypeDef::Primitive(primitive) = field_ty.type_def()  {
+                                let field_ty =
+                                    self.metadata.resolve_type(field.ty().id()).ok_or(
+                                        MetadataError::TypeNotFound(field.ty().id()),
+                                    )?;
+                                if let TypeDef::Primitive(primitive) = field_ty.type_def()
+                                {
                                     decode_compact_primitive(primitive)
                                 } else {
                                     Err(EventsDecodingError::InvalidCompactType("Composite type must have a single primitive field".into()).into())
                                 }
                             }
-                            _ => Err(EventsDecodingError::InvalidCompactType("Composite type must have a single field".into()).into())
+                            _ => {
+                                Err(EventsDecodingError::InvalidCompactType(
+                                    "Composite type must have a single field".into(),
+                                )
+                                .into())
+                            }
                         }
                     }
-                    _ => Err(EventsDecodingError::InvalidCompactType("Compact type must be a primitive or a composite type".into()).into()),
+                    _ => {
+                        Err(EventsDecodingError::InvalidCompactType(
+                            "Compact type must be a primitive or a composite type".into(),
+                        )
+                        .into())
+                    }
                 }
             }
             TypeDef::BitSequence(_bitseq) => {
