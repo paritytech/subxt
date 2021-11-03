@@ -316,7 +316,7 @@ where
             }
             TypeDef::BitSequence(_bitseq) => {
                 // decode_raw::<bitvec::BitVec>
-                todo!("BitVec")
+                unimplemented!("BitVec decoding for events not implemented yet")
             }
         }
     }
