@@ -201,7 +201,6 @@ impl RuntimeGenerator {
             }
         };
 
-        // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod_ir.ident;
         let pallets_with_storage =
             pallets_with_mod_names
