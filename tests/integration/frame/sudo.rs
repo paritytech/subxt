@@ -26,7 +26,6 @@ use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
 use subxt::extrinsic::PairSigner;
 
-// todo: [AJ] supply alias for top level call types? runtime_types::node_runtime::Call
 type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
@@ -36,7 +35,6 @@ async fn test_sudo() {
     let bob = AccountKeyring::Bob.to_account_id().clone().into();
     let cxt = test_context().await;
 
-    // todo: [AJ] allow encoded call to be constructed dynamically
     let call = Call::Balances(BalancesCall::transfer {
         dest: bob,
         value: 10_000,
