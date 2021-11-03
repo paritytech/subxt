@@ -590,8 +590,7 @@ impl<T: Config> Rpc<T> {
                 TransactionStatus::Future
                 | TransactionStatus::Ready
                 | TransactionStatus::Broadcast(_)
-                | TransactionStatus::Retracted(_)
-                 => continue,
+                | TransactionStatus::Retracted(_) => continue,
                 TransactionStatus::InBlock(block_hash) => {
                     if self.accept_weak_inclusion {
                         return self
