@@ -2,6 +2,10 @@
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
 
+### :warning: Health Warning: considered *alpha* after recent changes, API still subject to change :warning:
+
+#### See https://github.com/paritytech/subxt/issues/309 for an overview of outstanding issues.
+
 ## Usage
 
 See [examples](./examples).
