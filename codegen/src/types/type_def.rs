@@ -201,7 +201,6 @@ impl<'a> TypeDefGen<'a> {
 
         let ty_toks = |ty_name: &str, ty_path: &TypePath| {
             if ty_name.contains("Box<") {
-                // todo [AJ] remove this hack once scale-info can represent Box somehow
                 quote! { ::std::boxed::Box<#ty_path> }
             } else {
                 quote! { #ty_path }
@@ -240,7 +239,6 @@ impl<'a> TypeDefGen<'a> {
                         }
                     };
                     if ty.is_compact() {
-                        // todo: [AJ] figure out way to ensure AsCompact generated for target type in scale_info.
                         quote!( #[codec(compact)] #field_type  )
                     } else {
                         quote!( #field_type  )

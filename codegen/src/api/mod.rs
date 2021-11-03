@@ -118,15 +118,6 @@ impl RuntimeGenerator {
                 "sp_runtime::multiaddress::MultiAddress",
                 parse_quote!(::subxt::sp_runtime::MultiAddress),
             ),
-            // todo: [AJ] remove the requirement for these by implementing Compact handling properly
-            (
-                "sp_arithmetic::per_things::Perbill",
-                parse_quote!(::subxt::sp_arithmetic::per_things::Perbill),
-            ),
-            (
-                "sp_arithmetic::per_things::Perquintill",
-                parse_quote!(::subxt::sp_arithmetic::per_things::Perquintill),
-            ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
@@ -210,7 +201,6 @@ impl RuntimeGenerator {
             }
         };
 
-        // todo: [AJ] keep all other code items from decorated mod?
         let mod_ident = item_mod_ir.ident;
         let pallets_with_storage =
             pallets_with_mod_names
@@ -233,7 +223,6 @@ impl RuntimeGenerator {
                 #types_mod
 
                 /// Default configuration of common types for a target Substrate runtime.
-                // todo: allow to define/override this as part of the annotated mod
                 #[derive(Clone, Debug, Default, Eq, PartialEq)]
                 pub struct DefaultConfig;
 
@@ -253,11 +242,9 @@ impl RuntimeGenerator {
 
                 impl ::subxt::ExtrinsicExtraData<DefaultConfig> for DefaultConfig {
                     type AccountData = AccountData;
-                    // todo: [AJ] make this configurable or auto-generated from metadata
                     type Extra = ::subxt::DefaultExtra<DefaultConfig>;
                 }
 
-                // todo: [AJ] check for this type's existence or allow config
                 pub type AccountData = self::system::storage::Account;
 
                 impl ::subxt::AccountData<DefaultConfig> for AccountData {
