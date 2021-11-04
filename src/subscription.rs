@@ -49,7 +49,7 @@ pub struct EventSubscription<'a, T: Config> {
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
-    events: VecDeque<RawEvent>,
+    events: VecDeque<Raw>,
     finished: bool,
 }
 
@@ -89,8 +89,11 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     /// Gets the next event.
     pub async fn next(&mut self) -> Option<Result<RawEvent, Error>> {
         loop {
-            if let Some(event) = self.events.pop_front() {
-                return Some(Ok(event))
+            if let Some(raw_event) = self.events.pop_front() {
+                match raw_event {
+                    Raw::Event(event) => return Some(Ok(event)),
+                    Raw::Error(err) => return Some(Err(err.into())),
+                };
             }
             if self.finished {
                 return None
@@ -117,16 +120,15 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                                     continue
                                 }
                             }
-                            let event = match raw {
-                                Raw::Event(event) => event,
-                                Raw::Error(err) => return Some(Err(err.into())),
-                            };
                             if let Some((module, variant)) = self.event {
-                                if event.pallet != module || event.variant != variant {
-                                    continue
+                                if let Raw::Event(ref event) = raw {
+                                    if event.pallet != module || event.variant != variant
+                                    {
+                                        continue
+                                    }
                                 }
                             }
-                            self.events.push_back(event);
+                            self.events.push_back(raw);
                         }
                     }
                 }
