@@ -16,40 +16,9 @@
 
 extern crate proc_macro;
 
-use darling::FromMeta;
 use proc_macro::TokenStream;
-use proc_macro_error::proc_macro_error;
-use syn::{
-    parse_macro_input,
-    punctuated::Punctuated,
-};
-
-#[derive(Debug, FromMeta)]
-struct RuntimeMetadataArgs {
-    runtime_metadata_path: String,
-    #[darling(default)]
-    generated_type_derives: Option<GeneratedTypeDerives>,
-}
-
-#[derive(Debug, FromMeta)]
-struct GeneratedTypeDerives(Punctuated<syn::Path, syn::Token![,]>);
 
 #[proc_macro_attribute]
-#[proc_macro_error]
-pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
-    let attr_args = parse_macro_input!(args as syn::AttributeArgs);
-    let item_mod = parse_macro_input!(input as syn::ItemMod);
-
-    let args = match RuntimeMetadataArgs::from_list(&attr_args) {
-        Ok(v) => v,
-        Err(e) => return TokenStream::from(e.write_errors()),
-    };
-
-    let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
-    let root_path = std::path::Path::new(&root);
-    let path = root_path.join(args.runtime_metadata_path);
-
-    let generated_type_derives = args.generated_type_derives.map(|derives| derives.0);
-
-    subxt_codegen::generate_runtime_api(item_mod, &path, generated_type_derives).into()
+pub fn subxt(_args: TokenStream, _input: TokenStream) -> TokenStream {
+    Default::default()
 }

@@ -15,17 +15,3 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Library to generate an API for a Substrate runtime from its metadata.
-
-mod api;
-mod derives;
-mod ir;
-mod struct_def;
-mod types;
-
-pub use self::{
-    api::{
-        generate_runtime_api,
-        RuntimeGenerator,
-    },
-    derives::GeneratedTypeDerives,
-};
