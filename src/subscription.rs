@@ -148,22 +148,20 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                 Err(err) => return Some(Err(err)),
                 Ok(raw_events) => {
                     for (phase, raw) in raw_events {
-                        if let Phase::ApplyExtrinsic(i) = phase {
-                            if let Some(ext_index) = self.extrinsic {
-                                if i as usize != ext_index {
+                        if let Some(ext_index) = self.extrinsic {
+                            if !matches!(phase, Phase::ApplyExtrinsic(i) if i as usize == ext_index)
+                            {
+                                continue
+                            }
+                        }
+                        if let Some((module, variant)) = self.event {
+                            if let Raw::Event(ref event) = raw {
+                                if event.pallet != module || event.variant != variant {
                                     continue
                                 }
                             }
-                            if let Some((module, variant)) = self.event {
-                                if let Raw::Event(ref event) = raw {
-                                    if event.pallet != module || event.variant != variant
-                                    {
-                                        continue
-                                    }
-                                }
-                            }
-                            self.events.push_back(raw);
                         }
+                        self.events.push_back(raw);
                     }
                 }
             }
@@ -349,7 +347,12 @@ mod tests {
         let mut events = vec![];
         // create all events
         for block_hash in [H256::from([0; 32]), H256::from([1; 32])] {
-            for phase in [Phase::ApplyExtrinsic(0), Phase::ApplyExtrinsic(1)] {
+            for phase in [
+                Phase::Initialization,
+                Phase::ApplyExtrinsic(0),
+                Phase::ApplyExtrinsic(1),
+                Phase::Finalization,
+            ] {
                 for event in [named_event("a"), named_event("b")] {
                     events.push((block_hash, phase.clone(), event))
                 }
@@ -359,6 +362,8 @@ mod tests {
         events.iter_mut().enumerate().for_each(|(idx, event)| {
             event.2.variant_index = idx as u8;
         });
+
+        let half_len = events.len() / 2;
 
         for block_filter in [None, Some(H256::from([1; 32]))] {
             for extrinsic_filter in [None, Some(1)] {
@@ -371,18 +376,17 @@ mod tests {
                                         events[0].0,
                                         Ok(events
                                             .iter()
-                                            .take(4)
+                                            .take(half_len)
                                             .map(|(_, phase, event)| {
                                                 (phase.clone(), Raw::Event(event.clone()))
                                             })
                                             .collect()),
                                     ),
                                     (
-                                        events[4].0,
+                                        events[half_len].0,
                                         Ok(events
                                             .iter()
-                                            .skip(4)
-                                            .take(4)
+                                            .skip(half_len)
                                             .map(|(_, phase, event)| {
                                                 (phase.clone(), Raw::Event(event.clone()))
                                             })
@@ -407,6 +411,7 @@ mod tests {
                     if let Some(name) = event_filter {
                         expected_events.retain(|(_, _, event)| event.pallet == name.0);
                     }
+
                     for expected_event in expected_events {
                         assert_eq!(
                             subscription.next().await.unwrap().unwrap(),
