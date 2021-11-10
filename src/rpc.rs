@@ -220,7 +220,7 @@ impl RpcClient {
         method: &str,
         params: &[JsonValue],
     ) -> Result<T, Error> {
-        let params = params.into();
+        let params = Some(params.into());
         log::debug!("request {}: {:?}", method, params);
         let data = match self {
             Self::WebSocket(inner) => {
@@ -238,7 +238,7 @@ impl RpcClient {
         params: &[JsonValue],
         unsubscribe_method: &str,
     ) -> Result<Subscription<T>, Error> {
-        let params = params.into();
+        let params = Some(params.into());
         match self {
             Self::WebSocket(inner) => {
                 inner

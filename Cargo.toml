@@ -16,12 +16,6 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
-[features]
-default = ["tokio1"]
-# jsonrpsee can be configured to use tokio02 or tokio1.
-tokio02 = ["jsonrpsee-http-client/tokio02", "jsonrpsee-ws-client/tokio02"]
-tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
-
 [dependencies]
 async-trait = "0.1.49"
 bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
@@ -30,10 +24,10 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee-proc-macros = "0.3.0"
-jsonrpsee-ws-client = { version = "0.3.0", default-features = false }
-jsonrpsee-http-client = { version = "0.3.0", default-features = false }
-jsonrpsee-types = "0.3.0"
+jsonrpsee-proc-macros = "0.4.1"
+jsonrpsee-ws-client = { version = "0.4.1", default-features = false }
+jsonrpsee-http-client = { version = "0.4.1", default-features = false }
+jsonrpsee-types = "0.4.1"
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
