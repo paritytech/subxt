@@ -584,12 +584,13 @@ impl<T: Config> Rpc<T> {
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
         while let Ok(Some(status)) = xt_sub.next().await {
-            log::info!("received status {:?}", status);
+            log::info!("Received status {:?}", status);
             match status {
                 // ignore in progress extrinsic for now
                 TransactionStatus::Future
                 | TransactionStatus::Ready
-                | TransactionStatus::Broadcast(_) => continue,
+                | TransactionStatus::Broadcast(_)
+                | TransactionStatus::Retracted(_) => continue,
                 TransactionStatus::InBlock(block_hash) => {
                     if self.accept_weak_inclusion {
                         return self
@@ -601,9 +602,6 @@ impl<T: Config> Rpc<T> {
                 TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
                 TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
                 TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
-                TransactionStatus::Retracted(_) => {
-                    return Err("Extrinsic Retracted".into())
-                }
                 TransactionStatus::Finalized(block_hash) => {
                     // read finalized blocks by default
                     return self
