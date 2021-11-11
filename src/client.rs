@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
-
 use futures::future;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;

@@ -21,6 +21,8 @@ mod utils;
 #[cfg(test)]
 mod client;
 #[cfg(test)]
+mod embedded_client;
+#[cfg(test)]
 mod frame;
 
 pub use runtime::node_runtime;
