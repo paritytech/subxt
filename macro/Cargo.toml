@@ -27,7 +27,7 @@ quote = "1.0.8"
 syn = "1.0.58"
 scale-info = "1.0.0"
 
-subxt-codegen = { version = "0.1.0", path = "../codegen" }
+subxt-codegen = { version = "0.2.0", path = "../codegen" }
 
 [dev-dependencies]
 pretty_assertions = "0.6.1"
