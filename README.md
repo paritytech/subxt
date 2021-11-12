@@ -21,7 +21,7 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ### Generating the runtime API from the downloaded metadata
 
-Simply declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
+Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
 target runtime:
 
 ```rust
