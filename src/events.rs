@@ -42,6 +42,7 @@ use sp_core::Bytes;
 
 /// Raw bytes for an Event
 #[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq, Clone))]
 pub struct RawEvent {
     /// The name of the pallet from whence the Event originated.
     pub pallet: String,
