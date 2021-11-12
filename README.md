@@ -10,7 +10,7 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ### Downloading metadata from a Substrate node
 
-Use the `subxt-cli` CLI tool to download the metadata for your target runtime from a Substrate node.
+Use the `subxt-cli` CLI tool to download the metadata for your target runtime from a node.
 
 ```bash
 cargo run -p subxt-cli -- metadata -f bytes > metadata.scale
