@@ -34,8 +34,8 @@ target runtime:
 pub mod node_runtime { }
 ```
 
-**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your project's `Cargo.toml` 
-resides, *not* relative to the source file.
+**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml` 
+resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)), *not* relative to the source file.
 
 ### Initializing the API client
 
