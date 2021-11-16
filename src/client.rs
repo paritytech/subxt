@@ -213,7 +213,7 @@ where
     where
         <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
-        let extrinsic = self.create_signed(signer).await?;
+        let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client
             .rpc()
             .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
@@ -235,7 +235,7 @@ where
     where
         <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
-        let extrinsic = self.create_signed(signer).await?;
+        let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
     }
 
@@ -243,6 +243,7 @@ where
     pub async fn create_signed(
         &self,
         signer: &(dyn Signer<T> + Send + Sync),
+        additional_params: <T::Extra as SignedExtra<T>>::Parameters,
     ) -> Result<UncheckedExtrinsic<T>, Error>
     where
         <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
@@ -273,6 +274,7 @@ where
             account_nonce,
             call,
             signer,
+            additional_params,
         )
         .await?;
         Ok(signed)
