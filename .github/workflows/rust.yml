@@ -17,7 +17,7 @@ env:
 
 jobs:
   build:
-    name: Check Code
+    name: Cargo check
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -64,7 +64,7 @@ jobs:
           args: --all -- --check
 
   docs:
-    name: Check Documentation
+    name: Check documentation
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -84,7 +84,7 @@ jobs:
         run: RUSTDOCFLAGS="--deny broken_intra_doc_links" cargo doc --verbose --workspace --no-deps --document-private-items
 
   tests:
-    name: Run tests
+    name: Cargo test
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -114,6 +114,7 @@ jobs:
           args: --all-targets --workspace
 
   clippy:
+    name: Cargo clippy
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
