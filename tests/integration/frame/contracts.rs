@@ -56,7 +56,7 @@ impl ContractsTestContext {
     }
 
     fn client(&self) -> &Client<DefaultConfig> {
-        &self.cxt.client()
+        self.cxt.client()
     }
 
     fn contracts_tx(&self) -> TransactionApi<DefaultConfig> {
@@ -172,7 +172,7 @@ async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
     let (code_hash, _) = ctx.instantiate_with_code().await.unwrap();
 
-    let instantiated = ctx.instantiate(code_hash.into(), vec![], vec![1u8]).await;
+    let instantiated = ctx.instantiate(code_hash, vec![], vec![1u8]).await;
 
     assert!(
         instantiated.is_ok(),

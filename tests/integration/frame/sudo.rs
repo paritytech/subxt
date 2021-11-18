@@ -32,7 +32,7 @@ type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 #[async_std::test]
 async fn test_sudo() {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id().clone().into();
+    let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 
     let call = Call::Balances(BalancesCall::transfer {

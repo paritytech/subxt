@@ -391,9 +391,9 @@ mod tests {
                                 ]
                                 .into_iter(),
                             )),
-                            block: block_filter.clone(),
-                            extrinsic: extrinsic_filter.clone(),
-                            event: event_filter.clone(),
+                            block: block_filter,
+                            extrinsic: extrinsic_filter,
+                            event: event_filter,
                             events: Default::default(),
                             finished: false,
                         };
