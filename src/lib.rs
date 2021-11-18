@@ -182,7 +182,7 @@ impl<T: Decode> WrapperKeepOpaque<T> {
     ///
     /// Returns `None` if the decoding failed.
     pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
+        T::decode_all(&self.data[..]).ok()
     }
 
     /// Returns the length of the encoded `T`.

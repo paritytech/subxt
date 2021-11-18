@@ -91,7 +91,7 @@ impl Metadata {
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
         self.pallets
             .get(name)
-            .ok_or(MetadataError::PalletNotFound(name.to_string()))
+            .ok_or_else(|| MetadataError::PalletNotFound(name.to_string()))
     }
 
     /// Returns the metadata for the event at the given pallet and event indices.
@@ -239,11 +239,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(InvalidMetadataError::InvalidPrefix.into())
+            return Err(InvalidMetadataError::InvalidPrefix)
         }
         let metadata = match metadata.1 {
             RuntimeMetadata::V14(meta) => meta,
-            _ => return Err(InvalidMetadataError::InvalidVersion.into()),
+            _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
         let get_type_def_variant = |type_id: u32| {

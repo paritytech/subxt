@@ -616,10 +616,10 @@ impl<T: Config> Rpc<T> {
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
-    async fn process_block<'a>(
+    async fn process_block(
         &self,
         events_sub: EventStorageSubscription<T>,
-        decoder: &'a EventsDecoder<T>,
+        decoder: &EventsDecoder<T>,
         block_hash: T::Hash,
         ext_hash: T::Hash,
     ) -> Result<ExtrinsicSuccess<T>, Error> {
