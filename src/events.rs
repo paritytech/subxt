@@ -100,7 +100,7 @@ where
             let mut event_data = Vec::<u8>::new();
             let mut event_errors = Vec::<RuntimeError>::new();
             let result = self.decode_raw_event(
-                &event_metadata,
+                event_metadata,
                 input,
                 &mut event_data,
                 &mut event_errors,
@@ -204,9 +204,13 @@ where
             TypeDef::Variant(variant) => {
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant = variant.variants().get(variant_index as usize).ok_or(
-                    Error::Other(format!("Variant {} not found", variant_index)),
-                )?;
+                let variant =
+                    variant
+                        .variants()
+                        .get(variant_index as usize)
+                        .ok_or_else(|| {
+                            Error::Other(format!("Variant {} not found", variant_index))
+                        })?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
@@ -299,15 +303,21 @@ where
                     TypeDef::Composite(composite) => {
                         match composite.fields() {
                             [field] => {
-                                let field_ty =
-                                    self.metadata.resolve_type(field.ty().id()).ok_or(
-                                        MetadataError::TypeNotFound(field.ty().id()),
-                                    )?;
+                                let field_ty = self
+                                    .metadata
+                                    .resolve_type(field.ty().id())
+                                    .ok_or_else(|| {
+                                        MetadataError::TypeNotFound(field.ty().id())
+                                    })?;
                                 if let TypeDef::Primitive(primitive) = field_ty.type_def()
                                 {
                                     decode_compact_primitive(primitive)
                                 } else {
-                                    Err(EventsDecodingError::InvalidCompactType("Composite type must have a single primitive field".into()).into())
+                                    Err(EventsDecodingError::InvalidCompactType(
+                                    "Composite type must have a single primitive field"
+                                        .into(),
+                                )
+                                .into())
                                 }
                             }
                             _ => {

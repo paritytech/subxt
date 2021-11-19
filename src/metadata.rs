@@ -73,6 +73,7 @@ pub enum MetadataError {
     /// Constant is not in metadata.
     #[error("Constant {0} not found")]
     ConstantNotFound(&'static str),
+    /// Type is not in metadata.
     #[error("Type {0} missing from type registry")]
     TypeNotFound(u32),
 }
@@ -91,7 +92,7 @@ impl Metadata {
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
         self.pallets
             .get(name)
-            .ok_or(MetadataError::PalletNotFound(name.to_string()))
+            .ok_or_else(|| MetadataError::PalletNotFound(name.to_string()))
     }
 
     /// Returns the metadata for the event at the given pallet and event indices.
@@ -131,6 +132,7 @@ impl Metadata {
     }
 }
 
+/// Metadata for a specific pallet.
 #[derive(Clone, Debug)]
 pub struct PalletMetadata {
     index: u8,
@@ -141,6 +143,7 @@ pub struct PalletMetadata {
 }
 
 impl PalletMetadata {
+    /// Encode a call based on this pallet metadata.
     pub fn encode_call<C>(&self, call: &C) -> Result<Encoded, MetadataError>
     where
         C: Call,
@@ -154,6 +157,7 @@ impl PalletMetadata {
         Ok(Encoded(bytes))
     }
 
+    /// Return [`StorageEntryMetadata`] given some storage key.
     pub fn storage(
         &self,
         key: &'static str,
@@ -163,7 +167,7 @@ impl PalletMetadata {
             .ok_or(MetadataError::StorageNotFound(key))
     }
 
-    /// Get a constant's metadata by name
+    /// Get a constant's metadata by name.
     pub fn constant(
         &self,
         key: &'static str,
@@ -239,11 +243,11 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
     fn try_from(metadata: RuntimeMetadataPrefixed) -> Result<Self, Self::Error> {
         if metadata.0 != META_RESERVED {
-            return Err(InvalidMetadataError::InvalidPrefix.into())
+            return Err(InvalidMetadataError::InvalidPrefix)
         }
         let metadata = match metadata.1 {
             RuntimeMetadata::V14(meta) => meta,
-            _ => return Err(InvalidMetadataError::InvalidVersion.into()),
+            _ => return Err(InvalidMetadataError::InvalidVersion),
         };
 
         let get_type_def_variant = |type_id: u32| {

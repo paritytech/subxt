@@ -96,7 +96,11 @@ pub use crate::{
         Signer,
         UncheckedExtrinsic,
     },
-    metadata::Metadata,
+    metadata::{
+        Metadata,
+        MetadataError,
+        PalletMetadata,
+    },
     rpc::{
         BlockNumber,
         ExtrinsicSuccess,
@@ -167,10 +171,8 @@ pub enum Phase {
 
 /// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
 ///
-/// This type is similar to [`WrapperOpaque`], but it differs in the way it stores the type `T`.
-/// While [`WrapperOpaque`] stores the decoded type, the [`WrapperKeepOpaque`] stores the type only
-/// in its opaque format, aka as a `Vec<u8>`. To access the real type `T` [`Self::try_decode`] needs
-/// to be used.
+/// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
+/// access the real type `T` [`Self::try_decode`] needs to be used.
 #[derive(Debug, Eq, PartialEq, Default, Clone, Decode, Encode)]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
@@ -182,7 +184,7 @@ impl<T: Decode> WrapperKeepOpaque<T> {
     ///
     /// Returns `None` if the decoding failed.
     pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
+        T::decode_all(&self.data[..]).ok()
     }
 
     /// Returns the length of the encoded `T`.

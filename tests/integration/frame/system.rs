@@ -37,7 +37,7 @@ async fn storage_account() {
         .api
         .storage()
         .system()
-        .account(alice.account_id().clone().into(), None)
+        .account(alice.account_id().clone(), None)
         .await;
     assert_matches!(account_info, Ok(_))
 }

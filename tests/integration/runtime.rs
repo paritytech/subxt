@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(clippy::too_many_arguments)]
+
 #[subxt::subxt(
     runtime_metadata_path = "tests/integration/node_runtime.scale",
     generated_type_derives = "Debug, Eq, PartialEq"

@@ -51,13 +51,13 @@ async fn tx_basic_transfer() {
     let alice_pre = api
         .storage()
         .system()
-        .account(alice.account_id().clone().into(), None)
+        .account(alice.account_id().clone(), None)
         .await
         .unwrap();
     let bob_pre = api
         .storage()
         .system()
-        .account(bob.account_id().clone().into(), None)
+        .account(bob.account_id().clone(), None)
         .await
         .unwrap();
 
@@ -74,7 +74,7 @@ async fn tx_basic_transfer() {
         .unwrap();
     let _extrinsic_success = result
         .find_event::<system::events::ExtrinsicSuccess>()
-        .expect("Failed to decode ExtrinisicSuccess".into())
+        .expect("Failed to decode ExtrinisicSuccess")
         .expect("Failed to find ExtrinisicSuccess");
 
     let expected_event = balances::events::Transfer(
@@ -87,13 +87,13 @@ async fn tx_basic_transfer() {
     let alice_post = api
         .storage()
         .system()
-        .account(alice.account_id().clone().into(), None)
+        .account(alice.account_id().clone(), None)
         .await
         .unwrap();
     let bob_post = api
         .storage()
         .system()
-        .account(bob.account_id().clone().into(), None)
+        .account(bob.account_id().clone(), None)
         .await
         .unwrap();
 
@@ -200,7 +200,7 @@ async fn transfer_subscription() {
     let cxt = test_context().await;
     let sub = cxt.client().rpc().subscribe_events().await.unwrap();
     let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig>::new(sub, &decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<balances::events::Transfer>();
 
     cxt.api
