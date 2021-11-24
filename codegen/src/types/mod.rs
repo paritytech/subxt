@@ -254,3 +254,15 @@ impl<'a> Module<'a> {
         &self.name
     }
 }
+
+/// Construct a [`core::marker::PhantomData`] type for the given type params.
+pub fn phantom_data(params: &[TypeParameter]) -> TokenStream {
+    let params = if params.len() == 1 {
+        let param = &params[0];
+        quote! { #param }
+    } else {
+        quote! { ( #( #params ), * ) }
+    };
+    quote! ( ::core::marker::PhantomData<#params> )
+}
+

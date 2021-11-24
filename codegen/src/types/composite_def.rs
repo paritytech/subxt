@@ -14,9 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::GeneratedTypeDerives;
-use crate::types::{
+use super::{
+    GeneratedTypeDerives,
     TypeGenerator,
+    TypeParameter,
     TypePath,
 };
 use heck::CamelCase as _;
@@ -27,13 +28,23 @@ use quote::{
     quote,
 };
 use scale_info::form::PortableForm;
+use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct CompositeDef {
     pub name: syn::Ident,
+    pub kind: CompositeDefKind,
     pub fields: CompositeDefFields,
     pub field_visibility: Option<syn::Visibility>,
     pub derives: GeneratedTypeDerives,
+}
+
+#[derive(Debug)]
+pub enum CompositeDefKind {
+    /// Composite type comprising a Rust `struct`.
+    Struct,
+    /// Comprises a variant of a Rust `enum`
+    EnumVariant,
 }
 
 #[derive(Debug)]
@@ -45,6 +56,7 @@ pub enum CompositeDefFields {
 impl CompositeDef {
     pub fn new(
         ident: &str,
+        kind: CompositeDefKind,
         fields: &[scale_info::Field<PortableForm>],
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
@@ -89,6 +101,7 @@ impl CompositeDef {
 
         Self {
             name,
+            kind,
             fields,
             field_visibility,
             derives,
@@ -106,8 +119,36 @@ impl CompositeDef {
 
 impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
+        fn unused_type_params<'a>(
+            type_params: &'a [TypeParameter],
+            types: impl Iterator<Item = &'a TypePath>,
+        ) -> Vec<TypeParameter> {
+            let mut used_type_params = HashSet::new();
+            for ty in types {
+                ty.parent_type_params(&mut used_type_params)
+            }
+            let type_params_set: HashSet<_> = type_params.iter().cloned().collect();
+            let mut unused = type_params_set
+                .difference(&used_type_params)
+                .cloned()
+                .collect::<Vec<_>>();
+            unused.sort();
+            unused
+        }
+
+        fn ty_toks(ty_name: &str, ty_path: &TypePath) -> TokenStream2 {
+            if ty_name.contains("Box<") {
+                quote! { ::std::boxed::Box<#ty_path> }
+            } else {
+                quote! { #ty_path }
+            }
+        };
+
         let visibility = &self.field_visibility;
         let derives = &self.derives;
+        let name = &self.name;
+        let decl_struct = matches!(self.kind, CompositeDefKind::Struct)
+            .then(|| quote!( pub struct ));
         tokens.extend(match self.fields {
             CompositeDefFields::Named(ref named_fields) => {
                 let fields = named_fields.iter().map(|(name, ty)| {
@@ -115,10 +156,9 @@ impl quote::ToTokens for CompositeDef {
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
                     quote! { #compact_attr #visibility #name: #ty }
                 });
-                let name = &self.name;
                 quote! {
                     #derives
-                    pub struct #name {
+                    #decl_struct #name {
                         #( #fields ),*
                     }
                 }
@@ -129,10 +169,9 @@ impl quote::ToTokens for CompositeDef {
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
                     quote! { #compact_attr #visibility #ty }
                 });
-                let name = &self.name;
                 quote! {
                     #derives
-                    pub struct #name (
+                    #decl_struct #name (
                         #( #fields ),*
                     );
                 }

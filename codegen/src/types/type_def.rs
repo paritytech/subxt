@@ -321,14 +321,4 @@ impl<'a> TypeDefGen<'a> {
             panic!("Fields must be either all named or all unnamed")
         }
     }
-
-    fn phantom_data(params: &[TypeParameter]) -> TokenStream {
-        let params = if params.len() == 1 {
-            let param = &params[0];
-            quote! { #param }
-        } else {
-            quote! { ( #( #params ), * ) }
-        };
-        quote! ( ::core::marker::PhantomData<#params> )
-    }
 }
