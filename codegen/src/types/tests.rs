@@ -327,11 +327,11 @@ fn generate_enum() {
 
 #[test]
 fn compact_fields() {
-
     #[allow(unused)]
     #[derive(TypeInfo)]
     struct S {
-        #[codec(compact)] a: u32,
+        #[codec(compact)]
+        a: u32,
     }
 
     #[allow(unused)]
@@ -341,8 +341,11 @@ fn compact_fields() {
     #[allow(unused)]
     #[derive(TypeInfo)]
     enum E {
-        A { #[codec(compact)] a: u32 },
-        B (#[codec(compact)] u32),
+        A {
+            #[codec(compact)]
+            a: u32,
+        },
+        B(#[codec(compact)] u32),
     }
 
     let mut registry = Registry::new();
@@ -384,7 +387,8 @@ fn compact_fields() {
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub struct TupleStruct(#[codec(compact)] pub ::core::primitive::u32,);
             }
-        }.to_string()
+        }
+        .to_string()
     )
 }
 
