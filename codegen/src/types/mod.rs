@@ -14,8 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod derives;
 mod composite_def;
+mod derives;
 #[cfg(test)]
 mod tests;
 mod type_def;
@@ -42,8 +42,8 @@ use std::collections::{
 };
 
 pub use self::{
-    derives::GeneratedTypeDerives,
     composite_def::CompositeDef,
+    derives::GeneratedTypeDerives,
     type_def::TypeDefGen,
     type_path::{
         TypeParameter,
@@ -265,4 +265,3 @@ pub fn phantom_data(params: &[TypeParameter]) -> TokenStream {
     };
     quote! ( ::core::marker::PhantomData<#params> )
 }
-

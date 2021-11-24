@@ -147,8 +147,8 @@ impl quote::ToTokens for CompositeDef {
         let visibility = &self.field_visibility;
         let derives = &self.derives;
         let name = &self.name;
-        let decl_struct = matches!(self.kind, CompositeDefKind::Struct)
-            .then(|| quote!( pub struct ));
+        let decl_struct =
+            matches!(self.kind, CompositeDefKind::Struct).then(|| quote!( pub struct ));
         tokens.extend(match self.fields {
             CompositeDefFields::Named(ref named_fields) => {
                 let fields = named_fields.iter().map(|(name, ty)| {

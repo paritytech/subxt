@@ -23,7 +23,7 @@ use crate::{
     ir,
     types::{
         CompositeDef,
-        TypeGenerator
+        TypeGenerator,
     },
 };
 use codec::Decode;
