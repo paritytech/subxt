@@ -279,18 +279,24 @@ impl<'a> TypeDefGen<'a> {
             let mut fields_tokens = type_paths
                 .iter()
                 .map(|(ty, ty_name)| {
-                    match ty_name {
-                        Some(ty_name) => {
-                            let ty = ty_toks(ty_name, ty);
-                            if is_struct {
-                                quote! { pub #ty }
-                            } else {
+                    let field_type =
+                        match ty_name {
+                            Some(ty_name) => {
+                                let ty = ty_toks(ty_name, ty);
+                                if is_struct {
+                                    quote! { pub #ty }
+                                } else {
+                                    quote! { #ty }
+                                }
+                            }
+                            None => {
                                 quote! { #ty }
                             }
-                        }
-                        None => {
-                            quote! { #ty }
-                        }
+                        };
+                    if ty.is_compact() {
+                        quote!( #[codec(compact)] #field_type  )
+                    } else {
+                        quote!( #field_type  )
                     }
                 })
                 .collect::<Vec<_>>();
