@@ -14,12 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+mod derives;
+mod struct_def;
 #[cfg(test)]
 mod tests;
 mod type_def;
 mod type_path;
 
-use super::GeneratedTypeDerives;
 use proc_macro2::{
     Ident,
     Span,
@@ -41,6 +42,8 @@ use std::collections::{
 };
 
 pub use self::{
+    derives::GeneratedTypeDerives,
+    struct_def::StructDef,
     type_def::TypeDefGen,
     type_path::{
         TypeParameter,

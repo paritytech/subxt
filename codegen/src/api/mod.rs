@@ -21,8 +21,10 @@ mod storage;
 use super::GeneratedTypeDerives;
 use crate::{
     ir,
-    struct_def::StructDef,
-    types::TypeGenerator,
+    types::{
+        StructDef,
+        TypeGenerator
+    },
 };
 use codec::Decode;
 use frame_metadata::{
