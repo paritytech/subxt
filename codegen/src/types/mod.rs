@@ -15,7 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod derives;
-mod struct_def;
+mod composite_def;
 #[cfg(test)]
 mod tests;
 mod type_def;
@@ -43,7 +43,7 @@ use std::collections::{
 
 pub use self::{
     derives::GeneratedTypeDerives,
-    struct_def::StructDef,
+    composite_def::CompositeDef,
     type_def::TypeDefGen,
     type_path::{
         TypeParameter,

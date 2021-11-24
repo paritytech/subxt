@@ -22,7 +22,7 @@ use super::GeneratedTypeDerives;
 use crate::{
     ir,
     types::{
-        StructDef,
+        CompositeDef,
         TypeGenerator
     },
 };
@@ -325,14 +325,14 @@ pub fn generate_structs_from_variants(
     type_gen: &TypeGenerator,
     type_id: u32,
     error_message_type_name: &str,
-) -> Vec<StructDef> {
+) -> Vec<CompositeDef> {
     let ty = type_gen.resolve_type(type_id);
     if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
         variant
             .variants()
             .iter()
             .map(|var| {
-                StructDef::new(
+                CompositeDef::new(
                     var.name(),
                     var.fields(),
                     Some(syn::parse_quote!(pub)),

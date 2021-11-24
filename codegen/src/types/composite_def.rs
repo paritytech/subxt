@@ -29,20 +29,20 @@ use quote::{
 use scale_info::form::PortableForm;
 
 #[derive(Debug)]
-pub struct StructDef {
+pub struct CompositeDef {
     pub name: syn::Ident,
-    pub fields: StructDefFields,
+    pub fields: CompositeDefFields,
     pub field_visibility: Option<syn::Visibility>,
     pub derives: GeneratedTypeDerives,
 }
 
 #[derive(Debug)]
-pub enum StructDefFields {
+pub enum CompositeDefFields {
     Named(Vec<(syn::Ident, TypePath)>),
     Unnamed(Vec<TypePath>),
 }
 
-impl StructDef {
+impl CompositeDef {
     pub fn new(
         ident: &str,
         fields: &[scale_info::Field<PortableForm>],
@@ -63,7 +63,7 @@ impl StructDef {
         let unnamed = fields.iter().all(|(name, _)| name.is_none());
 
         let fields = if named {
-            StructDefFields::Named(
+            CompositeDefFields::Named(
                 fields
                     .iter()
                     .map(|(name, field)| {
@@ -75,7 +75,7 @@ impl StructDef {
                     .collect(),
             )
         } else if unnamed {
-            StructDefFields::Unnamed(
+            CompositeDefFields::Unnamed(
                 fields.iter().map(|(_, field)| field.clone()).collect(),
             )
         } else {
@@ -96,7 +96,7 @@ impl StructDef {
     }
 
     pub fn named_fields(&self) -> Option<&[(syn::Ident, TypePath)]> {
-        if let StructDefFields::Named(ref fields) = self.fields {
+        if let CompositeDefFields::Named(ref fields) = self.fields {
             Some(fields)
         } else {
             None
@@ -104,12 +104,12 @@ impl StructDef {
     }
 }
 
-impl quote::ToTokens for StructDef {
+impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream2) {
         let visibility = &self.field_visibility;
         let derives = &self.derives;
         tokens.extend(match self.fields {
-            StructDefFields::Named(ref named_fields) => {
+            CompositeDefFields::Named(ref named_fields) => {
                 let fields = named_fields.iter().map(|(name, ty)| {
                     let compact_attr =
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
@@ -123,7 +123,7 @@ impl quote::ToTokens for StructDef {
                     }
                 }
             }
-            StructDefFields::Unnamed(ref unnamed_fields) => {
+            CompositeDefFields::Unnamed(ref unnamed_fields) => {
                 let fields = unnamed_fields.iter().map(|ty| {
                     let compact_attr =
                         ty.is_compact().then(|| quote!( #[codec(compact)] ));
