@@ -111,7 +111,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: test
-          args: --all-targets --workspace -- --test-threads 4
+          args: --all-targets --workspace
 
   clippy:
     name: Cargo clippy
