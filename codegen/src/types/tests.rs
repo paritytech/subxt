@@ -326,6 +326,73 @@ fn generate_enum() {
 }
 
 #[test]
+fn compact_fields() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct S {
+        #[codec(compact)]
+        a: u32,
+    }
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct TupleStruct(#[codec(compact)] u32);
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    enum E {
+        A {
+            #[codec(compact)]
+            a: u32,
+        },
+        B(#[codec(compact)] u32),
+    }
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<S>());
+    registry.register_type(&meta_type::<TupleStruct>());
+    registry.register_type(&meta_type::<E>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+    );
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
+                pub enum E {
+                    # [codec (index = 0)]
+                    A {
+                        #[codec(compact)]
+                        a: ::core::primitive::u32,
+                    },
+                    # [codec (index = 1)]
+                    B( #[codec(compact)] ::core::primitive::u32,),
+                }
+
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
+                pub struct S {
+                    #[codec(compact)] pub a: ::core::primitive::u32,
+                }
+
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
+                pub struct TupleStruct(#[codec(compact)] pub ::core::primitive::u32,);
+            }
+        }
+        .to_string()
+    )
+}
+
+#[test]
 fn generate_array_field() {
     #[allow(unused)]
     #[derive(TypeInfo)]
