@@ -213,7 +213,8 @@ where
 #[scale_info(skip_type_params(T))]
 pub struct ChargeAssetTxPayment {
     /// The tip for the block author.
-    #[codec(compact)] pub tip: u128,
+    #[codec(compact)]
+    pub tip: u128,
     /// The asset with which to pay the tip.
     pub asset_id: Option<u32>,
 }
@@ -296,7 +297,10 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
             CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeAssetTxPayment { tip: u128::default(), asset_id: None },
+            ChargeAssetTxPayment {
+                tip: u128::default(),
+                asset_id: None,
+            },
         )
     }
 }
