@@ -17,7 +17,7 @@
 #![allow(clippy::too_many_arguments)]
 
 /// The SCALE encoded metadata obtained from a local run of a substrate node.
-pub static METADATA: &'static [u8] = include_bytes!(concat!(env!("OUT_DIR"), "/metadata.scale"));
+pub static METADATA: &'static [u8] =
+    include_bytes!(concat!(env!("OUT_DIR"), "/metadata.scale"));
 
 include!(concat!(env!("OUT_DIR"), "/runtime.rs"));
-

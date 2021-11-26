@@ -1,12 +1,33 @@
-use std::env;
-use std::fs;
-use std::path::Path;
-use std::process::Command;
-use std::sync::atomic::{ AtomicU16, Ordering };
-use std::net::TcpListener;
-use std::time;
-use std::thread;
+// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// This file is part of subxt.
+//
+// subxt is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// subxt is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
+
 use serde_json::json;
+use std::{
+    env,
+    fs,
+    net::TcpListener,
+    path::Path,
+    process::Command,
+    sync::atomic::{
+        AtomicU16,
+        Ordering,
+    },
+    thread,
+    time,
+};
 
 static SUBSTRATE_BIN_ENV_VAR: &'static str = "SUBSTRATE_NODE_PATH";
 
@@ -24,7 +45,12 @@ fn main() {
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => cmd,
-        Err(e) => panic!("Cannot spawn substrate command '{}': {}", SUBSTRATE_BIN_ENV_VAR, e)
+        Err(e) => {
+            panic!(
+                "Cannot spawn substrate command '{}': {}",
+                SUBSTRATE_BIN_ENV_VAR, e
+            )
+        }
     };
 
     // Download metadata from binary; retry until successful, or a limit is hit.
@@ -39,17 +65,19 @@ fn main() {
             let res = reqwest::blocking::Client::new()
                 .post(format!("http://localhost:{}", port))
                 .json(&json!({
-                    "id": 1,
-                    "jsonrpc": "2.0",
-                    "method": "state_getMetadata",
-                 }))
+                   "id": 1,
+                   "jsonrpc": "2.0",
+                   "method": "state_getMetadata",
+                }))
                 .send();
             match res {
                 Ok(res) if res.status().is_success() => {
                     println!("RESPONSE: {:?}", res);
                     let _ = cmd.kill();
-                    break res.json().expect("valid JSON response from substrate node expected")
-                },
+                    break res
+                        .json()
+                        .expect("valid JSON response from substrate node expected")
+                }
                 _ => {
                     thread::sleep(time::Duration::from_secs(wait_secs));
                     retries += 1;
@@ -58,7 +86,8 @@ fn main() {
             };
         }
     };
-    let metadata_hex = res["result"].as_str()
+    let metadata_hex = res["result"]
+        .as_str()
         .expect("Metadata should be returned as a string of hex encoded SCALE bytes");
     let metadata_bytes = hex::decode(&metadata_hex.trim_start_matches("0x")).unwrap();
 
@@ -70,7 +99,8 @@ fn main() {
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to runtime_metadata_path,
     // and so we need to split it out here and include it verbatim instead.
-    let runtime_api_contents = format!("
+    let runtime_api_contents = format!(
+        "
         #[subxt::subxt(
             runtime_metadata_path = \"{}\",
             generated_type_derives = \"Debug, Eq, PartialEq\"
@@ -79,10 +109,15 @@ fn main() {
             #[subxt(substitute_type = \"sp_arithmetic::per_things::Perbill\")]
             use sp_runtime::Perbill;
         }}
-    ", metadata_path.to_str().expect("Path to metadata should be stringifiable"));
+    ",
+        metadata_path
+            .to_str()
+            .expect("Path to metadata should be stringifiable")
+    );
 
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
-    fs::write(&runtime_path, runtime_api_contents).expect("Couldn't write runtime rust output");
+    fs::write(&runtime_path, runtime_api_contents)
+        .expect("Couldn't write runtime rust output");
 
     // Re-build if we point to a different substrate binary:
     println!("cargo:rerun-if-env-changed={}", SUBSTRATE_BIN_ENV_VAR);

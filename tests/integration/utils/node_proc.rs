@@ -66,11 +66,7 @@ where
     pub fn kill(&mut self) -> Result<(), String> {
         log::info!("Killing node process {}", self.proc.id());
         if let Err(err) = self.proc.kill() {
-            let err = format!(
-                "Error killing node process {}: {}",
-                self.proc.id(),
-                err
-            );
+            let err = format!("Error killing node process {}: {}", self.proc.id(), err);
             log::error!("{}", err);
             return Err(err)
         }
