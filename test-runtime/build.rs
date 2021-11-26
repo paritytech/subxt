@@ -63,7 +63,7 @@ async fn main() {
             let res =
                 subxt::RpcClient::try_from_url(&format!("http://localhost:{}", port))
                     .await
-                    .unwrap()
+                    .expect("should only error if malformed URL for an HTTP connection")
                     .request("state_getMetadata", &[])
                     .await;
             match res {
