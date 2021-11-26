@@ -77,7 +77,7 @@ async fn tx_basic_transfer() {
         .expect("Failed to decode ExtrinisicSuccess")
         .expect("Failed to find ExtrinisicSuccess");
 
-    let expected_event = balances::events::Transfer{
+    let expected_event = balances::events::Transfer {
         from: alice.account_id().clone(),
         to: bob.account_id().clone(),
         amount: 10_000,
@@ -215,7 +215,11 @@ async fn transfer_subscription() {
     let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
     assert_eq!(
         event,
-        balances::events::Transfer { from: alice.account_id().clone(), to: bob.clone(), amount: 10_000 }
+        balances::events::Transfer {
+            from: alice.account_id().clone(),
+            to: bob.clone(),
+            amount: 10_000
+        }
     );
 }
 
