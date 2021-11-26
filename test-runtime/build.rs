@@ -36,7 +36,7 @@ fn main() {
     let substrate_bin =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
 
-    // Run binary, waiting for RPC to start.
+    // Run binary.
     let port = next_open_port()
         .expect("Cannot spawn substrate: no available ports in the given port range");
     let cmd = Command::new(&substrate_bin)
@@ -70,7 +70,6 @@ fn main() {
                 .send();
             match res {
                 Ok(res) if res.status().is_success() => {
-                    println!("RESPONSE: {:?}", res);
                     let _ = cmd.kill();
                     break res
                         .json()
@@ -96,7 +95,7 @@ fn main() {
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to runtime_metadata_path,
-    // and so we need to split it out here and include it verbatim instead.
+    // and so we need to spit it out here and include it verbatim instead.
     let runtime_api_contents = format!(
         "
         #[subxt::subxt(
@@ -112,7 +111,6 @@ fn main() {
             .to_str()
             .expect("Path to metadata should be stringifiable")
     );
-
     let runtime_path = Path::new(&out_dir).join("runtime.rs");
     fs::write(&runtime_path, runtime_api_contents)
         .expect("Couldn't write runtime rust output");
