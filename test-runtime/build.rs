@@ -30,7 +30,8 @@ use std::{
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
-fn main() {
+#[async_std::main]
+async fn main() {
     // Select substrate binary to run based on env var.
     let substrate_bin =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
@@ -51,7 +52,7 @@ fn main() {
     };
 
     // Download metadata from binary; retry until successful, or a limit is hit.
-    let res: ureq::SerdeValue = {
+    let metadata_bytes: sp_core::Bytes = {
         const MAX_RETRIES: usize = 20;
         let mut retries = 0;
         let mut wait_secs = 1;
@@ -59,20 +60,16 @@ fn main() {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
             }
-            let res = ureq::post(&format!("http://localhost:{}", port)).send_json(
-                ureq::json!({
-                   "id": 1,
-                   "jsonrpc": "2.0",
-                   "method": "state_getMetadata",
-                }),
-            );
+            let res =
+                subxt::RpcClient::try_from_url(&format!("http://localhost:{}", port))
+                    .await
+                    .unwrap()
+                    .request("state_getMetadata", &[])
+                    .await;
             match res {
-                // ureq "Ok" responses assume a non 4xx/5xx status code.
                 Ok(res) => {
                     let _ = cmd.kill();
                     break res
-                        .into_json()
-                        .expect("valid JSON response from substrate node expected")
                 }
                 _ => {
                     thread::sleep(time::Duration::from_secs(wait_secs));
@@ -82,15 +79,11 @@ fn main() {
             };
         }
     };
-    let metadata_hex = res["result"]
-        .as_str()
-        .expect("Metadata should be returned as a string of hex encoded SCALE bytes");
-    let metadata_bytes = hex::decode(&metadata_hex.trim_start_matches("0x")).unwrap();
 
     // Save metadata to a file:
     let out_dir = env::var_os("OUT_DIR").unwrap();
     let metadata_path = Path::new(&out_dir).join("metadata.scale");
-    fs::write(&metadata_path, metadata_bytes).expect("Couldn't write metadata output");
+    fs::write(&metadata_path, &metadata_bytes.0).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to runtime_metadata_path,

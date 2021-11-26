@@ -9,6 +9,6 @@ sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/subs
 codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
-hex = "0.4.3"
 subxt = { path = ".." }
-ureq = { version = "2", features = ["json"] }
+async-std = { version = "1.9.0", features = ["attributes"] }
+sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
