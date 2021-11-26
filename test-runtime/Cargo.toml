@@ -10,5 +10,5 @@ codec = { package = "parity-scale-codec", version = "2", default-features = fals
 
 [build-dependencies]
 hex = "0.4.3"
-reqwest = { version = "0.11.6", features = ["blocking", "json"] }
-serde_json = "1.0.72"
+subxt = { path = ".." }
+ureq = { version = "2", features = ["json"] }

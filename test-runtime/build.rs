@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use serde_json::json;
 use std::{
     env,
     fs,
@@ -52,7 +51,7 @@ fn main() {
     };
 
     // Download metadata from binary; retry until successful, or a limit is hit.
-    let res: serde_json::Value = {
+    let res: ureq::SerdeValue = {
         const MAX_RETRIES: usize = 20;
         let mut retries = 0;
         let mut wait_secs = 1;
@@ -60,19 +59,19 @@ fn main() {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
             }
-            let res = reqwest::blocking::Client::new()
-                .post(format!("http://localhost:{}", port))
-                .json(&json!({
+            let res = ureq::post(&format!("http://localhost:{}", port)).send_json(
+                ureq::json!({
                    "id": 1,
                    "jsonrpc": "2.0",
                    "method": "state_getMetadata",
-                }))
-                .send();
+                }),
+            );
             match res {
-                Ok(res) if res.status().is_success() => {
+                // ureq "Ok" responses assume a non 4xx/5xx status code.
+                Ok(res) => {
                     let _ = cmd.kill();
                     break res
-                        .json()
+                        .into_json()
                         .expect("valid JSON response from substrate node expected")
                 }
                 _ => {
@@ -97,16 +96,16 @@ fn main() {
     // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to runtime_metadata_path,
     // and so we need to spit it out here and include it verbatim instead.
     let runtime_api_contents = format!(
-        "
+        r#"
         #[subxt::subxt(
-            runtime_metadata_path = \"{}\",
-            generated_type_derives = \"Debug, Eq, PartialEq\"
+            runtime_metadata_path = "{}",
+            generated_type_derives = "Debug, Eq, PartialEq"
         )]
         pub mod node_runtime {{
-            #[subxt(substitute_type = \"sp_arithmetic::per_things::Perbill\")]
+            #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
             use sp_runtime::Perbill;
         }}
-    ",
+    "#,
         metadata_path
             .to_str()
             .expect("Path to metadata should be stringifiable")
