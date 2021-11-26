@@ -16,8 +16,20 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  download-substrate:
+    name: Download Substrate Binary
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download Substrate
+        run: |
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
+            chmod +x ./substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
   build:
     name: Cargo check
+    needs: download-substrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -41,6 +53,7 @@ jobs:
 
   fmt:
     name: Cargo fmt
+    needs: download-substrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -65,6 +78,7 @@ jobs:
 
   docs:
     name: Check documentation
+    needs: download-substrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
@@ -85,17 +99,11 @@ jobs:
 
   tests:
     name: Cargo test
+    needs: download-substrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
-
-      - name: Download Substrate
-        run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
-            chmod +x ./substrate
-            mkdir -p ~/.local/bin
-            mv substrate ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -115,6 +123,7 @@ jobs:
 
   clippy:
     name: Cargo clippy
+    needs: download-substrate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout sources

@@ -48,7 +48,7 @@ fn main() {
         Err(e) => {
             panic!(
                 "Cannot spawn substrate command '{}': {}",
-                SUBSTRATE_BIN_ENV_VAR, e
+                substrate_bin, e
             )
         }
     };
