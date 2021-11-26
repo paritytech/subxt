@@ -29,11 +29,12 @@ use std::{
     time,
 };
 
-static SUBSTRATE_BIN_ENV_VAR: &'static str = "SUBSTRATE_NODE_PATH";
+static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
 fn main() {
     // Select substrate binary to run based on env var.
-    let substrate_bin = env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or("substrate".to_owned());
+    let substrate_bin =
+        env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
 
     // Run binary, waiting for RPC to start.
     let port = next_open_port()
@@ -46,10 +47,7 @@ fn main() {
     let mut cmd = match cmd {
         Ok(cmd) => cmd,
         Err(e) => {
-            panic!(
-                "Cannot spawn substrate command '{}': {}",
-                substrate_bin, e
-            )
+            panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
         }
     };
 
