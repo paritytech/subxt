@@ -22,7 +22,7 @@ use crate::{
     },
     Metadata,
 };
-use jsonrpsee_types::Error as RequestError;
+use jsonrpsee::types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
     transaction_validity::TransactionValidityError,
