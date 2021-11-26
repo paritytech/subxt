@@ -15,7 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    runtime::node_runtime::system,
+    utils::node_runtime::system,
     test_node_process,
     test_node_process_with,
 };
