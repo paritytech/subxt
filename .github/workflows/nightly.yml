@@ -3,7 +3,7 @@ name: Daily compatibility check against latest substrate
 on:
   schedule:
     # Run at 8am every day
-    - cron: "0 5 * * *"
+    - cron: "0 5 */5 * *" # TESTING: REMOVE /5 PRIOR TO MERGE
 
 
 env:
