@@ -80,7 +80,7 @@ async fn tx_basic_transfer() {
     let expected_event = balances::events::Transfer {
         from: alice.account_id().clone(),
         to: bob.account_id().clone(),
-        amount: 10_000,
+        amount: 10_000_000_0, // TESTING
     };
     assert_eq!(event, expected_event);
 
