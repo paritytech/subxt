@@ -27,7 +27,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$LATEST/substrate/substrate" --output substrate --location
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -81,7 +81,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$LATEST/substrate/substrate" --output substrate --location
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -108,7 +108,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$LATEST/substrate/substrate" --output substrate --location
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -138,7 +138,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$LATEST/substrate/substrate" --output substrate --location
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
