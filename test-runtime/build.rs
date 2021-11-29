@@ -57,7 +57,7 @@ async fn run() {
 
     // Download metadata from binary; retry until successful, or a limit is hit.
     let metadata_bytes: sp_core::Bytes = {
-        const MAX_RETRIES: usize = 1;
+        const MAX_RETRIES: usize = 20;
         let mut retries = 0;
         loop {
             if retries >= MAX_RETRIES {
