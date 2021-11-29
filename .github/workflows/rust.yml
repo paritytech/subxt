@@ -23,6 +23,13 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
+      - name: Download Substrate
+        run: |
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -70,6 +77,13 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
+      - name: Download Substrate
+        run: |
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -93,7 +107,7 @@ jobs:
       - name: Download Substrate
         run: |
             curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
-            chmod +x ./substrate
+            chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -119,6 +133,13 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      - name: Download Substrate
+        run: |
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1

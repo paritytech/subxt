@@ -16,11 +16,7 @@
 
 #![allow(clippy::too_many_arguments)]
 
-#[subxt::subxt(
-    runtime_metadata_path = "tests/integration/node_runtime.scale",
-    generated_type_derives = "Debug, Eq, PartialEq"
-)]
-pub mod node_runtime {
-    #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
-    use sp_runtime::Perbill;
-}
+/// The SCALE encoded metadata obtained from a local run of a substrate node.
+pub static METADATA: &[u8] = include_bytes!(concat!(env!("OUT_DIR"), "/metadata.scale"));
+
+include!(concat!(env!("OUT_DIR"), "/runtime.rs"));
