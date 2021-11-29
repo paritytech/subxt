@@ -53,9 +53,8 @@ async fn main() {
 
     // Download metadata from binary; retry until successful, or a limit is hit.
     let metadata_bytes: sp_core::Bytes = {
-        const MAX_RETRIES: usize = 20;
+        const MAX_RETRIES: usize = 1;
         let mut retries = 0;
-        let mut wait_secs = 1;
         loop {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
@@ -72,9 +71,8 @@ async fn main() {
                     break res
                 }
                 _ => {
-                    thread::sleep(time::Duration::from_secs(wait_secs));
+                    thread::sleep(time::Duration::from_secs(1));
                     retries += 1;
-                    wait_secs += 1;
                 }
             };
         }
