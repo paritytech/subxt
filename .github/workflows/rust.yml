@@ -97,7 +97,7 @@ jobs:
         uses: Swatinem/rust-cache@v1.3.0
 
       - name: Check internal documentation links
-        run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc --verbose --workspace --no-deps --document-private-items
+        run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
 
   tests:
     name: Cargo test
@@ -128,6 +128,21 @@ jobs:
         with:
           command: test
           args: --all-targets --workspace
+
+      # If the previous step fails, create a new Github issue
+      # to nofity us about it.
+      - if: ${{ failure() }}
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Use this issue template:
+          filename: .github/nightly-run-failed.md
+          # Don't create a new issue; skip updating existing:
+          update_existing: false
+          # Look for new *open* issues in this search (we want to
+          # create a new one if we only find closed versions):
+          search_existing: open
 
   clippy:
     name: Cargo clippy
