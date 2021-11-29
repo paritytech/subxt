@@ -25,13 +25,17 @@ use std::{
         Ordering,
     },
     thread,
-    time,
+    time, ops::{Deref, DerefMut},
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
 #[async_std::main]
 async fn main() {
+    run().await;
+}
+
+async fn run() {
     // Select substrate binary to run based on env var.
     let substrate_bin =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
@@ -45,7 +49,7 @@ async fn main() {
         .arg(format!("--rpc-port={}", port))
         .spawn();
     let mut cmd = match cmd {
-        Ok(cmd) => cmd,
+        Ok(cmd) => KillOnDrop(cmd),
         Err(e) => {
             panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
         }
@@ -138,5 +142,28 @@ fn next_open_port() -> Option<u16> {
         if ports_scanned == MAX_PORTS {
             return None
         }
+    }
+}
+
+/// If the substrate process isn't explicilty killed on drop,
+/// it seems that panics that occur while the command is running
+/// will leave it running and block the build step from ever finishing.
+/// Wrapping it in this prevents this from happening.
+struct KillOnDrop(std::process::Child);
+
+impl Deref for KillOnDrop {
+    type Target = std::process::Child;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl DerefMut for KillOnDrop {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+impl Drop for KillOnDrop {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
     }
 }
