@@ -18,6 +18,10 @@ use std::{
     env,
     fs,
     net::TcpListener,
+    ops::{
+        Deref,
+        DerefMut,
+    },
     path::Path,
     process::Command,
     sync::atomic::{
@@ -25,7 +29,7 @@ use std::{
         Ordering,
     },
     thread,
-    time, ops::{Deref, DerefMut},
+    time,
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
