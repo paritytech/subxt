@@ -48,7 +48,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           # Use this issue template:
-          filename: .github/nightly-run-failed.md
+          filename: .github/issue_templates/nightly_run_failed.md
           # Don't create a new issue; skip updating existing:
           update_existing: false
           # Look for new *open* issues in this search (we want to
