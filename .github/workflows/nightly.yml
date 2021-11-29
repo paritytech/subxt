@@ -1,0 +1,41 @@
+name: Daily compatibility check against latest substrate
+
+on:
+  schedule:
+    # Run at 8am every day
+    - cron: "0 5 * * *"
+
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  tests:
+    name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Download Substrate
+        run: |
+            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Cargo test
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: test
+          args: --all-targets --workspace
