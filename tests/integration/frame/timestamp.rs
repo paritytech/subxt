@@ -34,6 +34,5 @@ async fn storage_get_current_timestamp() {
 
     let timestamp = cxt.api.storage().timestamp().now(None).await.unwrap();
 
-    println!("{}' {}", timestamp, sys_timestamp);
     assert!(timestamp > sys_timestamp)
 }
