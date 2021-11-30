@@ -27,7 +27,11 @@ use std::{
     thread,
     time,
 };
-use subxt::rpc::{Client as _, rpc_params, build_ws_client};
+use subxt::rpc::{
+    build_ws_client,
+    rpc_params,
+    Client as _,
+};
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
@@ -61,12 +65,11 @@ async fn main() {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
             }
-            let res =
-                build_ws_client(&format!("ws://localhost:{}", port))
-                    .await
-                    .expect("should only error if malformed URL for an HTTP connection")
-                    .request("state_getMetadata", rpc_params![])
-                    .await;
+            let res = build_ws_client(&format!("ws://localhost:{}", port))
+                .await
+                .expect("should only error if malformed URL for an HTTP connection")
+                .request("state_getMetadata", rpc_params![])
+                .await;
             match res {
                 Ok(res) => {
                     let _ = cmd.kill();

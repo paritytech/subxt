@@ -35,10 +35,10 @@ use core::{
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
+        Receiver as WsReceiver,
+        Sender as WsSender,
         Uri,
         WsTransportClientBuilder,
-        Sender as WsSender,
-        Receiver as WsReceiver,
     },
     core_client::{
         Client as RpcClient,
@@ -663,8 +663,7 @@ pub async fn build_ws_client(url: &str) -> Result<RpcClient, RpcError> {
 }
 
 async fn ws_transport(url: &str) -> (WsSender, WsReceiver) {
-    // TODO: fix unwraps because I'm lazy.
-
+    // fix unwraps because I'm lazy.
     let url: Uri = url.parse().unwrap();
     WsTransportClientBuilder::default()
         .build(url)
