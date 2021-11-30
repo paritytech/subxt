@@ -20,6 +20,7 @@ futures = "0.3.9"
 jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee/", branch = "extract-async-client", features = ["client"] }
 log = "0.4.13"
 thiserror = "1.0.23"
+serde_json = "1"
 
 sc-client-db = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
 sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
@@ -38,3 +39,5 @@ async-std = { version = "1.8.0", features = ["attributes"] }
 env_logger = "0.8.2"
 node-cli = { git = "https://github.com/paritytech/substrate.git", branch = "master", default-features = false }
 tempdir = "0.3.7"
+subxt = { path = ".." }
+test-runtime = { path = "../test-runtime" }

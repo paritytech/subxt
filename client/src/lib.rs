@@ -14,7 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! Client for embedding substrate nodes.
+
 #![deny(missing_docs)]
+
+#[cfg(test)]
+mod tests;
 
 use async_std::task;
 use futures::{
