@@ -91,7 +91,7 @@ impl ClientBuilder {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            RpcClient::try_from_url(url).await?
+            crate::rpc::build_ws_client(url).await?
         };
         let mut rpc = Rpc::new(client);
         if self.accept_weak_inclusion {
