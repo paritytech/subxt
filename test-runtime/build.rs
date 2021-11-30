@@ -18,6 +18,10 @@ use std::{
     env,
     fs,
     net::TcpListener,
+    ops::{
+        Deref,
+        DerefMut,
+    },
     path::Path,
     process::Command,
     sync::atomic::{
@@ -32,6 +36,10 @@ static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
 #[async_std::main]
 async fn main() {
+    run().await;
+}
+
+async fn run() {
     // Select substrate binary to run based on env var.
     let substrate_bin =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
@@ -45,7 +53,7 @@ async fn main() {
         .arg(format!("--rpc-port={}", port))
         .spawn();
     let mut cmd = match cmd {
-        Ok(cmd) => cmd,
+        Ok(cmd) => KillOnDrop(cmd),
         Err(e) => {
             panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
         }
@@ -55,7 +63,6 @@ async fn main() {
     let metadata_bytes: sp_core::Bytes = {
         const MAX_RETRIES: usize = 20;
         let mut retries = 0;
-        let mut wait_secs = 1;
         loop {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
@@ -72,9 +79,8 @@ async fn main() {
                     break res
                 }
                 _ => {
-                    thread::sleep(time::Duration::from_secs(wait_secs));
+                    thread::sleep(time::Duration::from_secs(1));
                     retries += 1;
-                    wait_secs += 1;
                 }
             };
         }
@@ -140,5 +146,28 @@ fn next_open_port() -> Option<u16> {
         if ports_scanned == MAX_PORTS {
             return None
         }
+    }
+}
+
+/// If the substrate process isn't explicilty killed on drop,
+/// it seems that panics that occur while the command is running
+/// will leave it running and block the build step from ever finishing.
+/// Wrapping it in this prevents this from happening.
+struct KillOnDrop(std::process::Child);
+
+impl Deref for KillOnDrop {
+    type Target = std::process::Child;
+    fn deref(&self) -> &Self::Target {
+        &self.0
+    }
+}
+impl DerefMut for KillOnDrop {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.0
+    }
+}
+impl Drop for KillOnDrop {
+    fn drop(&mut self) {
+        let _ = self.0.kill();
     }
 }
