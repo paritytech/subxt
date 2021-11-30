@@ -14,8 +14,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  # TODO What is available to put here? Is it sufficient?
-  SUBSTRATE_VERSION: latest
+  # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
+  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
 
 jobs:
   build:
@@ -27,7 +27,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
+            curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -81,7 +81,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
+            curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -108,7 +108,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
+            curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
@@ -138,7 +138,7 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/$SUBSTRATE_VERSION/substrate/substrate" --output substrate --location
+            curl $SUBSTRATE_URL --output substrate --location
             chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
