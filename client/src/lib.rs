@@ -1,5 +1,5 @@
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-subxt.
+// This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -12,14 +12,9 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-subxt.  If not, see <http://www.gnu.org/licenses/>.
-
-//! Client for embedding substrate nodes.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 #![deny(missing_docs)]
-
-#[cfg(test)]
-mod tests;
 
 use async_std::task;
 use futures::{
