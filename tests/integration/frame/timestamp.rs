@@ -30,9 +30,19 @@ async fn storage_get_current_timestamp() {
 
     // wait until blocks are produced to get the timestamp
     let mut sub = cxt.client().rpc().subscribe_blocks().await.unwrap();
-    let _ = sub.next().await.unwrap();
+    let block_hash = loop {
+        if let Ok(Some(block)) = sub.next().await {
+            break block.hash()
+        }
+    };
 
-    let timestamp = cxt.api.storage().timestamp().now(None).await.unwrap();
+    let timestamp = cxt
+        .api
+        .storage()
+        .timestamp()
+        .now(Some(block_hash))
+        .await
+        .unwrap();
 
     assert!(timestamp > sys_timestamp)
 }
