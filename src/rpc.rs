@@ -35,6 +35,7 @@ use core::{
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
+        InvalidUri,
         Receiver as WsReceiver,
         Sender as WsSender,
         Uri,
@@ -650,23 +651,24 @@ impl<T: Config> ExtrinsicSuccess<T> {
 
 /// Example to check that `From<(Sender, Receiver) for RpcClient` works.
 pub async fn build_ws_client_default(url: &str) -> Result<RpcClient, RpcError> {
-    let client = ws_transport(url).await.into();
+    let client = ws_transport(url).await?.into();
     Ok(client)
 }
 
 /// Build WS RPC client from URL
 pub async fn build_ws_client(url: &str) -> Result<RpcClient, RpcError> {
-    let (sender, receiver) = ws_transport(url).await;
+    let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
         .build(sender, receiver))
 }
 
-async fn ws_transport(url: &str) -> (WsSender, WsReceiver) {
-    // fix unwraps because I'm lazy.
-    let url: Uri = url.parse().unwrap();
+async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
+    let url: Uri = url
+        .parse()
+        .map_err(|e: InvalidUri| RpcError::Transport(e.into()))?;
     WsTransportClientBuilder::default()
         .build(url)
         .await
-        .unwrap()
+        .map_err(|e| RpcError::Transport(e.into()))
 }
