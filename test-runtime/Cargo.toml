@@ -10,6 +10,6 @@ codec = { package = "parity-scale-codec", version = "2", default-features = fals
 
 [build-dependencies]
 subxt = { path = ".." }
-async-std = { version = "1.9.0", features = ["attributes"] }
 sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
 jsonrpsee-http-client = { git = "https://github.com/paritytech/jsonrpsee/", branch = "extract-async-client" }
+async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
