@@ -161,7 +161,7 @@ impl<T: Config> Client<T> {
     ///
     /// # Note
     ///
-    /// Some chains use this to define common properties such as `token_decimals` and `token_symbol`
+    /// Many chains use this to define common properties such as `token_decimals` and `token_symbol`
     /// required for UIs, but this is merely a convention. So it is up to the library user to
     /// deserialize the JSON into the appropriate type or otherwise extract the properties defined
     /// in the target chain's spec.
