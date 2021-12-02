@@ -832,7 +832,7 @@ fn modules() {
         quote! {
             pub mod tests {
                 use super::root;
-                pub mod modules {
+                pub mod m {
                     use super::root;
                     pub mod a {
                         use super::root;
@@ -842,7 +842,7 @@ fn modules() {
 
                             #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                             pub struct Bar {
-                                pub a: root::subxt_codegen::types::tests::modules::a::Foo,
+                                pub a: root::subxt_codegen::types::tests::m::a::Foo,
                             }
                         }
 
@@ -855,7 +855,7 @@ fn modules() {
 
                         #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                         pub struct Foo {
-                            pub a: root::subxt_codegen::types::tests::modules::a::b::Bar,
+                            pub a: root::subxt_codegen::types::tests::m::a::b::Bar,
                         }
                     }
                 }
