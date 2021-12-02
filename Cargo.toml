@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "cli", "codegen", "macro"]
+members = [".", "cli", "codegen", "macro", "test-runtime"]
 
 [package]
 name = "subxt"
@@ -24,10 +24,7 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee-proc-macros = "0.4.1"
-jsonrpsee-ws-client = { version = "0.4.1", default-features = false }
-jsonrpsee-http-client = { version = "0.4.1", default-features = false }
-jsonrpsee-types = "0.4.1"
+jsonrpsee = { version = "0.5.1", features = ["macros", "ws-client", "http-client"] }
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
@@ -51,6 +48,7 @@ env_logger = "0.8.3"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
+test-runtime = { path = "test-runtime" }
 
 sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/", branch = "master" }
 

@@ -14,6 +14,8 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
+  # TODO: Currently pointing at latest substrate; is there a suitable binary we can pin to here?
+  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
 
 jobs:
   build:
@@ -22,6 +24,13 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
@@ -70,6 +79,13 @@ jobs:
       - name: Checkout sources
         uses: actions/checkout@v2
 
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
@@ -81,7 +97,7 @@ jobs:
         uses: Swatinem/rust-cache@v1.3.0
 
       - name: Check internal documentation links
-        run: RUSTDOCFLAGS="--deny broken_intra_doc_links" cargo doc --verbose --workspace --no-deps --document-private-items
+        run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
 
   tests:
     name: Cargo test
@@ -92,8 +108,8 @@ jobs:
 
       - name: Download Substrate
         run: |
-            curl "https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate" --output substrate --location
-            chmod +x ./substrate
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
@@ -119,6 +135,13 @@ jobs:
     steps:
       - name: Checkout sources
         uses: actions/checkout@v2
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
 
       - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1

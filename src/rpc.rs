@@ -33,24 +33,26 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee_http_client::{
-    HttpClient,
-    HttpClientBuilder,
-};
-use jsonrpsee_types::{
-    to_json_value,
-    traits::{
-        Client,
-        SubscriptionClient,
+use jsonrpsee::{
+    http_client::{
+        HttpClient,
+        HttpClientBuilder,
     },
-    DeserializeOwned,
-    Error as RpcError,
-    JsonValue,
-    Subscription,
-};
-use jsonrpsee_ws_client::{
-    WsClient,
-    WsClientBuilder,
+    types::{
+        to_json_value,
+        traits::{
+            Client,
+            SubscriptionClient,
+        },
+        DeserializeOwned,
+        Error as RpcError,
+        JsonValue,
+        Subscription,
+    },
+    ws_client::{
+        WsClient,
+        WsClientBuilder,
+    },
 };
 use serde::{
     Deserialize,
