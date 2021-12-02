@@ -32,11 +32,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust stable toolchain
+      - name: Install Rust nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: Rust Cache
@@ -86,11 +86,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust stable toolchain
+      - name: Install Rust nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: Rust Cache
@@ -113,11 +113,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust stable toolchain
+      - name: Install Rust nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: stable
+          toolchain: nightly
           override: true
 
       - name: Rust Cache
@@ -143,11 +143,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust stable toolchain
+      - name: Install Rust nightly toolchain
         uses: actions-rs/toolchain@v1
         with:
             profile: minimal
-            toolchain: stable
+            toolchain: nightly
             components: clippy
             override: true
 
