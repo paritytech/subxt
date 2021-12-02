@@ -141,17 +141,8 @@ impl From<u32> for BlockNumber {
     }
 }
 
-/// System properties for a Substrate-based runtime
-#[derive(serde::Serialize, Deserialize, Debug, Clone, PartialEq, Eq, Default)]
-#[serde(rename_all = "camelCase")]
-pub struct SystemProperties {
-    /// The address format
-    pub ss58_format: u8,
-    /// The number of digits after the decimal point in the native token
-    pub token_decimals: u8,
-    /// The symbol of the native token
-    pub token_symbol: String,
-}
+/// Arbitrary properties defined in the chain spec as a JSON object.
+pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
 
 /// Possible transaction status events.
 ///
