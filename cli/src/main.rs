@@ -120,7 +120,7 @@ fn main() -> color_eyre::Result<()> {
             });
             let (_, bytes) = fetch_metadata(&url)?;
             codegen(&mut &bytes[..])?;
-            return Ok(())
+            Ok(())
         }
     }
 }
@@ -139,7 +139,7 @@ fn fetch_metadata(url: &url::Url) -> color_eyre::Result<(String, Vec<u8>)> {
     let hex_data = json["result"]
         .as_str()
         .map(ToString::to_string)
-        .ok_or(eyre::eyre!("metadata result field should be a string"))?;
+        .ok_or_else(|| eyre::eyre!("metadata result field should be a string"))?;
     let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
 
     Ok((hex_data, bytes))

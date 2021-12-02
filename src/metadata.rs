@@ -143,6 +143,11 @@ pub struct PalletMetadata {
 }
 
 impl PalletMetadata {
+    /// Get the name of the pallet.
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
     /// Encode a call based on this pallet metadata.
     pub fn encode_call<C>(&self, call: &C) -> Result<Encoded, MetadataError>
     where
