@@ -16,6 +16,7 @@
 
 mod calls;
 mod events;
+mod extrinsic;
 mod storage;
 
 use super::GeneratedTypeDerives;
@@ -200,6 +201,8 @@ impl RuntimeGenerator {
                 #( #outer_event_variants )*
             }
         };
+
+        let extensions = extrinsic::generate_extensions(&type_gen, &self.metadata.extrinsic, types_mod_ident);
 
         let mod_ident = item_mod_ir.ident;
         let pallets_with_storage =
