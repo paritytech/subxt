@@ -3,7 +3,7 @@ name: Daily compatibility check against latest substrate
 on:
   schedule:
     # Run at 8am every day
-    - cron: "* 8 * * *"
+    - cron: "0 8 * * *"
 
 
 env:

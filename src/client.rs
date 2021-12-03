@@ -157,7 +157,14 @@ impl<T: Config> Client<T> {
         &self.metadata
     }
 
-    /// Returns the system properties
+    /// Returns the properties defined in the chain spec as a JSON object.
+    ///
+    /// # Note
+    ///
+    /// Many chains use this to define common properties such as `token_decimals` and `token_symbol`
+    /// required for UIs, but this is merely a convention. It is up to the library user to
+    /// deserialize the JSON into the appropriate type or otherwise extract the properties defined
+    /// in the target chain's spec.
     pub fn properties(&self) -> &SystemProperties {
         &self.properties
     }

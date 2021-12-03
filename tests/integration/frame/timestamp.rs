@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Test interactions with some built-in FRAME pallets.
+use crate::test_context;
 
-mod balances;
-mod contracts;
-mod staking;
-mod sudo;
-mod system;
-mod timestamp;
+#[async_std::test]
+async fn storage_get_current_timestamp() {
+    let cxt = test_context().await;
+
+    let timestamp = cxt.api.storage().timestamp().now(None).await;
+
+    assert!(timestamp.is_ok())
+}
