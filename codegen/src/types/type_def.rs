@@ -157,7 +157,7 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                     .cloned()
                     .collect::<Vec<_>>();
                 if !unused_type_params.is_empty() {
-                    let phantom = Self::phantom_data(&unused_type_params);
+                    let phantom = super::phantom_data(&unused_type_params);
                     variants.push(quote! {
                         __Ignore(#phantom)
                     })
@@ -254,7 +254,7 @@ impl<'a> TypeDefGen<'a> {
                 unused_type_params(type_params, fields.iter().map(|(_, ty, _)| ty));
 
             if is_struct && !unused_params.is_empty() {
-                let phantom = Self::phantom_data(&unused_params);
+                let phantom = super::phantom_data(&unused_params);
                 fields_tokens.push(quote! {
                     #[codec(skip)] pub __subxt_unused_type_params: #phantom
                 })
@@ -304,7 +304,7 @@ impl<'a> TypeDefGen<'a> {
                 unused_type_params(type_params, type_paths.iter().map(|(ty, _)| ty));
 
             if is_struct && !unused_params.is_empty() {
-                let phantom_data = Self::phantom_data(&unused_params);
+                let phantom_data = super::phantom_data(&unused_params);
                 fields_tokens.push(quote! { #[codec(skip)] pub #phantom_data })
             }
 

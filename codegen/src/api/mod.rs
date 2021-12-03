@@ -332,10 +332,9 @@ pub fn generate_structs_from_variants(
             .variants()
             .iter()
             .map(|var| {
-                CompositeDef::new(
+                CompositeDef::enum_variant_def(
                     var.name(),
                     var.fields(),
-                    Some(syn::parse_quote!(pub)),
                     type_gen,
                 )
             })
