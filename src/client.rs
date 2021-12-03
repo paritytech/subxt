@@ -21,7 +21,10 @@ use sp_runtime::traits::Hash;
 use futures::future;
 
 use crate::{
-    events::EventsDecoder,
+    events::{
+        EventsDecoder,
+        Raw,
+    },
     extrinsic::{
         self,
         SignedExtra,
@@ -29,7 +32,6 @@ use crate::{
         UncheckedExtrinsic,
     },
     rpc::{
-        ExtrinsicSuccess,
         Rpc,
         RpcClient,
         SystemProperties, TransactionStatus
@@ -119,27 +121,24 @@ impl ClientBuilder {
 
         let events_decoder = EventsDecoder::new(metadata.clone());
 
-        Ok(Client(Arc::new(ClientInner{
+        Ok(Client{
             rpc,
             genesis_hash: genesis_hash?,
-            metadata,
+            metadata: Arc::new(metadata),
             events_decoder,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             iter_page_size: self.page_size.unwrap_or(10),
-        })))
+        })
     }
 }
 
 /// Client to interface with a substrate node.
 #[derive(Clone)]
-pub struct Client<T: Config>(Arc<ClientInner<T>>);
-
-#[derive(Clone)]
-struct ClientInner<T: Config> {
+pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Metadata,
+    metadata: Arc<Metadata>,
     events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
@@ -149,27 +148,27 @@ struct ClientInner<T: Config> {
 impl<T: Config> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
-        &self.0.genesis_hash
+        &self.genesis_hash
     }
 
     /// Returns the chain metadata.
     pub fn metadata(&self) -> &Metadata {
-        &self.0.metadata
+        &self.metadata
     }
 
     /// Returns the system properties
     pub fn properties(&self) -> &SystemProperties {
-        &self.0.properties
+        &self.properties
     }
 
     /// Returns the rpc client.
     pub fn rpc(&self) -> &Rpc<T> {
-        &self.0.rpc
+        &self.rpc
     }
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.0.rpc, &self.0.metadata, self.0.iter_page_size)
+        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
@@ -182,49 +181,34 @@ impl<T: Config> Client<T> {
 
     /// Returns the events decoder.
     pub fn events_decoder(&self) -> &EventsDecoder<T> {
-        &self.0.events_decoder
+        &self.events_decoder
     }
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<T: Config, C> {
-    client: Arc<Client<T>>,
+pub struct SubmittableExtrinsic<'client, T: Config, C> {
+    client: &'client Client<T>,
     call: C,
 }
 
-impl<T, C> SubmittableExtrinsic<T, C>
+impl<'client, T, C> SubmittableExtrinsic<'client, T, C>
 where
     T: Config + ExtrinsicExtraData<T>,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: Arc<Client<T>>, call: C) -> Self {
+    pub fn new(client: &'client Client<T>, call: C) -> Self {
         Self { client, call }
     }
 
     /// Creates and signs an extrinsic and submits it to the chain.
     ///
-    /// Returns when the extrinsic has successfully been included in the block, together with any
-    /// events which were triggered by the extrinsic.
+    /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
+    /// and obtain details about it, once it's made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error>
-    where
-        <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
-    {
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
-        self.client
-            .rpc()
-            .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
-            .await
-    }
-
-    /// TODO document
-    pub async fn sign_and_submit_then_watch_new(
-        self,
-        signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<TransactionProgress<T>, Error>
+    ) -> Result<TransactionProgress<'client, T>, Error>
     where
         <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
@@ -287,8 +271,8 @@ where
             .and_then(|pallet| pallet.encode_call(&self.call))?;
 
         let signed = extrinsic::create_signed(
-            &self.client.0.runtime_version,
-            self.client.0.genesis_hash,
+            &self.client.runtime_version,
+            self.client.genesis_hash,
             account_nonce,
             call,
             signer,
@@ -299,19 +283,21 @@ where
     }
 }
 
-pub struct TransactionProgress<T: Config> {
+/// This struct represents a subscription to the progress of some transaction, and is
+/// returned from [`SubmittableExtrinsic::sign_and_submit_then_watch()`].
+pub struct TransactionProgress<'client, T: Config> {
     sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>,
     ext_hash: T::Hash,
-    client: Arc<Client<T>>,
+    client: &'client Client<T>,
 }
 
-impl <T: Config> TransactionProgress<T> {
-    pub (crate) fn new(sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>, client: Arc<Client<T>>, ext_hash: T::Hash) -> Self {
+impl <'client, T: Config> TransactionProgress<'client, T> {
+    pub (crate) fn new(sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>, client: &'client Client<T>, ext_hash: T::Hash) -> Self {
         Self { sub, client, ext_hash }
     }
 
     /// Return the next transaction status when it's emitted.
-    pub async fn next(&mut self) -> Result<Option<TransactionProgressStatus<T>>, Error> {
+    pub async fn next(&mut self) -> Result<Option<TransactionProgressStatus<'client, T>>, Error> {
         let res = self.sub.next().await?;
         Ok(res.map(|status| {
             match status {
@@ -321,14 +307,14 @@ impl <T: Config> TransactionProgress<T> {
                 TransactionStatus::InBlock(hash) => TransactionProgressStatus::InBlock(TransactionInBlock {
                     block_hash: hash,
                     ext_hash: self.ext_hash,
-                    client: Arc::clone(&self.client)
+                    client: self.client
                 }),
                 TransactionStatus::Retracted(hash) => TransactionProgressStatus::Retracted(hash),
                 TransactionStatus::FinalityTimeout(hash) => TransactionProgressStatus::FinalityTimeout(hash),
                 TransactionStatus::Finalized(hash) => TransactionProgressStatus::Finalized(TransactionInBlock {
                     block_hash: hash,
                     ext_hash: self.ext_hash,
-                    client: Arc::clone(&self.client)
+                    client: self.client
                 }),
                 TransactionStatus::Usurped(hash) => TransactionProgressStatus::Usurped(hash),
                 TransactionStatus::Dropped => TransactionProgressStatus::Dropped,
@@ -340,7 +326,7 @@ impl <T: Config> TransactionProgress<T> {
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
     /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
     /// waiting for finalization.
-    pub async fn wait_for_in_block(mut self) -> Result<TransactionInBlock<T>, Error> {
+    pub async fn wait_for_in_block(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized or otherwise in a block! Return.
@@ -360,7 +346,7 @@ impl <T: Config> TransactionProgress<T> {
 
     /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
-    pub async fn wait_for_finalized(mut self) -> Result<TransactionInBlock<T>, Error> {
+    pub async fn wait_for_finalized(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized! Return.
@@ -380,23 +366,35 @@ impl <T: Config> TransactionProgress<T> {
 
 /// Possible transaction status events returned from our [`crate::Client`].
 #[derive(Clone)]
-pub enum TransactionProgressStatus<T: Config> {
+pub enum TransactionProgressStatus<'client, T: Config> {
+    /// Transaction is part of the future queue.
     Future,
+    /// Transaction is part of the ready queue.
     Ready,
+    /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
-    InBlock(TransactionInBlock<T>),
+    /// Transaction has been included in block with given hash.
+    InBlock(TransactionInBlock<'client, T>),
+    /// The block this transaction was included in has been retracted.
     Retracted(T::Hash),
+    /// Maximum number of finality watchers has been reached,
+    /// old watchers are being removed.
     FinalityTimeout(T::Hash),
-    Finalized(TransactionInBlock<T>),
+    /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
+    Finalized(TransactionInBlock<'client, T>),
+    /// Transaction has been replaced in the pool, by another transaction
+    /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
+    /// Transaction has been dropped from the pool because of the limit.
     Dropped,
+    /// Transaction is no longer valid in the current state.
     Invalid
 }
 
-impl <T: Config> TransactionProgressStatus<T> {
+impl <'client, T: Config> TransactionProgressStatus<'client, T> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T>> {
+    pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None
@@ -405,7 +403,7 @@ impl <T: Config> TransactionProgressStatus<T> {
 
     /// A convenience method to return the `InBlock` details. Returns
     /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T>> {
+    pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None
@@ -415,13 +413,13 @@ impl <T: Config> TransactionProgressStatus<T> {
 
 /// This struct represents a transaction that has made it into a block.
 #[derive(Clone)]
-pub struct TransactionInBlock<T: Config> {
+pub struct TransactionInBlock<'client, T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
-    client: Arc<Client<T>>
+    client: &'client Client<T>
 }
 
-impl <T: Config> TransactionInBlock<T> {
+impl <'client, T: Config> TransactionInBlock<'client, T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash
@@ -460,10 +458,16 @@ impl <T: Config> TransactionInBlock<T> {
             .events_decoder()
             .decode_events(&mut &*raw_events)?
             .into_iter()
-            .filter(|(phase, _raw)| {
+            .filter(move |(phase, _raw)| {
                 phase == &Phase::ApplyExtrinsic(extrinsic_idx as u32)
             })
-            .map(|(_phase, raw)| raw);
+            .filter_map(|(_phase, raw)| {
+                if let Raw::Event(evt) = raw {
+                    Some(evt)
+                } else {
+                    None
+                }
+            });
 
         Ok(event_iter)
     }

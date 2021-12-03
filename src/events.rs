@@ -16,6 +16,7 @@
 
 use codec::{
     Codec,
+    Error as CodecError,
     Compact,
     Decode,
     Encode,
@@ -30,6 +31,7 @@ use crate::{
     },
     Config,
     Error,
+    Event,
     Metadata,
     Phase,
     RuntimeError,
@@ -54,6 +56,28 @@ pub struct RawEvent {
     pub variant_index: u8,
     /// The raw Event data
     pub data: Bytes,
+}
+
+impl RawEvent {
+
+    /// Attempt to decode this [`RawEvent`] into a specific event.
+    pub fn try_as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+        if self.pallet == E::PALLET && self.variant == E::EVENT {
+            Ok(Some(E::decode(&mut &self.data[..])?))
+        } else {
+            Ok(None)
+        }
+    }
+
+    /// Attempt to decode this [`RawEvent`] into a specific event.
+    /// Returns [`None`] is the event of a decoding error. Use
+    /// [`RawEvent::try_as_event`] if you'd like to handle this error.
+    pub fn as_event<E: Event>(&self) -> Option<E> {
+        self.try_as_event::<E>()
+            .ok()
+            .flatten()
+    }
+
 }
 
 /// Events decoder.

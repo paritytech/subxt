@@ -162,6 +162,7 @@ pub struct PalletError {
     pub description: Vec<String>,
 }
 
+/// Transaction error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum TransactionError {
     /// The finality subscription expired

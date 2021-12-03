@@ -42,14 +42,27 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-    let result = api
+
+    let balance_transfer = api
         .tx()
-        .balances()
+        .balances();
+
+    let transaction_progress = balance_transfer
         .transfer(dest, 10_000)
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    if let Some(event) = result.find_event::<polkadot::balances::events::Transfer>()? {
+    let transaction_events = transaction_progress
+        .wait_for_finalized()
+        .await?
+        .events()
+        .await?;
+
+    let transfer_event = transaction_events
+        .filter_map(|e| e.as_event::<polkadot::balances::events::Transfer>())
+        .next();
+
+    if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);
     } else {
         println!("Failed to find Balances::Transfer Event");

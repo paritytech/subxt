@@ -74,6 +74,9 @@ pub use crate::{
         Client,
         ClientBuilder,
         SubmittableExtrinsic,
+        TransactionProgress,
+        TransactionProgressStatus,
+        TransactionInBlock,
     },
     config::{
         AccountData,
@@ -84,6 +87,7 @@ pub use crate::{
         Error,
         PalletError,
         RuntimeError,
+        TransactionError,
     },
     events::{
         EventsDecoder,
@@ -103,7 +107,6 @@ pub use crate::{
     },
     rpc::{
         BlockNumber,
-        ExtrinsicSuccess,
         ReadProof,
         RpcClient,
         SystemProperties,
