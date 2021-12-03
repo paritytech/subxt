@@ -60,7 +60,6 @@ pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
-    accept_weak_inclusion: bool,
 }
 
 impl ClientBuilder {
@@ -70,7 +69,6 @@ impl ClientBuilder {
             url: None,
             client: None,
             page_size: None,
-            accept_weak_inclusion: false,
         }
     }
 
@@ -92,12 +90,6 @@ impl ClientBuilder {
         self
     }
 
-    /// Only check that transactions are InBlock on submit.
-    pub fn accept_weak_inclusion(mut self) -> Self {
-        self.accept_weak_inclusion = true;
-        self
-    }
-
     /// Creates a new Client.
     pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
@@ -106,10 +98,7 @@ impl ClientBuilder {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             RpcClient::try_from_url(url).await?
         };
-        let mut rpc = Rpc::new(client);
-        if self.accept_weak_inclusion {
-            rpc.accept_weak_inclusion();
-        }
+        let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
             rpc.metadata(),
             rpc.genesis_hash(),

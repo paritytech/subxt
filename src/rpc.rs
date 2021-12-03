@@ -294,7 +294,6 @@ pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
     marker: PhantomData<T>,
-    accept_weak_inclusion: bool,
 }
 
 impl<T: Config> Clone for Rpc<T> {
@@ -302,7 +301,6 @@ impl<T: Config> Clone for Rpc<T> {
         Self {
             client: self.client.clone(),
             marker: PhantomData,
-            accept_weak_inclusion: self.accept_weak_inclusion,
         }
     }
 }
@@ -313,14 +311,7 @@ impl<T: Config> Rpc<T> {
         Self {
             client,
             marker: PhantomData,
-            accept_weak_inclusion: false,
         }
-    }
-
-    /// Configure the Rpc to accept non-finalized blocks
-    /// in `submit_and_watch_extrinsic`
-    pub fn accept_weak_inclusion(&mut self) {
-        self.accept_weak_inclusion = true;
     }
 
     /// Fetch a storage key
