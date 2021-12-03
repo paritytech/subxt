@@ -63,6 +63,9 @@ pub enum Error {
     /// Events decoding error.
     #[error("Events decoding error: {0}")]
     EventsDecoding(#[from] EventsDecodingError),
+    /// Transaction progress error.
+    #[error("Transaction error: {0}")]
+    Transaction(#[from] TransactionError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -157,4 +160,24 @@ pub struct PalletError {
     pub error: String,
     /// The error description.
     pub description: Vec<String>,
+}
+
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
+pub enum TransactionError {
+    /// The finality subscription expired
+    #[error("The finality subscription expired")]
+    FinalitySubscriptionTimeout,
+    /// The transaction was invalid
+    #[error("The transaction was invalid")]
+    Invalid,
+    /// The transaction was dropped from the pool
+    #[error("The transaction was dropped from the pool")]
+    Dropped,
+    /// The transaction was usurped
+    #[error("The transaction was usurped")]
+    Usurped,
+    /// The block hash that the tranaction was added to could not be found.
+    /// This is probably because the block was retracted before being finalized.
+    #[error("Block hash containing non-finalized transaction can no longer be found")]
+    BlockHashNotFound,
 }

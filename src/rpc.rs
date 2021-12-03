@@ -618,6 +618,55 @@ impl<T: Config> Rpc<T> {
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
+    /// TODO document
+    pub async fn submit_and_watch_extrinsic_new<'a, E: Encode + 'static>(
+        &self,
+        extrinsic: E,
+        decoder: &'a EventsDecoder<T>,
+    ) -> Result<ExtrinsicSuccess<T>, Error> {
+        let ext_hash = T::Hashing::hash_of(&extrinsic);
+        log::info!("Submitting Extrinsic `{:?}`", ext_hash);
+
+        let events_sub = if self.accept_weak_inclusion {
+            self.subscribe_events().await
+        } else {
+            self.subscribe_finalized_events().await
+        }?;
+        let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
+
+        while let Ok(Some(status)) = xt_sub.next().await {
+            log::info!("Received status {:?}", status);
+            match status {
+                // ignore in progress extrinsic for now
+                TransactionStatus::Future
+                | TransactionStatus::Ready
+                | TransactionStatus::Broadcast(_)
+                | TransactionStatus::Retracted(_) => continue,
+                TransactionStatus::InBlock(block_hash) => {
+                    if self.accept_weak_inclusion {
+                        return self
+                            .process_block(events_sub, decoder, block_hash, ext_hash)
+                            .await
+                    }
+                    continue
+                }
+                TransactionStatus::Invalid => return Err("Extrinsic Invalid".into()),
+                TransactionStatus::Usurped(_) => return Err("Extrinsic Usurped".into()),
+                TransactionStatus::Dropped => return Err("Extrinsic Dropped".into()),
+                TransactionStatus::Finalized(block_hash) => {
+                    // read finalized blocks by default
+                    return self
+                        .process_block(events_sub, decoder, block_hash, ext_hash)
+                        .await
+                }
+                TransactionStatus::FinalityTimeout(_) => {
+                    return Err("Extrinsic FinalityTimeout".into())
+                }
+            }
+        }
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+    }
+
     async fn process_block(
         &self,
         events_sub: EventStorageSubscription<T>,
