@@ -136,7 +136,7 @@ impl Metadata {
 #[derive(Clone, Debug)]
 pub struct PalletMetadata {
     index: u8,
-    _name: String,
+    name: String,
     calls: HashMap<String, u8>,
     storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
     constants: HashMap<String, PalletConstantMetadata<PortableForm>>,
@@ -291,7 +291,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
-                    _name: pallet.name.to_string(),
+                    name: pallet.name.to_string(),
                     calls,
                     storage,
                     constants,
