@@ -21,9 +21,12 @@ use super::{
     TypePath,
 };
 use heck::CamelCase as _;
-use proc_macro2::{TokenStream as TokenStream2, TokenStream};
+use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
-use quote::{format_ident, quote};
+use quote::{
+    format_ident,
+    quote,
+};
 use scale_info::form::PortableForm;
 use std::collections::HashSet;
 
@@ -49,7 +52,11 @@ impl CompositeDef {
 
         Self {
             name,
-            kind : CompositeDefKind::Struct { derives, type_params, field_visibility },
+            kind: CompositeDefKind::Struct {
+                derives,
+                type_params,
+                field_visibility,
+            },
             fields,
         }
     }
@@ -108,12 +115,19 @@ impl quote::ToTokens for CompositeDef {
         let name = &self.name;
 
         let decl = match &self.kind {
-            CompositeDefKind::Struct { derives, type_params, field_visibility } => {
+            CompositeDefKind::Struct {
+                derives,
+                type_params,
+                field_visibility,
+            } => {
+                let unused_params_marker = unused_type_params_phantom_data(
+                    type_params,
+                    self.fields.field_types().iter(),
+                );
 
-                let unused_params_marker =
-                    unused_type_params_phantom_data(type_params, self.fields.field_types().iter());
-
-                let fields = self.fields.field_tokens(field_visibility.as_ref(), unused_params_marker);
+                let fields = self
+                    .fields
+                    .field_tokens(field_visibility.as_ref(), unused_params_marker);
 
                 quote! {
                     #derives
@@ -151,7 +165,11 @@ pub enum CompositeDefFields {
 }
 
 impl CompositeDefFields {
-    fn new(name: &str, type_gen: &TypeGenerator, fields: &[scale_info::Field<PortableForm>]) -> Self {
+    fn new(
+        name: &str,
+        type_gen: &TypeGenerator,
+        fields: &[scale_info::Field<PortableForm>],
+    ) -> Self {
         let fields = fields
             .iter()
             .map(|field| {
@@ -178,7 +196,10 @@ impl CompositeDefFields {
             )
         } else if unnamed {
             Self::Unnamed(
-                fields.iter().map(|(_, field, type_name)| (field.clone(), type_name.cloned())).collect(),
+                fields
+                    .iter()
+                    .map(|(_, field, type_name)| (field.clone(), type_name.cloned()))
+                    .collect(),
             )
         } else {
             abort_call_site!(
@@ -195,7 +216,11 @@ impl CompositeDefFields {
         }
     }
 
-    fn field_tokens(&self, visibility: Option<&syn::Visibility>, phantom_data: Option<syn::TypePath>) -> TokenStream {
+    fn field_tokens(
+        &self,
+        visibility: Option<&syn::Visibility>,
+        phantom_data: Option<syn::TypePath>,
+    ) -> TokenStream {
         fn ty_path(ty_name: &Option<String>, ty_path: &TypePath) -> syn::TypePath {
             if let Some(ty_name) = ty_name {
                 if ty_name.contains("Box<") {
@@ -229,8 +254,9 @@ impl CompositeDefFields {
                     let ty = ty_path(ty_name, ty);
                     quote! { #compact_attr #visibility #ty }
                 });
-                let marker = phantom_data
-                    .map(|phantom_data| quote! ( #[codec(skip)] #visibility #phantom_data ));
+                let marker = phantom_data.map(
+                    |phantom_data| quote! ( #[codec(skip)] #visibility #phantom_data ),
+                );
                 quote! (
                     (
                         #( #fields ),*
