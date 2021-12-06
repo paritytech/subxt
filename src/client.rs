@@ -411,6 +411,20 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         }
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
+
+    /// Wait for the transaction to be finalized, and then return the event provided
+    /// as a generic parameter to this call, or [`None`] if it was not found.
+    pub async fn find_finalized_event<E: crate::Event>(self) -> Result<Option<E>, Error> {
+        let e = self.wait_for_finalized().await?.find_event::<E>().await?;
+        Ok(e)
+    }
+
+    /// Wait for the transaction to be finalized, and then return `true` if the event
+    /// provided as a generic parameter to this call was found, or `false` otherwise.
+    pub async fn has_finalized_event<E: crate::Event>(self) -> Result<bool, Error> {
+        let is_found = self.find_finalized_event::<E>().await?.is_some();
+        Ok(is_found)
+    }
 }
 
 /// Possible transaction status events returned from our [`crate::Client`].

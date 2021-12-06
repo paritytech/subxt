@@ -120,7 +120,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
-    let result = cxt
+    let success = cxt
         .api
         .tx()
         .staking()
@@ -130,12 +130,8 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
             runtime_types::pallet_staking::RewardDestination::Stash,
         )
         .sign_and_submit_then_watch(&bob)
-        .await?;
-
-    let success = result
-        .wait_for_finalized()
         .await?
-        .has_event::<system::events::ExtrinsicSuccess>()
+        .has_finalized_event::<system::events::ExtrinsicSuccess>()
         .await?;
     assert!(success, "No ExtrinsicSuccess Event found");
 
@@ -174,8 +170,9 @@ async fn transfer_error() {
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap()
-        .wait_for_finalized()
+        .find_finalized_event::<system::events::ExtrinsicSuccess>()
         .await
+        .unwrap()
         .unwrap();
 
     let res = cxt
@@ -220,6 +217,37 @@ async fn transfer_subscription() {
 
     let raw = sub.next().await.unwrap().unwrap();
     let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
+    assert_eq!(
+        event,
+        balances::events::Transfer {
+            from: alice.account_id().clone(),
+            to: bob.clone(),
+            amount: 10_000
+        }
+    );
+}
+
+#[async_std::test]
+async fn transfer_implicit_subscription() {
+    env_logger::try_init().ok();
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id();
+    let bob_addr = bob.clone().into();
+    let cxt = test_context().await;
+
+    let event = cxt
+        .api
+        .tx()
+        .balances()
+        .transfer(bob_addr, 10_000)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap()
+        .find_finalized_event::<balances::events::Transfer>()
+        .await
+        .expect("Can decode events")
+        .expect("Can find balance transfer event");
+
     assert_eq!(
         event,
         balances::events::Transfer {
