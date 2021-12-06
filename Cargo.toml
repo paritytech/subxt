@@ -35,7 +35,7 @@ url = "2.2.1"
 subxt-macro = { version = "0.1.0", path = "macro" }
 
 sp-core = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false  }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
+sp-runtime = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
 sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "master" }
 
 frame-metadata = "14.0.0"
