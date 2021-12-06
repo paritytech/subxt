@@ -45,14 +45,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let balance_transfer = api
         .tx()
-        .balances();
-
-    let transaction_progress = balance_transfer
+        .balances()
         .transfer(dest, 10_000)
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    let transaction_events = transaction_progress
+    let transaction_events = balance_transfer
         .wait_for_finalized()
         .await?
         .events()
