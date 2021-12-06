@@ -57,8 +57,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let transfer_event = transaction_events
-        .filter_map(|e| e.as_event::<polkadot::balances::events::Transfer>())
-        .next();
+        .find_event::<polkadot::balances::events::Transfer>();
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);

@@ -420,7 +420,7 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
     }
 
     /// Fetch the events associated with this transaction.
-    pub async fn events(&self) -> Result<impl Iterator<Item=crate::RawEvent>, Error> {
+    pub async fn events(&self) -> Result<TransactionEvents, Error> {
         let block = self.client
             .rpc()
             .block(Some(self.block_hash))
@@ -458,6 +458,55 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
                 }
             });
 
-        Ok(event_iter)
+        Ok(TransactionEvents { events: event_iter.collect() })
+    }
+}
+
+/// This represents the events related to our transaction.
+/// We can iterate over the events, or look for a specific one.
+pub struct TransactionEvents {
+    events: Vec<crate::RawEvent>
+}
+
+impl TransactionEvents {
+    /// Iterate over the events.
+    pub fn iter(&self) -> impl Iterator<Item=&crate::RawEvent> {
+        self.events.iter()
+    }
+
+    /// Iterate over the events, taking ownership of them.
+    pub fn into_iter(self) -> impl Iterator<Item=crate::RawEvent> {
+        self.events.into_iter()
+    }
+
+    /// Find an event.
+    pub fn find_event<E: crate::Event>(&self) -> Option<E> {
+        self.events
+            .iter()
+            .filter_map(|e| e.as_event::<E>())
+            .next()
+    }
+
+    /// Does a specific event exist in the events?
+    pub fn has_event<E: crate::Event>(&self) -> bool{
+        self.find_event::<E>().is_some()
+    }
+}
+
+impl std::iter::IntoIterator for TransactionEvents {
+    type Item = crate::RawEvent;
+    type IntoIter = std::vec::IntoIter<crate::RawEvent>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.events.into_iter()
+    }
+}
+
+impl <'a> std::iter::IntoIterator for &'a TransactionEvents {
+    type Item = &'a crate::RawEvent;
+    type IntoIter = std::slice::Iter<'a, crate::RawEvent>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.events.iter()
     }
 }
