@@ -35,7 +35,7 @@ use subxt::{
     Client,
     Config,
     Error,
-    ExtrinsicSuccess,
+    TransactionProgress,
     PairSigner,
 };
 
@@ -86,21 +86,27 @@ impl ContractsTestContext {
                 vec![], // salt
             )
             .sign_and_submit_then_watch(&self.signer)
+            .await?
+            .wait_for_finalized()
             .await?;
 
-        let code_stored = result
+        let events = result
+            .events()
+            .await?;
+
+        let code_stored = events
             .find_event::<events::CodeStored>()?
             .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
-        let instantiated = result
+        let instantiated = events
             .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
-        let _extrinsic_success = result
+        let _extrinsic_success = events
             .find_event::<system::events::ExtrinsicSuccess>()?
             .ok_or_else(|| {
                 Error::Other("Failed to find a ExtrinsicSuccess event".into())
             })?;
 
-        log::info!("  Block hash: {:?}", result.block);
+        log::info!("  Block hash: {:?}", result.block_hash());
         log::info!("  Code hash: {:?}", code_stored.code_hash);
         log::info!("  Contract address: {:?}", instantiated.contract);
         Ok((code_stored.code_hash, instantiated.contract))
@@ -123,11 +129,14 @@ impl ContractsTestContext {
                 salt,
             )
             .sign_and_submit_then_watch(&self.signer)
+            .await?
+            .wait_for_finalized()
             .await?;
 
         log::info!("Instantiate result: {:?}", result);
         let instantiated = result
-            .find_event::<events::Instantiated>()?
+            .find_event::<events::Instantiated>()
+            .await?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
         Ok(instantiated.contract)
@@ -137,7 +146,7 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<ExtrinsicSuccess<DefaultConfig>, Error> {
+    ) -> Result<TransactionProgress<'_, DefaultConfig>, Error> {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()

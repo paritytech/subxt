@@ -58,16 +58,19 @@ fn default_validator_prefs() -> ValidatorPrefs {
 async fn validate_with_controller_account() -> Result<(), Error> {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
-    let result = cxt
+    let is_success = cxt
         .api
         .tx()
         .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized()
+        .await?
+        .has_event::<system::events::ExtrinsicSuccess>()
         .await?;
 
-    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
-    assert!(success.is_some());
+    assert!(is_success);
 
     Ok(())
 }
@@ -96,16 +99,19 @@ async fn nominate_with_controller_account() -> Result<(), Error> {
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    let result = cxt
+    let is_success = cxt
         .api
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized()
+        .await?
+        .has_event::<system::events::ExtrinsicSuccess>()
         .await?;
 
-    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
-    assert!(success.is_some());
+    assert!(is_success);
 
     Ok(())
 }
@@ -171,15 +177,19 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         assert_eq!(module_err.error, "NotController");
     });
 
-    let result = cxt
+    let is_chilled = cxt
         .api
         .tx()
         .staking()
         .chill()
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized()
+        .await?
+        .has_event::<staking::events::Chilled>()
         .await?;
-    let chill = result.find_event::<staking::events::Chilled>()?;
-    assert!(chill.is_some());
+    assert!(is_chilled);
+
     Ok(())
 }
 

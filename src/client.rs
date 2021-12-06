@@ -280,6 +280,16 @@ pub struct TransactionProgress<'client, T: Config> {
     client: &'client Client<T>,
 }
 
+impl <'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TransactionProgress")
+            .field("sub", &self.sub)
+            .field("ext_hash", &self.ext_hash)
+            .field("client", &"<client>")
+            .finish()
+    }
+}
+
 impl <'client, T: Config> TransactionProgress<'client, T> {
     pub (crate) fn new(sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>, client: &'client Client<T>, ext_hash: T::Hash) -> Self {
         Self { sub, client, ext_hash }
@@ -315,6 +325,9 @@ impl <'client, T: Config> TransactionProgress<'client, T> {
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
     /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
     /// waiting for finalization.
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
+    /// use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_in_block(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
@@ -335,6 +348,9 @@ impl <'client, T: Config> TransactionProgress<'client, T> {
 
     /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
+    /// use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_finalized(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
@@ -354,7 +370,7 @@ impl <'client, T: Config> TransactionProgress<'client, T> {
 }
 
 /// Possible transaction status events returned from our [`crate::Client`].
-#[derive(Clone)]
+#[derive(Debug)]
 pub enum TransactionProgressStatus<'client, T: Config> {
     /// Transaction is part of the future queue.
     Future,
@@ -401,11 +417,20 @@ impl <'client, T: Config> TransactionProgressStatus<'client, T> {
 }
 
 /// This struct represents a transaction that has made it into a block.
-#[derive(Clone)]
 pub struct TransactionInBlock<'client, T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: &'client Client<T>
+}
+
+impl <'client, T: Config> std::fmt::Debug for TransactionInBlock<'client, T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("TransactionInBlock")
+            .field("block_hash", &self.block_hash)
+            .field("ext_hash", &self.ext_hash)
+            .field("client", &"<client>")
+            .finish()
+    }
 }
 
 impl <'client, T: Config> TransactionInBlock<'client, T> {
@@ -460,10 +485,29 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
 
         Ok(TransactionEvents { events: event_iter.collect() })
     }
+
+    /// Find an event associated with this transaction. This is a shorthand
+    /// for `this.events().await?.find_event::<some::Event>()`.
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions on
+    /// the transaction events, use [`TransactionInBlock::events()`] instead.
+    pub async fn find_event<E: crate::Event>(self) -> Result<Option<E>, Error> {
+        let ev = self.events().await?.find_event::<E>()?;
+        Ok(ev)
+    }
+
+    /// Find an event associated with this transaction. Return `true` if it was found.
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions on
+    /// the transaction events, use [`TransactionInBlock::events()`] instead.
+    pub async fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
+        Ok(self.find_event::<E>().await?.is_some())
+    }
 }
 
 /// This represents the events related to our transaction.
 /// We can iterate over the events, or look for a specific one.
+#[derive(Debug)]
 pub struct TransactionEvents {
     events: Vec<crate::RawEvent>
 }
@@ -480,16 +524,17 @@ impl TransactionEvents {
     }
 
     /// Find an event.
-    pub fn find_event<E: crate::Event>(&self) -> Option<E> {
+    pub fn find_event<E: crate::Event>(&self) -> Result<Option<E>, codec::Error> {
         self.events
             .iter()
-            .filter_map(|e| e.as_event::<E>())
+            .filter_map(|e| e.as_event::<E>().transpose())
             .next()
+            .transpose()
     }
 
-    /// Does a specific event exist in the events?
-    pub fn has_event<E: crate::Event>(&self) -> bool{
-        self.find_event::<E>().is_some()
+    /// Find an event. Returns true if it was found.
+    pub fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
+        Ok(self.find_event::<E>()?.is_some())
     }
 }
 

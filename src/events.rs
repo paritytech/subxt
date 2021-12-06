@@ -59,25 +59,14 @@ pub struct RawEvent {
 }
 
 impl RawEvent {
-
     /// Attempt to decode this [`RawEvent`] into a specific event.
-    pub fn try_as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+    pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
             Ok(Some(E::decode(&mut &self.data[..])?))
         } else {
             Ok(None)
         }
     }
-
-    /// Attempt to decode this [`RawEvent`] into a specific event.
-    /// Returns [`None`] is the event of a decoding error. Use
-    /// [`RawEvent::try_as_event`] if you'd like to handle this error.
-    pub fn as_event<E: Event>(&self) -> Option<E> {
-        self.try_as_event::<E>()
-            .ok()
-            .flatten()
-    }
-
 }
 
 /// Events decoder.

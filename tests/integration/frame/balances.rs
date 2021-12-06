@@ -41,7 +41,7 @@ use subxt::{
 };
 
 #[async_std::test]
-async fn tx_basic_transfer() {
+async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
@@ -52,27 +52,28 @@ async fn tx_basic_transfer() {
         .storage()
         .system()
         .account(alice.account_id().clone(), None)
-        .await
-        .unwrap();
+        .await?;
     let bob_pre = api
         .storage()
         .system()
         .account(bob.account_id().clone(), None)
-        .await
-        .unwrap();
+        .await?;
 
-    let result = api
+    let events = api
         .tx()
         .balances()
         .transfer(bob_address, 10_000)
         .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-    let event = result
+        .await?
+        .wait_for_finalized()
+        .await?
+        .events()
+        .await?;
+    let event = events
         .find_event::<balances::events::Transfer>()
-        .unwrap()
-        .unwrap();
-    let _extrinsic_success = result
+        .expect("Failed to decode balances::events::Transfer")
+        .expect("Failed to find balances::events::Transfer");
+    let _extrinsic_success = events
         .find_event::<system::events::ExtrinsicSuccess>()
         .expect("Failed to decode ExtrinisicSuccess")
         .expect("Failed to find ExtrinisicSuccess");
@@ -88,17 +89,16 @@ async fn tx_basic_transfer() {
         .storage()
         .system()
         .account(alice.account_id().clone(), None)
-        .await
-        .unwrap();
+        .await?;
     let bob_post = api
         .storage()
         .system()
         .account(bob.account_id().clone(), None)
-        .await
-        .unwrap();
+        .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
+    Ok(())
 }
 
 #[async_std::test]
@@ -132,8 +132,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         .sign_and_submit_then_watch(&bob)
         .await?;
 
-    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
-    assert!(success.is_some(), "No ExtrinsicSuccess Event found");
+    let success = result
+        .wait_for_finalized()
+        .await?
+        .has_event::<system::events::ExtrinsicSuccess>()
+        .await?;
+    assert!(success, "No ExtrinsicSuccess Event found");
 
     let locks = cxt
         .api
