@@ -542,18 +542,20 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// Find an event associated with this transaction. This is a shorthand
     /// for `this.events().await?.find_event::<some::Event>()`.
     ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions on
-    /// the transaction events, use [`TransactionInBlock::events()`] instead.
-    pub async fn find_event<E: crate::Event>(self) -> Result<Option<E>, Error> {
+    /// **Note:** This call needs to obtain events, which is expensive. If you'd
+    /// like to perform multiple actions on the transaction events, use
+    /// [`TransactionInBlock::events()`] instead so that they are only obtained once.
+    pub async fn find_event<E: crate::Event>(&self) -> Result<Option<E>, Error> {
         let ev = self.events().await?.find_event::<E>()?;
         Ok(ev)
     }
 
     /// Find an event associated with this transaction. Return `true` if it was found.
     ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions on
-    /// the transaction events, use [`TransactionInBlock::events()`] instead.
-    pub async fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
+    /// **Note:** This call needs to obtain events, which is expensive. If you'd
+    /// like to perform multiple actions on the transaction events, use
+    /// [`TransactionInBlock::events()`] instead so that they are only obtained once.
+    pub async fn has_event<E: crate::Event>(&self) -> Result<bool, Error> {
         Ok(self.find_event::<E>().await?.is_some())
     }
 }
