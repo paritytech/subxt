@@ -173,6 +173,9 @@ async fn transfer_error() {
         .transfer(hans_address, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
+        .unwrap()
+        .wait_for_finalized()
+        .await
         .unwrap();
 
     let res = cxt
