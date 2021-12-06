@@ -14,13 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
+use futures::future;
 use sp_core::storage::StorageKey;
 use sp_runtime::traits::Hash;
-use futures::future;
+pub use sp_runtime::traits::SignedExtension;
+pub use sp_version::RuntimeVersion;
 
 use crate::{
+    error::{
+        Error,
+        TransactionError,
+    },
     events::{
         EventsDecoder,
         Raw,
@@ -34,19 +38,17 @@ use crate::{
     rpc::{
         Rpc,
         RpcClient,
-        SystemProperties, TransactionStatus
+        SystemProperties,
+        TransactionStatus,
     },
-    error::{
-        Error,
-        TransactionError
-    },
-    subscription::SystemEvents,
     storage::StorageClient,
+    subscription::SystemEvents,
     AccountData,
     Call,
     Config,
     ExtrinsicExtraData,
-    Metadata, Phase,
+    Metadata,
+    Phase,
 };
 use jsonrpsee::types::{
     Error as RpcError,
@@ -110,7 +112,7 @@ impl ClientBuilder {
 
         let events_decoder = EventsDecoder::new(metadata.clone());
 
-        Ok(Client{
+        Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
             metadata: Arc::new(metadata),
@@ -280,7 +282,7 @@ pub struct TransactionProgress<'client, T: Config> {
     client: &'client Client<T>,
 }
 
-impl <'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
+impl<'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TransactionProgress")
             .field("sub", &self.sub)
@@ -290,32 +292,54 @@ impl <'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
     }
 }
 
-impl <'client, T: Config> TransactionProgress<'client, T> {
-    pub (crate) fn new(sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>, client: &'client Client<T>, ext_hash: T::Hash) -> Self {
-        Self { sub, client, ext_hash }
+impl<'client, T: Config> TransactionProgress<'client, T> {
+    pub(crate) fn new(
+        sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>,
+        client: &'client Client<T>,
+        ext_hash: T::Hash,
+    ) -> Self {
+        Self {
+            sub,
+            client,
+            ext_hash,
+        }
     }
 
     /// Return the next transaction status when it's emitted.
-    pub async fn next(&mut self) -> Result<Option<TransactionProgressStatus<'client, T>>, Error> {
+    pub async fn next(
+        &mut self,
+    ) -> Result<Option<TransactionProgressStatus<'client, T>>, Error> {
         let res = self.sub.next().await?;
         Ok(res.map(|status| {
             match status {
                 TransactionStatus::Future => TransactionProgressStatus::Future,
                 TransactionStatus::Ready => TransactionProgressStatus::Ready,
-                TransactionStatus::Broadcast(peers) => TransactionProgressStatus::Broadcast(peers),
-                TransactionStatus::InBlock(hash) => TransactionProgressStatus::InBlock(TransactionInBlock {
-                    block_hash: hash,
-                    ext_hash: self.ext_hash,
-                    client: self.client
-                }),
-                TransactionStatus::Retracted(hash) => TransactionProgressStatus::Retracted(hash),
-                TransactionStatus::FinalityTimeout(hash) => TransactionProgressStatus::FinalityTimeout(hash),
-                TransactionStatus::Finalized(hash) => TransactionProgressStatus::Finalized(TransactionInBlock {
-                    block_hash: hash,
-                    ext_hash: self.ext_hash,
-                    client: self.client
-                }),
-                TransactionStatus::Usurped(hash) => TransactionProgressStatus::Usurped(hash),
+                TransactionStatus::Broadcast(peers) => {
+                    TransactionProgressStatus::Broadcast(peers)
+                }
+                TransactionStatus::InBlock(hash) => {
+                    TransactionProgressStatus::InBlock(TransactionInBlock {
+                        block_hash: hash,
+                        ext_hash: self.ext_hash,
+                        client: self.client,
+                    })
+                }
+                TransactionStatus::Retracted(hash) => {
+                    TransactionProgressStatus::Retracted(hash)
+                }
+                TransactionStatus::FinalityTimeout(hash) => {
+                    TransactionProgressStatus::FinalityTimeout(hash)
+                }
+                TransactionStatus::Finalized(hash) => {
+                    TransactionProgressStatus::Finalized(TransactionInBlock {
+                        block_hash: hash,
+                        ext_hash: self.ext_hash,
+                        client: self.client,
+                    })
+                }
+                TransactionStatus::Usurped(hash) => {
+                    TransactionProgressStatus::Usurped(hash)
+                }
                 TransactionStatus::Dropped => TransactionProgressStatus::Dropped,
                 TransactionStatus::Invalid => TransactionProgressStatus::Invalid,
             }
@@ -328,19 +352,29 @@ impl <'client, T: Config> TransactionProgress<'client, T> {
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
     /// use [`TransactionProgress::next()`] instead.
-    pub async fn wait_for_in_block(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
+    pub async fn wait_for_in_block(
+        mut self,
+    ) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized or otherwise in a block! Return.
                 TransactionProgressStatus::InBlock(s)
                 | TransactionProgressStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionProgressStatus::FinalityTimeout(_) => return Err(TransactionError::FinalitySubscriptionTimeout.into()),
-                TransactionProgressStatus::Invalid => return Err(TransactionError::Invalid.into()),
-                TransactionProgressStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
-                TransactionProgressStatus::Dropped => return Err(TransactionError::Dropped.into()),
+                TransactionProgressStatus::FinalityTimeout(_) => {
+                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                }
+                TransactionProgressStatus::Invalid => {
+                    return Err(TransactionError::Invalid.into())
+                }
+                TransactionProgressStatus::Usurped(_) => {
+                    return Err(TransactionError::Usurped.into())
+                }
+                TransactionProgressStatus::Dropped => {
+                    return Err(TransactionError::Dropped.into())
+                }
                 // Ignore and wait for next status event:
-                _ => continue
+                _ => continue,
             }
         }
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
@@ -351,18 +385,28 @@ impl <'client, T: Config> TransactionProgress<'client, T> {
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
     /// use [`TransactionProgress::next()`] instead.
-    pub async fn wait_for_finalized(mut self) -> Result<TransactionInBlock<'client, T>, Error> {
+    pub async fn wait_for_finalized(
+        mut self,
+    ) -> Result<TransactionInBlock<'client, T>, Error> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized! Return.
                 TransactionProgressStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionProgressStatus::FinalityTimeout(_) => return Err(TransactionError::FinalitySubscriptionTimeout.into()),
-                TransactionProgressStatus::Invalid => return Err(TransactionError::Invalid.into()),
-                TransactionProgressStatus::Usurped(_) => return Err(TransactionError::Usurped.into()),
-                TransactionProgressStatus::Dropped => return Err(TransactionError::Dropped.into()),
+                TransactionProgressStatus::FinalityTimeout(_) => {
+                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                }
+                TransactionProgressStatus::Invalid => {
+                    return Err(TransactionError::Invalid.into())
+                }
+                TransactionProgressStatus::Usurped(_) => {
+                    return Err(TransactionError::Usurped.into())
+                }
+                TransactionProgressStatus::Dropped => {
+                    return Err(TransactionError::Dropped.into())
+                }
                 // Ignore and wait for next status event:
-                _ => continue
+                _ => continue,
             }
         }
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
@@ -393,16 +437,16 @@ pub enum TransactionProgressStatus<'client, T: Config> {
     /// Transaction has been dropped from the pool because of the limit.
     Dropped,
     /// Transaction is no longer valid in the current state.
-    Invalid
+    Invalid,
 }
 
-impl <'client, T: Config> TransactionProgressStatus<'client, T> {
+impl<'client, T: Config> TransactionProgressStatus<'client, T> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
     pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::Finalized(val) => Some(val),
-            _ => None
+            _ => None,
         }
     }
 
@@ -411,7 +455,7 @@ impl <'client, T: Config> TransactionProgressStatus<'client, T> {
     pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::InBlock(val) => Some(val),
-            _ => None
+            _ => None,
         }
     }
 }
@@ -420,10 +464,10 @@ impl <'client, T: Config> TransactionProgressStatus<'client, T> {
 pub struct TransactionInBlock<'client, T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
-    client: &'client Client<T>
+    client: &'client Client<T>,
 }
 
-impl <'client, T: Config> std::fmt::Debug for TransactionInBlock<'client, T> {
+impl<'client, T: Config> std::fmt::Debug for TransactionInBlock<'client, T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("TransactionInBlock")
             .field("block_hash", &self.block_hash)
@@ -433,7 +477,7 @@ impl <'client, T: Config> std::fmt::Debug for TransactionInBlock<'client, T> {
     }
 }
 
-impl <'client, T: Config> TransactionInBlock<'client, T> {
+impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash
@@ -446,7 +490,8 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
 
     /// Fetch the events associated with this transaction.
     pub async fn events(&self) -> Result<TransactionEvents, Error> {
-        let block = self.client
+        let block = self
+            .client
             .rpc()
             .block(Some(self.block_hash))
             .await?
@@ -458,17 +503,23 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
                 let hash = T::Hashing::hash_of(ext);
                 hash == self.ext_hash
             })
-            // TODO [jsdw] is it possible to actually hit an error here?
+            // If we successfully obtain the block hash we think contains our
+            // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let raw_events = self.client
+        let raw_events = self
+            .client
             .rpc()
-            .storage(&StorageKey::from(SystemEvents::new()), Some(self.block_hash))
+            .storage(
+                &StorageKey::from(SystemEvents::new()),
+                Some(self.block_hash),
+            )
             .await?
             .map(|s| s.0)
-            .unwrap_or(Vec::new());
+            .unwrap_or_else(Vec::new);
 
-        let event_iter = self.client
+        let event_iter = self
+            .client
             .events_decoder()
             .decode_events(&mut &*raw_events)?
             .into_iter()
@@ -483,7 +534,9 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
                 }
             });
 
-        Ok(TransactionEvents { events: event_iter.collect() })
+        Ok(TransactionEvents {
+            events: event_iter.collect(),
+        })
     }
 
     /// Find an event associated with this transaction. This is a shorthand
@@ -509,17 +562,17 @@ impl <'client, T: Config> TransactionInBlock<'client, T> {
 /// We can iterate over the events, or look for a specific one.
 #[derive(Debug)]
 pub struct TransactionEvents {
-    events: Vec<crate::RawEvent>
+    events: Vec<crate::RawEvent>,
 }
 
 impl TransactionEvents {
     /// Iterate over the events.
-    pub fn iter(&self) -> impl Iterator<Item=&crate::RawEvent> {
+    pub fn iter(&self) -> impl Iterator<Item = &crate::RawEvent> {
         self.events.iter()
     }
 
     /// Iterate over the events, taking ownership of them.
-    pub fn into_iter(self) -> impl Iterator<Item=crate::RawEvent> {
+    pub fn into_iter(self) -> impl Iterator<Item = crate::RawEvent> {
         self.events.into_iter()
     }
 
@@ -547,7 +600,7 @@ impl std::iter::IntoIterator for TransactionEvents {
     }
 }
 
-impl <'a> std::iter::IntoIterator for &'a TransactionEvents {
+impl<'a> std::iter::IntoIterator for &'a TransactionEvents {
     type Item = &'a crate::RawEvent;
     type IntoIter = std::slice::Iter<'a, crate::RawEvent>;
 

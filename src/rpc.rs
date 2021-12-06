@@ -66,11 +66,9 @@ use sp_core::{
     Bytes,
     U256,
 };
-use sp_runtime::{
-    generic::{
-        Block,
-        SignedBlock,
-    },
+use sp_runtime::generic::{
+    Block,
+    SignedBlock,
 };
 use sp_version::RuntimeVersion;
 

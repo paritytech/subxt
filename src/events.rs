@@ -16,10 +16,10 @@
 
 use codec::{
     Codec,
-    Error as CodecError,
     Compact,
     Decode,
     Encode,
+    Error as CodecError,
     Input,
 };
 use std::marker::PhantomData;

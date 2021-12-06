@@ -72,6 +72,7 @@ impl ItemMod {
     }
 }
 
+#[allow(clippy::large_enum_variant)]
 #[derive(Debug, PartialEq, Eq)]
 pub enum Item {
     Rust(syn::Item),

@@ -35,8 +35,8 @@ use subxt::{
     Client,
     Config,
     Error,
-    TransactionProgress,
     PairSigner,
+    TransactionProgress,
 };
 
 struct ContractsTestContext {
@@ -90,9 +90,7 @@ impl ContractsTestContext {
             .wait_for_finalized()
             .await?;
 
-        let events = result
-            .events()
-            .await?;
+        let events = result.events().await?;
 
         let code_stored = events
             .find_event::<events::CodeStored>()?
