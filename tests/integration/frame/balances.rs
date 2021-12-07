@@ -19,7 +19,6 @@ use crate::{
         balances,
         runtime_types,
         system,
-        treasury,
         DefaultConfig,
     },
     test_context,
