@@ -21,7 +21,7 @@ use super::{
     TypePath,
 };
 use heck::CamelCase as _;
-use proc_macro2::TokenStream as TokenStream2;
+use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
@@ -86,7 +86,7 @@ impl CompositeDef {
 }
 
 impl quote::ToTokens for CompositeDef {
-    fn to_tokens(&self, tokens: &mut TokenStream2) {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
         fn unused_type_params_phantom_data<'a>(
             type_params: &'a [TypeParameter],
             types: impl Iterator<Item = &'a TypePath>,
