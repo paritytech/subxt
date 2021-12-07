@@ -79,6 +79,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
         .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice_stash)
+        .await?
+        .wait_for_finalized_success()
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
         assert_eq!(module_err.pallet, "Staking");
@@ -118,6 +120,8 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice_stash)
+        .await?
+        .wait_for_finalized_success()
         .await;
 
     assert_matches!(nomination, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
@@ -161,6 +165,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .staking()
         .chill()
         .sign_and_submit_then_watch(&alice_stash)
+        .await?
+        .wait_for_finalized_success()
         .await;
 
     assert_matches!(chill, Err(Error::Runtime(RuntimeError::Module(module_err))) => {
@@ -198,6 +204,8 @@ async fn tx_bond() -> Result<(), Error> {
             RewardDestination::Stash,
         )
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized_success()
         .await;
 
     assert!(bond.is_ok());
@@ -212,6 +220,8 @@ async fn tx_bond() -> Result<(), Error> {
             RewardDestination::Stash,
         )
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized_success()
         .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(RuntimeError::Module(module_err))) => {

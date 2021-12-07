@@ -184,33 +184,6 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
-    println!("{:#?}", res);
-    println!(
-        "{:?}",
-        res.as_ref()
-            .map(|e| e.find_event::<balances::events::Withdraw>())
-    );
-    println!(
-        "{:?}",
-        res.as_ref()
-            .map(|e| e.find_event::<balances::events::Deposit>())
-    );
-    println!(
-        "{:?}",
-        res.as_ref()
-            .map(|e| e.find_event::<treasury::events::Deposit>())
-    );
-    println!(
-        "{:?}",
-        res.as_ref()
-            .map(|e| e.find_event::<system::events::ExtrinsicSuccess>())
-    );
-    println!(
-        "{:?}",
-        res.as_ref()
-            .map(|e| e.find_event::<system::events::ExtrinsicFailed>())
-    );
-
     if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
         let error2 = PalletError {
             pallet: "Balances".into(),
