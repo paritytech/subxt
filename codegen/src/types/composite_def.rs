@@ -29,6 +29,7 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 use std::collections::HashSet;
+use syn::Visibility::Public;
 
 #[derive(Debug)]
 pub struct CompositeDef {
@@ -222,12 +223,11 @@ impl CompositeDefFields {
         phantom_data: Option<syn::TypePath>,
     ) -> TokenStream {
         fn ty_path(ty_name: &Option<String>, ty_path: &TypePath) -> TokenStream {
-            if let Some(ty_name) = ty_name {
-                if ty_name.contains("Box<") {
-                    return quote! { ::std::boxed::Box<#ty_path> }
-                }
+            if matches!(ty_name, Some(ty_name) if ty_name.contains("Box<")) {
+                quote! { ::std::boxed::Box<#ty_path> }
+            } else {
+                quote! { #ty_path }
             }
-            quote! { #ty_path }
         }
 
         match self {
