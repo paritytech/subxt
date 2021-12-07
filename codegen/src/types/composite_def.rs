@@ -221,13 +221,13 @@ impl CompositeDefFields {
         visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
     ) -> TokenStream {
-        fn ty_path(ty_name: &Option<String>, ty_path: &TypePath) -> syn::TypePath {
+        fn ty_path(ty_name: &Option<String>, ty_path: &TypePath) -> TokenStream {
             if let Some(ty_name) = ty_name {
                 if ty_name.contains("Box<") {
-                    return syn::parse_quote! { ::std::boxed::Box<#ty_path> }
+                    return quote! { ::std::boxed::Box<#ty_path> }
                 }
             }
-            syn::parse_quote! { #ty_path }
+            quote! { #ty_path }
         }
 
         match self {
@@ -260,7 +260,7 @@ impl CompositeDefFields {
                 quote! (
                     (
                         #( #fields ),*
-                    )
+                    );
                 )
             }
         }
