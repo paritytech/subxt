@@ -309,7 +309,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         // Return `None` if the subscription has been dropped:
         let sub = match &mut self.sub {
             Some(sub) => sub,
-            None => return Ok(None)
+            None => return Ok(None),
         };
 
         // Return the next item otherwise:
@@ -353,11 +353,11 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 TransactionStatus::Dropped => {
                     self.sub = None;
                     TransactionProgressStatus::Dropped
-                },
+                }
                 TransactionStatus::Invalid => {
                     self.sub = None;
                     TransactionProgressStatus::Invalid
-                },
+                }
             }
         }))
     }
