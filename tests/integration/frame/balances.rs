@@ -164,7 +164,7 @@ async fn transfer_error() {
     cxt.api
         .tx()
         .balances()
-        .transfer(hans_address, 100_000_000_000_000)
+        .transfer(hans_address, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap()
@@ -176,7 +176,7 @@ async fn transfer_error() {
         .api
         .tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000)
+        .transfer(alice_addr, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&hans)
         .await
         .unwrap()
@@ -191,7 +191,7 @@ async fn transfer_error() {
         };
         assert_eq!(error, error2);
     } else {
-        panic!("expected an error");
+        panic!("expected a runtime module error");
     }
 }
 
