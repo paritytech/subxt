@@ -274,7 +274,7 @@ where
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`SubmittableExtrinsic::sign_and_submit_then_watch()`].
 pub struct TransactionProgress<'client, T: Config> {
-    sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>,
+    sub: Option<RpcSubscription<TransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
@@ -296,7 +296,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         ext_hash: T::Hash,
     ) -> Self {
         Self {
-            sub,
+            sub: Some(sub),
             client,
             ext_hash,
         }
@@ -306,7 +306,14 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     pub async fn next(
         &mut self,
     ) -> Result<Option<TransactionProgressStatus<'client, T>>, Error> {
-        let res = self.sub.next().await?;
+        // Return `None` if the subscription has been dropped:
+        let sub = match &mut self.sub {
+            Some(sub) => sub,
+            None => return Ok(None)
+        };
+
+        // Return the next item otherwise:
+        let res = sub.next().await?;
         Ok(res.map(|status| {
             match status {
                 TransactionStatus::Future => TransactionProgressStatus::Future,
@@ -324,10 +331,15 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 TransactionStatus::Retracted(hash) => {
                     TransactionProgressStatus::Retracted(hash)
                 }
+                // All of the following statuses are "final"; we don't expect any
+                // further statuses after them. So, we drop the subscription when
+                // we hit them:
                 TransactionStatus::FinalityTimeout(hash) => {
+                    self.sub = None;
                     TransactionProgressStatus::FinalityTimeout(hash)
                 }
                 TransactionStatus::Finalized(hash) => {
+                    self.sub = None;
                     TransactionProgressStatus::Finalized(TransactionInBlock {
                         block_hash: hash,
                         ext_hash: self.ext_hash,
@@ -335,10 +347,17 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                     })
                 }
                 TransactionStatus::Usurped(hash) => {
+                    self.sub = None;
                     TransactionProgressStatus::Usurped(hash)
                 }
-                TransactionStatus::Dropped => TransactionProgressStatus::Dropped,
-                TransactionStatus::Invalid => TransactionProgressStatus::Invalid,
+                TransactionStatus::Dropped => {
+                    self.sub = None;
+                    TransactionProgressStatus::Dropped
+                },
+                TransactionStatus::Invalid => {
+                    self.sub = None;
+                    TransactionProgressStatus::Invalid
+                },
             }
         }))
     }
