@@ -81,6 +81,7 @@ impl ContractsTestContext {
             .instantiate_with_code(
                 100_000_000_000_000_000, // endowment
                 500_000_000_000,         // gas_limit
+                None,                    // storage_deposit_limit
                 code,
                 vec![], // data
                 vec![], // salt
@@ -120,6 +121,7 @@ impl ContractsTestContext {
             .instantiate(
                 100_000_000_000_000_000, // endowment
                 500_000_000_000,         // gas_limit
+                None,                    // storage_deposit_limit
                 code_hash,
                 data,
                 salt,
@@ -149,6 +151,7 @@ impl ContractsTestContext {
                 MultiAddress::Id(contract),
                 0,           // value
                 500_000_000, // gas_limit
+                None,        // storage_deposit_limit
                 input_data,
             )
             .sign_and_submit_then_watch(&self.signer)
