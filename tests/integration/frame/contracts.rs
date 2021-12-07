@@ -73,7 +73,7 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let result = self
+        let events = self
             .cxt
             .api
             .tx()
@@ -87,10 +87,8 @@ impl ContractsTestContext {
             )
             .sign_and_submit_then_watch(&self.signer)
             .await?
-            .wait_for_finalized()
+            .wait_for_finalized_success()
             .await?;
-
-        let events = result.events().await?;
 
         let code_stored = events
             .find_event::<events::CodeStored>()?
@@ -104,7 +102,7 @@ impl ContractsTestContext {
                 Error::Other("Failed to find a ExtrinsicSuccess event".into())
             })?;
 
-        log::info!("  Block hash: {:?}", result.block_hash());
+        log::info!("  Block hash: {:?}", events.block_hash());
         log::info!("  Code hash: {:?}", code_stored.code_hash);
         log::info!("  Contract address: {:?}", instantiated.contract);
         Ok((code_stored.code_hash, instantiated.contract))
@@ -128,13 +126,12 @@ impl ContractsTestContext {
             )
             .sign_and_submit_then_watch(&self.signer)
             .await?
-            .wait_for_finalized()
+            .wait_for_finalized_success()
             .await?;
 
         log::info!("Instantiate result: {:?}", result);
         let instantiated = result
-            .find_event::<events::Instantiated>()
-            .await?
+            .find_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
         Ok(instantiated.contract)

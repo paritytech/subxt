@@ -21,7 +21,6 @@ use crate::{
             ValidatorPrefs,
         },
         staking,
-        system,
         DefaultConfig,
     },
     test_context,
@@ -55,24 +54,20 @@ fn default_validator_prefs() -> ValidatorPrefs {
 }
 
 #[async_std::test]
-async fn validate_with_controller_account() -> Result<(), Error> {
+async fn validate_with_controller_account() {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
-    let is_success = cxt
+    cxt
         .api
         .tx()
         .staking()
         .validate(default_validator_prefs())
         .sign_and_submit_then_watch(&alice)
-        .await?
-        .wait_for_finalized()
-        .await?
-        .has_event::<system::events::ExtrinsicSuccess>()
-        .await?;
-
-    assert!(is_success);
-
-    Ok(())
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .expect("should be successful");
 }
 
 #[async_std::test]
@@ -94,26 +89,22 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
 }
 
 #[async_std::test]
-async fn nominate_with_controller_account() -> Result<(), Error> {
+async fn nominate_with_controller_account() {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    let is_success = cxt
+    cxt
         .api
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
-        .await?
-        .wait_for_finalized()
-        .await?
-        .has_event::<system::events::ExtrinsicSuccess>()
-        .await?;
-
-    assert!(is_success);
-
-    Ok(())
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .expect("should be successful");
 }
 
 #[async_std::test]
@@ -153,6 +144,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .staking()
         .nominate(vec![bob_stash.account_id().clone().into()])
         .sign_and_submit_then_watch(&alice)
+        .await?
+        .wait_for_finalized_success()
         .await?;
 
     let ledger = cxt
@@ -184,10 +177,9 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
         .chill()
         .sign_and_submit_then_watch(&alice)
         .await?
-        .wait_for_finalized()
+        .wait_for_finalized_success()
         .await?
-        .has_event::<staking::events::Chilled>()
-        .await?;
+        .has_event::<staking::events::Chilled>()?;
     assert!(is_chilled);
 
     Ok(())

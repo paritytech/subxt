@@ -382,7 +382,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
+    /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
     /// use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_finalized(
         mut self,
@@ -411,18 +411,19 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         Err(RpcError::Custom("RPC subscription dropped".into()).into())
     }
 
-    /// Wait for the transaction to be finalized, and then return the event provided
-    /// as a generic parameter to this call, or [`None`] if it was not found.
-    pub async fn find_finalized_event<E: crate::Event>(self) -> Result<Option<E>, Error> {
-        let e = self.wait_for_finalized().await?.find_event::<E>().await?;
-        Ok(e)
-    }
-
-    /// Wait for the transaction to be finalized, and then return `true` if the event
-    /// provided as a generic parameter to this call was found, or `false` otherwise.
-    pub async fn has_finalized_event<E: crate::Event>(self) -> Result<bool, Error> {
-        let is_found = self.find_finalized_event::<E>().await?.is_some();
-        Ok(is_found)
+    /// Wait for the transaction to be finalized, and for the transaction events to indicate
+    /// that the transaction was successful. Returns the events associated with the transaction,
+    /// as well as a couple of other details (block hash and extrinsic hash).
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
+    /// use [`TransactionProgress::next()`] instead.
+    pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
+        let evs = self
+            .wait_for_finalized()
+            .await?
+            .wait_for_success()
+            .await?;
+        Ok(evs)
     }
 }
 
@@ -501,8 +502,36 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
         self.ext_hash
     }
 
-    /// Fetch the events and errors associated with this transaction.
-    pub async fn events(&self) -> Result<TransactionEvents, Error> {
+    /// Fetch the events associated with this transaction. If the transaction
+    /// was successful (ie no `ExtrinsicFailed`) events were found, then we return
+    /// the events associated with it. If the transaction was not successful, or
+    /// something else went wrong, we return an error.
+    ///
+    /// **Note:** If multiple `ExtrinsicFailed` errors are returned (for instance
+    /// because a pallet chooses to emit one as an event, which is considered
+    /// abnormal behaviour), it is not specified which of the errors is returned here.
+    /// You can use [`TransactionInBlock::find_all_events`] if you'd like to handle
+    /// scenarios like this.
+    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error> {
+        let events = self.find_all_events().await?;
+
+        // Try to find any errors; return the first one we encounter.
+        for ev in events.as_slice() {
+            if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
+                use codec::Decode;
+                let dispatch_error = sp_runtime::DispatchError::decode(&mut &*ev.data)?;
+                let runtime_error = crate::RuntimeError::from_dispatch(&self.client.metadata, dispatch_error)?;
+                return Err(runtime_error.into())
+            }
+        }
+
+        Ok(events)
+    }
+
+    /// Fetch all of the events associated with this transaction. This succeeds whether
+    /// the transaction was a success or not; it's up to you to handle the error and
+    /// success events however you prefer.
+    pub async fn find_all_events(&self) -> Result<TransactionEvents<T>, Error> {
         let block = self
             .client
             .rpc()
@@ -542,45 +571,47 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
             .map(|(_phase, event)| event)
             .collect();
 
-        Ok(TransactionEvents { events })
-    }
-
-    /// Find an event associated with this transaction. This is a shorthand
-    /// for `this.events().await?.find_event::<some::Event>()`.
-    ///
-    /// **Note:** This call needs to obtain events, which is expensive. If you'd
-    /// like to perform multiple actions on the transaction events, use
-    /// [`TransactionInBlock::events()`] instead so that they are only obtained once.
-    pub async fn find_event<E: crate::Event>(&self) -> Result<Option<E>, Error> {
-        let ev = self.events().await?.find_event::<E>()?;
-        Ok(ev)
-    }
-
-    /// Find an event associated with this transaction. Return `true` if it was found.
-    ///
-    /// **Note:** This call needs to obtain events, which is expensive. If you'd
-    /// like to perform multiple actions on the transaction events, use
-    /// [`TransactionInBlock::events()`] instead so that they are only obtained once.
-    pub async fn has_event<E: crate::Event>(&self) -> Result<bool, Error> {
-        Ok(self.find_event::<E>().await?.is_some())
+        Ok(TransactionEvents {
+            block_hash: self.block_hash,
+            ext_hash: self.ext_hash,
+            events,
+        })
     }
 }
 
 /// This represents the events related to our transaction.
 /// We can iterate over the events, or look for a specific one.
 #[derive(Debug)]
-pub struct TransactionEvents {
-    pub events: Vec<crate::RawEvent>,
+pub struct TransactionEvents<T: Config> {
+    block_hash: T::Hash,
+    ext_hash: T::Hash,
+    events: Vec<crate::RawEvent>,
 }
 
-impl TransactionEvents {
+impl <T: Config> TransactionEvents<T> {
+    /// Return the hash of the block that the transaction has made it into.
+    pub fn block_hash(&self) -> T::Hash {
+        self.block_hash
+    }
+
+    /// Return the hash of the extrinsic.
+    pub fn extrinsic_hash(&self) -> T::Hash {
+        self.ext_hash
+    }
+
+    /// Return a slice of the returned events.
+    pub fn as_slice(&self) -> &[crate::RawEvent] {
+        &self.events
+    }
+
     /// Find an event.
-    pub fn find_event<E: crate::Event>(&self) -> Result<Option<E>, codec::Error> {
+    pub fn find_event<E: crate::Event>(&self) -> Result<Option<E>, Error> {
         self.events
             .iter()
             .filter_map(|e| e.as_event::<E>().transpose())
             .next()
             .transpose()
+            .map_err(Into::into)
     }
 
     /// Find an event. Returns true if it was found.

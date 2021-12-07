@@ -66,9 +66,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error> {
         .transfer(bob_address, 10_000)
         .sign_and_submit_then_watch(&alice)
         .await?
-        .wait_for_finalized()
-        .await?
-        .events()
+        .wait_for_finalized_success()
         .await?;
     let event = events
         .find_event::<balances::events::Transfer>()
@@ -121,7 +119,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
-    let success = cxt
+    cxt
         .api
         .tx()
         .staking()
@@ -132,9 +130,10 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
         )
         .sign_and_submit_then_watch(&bob)
         .await?
-        .has_finalized_event::<system::events::ExtrinsicSuccess>()
-        .await?;
-    assert!(success, "No ExtrinsicSuccess Event found");
+        .wait_for_finalized_success()
+        .await?
+        .find_event::<system::events::ExtrinsicSuccess>()?
+        .expect("No ExtrinsicSuccess Event found");
 
     let locks = cxt
         .api
@@ -171,10 +170,9 @@ async fn transfer_error() {
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap()
-        .find_finalized_event::<system::events::ExtrinsicSuccess>()
+        .wait_for_finalized_success()
         .await
-        .unwrap()
-        .expect("ExtrinsicSuccess event expected");
+        .unwrap();
 
     let res = cxt
         .api
@@ -182,33 +180,28 @@ async fn transfer_error() {
         .balances()
         .transfer(alice_addr, 100_000_000_000_000)
         .sign_and_submit_then_watch(&hans)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await;
 
-    let events = res
-        .unwrap()
-        .wait_for_finalized()
-        .await
-        .unwrap()
-        .events()
-        .await
-        .unwrap();
-    println!("{:#?}", events);
-    println!("{:?}", events.find_event::<balances::events::Withdraw>());
-    println!("{:?}", events.find_event::<balances::events::Deposit>());
-    println!("{:?}", events.find_event::<treasury::events::Deposit>());
-    println!("{:?}", events.find_event::<system::events::ExtrinsicSuccess>());
-    println!("{:?}", events.find_event::<system::events::ExtrinsicFailed>());
+    println!("{:#?}", res.as_ref().map(|e| e));
+    println!("{:?}", res.as_ref().map(|e| e.find_event::<balances::events::Withdraw>()));
+    println!("{:?}", res.as_ref().map(|e| e.find_event::<balances::events::Deposit>()));
+    println!("{:?}", res.as_ref().map(|e| e.find_event::<treasury::events::Deposit>()));
+    println!("{:?}", res.as_ref().map(|e| e.find_event::<system::events::ExtrinsicSuccess>()));
+    println!("{:?}", res.as_ref().map(|e| e.find_event::<system::events::ExtrinsicFailed>()));
 
-    // if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
-    //     let error2 = PalletError {
-    //         pallet: "Balances".into(),
-    //         error: "InsufficientBalance".into(),
-    //         description: vec!["Balance too low to send value".to_string()],
-    //     };
-    //     assert_eq!(error, error2);
-    // } else {
-    //     panic!("expected an error");
-    // }
+    if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
+        let error2 = PalletError {
+            pallet: "Balances".into(),
+            error: "InsufficientBalance".into(),
+            description: vec!["Balance too low to send value".to_string()],
+        };
+        assert_eq!(error, error2);
+    } else {
+        panic!("expected an error");
+    }
 }
 
 #[async_std::test]
@@ -259,8 +252,10 @@ async fn transfer_implicit_subscription() {
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap()
-        .find_finalized_event::<balances::events::Transfer>()
+        .wait_for_finalized_success()
         .await
+        .unwrap()
+        .find_event::<balances::events::Transfer>()
         .expect("Can decode events")
         .expect("Can find balance transfer event");
 

@@ -56,10 +56,9 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error> {
         .remark_with_event(b"remarkable".to_vec())
         .sign_and_submit_then_watch(&alice)
         .await?
-        .wait_for_finalized()
+        .wait_for_finalized_success()
         .await?
-        .has_event::<system::events::Remarked>()
-        .await?;
+        .has_event::<system::events::Remarked>()?;
 
     assert!(found_event);
     Ok(())

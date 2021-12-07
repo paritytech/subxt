@@ -46,10 +46,9 @@ async fn test_sudo() -> Result<(), subxt::Error> {
         .sudo(call)
         .sign_and_submit_then_watch(&alice)
         .await?
-        .wait_for_finalized()
+        .wait_for_finalized_success()
         .await?
-        .has_event::<sudo::events::Sudid>()
-        .await?;
+        .has_event::<sudo::events::Sudid>()?;
 
     assert!(found_event);
     Ok(())
@@ -73,10 +72,9 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
         .sudo_unchecked_weight(call, 0)
         .sign_and_submit_then_watch(&alice)
         .await?
-        .wait_for_finalized()
+        .wait_for_finalized_success()
         .await?
-        .has_event::<sudo::events::Sudid>()
-        .await?;
+        .has_event::<sudo::events::Sudid>()?;
 
     assert!(found_event);
     Ok(())
