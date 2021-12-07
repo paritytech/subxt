@@ -73,6 +73,7 @@ impl ItemMod {
 }
 
 #[derive(Debug, PartialEq, Eq)]
+#[allow(clippy::large_enum_variant)]
 pub enum Item {
     Rust(syn::Item),
     Subxt(SubxtItem),

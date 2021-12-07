@@ -22,7 +22,7 @@ use scale_info::{
     TypeInfo,
 };
 
-const MOD_PATH: &'static [&'static str] = &["subxt_codegen", "types", "tests"];
+const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
 
 fn get_mod<'a>(module: &'a Module, path_segs: &[&'static str]) -> Option<&'a Module<'a>> {
     let (mod_name, rest) = path_segs.split_first()?;
@@ -790,7 +790,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
 
 #[test]
 fn modules() {
-    mod modules {
+    mod m {
         pub mod a {
             #[allow(unused)]
             #[derive(scale_info::TypeInfo)]
@@ -815,7 +815,7 @@ fn modules() {
     }
 
     let mut registry = Registry::new();
-    registry.register_type(&meta_type::<modules::c::Foo>());
+    registry.register_type(&meta_type::<m::c::Foo>());
     let portable_types: PortableRegistry = registry.into();
 
     let type_gen = TypeGenerator::new(
@@ -832,7 +832,7 @@ fn modules() {
         quote! {
             pub mod tests {
                 use super::root;
-                pub mod modules {
+                pub mod m {
                     use super::root;
                     pub mod a {
                         use super::root;
@@ -842,7 +842,7 @@ fn modules() {
 
                             #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                             pub struct Bar {
-                                pub a: root::subxt_codegen::types::tests::modules::a::Foo,
+                                pub a: root::subxt_codegen::types::tests::m::a::Foo,
                             }
                         }
 
@@ -855,7 +855,7 @@ fn modules() {
 
                         #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                         pub struct Foo {
-                            pub a: root::subxt_codegen::types::tests::modules::a::b::Bar,
+                            pub a: root::subxt_codegen::types::tests::m::a::b::Bar,
                         }
                     }
                 }

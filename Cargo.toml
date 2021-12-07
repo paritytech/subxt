@@ -34,14 +34,14 @@ url = "2.2.1"
 
 subxt-macro = { version = "0.1.0", path = "macro" }
 
-sp-arithmetic = { package = "sp-arithmetic", git = "https://github.com/paritytech/substrate/", branch = "master" }
-sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/paritytech/substrate/", branch = "master" }
+sp-core = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false  }
+sp-runtime = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
 sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "master" }
 
 frame-metadata = "14.0.0"
 
 [dev-dependencies]
+sp-arithmetic = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
@@ -51,4 +51,3 @@ which = "4.0.2"
 test-runtime = { path = "test-runtime" }
 
 sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/", branch = "master" }
-
