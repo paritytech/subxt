@@ -70,13 +70,13 @@ where
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
-    let mut derives = GeneratedTypeDerives::default();
+    let mut derives = GeneratedTypeDerives::with_codec_encode_decode();
     if let Some(user_derives) = generated_type_derives {
         derives.append(user_derives.iter().cloned())
     }
 
     let generator = RuntimeGenerator::new(metadata);
-    generator.generate_runtime(item_mod, derives)
+    generator.generate_runtime(item_mod, Some(derives))
 }
 
 pub struct RuntimeGenerator {
@@ -94,7 +94,7 @@ impl RuntimeGenerator {
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: GeneratedTypeDerives,
+        derives: Option<GeneratedTypeDerives>,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
 

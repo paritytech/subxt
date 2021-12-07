@@ -63,7 +63,7 @@ pub struct TypeGenerator<'a> {
     /// User defined overrides for generated types.
     type_substitutes: HashMap<String, syn::TypePath>,
     /// Set of derives with which to annotate generated types.
-    derives: GeneratedTypeDerives,
+    derives: Option<GeneratedTypeDerives>,
 }
 
 impl<'a> TypeGenerator<'a> {
@@ -72,7 +72,7 @@ impl<'a> TypeGenerator<'a> {
         type_registry: &'a PortableRegistry,
         root_mod: &'static str,
         type_substitutes: HashMap<String, syn::TypePath>,
-        derives: GeneratedTypeDerives,
+        derives: Option<GeneratedTypeDerives>,
     ) -> Self {
         let root_mod_ident = Ident::new(root_mod, Span::call_site());
         Self {
@@ -208,8 +208,8 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Returns the derives with which all generated type will be decorated.
-    pub fn derives(&self) -> &GeneratedTypeDerives {
-        &self.derives
+    pub fn derives(&self) -> Option<&GeneratedTypeDerives> {
+        self.derives.as_ref()
     }
 }
 
