@@ -331,7 +331,15 @@ pub fn generate_structs_from_variants(
         variant
             .variants()
             .iter()
-            .map(|var| CompositeDef::enum_variant_def(var.name(), var.fields(), type_gen))
+            .map(|var| {
+                CompositeDef::struct_def(
+                    var.name(),
+                    &[],
+                    var.fields(),
+                    Some(parse_quote!(pub)),
+                    type_gen,
+                )
+            })
             .collect()
     } else {
         abort_call_site!(

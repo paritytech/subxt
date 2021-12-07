@@ -243,7 +243,7 @@ impl CompositeDefFields {
                 quote! (
                     {
                         #( #fields ),*
-                        #marker,
+                        #marker
                     }
                 )
             }
@@ -260,6 +260,7 @@ impl CompositeDefFields {
                 quote! (
                     (
                         #( #fields ),*
+                        #marker
                     );
                 )
             }
