@@ -19,6 +19,7 @@ use crate::{
         balances,
         runtime_types,
         system,
+        treasury,
         DefaultConfig,
     },
     test_context,
@@ -166,33 +167,48 @@ async fn transfer_error() {
     cxt.api
         .tx()
         .balances()
-        .transfer(hans_address, 100_000_000_000_000_000)
+        .transfer(hans_address, 100_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap()
         .find_finalized_event::<system::events::ExtrinsicSuccess>()
         .await
         .unwrap()
-        .unwrap();
+        .expect("ExtrinsicSuccess event expected");
 
     let res = cxt
         .api
         .tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000)
+        .transfer(alice_addr, 100_000_000_000_000)
         .sign_and_submit_then_watch(&hans)
         .await;
 
-    if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
-        let error2 = PalletError {
-            pallet: "Balances".into(),
-            error: "InsufficientBalance".into(),
-            description: vec!["Balance too low to send value".to_string()],
-        };
-        assert_eq!(error, error2);
-    } else {
-        panic!("expected an error");
-    }
+    let events = res
+        .unwrap()
+        .wait_for_finalized()
+        .await
+        .unwrap()
+        .events()
+        .await
+        .unwrap();
+    println!("{:#?}", events);
+    println!("{:?}", events.find_event::<balances::events::Withdraw>());
+    println!("{:?}", events.find_event::<balances::events::Deposit>());
+    println!("{:?}", events.find_event::<treasury::events::Deposit>());
+    println!("{:?}", events.find_event::<system::events::ExtrinsicSuccess>());
+    println!("{:?}", events.find_event::<system::events::ExtrinsicFailed>());
+
+    // if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
+    //     let error2 = PalletError {
+    //         pallet: "Balances".into(),
+    //         error: "InsufficientBalance".into(),
+    //         description: vec!["Balance too low to send value".to_string()],
+    //     };
+    //     assert_eq!(error, error2);
+    // } else {
+    //     panic!("expected an error");
+    // }
 }
 
 #[async_std::test]

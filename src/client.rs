@@ -27,7 +27,6 @@ use crate::{
     },
     events::{
         EventsDecoder,
-        Raw,
     },
     extrinsic::{
         self,
@@ -502,7 +501,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
         self.ext_hash
     }
 
-    /// Fetch the events associated with this transaction.
+    /// Fetch the events and errors associated with this transaction.
     pub async fn events(&self) -> Result<TransactionEvents, Error> {
         let block = self
             .client
@@ -532,7 +531,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
             .map(|s| s.0)
             .unwrap_or_else(Vec::new);
 
-        let event_iter = self
+        let events = self
             .client
             .events_decoder()
             .decode_events(&mut &*raw_events)?
@@ -540,17 +539,10 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
             .filter(move |(phase, _raw)| {
                 phase == &Phase::ApplyExtrinsic(extrinsic_idx as u32)
             })
-            .filter_map(|(_phase, raw)| {
-                if let Raw::Event(evt) = raw {
-                    Some(evt)
-                } else {
-                    None
-                }
-            });
+            .map(|(_phase, event)| event)
+            .collect();
 
-        Ok(TransactionEvents {
-            events: event_iter.collect(),
-        })
+        Ok(TransactionEvents { events })
     }
 
     /// Find an event associated with this transaction. This is a shorthand
@@ -578,20 +570,10 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
 /// We can iterate over the events, or look for a specific one.
 #[derive(Debug)]
 pub struct TransactionEvents {
-    events: Vec<crate::RawEvent>,
+    pub events: Vec<crate::RawEvent>,
 }
 
 impl TransactionEvents {
-    /// Iterate over the events.
-    pub fn iter(&self) -> impl Iterator<Item = &crate::RawEvent> {
-        self.events.iter()
-    }
-
-    /// Iterate over the events, taking ownership of them.
-    pub fn into_iter(self) -> impl Iterator<Item = crate::RawEvent> {
-        self.events.into_iter()
-    }
-
     /// Find an event.
     pub fn find_event<E: crate::Event>(&self) -> Result<Option<E>, codec::Error> {
         self.events
@@ -604,23 +586,5 @@ impl TransactionEvents {
     /// Find an event. Returns true if it was found.
     pub fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
         Ok(self.find_event::<E>()?.is_some())
-    }
-}
-
-impl std::iter::IntoIterator for TransactionEvents {
-    type Item = crate::RawEvent;
-    type IntoIter = std::vec::IntoIter<crate::RawEvent>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.events.into_iter()
-    }
-}
-
-impl<'a> std::iter::IntoIterator for &'a TransactionEvents {
-    type Item = &'a crate::RawEvent;
-    type IntoIter = std::slice::Iter<'a, crate::RawEvent>;
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.events.iter()
     }
 }

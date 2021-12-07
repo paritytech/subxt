@@ -50,14 +50,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    let transaction_events = balance_transfer
-        .wait_for_finalized()
-        .await?
-        .events()
+    let transfer_event = balance_transfer
+        .find_finalized_event::<polkadot::balances::events::Transfer>()
         .await?;
-
-    let transfer_event =
-        transaction_events.find_event::<polkadot::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);
