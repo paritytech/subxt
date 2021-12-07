@@ -25,9 +25,7 @@ use crate::{
         Error,
         TransactionError,
     },
-    events::{
-        EventsDecoder,
-    },
+    events::EventsDecoder,
     extrinsic::{
         self,
         SignedExtra,
@@ -418,11 +416,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
     /// use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
-        let evs = self
-            .wait_for_finalized()
-            .await?
-            .wait_for_success()
-            .await?;
+        let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
@@ -520,7 +514,10 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 use codec::Decode;
                 let dispatch_error = sp_runtime::DispatchError::decode(&mut &*ev.data)?;
-                let runtime_error = crate::RuntimeError::from_dispatch(&self.client.metadata, dispatch_error)?;
+                let runtime_error = crate::RuntimeError::from_dispatch(
+                    &self.client.metadata,
+                    dispatch_error,
+                )?;
                 return Err(runtime_error.into())
             }
         }
@@ -588,7 +585,7 @@ pub struct TransactionEvents<T: Config> {
     events: Vec<crate::RawEvent>,
 }
 
-impl <T: Config> TransactionEvents<T> {
+impl<T: Config> TransactionEvents<T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash

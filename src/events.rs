@@ -88,7 +88,10 @@ where
     }
 
     /// Decode events.
-    pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    pub fn decode_events(
+        &self,
+        input: &mut &[u8],
+    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
         log::debug!("decoding {} events", len);
@@ -110,11 +113,7 @@ where
             let event_metadata = self.metadata.event(pallet_index, variant_index)?;
 
             let mut event_data = Vec::<u8>::new();
-            let result = self.decode_raw_event(
-                event_metadata,
-                input,
-                &mut event_data,
-            );
+            let result = self.decode_raw_event(event_metadata, input, &mut event_data);
             let raw = match result {
                 Ok(()) => {
                     log::debug!("raw bytes: {}", hex::encode(&event_data),);

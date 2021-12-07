@@ -57,8 +57,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
 async fn validate_with_controller_account() {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
-    cxt
-        .api
+    cxt.api
         .tx()
         .staking()
         .validate(default_validator_prefs())
@@ -94,8 +93,7 @@ async fn nominate_with_controller_account() {
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
-    cxt
-        .api
+    cxt.api
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
