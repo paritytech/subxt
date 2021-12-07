@@ -399,8 +399,7 @@ fn generate_array_field() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -437,8 +436,7 @@ fn option_fields() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -478,8 +476,7 @@ fn box_fields_struct() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -559,8 +556,7 @@ fn range_fields() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -604,8 +600,7 @@ fn generics() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -651,8 +646,7 @@ fn generics_nested() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -702,8 +696,7 @@ fn generate_bitvec() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
@@ -756,8 +749,7 @@ fn generics_with_alias_adds_phantom_data_marker() {
         &portable_types,
         "root",
         Default::default(),
-        Some(GeneratedTypeDerives::with_codec_encode_decode())
-,
+        Some(GeneratedTypeDerives::with_codec_encode_decode()),
     );
     let types = type_gen.generate_types_mod();
     let tests_mod = get_mod(&types, MOD_PATH).unwrap();
