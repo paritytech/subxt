@@ -345,10 +345,10 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
     /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
-    /// waiting for finalization.
+    /// waiting for this to happen.
     ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions on the progress,
-    /// use [`TransactionProgress::next()`] instead.
+    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
+    /// transaction progresses, use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_in_block(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -380,8 +380,8 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TransactionProgress::next()`] instead.
+    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
+    /// transaction progresses, use [`TransactionProgress::next()`] instead.
     pub async fn wait_for_finalized(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -421,7 +421,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     }
 }
 
-/// Possible transaction status events returned from our [`crate::Client`].
+/// Possible transaction progess states returned from our [`TransactionProgress::next()`] call.
 #[derive(Debug)]
 pub enum TransactionProgressStatus<'client, T: Config> {
     /// Transaction is part of the future queue.
@@ -459,7 +459,7 @@ impl<'client, T: Config> TransactionProgressStatus<'client, T> {
     }
 
     /// A convenience method to return the `InBlock` details. Returns
-    /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
+    /// [`None`] if the enum variant is not [`TransactionProgressStatus::InBlock`].
     pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::InBlock(val) => Some(val),
@@ -491,7 +491,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
         self.block_hash
     }
 
-    /// Return the hash of the extrinsic.
+    /// Return the hash of the extrinsic that was submitted.
     pub fn extrinsic_hash(&self) -> T::Hash {
         self.ext_hash
     }
