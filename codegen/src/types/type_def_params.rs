@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use quote::quote;
 use super::TypeParameter;
-use std::collections::HashSet;
 use crate::types::CompositeDefField;
+use quote::quote;
+use std::collections::HashSet;
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefParameters {
     params: Vec<TypeParameter>,
-    unused: HashSet<TypeParameter>
+    unused: HashSet<TypeParameter>,
 }
 
 impl TypeDefParameters {

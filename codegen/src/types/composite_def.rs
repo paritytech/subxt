@@ -16,14 +16,17 @@
 
 use super::{
     GeneratedTypeDerives,
-    TypeGenerator,
     TypeDefParameters,
+    TypeGenerator,
     TypePath,
 };
 use heck::CamelCase as _;
 use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
-use quote::{format_ident, quote};
+use quote::{
+    format_ident,
+    quote,
+};
 use scale_info::{
     TypeDef,
     TypeDefPrimitive,
@@ -57,15 +60,15 @@ impl CompositeDef {
             {
                 let ty = type_gen.resolve_type(field.ty().id());
                 if matches!(
-                        ty.type_def(),
-                        TypeDef::Primitive(
-                            TypeDefPrimitive::U8
-                                | TypeDefPrimitive::U16
-                                | TypeDefPrimitive::U32
-                                | TypeDefPrimitive::U64
-                                | TypeDefPrimitive::U128
-                        )
-                    ) {
+                    ty.type_def(),
+                    TypeDef::Primitive(
+                        TypeDefPrimitive::U8
+                            | TypeDefPrimitive::U16
+                            | TypeDefPrimitive::U32
+                            | TypeDefPrimitive::U64
+                            | TypeDefPrimitive::U128
+                    )
+                ) {
                     derives.push_codec_compact_as()
                 }
             }
@@ -85,10 +88,7 @@ impl CompositeDef {
         }
     }
 
-    pub fn enum_variant_def(
-        ident: &str,
-        fields: Vec<CompositeDefField>,
-    ) -> Self {
+    pub fn enum_variant_def(ident: &str, fields: Vec<CompositeDefField>) -> Self {
         let name = format_ident!("{}", ident.to_camel_case());
         let fields = CompositeDefFields::new(ident, fields);
 
@@ -159,10 +159,7 @@ pub enum CompositeDefFields {
 }
 
 impl CompositeDefFields {
-    fn new(
-        name: &str,
-        fields: Vec<CompositeDefField>,
-    ) -> Self {
+    fn new(name: &str, fields: Vec<CompositeDefField>) -> Self {
         let named = fields.iter().all(|field| field.name.is_some());
         let unnamed = fields.iter().all(|field| field.name.is_none());
 
@@ -242,12 +239,22 @@ pub struct CompositeDefField {
 }
 
 impl CompositeDefField {
-    pub fn new(name: Option<syn::Ident>, type_path: TypePath, type_name: Option<String>) -> Self {
-        CompositeDefField { name, type_path, type_name }
+    pub fn new(
+        name: Option<syn::Ident>,
+        type_path: TypePath,
+        type_name: Option<String>,
+    ) -> Self {
+        CompositeDefField {
+            name,
+            type_path,
+            type_name,
+        }
     }
 
     fn compact_attr(&self) -> Option<TokenStream> {
-        self.type_path.is_compact().then(|| quote!( #[codec(compact)] ))
+        self.type_path
+            .is_compact()
+            .then(|| quote!( #[codec(compact)] ))
     }
 }
 

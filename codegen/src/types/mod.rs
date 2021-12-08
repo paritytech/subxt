@@ -19,8 +19,8 @@ mod derives;
 #[cfg(test)]
 mod tests;
 mod type_def;
-mod type_path;
 mod type_def_params;
+mod type_path;
 
 use proc_macro2::{
     Ident,

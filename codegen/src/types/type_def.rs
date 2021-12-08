@@ -17,10 +17,10 @@
 use super::{
     CompositeDef,
     CompositeDefField,
+    GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
-    GeneratedTypeDerives,
 };
 use proc_macro2::TokenStream;
 use quote::{
@@ -71,47 +71,79 @@ impl<'a> TypeDefGen<'a> {
             })
             .collect::<Vec<_>>();
 
-        let mut type_params = TypeDefParameters::new(type_params.iter().cloned().collect());
+        let mut type_params =
+            TypeDefParameters::new(type_params.iter().cloned().collect());
 
-        let ty_kind =
-            match ty.type_def() {
-                TypeDef::Composite(composite) => {
-                    let type_name = ty.path().ident().expect("structs should have a name");
-                    let fields = Self::fields(composite.fields(), type_gen);
-                    type_params.update_unused(&fields);
-                    let composite_def = CompositeDef::struct_def(&type_name, type_params.clone(), fields, Some(parse_quote!(pub)), &type_gen);
-                    TypeDefGenKind::Struct(composite_def)
-                }
-                TypeDef::Variant(variant) => {
-                    let type_name = ty.path().ident().expect("variants should have a name");
-                    let variants = variant.variants().iter().map(|v| {
+        let ty_kind = match ty.type_def() {
+            TypeDef::Composite(composite) => {
+                let type_name = ty.path().ident().expect("structs should have a name");
+                let fields = Self::fields(composite.fields(), type_gen);
+                type_params.update_unused(&fields);
+                let composite_def = CompositeDef::struct_def(
+                    &type_name,
+                    type_params.clone(),
+                    fields,
+                    Some(parse_quote!(pub)),
+                    &type_gen,
+                );
+                TypeDefGenKind::Struct(composite_def)
+            }
+            TypeDef::Variant(variant) => {
+                let type_name = ty.path().ident().expect("variants should have a name");
+                let variants = variant
+                    .variants()
+                    .iter()
+                    .map(|v| {
                         let fields = Self::fields(v.fields(), type_gen);
                         type_params.update_unused(&fields);
-                        let variant_def = CompositeDef::enum_variant_def(v.name(), fields);
+                        let variant_def =
+                            CompositeDef::enum_variant_def(v.name(), fields);
                         (v.index(), variant_def)
-                    }).collect();
+                    })
+                    .collect();
 
-                    TypeDefGenKind::Enum(type_name, variants)
-                }
-                _ => TypeDefGenKind::BuiltIn,
+                TypeDefGenKind::Enum(type_name, variants)
+            }
+            _ => TypeDefGenKind::BuiltIn,
         };
 
-        Self { type_params, derives, ty_kind }
+        Self {
+            type_params,
+            derives,
+            ty_kind,
+        }
     }
 
     /// Construct a type definition for generating a `struct`.
-    pub fn struct_def(type_name: &str, fields: &[super::Field], type_gen: &'a TypeGenerator) -> Self {
+    pub fn struct_def(
+        type_name: &str,
+        fields: &[super::Field],
+        type_gen: &'a TypeGenerator,
+    ) -> Self {
         let type_params = TypeDefParameters::default();
         let derives = type_gen.derives();
 
         let fields = Self::fields(fields, type_gen);
-        let composite_def = CompositeDef::struct_def(type_name, type_params.clone(), fields, Some(parse_quote!(pub)), &type_gen);
+        let composite_def = CompositeDef::struct_def(
+            type_name,
+            type_params.clone(),
+            fields,
+            Some(parse_quote!(pub)),
+            &type_gen,
+        );
         let ty_kind = TypeDefGenKind::Struct(composite_def);
 
-        Self { type_params, derives, ty_kind }
+        Self {
+            type_params,
+            derives,
+            ty_kind,
+        }
     }
 
-    fn fields(fields: &[scale_info::Field<PortableForm>], type_gen: &TypeGenerator) -> Vec<CompositeDefField> {
+    fn fields(
+        fields: &[scale_info::Field<PortableForm>],
+        type_gen: &TypeGenerator,
+    ) -> Vec<CompositeDefField> {
         fields
             .iter()
             .map(|field| {
@@ -126,17 +158,18 @@ impl<'a> TypeDefGen<'a> {
 impl<'a> quote::ToTokens for TypeDefGen<'a> {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match &self.ty_kind {
-            TypeDefGenKind::Struct(composite) => {
-                composite.to_tokens(tokens)
-            }
+            TypeDefGenKind::Struct(composite) => composite.to_tokens(tokens),
             TypeDefGenKind::Enum(type_name, variants) => {
-                let mut variants = variants.iter().map(|(index, def)| {
-                    let index = proc_macro2::Literal::u8_unsuffixed(*index);
-                    quote! {
-                        #[codec(index = #index)]
-                        #def
-                    }
-                }).collect::<Vec<_>>();
+                let mut variants = variants
+                    .iter()
+                    .map(|(index, def)| {
+                        let index = proc_macro2::Literal::u8_unsuffixed(*index);
+                        quote! {
+                            #[codec(index = #index)]
+                            #def
+                        }
+                    })
+                    .collect::<Vec<_>>();
 
                 if let Some(phantom) = self.type_params.unused_params_phantom_data() {
                     variants.push(quote! {
@@ -154,7 +187,7 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                 };
                 tokens.extend(ty_toks);
             }
-            TypeDefGenKind::BuiltIn => (), // all built-in types should already be in scope
+            TypeDefGenKind::BuiltIn => (), /* all built-in types should already be in scope */
         }
     }
 }
