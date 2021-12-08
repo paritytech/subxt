@@ -133,6 +133,20 @@ pub struct Client<T: Config> {
     iter_page_size: u32,
 }
 
+impl <T: Config> std::fmt::Debug for Client<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Client")
+            .field("rpc", &"<Rpc>")
+            .field("genesis_hash", &self.genesis_hash)
+            .field("metadata", &"<Metadata>")
+            .field("events_decoder", &"<EventsDecoder>")
+            .field("properties", &self.properties)
+            .field("runtime_version", &self.runtime_version.to_string())
+            .field("iter_page_size", &self.iter_page_size)
+            .finish()
+    }
+}
+
 impl<T: Config> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
@@ -273,21 +287,13 @@ where
 
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`SubmittableExtrinsic::sign_and_submit_then_watch()`].
+#[derive(Debug)]
 pub struct TransactionProgress<'client, T: Config> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
 
-impl<'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TransactionProgress")
-            .field("sub", &self.sub)
-            .field("ext_hash", &self.ext_hash)
-            .field("client", &"<client>")
-            .finish()
-    }
-}
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
     pub(crate) fn new(
@@ -528,20 +534,11 @@ impl<'client, T: Config> TransactionStatus<'client, T> {
 }
 
 /// This struct represents a transaction that has made it into a block.
+#[derive(Debug)]
 pub struct TransactionInBlock<'client, T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: &'client Client<T>,
-}
-
-impl<'client, T: Config> std::fmt::Debug for TransactionInBlock<'client, T> {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_struct("TransactionInBlock")
-            .field("block_hash", &self.block_hash)
-            .field("ext_hash", &self.ext_hash)
-            .field("client", &"<client>")
-            .finish()
-    }
 }
 
 impl<'client, T: Config> TransactionInBlock<'client, T> {
