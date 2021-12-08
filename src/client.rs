@@ -133,7 +133,7 @@ pub struct Client<T: Config> {
     iter_page_size: u32,
 }
 
-impl <T: Config> std::fmt::Debug for Client<T> {
+impl<T: Config> std::fmt::Debug for Client<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
             .field("rpc", &"<Rpc>")
@@ -293,7 +293,6 @@ pub struct TransactionProgress<'client, T: Config> {
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
-
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
     pub(crate) fn new(
@@ -461,20 +460,20 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 /// These status events can be grouped based on their kinds as:
 ///
 /// 1. Entering/Moving within the pool:
-/// 	- `Future`
-/// 	- `Ready`
+///    - `Future`
+///    - `Ready`
 /// 2. Inside `Ready` queue:
-/// 	- `Broadcast`
+///    - `Broadcast`
 /// 3. Leaving the pool:
-/// 	- `InBlock`
-/// 	- `Invalid`
-/// 	- `Usurped`
-/// 	- `Dropped`
+///    - `InBlock`
+///    - `Invalid`
+///    - `Usurped`
+///    - `Dropped`
 /// 4. Re-entering the pool:
-/// 	- `Retracted`
+///    - `Retracted`
 /// 5. Block finalized:
-/// 	- `Finalized`
-/// 	- `FinalityTimeout`
+///    - `Finalized`
+///    - `FinalityTimeout`
 ///
 /// The events will always be received in the order described above, however
 /// there might be cases where transactions alternate between `Future` and `Ready`
