@@ -46,18 +46,18 @@ impl CompositeDef {
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
     ) -> Self {
-        let derives = type_gen.derives().map(|derives| {
-            let mut derives = derives.clone();
-            if fields.len() == 1 {
-                // any single field wrapper struct with a concrete unsigned int type can derive
-                // CompactAs.
-                let field = &fields[0];
-                if type_params
-                    .iter()
-                    .any(|tp| Some(&tp.name.to_string()) == field.type_name())
-                {
-                    let ty = type_gen.resolve_type(field.ty().id());
-                    if matches!(
+        let mut derives = type_gen.derives().clone();
+
+        if fields.len() == 1 {
+            // any single field wrapper struct with a concrete unsigned int type can derive
+            // CompactAs.
+            let field = &fields[0];
+            if type_params
+                .iter()
+                .any(|tp| Some(&tp.name.to_string()) == field.type_name())
+            {
+                let ty = type_gen.resolve_type(field.ty().id());
+                if matches!(
                         ty.type_def(),
                         TypeDef::Primitive(
                             TypeDefPrimitive::U8
@@ -67,12 +67,10 @@ impl CompositeDef {
                                 | TypeDefPrimitive::U128
                         )
                     ) {
-                        derives.push_codec_compact_as()
-                    }
+                    derives.push_codec_compact_as()
                 }
             }
-            derives
-        });
+        }
 
         let name = format_ident!("{}", ident.to_camel_case());
         let type_params = type_params.iter().cloned().collect();
@@ -178,7 +176,7 @@ impl quote::ToTokens for CompositeDef {
 pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
     Struct {
-        derives: Option<GeneratedTypeDerives>,
+        derives: GeneratedTypeDerives,
         type_params: Vec<TypeParameter>,
         field_visibility: Option<syn::Visibility>,
     },

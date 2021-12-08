@@ -29,22 +29,9 @@ impl GeneratedTypeDerives {
         Self { derives }
     }
 
-    pub fn with_codec_encode_decode() -> Self {
-        let mut derives = Punctuated::new();
-        derives.push(parse_quote!(::subxt::codec::Encode));
-        derives.push(parse_quote!(::subxt::codec::Decode));
-        Self::new(derives)
-    }
-
-    /// Add `::subxt::codec::CompactAs` to the derives, if either `Encode` or `Decode` are already
-    /// derived.
+    /// Add `::subxt::codec::CompactAs` to the derives.
     pub fn push_codec_compact_as(&mut self) {
-        if self.derives.iter().any(|derive: &syn::Path| {
-            derive == &parse_quote!(::subxt::codec::Encode)
-                || derive == &parse_quote!(::subxt::codec::Decode)
-        }) {
-            self.derives.push(parse_quote!(::subxt::codec::CompactAs));
-        }
+        self.derives.push(parse_quote!(::subxt::codec::CompactAs));
     }
 
     pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
@@ -55,6 +42,16 @@ impl GeneratedTypeDerives {
 
     pub fn push(&mut self, derive: syn::Path) {
         self.derives.push(derive);
+    }
+}
+
+impl Default for GeneratedTypeDerives {
+    fn default() -> Self {
+        let mut derives = Punctuated::new();
+        // All generated types should implement Encode and Decode by default.
+        derives.push(parse_quote!(::subxt::codec::Encode));
+        derives.push(parse_quote!(::subxt::codec::Decode));
+        Self::new(derives)
     }
 }
 

@@ -44,7 +44,7 @@ async fn test_sudo() {
         .api
         .tx()
         .sudo()
-        .sudo(call)
+        .sudo(Box::new(call))
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
@@ -67,7 +67,7 @@ async fn test_sudo_unchecked_weight() {
         .api
         .tx()
         .sudo()
-        .sudo_unchecked_weight(call, 0)
+        .sudo_unchecked_weight(Box::new(call), 0)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
