@@ -206,7 +206,7 @@ where
     /// Creates and signs an extrinsic and submits it to the chain.
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
-    /// and obtain details about it, once it's made it into a block.
+    /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
@@ -368,6 +368,12 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TransactionProgress::next()`] instead.
+    ///
+    /// **Note:**: an error from this _does not_ guarantee that the transaction won't eventually be included.
+    /// The only way to be sure that a transaction won't make it into a block is to submit a mortal
+    /// transaction, and check that your transaciton has not made it into a finalized block prior to
+    /// the mortality expiring. Currently, you need to do this yourself using [`TransactionProgress::next()`]
+    /// if you need that guarantee.
     pub async fn wait_for_in_block(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -402,6 +408,12 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TransactionProgress::next()`] instead.
+    ///
+    /// **Note:**: an error from this _does not_ guarantee that the transaction won't eventually be included.
+    /// The only way to be sure that a transaction won't make it into a block is to submit a mortal
+    /// transaction, and check that your transaciton has not made it into a finalized block prior to
+    /// the mortality expiring. Currently, you need to do this yourself using [`TransactionProgress::next()`]
+    /// if you need that guarantee.
     pub async fn wait_for_finalized(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -560,8 +572,11 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// **Note:** If multiple `ExtrinsicFailed` errors are returned (for instance
     /// because a pallet chooses to emit one as an event, which is considered
     /// abnormal behaviour), it is not specified which of the errors is returned here.
-    /// You can use [`TransactionInBlock::find_all_events`] if you'd like to handle
-    /// scenarios like this.
+    /// You can use [`TransactionInBlock::find_all_events`] instead if you'd like to
+    /// work with multiple "error" events.
+    ///
+    /// **Note:** This has to download block details from the node and decode events
+    /// from them.
     pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error> {
         let events = self.fetch_events().await?;
 
@@ -584,6 +599,9 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// Fetch all of the events associated with this transaction. This succeeds whether
     /// the transaction was a success or not; it's up to you to handle the error and
     /// success events however you prefer.
+    ///
+    /// **Note:** This has to download block details from the node and decode events
+    /// from them.
     pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, Error> {
         let block = self
             .client

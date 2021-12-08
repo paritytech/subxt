@@ -165,7 +165,8 @@ pub struct PalletError {
 /// Transaction error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]
 pub enum TransactionError {
-    /// The finality subscription expired
+    /// The finality subscription expired (after ~512 blocks we give up if the
+    /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
     FinalitySubscriptionTimeout,
     /// The transaction was invalid
