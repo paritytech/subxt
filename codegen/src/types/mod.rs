@@ -20,6 +20,7 @@ mod derives;
 mod tests;
 mod type_def;
 mod type_path;
+mod type_def_params;
 
 use proc_macro2::{
     Ident,
@@ -42,9 +43,13 @@ use std::collections::{
 };
 
 pub use self::{
-    composite_def::CompositeDef,
+    composite_def::{
+        CompositeDef,
+        CompositeDefField,
+    },
     derives::GeneratedTypeDerives,
     type_def::TypeDefGen,
+    type_def_params::TypeDefParameters,
     type_path::{
         TypeParameter,
         TypePath,
@@ -52,6 +57,8 @@ pub use self::{
         TypePathType,
     },
 };
+
+pub type Field = scale_info::Field<PortableForm>;
 
 /// Generate a Rust module containing all types defined in the supplied [`PortableRegistry`].
 #[derive(Debug)]
@@ -129,7 +136,7 @@ impl<'a> TypeGenerator<'a> {
         if path.len() == 1 {
             child_mod
                 .types
-                .insert(ty.path().clone(), TypeDefGen { ty, type_gen: self });
+                .insert(ty.path().clone(), TypeDefGen::from_type(ty, self));
         } else {
             self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
         }
@@ -253,15 +260,4 @@ impl<'a> Module<'a> {
     pub fn ident(&self) -> &Ident {
         &self.name
     }
-}
-
-/// Construct a [`core::marker::PhantomData`] type for the given type params.
-pub fn phantom_data(params: &[TypeParameter]) -> syn::TypePath {
-    let params = if params.len() == 1 {
-        let param = &params[0];
-        quote! { #param }
-    } else {
-        quote! { ( #( #params ), * ) }
-    };
-    syn::parse_quote! ( ::core::marker::PhantomData<#params> )
 }

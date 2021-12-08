@@ -17,7 +17,7 @@
 use super::{
     GeneratedTypeDerives,
     TypeGenerator,
-    TypeParameter,
+    TypeDefParameters,
     TypePath,
 };
 use heck::CamelCase as _;
@@ -25,11 +25,9 @@ use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
 use quote::{format_ident, quote};
 use scale_info::{
-    form::PortableForm,
     TypeDef,
     TypeDefPrimitive,
 };
-use std::collections::HashSet;
 
 #[derive(Debug)]
 pub struct CompositeDef {
@@ -41,8 +39,8 @@ pub struct CompositeDef {
 impl CompositeDef {
     pub fn struct_def(
         ident: &str,
-        type_params: &[TypeParameter],
-        fields: &[scale_info::Field<PortableForm>],
+        type_params: TypeDefParameters,
+        fields: Vec<CompositeDefField>,
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
     ) -> Self {
@@ -53,6 +51,7 @@ impl CompositeDef {
             // CompactAs.
             let field = &fields[0];
             if type_params
+                .params()
                 .iter()
                 .any(|tp| Some(&tp.name.to_string()) == field.type_name())
             {
@@ -73,8 +72,7 @@ impl CompositeDef {
         }
 
         let name = format_ident!("{}", ident.to_camel_case());
-        let type_params = type_params.iter().cloned().collect();
-        let fields = CompositeDefFields::new(ident, type_gen, fields);
+        let fields = CompositeDefFields::new(ident, fields);
 
         Self {
             name,
@@ -89,11 +87,10 @@ impl CompositeDef {
 
     pub fn enum_variant_def(
         ident: &str,
-        fields: &[scale_info::Field<PortableForm>],
-        type_gen: &TypeGenerator,
+        fields: Vec<CompositeDefField>,
     ) -> Self {
         let name = format_ident!("{}", ident.to_camel_case());
-        let fields = CompositeDefFields::new(ident, type_gen, fields);
+        let fields = CompositeDefFields::new(ident, fields);
 
         Self {
             name,
@@ -102,7 +99,7 @@ impl CompositeDef {
         }
     }
 
-    pub fn named_fields(&self) -> Option<&[(syn::Ident, CompositeDefFieldType)]> {
+    pub fn named_fields(&self) -> Option<&[(syn::Ident, CompositeDefField)]> {
         if let CompositeDefFields::Named(ref fields) = self.fields {
             Some(fields)
         } else {
@@ -113,31 +110,6 @@ impl CompositeDef {
 
 impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        fn unused_type_params_phantom_data<'a>(
-            type_params: &'a [TypeParameter],
-            types: Vec<&'a TypePath>,
-        ) -> Option<syn::TypePath> {
-            if type_params.is_empty() {
-                return None
-            }
-            let mut used_type_params = HashSet::new();
-            for ty in types {
-                ty.parent_type_params(&mut used_type_params)
-            }
-            let type_params_set: HashSet<_> = type_params.iter().cloned().collect();
-            let mut unused = type_params_set
-                .difference(&used_type_params)
-                .cloned()
-                .collect::<Vec<_>>();
-            unused.sort();
-
-            if !unused.is_empty() {
-                Some(super::phantom_data(&unused))
-            } else {
-                None
-            }
-        }
-
         let name = &self.name;
 
         let decl = match &self.kind {
@@ -146,18 +118,14 @@ impl quote::ToTokens for CompositeDef {
                 type_params,
                 field_visibility,
             } => {
-                let unused_params_marker = unused_type_params_phantom_data(
-                    type_params,
-                    self.fields.field_types(),
-                );
-
+                let unused_phantom_marker = type_params.unused_params_phantom_data();
                 let fields = self
                     .fields
-                    .field_tokens(field_visibility.as_ref(), unused_params_marker);
+                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker);
 
                 quote! {
                     #derives
-                    pub struct #name #fields
+                    pub struct #name #type_params #fields
                 }
             }
             CompositeDefKind::EnumVariant => {
@@ -177,7 +145,7 @@ pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
     Struct {
         derives: GeneratedTypeDerives,
-        type_params: Vec<TypeParameter>,
+        type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
     },
     /// Comprises a variant of a Rust `enum`
@@ -186,47 +154,32 @@ pub enum CompositeDefKind {
 
 #[derive(Debug)]
 pub enum CompositeDefFields {
-    Named(Vec<(syn::Ident, CompositeDefFieldType)>),
-    Unnamed(Vec<CompositeDefFieldType>),
+    Named(Vec<(syn::Ident, CompositeDefField)>),
+    Unnamed(Vec<CompositeDefField>),
 }
 
 impl CompositeDefFields {
     fn new(
         name: &str,
-        type_gen: &TypeGenerator,
-        fields: &[scale_info::Field<PortableForm>],
+        fields: Vec<CompositeDefField>,
     ) -> Self {
-        let fields = fields
-            .iter()
-            .map(|field| {
-                let name = field.name().map(|f| format_ident!("{}", f));
-                let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
-                (name, CompositeDefFieldType { type_path, type_name: field.type_name().cloned() })
-            })
-            .collect::<Vec<_>>();
-
-        let named = fields.iter().all(|(name, _)| name.is_some());
-        let unnamed = fields.iter().all(|(name, _)| name.is_none());
+        let named = fields.iter().all(|field| field.name.is_some());
+        let unnamed = fields.iter().all(|field| field.name.is_none());
 
         if named {
             Self::Named(
                 fields
                     .into_iter()
-                    .map(|(name, field_type)| {
-                        let name = name.unwrap_or_else(|| {
+                    .map(|field| {
+                        let name = field.name.unwrap_or_else(|| {
                             abort_call_site!("All fields should have a name")
                         });
-                        (name, field_type)
+                        (name, field)
                     })
                     .collect(),
             )
         } else if unnamed {
-            Self::Unnamed(
-                fields
-                    .into_iter()
-                    .map(|(_, field_type)| field_type)
-                    .collect(),
-            )
+            Self::Unnamed(fields)
         } else {
             abort_call_site!(
                 "Struct '{}': Fields should either be all named or all unnamed.",
@@ -282,18 +235,23 @@ impl CompositeDefFields {
 }
 
 #[derive(Debug)]
-pub struct CompositeDefFieldType {
+pub struct CompositeDefField {
+    name: Option<syn::Ident>,
     type_path: TypePath,
     type_name: Option<String>,
 }
 
-impl CompositeDefFieldType {
+impl CompositeDefField {
+    pub fn new(name: Option<syn::Ident>, type_path: TypePath, type_name: Option<String>) -> Self {
+        CompositeDefField { name, type_path, type_name }
+    }
+
     fn compact_attr(&self) -> Option<TokenStream> {
         self.type_path.is_compact().then(|| quote!( #[codec(compact)] ))
     }
 }
 
-impl quote::ToTokens for CompositeDefFieldType {
+impl quote::ToTokens for CompositeDefField {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let ty_path = &self.type_path;
         if matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<")) {
