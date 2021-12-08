@@ -35,8 +35,8 @@ use crate::{
     rpc::{
         Rpc,
         RpcClient,
-        SystemProperties,
         SubstrateTransactionStatus,
+        SystemProperties,
     },
     storage::StorageClient,
     subscription::SystemEvents,
@@ -303,9 +303,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     }
 
     /// Return the next transaction status when it's emitted.
-    pub async fn next(
-        &mut self,
-    ) -> Result<Option<TransactionStatus<'client, T>>, Error> {
+    pub async fn next(&mut self) -> Result<Option<TransactionStatus<'client, T>>, Error> {
         // Return `None` if the subscription has been dropped:
         let sub = match &mut self.sub {
             Some(sub) => sub,
@@ -331,9 +329,17 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 SubstrateTransactionStatus::Retracted(hash) => {
                     TransactionStatus::Retracted(hash)
                 }
-                // All of the following statuses are "final"; we don't expect any
-                // further statuses after them. So, we drop the subscription when
-                // we hit them:
+                SubstrateTransactionStatus::Usurped(hash) => {
+                    TransactionStatus::Usurped(hash)
+                }
+                SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
+                SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
+                // Only the following statuses are actually considered "final" (see the substrate
+                // docs on `TransactionStatus`). Basically, either the transaction makes it into a
+                // block, or we eventually give up on waiting for it to make it into a block. The docs
+                // suggest that even Dropped and Invalid transactions might make it into a block eventually,
+                // and separately, what if a Usurped transaction on a fork becomes a perfectly fine
+                // transaction in the finalized chain?
                 SubstrateTransactionStatus::FinalityTimeout(hash) => {
                     self.sub = None;
                     TransactionStatus::FinalityTimeout(hash)
@@ -345,18 +351,6 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                         ext_hash: self.ext_hash,
                         client: self.client,
                     })
-                }
-                SubstrateTransactionStatus::Usurped(hash) => {
-                    self.sub = None;
-                    TransactionStatus::Usurped(hash)
-                }
-                SubstrateTransactionStatus::Dropped => {
-                    self.sub = None;
-                    TransactionStatus::Dropped
-                }
-                SubstrateTransactionStatus::Invalid => {
-                    self.sub = None;
-                    TransactionStatus::Invalid
                 }
             }
         }))
@@ -374,8 +368,9 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized or otherwise in a block! Return.
-                TransactionStatus::InBlock(s)
-                | TransactionStatus::Finalized(s) => return Ok(s),
+                TransactionStatus::InBlock(s) | TransactionStatus::Finalized(s) => {
+                    return Ok(s)
+                }
                 // Error scenarios; return the error.
                 TransactionStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
@@ -440,30 +435,75 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     }
 }
 
-/// Possible transaction progess states returned from our [`TransactionProgress::next()`] call.
+//* Dev note: The below is adapted from the substrate docs on `TransactionStatus`, which this
+//* enum was adapted from (and which is an exact copy of `SubstrateTransactionStatus` in this crate):
+//*
+/// Possible transaction statuses returned from our [`TransactionProgress::next()`] call.
+///
+/// These status events can be grouped based on their kinds as:
+///
+/// 1. Entering/Moving within the pool:
+/// 	- `Future`
+/// 	- `Ready`
+/// 2. Inside `Ready` queue:
+/// 	- `Broadcast`
+/// 3. Leaving the pool:
+/// 	- `InBlock`
+/// 	- `Invalid`
+/// 	- `Usurped`
+/// 	- `Dropped`
+/// 4. Re-entering the pool:
+/// 	- `Retracted`
+/// 5. Block finalized:
+/// 	- `Finalized`
+/// 	- `FinalityTimeout`
+///
+/// The events will always be received in the order described above, however
+/// there might be cases where transactions alternate between `Future` and `Ready`
+/// pool, and are `Broadcast` in the meantime.
+///
+/// Note that there are conditions that may cause transactions to reappear in the pool:
+///
+/// 1. Due to possible forks, the transaction that ends up being in included
+///    in one block may later re-enter the pool or be marked as invalid.
+/// 2. A transaction that is `Dropped` at one point may later re-enter the pool if
+///    some other transactions are removed.
+/// 3. `Invalid` transactions may become valid at some point in the future.
+///    (Note that runtimes are encouraged to use `UnknownValidity` to inform the
+///    pool about such cases).
+/// 4. `Retracted` transactions might be included in a future block.
+///
+/// The stream is considered finished only when either the `Finalized` or `FinalityTimeout`
+/// event is triggered. You are however free to unsubscribe from notifications at any point.
+/// The first one will be emitted when the block in which the transaction was included gets
+/// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
+/// within 512 blocks. This either indicates that finality is not available for your chain,
+/// or that finality gadget is lagging behind.
 #[derive(Debug)]
 pub enum TransactionStatus<'client, T: Config> {
-    /// Transaction is part of the future queue.
+    /// The transaction is part of the "future" queue.
     Future,
-    /// Transaction is part of the ready queue.
+    /// The transaction is part of the "ready" queue.
     Ready,
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
-    /// Transaction has been included in block with given hash.
+    /// The transaction has been included in a block with given hash.
     InBlock(TransactionInBlock<'client, T>),
-    /// The block this transaction was included in has been retracted.
+    /// The block this transaction was included in has been retracted,
+    /// probably because it did not make it onto the blocks which were
+    /// finalized.
     Retracted(T::Hash),
-    /// Maximum number of finality watchers has been reached,
-    /// old watchers are being removed.
+    /// A block containing the transaction did not reach finality within 512
+    /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
-    /// Transaction has been finalized by a finality-gadget, e.g GRANDPA
+    /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
     Finalized(TransactionInBlock<'client, T>),
-    /// Transaction has been replaced in the pool, by another transaction
+    /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
-    /// Transaction has been dropped from the pool because of the limit.
+    /// The transaction has been dropped from the pool because of the limit.
     Dropped,
-    /// Transaction is no longer valid in the current state.
+    /// The transaction is no longer valid in the current state.
     Invalid,
 }
 
