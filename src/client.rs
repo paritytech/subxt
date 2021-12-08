@@ -368,11 +368,10 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TransactionProgress::next()`] instead.
     ///
-    /// **Note:**: an error from this _does not_ guarantee that the transaction won't eventually be included.
-    /// The only way to be sure that a transaction won't make it into a block is to submit a mortal
-    /// transaction, and check that your transaciton has not made it into a finalized block prior to
-    /// the mortality expiring. Currently, you need to do this yourself using [`TransactionProgress::next()`]
-    /// if you need that guarantee.
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -386,16 +385,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 TransactionStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
-                TransactionStatus::Invalid => {
-                    return Err(TransactionError::Invalid.into())
-                }
-                TransactionStatus::Usurped(_) => {
-                    return Err(TransactionError::Usurped.into())
-                }
-                TransactionStatus::Dropped => {
-                    return Err(TransactionError::Dropped.into())
-                }
-                // Ignore and wait for next status event:
+                // Ignore anything else and wait for next status event:
                 _ => continue,
             }
         }
@@ -408,11 +398,10 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
     /// transaction progresses, use [`TransactionProgress::next()`] instead.
     ///
-    /// **Note:**: an error from this _does not_ guarantee that the transaction won't eventually be included.
-    /// The only way to be sure that a transaction won't make it into a block is to submit a mortal
-    /// transaction, and check that your transaciton has not made it into a finalized block prior to
-    /// the mortality expiring. Currently, you need to do this yourself using [`TransactionProgress::next()`]
-    /// if you need that guarantee.
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -423,15 +412,6 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 // Error scenarios; return the error.
                 TransactionStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
-                }
-                TransactionStatus::Invalid => {
-                    return Err(TransactionError::Invalid.into())
-                }
-                TransactionStatus::Usurped(_) => {
-                    return Err(TransactionError::Usurped.into())
-                }
-                TransactionStatus::Dropped => {
-                    return Err(TransactionError::Dropped.into())
                 }
                 // Ignore and wait for next status event:
                 _ => continue,
@@ -446,6 +426,11 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
     /// use [`TransactionProgress::next()`] instead.
+    ///
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)

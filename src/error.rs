@@ -169,15 +169,6 @@ pub enum TransactionError {
     /// block hasn't yet been finalized).
     #[error("The finality subscription expired")]
     FinalitySubscriptionTimeout,
-    /// The transaction was invalid
-    #[error("The transaction was invalid")]
-    Invalid,
-    /// The transaction was dropped from the pool
-    #[error("The transaction was dropped from the pool")]
-    Dropped,
-    /// The transaction was usurped
-    #[error("The transaction was usurped")]
-    Usurped,
     /// The block hash that the tranaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
