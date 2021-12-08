@@ -179,6 +179,6 @@ pub enum TransactionError {
     Usurped,
     /// The block hash that the tranaction was added to could not be found.
     /// This is probably because the block was retracted before being finalized.
-    #[error("Block hash containing non-finalized transaction can no longer be found")]
+    #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
     BlockHashNotFound,
 }

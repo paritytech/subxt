@@ -92,13 +92,13 @@ impl ContractsTestContext {
             .await?;
 
         let code_stored = events
-            .find_event::<events::CodeStored>()?
+            .find_first_event::<events::CodeStored>()?
             .ok_or_else(|| Error::Other("Failed to find a CodeStored event".into()))?;
         let instantiated = events
-            .find_event::<events::Instantiated>()?
+            .find_first_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
         let _extrinsic_success = events
-            .find_event::<system::events::ExtrinsicSuccess>()?
+            .find_first_event::<system::events::ExtrinsicSuccess>()?
             .ok_or_else(|| {
                 Error::Other("Failed to find a ExtrinsicSuccess event".into())
             })?;
@@ -133,7 +133,7 @@ impl ContractsTestContext {
 
         log::info!("Instantiate result: {:?}", result);
         let instantiated = result
-            .find_event::<events::Instantiated>()?
+            .find_first_event::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
 
         Ok(instantiated.contract)

@@ -526,7 +526,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// You can use [`TransactionInBlock::find_all_events`] if you'd like to handle
     /// scenarios like this.
     pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error> {
-        let events = self.find_all_events().await?;
+        let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
         for ev in events.as_slice() {
@@ -547,7 +547,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// Fetch all of the events associated with this transaction. This succeeds whether
     /// the transaction was a success or not; it's up to you to handle the error and
     /// success events however you prefer.
-    pub async fn find_all_events(&self) -> Result<TransactionEvents<T>, Error> {
+    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, Error> {
         let block = self
             .client
             .rpc()
@@ -620,8 +620,19 @@ impl<T: Config> TransactionEvents<T> {
         &self.events
     }
 
-    /// Find an event.
-    pub fn find_event<E: crate::Event>(&self) -> Result<Option<E>, Error> {
+    /// Find all of the events matching the event type provided as a generic parameter.
+    pub fn find_events<E: crate::Event>(&self) -> Result<Vec<E>, Error> {
+        self.events
+            .iter()
+            .filter_map(|e| e.as_event::<E>().map_err(Into::into).transpose())
+            .collect()
+    }
+
+    /// Find the first event that matches the event type provided as a generic parameter.
+    ///
+    /// Use [`TransactionEvents::find_events`], or iterate over [`TransactionEvents`] yourself
+    /// if you'd like to handle multiple events of the same type.
+    pub fn find_first_event<E: crate::Event>(&self) -> Result<Option<E>, Error> {
         self.events
             .iter()
             .filter_map(|e| e.as_event::<E>().transpose())
@@ -632,6 +643,13 @@ impl<T: Config> TransactionEvents<T> {
 
     /// Find an event. Returns true if it was found.
     pub fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
-        Ok(self.find_event::<E>()?.is_some())
+        Ok(self.find_first_event::<E>()?.is_some())
+    }
+}
+
+impl<T: Config> std::ops::Deref for TransactionEvents<T> {
+    type Target = [crate::RawEvent];
+    fn deref(&self) -> &Self::Target {
+        &self.events
     }
 }
