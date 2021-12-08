@@ -341,10 +341,13 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                 SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
                 // Only the following statuses are actually considered "final" (see the substrate
                 // docs on `TransactionStatus`). Basically, either the transaction makes it into a
-                // block, or we eventually give up on waiting for it to make it into a block. The docs
-                // suggest that even Dropped and Invalid transactions might make it into a block eventually,
-                // and separately, what if a Usurped transaction on a fork becomes a perfectly fine
-                // transaction in the finalized chain?
+                // block, or we eventually give up on waiting for it to make it into a block.
+                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                //
+                // As an example, a transaction that is `Invalid` on one node due to having the wrong
+                // nonce might still be valid on some fork on another node which ends up being finalized.
+                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
+                // and make it into a block, on another node. Likewise with `Usurped`.
                 SubstrateTransactionStatus::FinalityTimeout(hash) => {
                     self.sub = None;
                     TransactionStatus::FinalityTimeout(hash)
@@ -438,7 +441,9 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 }
 
 //* Dev note: The below is adapted from the substrate docs on `TransactionStatus`, which this
-//* enum was adapted from (and which is an exact copy of `SubstrateTransactionStatus` in this crate):
+//* enum was adapted from (and which is an exact copy of `SubstrateTransactionStatus` in this crate).
+//* Note that the number of finality watchers is, at the time of writing, found in the constant
+//* `MAX_FINALITY_WATCHERS` in the `sc_transaction_pool` crate.
 //*
 /// Possible transaction statuses returned from our [`TransactionProgress::next()`] call.
 ///
@@ -466,7 +471,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 ///
 /// Note that there are conditions that may cause transactions to reappear in the pool:
 ///
-/// 1. Due to possible forks, the transaction that ends up being in included
+/// 1. Due to possible forks, the transaction that ends up being included
 ///    in one block may later re-enter the pool or be marked as invalid.
 /// 2. A transaction that is `Dropped` at one point may later re-enter the pool if
 ///    some other transactions are removed.
