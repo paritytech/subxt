@@ -526,7 +526,7 @@ pub enum TransactionStatus<'client, T: Config> {
 
 impl<'client, T: Config> TransactionStatus<'client, T> {
     /// A convenience method to return the `Finalized` details. Returns
-    /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
+    /// [`None`] if the enum variant is not [`TransactionStatus::Finalized`].
     pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::Finalized(val) => Some(val),
@@ -535,7 +535,7 @@ impl<'client, T: Config> TransactionStatus<'client, T> {
     }
 
     /// A convenience method to return the `InBlock` details. Returns
-    /// [`None`] if the enum variant is not [`TransactionProgressStatus::InBlock`].
+    /// [`None`] if the enum variant is not [`TransactionStatus::InBlock`].
     pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T>> {
         match self {
             Self::InBlock(val) => Some(val),
@@ -571,7 +571,7 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
     /// **Note:** If multiple `ExtrinsicFailed` errors are returned (for instance
     /// because a pallet chooses to emit one as an event, which is considered
     /// abnormal behaviour), it is not specified which of the errors is returned here.
-    /// You can use [`TransactionInBlock::find_all_events`] instead if you'd like to
+    /// You can use [`TransactionInBlock::fetch_events`] instead if you'd like to
     /// work with multiple "error" events.
     ///
     /// **Note:** This has to download block details from the node and decode events
