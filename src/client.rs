@@ -36,7 +36,7 @@ use crate::{
         Rpc,
         RpcClient,
         SystemProperties,
-        TransactionStatus,
+        SubstrateTransactionStatus,
     },
     storage::StorageClient,
     subscription::SystemEvents,
@@ -274,7 +274,7 @@ where
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`SubmittableExtrinsic::sign_and_submit_then_watch()`].
 pub struct TransactionProgress<'client, T: Config> {
-    sub: Option<RpcSubscription<TransactionStatus<T::Hash, T::Hash>>>,
+    sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
@@ -291,7 +291,7 @@ impl<'client, T: Config> std::fmt::Debug for TransactionProgress<'client, T> {
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
     pub(crate) fn new(
-        sub: RpcSubscription<TransactionStatus<T::Hash, T::Hash>>,
+        sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
         client: &'client Client<T>,
         ext_hash: T::Hash,
     ) -> Self {
@@ -305,7 +305,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// Return the next transaction status when it's emitted.
     pub async fn next(
         &mut self,
-    ) -> Result<Option<TransactionProgressStatus<'client, T>>, Error> {
+    ) -> Result<Option<TransactionStatus<'client, T>>, Error> {
         // Return `None` if the subscription has been dropped:
         let sub = match &mut self.sub {
             Some(sub) => sub,
@@ -316,47 +316,47 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         let res = sub.next().await?;
         Ok(res.map(|status| {
             match status {
-                TransactionStatus::Future => TransactionProgressStatus::Future,
-                TransactionStatus::Ready => TransactionProgressStatus::Ready,
-                TransactionStatus::Broadcast(peers) => {
-                    TransactionProgressStatus::Broadcast(peers)
+                SubstrateTransactionStatus::Future => TransactionStatus::Future,
+                SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
+                SubstrateTransactionStatus::Broadcast(peers) => {
+                    TransactionStatus::Broadcast(peers)
                 }
-                TransactionStatus::InBlock(hash) => {
-                    TransactionProgressStatus::InBlock(TransactionInBlock {
+                SubstrateTransactionStatus::InBlock(hash) => {
+                    TransactionStatus::InBlock(TransactionInBlock {
                         block_hash: hash,
                         ext_hash: self.ext_hash,
                         client: self.client,
                     })
                 }
-                TransactionStatus::Retracted(hash) => {
-                    TransactionProgressStatus::Retracted(hash)
+                SubstrateTransactionStatus::Retracted(hash) => {
+                    TransactionStatus::Retracted(hash)
                 }
                 // All of the following statuses are "final"; we don't expect any
                 // further statuses after them. So, we drop the subscription when
                 // we hit them:
-                TransactionStatus::FinalityTimeout(hash) => {
+                SubstrateTransactionStatus::FinalityTimeout(hash) => {
                     self.sub = None;
-                    TransactionProgressStatus::FinalityTimeout(hash)
+                    TransactionStatus::FinalityTimeout(hash)
                 }
-                TransactionStatus::Finalized(hash) => {
+                SubstrateTransactionStatus::Finalized(hash) => {
                     self.sub = None;
-                    TransactionProgressStatus::Finalized(TransactionInBlock {
+                    TransactionStatus::Finalized(TransactionInBlock {
                         block_hash: hash,
                         ext_hash: self.ext_hash,
                         client: self.client,
                     })
                 }
-                TransactionStatus::Usurped(hash) => {
+                SubstrateTransactionStatus::Usurped(hash) => {
                     self.sub = None;
-                    TransactionProgressStatus::Usurped(hash)
+                    TransactionStatus::Usurped(hash)
                 }
-                TransactionStatus::Dropped => {
+                SubstrateTransactionStatus::Dropped => {
                     self.sub = None;
-                    TransactionProgressStatus::Dropped
+                    TransactionStatus::Dropped
                 }
-                TransactionStatus::Invalid => {
+                SubstrateTransactionStatus::Invalid => {
                     self.sub = None;
-                    TransactionProgressStatus::Invalid
+                    TransactionStatus::Invalid
                 }
             }
         }))
@@ -374,19 +374,19 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized or otherwise in a block! Return.
-                TransactionProgressStatus::InBlock(s)
-                | TransactionProgressStatus::Finalized(s) => return Ok(s),
+                TransactionStatus::InBlock(s)
+                | TransactionStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionProgressStatus::FinalityTimeout(_) => {
+                TransactionStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
-                TransactionProgressStatus::Invalid => {
+                TransactionStatus::Invalid => {
                     return Err(TransactionError::Invalid.into())
                 }
-                TransactionProgressStatus::Usurped(_) => {
+                TransactionStatus::Usurped(_) => {
                     return Err(TransactionError::Usurped.into())
                 }
-                TransactionProgressStatus::Dropped => {
+                TransactionStatus::Dropped => {
                     return Err(TransactionError::Dropped.into())
                 }
                 // Ignore and wait for next status event:
@@ -407,18 +407,18 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         while let Some(status) = self.next().await? {
             match status {
                 // Finalized! Return.
-                TransactionProgressStatus::Finalized(s) => return Ok(s),
+                TransactionStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
-                TransactionProgressStatus::FinalityTimeout(_) => {
+                TransactionStatus::FinalityTimeout(_) => {
                     return Err(TransactionError::FinalitySubscriptionTimeout.into())
                 }
-                TransactionProgressStatus::Invalid => {
+                TransactionStatus::Invalid => {
                     return Err(TransactionError::Invalid.into())
                 }
-                TransactionProgressStatus::Usurped(_) => {
+                TransactionStatus::Usurped(_) => {
                     return Err(TransactionError::Usurped.into())
                 }
-                TransactionProgressStatus::Dropped => {
+                TransactionStatus::Dropped => {
                     return Err(TransactionError::Dropped.into())
                 }
                 // Ignore and wait for next status event:
@@ -442,7 +442,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 
 /// Possible transaction progess states returned from our [`TransactionProgress::next()`] call.
 #[derive(Debug)]
-pub enum TransactionProgressStatus<'client, T: Config> {
+pub enum TransactionStatus<'client, T: Config> {
     /// Transaction is part of the future queue.
     Future,
     /// Transaction is part of the ready queue.
@@ -467,7 +467,7 @@ pub enum TransactionProgressStatus<'client, T: Config> {
     Invalid,
 }
 
-impl<'client, T: Config> TransactionProgressStatus<'client, T> {
+impl<'client, T: Config> TransactionStatus<'client, T> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionProgressStatus::Finalized`].
     pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T>> {

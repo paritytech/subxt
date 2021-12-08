@@ -76,7 +76,7 @@ pub use crate::{
         SubmittableExtrinsic,
         TransactionInBlock,
         TransactionProgress,
-        TransactionProgressStatus,
+        TransactionStatus,
     },
     config::{
         AccountData,

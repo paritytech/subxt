@@ -151,7 +151,7 @@ pub struct SystemProperties {
 /// must be kept compatible with that type from the target substrate version.
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "camelCase")]
-pub enum TransactionStatus<Hash, BlockHash> {
+pub enum SubstrateTransactionStatus<Hash, BlockHash> {
     /// Transaction is part of the future queue.
     Future,
     /// Transaction is part of the ready queue.
@@ -536,7 +536,7 @@ impl<T: Config> Rpc<T> {
     pub async fn watch_extrinsic<E: Encode>(
         &self,
         extrinsic: E,
-    ) -> Result<Subscription<TransactionStatus<T::Hash, T::Hash>>, Error> {
+    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, Error> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = &[to_json_value(bytes)?];
         let subscription = self
