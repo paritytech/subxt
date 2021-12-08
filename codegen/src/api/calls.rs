@@ -48,7 +48,7 @@ pub fn generate_calls(
                     )
                 })
                 .iter()
-                .map(|(name, ty, _)| (quote!( #name: #ty ), name))
+                .map(|(name, field_type)| (quote!( #name: #field_type ), name))
                 .unzip();
 
             let pallet_name = &pallet.name;

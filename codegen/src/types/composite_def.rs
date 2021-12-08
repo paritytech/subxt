@@ -23,10 +23,7 @@ use super::{
 use heck::CamelCase as _;
 use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
-use quote::{
-    format_ident,
-    quote,
-};
+use quote::{format_ident, quote};
 use scale_info::{
     form::PortableForm,
     TypeDef,
@@ -107,7 +104,7 @@ impl CompositeDef {
         }
     }
 
-    pub fn named_fields(&self) -> Option<&[(syn::Ident, TypePath, Option<String>)]> {
+    pub fn named_fields(&self) -> Option<&[(syn::Ident, CompositeDefFieldType)]> {
         if let CompositeDefFields::Named(ref fields) = self.fields {
             Some(fields)
         } else {
@@ -120,7 +117,7 @@ impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         fn unused_type_params_phantom_data<'a>(
             type_params: &'a [TypeParameter],
-            types: impl Iterator<Item = &'a TypePath>,
+            types: Vec<&'a TypePath>,
         ) -> Option<syn::TypePath> {
             if type_params.is_empty() {
                 return None
@@ -153,7 +150,7 @@ impl quote::ToTokens for CompositeDef {
             } => {
                 let unused_params_marker = unused_type_params_phantom_data(
                     type_params,
-                    self.fields.field_types().iter(),
+                    self.fields.field_types(),
                 );
 
                 let fields = self
@@ -191,8 +188,8 @@ pub enum CompositeDefKind {
 
 #[derive(Debug)]
 pub enum CompositeDefFields {
-    Named(Vec<(syn::Ident, TypePath, Option<String>)>),
-    Unnamed(Vec<(TypePath, Option<String>)>),
+    Named(Vec<(syn::Ident, CompositeDefFieldType)>),
+    Unnamed(Vec<CompositeDefFieldType>),
 }
 
 impl CompositeDefFields {
@@ -205,31 +202,31 @@ impl CompositeDefFields {
             .iter()
             .map(|field| {
                 let name = field.name().map(|f| format_ident!("{}", f));
-                let ty = type_gen.resolve_type_path(field.ty().id(), &[]);
-                (name, ty, field.type_name())
+                let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
+                (name, CompositeDefFieldType { type_path, type_name: field.type_name().cloned() })
             })
             .collect::<Vec<_>>();
 
-        let named = fields.iter().all(|(name, _, _)| name.is_some());
-        let unnamed = fields.iter().all(|(name, _, _)| name.is_none());
+        let named = fields.iter().all(|(name, _)| name.is_some());
+        let unnamed = fields.iter().all(|(name, _)| name.is_none());
 
         if named {
             Self::Named(
                 fields
-                    .iter()
-                    .map(|(name, field, type_name)| {
-                        let name = name.as_ref().unwrap_or_else(|| {
+                    .into_iter()
+                    .map(|(name, field_type)| {
+                        let name = name.unwrap_or_else(|| {
                             abort_call_site!("All fields should have a name")
                         });
-                        (name.clone(), field.clone(), type_name.cloned())
+                        (name, field_type)
                     })
                     .collect(),
             )
         } else if unnamed {
             Self::Unnamed(
                 fields
-                    .iter()
-                    .map(|(_, field, type_name)| (field.clone(), type_name.cloned()))
+                    .into_iter()
+                    .map(|(_, field_type)| field_type)
                     .collect(),
             )
         } else {
@@ -240,10 +237,10 @@ impl CompositeDefFields {
         }
     }
 
-    fn field_types(&self) -> Vec<TypePath> {
+    fn field_types(&self) -> Vec<&TypePath> {
         match self {
-            Self::Named(fields) => fields.iter().map(|(_, ty, _)| ty.clone()).collect(),
-            Self::Unnamed(fields) => fields.iter().map(|(ty, _)| ty.clone()).collect(),
+            Self::Named(fields) => fields.iter().map(|(_, ty)| &ty.type_path).collect(),
+            Self::Unnamed(fields) => fields.iter().map(|ty| &ty.type_path).collect(),
         }
     }
 
@@ -252,21 +249,11 @@ impl CompositeDefFields {
         visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
     ) -> TokenStream {
-        fn ty_path(ty_name: &Option<String>, ty_path: &TypePath) -> TokenStream {
-            if matches!(ty_name, Some(ty_name) if ty_name.contains("Box<")) {
-                quote! { ::std::boxed::Box<#ty_path> }
-            } else {
-                quote! { #ty_path }
-            }
-        }
-
         match self {
             CompositeDefFields::Named(named_fields) => {
-                let fields = named_fields.iter().map(|(name, ty, ty_name)| {
-                    let compact_attr =
-                        ty.is_compact().then(|| quote!( #[codec(compact)] ));
-                    let ty = ty_path(ty_name, ty);
-                    quote! { #compact_attr #visibility #name: #ty }
+                let fields = named_fields.iter().map(|(name, field_type)| {
+                    let compact_attr = field_type.compact_attr();
+                    quote! { #compact_attr #visibility #name: #field_type }
                 });
                 let marker = phantom_data
                     .map(|phantom_data| quote! ( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
@@ -278,11 +265,9 @@ impl CompositeDefFields {
                 )
             }
             CompositeDefFields::Unnamed(ref unnamed_fields) => {
-                let fields = unnamed_fields.iter().map(|(ty, ty_name)| {
-                    let compact_attr =
-                        ty.is_compact().then(|| quote!( #[codec(compact)] ));
-                    let ty = ty_path(ty_name, ty);
-                    quote! { #compact_attr #visibility #ty }
+                let fields = unnamed_fields.iter().map(|field_type| {
+                    let compact_attr = field_type.compact_attr();
+                    quote! { #compact_attr #visibility #field_type }
                 });
                 let marker = phantom_data.map(
                     |phantom_data| quote! ( #[codec(skip)] #visibility #phantom_data ),
@@ -295,5 +280,28 @@ impl CompositeDefFields {
                 )
             }
         }
+    }
+}
+
+#[derive(Debug)]
+pub struct CompositeDefFieldType {
+    type_path: TypePath,
+    type_name: Option<String>,
+}
+
+impl CompositeDefFieldType {
+    fn compact_attr(&self) -> Option<TokenStream> {
+        self.type_path.is_compact().then(|| quote!( #[codec(compact)] ))
+    }
+}
+
+impl quote::ToTokens for CompositeDefFieldType {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        let ty_path = &self.type_path;
+        if matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<")) {
+            tokens.extend(quote! { ::std::boxed::Box<#ty_path> })
+        } else {
+            tokens.extend(quote! { #ty_path })
+        };
     }
 }
