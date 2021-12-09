@@ -174,7 +174,12 @@ impl CompositeDefFields {
             .map(|field| {
                 let name = field.name().map(|f| format_ident!("{}", f));
                 let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
-                CompositeDefField::new(name, field.ty().id(), type_path, field.type_name().cloned())
+                CompositeDefField::new(
+                    name,
+                    field.ty().id(),
+                    type_path,
+                    field.type_name().cloned(),
+                )
             })
             .collect();
         Self::new(name, composite_def_fields)
@@ -194,7 +199,8 @@ impl CompositeDefFields {
         phantom_data: Option<syn::TypePath>,
     ) -> TokenStream {
         let fields = self.fields.iter().map(|field| {
-            let compact_attr = field.type_path
+            let compact_attr = field
+                .type_path
                 .is_compact()
                 .then(|| quote!( #[codec(compact)] ));
             let field_name = field.name.as_ref().map(|name| quote! { #name: });
