@@ -68,15 +68,13 @@ mod metadata;
 pub mod rpc;
 pub mod storage;
 mod subscription;
+mod transaction;
 
 pub use crate::{
     client::{
         Client,
         ClientBuilder,
         SubmittableExtrinsic,
-        TransactionInBlock,
-        TransactionProgress,
-        TransactionStatus,
     },
     config::{
         AccountData,
@@ -122,6 +120,11 @@ pub use crate::{
         EventSubscription,
         FinalizedEventStorageSubscription,
     },
+    transaction::{
+        TransactionInBlock,
+        TransactionProgress,
+        TransactionStatus,
+    }
 };
 
 /// Call trait.
