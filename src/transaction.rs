@@ -1,4 +1,3 @@
-
 // Copyright 2019-2021 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
@@ -21,13 +20,12 @@ pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
 
 use crate::{
+    client::Client,
     error::{
         Error,
         TransactionError,
     },
-    rpc::{
-        SubstrateTransactionStatus,
-    },
+    rpc::SubstrateTransactionStatus,
     subscription::SystemEvents,
     Config,
     Phase,
@@ -36,10 +34,9 @@ use jsonrpsee::types::{
     Error as RpcError,
     Subscription as RpcSubscription,
 };
-use crate::client::Client;
 
 /// This struct represents a subscription to the progress of some transaction, and is
-/// returned from [`SubmittableExtrinsic::sign_and_submit_then_watch()`].
+/// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
 #[derive(Debug)]
 pub struct TransactionProgress<'client, T: Config> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,

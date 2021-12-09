@@ -124,7 +124,7 @@ pub use crate::{
         TransactionInBlock,
         TransactionProgress,
         TransactionStatus,
-    }
+    },
 };
 
 /// Call trait.

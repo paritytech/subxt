@@ -20,9 +20,7 @@ pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
 
 use crate::{
-    error::{
-        Error,
-    },
+    error::Error,
     events::EventsDecoder,
     extrinsic::{
         self,
@@ -36,6 +34,7 @@ use crate::{
         SystemProperties,
     },
     storage::StorageClient,
+    transaction::TransactionProgress,
     AccountData,
     Call,
     Config,
@@ -43,7 +42,6 @@ use crate::{
     Metadata,
 };
 use std::sync::Arc;
-use crate::transaction::TransactionProgress;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
