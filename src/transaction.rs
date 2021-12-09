@@ -436,7 +436,7 @@ impl<T: Config> TransactionEvents<T> {
     }
 
     /// Find an event. Returns true if it was found.
-    pub fn has_event<E: crate::Event>(self) -> Result<bool, Error> {
+    pub fn has_event<E: crate::Event>(&self) -> Result<bool, Error> {
         Ok(self.find_first_event::<E>()?.is_some())
     }
 }
