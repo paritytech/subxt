@@ -173,7 +173,7 @@ impl TypePathType {
             }
             TypeDef::Compact(_) => {
                 let compact_type = &self.params[0];
-                syn::Type::Path(parse_quote! ( #compact_type ))
+                parse_quote! ( #compact_type )
             }
             TypeDef::BitSequence(_) => {
                 let bit_order_type = &self.params[0];

@@ -145,11 +145,12 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                     })
                 }
 
+                let enum_ident = format_ident!("{}", type_name);
                 let type_params = &self.type_params;
                 let derives = self.derives;
                 let ty_toks = quote! {
                     #derives
-                    pub enum #type_name #type_params {
+                    pub enum #enum_ident #type_params {
                         #( #variants, )*
                     }
                 };

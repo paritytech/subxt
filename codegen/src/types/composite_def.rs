@@ -112,7 +112,7 @@ impl quote::ToTokens for CompositeDef {
                 let unused_phantom_marker = type_params.unused_params_phantom_data();
                 let fields = self
                     .fields
-                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker);
+                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker, true);
 
                 quote! {
                     #derives
@@ -120,7 +120,7 @@ impl quote::ToTokens for CompositeDef {
                 }
             }
             CompositeDefKind::EnumVariant => {
-                let fields = self.fields.field_tokens(None, None);
+                let fields = self.fields.field_tokens(None, None, false);
 
                 quote! {
                     #name #fields
@@ -189,14 +189,11 @@ impl CompositeDefFields {
         &self.fields
     }
 
-    fn field_types(&self) -> impl Iterator<Item = &TypePath> {
-        self.fields.iter().map(|ty| &ty.type_path)
-    }
-
     fn field_tokens(
         &self,
         visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
+        unnamed_trailing_semicolon: bool,
     ) -> TokenStream {
         let fields = self.fields.iter().map(|field| {
             let compact_attr = field
@@ -212,18 +209,19 @@ impl CompositeDefFields {
                 .map(|phantom_data| quote!( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
             quote!(
                 {
-                    #( #fields ),*
+                    #( #fields, )*
                     #marker
                 }
             )
         } else {
             let marker = phantom_data
                 .map(|phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ));
+            let trailing_semicolon = unnamed_trailing_semicolon.then(|| quote!(;));
             quote! {
                 (
-                    #( #fields ),*
+                    #( #fields, )*
                     #marker
-                );
+                )#trailing_semicolon
             }
         }
     }
@@ -231,7 +229,7 @@ impl CompositeDefFields {
     pub fn named_fields(&self) -> Option<impl Iterator<Item = (syn::Ident, &TypePath)>> {
         if self.named {
             Some(self.fields.iter().map(|f| {
-                let type_name = f.type_name.as_ref().expect("All fields have names");
+                let type_name = f.name.as_ref().expect("All fields have names");
                 let ident = format_ident!("{}", type_name);
                 (ident, &f.type_path)
             }))
