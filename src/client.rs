@@ -15,10 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
+use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
 
 use crate::{
+    error::Error,
     events::EventsDecoder,
     extrinsic::{
         self,
@@ -27,19 +29,19 @@ use crate::{
         UncheckedExtrinsic,
     },
     rpc::{
-        ExtrinsicSuccess,
         Rpc,
         RpcClient,
         SystemProperties,
     },
     storage::StorageClient,
+    transaction::TransactionProgress,
     AccountData,
     Call,
     Config,
-    Error,
     ExtrinsicExtraData,
     Metadata,
 };
+use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -47,7 +49,6 @@ pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
-    accept_weak_inclusion: bool,
 }
 
 impl ClientBuilder {
@@ -57,7 +58,6 @@ impl ClientBuilder {
             url: None,
             client: None,
             page_size: None,
-            accept_weak_inclusion: false,
         }
     }
 
@@ -79,12 +79,6 @@ impl ClientBuilder {
         self
     }
 
-    /// Only check that transactions are InBlock on submit.
-    pub fn accept_weak_inclusion(mut self) -> Self {
-        self.accept_weak_inclusion = true;
-        self
-    }
-
     /// Creates a new Client.
     pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
         let client = if let Some(client) = self.client {
@@ -93,10 +87,7 @@ impl ClientBuilder {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
             RpcClient::try_from_url(url).await?
         };
-        let mut rpc = Rpc::new(client);
-        if self.accept_weak_inclusion {
-            rpc.accept_weak_inclusion();
-        }
+        let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
             rpc.metadata(),
             rpc.genesis_hash(),
@@ -111,7 +102,7 @@ impl ClientBuilder {
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata,
+            metadata: Arc::new(metadata),
             events_decoder,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
@@ -121,28 +112,28 @@ impl ClientBuilder {
 }
 
 /// Client to interface with a substrate node.
+#[derive(Clone)]
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Metadata,
+    metadata: Arc<Metadata>,
     events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
-    // _marker: PhantomData<(fn() -> T::Signature, T::Extra)>,
     iter_page_size: u32,
 }
 
-impl<T: Config> Clone for Client<T> {
-    fn clone(&self) -> Self {
-        Self {
-            rpc: self.rpc.clone(),
-            genesis_hash: self.genesis_hash,
-            metadata: self.metadata.clone(),
-            events_decoder: self.events_decoder.clone(),
-            properties: self.properties.clone(),
-            runtime_version: self.runtime_version.clone(),
-            iter_page_size: self.iter_page_size,
-        }
+impl<T: Config> std::fmt::Debug for Client<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Client")
+            .field("rpc", &"<Rpc>")
+            .field("genesis_hash", &self.genesis_hash)
+            .field("metadata", &"<Metadata>")
+            .field("events_decoder", &"<EventsDecoder>")
+            .field("properties", &self.properties)
+            .field("runtime_version", &self.runtime_version.to_string())
+            .field("iter_page_size", &self.iter_page_size)
+            .finish()
     }
 }
 
@@ -194,37 +185,40 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'a, T: Config, C> {
-    client: &'a Client<T>,
+pub struct SubmittableExtrinsic<'client, T: Config, C> {
+    client: &'client Client<T>,
     call: C,
 }
 
-impl<'a, T, C> SubmittableExtrinsic<'a, T, C>
+impl<'client, T, C> SubmittableExtrinsic<'client, T, C>
 where
     T: Config + ExtrinsicExtraData<T>,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: &'a Client<T>, call: C) -> Self {
+    pub fn new(client: &'client Client<T>, call: C) -> Self {
         Self { client, call }
     }
 
     /// Creates and signs an extrinsic and submits it to the chain.
     ///
-    /// Returns when the extrinsic has successfully been included in the block, together with any
-    /// events which were triggered by the extrinsic.
+    /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
+    /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<ExtrinsicSuccess<T>, Error>
+    ) -> Result<TransactionProgress<'client, T>, Error>
     where
         <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
     {
+        // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
-        self.client
-            .rpc()
-            .submit_and_watch_extrinsic(extrinsic, self.client.events_decoder())
-            .await
+        // Get a hash of the extrinsic (we'll need this later).
+        let ext_hash = T::Hashing::hash_of(&extrinsic);
+        // Submit and watch for transaction progress.
+        let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
+
+        Ok(TransactionProgress::new(sub, self.client, ext_hash))
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.
