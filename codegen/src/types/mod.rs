@@ -46,6 +46,7 @@ pub use self::{
     composite_def::{
         CompositeDef,
         CompositeDefField,
+        CompositeDefFields,
     },
     derives::GeneratedTypeDerives,
     type_def::TypeDefGen,

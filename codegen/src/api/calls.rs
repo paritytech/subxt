@@ -40,6 +40,7 @@ pub fn generate_calls(
         .iter()
         .map(|struct_def| {
             let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
+                .fields
                 .named_fields()
                 .unwrap_or_else(|| {
                     abort_call_site!(
@@ -47,7 +48,6 @@ pub fn generate_calls(
                         call.ty.id()
                     )
                 })
-                .iter()
                 .map(|(name, field_type)| (quote!( #name: #field_type ), name))
                 .unzip();
 

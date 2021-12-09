@@ -16,7 +16,7 @@
 
 use super::{
     CompositeDef,
-    CompositeDefField,
+    CompositeDefFields,
     GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
@@ -77,8 +77,12 @@ impl<'a> TypeDefGen<'a> {
         let ty_kind = match ty.type_def() {
             TypeDef::Composite(composite) => {
                 let type_name = ty.path().ident().expect("structs should have a name");
-                let fields = Self::fields(composite.fields(), type_gen);
-                type_params.update_unused(&fields);
+                let fields = CompositeDefFields::from_scale_info_fields(
+                    &type_name,
+                    composite.fields(),
+                    type_gen,
+                );
+                type_params.update_unused(fields.fields());
                 let composite_def = CompositeDef::struct_def(
                     &type_name,
                     type_params.clone(),
@@ -94,8 +98,12 @@ impl<'a> TypeDefGen<'a> {
                     .variants()
                     .iter()
                     .map(|v| {
-                        let fields = Self::fields(v.fields(), type_gen);
-                        type_params.update_unused(&fields);
+                        let fields = CompositeDefFields::from_scale_info_fields(
+                            v.name(),
+                            v.fields(),
+                            type_gen,
+                        );
+                        type_params.update_unused(fields.fields());
                         let variant_def =
                             CompositeDef::enum_variant_def(v.name(), fields);
                         (v.index(), variant_def)
@@ -112,46 +120,6 @@ impl<'a> TypeDefGen<'a> {
             derives,
             ty_kind,
         }
-    }
-
-    /// Construct a type definition for generating a `struct`.
-    pub fn struct_def(
-        type_name: &str,
-        fields: &[super::Field],
-        type_gen: &'a TypeGenerator,
-    ) -> Self {
-        let type_params = TypeDefParameters::default();
-        let derives = type_gen.derives();
-
-        let fields = Self::fields(fields, type_gen);
-        let composite_def = CompositeDef::struct_def(
-            type_name,
-            type_params.clone(),
-            fields,
-            Some(parse_quote!(pub)),
-            &type_gen,
-        );
-        let ty_kind = TypeDefGenKind::Struct(composite_def);
-
-        Self {
-            type_params,
-            derives,
-            ty_kind,
-        }
-    }
-
-    fn fields(
-        fields: &[scale_info::Field<PortableForm>],
-        type_gen: &TypeGenerator,
-    ) -> Vec<CompositeDefField> {
-        fields
-            .iter()
-            .map(|field| {
-                let name = field.name().map(|f| format_ident!("{}", f));
-                let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
-                CompositeDefField::new(name, type_path, field.type_name().cloned())
-            })
-            .collect()
     }
 }
 
@@ -177,7 +145,7 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                     })
                 }
 
-                let type_params = self.type_params;
+                let type_params = &self.type_params;
                 let derives = self.derives;
                 let ty_toks = quote! {
                     #derives

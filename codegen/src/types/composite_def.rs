@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
+    Field,
     GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
@@ -43,11 +44,12 @@ impl CompositeDef {
     pub fn struct_def(
         ident: &str,
         type_params: TypeDefParameters,
-        fields: Vec<CompositeDefField>,
+        fields_def: CompositeDefFields,
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
     ) -> Self {
         let mut derives = type_gen.derives().clone();
+        let fields = fields_def.fields();
 
         if fields.len() == 1 {
             // any single field wrapper struct with a concrete unsigned int type can derive
@@ -56,9 +58,9 @@ impl CompositeDef {
             if type_params
                 .params()
                 .iter()
-                .any(|tp| Some(&tp.name.to_string()) == field.type_name())
+                .any(|tp| Some(tp.name.to_string()) == field.type_name)
             {
-                let ty = type_gen.resolve_type(field.ty().id());
+                let ty = type_gen.resolve_type(field.type_id);
                 if matches!(
                     ty.type_def(),
                     TypeDef::Primitive(
@@ -75,7 +77,6 @@ impl CompositeDef {
         }
 
         let name = format_ident!("{}", ident.to_camel_case());
-        let fields = CompositeDefFields::new(ident, fields);
 
         Self {
             name,
@@ -84,26 +85,16 @@ impl CompositeDef {
                 type_params,
                 field_visibility,
             },
-            fields,
+            fields: fields_def,
         }
     }
 
-    pub fn enum_variant_def(ident: &str, fields: Vec<CompositeDefField>) -> Self {
+    pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
         let name = format_ident!("{}", ident.to_camel_case());
-        let fields = CompositeDefFields::new(ident, fields);
-
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
             fields,
-        }
-    }
-
-    pub fn named_fields(&self) -> Option<&[(syn::Ident, CompositeDefField)]> {
-        if let CompositeDefFields::Named(ref fields) = self.fields {
-            Some(fields)
-        } else {
-            None
         }
     }
 }
@@ -148,48 +139,53 @@ pub enum CompositeDefKind {
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
     },
-    /// Comprises a variant of a Rust `enum`
+    /// Comprises a variant of a Rust `enum`.
     EnumVariant,
 }
 
 #[derive(Debug)]
-pub enum CompositeDefFields {
-    Named(Vec<(syn::Ident, CompositeDefField)>),
-    Unnamed(Vec<CompositeDefField>),
+pub struct CompositeDefFields {
+    named: bool,
+    fields: Vec<CompositeDefField>,
 }
 
 impl CompositeDefFields {
-    fn new(name: &str, fields: Vec<CompositeDefField>) -> Self {
+    pub fn new(name: &str, fields: Vec<CompositeDefField>) -> Self {
         let named = fields.iter().all(|field| field.name.is_some());
         let unnamed = fields.iter().all(|field| field.name.is_none());
 
-        if named {
-            Self::Named(
-                fields
-                    .into_iter()
-                    .map(|field| {
-                        let name = field.name.unwrap_or_else(|| {
-                            abort_call_site!("All fields should have a name")
-                        });
-                        (name, field)
-                    })
-                    .collect(),
-            )
-        } else if unnamed {
-            Self::Unnamed(fields)
-        } else {
+        if !named && !unnamed {
             abort_call_site!(
                 "Struct '{}': Fields should either be all named or all unnamed.",
                 name,
             )
         }
+
+        Self { named, fields }
     }
 
-    fn field_types(&self) -> Vec<&TypePath> {
-        match self {
-            Self::Named(fields) => fields.iter().map(|(_, ty)| &ty.type_path).collect(),
-            Self::Unnamed(fields) => fields.iter().map(|ty| &ty.type_path).collect(),
-        }
+    pub fn from_scale_info_fields(
+        name: &str,
+        fields: &[Field],
+        type_gen: &TypeGenerator,
+    ) -> Self {
+        let composite_def_fields = fields
+            .iter()
+            .map(|field| {
+                let name = field.name().map(|f| format_ident!("{}", f));
+                let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
+                CompositeDefField::new(name, field.ty().id(), type_path, field.type_name().cloned())
+            })
+            .collect();
+        Self::new(name, composite_def_fields)
+    }
+
+    pub fn fields(&self) -> &[CompositeDefField] {
+        &self.fields
+    }
+
+    fn field_types(&self) -> impl Iterator<Item = &TypePath> {
+        self.fields.iter().map(|ty| &ty.type_path)
     }
 
     fn field_tokens(
@@ -197,64 +193,69 @@ impl CompositeDefFields {
         visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
     ) -> TokenStream {
-        match self {
-            CompositeDefFields::Named(named_fields) => {
-                let fields = named_fields.iter().map(|(name, field_type)| {
-                    let compact_attr = field_type.compact_attr();
-                    quote! { #compact_attr #visibility #name: #field_type }
-                });
-                let marker = phantom_data
-                    .map(|phantom_data| quote! ( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
-                quote! (
-                    {
-                        #( #fields ),*
-                        #marker
-                    }
-                )
-            }
-            CompositeDefFields::Unnamed(ref unnamed_fields) => {
-                let fields = unnamed_fields.iter().map(|field_type| {
-                    let compact_attr = field_type.compact_attr();
-                    quote! { #compact_attr #visibility #field_type }
-                });
-                let marker = phantom_data.map(
-                    |phantom_data| quote! ( #[codec(skip)] #visibility #phantom_data ),
+        let fields = self.fields.iter().map(|field| {
+            let compact_attr = field.type_path
+                .is_compact()
+                .then(|| quote!( #[codec(compact)] ));
+            let field_name = field.name.as_ref().map(|name| quote! { #name: });
+            let field_type = &field.type_path;
+            quote! { #compact_attr #visibility #field_name #field_type }
+        });
+        if self.named {
+            let marker = phantom_data
+                .map(|phantom_data| quote!( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
+            quote!(
+                {
+                    #( #fields ),*
+                    #marker
+                }
+            )
+        } else {
+            let marker = phantom_data
+                .map(|phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ));
+            quote! {
+                (
+                    #( #fields ),*
+                    #marker
                 );
-                quote! (
-                    (
-                        #( #fields ),*
-                        #marker
-                    );
-                )
             }
+        }
+    }
+
+    pub fn named_fields(&self) -> Option<impl Iterator<Item = (syn::Ident, &TypePath)>> {
+        if self.named {
+            Some(self.fields.iter().map(|f| {
+                let type_name = f.type_name.as_ref().expect("All fields have names");
+                let ident = format_ident!("{}", type_name);
+                (ident, &f.type_path)
+            }))
+        } else {
+            None
         }
     }
 }
 
 #[derive(Debug)]
 pub struct CompositeDefField {
-    name: Option<syn::Ident>,
-    type_path: TypePath,
-    type_name: Option<String>,
+    pub name: Option<syn::Ident>,
+    pub type_id: u32,
+    pub type_path: TypePath,
+    pub type_name: Option<String>,
 }
 
 impl CompositeDefField {
     pub fn new(
         name: Option<syn::Ident>,
+        type_id: u32,
         type_path: TypePath,
         type_name: Option<String>,
     ) -> Self {
         CompositeDefField {
             name,
+            type_id,
             type_path,
             type_name,
         }
-    }
-
-    fn compact_attr(&self) -> Option<TokenStream> {
-        self.type_path
-            .is_compact()
-            .then(|| quote!( #[codec(compact)] ))
     }
 }
 

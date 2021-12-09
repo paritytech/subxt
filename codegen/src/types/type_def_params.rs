@@ -36,7 +36,7 @@ impl TypeDefParameters {
     pub fn update_unused<'a>(&mut self, fields: &[CompositeDefField]) {
         let mut used_type_params = HashSet::new();
         for field in fields {
-            field.parent_type_params(&mut used_type_params)
+            field.type_path.parent_type_params(&mut used_type_params)
         }
         for used_type_param in &used_type_params {
             self.unused.remove(used_type_param);
