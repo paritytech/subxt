@@ -32,7 +32,6 @@ use crate::{
     error::Error,
     events::{
         EventsDecoder,
-        Raw,
         RawEvent,
     },
     rpc::Rpc,
@@ -48,7 +47,7 @@ pub struct EventSubscription<'a, T: Config> {
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
-    events: VecDeque<Raw>,
+    events: VecDeque<RawEvent>,
     finished: bool,
 }
 
@@ -59,11 +58,11 @@ enum BlockReader<'a, T: Config> {
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, Raw)>, Error>)>>),
+    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)>>),
 }
 
 impl<'a, T: Config> BlockReader<'a, T> {
-    async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, Raw)>, Error>)> {
+    async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)> {
         match self {
             BlockReader::Decoder {
                 subscription,
@@ -126,10 +125,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     pub async fn next(&mut self) -> Option<Result<RawEvent, Error>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
-                match raw_event {
-                    Raw::Event(event) => return Some(Ok(event)),
-                    Raw::Error(err) => return Some(Err(err.into())),
-                };
+                return Some(Ok(raw_event))
             }
             if self.finished {
                 return None
@@ -155,10 +151,8 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                             }
                         }
                         if let Some((module, variant)) = self.event {
-                            if let Raw::Event(ref event) = raw {
-                                if event.pallet != module || event.variant != variant {
-                                    continue
-                                }
+                            if raw.pallet != module || raw.variant != variant {
+                                continue
                             }
                         }
                         self.events.push_back(raw);
@@ -264,8 +258,6 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::RuntimeError;
-
     use super::*;
     use sp_core::H256;
     #[derive(Clone)]
@@ -294,51 +286,6 @@ mod tests {
             pallet_index: 0,
             variant_index: 0,
         }
-    }
-
-    fn raw_event(id: u8) -> RawEvent {
-        RawEvent {
-            data: sp_core::Bytes::from(Vec::new()),
-            pallet: "SomePallet".to_string(),
-            variant: "SomeVariant".to_string(),
-            pallet_index: id,
-            variant_index: id,
-        }
-    }
-
-    fn event(id: u8) -> Raw {
-        Raw::Event(raw_event(id))
-    }
-
-    #[async_std::test]
-    async fn test_error_does_not_stop_subscription() {
-        let mut subscription: EventSubscription<MockConfig> = EventSubscription {
-            block_reader: BlockReader::Mock(Box::new(
-                vec![(
-                    H256::from([0; 32]),
-                    Ok(vec![
-                        (
-                            Phase::ApplyExtrinsic(0),
-                            Raw::Error(RuntimeError::BadOrigin),
-                        ),
-                        (Phase::ApplyExtrinsic(0), event(1)),
-                    ]),
-                )]
-                .into_iter(),
-            )),
-            block: None,
-            extrinsic: None,
-            event: None,
-            events: Default::default(),
-            finished: false,
-        };
-
-        assert!(matches!(
-            subscription.next().await.unwrap().unwrap_err(),
-            Error::Runtime(RuntimeError::BadOrigin)
-        ));
-        assert_eq!(subscription.next().await.unwrap().unwrap(), raw_event(1));
-        assert!(subscription.next().await.is_none());
     }
 
     #[async_std::test]
@@ -378,7 +325,7 @@ mod tests {
                                             .iter()
                                             .take(half_len)
                                             .map(|(_, phase, event)| {
-                                                (phase.clone(), Raw::Event(event.clone()))
+                                                (phase.clone(), event.clone())
                                             })
                                             .collect()),
                                     ),
@@ -388,7 +335,7 @@ mod tests {
                                             .iter()
                                             .skip(half_len)
                                             .map(|(_, phase, event)| {
-                                                (phase.clone(), Raw::Event(event.clone()))
+                                                (phase.clone(), event.clone())
                                             })
                                             .collect()),
                                     ),
