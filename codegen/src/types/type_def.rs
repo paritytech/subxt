@@ -72,8 +72,7 @@ impl<'a> TypeDefGen<'a> {
             })
             .collect::<Vec<_>>();
 
-        let mut type_params =
-            TypeDefParameters::new(type_params);
+        let mut type_params = TypeDefParameters::new(type_params);
 
         let ty_kind = match ty.type_def() {
             TypeDef::Composite(composite) => {
