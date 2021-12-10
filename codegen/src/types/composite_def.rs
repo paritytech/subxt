@@ -200,9 +200,7 @@ impl CompositeDefFields {
                 .type_path
                 .is_compact()
                 .then(|| quote!( #[codec(compact)] ));
-            let field_name = field.name.as_ref().map(|name| quote! { #name: });
-            let field_type = &field.type_path;
-            quote! { #compact_attr #visibility #field_name #field_type }
+            quote! { #compact_attr #visibility #field }
         });
         if self.named {
             let marker = phantom_data
@@ -265,7 +263,14 @@ impl CompositeDefField {
 
 impl quote::ToTokens for CompositeDefField {
     fn to_tokens(&self, tokens: &mut TokenStream) {
+        // Prepend the field name if it is a named field.
+        if let Some(ref name) = self.name {
+            tokens.extend(quote! { #name: })
+        }
         let ty_path = &self.type_path;
+        // Use the type name to detect a `Box` field.
+        // Should be updated once `Box` types are no longer erased:
+        // https://github.com/paritytech/scale-info/pull/82
         if matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<")) {
             tokens.extend(quote! { ::std::boxed::Box<#ty_path> })
         } else {
