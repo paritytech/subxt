@@ -769,15 +769,15 @@ fn generics_with_alias_adds_phantom_data_marker() {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
+                    #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, ::subxt::codec::CompactAs)]
                     pub struct NamedFields<_0> {
                         pub b: ::core::primitive::u32,
-                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
+                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
                     }
                     #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (::core::primitive::u32, ::core::primitive::u32,),
-                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>,
+                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>
                     );
                 }
             }
