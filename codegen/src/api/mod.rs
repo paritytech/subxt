@@ -344,7 +344,7 @@ pub fn generate_structs_from_variants<'a>(
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),
-                    &type_gen,
+                    type_gen,
                 )
             })
             .collect()

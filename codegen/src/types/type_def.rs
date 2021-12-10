@@ -89,7 +89,7 @@ impl<'a> TypeDefGen<'a> {
                     type_params.clone(),
                     fields,
                     Some(parse_quote!(pub)),
-                    &type_gen,
+                    type_gen,
                 );
                 TypeDefGenKind::Struct(composite_def)
             }
