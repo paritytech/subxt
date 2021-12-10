@@ -75,7 +75,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
 }
 
 /// This is very similar to `simple_transfer`, except to show that we can handle
-/// waiting for the transaciton to be finalized separately from obtaining and checking
+/// waiting for the transaction to be finalized separately from obtaining and checking
 /// for success on the events.
 async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
@@ -125,7 +125,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     Ok(())
 }
 
-/// If we need more visibility into thestate of the transaction, we can also ditch
+/// If we need more visibility into the state of the transaction, we can also ditch
 /// `wait_for_finalized` entirely and stream the transaction progress events, handling
 /// them more manually.
 async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
