@@ -123,6 +123,7 @@ pub use crate::{
         TransactionInBlock,
         TransactionProgress,
         TransactionStatus,
+        TransactionEvents,
     },
 };
 
