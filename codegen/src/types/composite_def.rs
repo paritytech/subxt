@@ -55,7 +55,7 @@ impl CompositeDef {
             // any single field wrapper struct with a concrete unsigned int type can derive
             // CompactAs.
             let field = &fields[0];
-            if type_params
+            if !type_params
                 .params()
                 .iter()
                 .any(|tp| Some(tp.name.to_string()) == field.type_name)
