@@ -336,6 +336,7 @@ pub fn generate_structs_from_variants<'a>(
                 let fields = CompositeDefFields::from_scale_info_fields(
                     var.name(),
                     var.fields(),
+                    &[],
                     type_gen,
                 );
                 CompositeDef::struct_def(

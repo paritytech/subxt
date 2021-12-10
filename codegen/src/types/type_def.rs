@@ -80,6 +80,7 @@ impl<'a> TypeDefGen<'a> {
                 let fields = CompositeDefFields::from_scale_info_fields(
                     &type_name,
                     composite.fields(),
+                    type_params.params(),
                     type_gen,
                 );
                 type_params.update_unused(fields.fields());
@@ -101,6 +102,7 @@ impl<'a> TypeDefGen<'a> {
                         let fields = CompositeDefFields::from_scale_info_fields(
                             v.name(),
                             v.fields(),
+                            type_params.params(),
                             type_gen,
                         );
                         type_params.update_unused(fields.fields());

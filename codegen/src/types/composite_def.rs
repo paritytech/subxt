@@ -19,6 +19,7 @@ use super::{
     GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
+    TypeParameter,
     TypePath,
 };
 use heck::CamelCase as _;
@@ -169,13 +170,15 @@ impl CompositeDefFields {
     pub fn from_scale_info_fields(
         name: &str,
         fields: &[Field],
+        parent_type_params: &[TypeParameter],
         type_gen: &TypeGenerator,
     ) -> Self {
         let composite_def_fields = fields
             .iter()
             .map(|field| {
                 let name = field.name().map(|f| format_ident!("{}", f));
-                let type_path = type_gen.resolve_type_path(field.ty().id(), &[]);
+                let type_path =
+                    type_gen.resolve_type_path(field.ty().id(), parent_type_params);
                 CompositeDefField::new(
                     name,
                     field.ty().id(),
