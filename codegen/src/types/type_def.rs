@@ -63,6 +63,7 @@ impl<'a> TypeDefGen<'a> {
                         let tp_name = format_ident!("_{}", i);
                         Some(TypeParameter {
                             concrete_type_id: ty.id(),
+                            original_name: tp.name().clone(),
                             name: tp_name,
                         })
                     }
@@ -72,7 +73,7 @@ impl<'a> TypeDefGen<'a> {
             .collect::<Vec<_>>();
 
         let mut type_params =
-            TypeDefParameters::new(type_params.iter().cloned().collect());
+            TypeDefParameters::new(type_params);
 
         let ty_kind = match ty.type_def() {
             TypeDef::Composite(composite) => {

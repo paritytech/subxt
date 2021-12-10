@@ -58,7 +58,7 @@ impl CompositeDef {
             if !type_params
                 .params()
                 .iter()
-                .any(|tp| Some(tp.name.to_string()) == field.type_name)
+                .any(|tp| Some(tp.original_name.to_string()) == field.type_name)
             {
                 let ty = type_gen.resolve_type(field.type_id);
                 if matches!(

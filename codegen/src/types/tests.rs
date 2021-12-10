@@ -620,6 +620,7 @@ fn generics() {
                     pub b: root::subxt_codegen::types::tests::Foo<::core::primitive::u32>,
                     pub c: root::subxt_codegen::types::tests::Foo<::core::primitive::u8>,
                 }
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
                 pub struct Foo<_0> {
                     pub a: _0,
                 }

@@ -205,6 +205,7 @@ impl TypePathType {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct TypeParameter {
     pub(super) concrete_type_id: u32,
+    pub(super) original_name: String,
     pub(super) name: proc_macro2::Ident,
 }
 
