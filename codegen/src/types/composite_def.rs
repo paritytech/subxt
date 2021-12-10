@@ -236,7 +236,9 @@ impl CompositeDefFields {
         }
     }
 
-    pub fn named_fields(&self) -> Option<impl Iterator<Item = (syn::Ident, &CompositeDefField)>> {
+    pub fn named_fields(
+        &self,
+    ) -> Option<impl Iterator<Item = (syn::Ident, &CompositeDefField)>> {
         if self.named {
             Some(self.fields.iter().map(|f| {
                 let type_name = f.name.as_ref().expect("All fields have names");
