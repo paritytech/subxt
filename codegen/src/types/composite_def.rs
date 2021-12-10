@@ -197,11 +197,12 @@ impl CompositeDefFields {
         phantom_data: Option<syn::TypePath>,
         unnamed_trailing_semicolon: bool,
     ) -> TokenStream {
+        let trailing_semicolon = unnamed_trailing_semicolon.then(|| quote!(;));
         if self.fields.is_empty() {
             return if let Some(phantom_data) = phantom_data {
-                quote! { ( #phantom_data ) }
+                quote! { ( #phantom_data )#trailing_semicolon }
             } else {
-                quote! { }
+                quote! { #trailing_semicolon }
             }
         }
         let fields = self.fields.iter().map(|field| {
@@ -223,7 +224,6 @@ impl CompositeDefFields {
         } else {
             let marker = phantom_data
                 .map(|phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ));
-            let trailing_semicolon = unnamed_trailing_semicolon.then(|| quote!(;));
             quote! {
                 (
                     #( #fields, )*

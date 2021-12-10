@@ -790,7 +790,7 @@ fn modules() {
         pub mod a {
             #[allow(unused)]
             #[derive(scale_info::TypeInfo)]
-            pub struct Foo {}
+            pub struct Foo;
 
             pub mod b {
                 #[allow(unused)]
@@ -843,7 +843,7 @@ fn modules() {
                         }
 
                         #[derive(::subxt::codec::Encode, ::subxt::codec::Decode)]
-                        pub struct Foo {}
+                        pub struct Foo;
                     }
 
                     pub mod c {
