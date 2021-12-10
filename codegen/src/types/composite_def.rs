@@ -110,9 +110,11 @@ impl quote::ToTokens for CompositeDef {
                 field_visibility,
             } => {
                 let unused_phantom_marker = type_params.unused_params_phantom_data();
-                let fields = self
-                    .fields
-                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker, true);
+                let fields = self.fields.field_tokens(
+                    field_visibility.as_ref(),
+                    unused_phantom_marker,
+                    true,
+                );
 
                 quote! {
                     #derives
