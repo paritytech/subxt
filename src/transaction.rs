@@ -414,7 +414,8 @@ impl<T: Config> TransactionEvents<T> {
         &self.events
     }
 
-    /// Find all of the events matching the event type provided as a generic parameter.
+    /// Find all of the events matching the event type provided as a generic parameter. This
+    /// will return an error if a matching event is found but cannot be properly decoded.
     pub fn find_events<E: crate::Event>(&self) -> Result<Vec<E>, Error> {
         self.events
             .iter()
@@ -422,7 +423,8 @@ impl<T: Config> TransactionEvents<T> {
             .collect()
     }
 
-    /// Find the first event that matches the event type provided as a generic parameter.
+    /// Find the first event that matches the event type provided as a generic parameter. This
+    /// will return an error if a matching event is found but cannot be properly decoded.
     ///
     /// Use [`TransactionEvents::find_events`], or iterate over [`TransactionEvents`] yourself
     /// if you'd like to handle multiple events of the same type.
