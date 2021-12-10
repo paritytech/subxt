@@ -48,7 +48,15 @@ pub fn generate_calls(
                         call.ty.id()
                     )
                 })
-                .map(|(name, field_type)| (quote!( #name: #field_type ), name))
+                .map(|(name, field)| {
+                    let fn_arg_type = &field.type_path;
+                    let call_arg = if field.is_boxed() {
+                        quote! { #name: ::std::boxed::Box::new(#name) }
+                    } else {
+                        quote! { #name }
+                    };
+                    (quote!( #name: #fn_arg_type ), call_arg)
+                })
                 .unzip();
 
             let pallet_name = &pallet.name;

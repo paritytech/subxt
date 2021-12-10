@@ -91,7 +91,7 @@ impl CompositeDef {
     }
 
     pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
-        let name = format_ident!("{}", ident.to_camel_case());
+        let name = format_ident!("{}", ident);
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
@@ -236,12 +236,12 @@ impl CompositeDefFields {
         }
     }
 
-    pub fn named_fields(&self) -> Option<impl Iterator<Item = (syn::Ident, &TypePath)>> {
+    pub fn named_fields(&self) -> Option<impl Iterator<Item = (syn::Ident, &CompositeDefField)>> {
         if self.named {
             Some(self.fields.iter().map(|f| {
                 let type_name = f.name.as_ref().expect("All fields have names");
                 let ident = format_ident!("{}", type_name);
-                (ident, &f.type_path)
+                (ident, f)
             }))
         } else {
             None
@@ -271,6 +271,14 @@ impl CompositeDefField {
             type_name,
         }
     }
+
+    /// Returns `true` if the field is a [`::std::boxed::Box`].
+    pub fn is_boxed(&self) -> bool {
+        // Use the type name to detect a `Box` field.
+        // Should be updated once `Box` types are no longer erased:
+        // https://github.com/paritytech/scale-info/pull/82
+        matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<"))
+    }
 }
 
 impl quote::ToTokens for CompositeDefField {
@@ -280,10 +288,8 @@ impl quote::ToTokens for CompositeDefField {
             tokens.extend(quote! { #name: })
         }
         let ty_path = &self.type_path;
-        // Use the type name to detect a `Box` field.
-        // Should be updated once `Box` types are no longer erased:
-        // https://github.com/paritytech/scale-info/pull/82
-        if matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<")) {
+
+        if self.is_boxed() {
             tokens.extend(quote! { ::std::boxed::Box<#ty_path> })
         } else {
             tokens.extend(quote! { #ty_path })
