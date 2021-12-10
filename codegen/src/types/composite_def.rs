@@ -34,14 +34,22 @@ use scale_info::{
     TypeDefPrimitive,
 };
 
+/// Representation of a type which consists of a set of fields. Used to generate Rust code for
+/// either a standalone `struct` definition, or an `enum` variant.
+///
+/// Fields can either be named or unnamed in either case.
 #[derive(Debug)]
 pub struct CompositeDef {
+    /// The name of the `struct`, or the name of the `enum` variant.
     pub name: syn::Ident,
+    /// Generate either a standalone `struct` or an `enum` variant.
     pub kind: CompositeDefKind,
+    /// The fields of the type, which are either all named or all unnamed.
     pub fields: CompositeDefFields,
 }
 
 impl CompositeDef {
+    /// Construct a definition which will generate code for a standalone `struct`.
     pub fn struct_def(
         ident: &str,
         type_params: TypeDefParameters,
@@ -90,6 +98,7 @@ impl CompositeDef {
         }
     }
 
+    /// Construct a definition which will generate code for an `enum` variant.
     pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
         let name = format_ident!("{}", ident);
         Self {
@@ -134,6 +143,8 @@ impl quote::ToTokens for CompositeDef {
     }
 }
 
+/// Which kind of composite type are we generating, either a standalone `struct` or an `enum`
+/// variant.
 #[derive(Debug)]
 pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
@@ -146,6 +157,8 @@ pub enum CompositeDefKind {
     EnumVariant,
 }
 
+/// Encapsulates the composite fields, keeping the invariant that all fields are either named or
+/// unnamed.
 #[derive(Debug)]
 pub struct CompositeDefFields {
     named: bool,
@@ -153,6 +166,7 @@ pub struct CompositeDefFields {
 }
 
 impl CompositeDefFields {
+    /// Construct a new set of fields, validating whether they are all named or unnamed.
     pub fn new(name: &str, fields: Vec<CompositeDefField>) -> Self {
         let named = fields.iter().all(|field| field.name.is_some());
         let unnamed = fields.iter().all(|field| field.name.is_none());
@@ -167,6 +181,7 @@ impl CompositeDefFields {
         Self { named, fields }
     }
 
+    /// Construct a new set of composite fields from the supplied [`::scale_info::Field`]s.
     pub fn from_scale_info_fields(
         name: &str,
         fields: &[Field],
@@ -190,10 +205,12 @@ impl CompositeDefFields {
         Self::new(name, composite_def_fields)
     }
 
+    /// Returns the set of composite fields.
     pub fn fields(&self) -> &[CompositeDefField] {
         &self.fields
     }
 
+    /// Generate the code of the fields.
     fn field_tokens(
         &self,
         visibility: Option<&syn::Visibility>,
@@ -236,6 +253,7 @@ impl CompositeDefFields {
         }
     }
 
+    /// If fields are named, returns all fields with their names, otherwise returns `None`.
     pub fn named_fields(
         &self,
     ) -> Option<impl Iterator<Item = (syn::Ident, &CompositeDefField)>> {
@@ -251,6 +269,7 @@ impl CompositeDefFields {
     }
 }
 
+/// Represents a field of a composite type to be generated.
 #[derive(Debug)]
 pub struct CompositeDefField {
     pub name: Option<syn::Ident>,
@@ -260,6 +279,7 @@ pub struct CompositeDefField {
 }
 
 impl CompositeDefField {
+    /// Construct a new [`CompositeDefField`].
     pub fn new(
         name: Option<syn::Ident>,
         type_id: u32,
