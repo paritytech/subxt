@@ -120,6 +120,7 @@ pub use crate::{
         FinalizedEventStorageSubscription,
     },
     transaction::{
+        TransactionEvents,
         TransactionInBlock,
         TransactionProgress,
         TransactionStatus,
