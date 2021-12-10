@@ -113,6 +113,14 @@ async fn run() {
     fs::write(&runtime_path, runtime_api_contents)
         .expect("Couldn't write runtime rust output");
 
+    let substrate_path =
+        which::which(substrate_bin).expect("Cannot resolve path to substrate binary");
+
+    // Re-build if the substrate binary we're pointed to changes (mtime):
+    println!(
+        "cargo:rerun-if-changed={}",
+        substrate_path.to_string_lossy()
+    );
     // Re-build if we point to a different substrate binary:
     println!("cargo:rerun-if-env-changed={}", SUBSTRATE_BIN_ENV_VAR);
     // Re-build if this file changes:
