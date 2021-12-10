@@ -197,6 +197,13 @@ impl CompositeDefFields {
         phantom_data: Option<syn::TypePath>,
         unnamed_trailing_semicolon: bool,
     ) -> TokenStream {
+        if self.fields.is_empty() {
+            return if let Some(phantom_data) = phantom_data {
+                quote! { ( #phantom_data ) }
+            } else {
+                quote! { }
+            }
+        }
         let fields = self.fields.iter().map(|field| {
             let compact_attr = field
                 .type_path
