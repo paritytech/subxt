@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod calls;
+mod config;
 mod events;
 mod storage;
 
@@ -181,6 +182,8 @@ impl RuntimeGenerator {
             }
         });
 
+        let config = config::generate_config();
+
         let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
             let variant_name = format_ident!("{}", p.name);
             let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
@@ -222,39 +225,7 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                /// Default configuration of common types for a target Substrate runtime.
-                #[derive(Clone, Debug, Default, Eq, PartialEq)]
-                pub struct DefaultConfig;
-
-                impl ::subxt::Config for DefaultConfig {
-                    type Index = u32;
-                    type BlockNumber = u32;
-                    type Hash = ::subxt::sp_core::H256;
-                    type Hashing = ::subxt::sp_runtime::traits::BlakeTwo256;
-                    type AccountId = ::subxt::sp_runtime::AccountId32;
-                    type Address = ::subxt::sp_runtime::MultiAddress<Self::AccountId, u32>;
-                    type Header = ::subxt::sp_runtime::generic::Header<
-                        Self::BlockNumber, ::subxt::sp_runtime::traits::BlakeTwo256
-                    >;
-                    type Signature = ::subxt::sp_runtime::MultiSignature;
-                    type Extrinsic = ::subxt::sp_runtime::OpaqueExtrinsic;
-                }
-
-                impl ::subxt::ExtrinsicExtraData<DefaultConfig> for DefaultConfig {
-                    type AccountData = AccountData;
-                    type Extra = ::subxt::DefaultExtra<DefaultConfig>;
-                }
-
-                pub type AccountData = self::system::storage::Account;
-
-                impl ::subxt::AccountData<DefaultConfig> for AccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <DefaultConfig as ::subxt::Config>::Index {
-                        result.nonce
-                    }
-                    fn storage_entry(account_id: <DefaultConfig as ::subxt::Config>::AccountId) -> Self {
-                        Self(account_id)
-                    }
-                }
+                #config
 
                 pub struct RuntimeApi<T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
                     pub client: ::subxt::Client<T>,
