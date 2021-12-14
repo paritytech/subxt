@@ -15,31 +15,18 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
+use sp_runtime::{generic::Era, traits::Hash};
 pub use sp_version::RuntimeVersion;
 
 use crate::{
     error::Error,
     events::EventsDecoder,
-    extrinsic::{
-        self,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
-    },
-    rpc::{
-        Rpc,
-        RpcClient,
-        SystemProperties,
-    },
+    extrinsic::{self, SignedExtra, Signer, UncheckedExtrinsic},
+    rpc::{Rpc, RpcClient, SystemProperties},
     storage::StorageClient,
     transaction::TransactionProgress,
-    AccountData,
-    Call,
-    Config,
-    ExtrinsicExtraData,
-    Metadata,
+    AccountData, Call, Config, ExtrinsicExtraData, Metadata,
 };
 use std::sync::Arc;
 
@@ -276,6 +263,7 @@ where
             call,
             signer,
             additional_params,
+            Era::Immortal,
         )
         .await?;
         Ok(signed)

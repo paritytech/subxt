@@ -16,18 +16,12 @@
 
 use crate::{
     events::EventsDecodingError,
-    metadata::{
-        InvalidMetadataError,
-        MetadataError,
-    },
+    metadata::{InvalidMetadataError, MetadataError},
     Metadata,
 };
 use jsonrpsee::types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
-use sp_runtime::{
-    transaction_validity::TransactionValidityError,
-    DispatchError,
-};
+use sp_runtime::{transaction_validity::TransactionValidityError, DispatchError};
 use thiserror::Error;
 
 /// Error enum.

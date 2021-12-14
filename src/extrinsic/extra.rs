@@ -14,21 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Decode,
-    Encode,
-};
-use core::{
-    fmt::Debug,
-    marker::PhantomData,
-};
+use codec::{Decode, Encode};
+use core::{fmt::Debug, marker::PhantomData};
 use scale_info::TypeInfo;
 use sp_runtime::{
     generic::Era,
-    traits::{
-        DispatchInfoOf,
-        SignedExtension,
-    },
+    traits::{DispatchInfoOf, SignedExtension},
     transaction_validity::TransactionValidityError,
 };
 
@@ -312,6 +303,7 @@ pub trait SignedExtra<T: Config>: SignedExtension {
         nonce: T::Index,
         genesis_hash: T::Hash,
         additional_params: Self::Parameters,
+        mortality: Era,
     ) -> Self;
 
     /// Returns the transaction extra.
@@ -326,6 +318,7 @@ pub struct DefaultExtra<T: Config> {
     tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
+    mortality: Era,
 }
 
 impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
@@ -346,12 +339,14 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
         nonce: T::Index,
         genesis_hash: T::Hash,
         _params: Self::Parameters,
+        mortality: Era,
     ) -> Self {
         DefaultExtra {
             spec_version,
             tx_version,
             nonce,
             genesis_hash,
+            mortality,
         }
     }
 
@@ -360,7 +355,7 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
             CheckSpecVersion(PhantomData, self.spec_version),
             CheckTxVersion(PhantomData, self.tx_version),
             CheckGenesis(PhantomData, self.genesis_hash),
-            CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
+            CheckMortality((self.mortality, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
             ChargeAssetTxPayment {
