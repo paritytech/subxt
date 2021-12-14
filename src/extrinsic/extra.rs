@@ -25,7 +25,10 @@ use core::{
 use scale_info::TypeInfo;
 use sp_runtime::{
     generic::Era,
-    traits::SignedExtension,
+    traits::{
+        DispatchInfoOf,
+        SignedExtension,
+    },
     transaction_validity::TransactionValidityError,
 };
 
@@ -68,6 +71,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Ensure the transaction version registered in the transaction is the same as at present.
@@ -99,6 +111,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Check genesis hash
@@ -129,6 +150,15 @@ where
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
     }
 }
 
@@ -163,6 +193,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Nonce check and increment to give replay protection for transactions.
@@ -184,6 +223,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Resource limit check.
@@ -203,6 +251,15 @@ where
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
         Ok(())
     }
 }
@@ -228,6 +285,15 @@ impl SignedExtension for ChargeAssetTxPayment {
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
         Ok(())
     }
 }
@@ -317,5 +383,14 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultEx
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         self.extra().additional_signed()
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
     }
 }
