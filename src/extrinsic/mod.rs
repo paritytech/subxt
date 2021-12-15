@@ -41,50 +41,49 @@ use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 
 use crate::{
+    ApiConfig,
     Config,
     Encoded,
     Error,
-    ExtrinsicExtraData,
 };
 
 /// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T, E> = sp_runtime::generic::UncheckedExtrinsic<
-    <T as Config>::Address,
+pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
+    <<T as ApiConfig>::Config as Config>::Address,
     Encoded,
-    <T as Config>::Signature,
-    <E as SignedExtra<T>>::Extra,
+    <<T as ApiConfig>::Config as Config>::Signature,
+    <<T as ApiConfig>::Extra as SignedExtra<<T as ApiConfig>::Config>>::Extra,
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T, E> = sp_runtime::generic::SignedPayload<
+pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<
     Encoded,
-    <E as SignedExtra<T>>::Extra,
+    <<T as ApiConfig>::Extra as SignedExtra<<T as ApiConfig>::Config>>::Extra,
 >;
 
 /// Creates a signed extrinsic
-pub async fn create_signed<T, E>(
+pub async fn create_signed<T>(
     runtime_version: &RuntimeVersion,
-    genesis_hash: T::Hash,
-    nonce: T::Index,
+    genesis_hash: <<T as ApiConfig>::Config as Config>::Hash,
+    nonce: <<T as ApiConfig>::Config as Config>::Index,
     call: Encoded,
-    signer: &(dyn Signer<T, E> + Send + Sync),
-    additional_params: E::Parameters,
-) -> Result<UncheckedExtrinsic<T, E>, Error>
+    signer: &(dyn Signer<T> + Send + Sync),
+    additional_params: <<T as ApiConfig>::Extra as SignedExtra<T::Config>>::Parameters,
+) -> Result<UncheckedExtrinsic<T>, Error>
 where
-    T: Config,
-    E: SignedExtra<T> + Send + Sync + 'static,
-    <E::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    T: ApiConfig,
+    <<T as ApiConfig>::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let extra = E::new(
+    let extra = T::Extra::new(
         spec_version,
         tx_version,
         nonce,
         genesis_hash,
         additional_params,
     );
-    let payload = SignedPayload::<T, E>::new(call, extra.extra())?;
+    let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
 }

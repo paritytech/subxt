@@ -77,8 +77,8 @@ pub use crate::{
     },
     config::{
         AccountData,
+        ApiConfig,
         Config,
-        ExtrinsicExtraData,
     },
     error::{
         Error,

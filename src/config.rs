@@ -34,6 +34,16 @@ use sp_runtime::traits::{
     Verify,
 };
 
+/// todo: [AJ] comment
+pub trait ApiConfig {
+    /// todo: [AJ] comment
+    type Config: Config;
+    /// The type of the [`StorageEntry`] which can be used to retrieve an account nonce.
+    type AccountData: AccountData<Self::Config>;
+    /// The type of extra data and additional signed data to be included in a transaction.
+    type Extra: SignedExtra<Self::Config> + Send + Sync + 'static;
+}
+
 /// Runtime types.
 pub trait Config: Clone + Sized + Send + Sync + 'static {
     /// Account index (aka nonce) type. This stores the number of previous
@@ -95,9 +105,8 @@ impl Config for DefaultConfig {
     type Hashing = sp_runtime::traits::BlakeTwo256;
     type AccountId = sp_runtime::AccountId32;
     type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-    type Header = sp_runtime::generic::Header<
-        Self::BlockNumber, sp_runtime::traits::BlakeTwo256
-    >;
+    type Header =
+        sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
 }
@@ -111,12 +120,4 @@ pub trait AccountData<T: Config>: StorageEntry {
     fn storage_entry(account_id: T::AccountId) -> Self;
     /// Get the nonce from the storage entry value.
     fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
-}
-
-/// Trait to configure the extra data for an extrinsic.
-pub trait ExtrinsicExtraData<T: Config> {
-    /// The type of the [`StorageEntry`] which can be used to retrieve an account nonce.
-    type AccountData: AccountData<T>;
-    /// The type of extra data and additional signed data to be included in a transaction.
-    type Extra: SignedExtra<T> + Send + Sync + 'static;
 }

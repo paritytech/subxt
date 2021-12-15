@@ -82,13 +82,13 @@ pub fn generate_calls(
             use super::#types_mod_ident;
             #( #call_structs )*
 
-            pub struct TransactionApi<'a, T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
+            pub struct TransactionApi<'a, T: ::subxt::Config> {
                 client: &'a ::subxt::Client<T>,
             }
 
-            impl<'a, T: ::subxt::Config> TransactionApi<'a, T>
+            impl<'a> TransactionApi<'a>
             where
-                T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                T: ::subxt::Config
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }

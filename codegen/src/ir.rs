@@ -16,7 +16,10 @@
 
 use proc_macro_error::abort;
 use std::collections::HashMap;
-use syn::{spanned::Spanned as _, token};
+use syn::{
+    spanned::Spanned as _,
+    token,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ItemMod {
@@ -67,8 +70,6 @@ impl ItemMod {
             })
             .collect()
     }
-
-    pub fn
 }
 
 #[allow(clippy::large_enum_variant)]
@@ -80,13 +81,12 @@ pub enum Item {
 
 impl From<syn::Item> for Item {
     fn from(item: syn::Item) -> Self {
-        fn config_struct(attrs: &[syn::Attribute]) -> Option<bool> {
+        fn config_struct(attrs: &[syn::Attribute]) -> bool {
             let subxt_attrs = attrs::from_attrs(attrs);
-            if attrs::check_for_duplicates(&subxt_attrs, |attr| matches!(attr, attrs::Subxt::Config)) {
-                abort!(
-                    attrs[0].span(),
-                    "Duplicate `substitute_type` attributes"
-                )
+            if attrs::check_for_duplicates(&subxt_attrs, |attr| {
+                matches!(attr, attrs::Subxt::Config)
+            }) {
+                abort!(attrs[0].span(), "Duplicate `substitute_type` attributes")
             }
             if let Some(attr) = subxt_attrs.get(0) {
                 if let attrs::Subxt::Config = attr {
@@ -99,7 +99,9 @@ impl From<syn::Item> for Item {
         match &item {
             syn::Item::Use(ref use_) => {
                 let substitute_attrs = attrs::from_attrs(&use_.attrs);
-                if attrs::check_for_duplicates(&substitute_attrs, |attr| matches!(attr, attrs::Subxt::SubstituteType(_))) {
+                if attrs::check_for_duplicates(&substitute_attrs, |attr| {
+                    matches!(attr, attrs::Subxt::SubstituteType(_))
+                }) {
                     abort!(
                         use_.attrs[0].span(),
                         "Duplicate `substitute_type` attributes"
@@ -109,7 +111,8 @@ impl From<syn::Item> for Item {
                 if let Some(attr) = substitute_attrs.get(0) {
                     if let attrs::Subxt::SubstituteType(path) = attr {
                         let use_path = &use_.tree;
-                        let substitute_with: syn::TypePath = syn::parse_quote!( #use_path );
+                        let substitute_with: syn::TypePath =
+                            syn::parse_quote!( #use_path );
                         let type_substitute = SubxtItem::TypeSubstitute {
                             generated_type_path: path.clone(),
                             substitute_with,
@@ -122,23 +125,19 @@ impl From<syn::Item> for Item {
                 if config_struct(&struct_.attrs) {
                     if !struct_.fields.is_empty() {
                         abort!(
-                            enum_.span(),
+                            struct_.span(),
                             "Config type must be a struct with no fields"
                         )
                     }
-                    let config = SubxtItemConfig { config_struct: struct_.clone(), generate_default_impls: }
                     return Self::Subxt(SubxtItem::Config(struct_.clone()))
                 }
             }
             syn::Item::Enum(enum_) => {
                 if config_struct(&enum_.attrs) {
-                    abort!(
-                        enum_.span(),
-                        "Config type must be a struct with no fields"
-                    )
+                    abort!(enum_.span(), "Config type must be a struct with no fields")
                 }
             }
-            _ => ()
+            _ => (),
         }
         Self::Rust(item)
     }
@@ -154,23 +153,23 @@ pub enum SubxtItem {
 }
 
 mod attrs {
-    use darling::FromMeta;
     use super::*;
+    use darling::FromMeta;
 
     /// Parse the `#[subxt(..)]` attributes.
     pub fn from_attrs(attrs: &[syn::Attribute]) -> Vec<Subxt> {
-        attrs
-            .iter()
-            .map(Subxt::from)
-            .collect()
+        attrs.iter().map(Subxt::from).collect()
     }
 
     /// Returns true if any duplicates matching the predicate found.
-    pub fn check_for_duplicates<P: Fn(&Subxt) -> bool>(attrs: &[Subxt], predicate: P) -> bool {
+    pub fn check_for_duplicates<P: Fn(&Subxt) -> bool>(
+        attrs: &[Subxt],
+        predicate: P,
+    ) -> bool {
         let matched = false;
         for attr in attrs {
             if matched && predicate(attr) {
-                return true;
+                return true
             }
         }
         return false
@@ -188,9 +187,9 @@ mod attrs {
             let meta = attr.parse_meta().unwrap_or_else(|e| {
                 abort!(attr.span(), "Error parsing attribute: {}", e)
             });
-            <attrs::Subxt as darling::FromMeta>::from_meta(&meta).unwrap_or_else(
-                |e| abort!(attr.span(), "Error parsing attribute meta: {}", e),
-            )
+            <attrs::Subxt as darling::FromMeta>::from_meta(&meta).unwrap_or_else(|e| {
+                abort!(attr.span(), "Error parsing attribute meta: {}", e)
+            })
         }
     }
 }

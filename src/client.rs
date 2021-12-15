@@ -36,9 +36,9 @@ use crate::{
     storage::StorageClient,
     transaction::TransactionProgress,
     AccountData,
+    ApiConfig,
     Call,
     Config,
-    ExtrinsicExtraData,
     Metadata,
 };
 use std::sync::Arc;
@@ -185,22 +185,19 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, A, E, C> {
-    client: &'client Client<T>,
+pub struct SubmittableExtrinsic<'client, T: ApiConfig, C> {
+    client: &'client Client<T::Config>,
     call: C,
-    marker: std::marker::PhantomData<fn () -> (A, E)>,
 }
 
-impl<'client, T, A, E, C> SubmittableExtrinsic<'client, T, A, E, C>
+impl<'client, T, C> SubmittableExtrinsic<'client, T, C>
 where
-    T: Config,
-    A: AccountData<T>,
-    E: SignedExtra<T>,
+    T: ApiConfig,
     C: Call + Send + Sync,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: &'client Client<T>, call: C) -> Self {
-        Self { client, call, marker: Default::default() }
+    pub fn new(client: &'client Client<T::Config>, call: C) -> Self {
+        Self { client, call }
     }
 
     /// Creates and signs an extrinsic and submits it to the chain.
@@ -209,15 +206,16 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T>, Error>
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<TransactionProgress<'client, T::Config>, Error>
     where
-        <E::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
+        <<T as ApiConfig>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync + 'static,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hashing::hash_of(&extrinsic);
+        let ext_hash = <T::Config as Config>::Hashing::hash_of(&extrinsic);
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
@@ -234,10 +232,11 @@ where
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<T::Hash, Error>
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<<T::Config as Config>::Hash, Error>
     where
-        <E::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
+        <<T as ApiConfig>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync + 'static,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -246,23 +245,24 @@ where
     /// Creates a signed extrinsic.
     pub async fn create_signed(
         &self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-        additional_params: E::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, E>, Error>
+        signer: &(dyn Signer<T> + Send + Sync),
+        additional_params: <<T as ApiConfig>::Extra as SignedExtra<T::Config>>::Parameters,
+    ) -> Result<UncheckedExtrinsic<T>, Error>
     where
-        <E::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static
+        <<T as ApiConfig>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync + 'static,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
             let account_storage_entry =
-                A::storage_entry(signer.account_id().clone());
+                T::AccountData::storage_entry(signer.account_id().clone());
             let account_data = self
                 .client
                 .storage()
                 .fetch_or_default(&account_storage_entry, None)
                 .await?;
-            A::nonce(&account_data)
+            T::AccountData::nonce(&account_data)
         };
         let call = self
             .client
