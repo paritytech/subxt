@@ -150,12 +150,7 @@ pub enum SubxtItem {
         generated_type_path: String,
         substitute_with: syn::TypePath,
     },
-    Config(SubxtItemConfig),
-}
-
-pub struct SubxtItemConfig {
-    config_struct: syn::ItemStruct,
-    generate_default_impls: bool,
+    Config(syn::ItemStruct),
 }
 
 mod attrs {
@@ -185,7 +180,7 @@ mod attrs {
     #[darling(rename_all = "snake_case")]
     pub enum Subxt {
         SubstituteType(String),
-        Config(),
+        Config,
     }
 
     impl From<&syn::Attribute> for Subxt {

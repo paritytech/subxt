@@ -35,6 +35,7 @@ pub fn generate_config(
 ) -> TokenStream {
     let config_name = &struct_.ident;
     let default_impls = generate_default_impls.then(|| quote! {
+        // todo: [AJ] add a #[derive(subxt::DefaultConfig)] for this
         impl ::subxt::Config for #config_name {
             type Index = u32;
             type BlockNumber = u32;
@@ -50,7 +51,10 @@ pub fn generate_config(
         }
 
         impl ::subxt::ExtrinsicExtraData<#config_name> for #config_name {
+            // todo: extract this from this trait so it can stay hardcoded (for now)
+            // ^^ could combine into
             type AccountData = AccountData;
+            // todo: add a #[derive(subxt::DefaultExtra)] for Config
             type Extra = ::subxt::DefaultExtra<#config_name>;
         }
 
