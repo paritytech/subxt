@@ -33,7 +33,7 @@ pub fn generate_config(
     config_struct: &syn::ItemStruct,
     generate_default_impls: bool,
 ) -> TokenStream {
-    let config_name = &struct_.ident;
+    let config_name = &config_struct.ident;
     let default_impls = generate_default_impls.then(|| quote! {
         // todo: [AJ] add a #[derive(subxt::DefaultConfig)] for this
         impl ::subxt::Config for #config_name {

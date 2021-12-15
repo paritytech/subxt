@@ -85,6 +85,23 @@ pub trait Config: Clone + Sized + Send + Sync + 'static {
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
+#[derive(Clone, Debug)]
+pub enum DefaultConfig {}
+
+impl Config for DefaultConfig {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = sp_runtime::traits::BlakeTwo256;
+    type AccountId = sp_runtime::AccountId32;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
+    type Header = sp_runtime::generic::Header<
+        Self::BlockNumber, sp_runtime::traits::BlakeTwo256
+    >;
+    type Signature = sp_runtime::MultiSignature;
+    type Extrinsic = sp_runtime::OpaqueExtrinsic;
+}
+
 /// Trait to fetch data about an account.
 ///
 /// Should be implemented on a type implementing `StorageEntry`,
