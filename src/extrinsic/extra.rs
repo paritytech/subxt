@@ -25,7 +25,10 @@ use core::{
 use scale_info::TypeInfo;
 use sp_runtime::{
     generic::Era,
-    traits::SignedExtension,
+    traits::{
+        DispatchInfoOf,
+        SignedExtension,
+    },
     transaction_validity::TransactionValidityError,
 };
 
@@ -68,6 +71,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Ensure the transaction version registered in the transaction is the same as at present.
@@ -99,6 +111,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Check genesis hash
@@ -129,6 +150,15 @@ where
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
     }
 }
 
@@ -163,6 +193,15 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(self.1)
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Nonce check and increment to give replay protection for transactions.
@@ -182,6 +221,15 @@ where
     fn additional_signed(
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
         Ok(())
     }
 }
@@ -205,16 +253,31 @@ where
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct ChargeTransactionPayment(#[codec(compact)] pub u128);
+pub struct ChargeAssetTxPayment {
+    /// The tip for the block author.
+    #[codec(compact)]
+    pub tip: u128,
+    /// The asset with which to pay the tip.
+    pub asset_id: Option<u32>,
+}
 
-impl SignedExtension for ChargeTransactionPayment {
-    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
+impl SignedExtension for ChargeAssetTxPayment {
+    const IDENTIFIER: &'static str = "ChargeAssetTxPayment";
     type AccountId = u64;
     type Call = ();
     type AdditionalSigned = ();
@@ -224,12 +287,23 @@ impl SignedExtension for ChargeTransactionPayment {
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         Ok(())
     }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
 }
 
 /// Trait for implementing transaction extras for a runtime.
 pub trait SignedExtra<T: Config>: SignedExtension {
     /// The type the extras.
     type Extra: SignedExtension + Send + Sync;
+    /// The additional config parameters.
+    type Parameters: Default + Send + Sync;
 
     /// Creates a new `SignedExtra`.
     fn new(
@@ -237,6 +311,7 @@ pub trait SignedExtra<T: Config>: SignedExtension {
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
+        additional_params: Self::Parameters,
     ) -> Self;
 
     /// Returns the transaction extra.
@@ -261,14 +336,16 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
         CheckMortality<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        ChargeTransactionPayment,
+        ChargeAssetTxPayment,
     );
+    type Parameters = ();
 
     fn new(
         spec_version: u32,
         tx_version: u32,
         nonce: T::Index,
         genesis_hash: T::Hash,
+        _params: Self::Parameters,
     ) -> Self {
         DefaultExtra {
             spec_version,
@@ -286,7 +363,10 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
             CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeTransactionPayment(u128::default()),
+            ChargeAssetTxPayment {
+                tip: u128::default(),
+                asset_id: None,
+            },
         )
     }
 }
@@ -303,5 +383,14 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultEx
         &self,
     ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
         self.extra().additional_signed()
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
     }
 }

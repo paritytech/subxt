@@ -35,6 +35,17 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
+    simple_transfer().await?;
+    simple_transfer_separate_events().await?;
+    handle_transfer_events().await?;
+
+    Ok(())
+}
+
+/// This is the highest level approach to using this API. We use `wait_for_finalized_success`
+/// to wait for the transaction to make it into a finalized block, and also ensure that the
+/// transaction was successful according to the associated events.
+async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
@@ -42,17 +53,144 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
-    let result = api
+
+    let balance_transfer = api
+        .tx()
+        .balances()
+        .transfer(dest, 10_000)
+        .sign_and_submit_then_watch(&signer)
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+
+    let transfer_event =
+        balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
+
+    if let Some(event) = transfer_event {
+        println!("Balance transfer success: value: {:?}", event.2);
+    } else {
+        println!("Failed to find Balances::Transfer Event");
+    }
+    Ok(())
+}
+
+/// This is very similar to `simple_transfer`, except to show that we can handle
+/// waiting for the transaction to be finalized separately from obtaining and checking
+/// for success on the events.
+async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Error>> {
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let dest = AccountKeyring::Bob.to_account_id().into();
+
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+
+    let balance_transfer = api
+        .tx()
+        .balances()
+        .transfer(dest, 10_000)
+        .sign_and_submit_then_watch(&signer)
+        .await?
+        .wait_for_finalized()
+        .await?;
+
+    // Now we know it's been finalized, we can get hold of a couple of
+    // details, including events. Calling `wait_for_finalized_success` is
+    // equivalent to calling `wait_for_finalized` and then `wait_for_success`:
+    let _events = balance_transfer.wait_for_success().await?;
+
+    // Alternately, we could just `fetch_events`, which grabs all of the events like
+    // the above, but does not check for success, and leaves it up to you:
+    let events = balance_transfer.fetch_events().await?;
+
+    let failed_event =
+        events.find_first_event::<polkadot::system::events::ExtrinsicFailed>()?;
+
+    if let Some(_ev) = failed_event {
+        // We found a failed event; the transfer didn't succeed.
+        println!("Balance transfer failed");
+    } else {
+        // We didn't find a failed event; the transfer succeeded. Find
+        // more details about it to report..
+        let transfer_event =
+            events.find_first_event::<polkadot::balances::events::Transfer>()?;
+        if let Some(event) = transfer_event {
+            println!("Balance transfer success: value: {:?}", event.2);
+        } else {
+            println!("Failed to find Balances::Transfer Event");
+        }
+    }
+
+    Ok(())
+}
+
+/// If we need more visibility into the state of the transaction, we can also ditch
+/// `wait_for_finalized` entirely and stream the transaction progress events, handling
+/// them more manually.
+async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let dest = AccountKeyring::Bob.to_account_id().into();
+
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+
+    let mut balance_transfer_progress = api
         .tx()
         .balances()
         .transfer(dest, 10_000)
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    if let Some(event) = result.find_event::<polkadot::balances::events::Transfer>()? {
-        println!("Balance transfer success: value: {:?}", event.2);
-    } else {
-        println!("Failed to find Balances::Transfer Event");
+    while let Some(ev) = balance_transfer_progress.next().await? {
+        use subxt::TransactionStatus::*;
+
+        // Made it into a block, but not finalized.
+        if let InBlock(details) = ev {
+            println!(
+                "Transaction {:?} made it into block {:?}",
+                details.extrinsic_hash(),
+                details.block_hash()
+            );
+
+            let events = details.wait_for_success().await?;
+            let transfer_event =
+                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+
+            if let Some(event) = transfer_event {
+                println!(
+                    "Balance transfer is now in block (but not finalized): value: {:?}",
+                    event.2
+                );
+            } else {
+                println!("Failed to find Balances::Transfer Event");
+            }
+        }
+        // Finalized!
+        else if let Finalized(details) = ev {
+            println!(
+                "Transaction {:?} is finalized in block {:?}",
+                details.extrinsic_hash(),
+                details.block_hash()
+            );
+
+            let events = details.wait_for_success().await?;
+            let transfer_event =
+                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+
+            if let Some(event) = transfer_event {
+                println!("Balance transfer success: value: {:?}", event.2);
+            } else {
+                println!("Failed to find Balances::Transfer Event");
+            }
+        }
+        // Report other statuses we see.
+        else {
+            println!("Current transaction status: {:?}", ev);
+        }
     }
+
     Ok(())
 }

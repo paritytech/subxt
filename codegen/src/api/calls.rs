@@ -68,7 +68,7 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<T, #call_struct_name> {
+                ) -> ::subxt::SubmittableExtrinsic<'a, T, #call_struct_name> {
                     let call = #call_struct_name { #( #call_args, )* };
                     ::subxt::SubmittableExtrinsic::new(self.client, call)
                 }

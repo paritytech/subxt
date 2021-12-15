@@ -14,11 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-#[subxt::subxt(
-    runtime_metadata_path = "tests/integration/node_runtime.scale",
-    generated_type_derives = "Debug, Eq, PartialEq"
-)]
-pub mod node_runtime {
-    #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
-    use sp_runtime::Perbill;
+use crate::test_context;
+
+#[async_std::test]
+async fn storage_get_current_timestamp() {
+    let cxt = test_context().await;
+
+    let timestamp = cxt.api.storage().timestamp().now(None).await;
+
+    assert!(timestamp.is_ok())
 }

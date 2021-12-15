@@ -19,6 +19,7 @@ use codec::{
     Compact,
     Decode,
     Encode,
+    Error as CodecError,
     Input,
 };
 use std::marker::PhantomData;
@@ -30,9 +31,9 @@ use crate::{
     },
     Config,
     Error,
+    Event,
     Metadata,
     Phase,
-    RuntimeError,
 };
 use scale_info::{
     TypeDef,
@@ -42,6 +43,7 @@ use sp_core::Bytes;
 
 /// Raw bytes for an Event
 #[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq, Clone))]
 pub struct RawEvent {
     /// The name of the pallet from whence the Event originated.
     pub pallet: String,
@@ -53,6 +55,17 @@ pub struct RawEvent {
     pub variant_index: u8,
     /// The raw Event data
     pub data: Bytes,
+}
+
+impl RawEvent {
+    /// Attempt to decode this [`RawEvent`] into a specific event.
+    pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+        if self.pallet == E::PALLET && self.variant == E::EVENT {
+            Ok(Some(E::decode(&mut &self.data[..])?))
+        } else {
+            Ok(None)
+        }
+    }
 }
 
 /// Events decoder.
@@ -75,7 +88,10 @@ where
     }
 
     /// Decode events.
-    pub fn decode_events(&self, input: &mut &[u8]) -> Result<Vec<(Phase, Raw)>, Error> {
+    pub fn decode_events(
+        &self,
+        input: &mut &[u8],
+    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
         log::debug!("decoding {} events", len);
@@ -97,13 +113,7 @@ where
             let event_metadata = self.metadata.event(pallet_index, variant_index)?;
 
             let mut event_data = Vec::<u8>::new();
-            let mut event_errors = Vec::<RuntimeError>::new();
-            let result = self.decode_raw_event(
-                &event_metadata,
-                input,
-                &mut event_data,
-                &mut event_errors,
-            );
+            let result = self.decode_raw_event(event_metadata, input, &mut event_data);
             let raw = match result {
                 Ok(()) => {
                     log::debug!("raw bytes: {}", hex::encode(&event_data),);
@@ -120,18 +130,11 @@ where
                     let topics = Vec::<T::Hash>::decode(input)?;
                     log::debug!("topics: {:?}", topics);
 
-                    Raw::Event(event)
+                    event
                 }
                 Err(err) => return Err(err),
             };
-
-            if event_errors.is_empty() {
-                r.push((phase.clone(), raw));
-            }
-
-            for err in event_errors {
-                r.push((phase.clone(), Raw::Error(err)));
-            }
+            r.push((phase.clone(), raw));
         }
         Ok(r)
     }
@@ -141,7 +144,6 @@ where
         event_metadata: &EventMetadata,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-        errors: &mut Vec<RuntimeError>,
     ) -> Result<(), Error> {
         log::debug!(
             "Decoding Event '{}::{}'",
@@ -150,24 +152,6 @@ where
         );
         for arg in event_metadata.variant().fields() {
             let type_id = arg.ty().id();
-            if event_metadata.pallet() == "System"
-                && event_metadata.event() == "ExtrinsicFailed"
-            {
-                let ty = self
-                    .metadata
-                    .resolve_type(type_id)
-                    .ok_or(MetadataError::TypeNotFound(type_id))?;
-
-                if ty.path().ident() == Some("DispatchError".to_string()) {
-                    let dispatch_error = sp_runtime::DispatchError::decode(input)?;
-                    log::info!("Dispatch Error {:?}", dispatch_error);
-                    dispatch_error.encode_to(output);
-                    let runtime_error =
-                        RuntimeError::from_dispatch(&self.metadata, dispatch_error)?;
-                    errors.push(runtime_error);
-                    continue
-                }
-            }
             self.decode_type(type_id, input, output)?
         }
         Ok(())
@@ -203,9 +187,13 @@ where
             TypeDef::Variant(variant) => {
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant = variant.variants().get(variant_index as usize).ok_or(
-                    Error::Other(format!("Variant {} not found", variant_index)),
-                )?;
+                let variant =
+                    variant
+                        .variants()
+                        .get(variant_index as usize)
+                        .ok_or_else(|| {
+                            Error::Other(format!("Variant {} not found", variant_index))
+                        })?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
@@ -298,15 +286,21 @@ where
                     TypeDef::Composite(composite) => {
                         match composite.fields() {
                             [field] => {
-                                let field_ty =
-                                    self.metadata.resolve_type(field.ty().id()).ok_or(
-                                        MetadataError::TypeNotFound(field.ty().id()),
-                                    )?;
+                                let field_ty = self
+                                    .metadata
+                                    .resolve_type(field.ty().id())
+                                    .ok_or_else(|| {
+                                        MetadataError::TypeNotFound(field.ty().id())
+                                    })?;
                                 if let TypeDef::Primitive(primitive) = field_ty.type_def()
                                 {
                                     decode_compact_primitive(primitive)
                                 } else {
-                                    Err(EventsDecodingError::InvalidCompactType("Composite type must have a single primitive field".into()).into())
+                                    Err(EventsDecodingError::InvalidCompactType(
+                                    "Composite type must have a single primitive field"
+                                        .into(),
+                                )
+                                .into())
                                 }
                             }
                             _ => {
@@ -331,15 +325,6 @@ where
             }
         }
     }
-}
-
-/// Raw event or error event
-#[derive(Debug)]
-pub enum Raw {
-    /// Event
-    Event(RawEvent),
-    /// Error
-    Error(RuntimeError),
 }
 
 #[derive(Debug, thiserror::Error)]

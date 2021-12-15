@@ -44,7 +44,7 @@ pub fn generate_storage(
     let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
         .entries
         .iter()
-        .map(|entry| generate_storage_entry_fns(&type_gen, &pallet, entry))
+        .map(|entry| generate_storage_entry_fns(type_gen, pallet, entry))
         .unzip();
 
     quote! {

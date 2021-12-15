@@ -64,15 +64,11 @@ where
 
     /// Attempt to kill the running substrate process.
     pub fn kill(&mut self) -> Result<(), String> {
-        log::info!("Killing contracts node process {}", self.proc.id());
+        log::info!("Killing node process {}", self.proc.id());
         if let Err(err) = self.proc.kill() {
-            let err = format!(
-                "Error killing contracts node process {}: {}",
-                self.proc.id(),
-                err
-            );
+            let err = format!("Error killing node process {}: {}", self.proc.id(), err);
             log::error!("{}", err);
-            return Err(err.into())
+            return Err(err)
         }
         Ok(())
     }
@@ -132,7 +128,7 @@ impl TestNodeProcessBuilder {
 
         let ws_port = if self.scan_port_range {
             let (p2p_port, http_port, ws_port) = next_open_port()
-                .ok_or("No available ports in the given port range".to_owned())?;
+                .ok_or_else(|| "No available ports in the given port range".to_owned())?;
 
             cmd.arg(format!("--port={}", p2p_port));
             cmd.arg(format!("--rpc-port={}", http_port));
@@ -169,7 +165,7 @@ impl TestNodeProcessBuilder {
                 Err(err) => {
                     if attempts < MAX_ATTEMPTS {
                         attempts += 1;
-                        wait_secs = wait_secs * 2; // backoff
+                        wait_secs *= 2; // backoff
                         continue
                     }
                     break Err(err)
@@ -187,7 +183,7 @@ impl TestNodeProcessBuilder {
                 proc.kill().map_err(|e| {
                     format!("Error killing substrate process '{}': {}", proc.id(), e)
                 })?;
-                Err(err.into())
+                Err(err)
             }
         }
     }
@@ -216,14 +212,11 @@ fn next_open_port() -> Option<(u16, u16, u16)> {
             Ordering::SeqCst,
         );
         let next = PORT.fetch_add(1, Ordering::SeqCst);
-        match TcpListener::bind(("0.0.0.0", next)) {
-            Ok(_) => {
-                ports.push(next);
-                if ports.len() == 3 {
-                    return Some((ports[0], ports[1], ports[2]))
-                }
+        if TcpListener::bind(("0.0.0.0", next)).is_ok() {
+            ports.push(next);
+            if ports.len() == 3 {
+                return Some((ports[0], ports[1], ports[2]))
             }
-            Err(_) => (),
         }
         ports_scanned += 1;
         if ports_scanned == MAX_PORTS {

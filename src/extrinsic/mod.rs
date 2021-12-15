@@ -21,7 +21,7 @@ mod signer;
 
 pub use self::{
     extra::{
-        ChargeTransactionPayment,
+        ChargeAssetTxPayment,
         CheckGenesis,
         CheckMortality,
         CheckNonce,
@@ -68,6 +68,7 @@ pub async fn create_signed<T>(
     nonce: T::Index,
     call: Encoded,
     signer: &(dyn Signer<T> + Send + Sync),
+    additional_params: <T::Extra as SignedExtra<T>>::Parameters,
 ) -> Result<UncheckedExtrinsic<T>, Error>
 where
     T: Config + ExtrinsicExtraData<T>,
@@ -81,6 +82,7 @@ where
         tx_version,
         nonce,
         genesis_hash,
+        additional_params,
     );
     let payload = SignedPayload::<T>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;

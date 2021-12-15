@@ -1,7 +1,14 @@
 [package]
 name = "subxt-codegen"
-version = "0.1.0"
+version = "0.2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/subxt"
+documentation = "https://docs.rs/subxt-codegen"
+homepage = "https://www.parity.io/"
+description = "Generate an API for interacting with a substrate node from FRAME metadata"
 
 [dependencies]
 async-trait = "0.1.49"

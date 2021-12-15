@@ -1,5 +1,5 @@
 [workspace]
-members = [".", "cli", "codegen", "macro"]
+members = [".", "cli", "codegen", "macro", "test-runtime"]
 
 [package]
 name = "subxt"
@@ -16,12 +16,6 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
 
-[features]
-default = ["tokio1"]
-# jsonrpsee can be configured to use tokio02 or tokio1.
-tokio02 = ["jsonrpsee-http-client/tokio02", "jsonrpsee-ws-client/tokio02"]
-tokio1 = ["jsonrpsee-http-client/tokio1", "jsonrpsee-ws-client/tokio1"]
-
 [dependencies]
 async-trait = "0.1.49"
 bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
@@ -30,10 +24,7 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee-proc-macros = "0.3.0"
-jsonrpsee-ws-client = { version = "0.3.0", default-features = false }
-jsonrpsee-http-client = { version = "0.3.0", default-features = false }
-jsonrpsee-types = "0.3.0"
+jsonrpsee = { version = "0.5.1", features = ["macros", "ws-client", "http-client"] }
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
@@ -43,7 +34,6 @@ url = "2.2.1"
 
 subxt-macro = { version = "0.1.0", path = "macro" }
 
-sp-arithmetic = { package = "sp-arithmetic", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
 sp-core = { package = "sp-core", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
 sp-runtime = { package = "sp-runtime", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
 sp-version = { package = "sp-version", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
@@ -51,12 +41,13 @@ sp-version = { package = "sp-version", git = "https://tributary.semantic-network
 frame-metadata = "14.0.0"
 
 [dev-dependencies]
+sp-arithmetic = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
+test-runtime = { path = "test-runtime" }
 
 sp-keyring = { package = "sp-keyring", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
-

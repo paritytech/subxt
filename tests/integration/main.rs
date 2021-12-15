@@ -15,7 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod codegen;
-mod runtime;
 mod utils;
 
 #[cfg(test)]
@@ -23,5 +22,5 @@ mod client;
 #[cfg(test)]
 mod frame;
 
-pub use runtime::node_runtime;
+pub use test_runtime::node_runtime;
 pub use utils::*;

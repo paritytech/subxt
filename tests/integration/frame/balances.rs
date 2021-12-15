@@ -41,7 +41,7 @@ use subxt::{
 };
 
 #[async_std::test]
-async fn tx_basic_transfer() {
+async fn tx_basic_transfer() -> Result<(), subxt::Error> {
     let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
     let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
@@ -51,54 +51,52 @@ async fn tx_basic_transfer() {
     let alice_pre = api
         .storage()
         .system()
-        .account(alice.account_id().clone().into(), None)
-        .await
-        .unwrap();
+        .account(alice.account_id().clone(), None)
+        .await?;
     let bob_pre = api
         .storage()
         .system()
-        .account(bob.account_id().clone().into(), None)
-        .await
-        .unwrap();
+        .account(bob.account_id().clone(), None)
+        .await?;
 
-    let result = api
+    let events = api
         .tx()
         .balances()
         .transfer(bob_address, 10_000)
         .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-    let event = result
-        .find_event::<balances::events::Transfer>()
-        .unwrap()
-        .unwrap();
-    let _extrinsic_success = result
-        .find_event::<system::events::ExtrinsicSuccess>()
-        .expect("Failed to decode ExtrinisicSuccess".into())
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+    let event = events
+        .find_first_event::<balances::events::Transfer>()
+        .expect("Failed to decode balances::events::Transfer")
+        .expect("Failed to find balances::events::Transfer");
+    let _extrinsic_success = events
+        .find_first_event::<system::events::ExtrinsicSuccess>()
+        .expect("Failed to decode ExtrinisicSuccess")
         .expect("Failed to find ExtrinisicSuccess");
 
-    let expected_event = balances::events::Transfer(
-        alice.account_id().clone(),
-        bob.account_id().clone(),
-        10_000,
-    );
+    let expected_event = balances::events::Transfer {
+        from: alice.account_id().clone(),
+        to: bob.account_id().clone(),
+        amount: 10_000,
+    };
     assert_eq!(event, expected_event);
 
     let alice_post = api
         .storage()
         .system()
-        .account(alice.account_id().clone().into(), None)
-        .await
-        .unwrap();
+        .account(alice.account_id().clone(), None)
+        .await?;
     let bob_post = api
         .storage()
         .system()
-        .account(bob.account_id().clone().into(), None)
-        .await
-        .unwrap();
+        .account(bob.account_id().clone(), None)
+        .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
+    Ok(())
 }
 
 #[async_std::test]
@@ -120,8 +118,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
-    let result = cxt
-        .api
+    cxt.api
         .tx()
         .staking()
         .bond(
@@ -130,10 +127,11 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
             runtime_types::pallet_staking::RewardDestination::Stash,
         )
         .sign_and_submit_then_watch(&bob)
-        .await?;
-
-    let success = result.find_event::<system::events::ExtrinsicSuccess>()?;
-    assert!(success.is_some(), "No ExtrinsicSuccess Event found");
+        .await?
+        .wait_for_finalized_success()
+        .await?
+        .find_first_event::<system::events::ExtrinsicSuccess>()?
+        .expect("No ExtrinsicSuccess Event found");
 
     let locks = cxt
         .api
@@ -169,6 +167,9 @@ async fn transfer_error() {
         .transfer(hans_address, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
         .unwrap();
 
     let res = cxt
@@ -177,6 +178,9 @@ async fn transfer_error() {
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&hans)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
         .await;
 
     if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
@@ -187,7 +191,7 @@ async fn transfer_error() {
         };
         assert_eq!(error, error2);
     } else {
-        panic!("expected an error");
+        panic!("expected a runtime module error");
     }
 }
 
@@ -200,7 +204,7 @@ async fn transfer_subscription() {
     let cxt = test_context().await;
     let sub = cxt.client().rpc().subscribe_events().await.unwrap();
     let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig>::new(sub, &decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<balances::events::Transfer>();
 
     cxt.api
@@ -215,7 +219,44 @@ async fn transfer_subscription() {
     let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
     assert_eq!(
         event,
-        balances::events::Transfer(alice.account_id().clone(), bob.clone(), 10_000,)
+        balances::events::Transfer {
+            from: alice.account_id().clone(),
+            to: bob.clone(),
+            amount: 10_000
+        }
+    );
+}
+
+#[async_std::test]
+async fn transfer_implicit_subscription() {
+    env_logger::try_init().ok();
+    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let bob = AccountKeyring::Bob.to_account_id();
+    let bob_addr = bob.clone().into();
+    let cxt = test_context().await;
+
+    let event = cxt
+        .api
+        .tx()
+        .balances()
+        .transfer(bob_addr, 10_000)
+        .sign_and_submit_then_watch(&alice)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap()
+        .find_first_event::<balances::events::Transfer>()
+        .expect("Can decode events")
+        .expect("Can find balance transfer event");
+
+    assert_eq!(
+        event,
+        balances::events::Transfer {
+            from: alice.account_id().clone(),
+            to: bob.clone(),
+            amount: 10_000
+        }
     );
 }
 

@@ -22,7 +22,7 @@ use crate::{
     },
     Metadata,
 };
-use jsonrpsee_types::Error as RequestError;
+use jsonrpsee::types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
     transaction_validity::TransactionValidityError,
@@ -63,6 +63,9 @@ pub enum Error {
     /// Events decoding error.
     #[error("Events decoding error: {0}")]
     EventsDecoding(#[from] EventsDecodingError),
+    /// Transaction progress error.
+    #[error("Transaction error: {0}")]
+    Transaction(#[from] TransactionError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -104,6 +107,9 @@ pub enum RuntimeError {
     /// There are no providers so the account cannot be created.
     #[error("There are no providers so the account cannot be created.")]
     NoProviders,
+    /// There are too many consumers so the account cannot be created.
+    #[error("There are too many consumers so the account cannot be created.")]
+    TooManyConsumers,
     /// Bad origin.
     #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
     BadOrigin,
@@ -138,6 +144,7 @@ impl RuntimeError {
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
+            DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
             DispatchError::Arithmetic(_math_error) => {
                 Ok(Self::Other("math_error".into()))
             }
@@ -157,4 +164,17 @@ pub struct PalletError {
     pub error: String,
     /// The error description.
     pub description: Vec<String>,
+}
+
+/// Transaction error.
+#[derive(Clone, Debug, Eq, Error, PartialEq)]
+pub enum TransactionError {
+    /// The finality subscription expired (after ~512 blocks we give up if the
+    /// block hasn't yet been finalized).
+    #[error("The finality subscription expired")]
+    FinalitySubscriptionTimeout,
+    /// The block hash that the tranaction was added to could not be found.
+    /// This is probably because the block was retracted before being finalized.
+    #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
+    BlockHashNotFound,
 }

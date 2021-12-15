@@ -15,9 +15,9 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    runtime::node_runtime::system,
     test_node_process,
     test_node_process_with,
+    utils::node_runtime::system,
 };
 
 use sp_core::storage::{
@@ -117,7 +117,7 @@ async fn test_iter() {
         .await
         .unwrap();
     let mut i = 0;
-    while let Some(_) = iter.next().await.unwrap() {
+    while iter.next().await.unwrap().is_some() {
         i += 1;
     }
     assert_eq!(i, 13);

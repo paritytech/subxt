@@ -1,0 +1,58 @@
+name: Daily compatibility check against latest substrate
+
+on:
+  schedule:
+    # Run at 8am every day
+    - cron: "0 8 * * *"
+
+
+env:
+  CARGO_TERM_COLOR: always
+  # Use latest substrate for nightly runs:
+  SUBSTRATE_URL: https://releases.parity.io/substrate/x86_64-debian:stretch/latest/substrate/substrate
+
+jobs:
+  tests:
+    name: Cargo test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout sources
+        uses: actions/checkout@v2
+
+      - name: Download Substrate
+        run: |
+            curl $SUBSTRATE_URL --output substrate --location
+            chmod +x substrate
+            mkdir -p ~/.local/bin
+            mv substrate ~/.local/bin
+
+      - name: Install Rust stable toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: stable
+          override: true
+
+      - name: Rust Cache
+        uses: Swatinem/rust-cache@v1.3.0
+
+      - name: Cargo test
+        uses: actions-rs/cargo@v1.0.3
+        with:
+          command: test
+          args: --all-targets --workspace
+
+      # If the previous step fails, create a new Github issue
+      # to nofity us about it.
+      - if: ${{ failure() }}
+        uses: JasonEtco/create-an-issue@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Use this issue template:
+          filename: .github/issue_templates/nightly_run_failed.md
+          # Don't create a new issue; skip updating existing:
+          update_existing: false
+          # Look for new *open* issues in this search (we want to
+          # create a new one if we only find closed versions):
+          search_existing: open

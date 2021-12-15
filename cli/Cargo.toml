@@ -1,7 +1,14 @@
 [package]
 name = "subxt-cli"
-version = "0.1.0"
+version = "0.2.0"
+authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
+
+license = "GPL-3.0"
+repository = "https://github.com/paritytech/subxt"
+documentation = "https://docs.rs/subxt-cli"
+homepage = "https://www.parity.io/"
+description = "Command line utilities for working with subxt codegen"
 
 [[bin]]
 name = "subxt"
@@ -9,7 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.1.0", path = "../codegen" }
+subxt-codegen = { version = "0.2.0", path = "../codegen" }
 # parse command line args
 structopt = "0.3.25"
 # make the request to a substrate node to get the metadata
