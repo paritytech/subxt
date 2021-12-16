@@ -92,6 +92,7 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         PairSigner,
         SignedExtra,
         Signer,

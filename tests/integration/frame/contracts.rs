@@ -27,6 +27,7 @@ use crate::{
         DefaultAccountData,
     },
     test_context,
+    NodeRuntimeSignedExtra,
     TestContext,
 };
 use sp_core::sr25519::Pair;
@@ -35,7 +36,6 @@ use subxt::{
     Client,
     Config,
     DefaultConfig,
-    DefaultExtra,
     Error,
     PairSigner,
     TransactionProgress,
@@ -43,7 +43,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, DefaultExtra<DefaultConfig>, Pair>,
+    signer: PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;
@@ -63,8 +63,7 @@ impl ContractsTestContext {
 
     fn contracts_tx(
         &self,
-    ) -> TransactionApi<DefaultConfig, DefaultExtra<DefaultConfig>, DefaultAccountData>
-    {
+    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData> {
         self.cxt.api.tx().contracts()
     }
 

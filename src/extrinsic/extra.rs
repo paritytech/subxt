@@ -62,7 +62,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckSpecVersion";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = u32;
     type Pre = ();
@@ -102,7 +102,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckTxVersion";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = u32;
     type Pre = ();
@@ -142,7 +142,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckGenesis";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
@@ -184,7 +184,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckMortality";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = T::Hash;
     type Pre = ();
@@ -214,7 +214,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckNonce";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
@@ -244,7 +244,7 @@ where
     T: Config + Clone + Debug + Eq + Send + Sync,
 {
     const IDENTIFIER: &'static str = "CheckWeight";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
@@ -266,19 +266,58 @@ where
 
 /// Require the transactor pay for themselves and maybe include a tip to gain additional priority
 /// in the queue.
-#[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
+#[derive(Encode, Decode, Clone, Debug, Default, Eq, PartialEq, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct ChargeAssetTxPayment {
+pub struct ChargeTransactionPayment<T: Config>(
+    #[codec(compact)] u128,
+    pub PhantomData<T>,
+);
+
+impl<T> SignedExtension for ChargeTransactionPayment<T>
+where
+    T: Config + Clone + Debug + Eq + Send + Sync,
+{
+    const IDENTIFIER: &'static str = "ChargeTransactionPayment";
+    type AccountId = T::AccountId;
+    type Call = ();
+    type AdditionalSigned = ();
+    type Pre = ();
+    fn additional_signed(
+        &self,
+    ) -> Result<Self::AdditionalSigned, TransactionValidityError> {
+        Ok(())
+    }
+    fn pre_dispatch(
+        self,
+        _who: &Self::AccountId,
+        _call: &Self::Call,
+        _info: &DispatchInfoOf<Self::Call>,
+        _len: usize,
+    ) -> Result<Self::Pre, TransactionValidityError> {
+        Ok(())
+    }
+}
+
+/// Require the transactor pay for themselves and maybe include a tip to gain additional priority
+/// in the queue.
+#[derive(Encode, Decode, Clone, Default, Eq, PartialEq, Debug, TypeInfo)]
+#[scale_info(skip_type_params(T))]
+pub struct ChargeAssetTxPayment<T: Config> {
     /// The tip for the block author.
     #[codec(compact)]
     pub tip: u128,
     /// The asset with which to pay the tip.
     pub asset_id: Option<u32>,
+    /// Marker for unused type parameter.
+    pub marker: PhantomData<T>,
 }
 
-impl SignedExtension for ChargeAssetTxPayment {
+impl<T> SignedExtension for ChargeAssetTxPayment<T>
+where
+    T: Config + Clone + Debug + Eq + Send + Sync,
+{
     const IDENTIFIER: &'static str = "ChargeAssetTxPayment";
-    type AccountId = u64;
+    type AccountId = T::AccountId;
     type Call = ();
     type AdditionalSigned = ();
     type Pre = ();
@@ -321,14 +360,19 @@ pub trait SignedExtra<T: Config>: SignedExtension {
 /// Default `SignedExtra` for substrate runtimes.
 #[derive(Encode, Decode, Clone, Eq, PartialEq, Debug, TypeInfo)]
 #[scale_info(skip_type_params(T))]
-pub struct DefaultExtra<T: Config> {
+pub struct DefaultExtraWithTxPayment<T: Config, X> {
     spec_version: u32,
     tx_version: u32,
     nonce: T::Index,
     genesis_hash: T::Hash,
+    marker: PhantomData<X>,
 }
 
-impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExtra<T> {
+impl<T, X> SignedExtra<T> for DefaultExtraWithTxPayment<T, X>
+where
+    T: Config + Clone + Debug + Eq + Send + Sync,
+    X: SignedExtension<AccountId = T::AccountId, Call = ()> + Default,
+{
     type Extra = (
         CheckSpecVersion<T>,
         CheckTxVersion<T>,
@@ -336,7 +380,7 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
         CheckMortality<T>,
         CheckNonce<T>,
         CheckWeight<T>,
-        ChargeAssetTxPayment,
+        X,
     );
     type Parameters = ();
 
@@ -347,11 +391,12 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
         genesis_hash: T::Hash,
         _params: Self::Parameters,
     ) -> Self {
-        DefaultExtra {
+        DefaultExtraWithTxPayment {
             spec_version,
             tx_version,
             nonce,
             genesis_hash,
+            marker: PhantomData,
         }
     }
 
@@ -363,15 +408,17 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtra<T> for DefaultExt
             CheckMortality((Era::Immortal, PhantomData), self.genesis_hash),
             CheckNonce(self.nonce),
             CheckWeight(PhantomData),
-            ChargeAssetTxPayment {
-                tip: u128::default(),
-                asset_id: None,
-            },
+            X::default(),
         )
     }
 }
 
-impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultExtra<T> {
+impl<T, X: SignedExtension<AccountId = T::AccountId, Call = ()> + Default> SignedExtension
+    for DefaultExtraWithTxPayment<T, X>
+where
+    T: Config + Clone + Debug + Eq + Send + Sync,
+    X: SignedExtension,
+{
     const IDENTIFIER: &'static str = "DefaultExtra";
     type AccountId = T::AccountId;
     type Call = ();
@@ -394,3 +441,8 @@ impl<T: Config + Clone + Debug + Eq + Send + Sync> SignedExtension for DefaultEx
         Ok(())
     }
 }
+
+/// A default `SignedExtra` configuration, with [`ChargeTransactionPayment`] for tipping.
+///
+/// Note that this must match the `SignedExtra` type in the target runtime's extrinsic definition.
+pub type DefaultExtra<T> = DefaultExtraWithTxPayment<T, ChargeTransactionPayment<T>>;

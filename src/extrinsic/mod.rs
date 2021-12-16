@@ -29,6 +29,7 @@ pub use self::{
         CheckTxVersion,
         CheckWeight,
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         SignedExtra,
     },
     signer::{

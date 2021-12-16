@@ -32,7 +32,7 @@ use sp_runtime::traits::{
 };
 
 /// Runtime types.
-pub trait Config: Clone + Sized + Send + Sync + 'static {
+pub trait Config: Clone + Default + Sized + Send + Sync + 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter + Member + Default + AtLeast32Bit + Copy + scale_info::TypeInfo;
@@ -83,8 +83,8 @@ pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
 /// Default set of commonly used types by Substrate runtimes.
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub enum DefaultConfig {}
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
+pub struct DefaultConfig;
 
 impl Config for DefaultConfig {
     type Index = u32;
