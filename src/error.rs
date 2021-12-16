@@ -16,12 +16,18 @@
 
 use crate::{
     events::EventsDecodingError,
-    metadata::{InvalidMetadataError, MetadataError},
+    metadata::{
+        InvalidMetadataError,
+        MetadataError,
+    },
     Metadata,
 };
 use jsonrpsee::types::Error as RequestError;
 use sp_core::crypto::SecretStringError;
-use sp_runtime::{transaction_validity::TransactionValidityError, DispatchError};
+use sp_runtime::{
+    transaction_validity::TransactionValidityError,
+    DispatchError,
+};
 use thiserror::Error;
 
 /// Error enum.
@@ -102,8 +108,8 @@ pub enum RuntimeError {
     #[error("There are no providers so the account cannot be created.")]
     NoProviders,
     /// There are too many consumers so the account cannot be created.
-    //#[error("There are too many consumers so the account cannot be created.")]
-    //TooManyConsumers,
+    #[error("There are too many consumers so the account cannot be created.")]
+    TooManyConsumers,
     /// Bad origin.
     #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
     BadOrigin,
@@ -138,7 +144,7 @@ impl RuntimeError {
             DispatchError::CannotLookup => Ok(Self::CannotLookup),
             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
             DispatchError::NoProviders => Ok(Self::NoProviders),
-            //DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
+            DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
             DispatchError::Arithmetic(_math_error) => {
                 Ok(Self::Other("math_error".into()))
             }
