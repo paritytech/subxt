@@ -22,7 +22,11 @@
 //! polkadot --dev --tmp
 //! ```
 
-use subxt::ClientBuilder;
+use subxt::{
+    ClientBuilder,
+    DefaultConfig,
+    DefaultExtra,
+};
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -34,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
     let mut iter = api.storage().system().account_iter(None).await?;
 

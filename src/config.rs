@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    SignedExtra,
-    StorageEntry,
-};
+use crate::StorageEntry;
 use codec::{
     Codec,
     Encode,
@@ -33,16 +30,6 @@ use sp_runtime::traits::{
     Member,
     Verify,
 };
-
-/// todo: [AJ] comment
-pub trait ApiConfig {
-    /// todo: [AJ] comment
-    type Config: Config;
-    /// The type of the [`StorageEntry`] which can be used to retrieve an account nonce.
-    type AccountData: AccountData<Self::Config>;
-    /// The type of extra data and additional signed data to be included in a transaction.
-    type Extra: SignedExtra<Self::Config> + Send + Sync + 'static;
-}
 
 /// Runtime types.
 pub trait Config: Clone + Sized + Send + Sync + 'static {
@@ -95,7 +82,8 @@ pub trait Config: Clone + Sized + Send + Sync + 'static {
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
-#[derive(Clone, Debug)]
+/// Default set of commonly used types by Substrate runtimes.
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub enum DefaultConfig {}
 
 impl Config for DefaultConfig {

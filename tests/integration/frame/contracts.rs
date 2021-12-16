@@ -24,7 +24,7 @@ use crate::{
             storage,
         },
         system,
-        DefaultConfig,
+        DefaultAccountData,
     },
     test_context,
     TestContext,
@@ -34,6 +34,8 @@ use sp_runtime::MultiAddress;
 use subxt::{
     Client,
     Config,
+    DefaultConfig,
+    DefaultExtra,
     Error,
     PairSigner,
     TransactionProgress,
@@ -41,7 +43,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<DefaultConfig, DefaultExtra<DefaultConfig>, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;
@@ -59,7 +61,10 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig> {
+    fn contracts_tx(
+        &self,
+    ) -> TransactionApi<DefaultConfig, DefaultExtra<DefaultConfig>, DefaultAccountData>
+    {
         self.cxt.api.tx().contracts()
     }
 

@@ -22,10 +22,7 @@ use super::{
     SignedPayload,
     UncheckedExtrinsic,
 };
-use crate::{
-    ApiConfig,
-    Config,
-};
+use crate::Config;
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
@@ -36,12 +33,12 @@ use sp_runtime::traits::{
 
 /// Extrinsic signer.
 #[async_trait::async_trait]
-pub trait Signer<T: ApiConfig> {
+pub trait Signer<T: Config, E: SignedExtra<T>> {
     /// Returns the account id.
-    fn account_id(&self) -> &<<T as ApiConfig>::Config as Config>::AccountId;
+    fn account_id(&self) -> &T::AccountId;
 
     /// Optionally returns a nonce.
-    fn nonce(&self) -> Option<<<T as ApiConfig>::Config as Config>::Index>;
+    fn nonce(&self) -> Option<T::Index>;
 
     /// Takes an unsigned extrinsic and returns a signed extrinsic.
     ///
@@ -49,42 +46,42 @@ pub trait Signer<T: ApiConfig> {
     /// refused the operation.
     async fn sign(
         &self,
-        extrinsic: SignedPayload<T>,
-    ) -> Result<UncheckedExtrinsic<T>, String>;
+        extrinsic: SignedPayload<T, E>,
+    ) -> Result<UncheckedExtrinsic<T, E>, String>;
 }
 
 /// Extrinsic signer using a private key.
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: ApiConfig, P: Pair> {
-    account_id: <<T as ApiConfig>::Config as Config>::AccountId,
-    nonce: Option<<<T as ApiConfig>::Config as Config>::Index>,
+pub struct PairSigner<T: Config, E, P: Pair> {
+    account_id: T::AccountId,
+    nonce: Option<T::Index>,
     signer: P,
+    marker: std::marker::PhantomData<E>,
 }
 
-impl<T, P> PairSigner<T, P>
+impl<T, E, P> PairSigner<T, E, P>
 where
-    T: ApiConfig,
-    <<T as ApiConfig>::Config as Config>::Signature: From<P::Signature>,
-    <<<T as ApiConfig>::Config as Config>::Signature as Verify>::Signer: From<P::Public>
-        + IdentifyAccount<AccountId = <<T as ApiConfig>::Config as Config>::AccountId>,
+    T: Config,
+    E: SignedExtra<T>,
+    T::Signature: From<P::Signature>,
+    <T::Signature as Verify>::Signer:
+        From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P: Pair,
 {
     /// Creates a new `Signer` from a `Pair`.
     pub fn new(signer: P) -> Self {
         let account_id =
-            <<<T as ApiConfig>::Config as Config>::Signature as Verify>::Signer::from(
-                signer.public(),
-            )
-            .into_account();
+            <T::Signature as Verify>::Signer::from(signer.public()).into_account();
         Self {
             account_id,
             nonce: None,
             signer,
+            marker: Default::default(),
         }
     }
 
     /// Sets the nonce to a new value.
-    pub fn set_nonce(&mut self, nonce: <<T as ApiConfig>::Config as Config>::Index) {
+    pub fn set_nonce(&mut self, nonce: T::Index) {
         self.nonce = Some(nonce);
     }
 
@@ -100,29 +97,31 @@ where
 }
 
 #[async_trait::async_trait]
-impl<T, P> Signer<T> for PairSigner<T, P>
+impl<T, E, P> Signer<T, E> for PairSigner<T, E, P>
 where
-    T: ApiConfig,
-    <<T as ApiConfig>::Config as Config>::AccountId: Into<<<T as ApiConfig>::Config as Config>::Address> + 'static,
-    <<<T as ApiConfig>::Extra as SignedExtra<<T as ApiConfig>::Config>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static,
+    T: Config,
+    E: SignedExtra<T>,
+    T::AccountId: Into<T::Address> + 'static,
+    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        Send + Sync + 'static,
     P: Pair + 'static,
-    P::Signature: Into<<<T as ApiConfig>::Config as Config>::Signature> + 'static,
+    P::Signature: Into<T::Signature> + 'static,
 {
-    fn account_id(&self) -> &<<T as ApiConfig>::Config as Config>::AccountId {
+    fn account_id(&self) -> &T::AccountId {
         &self.account_id
     }
 
-    fn nonce(&self) -> Option<<<T as ApiConfig>::Config as Config>::Index> {
+    fn nonce(&self) -> Option<T::Index> {
         self.nonce
     }
 
     async fn sign(
         &self,
-        extrinsic: SignedPayload<T>,
-    ) -> Result<UncheckedExtrinsic<T>, String> {
+        extrinsic: SignedPayload<T, E>,
+    ) -> Result<UncheckedExtrinsic<T, E>, String> {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        let extrinsic = UncheckedExtrinsic::<T>::new_signed(
+        let extrinsic = UncheckedExtrinsic::<T, E>::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),

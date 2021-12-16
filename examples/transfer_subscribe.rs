@@ -25,6 +25,8 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
+    DefaultConfig,
+    DefaultExtra,
     EventSubscription,
     PairSigner,
 };
@@ -42,11 +44,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
     let sub = api.client.rpc().subscribe_events().await?;
     let decoder = api.client.events_decoder();
-    let mut sub = EventSubscription::<polkadot::DefaultConfig>::new(sub, decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<polkadot::balances::events::Transfer>();
 
     api.tx()

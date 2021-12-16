@@ -15,22 +15,17 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::{
-        system,
-        DefaultConfig,
-    },
+    node_runtime::system,
+    pair_signer,
     test_context,
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::{
-    PairSigner,
-    Signer,
-};
+use subxt::Signer;
 
 #[async_std::test]
 async fn storage_account() -> Result<(), subxt::Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
 
     let cxt = test_context().await;
     let account_info = cxt
@@ -46,7 +41,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
 
 #[async_std::test]
 async fn tx_remark_with_event() -> Result<(), subxt::Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
     let found_event = cxt
