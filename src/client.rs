@@ -22,23 +22,11 @@ pub use sp_version::RuntimeVersion;
 use crate::{
     error::Error,
     events::EventsDecoder,
-    extrinsic::{
-        self,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
-    },
-    rpc::{
-        Rpc,
-        RpcClient,
-        SystemProperties,
-    },
+    extrinsic::{self, SignedExtra, Signer, UncheckedExtrinsic},
+    rpc::{Rpc, RpcClient, SystemProperties},
     storage::StorageClient,
     transaction::TransactionProgress,
-    AccountData,
-    Call,
-    Config,
-    Metadata,
+    AccountData, Call, Config, Metadata,
 };
 use std::sync::Arc;
 
@@ -284,6 +272,22 @@ where
             additional_params,
         )
         .await?;
+        Ok(signed)
+    }
+
+    /// Creates a unsigned extrinsic.
+    pub fn create_unsigned(&self) -> Result<UncheckedExtrinsic<T, E>, Error>
+    where
+        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+            Send + Sync + 'static,
+    {
+        let call = self
+            .client
+            .metadata()
+            .pallet(C::PALLET)
+            .and_then(|pallet| pallet.encode_call(&self.call))?;
+
+        let signed = extrinsic::create_unsigned::<T, E>(call);
         Ok(signed)
     }
 }

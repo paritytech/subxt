@@ -21,31 +21,17 @@ mod signer;
 
 pub use self::{
     extra::{
-        ChargeAssetTxPayment,
-        CheckGenesis,
-        CheckMortality,
-        CheckNonce,
-        CheckSpecVersion,
-        CheckTxVersion,
-        CheckWeight,
-        DefaultExtra,
-        DefaultExtraWithTxPayment,
+        ChargeAssetTxPayment, CheckGenesis, CheckMortality, CheckNonce, CheckSpecVersion,
+        CheckTxVersion, CheckWeight, DefaultExtra, DefaultExtraWithTxPayment,
         SignedExtra,
     },
-    signer::{
-        PairSigner,
-        Signer,
-    },
+    signer::{PairSigner, Signer},
 };
 
 use sp_runtime::traits::SignedExtension;
 use sp_version::RuntimeVersion;
 
-use crate::{
-    Config,
-    Encoded,
-    Error,
-};
+use crate::{Config, Encoded, Error};
 
 /// UncheckedExtrinsic type.
 pub type UncheckedExtrinsic<T, E> = sp_runtime::generic::UncheckedExtrinsic<
@@ -85,4 +71,13 @@ where
     let payload = SignedPayload::<T, E>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
+}
+
+/// Creates an unsigned extrinsic
+pub fn create_unsigned<T, E>(call: Encoded) -> UncheckedExtrinsic<T, E>
+where
+    T: Config,
+    E: SignedExtra<T>,
+{
+    UncheckedExtrinsic::<T, E>::new_unsigned(call)
 }
