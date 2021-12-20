@@ -36,12 +36,12 @@ subxt-macro = { version = "0.1.0", path = "macro" }
 
 sp-core = { version = "4.0.0", default-features = false  }
 sp-runtime = { version = "4.0.0", default-features = false }
-sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "master" }
+sp-version = "4.0.0"
 
 frame-metadata = "14.0.0"
 
 [dev-dependencies]
-sp-arithmetic = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
+sp-arithmetic = { version = "4.0.0", default-features = false }
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.8.3"
