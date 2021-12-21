@@ -22,7 +22,7 @@ use crate::{
     },
     Metadata,
 };
-use jsonrpsee::types::Error as RequestError;
+use jsonrpsee::core::Error as RpcError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::{
     transaction_validity::TransactionValidityError,
@@ -41,7 +41,7 @@ pub enum Error {
     Codec(#[from] codec::Error),
     /// Rpc error.
     #[error("Rpc error: {0}")]
-    Rpc(#[from] RequestError),
+    Rpc(#[from] RpcError),
     /// Serde serialization error
     #[error("Serde json error: {0}")]
     Serialization(#[from] serde_json::error::Error),

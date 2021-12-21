@@ -41,22 +41,20 @@ pub use jsonrpsee::{
         Uri,
         WsTransportClientBuilder,
     },
-    core_client::{
-        Client as RpcClient,
-        ClientBuilder as RpcClientBuilder,
-    },
-    rpc_params,
-    types::{
-        to_json_value,
-        traits::{
-            Client,
-            SubscriptionClient,
+    core::{
+        client::{
+            Client as RpcClient,
+            ClientBuilder as RpcClientBuilder,
+            ClientT,
+            Subscription,
+            SubscriptionClientT,
         },
+        to_json_value,
         DeserializeOwned,
         Error as RpcError,
         JsonValue,
-        Subscription,
     },
+    rpc_params,
 };
 use serde::{
     Deserialize,
@@ -488,10 +486,10 @@ impl<T: Config> Rpc<T> {
         }?;
         let mut xt_sub = self.watch_extrinsic(extrinsic).await?;
 
-        while let Ok(Some(status)) = xt_sub.next().await {
+        while let Some(status) = xt_sub.next().await {
             log::info!("Received status {:?}", status);
+            let status = status?;
             match status {
-                // ignore in progress extrinsic for now
                 TransactionStatus::Future
                 | TransactionStatus::Ready
                 | TransactionStatus::Broadcast(_)
@@ -638,12 +636,6 @@ impl<T: Config> ExtrinsicSuccess<T> {
             Ok(None)
         }
     }
-}
-
-/// Example to check that `From<(Sender, Receiver) for RpcClient` works.
-pub async fn build_ws_client_default(url: &str) -> Result<RpcClient, RpcError> {
-    let client = ws_transport(url).await?.into();
-    Ok(client)
 }
 
 /// Build WS RPC client from URL
