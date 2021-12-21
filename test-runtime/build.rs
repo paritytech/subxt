@@ -95,7 +95,7 @@ async fn run() {
     fs::write(&metadata_path, &metadata_bytes.0).expect("Couldn't write metadata output");
 
     // Write out our expression to generate the runtime API to a file. Ideally, we'd just write this code
-    // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to runtime_metadata_path,
+    // in lib.rs, but we must pass a string literal (and not `concat!(..)`) as an arg to `runtime_metadata_path`,
     // and so we need to spit it out here and include it verbatim instead.
     let runtime_api_contents = format!(
         r#"
@@ -116,6 +116,14 @@ async fn run() {
     fs::write(&runtime_path, runtime_api_contents)
         .expect("Couldn't write runtime rust output");
 
+    let substrate_path =
+        which::which(substrate_bin).expect("Cannot resolve path to substrate binary");
+
+    // Re-build if the substrate binary we're pointed to changes (mtime):
+    println!(
+        "cargo:rerun-if-changed={}",
+        substrate_path.to_string_lossy()
+    );
     // Re-build if we point to a different substrate binary:
     println!("cargo:rerun-if-env-changed={}", SUBSTRATE_BIN_ENV_VAR);
     // Re-build if this file changes:

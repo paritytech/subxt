@@ -45,7 +45,6 @@ pub use subxt_macro::subxt;
 
 pub use bitvec;
 pub use codec;
-pub use sp_arithmetic;
 pub use sp_core;
 pub use sp_runtime;
 
@@ -68,6 +67,7 @@ mod metadata;
 pub mod rpc;
 pub mod storage;
 mod subscription;
+mod transaction;
 
 pub use crate::{
     client::{
@@ -84,6 +84,7 @@ pub use crate::{
         Error,
         PalletError,
         RuntimeError,
+        TransactionError,
     },
     events::{
         EventsDecoder,
@@ -103,7 +104,6 @@ pub use crate::{
     },
     rpc::{
         BlockNumber,
-        ExtrinsicSuccess,
         ReadProof,
         RpcClient,
         SystemProperties,
@@ -118,6 +118,12 @@ pub use crate::{
         EventStorageSubscription,
         EventSubscription,
         FinalizedEventStorageSubscription,
+    },
+    transaction::{
+        TransactionEvents,
+        TransactionInBlock,
+        TransactionProgress,
+        TransactionStatus,
     },
 };
 

@@ -13,3 +13,4 @@ subxt = { path = ".." }
 sp-core = { package = "sp-core", git = "https://github.com/paritytech/substrate/", branch = "master" }
 jsonrpsee-http-client = { git = "https://github.com/paritytech/jsonrpsee/", branch = "extract-async-client" }
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
+which = "4.2.2"
