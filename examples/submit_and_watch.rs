@@ -61,7 +61,8 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?
         .wait_for_finalized_success()
-        .await.unwrap()?;
+        .await
+        .unwrap()?;
 
     let transfer_event =
         balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
@@ -93,7 +94,8 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         .sign_and_submit_then_watch(&signer)
         .await?
         .wait_for_finalized()
-        .await.unwrap()?;
+        .await
+        .unwrap()?;
 
     // Now we know it's been finalized, we can get hold of a couple of
     // details, including events. Calling `wait_for_finalized_success` is

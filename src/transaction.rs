@@ -64,51 +64,54 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 
         // Return the next item otherwise:
         let res = sub.next().await?;
-        Some(res.map(|status| {
-            match status {
-                SubstrateTransactionStatus::Future => TransactionStatus::Future,
-                SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
-                SubstrateTransactionStatus::Broadcast(peers) => {
-                    TransactionStatus::Broadcast(peers)
+        Some(
+            res.map(|status| {
+                match status {
+                    SubstrateTransactionStatus::Future => TransactionStatus::Future,
+                    SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
+                    SubstrateTransactionStatus::Broadcast(peers) => {
+                        TransactionStatus::Broadcast(peers)
+                    }
+                    SubstrateTransactionStatus::InBlock(hash) => {
+                        TransactionStatus::InBlock(TransactionInBlock {
+                            block_hash: hash,
+                            ext_hash: self.ext_hash,
+                            client: self.client,
+                        })
+                    }
+                    SubstrateTransactionStatus::Retracted(hash) => {
+                        TransactionStatus::Retracted(hash)
+                    }
+                    SubstrateTransactionStatus::Usurped(hash) => {
+                        TransactionStatus::Usurped(hash)
+                    }
+                    SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
+                    SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
+                    // Only the following statuses are actually considered "final" (see the substrate
+                    // docs on `TransactionStatus`). Basically, either the transaction makes it into a
+                    // block, or we eventually give up on waiting for it to make it into a block.
+                    // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                    //
+                    // As an example, a transaction that is `Invalid` on one node due to having the wrong
+                    // nonce might still be valid on some fork on another node which ends up being finalized.
+                    // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
+                    // and make it into a block, on another node. Likewise with `Usurped`.
+                    SubstrateTransactionStatus::FinalityTimeout(hash) => {
+                        self.sub = None;
+                        TransactionStatus::FinalityTimeout(hash)
+                    }
+                    SubstrateTransactionStatus::Finalized(hash) => {
+                        self.sub = None;
+                        TransactionStatus::Finalized(TransactionInBlock {
+                            block_hash: hash,
+                            ext_hash: self.ext_hash,
+                            client: self.client,
+                        })
+                    }
                 }
-                SubstrateTransactionStatus::InBlock(hash) => {
-                    TransactionStatus::InBlock(TransactionInBlock {
-                        block_hash: hash,
-                        ext_hash: self.ext_hash,
-                        client: self.client,
-                    })
-                }
-                SubstrateTransactionStatus::Retracted(hash) => {
-                    TransactionStatus::Retracted(hash)
-                }
-                SubstrateTransactionStatus::Usurped(hash) => {
-                    TransactionStatus::Usurped(hash)
-                }
-                SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
-                SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
-                // Only the following statuses are actually considered "final" (see the substrate
-                // docs on `TransactionStatus`). Basically, either the transaction makes it into a
-                // block, or we eventually give up on waiting for it to make it into a block.
-                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
-                //
-                // As an example, a transaction that is `Invalid` on one node due to having the wrong
-                // nonce might still be valid on some fork on another node which ends up being finalized.
-                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
-                // and make it into a block, on another node. Likewise with `Usurped`.
-                SubstrateTransactionStatus::FinalityTimeout(hash) => {
-                    self.sub = None;
-                    TransactionStatus::FinalityTimeout(hash)
-                }
-                SubstrateTransactionStatus::Finalized(hash) => {
-                    self.sub = None;
-                    TransactionStatus::Finalized(TransactionInBlock {
-                        block_hash: hash,
-                        ext_hash: self.ext_hash,
-                        client: self.client,
-                    })
-                }
-            }
-        }).map_err(Into::into))
+            })
+            .map_err(Into::into),
+        )
     }
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
@@ -127,17 +130,20 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     ) -> Option<Result<TransactionInBlock<'client, T>, Error>> {
         loop {
             match self.next().await? {
-                Ok(status) => match status {
-                    // Finalized or otherwise in a block! Return.
-                    TransactionStatus::InBlock(s) | TransactionStatus::Finalized(s) => {
-                        return Some(Ok(s))
+                Ok(status) => {
+                    match status {
+                        // Finalized or otherwise in a block! Return.
+                        TransactionStatus::InBlock(s)
+                        | TransactionStatus::Finalized(s) => return Some(Ok(s)),
+                        // Error scenarios; return the error.
+                        TransactionStatus::FinalityTimeout(_) => {
+                            return Some(Err(
+                                TransactionError::FinalitySubscriptionTimeout.into(),
+                            ))
+                        }
+                        // Ignore anything else and wait for next status event:
+                        _ => continue,
                     }
-                    // Error scenarios; return the error.
-                    TransactionStatus::FinalityTimeout(_) => {
-                        return Some(Err(TransactionError::FinalitySubscriptionTimeout.into()))
-                    }
-                    // Ignore anything else and wait for next status event:
-                    _ => continue,
                 }
                 Err(err) => return Some(Err(err)),
             }
@@ -159,15 +165,19 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     ) -> Option<Result<TransactionInBlock<'client, T>, Error>> {
         loop {
             match self.next().await? {
-                Ok(status) => match status {
-                    // finalized! return.
-                    TransactionStatus::Finalized(s) => return Some(Ok(s)),
-                    // error scenarios; return the error.
-                    TransactionStatus::FinalityTimeout(_) => {
-                        return Some(Err(TransactionError::FinalitySubscriptionTimeout.into()))
+                Ok(status) => {
+                    match status {
+                        // finalized! return.
+                        TransactionStatus::Finalized(s) => return Some(Ok(s)),
+                        // error scenarios; return the error.
+                        TransactionStatus::FinalityTimeout(_) => {
+                            return Some(Err(
+                                TransactionError::FinalitySubscriptionTimeout.into(),
+                            ))
+                        }
+                        // ignore and wait for next status event:
+                        _ => continue,
                     }
-                    // ignore and wait for next status event:
-                    _ => continue,
                 }
                 Err(err) => return Some(Err(err)),
             }
@@ -185,7 +195,9 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
     /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(self) -> Option<Result<TransactionEvents<T>, Error>> {
+    pub async fn wait_for_finalized_success(
+        self,
+    ) -> Option<Result<TransactionEvents<T>, Error>> {
         let finalized = match self.wait_for_finalized().await? {
             Ok(f) => f,
             Err(err) => return Some(Err(err)),

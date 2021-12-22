@@ -24,13 +24,12 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee/", branch = "jsonrpsee-clients-expose-tls-feature", features = ["macros", "core-client", "client", "client-ws-transport"] }
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee/", branch = "na-fix-core-client-feature", features = ["macros", "async-client", "client-ws-transport"] }
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
-url = "2.2.1"
 
 subxt-macro = { version = "0.1.0", path = "macro" }
 

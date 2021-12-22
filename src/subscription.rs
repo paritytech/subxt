@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::core::{DeserializeOwned, client::Subscription};
+use jsonrpsee::core::{
+    client::Subscription,
+    DeserializeOwned,
+};
 use sp_core::{
     storage::{
         StorageChangeSet,

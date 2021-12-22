@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee_http_client::{
-    types::traits::Client,
-    HttpClientBuilder,
+use jsonrpsee::{
+    core::client::ClientT,
+    http_client::HttpClientBuilder,
 };
 use std::{
     env,

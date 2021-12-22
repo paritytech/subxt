@@ -31,14 +31,12 @@ use futures::{
     sink::SinkExt,
     stream::StreamExt,
 };
-use jsonrpsee::{
-    core_client::Client as JsonRpcClient,
-    types::{
-        async_trait,
-        traits::{
-            TransportReceiver,
-            TransportSender,
-        },
+use jsonrpsee::core::{
+    async_trait,
+    client::Client as JsonRpcClient,
+    traits::{
+        TransportReceiver,
+        TransportSender,
     },
 };
 use sc_network::config::TransportConfig;
