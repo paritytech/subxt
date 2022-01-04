@@ -60,7 +60,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             profile: minimal
-            toolchain: nightly
+            toolchain: nightly-2021-12-15
             override: true
             components: rustfmt
 
@@ -118,7 +118,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
+          toolchain: nightly-2021-12-15
           target: wasm32-unknown-unknown
           override: true
 
