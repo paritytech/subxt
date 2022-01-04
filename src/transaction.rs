@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use std::task::Poll;
+
 use sp_core::storage::StorageKey;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
@@ -30,9 +32,13 @@ use crate::{
     Config,
     Phase,
 };
-use jsonrpsee::types::{
+use futures::{
+    Stream,
+    StreamExt,
+};
+use jsonrpsee::core::{
+    client::Subscription as RpcSubscription,
     Error as RpcError,
-    Subscription as RpcSubscription,
 };
 
 /// This struct represents a subscription to the progress of some transaction, and is
@@ -43,6 +49,8 @@ pub struct TransactionProgress<'client, T: Config> {
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
+
+impl<'client, T: Config> Unpin for TransactionProgress<'client, T> {}
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
     pub(crate) fn new(
@@ -57,61 +65,13 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         }
     }
 
-    /// Return the next transaction status when it's emitted.
-    pub async fn next(&mut self) -> Result<Option<TransactionStatus<'client, T>>, Error> {
-        // Return `None` if the subscription has been dropped:
-        let sub = match &mut self.sub {
-            Some(sub) => sub,
-            None => return Ok(None),
-        };
-
-        // Return the next item otherwise:
-        let res = sub.next().await?;
-        Ok(res.map(|status| {
-            match status {
-                SubstrateTransactionStatus::Future => TransactionStatus::Future,
-                SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
-                SubstrateTransactionStatus::Broadcast(peers) => {
-                    TransactionStatus::Broadcast(peers)
-                }
-                SubstrateTransactionStatus::InBlock(hash) => {
-                    TransactionStatus::InBlock(TransactionInBlock {
-                        block_hash: hash,
-                        ext_hash: self.ext_hash,
-                        client: self.client,
-                    })
-                }
-                SubstrateTransactionStatus::Retracted(hash) => {
-                    TransactionStatus::Retracted(hash)
-                }
-                SubstrateTransactionStatus::Usurped(hash) => {
-                    TransactionStatus::Usurped(hash)
-                }
-                SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
-                SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
-                // Only the following statuses are actually considered "final" (see the substrate
-                // docs on `TransactionStatus`). Basically, either the transaction makes it into a
-                // block, or we eventually give up on waiting for it to make it into a block.
-                // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
-                //
-                // As an example, a transaction that is `Invalid` on one node due to having the wrong
-                // nonce might still be valid on some fork on another node which ends up being finalized.
-                // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
-                // and make it into a block, on another node. Likewise with `Usurped`.
-                SubstrateTransactionStatus::FinalityTimeout(hash) => {
-                    self.sub = None;
-                    TransactionStatus::FinalityTimeout(hash)
-                }
-                SubstrateTransactionStatus::Finalized(hash) => {
-                    self.sub = None;
-                    TransactionStatus::Finalized(TransactionInBlock {
-                        block_hash: hash,
-                        ext_hash: self.ext_hash,
-                        client: self.client,
-                    })
-                }
-            }
-        }))
+    /// Return the next transaction status when it's emitted. This just delegates to the
+    /// [`futures::Stream`] implementation for [`TransactionProgress`], but allows you to
+    /// avoid importing that trait if you don't otherwise need it.
+    pub async fn next_item(
+        &mut self,
+    ) -> Option<Result<TransactionStatus<'client, T>, Error>> {
+        self.next().await
     }
 
     /// Wait for the transaction to be in a block (but not necessarily finalized), and return
@@ -128,8 +88,8 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     pub async fn wait_for_in_block(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
-        while let Some(status) = self.next().await? {
-            match status {
+        while let Some(status) = self.next_item().await {
+            match status? {
                 // Finalized or otherwise in a block! Return.
                 TransactionStatus::InBlock(s) | TransactionStatus::Finalized(s) => {
                     return Ok(s)
@@ -158,8 +118,8 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     pub async fn wait_for_finalized(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
-        while let Some(status) = self.next().await? {
-            match status {
+        while let Some(status) = self.next_item().await {
+            match status? {
                 // Finalized! Return.
                 TransactionStatus::Finalized(s) => return Ok(s),
                 // Error scenarios; return the error.
@@ -187,6 +147,68 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
+    }
+}
+
+impl<'client, T: Config> Stream for TransactionProgress<'client, T> {
+    type Item = Result<TransactionStatus<'client, T>, Error>;
+
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        let sub = match self.sub.as_mut() {
+            Some(sub) => sub,
+            None => return Poll::Ready(None),
+        };
+
+        sub.poll_next_unpin(cx)
+            .map_err(|e| e.into())
+            .map_ok(|status| {
+                match status {
+                    SubstrateTransactionStatus::Future => TransactionStatus::Future,
+                    SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
+                    SubstrateTransactionStatus::Broadcast(peers) => {
+                        TransactionStatus::Broadcast(peers)
+                    }
+                    SubstrateTransactionStatus::InBlock(hash) => {
+                        TransactionStatus::InBlock(TransactionInBlock {
+                            block_hash: hash,
+                            ext_hash: self.ext_hash,
+                            client: self.client,
+                        })
+                    }
+                    SubstrateTransactionStatus::Retracted(hash) => {
+                        TransactionStatus::Retracted(hash)
+                    }
+                    SubstrateTransactionStatus::Usurped(hash) => {
+                        TransactionStatus::Usurped(hash)
+                    }
+                    SubstrateTransactionStatus::Dropped => TransactionStatus::Dropped,
+                    SubstrateTransactionStatus::Invalid => TransactionStatus::Invalid,
+                    // Only the following statuses are actually considered "final" (see the substrate
+                    // docs on `TransactionStatus`). Basically, either the transaction makes it into a
+                    // block, or we eventually give up on waiting for it to make it into a block.
+                    // Even `Dropped`/`Invalid`/`Usurped` transactions might make it into a block eventually.
+                    //
+                    // As an example, a transaction that is `Invalid` on one node due to having the wrong
+                    // nonce might still be valid on some fork on another node which ends up being finalized.
+                    // Equally, a transaction `Dropped` from one node may still be in the transaction pool,
+                    // and make it into a block, on another node. Likewise with `Usurped`.
+                    SubstrateTransactionStatus::FinalityTimeout(hash) => {
+                        self.sub = None;
+                        TransactionStatus::FinalityTimeout(hash)
+                    }
+                    SubstrateTransactionStatus::Finalized(hash) => {
+                        self.sub = None;
+                        TransactionStatus::Finalized(TransactionInBlock {
+                            block_hash: hash,
+                            ext_hash: self.ext_hash,
+                            client: self.client,
+                        })
+                    }
+                }
+            })
     }
 }
 

@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::types::{
+use jsonrpsee::core::{
+    client::Subscription,
     DeserializeOwned,
-    Subscription,
 };
 use sp_core::{
     storage::{
@@ -247,12 +247,12 @@ where
     T: DeserializeOwned,
 {
     match sub.next().await {
-        Ok(Some(next)) => Some(next),
-        Ok(None) => None,
-        Err(e) => {
+        Some(Ok(next)) => Some(next),
+        Some(Err(e)) => {
             log::error!("Subscription {} failed: {:?} dropping", sub_name, e);
             None
         }
+        None => None,
     }
 }
 

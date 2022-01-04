@@ -22,6 +22,7 @@
 //! polkadot --dev --tmp
 //! ```
 
+use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
@@ -144,7 +145,8 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    while let Some(ev) = balance_transfer_progress.next().await? {
+    while let Some(ev) = balance_transfer_progress.next().await {
+        let ev = ev?;
         use subxt::TransactionStatus::*;
 
         // Made it into a block, but not finalized.
