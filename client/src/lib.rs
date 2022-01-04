@@ -33,7 +33,11 @@ use futures::{
 };
 use jsonrpsee::core::{
     async_trait,
-    client::{Client as JsonRpcClient, TransportReceiverT, TransportSenderT}
+    client::{
+        Client as JsonRpcClient,
+        TransportReceiverT,
+        TransportSenderT,
+    },
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
