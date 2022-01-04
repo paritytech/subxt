@@ -86,17 +86,19 @@ pub async fn test_embedded_client() {
     let bob_address = AccountKeyring::Bob.to_account_id().into();
 
     // verify that we can call dispatchable functions
-    let result = api
+    let success = api
         .tx()
         .balances()
         .transfer(bob_address, 100_000_000_000_000_000)
         .sign_and_submit_then_watch(&alice)
         .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap()
+        .has_event::<system::events::ExtrinsicSuccess>()
         .unwrap();
 
     // verify that we receive events
-    let success = result
-        .find_event::<system::events::ExtrinsicSuccess>()
-        .unwrap();
-    assert!(success.is_some());
+    assert!(success);
 }
