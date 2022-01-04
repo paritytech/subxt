@@ -60,6 +60,14 @@ This can be installed from source via cargo:
 cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.10 --force
 ```
 
+## Real world usage
+
+Please add your project to this list via a PR.
+
+- [cargo-contract](https://github.com/paritytech/cargo-contract/pull/79) CLI for interacting with Wasm smart contracts.
+- [xcm-cli](https://github.com/ascjones/xcm-cli) CLI for submitting XCM messages.
+- [phala-pherry](https://github.com/Phala-Network/phala-blockchain/tree/master/standalone/pherry) The relayer between Phala blockchain and the off-chain Secure workers.
+
 **Alternatives**
 
 [substrate-api-client](https://github.com/scs/substrate-api-client) provides similar functionality.

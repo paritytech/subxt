@@ -22,6 +22,7 @@
 //! polkadot --dev --tmp
 //! ```
 
+use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
@@ -61,8 +62,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?
         .wait_for_finalized_success()
-        .await
-        .unwrap()?;
+        .await?;
 
     let transfer_event =
         balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
@@ -94,8 +94,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         .sign_and_submit_then_watch(&signer)
         .await?
         .wait_for_finalized()
-        .await
-        .unwrap()?;
+        .await?;
 
     // Now we know it's been finalized, we can get hold of a couple of
     // details, including events. Calling `wait_for_finalized_success` is
@@ -146,9 +145,9 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    loop {
+    while let Some(ev) = balance_transfer_progress.next().await {
+        let ev = ev?;
         use subxt::TransactionStatus::*;
-        let ev = balance_transfer_progress.next().await.unwrap()?;
 
         // Made it into a block, but not finalized.
         if let InBlock(details) = ev {
@@ -194,4 +193,6 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             println!("Current transaction status: {:?}", ev);
         }
     }
+
+    Ok(())
 }

@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use std::task::Poll;
+
 use sp_core::storage::StorageKey;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
@@ -30,7 +32,14 @@ use crate::{
     Config,
     Phase,
 };
-use jsonrpsee::core::client::Subscription as RpcSubscription;
+use futures::{
+    Stream,
+    StreamExt,
+};
+use jsonrpsee::core::{
+    client::Subscription as RpcSubscription,
+    Error as RpcError,
+};
 
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
@@ -40,6 +49,11 @@ pub struct TransactionProgress<'client, T: Config> {
     ext_hash: T::Hash,
     client: &'client Client<T>,
 }
+
+// The above type is not `Unpin` by default unless the generic param `T` is,
+// so we manually make it clear that Unpin is actually fine regardless of `T`
+// (we don't care if this moves around in memory while it's "pinned").
+impl<'client, T: Config> Unpin for TransactionProgress<'client, T> {}
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
     pub(crate) fn new(
@@ -54,18 +68,106 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
         }
     }
 
-    /// Return the next transaction status when it's emitted.
-    pub async fn next(&mut self) -> Option<Result<TransactionStatus<'client, T>, Error>> {
-        // Return `None` if the subscription has been dropped:
-        let sub = match &mut self.sub {
+    /// Return the next transaction status when it's emitted. This just delegates to the
+    /// [`futures::Stream`] implementation for [`TransactionProgress`], but allows you to
+    /// avoid importing that trait if you don't otherwise need it.
+    pub async fn next_item(
+        &mut self,
+    ) -> Option<Result<TransactionStatus<'client, T>, Error>> {
+        self.next().await
+    }
+
+    /// Wait for the transaction to be in a block (but not necessarily finalized), and return
+    /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
+    /// waiting for this to happen.
+    ///
+    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
+    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
+    ///
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_in_block(
+        mut self,
+    ) -> Result<TransactionInBlock<'client, T>, Error> {
+        while let Some(status) = self.next_item().await {
+            match status? {
+                // Finalized or otherwise in a block! Return.
+                TransactionStatus::InBlock(s) | TransactionStatus::Finalized(s) => {
+                    return Ok(s)
+                }
+                // Error scenarios; return the error.
+                TransactionStatus::FinalityTimeout(_) => {
+                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                }
+                // Ignore anything else and wait for next status event:
+                _ => continue,
+            }
+        }
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+    }
+
+    /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
+    /// instance when it is, or an error if there was a problem waiting for finalization.
+    ///
+    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
+    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
+    ///
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_finalized(
+        mut self,
+    ) -> Result<TransactionInBlock<'client, T>, Error> {
+        while let Some(status) = self.next_item().await {
+            match status? {
+                // Finalized! Return.
+                TransactionStatus::Finalized(s) => return Ok(s),
+                // Error scenarios; return the error.
+                TransactionStatus::FinalityTimeout(_) => {
+                    return Err(TransactionError::FinalitySubscriptionTimeout.into())
+                }
+                // Ignore and wait for next status event:
+                _ => continue,
+            }
+        }
+        Err(RpcError::Custom("RPC subscription dropped".into()).into())
+    }
+
+    /// Wait for the transaction to be finalized, and for the transaction events to indicate
+    /// that the transaction was successful. Returns the events associated with the transaction,
+    /// as well as a couple of other details (block hash and extrinsic hash).
+    ///
+    /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
+    /// use [`TransactionProgress::next_item()`] instead.
+    ///
+    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
+    /// may well indicate with some probability that the transaction will not make it into a block,
+    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
+    pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
+        let evs = self.wait_for_finalized().await?.wait_for_success().await?;
+        Ok(evs)
+    }
+}
+
+impl<'client, T: Config> Stream for TransactionProgress<'client, T> {
+    type Item = Result<TransactionStatus<'client, T>, Error>;
+
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        let sub = match self.sub.as_mut() {
             Some(sub) => sub,
-            None => return None,
+            None => return Poll::Ready(None),
         };
 
-        // Return the next item otherwise:
-        let res = sub.next().await?;
-        Some(
-            res.map(|status| {
+        sub.poll_next_unpin(cx)
+            .map_err(|e| e.into())
+            .map_ok(|status| {
                 match status {
                     SubstrateTransactionStatus::Future => TransactionStatus::Future,
                     SubstrateTransactionStatus::Ready => TransactionStatus::Ready,
@@ -110,100 +212,6 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
                     }
                 }
             })
-            .map_err(Into::into),
-        )
-    }
-
-    /// Wait for the transaction to be in a block (but not necessarily finalized), and return
-    /// an [`TransactionInBlock`] instance when this happens, or an error if there was a problem
-    /// waiting for this to happen.
-    ///
-    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next()`] instead.
-    ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_in_block(
-        mut self,
-    ) -> Option<Result<TransactionInBlock<'client, T>, Error>> {
-        loop {
-            match self.next().await? {
-                Ok(status) => {
-                    match status {
-                        // Finalized or otherwise in a block! Return.
-                        TransactionStatus::InBlock(s)
-                        | TransactionStatus::Finalized(s) => return Some(Ok(s)),
-                        // Error scenarios; return the error.
-                        TransactionStatus::FinalityTimeout(_) => {
-                            return Some(Err(
-                                TransactionError::FinalitySubscriptionTimeout.into(),
-                            ))
-                        }
-                        // Ignore anything else and wait for next status event:
-                        _ => continue,
-                    }
-                }
-                Err(err) => return Some(Err(err)),
-            }
-        }
-    }
-
-    /// Wait for the transaction to be finalized, and return a [`TransactionInBlock`]
-    /// instance when it is, or an error if there was a problem waiting for finalization.
-    ///
-    /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next()`] instead.
-    ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized(
-        mut self,
-    ) -> Option<Result<TransactionInBlock<'client, T>, Error>> {
-        loop {
-            match self.next().await? {
-                Ok(status) => {
-                    match status {
-                        // finalized! return.
-                        TransactionStatus::Finalized(s) => return Some(Ok(s)),
-                        // error scenarios; return the error.
-                        TransactionStatus::FinalityTimeout(_) => {
-                            return Some(Err(
-                                TransactionError::FinalitySubscriptionTimeout.into(),
-                            ))
-                        }
-                        // ignore and wait for next status event:
-                        _ => continue,
-                    }
-                }
-                Err(err) => return Some(Err(err)),
-            }
-        }
-    }
-
-    /// Wait for the transaction to be finalized, and for the transaction events to indicate
-    /// that the transaction was successful. Returns the events associated with the transaction,
-    /// as well as a couple of other details (block hash and extrinsic hash).
-    ///
-    /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TransactionProgress::next()`] instead.
-    ///
-    /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
-    /// may well indicate with some probability that the transaction will not make it into a block,
-    /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(
-        self,
-    ) -> Option<Result<TransactionEvents<T>, Error>> {
-        let finalized = match self.wait_for_finalized().await? {
-            Ok(f) => f,
-            Err(err) => return Some(Err(err)),
-        };
-
-        Some(finalized.wait_for_success().await)
     }
 }
 
@@ -212,7 +220,7 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
 //* Note that the number of finality watchers is, at the time of writing, found in the constant
 //* `MAX_FINALITY_WATCHERS` in the `sc_transaction_pool` crate.
 //*
-/// Possible transaction statuses returned from our [`TransactionProgress::next()`] call.
+/// Possible transaction statuses returned from our [`TransactionProgress::next_item()`] call.
 ///
 /// These status events can be grouped based on their kinds as:
 ///

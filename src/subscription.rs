@@ -247,12 +247,12 @@ where
     T: DeserializeOwned,
 {
     match sub.next().await {
-        None => None,
         Some(Ok(next)) => Some(next),
         Some(Err(e)) => {
             log::error!("Subscription {} failed: {:?} dropping", sub_name, e);
             None
         }
+        None => None,
     }
 }
 

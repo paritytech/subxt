@@ -84,7 +84,7 @@ async fn chain_subscribe_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
     let mut blocks = client.rpc().subscribe_blocks().await.unwrap();
-    blocks.next().await.unwrap();
+    blocks.next().await.unwrap().unwrap();
 }
 
 #[async_std::test]
@@ -92,7 +92,7 @@ async fn chain_subscribe_finalized_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
     let mut blocks = client.rpc().subscribe_finalized_blocks().await.unwrap();
-    blocks.next().await.unwrap();
+    blocks.next().await.unwrap().unwrap();
 }
 
 #[async_std::test]
