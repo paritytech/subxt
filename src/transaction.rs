@@ -79,12 +79,12 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// waiting for this to happen.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next()`] instead.
+    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -109,12 +109,12 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// instance when it is, or an error if there was a problem waiting for finalization.
     ///
     /// **Note:** consumes `self`. If you'd like to perform multiple actions as the state of the
-    /// transaction progresses, use [`TransactionProgress::next()`] instead.
+    /// transaction progresses, use [`TransactionProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
     ) -> Result<TransactionInBlock<'client, T>, Error> {
@@ -138,12 +138,12 @@ impl<'client, T: Config> TransactionProgress<'client, T> {
     /// as well as a couple of other details (block hash and extrinsic hash).
     ///
     /// **Note:** consumes self. If you'd like to perform multiple actions as progress is made,
-    /// use [`TransactionProgress::next()`] instead.
+    /// use [`TransactionProgress::next_item()`] instead.
     ///
     /// **Note:** transaction statuses like `Invalid` and `Usurped` are ignored, because while they
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
-    /// level [`TransactionProgress::next()`] API if you'd like to handle these statuses yourself.
+    /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T>, Error> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
@@ -217,7 +217,7 @@ impl<'client, T: Config> Stream for TransactionProgress<'client, T> {
 //* Note that the number of finality watchers is, at the time of writing, found in the constant
 //* `MAX_FINALITY_WATCHERS` in the `sc_transaction_pool` crate.
 //*
-/// Possible transaction statuses returned from our [`TransactionProgress::next()`] call.
+/// Possible transaction statuses returned from our [`TransactionProgress::next_item()`] call.
 ///
 /// These status events can be grouped based on their kinds as:
 ///
