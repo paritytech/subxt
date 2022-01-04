@@ -33,11 +33,7 @@ use futures::{
 };
 use jsonrpsee::core::{
     async_trait,
-    client::Client as JsonRpcClient,
-    traits::{
-        TransportReceiver,
-        TransportSender,
-    },
+    client::{Client as JsonRpcClient, TransportReceiverT, TransportSenderT}
 };
 use sc_network::config::TransportConfig;
 pub use sc_service::{
@@ -80,7 +76,7 @@ pub struct Sender(mpsc::UnboundedSender<String>);
 pub struct Receiver(mpsc::UnboundedReceiver<String>);
 
 #[async_trait]
-impl TransportSender for Sender {
+impl TransportSenderT for Sender {
     type Error = SubxtClientError;
 
     async fn send(&mut self, msg: String) -> Result<(), Self::Error> {
@@ -90,7 +86,7 @@ impl TransportSender for Sender {
 }
 
 #[async_trait]
-impl TransportReceiver for Receiver {
+impl TransportReceiverT for Receiver {
     type Error = SubxtClientError;
 
     async fn receive(&mut self) -> Result<String, Self::Error> {
@@ -261,6 +257,8 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             rpc_ws: Default::default(),
             rpc_ws_max_connections: Default::default(),
             rpc_methods: Default::default(),
+            rpc_max_payload: Default::default(),
+            runtime_cache_size: Default::default(),
             state_cache_child_ratio: Default::default(),
             state_cache_size: Default::default(),
             tracing_receiver: Default::default(),
@@ -272,7 +270,6 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             state_pruning: Default::default(),
             transaction_storage: sc_client_db::TransactionStorageMode::BlockBody,
             wasm_runtime_overrides: Default::default(),
-            rpc_max_payload: Default::default(),
             ws_max_out_buffer_capacity: Default::default(),
         };
 
