@@ -50,6 +50,9 @@ pub struct TransactionProgress<'client, T: Config> {
     client: &'client Client<T>,
 }
 
+// The above type is not `Unpin` by default unless the generic param `T` is,
+// so we manually make it clear that Unpin is actually fine regardless of `T`
+// (we don't care if this moves around in memory while it's "pinned").
 impl<'client, T: Config> Unpin for TransactionProgress<'client, T> {}
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
