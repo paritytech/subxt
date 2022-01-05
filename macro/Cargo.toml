@@ -34,4 +34,4 @@ pretty_assertions = "0.6.1"
 subxt = { path = ".." }
 trybuild = "1.0.38"
 
-sp-keyring = { package = "sp-keyring", git = "https://github.com/paritytech/substrate/" }
+sp-keyring = { git = "https://github.com/paritytech/substrate/", branch = "master" }
