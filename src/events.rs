@@ -375,23 +375,11 @@ mod tests {
         }
     }
 
-    #[test]
-    fn it_works() {
-        #[derive(Clone, Encode, TypeInfo)]
-        enum Event {
-            A(u8),
-        }
-
-        let extrinsic = ExtrinsicMetadata {
-            ty: meta_type::<()>(),
-            version: 0,
-            signed_extensions: vec![]
-        };
+    fn pallet_metadata<E: TypeInfo + 'static>(pallet_index: u8) -> PalletMetadata {
         let event = PalletEventMetadata {
-            ty: meta_type::<Event>()
+            ty: meta_type::<E>()
         };
-        let pallet_index = 0;
-        let pallet = PalletMetadata {
+        PalletMetadata {
             name: "Test",
             storage: None,
             calls: None,
@@ -399,13 +387,59 @@ mod tests {
             constants: vec![],
             error: None,
             index: pallet_index
+        }
+    }
+
+    fn init_decoder(pallets: Vec<PalletMetadata>) -> EventsDecoder<DefaultConfig> {
+        let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<()>(),
+            version: 0,
+            signed_extensions: vec![]
         };
-        let v14 = RuntimeMetadataLastVersion::new(vec![pallet], extrinsic, meta_type::<()>());
+        let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
         let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
         let metadata = Metadata::try_from(runtime_metadata).unwrap();
-        let decoder = EventsDecoder::<DefaultConfig>::new(metadata);
+        EventsDecoder::<DefaultConfig>::new(metadata)
+    }
+
+    #[test]
+    fn decode_single_event() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
 
         let event = Event::A(1);
+        let encoded_event = event.encode();
+        let event_records = vec![
+            event_record(pallet_index, event)
+        ];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn compact_event_field() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(#[codec(compact)] u32),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(u32::MAX);
         let encoded_event = event.encode();
         let event_records = vec![
             event_record(pallet_index, event)
