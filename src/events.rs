@@ -342,21 +342,25 @@ pub enum EventsDecodingError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::convert::TryFrom;
-    use crate::{Config, DefaultConfig, Phase};
+    use crate::{
+        Config,
+        DefaultConfig,
+        Phase,
+    };
     use frame_metadata::{
-        RuntimeMetadataPrefixed,
         v14::{
             ExtrinsicMetadata,
-            RuntimeMetadataLastVersion,
-            PalletMetadata,
             PalletEventMetadata,
-        }
+            PalletMetadata,
+            RuntimeMetadataLastVersion,
+        },
+        RuntimeMetadataPrefixed,
     };
     use scale_info::{
+        meta_type,
         TypeInfo,
-        meta_type
     };
+    use std::convert::TryFrom;
 
     #[derive(Encode)]
     pub struct EventRecord<E: Encode> {
@@ -371,13 +375,13 @@ mod tests {
             phase: Phase::Finalization,
             pallet_index,
             event,
-            topics: vec![]
+            topics: vec![],
         }
     }
 
     fn pallet_metadata<E: TypeInfo + 'static>(pallet_index: u8) -> PalletMetadata {
         let event = PalletEventMetadata {
-            ty: meta_type::<E>()
+            ty: meta_type::<E>(),
         };
         PalletMetadata {
             name: "Test",
@@ -386,7 +390,7 @@ mod tests {
             event: Some(event),
             constants: vec![],
             error: None,
-            index: pallet_index
+            index: pallet_index,
         }
     }
 
@@ -394,7 +398,7 @@ mod tests {
         let extrinsic = ExtrinsicMetadata {
             ty: meta_type::<()>(),
             version: 0,
-            signed_extensions: vec![]
+            signed_extensions: vec![],
         };
         let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
         let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
@@ -415,9 +419,7 @@ mod tests {
 
         let event = Event::A(1);
         let encoded_event = event.encode();
-        let event_records = vec![
-            event_record(pallet_index, event)
-        ];
+        let event_records = vec![event_record(pallet_index, event)];
 
         let mut input = Vec::new();
         event_records.encode_to(&mut input);
@@ -441,9 +443,7 @@ mod tests {
 
         let event = Event::A(u32::MAX);
         let encoded_event = event.encode();
-        let event_records = vec![
-            event_record(pallet_index, event)
-        ];
+        let event_records = vec![event_record(pallet_index, event)];
 
         let mut input = Vec::new();
         event_records.encode_to(&mut input);
