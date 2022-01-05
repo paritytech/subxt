@@ -339,35 +339,84 @@ pub enum EventsDecodingError {
     InvalidCompactType(String),
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use std::convert::TryFrom;
-//
-//     type DefaultConfig = crate::NodeTemplateRuntime;
-//
-//     #[test]
-//     fn test_decode_option() {
-//         let decoder = EventsDecoder::<DefaultConfig>::new(
-//             Metadata::default(),
-//         );
-//
-//         let value = Some(0u8);
-//         let input = value.encode();
-//         let mut output = Vec::<u8>::new();
-//         let mut errors = Vec::<RuntimeError>::new();
-//
-//         decoder
-//             .decode_raw_bytes(
-//                 &[EventArg::Option(Box::new(EventArg::Primitive(
-//                     "u8".to_string(),
-//                 )))],
-//                 &mut &input[..],
-//                 &mut output,
-//                 &mut errors,
-//             )
-//             .unwrap();
-//
-//         assert_eq!(output, vec![1, 0]);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::convert::TryFrom;
+    use crate::{Config, DefaultConfig, Phase};
+    use frame_metadata::{
+        RuntimeMetadataPrefixed,
+        v14::{
+            ExtrinsicMetadata,
+            RuntimeMetadataLastVersion,
+            PalletMetadata,
+            PalletEventMetadata,
+        }
+    };
+    use scale_info::{
+        TypeInfo,
+        meta_type
+    };
+
+    #[derive(Encode)]
+    pub struct EventRecord<E: Encode> {
+        phase: Phase,
+        pallet_index: u8,
+        event: E,
+        topics: Vec<<DefaultConfig as Config>::Hash>,
+    }
+
+    fn event_record<E: Encode>(pallet_index: u8, event: E) -> EventRecord<E> {
+        EventRecord {
+            phase: Phase::Finalization,
+            pallet_index,
+            event,
+            topics: vec![]
+        }
+    }
+
+    #[test]
+    fn it_works() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+        }
+
+        let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<()>(),
+            version: 0,
+            signed_extensions: vec![]
+        };
+        let event = PalletEventMetadata {
+            ty: meta_type::<Event>()
+        };
+        let pallet_index = 0;
+        let pallet = PalletMetadata {
+            name: "Test",
+            storage: None,
+            calls: None,
+            event: Some(event),
+            constants: vec![],
+            error: None,
+            index: pallet_index
+        };
+        let v14 = RuntimeMetadataLastVersion::new(vec![pallet], extrinsic, meta_type::<()>());
+        let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
+        let metadata = Metadata::try_from(runtime_metadata).unwrap();
+        let decoder = EventsDecoder::<DefaultConfig>::new(metadata);
+
+        let event = Event::A(1);
+        let encoded_event = event.encode();
+        let event_records = vec![
+            event_record(pallet_index, event)
+        ];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+}
