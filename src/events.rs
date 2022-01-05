@@ -253,10 +253,10 @@ where
                     }
                 }
             }
-            TypeDef::Compact(_compact) => {
+            TypeDef::Compact(compact) => {
                 let inner = self
                     .metadata
-                    .resolve_type(type_id)
+                    .resolve_type(compact.type_param().id())
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
                 let mut decode_compact_primitive = |primitive: &TypeDefPrimitive| {
                     match primitive {
@@ -281,6 +281,7 @@ where
                         }
                     }
                 };
+                println!("{:?}", inner.type_def());
                 match inner.type_def() {
                     TypeDef::Primitive(primitive) => decode_compact_primitive(primitive),
                     TypeDef::Composite(composite) => {
