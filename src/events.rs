@@ -281,7 +281,6 @@ where
                         }
                     }
                 };
-                println!("{:?}", inner.type_def());
                 match inner.type_def() {
                     TypeDef::Primitive(primitive) => decode_compact_primitive(primitive),
                     TypeDef::Composite(composite) => {
