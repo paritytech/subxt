@@ -122,3 +122,21 @@ async fn test_iter() {
     }
     assert_eq!(i, 13);
 }
+
+#[async_std::test]
+async fn fetch_system_chain() {
+    let node_process = test_node_process().await;
+    node_process.client().rpc().system_chain().await.unwrap();
+}
+
+#[async_std::test]
+async fn fetch_system_name() {
+    let node_process = test_node_process().await;
+    node_process.client().rpc().system_name().await.unwrap();
+}
+
+#[async_std::test]
+async fn fetch_system_version() {
+    let node_process = test_node_process().await;
+    node_process.client().rpc().system_version().await.unwrap();
+}
