@@ -129,8 +129,5 @@ async fn fetch_system_info() {
     let client = node_process.client();
     assert_eq!(client.rpc().system_chain().await.unwrap(), "Development");
     assert_eq!(client.rpc().system_name().await.unwrap(), "Substrate Node");
-    assert_eq!(
-        client.rpc().system_version().await.unwrap().is_empty(),
-        false
-    );
+    assert!(!client.rpc().system_version().await.unwrap().is_empty());
 }
