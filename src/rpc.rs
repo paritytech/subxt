@@ -391,6 +391,21 @@ impl<T: Config> Rpc<T> {
         Ok(self.client.request("system_properties", &[]).await?)
     }
 
+    /// Fetch system chain
+    pub async fn system_chain(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_chain", &[]).await?)
+    }
+
+    /// Fetch system name
+    pub async fn system_name(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_name", &[]).await?)
+    }
+
+    /// Fetch system version
+    pub async fn system_version(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_version", &[]).await?)
+    }
+
     /// Get a header
     pub async fn header(
         &self,
