@@ -124,19 +124,10 @@ async fn test_iter() {
 }
 
 #[async_std::test]
-async fn fetch_system_chain() {
+async fn fetch_system_info() {
     let node_process = test_node_process().await;
-    node_process.client().rpc().system_chain().await.unwrap();
-}
-
-#[async_std::test]
-async fn fetch_system_name() {
-    let node_process = test_node_process().await;
-    node_process.client().rpc().system_name().await.unwrap();
-}
-
-#[async_std::test]
-async fn fetch_system_version() {
-    let node_process = test_node_process().await;
-    node_process.client().rpc().system_version().await.unwrap();
+    let client = node_process.client();
+    assert_eq!(client.rpc().system_chain().await.unwrap(), "Development");
+    assert_eq!(client.rpc().system_name().await.unwrap(), "Substrate Node");
+    assert_eq!(client.rpc().system_version().await.unwrap().is_empty(), false);
 }
