@@ -24,7 +24,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let api = ClientBuilder::new()
-        .set_url("wss://rpc.polkadot.io")
+        .set_url("wss://rpc.polkadot.io:443")
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
