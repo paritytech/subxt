@@ -431,6 +431,48 @@ mod tests {
     }
 
     #[test]
+    fn decode_multiple_events() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B,
+            C { a: u32 },
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event1 = Event::A(1);
+        let event2 = Event::B;
+        let event3 = Event::C { a: 3 };
+
+        let encoded_event1 = event1.encode();
+        let encoded_event2 = event2.encode();
+        let encoded_event3 = event3.encode();
+
+        let event_records = vec![
+            event_record(pallet_index, event1),
+            event_record(pallet_index, event2),
+            event_record(pallet_index, event3),
+        ];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event1[0]);
+        assert_eq!(events[0].1.data.0, encoded_event1[1..]);
+
+        assert_eq!(events[1].1.variant_index, encoded_event2[0]);
+        assert_eq!(events[1].1.data.0, encoded_event2[1..]);
+
+        assert_eq!(events[2].1.variant_index, encoded_event3[0]);
+        assert_eq!(events[2].1.data.0, encoded_event3[1..]);
+    }
+
+    #[test]
     fn compact_event_field() {
         #[derive(Clone, Encode, TypeInfo)]
         enum Event {
@@ -442,6 +484,33 @@ mod tests {
         let decoder = init_decoder(vec![pallet]);
 
         let event = Event::A(u32::MAX);
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn compact_wrapper_struct_field() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(#[codec(compact)] CompactWrapper),
+        }
+
+        #[derive(Clone, codec::CompactAs, Encode, TypeInfo)]
+        struct CompactWrapper(u64);
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(CompactWrapper(0));
         let encoded_event = event.encode();
         let event_records = vec![event_record(pallet_index, event)];
 
