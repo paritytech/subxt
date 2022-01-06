@@ -18,19 +18,18 @@ use crate::{
     node_runtime::{
         runtime_types,
         sudo,
-        DefaultConfig,
     },
+    pair_signer,
     test_context,
 };
 use sp_keyring::AccountKeyring;
-use subxt::extrinsic::PairSigner;
 
 type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
 #[async_std::test]
 async fn test_sudo() -> Result<(), subxt::Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 
@@ -56,7 +55,7 @@ async fn test_sudo() -> Result<(), subxt::Error> {
 
 #[async_std::test]
 async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
     let cxt = test_context().await;
 

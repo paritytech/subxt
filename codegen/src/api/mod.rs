@@ -152,6 +152,7 @@ impl RuntimeGenerator {
                 )
             })
             .collect::<Vec<_>>();
+
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
@@ -222,76 +223,55 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                /// Default configuration of common types for a target Substrate runtime.
-                #[derive(Clone, Debug, Default, Eq, PartialEq)]
-                pub struct DefaultConfig;
+                /// The default storage entry from which to fetch an account nonce, required for
+                /// constructing a transaction.
+                pub type DefaultAccountData = self::system::storage::Account;
 
-                impl ::subxt::Config for DefaultConfig {
-                    type Index = u32;
-                    type BlockNumber = u32;
-                    type Hash = ::subxt::sp_core::H256;
-                    type Hashing = ::subxt::sp_runtime::traits::BlakeTwo256;
-                    type AccountId = ::subxt::sp_runtime::AccountId32;
-                    type Address = ::subxt::sp_runtime::MultiAddress<Self::AccountId, u32>;
-                    type Header = ::subxt::sp_runtime::generic::Header<
-                        Self::BlockNumber, ::subxt::sp_runtime::traits::BlakeTwo256
-                    >;
-                    type Signature = ::subxt::sp_runtime::MultiSignature;
-                    type Extrinsic = ::subxt::sp_runtime::OpaqueExtrinsic;
-                }
-
-                impl ::subxt::ExtrinsicExtraData<DefaultConfig> for DefaultConfig {
-                    type AccountData = AccountData;
-                    type Extra = ::subxt::DefaultExtra<DefaultConfig>;
-                }
-
-                pub type AccountData = self::system::storage::Account;
-
-                impl ::subxt::AccountData<DefaultConfig> for AccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <DefaultConfig as ::subxt::Config>::Index {
+                impl ::subxt::AccountData<::subxt::DefaultConfig> for DefaultAccountData {
+                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
                         result.nonce
                     }
-                    fn storage_entry(account_id: <DefaultConfig as ::subxt::Config>::AccountId) -> Self {
+                    fn storage_entry(account_id: <::subxt::DefaultConfig as ::subxt::Config>::AccountId) -> Self {
                         Self(account_id)
                     }
                 }
 
-                pub struct RuntimeApi<T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
+                pub struct RuntimeApi<T: ::subxt::Config, E> {
                     pub client: ::subxt::Client<T>,
+                    marker: ::core::marker::PhantomData<E>,
                 }
 
-                impl<T> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T>
+                impl<T, E> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, E>
                 where
-                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                    T: ::subxt::Config,
+                    E: ::subxt::SignedExtra<T>,
                 {
                     fn from(client: ::subxt::Client<T>) -> Self {
-                        Self { client }
+                        Self { client, marker: ::core::marker::PhantomData }
                     }
                 }
 
-                impl<'a, T> RuntimeApi<T>
+                impl<'a, T, E> RuntimeApi<T, E>
                 where
-                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                    T: ::subxt::Config,
+                    E: ::subxt::SignedExtra<T>,
                 {
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
 
-                    pub fn tx(&'a self) -> TransactionApi<'a, T> {
-                        TransactionApi { client: &self.client }
+                    pub fn tx(&'a self) -> TransactionApi<'a, T, E, DefaultAccountData> {
+                        TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
                 }
 
-                pub struct StorageApi<'a, T>
-                where
-                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
-                {
+                pub struct StorageApi<'a, T: ::subxt::Config> {
                     client: &'a ::subxt::Client<T>,
                 }
 
                 impl<'a, T> StorageApi<'a, T>
                 where
-                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                    T: ::subxt::Config,
                 {
                     #(
                         pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
@@ -300,16 +280,19 @@ impl RuntimeGenerator {
                     )*
                 }
 
-                pub struct TransactionApi<'a, T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
+                pub struct TransactionApi<'a, T: ::subxt::Config, E, A> {
                     client: &'a ::subxt::Client<T>,
+                    marker: ::core::marker::PhantomData<(E, A)>,
                 }
 
-                impl<'a, T> TransactionApi<'a, T>
+                impl<'a, T, E, A> TransactionApi<'a, T, E, A>
                 where
-                    T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                    T: ::subxt::Config,
+                    E: ::subxt::SignedExtra<T>,
+                    A: ::subxt::AccountData<T>,
                 {
                     #(
-                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T> {
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, E, A> {
                             #pallets_with_calls::calls::TransactionApi::new(self.client)
                         }
                     )*

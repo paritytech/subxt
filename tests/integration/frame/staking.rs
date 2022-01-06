@@ -21,8 +21,8 @@ use crate::{
             ValidatorPrefs,
         },
         staking,
-        DefaultConfig,
     },
+    pair_signer,
     test_context,
 };
 use assert_matches::assert_matches;
@@ -32,12 +32,9 @@ use sp_core::{
 };
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::{
-        PairSigner,
-        Signer,
-    },
     Error,
     RuntimeError,
+    Signer,
 };
 
 /// Helper function to generate a crypto pair from seed
@@ -55,7 +52,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
 
 #[async_std::test]
 async fn validate_with_controller_account() {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
     cxt.api
         .tx()
@@ -71,7 +68,7 @@ async fn validate_with_controller_account() {
 
 #[async_std::test]
 async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
-    let alice_stash = PairSigner::<DefaultConfig, _>::new(get_from_seed("Alice//stash"));
+    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let cxt = test_context().await;
     let announce_validator = cxt
         .api
@@ -91,8 +88,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error> {
 
 #[async_std::test]
 async fn nominate_with_controller_account() {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
-    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
     cxt.api
@@ -109,9 +106,8 @@ async fn nominate_with_controller_account() {
 
 #[async_std::test]
 async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
-    let alice_stash =
-        PairSigner::<DefaultConfig, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
+    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
+    let bob = pair_signer(AccountKeyring::Bob.pair());
     let cxt = test_context().await;
 
     let nomination = cxt
@@ -133,11 +129,9 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error> {
 
 #[async_std::test]
 async fn chill_works_for_controller_only() -> Result<(), Error> {
-    let alice_stash =
-        PairSigner::<DefaultConfig, sr25519::Pair>::new(get_from_seed("Alice//stash"));
-    let bob_stash =
-        PairSigner::<DefaultConfig, sr25519::Pair>::new(get_from_seed("Bob//stash"));
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice_stash = pair_signer(get_from_seed("Alice//stash"));
+    let bob_stash = pair_signer(get_from_seed("Bob//stash"));
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
     // this will fail the second time, which is why this is one test, not two
@@ -191,7 +185,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error> {
 
 #[async_std::test]
 async fn tx_bond() -> Result<(), Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 
     let bond = cxt

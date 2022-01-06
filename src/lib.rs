@@ -78,7 +78,7 @@ pub use crate::{
     config::{
         AccountData,
         Config,
-        ExtrinsicExtraData,
+        DefaultConfig,
     },
     error::{
         Error,
@@ -92,6 +92,7 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         PairSigner,
         SignedExtra,
         Signer,
