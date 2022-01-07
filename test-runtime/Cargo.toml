@@ -5,11 +5,11 @@ edition = "2021"
 
 [dependencies]
 subxt = { path = ".." }
-sp-runtime = { package = "sp-runtime", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
 codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 subxt = { path = ".." }
-sp-core = { package = "sp-core", git = "https://tributary.semantic-network.tech/semnet/tidefi/back/substrate", branch = "tidefi-1.0.1" }
+sp-core = { package = "sp-core", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 which = "4.2.2"
