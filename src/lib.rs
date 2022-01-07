@@ -166,7 +166,7 @@ impl codec::Encode for Encoded {
 }
 
 /// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),
