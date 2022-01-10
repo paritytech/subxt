@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -22,9 +22,12 @@
 //! polkadot --dev --tmp
 //! ```
 
+use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
+    DefaultConfig,
+    DefaultExtra,
     PairSigner,
 };
 
@@ -52,7 +55,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
 
     let balance_transfer = api
         .tx()
@@ -84,7 +87,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
 
     let balance_transfer = api
         .tx()
@@ -135,7 +138,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<polkadot::DefaultConfig>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
 
     let mut balance_transfer_progress = api
         .tx()
@@ -144,7 +147,8 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         .sign_and_submit_then_watch(&signer)
         .await?;
 
-    while let Some(ev) = balance_transfer_progress.next().await? {
+    while let Some(ev) = balance_transfer_progress.next().await {
+        let ev = ev?;
         use subxt::TransactionStatus::*;
 
         // Made it into a block, but not finalized.

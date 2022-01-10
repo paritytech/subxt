@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -78,7 +78,7 @@ pub use crate::{
     config::{
         AccountData,
         Config,
-        ExtrinsicExtraData,
+        DefaultConfig,
     },
     error::{
         Error,
@@ -92,6 +92,7 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         PairSigner,
         SignedExtra,
         Signer,
@@ -165,7 +166,7 @@ impl codec::Encode for Encoded {
 }
 
 /// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),

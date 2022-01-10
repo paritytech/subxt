@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -14,9 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::types::{
+use jsonrpsee::core::{
+    client::Subscription,
     DeserializeOwned,
-    Subscription,
 };
 use sp_core::{
     storage::{
@@ -247,36 +247,20 @@ where
     T: DeserializeOwned,
 {
     match sub.next().await {
-        Ok(Some(next)) => Some(next),
-        Ok(None) => None,
-        Err(e) => {
+        Some(Ok(next)) => Some(next),
+        Some(Err(e)) => {
             log::error!("Subscription {} failed: {:?} dropping", sub_name, e);
             None
         }
+        None => None,
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::DefaultConfig;
     use sp_core::H256;
-    #[derive(Clone)]
-    struct MockConfig;
-
-    impl Config for MockConfig {
-        type Index = u32;
-        type BlockNumber = u32;
-        type Hash = sp_core::H256;
-        type Hashing = sp_runtime::traits::BlakeTwo256;
-        type AccountId = sp_runtime::AccountId32;
-        type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-        type Header = sp_runtime::generic::Header<
-            Self::BlockNumber,
-            sp_runtime::traits::BlakeTwo256,
-        >;
-        type Signature = sp_runtime::MultiSignature;
-        type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    }
 
     fn named_event(event_name: &str) -> RawEvent {
         RawEvent {
@@ -315,7 +299,7 @@ mod tests {
         for block_filter in [None, Some(H256::from([1; 32]))] {
             for extrinsic_filter in [None, Some(1)] {
                 for event_filter in [None, Some(("b", "b"))] {
-                    let mut subscription: EventSubscription<MockConfig> =
+                    let mut subscription: EventSubscription<DefaultConfig> =
                         EventSubscription {
                             block_reader: BlockReader::Mock(Box::new(
                                 vec![

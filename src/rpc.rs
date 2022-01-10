@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -33,25 +33,23 @@ use core::{
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::{
+    core::{
+        client::{
+            Client,
+            ClientT,
+            Subscription,
+            SubscriptionClientT,
+        },
+        to_json_value,
+        DeserializeOwned,
+        Error as RpcError,
+        JsonValue,
+    },
     http_client::{
         HttpClient,
         HttpClientBuilder,
     },
-    types::{
-        to_json_value,
-        traits::{
-            Client,
-            SubscriptionClient,
-        },
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
-        Subscription,
-    },
-    ws_client::{
-        WsClient,
-        WsClientBuilder,
-    },
+    ws_client::WsClientBuilder,
 };
 use serde::{
     Deserialize,
@@ -172,7 +170,7 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
 #[derive(Clone)]
 pub enum RpcClient {
     /// JSONRPC client WebSocket transport.
-    WebSocket(Arc<WsClient>),
+    WebSocket(Arc<Client>),
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
@@ -239,14 +237,14 @@ impl RpcClient {
     }
 }
 
-impl From<WsClient> for RpcClient {
-    fn from(client: WsClient) -> Self {
+impl From<Client> for RpcClient {
+    fn from(client: Client) -> Self {
         RpcClient::WebSocket(Arc::new(client))
     }
 }
 
-impl From<Arc<WsClient>> for RpcClient {
-    fn from(client: Arc<WsClient>) -> Self {
+impl From<Arc<Client>> for RpcClient {
+    fn from(client: Arc<Client>) -> Self {
         RpcClient::WebSocket(client)
     }
 }
@@ -391,6 +389,21 @@ impl<T: Config> Rpc<T> {
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
         Ok(self.client.request("system_properties", &[]).await?)
+    }
+
+    /// Fetch system chain
+    pub async fn system_chain(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_chain", &[]).await?)
+    }
+
+    /// Fetch system name
+    pub async fn system_name(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_name", &[]).await?)
+    }
+
+    /// Fetch system version
+    pub async fn system_version(&self) -> Result<String, Error> {
+        Ok(self.client.request("system_version", &[]).await?)
     }
 
     /// Get a header
