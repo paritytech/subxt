@@ -187,13 +187,13 @@ where
             TypeDef::Variant(variant) => {
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant =
-                    variant
-                        .variants()
-                        .get(variant_index as usize)
-                        .ok_or_else(|| {
-                            Error::Other(format!("Variant {} not found", variant_index))
-                        })?;
+                let variant = variant
+                    .variants()
+                    .iter()
+                    .find(|v| v.index() == variant_index)
+                    .ok_or_else(|| {
+                        Error::Other(format!("Variant {} not found", variant_index))
+                    })?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
@@ -517,6 +517,38 @@ mod tests {
         let mut input = Vec::new();
         event_records.encode_to(&mut input);
 
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn event_containing_explicit_index() {
+        #[derive(Clone, Encode, TypeInfo)]
+        #[repr(u8)]
+        #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
+        pub enum MyType {
+            B = 10u8,
+        }
+
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(MyType),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(MyType::B);
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        // this would panic if the explicit enum item index were not correctly used
         let events = decoder.decode_events(&mut &input[..]).unwrap();
 
         assert_eq!(events[0].1.variant_index, encoded_event[0]);
