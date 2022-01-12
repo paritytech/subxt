@@ -16,11 +16,6 @@
 
 use std::task::Poll;
 
-use sp_core::storage::StorageKey;
-use sp_runtime::traits::Hash;
-pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
-
 use crate::{
     client::Client,
     error::{
@@ -32,6 +27,7 @@ use crate::{
     Config,
     Phase,
 };
+use derivative::Derivative;
 use futures::{
     Stream,
     StreamExt,
@@ -40,10 +36,15 @@ use jsonrpsee::core::{
     client::Subscription as RpcSubscription,
     Error as RpcError,
 };
+use sp_core::storage::StorageKey;
+use sp_runtime::traits::Hash;
+pub use sp_runtime::traits::SignedExtension;
+pub use sp_version::RuntimeVersion;
 
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct TransactionProgress<'client, T: Config> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
@@ -261,7 +262,8 @@ impl<'client, T: Config> Stream for TransactionProgress<'client, T> {
 /// finalized. The `FinalityTimeout` event will be emitted when the block did not reach finality
 /// within 512 blocks. This either indicates that finality is not available for your chain,
 /// or that finality gadget is lagging behind.
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub enum TransactionStatus<'client, T: Config> {
     /// The transaction is part of the "future" queue.
     Future,
@@ -310,7 +312,8 @@ impl<'client, T: Config> TransactionStatus<'client, T> {
 }
 
 /// This struct represents a transaction that has made it into a block.
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct TransactionInBlock<'client, T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
@@ -416,7 +419,8 @@ impl<'client, T: Config> TransactionInBlock<'client, T> {
 
 /// This represents the events related to our transaction.
 /// We can iterate over the events, or look for a specific one.
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct TransactionEvents<T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,

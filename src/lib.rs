@@ -57,6 +57,7 @@ use core::{
     fmt::Debug,
     marker::PhantomData,
 };
+use derivative::Derivative;
 
 mod client;
 mod config;
@@ -180,7 +181,14 @@ pub enum Phase {
 ///
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
 /// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Debug, Eq, PartialEq, Default, Clone, Decode, Encode)]
+#[derive(Derivative, Encode, Decode)]
+#[derivative(
+    Debug(bound = ""),
+    Clone(bound = ""),
+    PartialEq(bound = ""),
+    Eq(bound = ""),
+    Default(bound = "")
+)]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
     _phantom: PhantomData<T>,

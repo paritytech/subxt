@@ -86,10 +86,9 @@ pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
 /// Default set of commonly used types by Substrate runtimes.
-// Note: We only use this at the type level, so instances of it should not be constructed,
-// hence the private () type contained within.
-#[derive(Debug)]
-pub struct DefaultConfig(());
+// Note: We only use this at the type level, so it should be impossible to
+// create an instance of it.
+pub enum DefaultConfig {}
 
 impl Config for DefaultConfig {
     type Index = u32;
