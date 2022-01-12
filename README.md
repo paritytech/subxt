@@ -67,6 +67,7 @@ Please add your project to this list via a PR.
 - [cargo-contract](https://github.com/paritytech/cargo-contract/pull/79) CLI for interacting with Wasm smart contracts.
 - [xcm-cli](https://github.com/ascjones/xcm-cli) CLI for submitting XCM messages.
 - [phala-pherry](https://github.com/Phala-Network/phala-blockchain/tree/master/standalone/pherry) The relayer between Phala blockchain and the off-chain Secure workers.
+- [crunch](https://github.com/turboflakes/crunch) CLI to claim staking rewards in batch every Era or X hours for substrate-based chains.
 
 **Alternatives**
 
