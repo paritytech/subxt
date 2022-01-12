@@ -14,16 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-};
-use std::marker::PhantomData;
-
 use crate::{
     metadata::{
         EventMetadata,
@@ -35,11 +25,21 @@ use crate::{
     Metadata,
     Phase,
 };
+use codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+};
+use derivative::Derivative;
 use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
 use sp_core::Bytes;
+use std::marker::PhantomData;
 
 /// Raw bytes for an Event
 #[derive(Debug)]
@@ -69,7 +69,8 @@ impl RawEvent {
 }
 
 /// Events decoder.
-#[derive(Debug, Clone)]
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct EventsDecoder<T> {
     metadata: Metadata,
     marker: PhantomData<T>,

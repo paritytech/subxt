@@ -39,6 +39,7 @@ sp-runtime = { git = "https://github.com/paritytech/substrate/", branch = "maste
 sp-version = { package = "sp-version", git = "https://github.com/paritytech/substrate/", branch = "master" }
 
 frame-metadata = "14.0.0"
+derivative = "2.2.0"
 
 [dev-dependencies]
 sp-arithmetic = { git = "https://github.com/paritytech/substrate/", branch = "master", default-features = false }
