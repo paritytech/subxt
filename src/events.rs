@@ -527,7 +527,7 @@ mod tests {
     fn event_containing_explicit_index() {
         #[derive(Clone, Encode, TypeInfo)]
         #[repr(u8)]
-        #[allow(trivial_numeric_casts)] // required because the Encode derive produces a warning otherwise
+        #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
         pub enum MyType {
             B = 10u8,
         }
