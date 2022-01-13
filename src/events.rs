@@ -71,9 +71,9 @@ impl RawEvent {
 /// Events decoder.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
-pub struct EventsDecoder<T: Config> {
+pub struct EventsDecoder<T: Config, E: Decode> {
     metadata: Metadata,
-    marker: PhantomDataSendSync<T>,
+    marker: PhantomDataSendSync<(T,E)>,
 }
 
 impl<T: Config> EventsDecoder<T> {
@@ -89,7 +89,7 @@ impl<T: Config> EventsDecoder<T> {
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    ) -> Result<Vec<(Phase, RawEvent)>, Error<E>> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
         log::debug!("decoding {} events", len);
@@ -142,7 +142,7 @@ impl<T: Config> EventsDecoder<T> {
         event_metadata: &EventMetadata,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error<E>> {
         log::debug!(
             "Decoding Event '{}::{}'",
             event_metadata.pallet(),
@@ -160,16 +160,16 @@ impl<T: Config> EventsDecoder<T> {
         type_id: u32,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), Error<E>> {
         let ty = self
             .metadata
             .resolve_type(type_id)
             .ok_or(MetadataError::TypeNotFound(type_id))?;
 
-        fn decode_raw<T: Codec>(
+        fn decode_raw<T: Codec, E>(
             input: &mut &[u8],
             output: &mut Vec<u8>,
-        ) -> Result<(), Error> {
+        ) -> Result<(), Error<E>> {
             let decoded = T::decode(input)?;
             decoded.encode_to(output);
             Ok(())

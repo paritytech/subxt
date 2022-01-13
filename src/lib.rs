@@ -81,7 +81,6 @@ pub use crate::{
     error::{
         Error,
         PalletError,
-        RuntimeError,
         TransactionError,
     },
     events::{

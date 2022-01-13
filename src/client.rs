@@ -42,22 +42,26 @@ use crate::{
 };
 use derivative::Derivative;
 use std::sync::Arc;
+use std::marker::PhantomData;
+use codec::Decode;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-pub struct ClientBuilder {
+pub struct ClientBuilder<E> {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
+    _error: PhantomData<E>
 }
 
-impl ClientBuilder {
+impl <E> ClientBuilder<E> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
             url: None,
             client: None,
             page_size: None,
+            _error: PhantomData
         }
     }
 
@@ -80,7 +84,7 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
+    pub async fn build<T: Config>(self) -> Result<Client<T,E>, Error<E>> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -114,17 +118,17 @@ impl ClientBuilder {
 /// Client to interface with a substrate node.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct Client<T: Config> {
+pub struct Client<T: Config, E: Decode> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Arc<Metadata>,
-    events_decoder: EventsDecoder<T>,
+    events_decoder: EventsDecoder<T, E>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     iter_page_size: u32,
 }
 
-impl<T: Config> std::fmt::Debug for Client<T> {
+impl<T: Config, E> std::fmt::Debug for Client<T, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
             .field("rpc", &"<Rpc>")
@@ -138,7 +142,7 @@ impl<T: Config> std::fmt::Debug for Client<T> {
     }
 }
 
-impl<T: Config> Client<T> {
+impl<T: Config, E> Client<T, E> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -180,27 +184,28 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the events decoder.
-    pub fn events_decoder(&self) -> &EventsDecoder<T> {
+    pub fn events_decoder(&self) -> &EventsDecoder<T, E> {
         &self.events_decoder
     }
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, E, A, C> {
-    client: &'client Client<T>,
+pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E> {
+    client: &'client Client<T, E>,
     call: C,
-    marker: std::marker::PhantomData<(E, A)>,
+    marker: std::marker::PhantomData<(X, A, E)>,
 }
 
-impl<'client, T, E, A, C> SubmittableExtrinsic<'client, T, E, A, C>
+impl<'client, T, X, A, C, E> SubmittableExtrinsic<'client, T, X, A, C, E>
 where
     T: Config,
-    E: SignedExtra<T>,
+    X: SignedExtra<T>,
     A: AccountData<T>,
     C: Call + Send + Sync,
+    E: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: &'client Client<T>, call: C) -> Self {
+    pub fn new(client: &'client Client<T, E>, call: C) -> Self {
         Self {
             client,
             call,
@@ -214,10 +219,10 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T>, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+    ) -> Result<TransactionProgress<'client, T, E>, Error<E>>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         // Sign the call data to create our extrinsic.
@@ -240,10 +245,10 @@ where
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<T::Hash, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+    ) -> Result<T::Hash, Error<E>>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -253,11 +258,11 @@ where
     /// Creates a signed extrinsic.
     pub async fn create_signed(
         &self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-        additional_params: E::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, E>, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+        additional_params: X::Parameters,
+    ) -> Result<UncheckedExtrinsic<T, X>, Error<E>>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {

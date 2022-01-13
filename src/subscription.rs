@@ -42,8 +42,8 @@ use crate::{
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Config> {
-    block_reader: BlockReader<'a, T>,
+pub struct EventSubscription<'a, T: Config, E> {
+    block_reader: BlockReader<'a, T, E>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
@@ -51,17 +51,17 @@ pub struct EventSubscription<'a, T: Config> {
     finished: bool,
 }
 
-enum BlockReader<'a, T: Config> {
+enum BlockReader<'a, T: Config, E> {
     Decoder {
         subscription: EventStorageSubscription<T>,
-        decoder: &'a EventsDecoder<T>,
+        decoder: &'a EventsDecoder<T, E>,
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
     Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)>>),
 }
 
-impl<'a, T: Config> BlockReader<'a, T> {
+impl<'a, T: Config, E> BlockReader<'a, T, E> {
     async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)> {
         match self {
             BlockReader::Decoder {
@@ -86,11 +86,11 @@ impl<'a, T: Config> BlockReader<'a, T> {
     }
 }
 
-impl<'a, T: Config> EventSubscription<'a, T> {
+impl<'a, T: Config, E> EventSubscription<'a, T, E> {
     /// Creates a new event subscription.
     pub fn new(
         subscription: EventStorageSubscription<T>,
-        decoder: &'a EventsDecoder<T>,
+        decoder: &'a EventsDecoder<T, E>,
     ) -> Self {
         Self {
             block_reader: BlockReader::Decoder {
@@ -117,8 +117,8 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     }
 
     /// Filters events by type.
-    pub fn filter_event<E: Event>(&mut self) {
-        self.event = Some((E::PALLET, E::EVENT));
+    pub fn filter_event<Ev: Event>(&mut self) {
+        self.event = Some((Ev::PALLET, Ev::EVENT));
     }
 
     /// Gets the next event.
