@@ -23,6 +23,7 @@ use crate::{
     Error,
     Event,
     Metadata,
+    PhantomDataSendSync,
     Phase,
 };
 use codec::{
@@ -39,7 +40,6 @@ use scale_info::{
     TypeDefPrimitive,
 };
 use sp_core::Bytes;
-use std::marker::PhantomData;
 
 /// Raw bytes for an Event
 #[derive(Debug)]
@@ -71,15 +71,12 @@ impl RawEvent {
 /// Events decoder.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
-pub struct EventsDecoder<T> {
+pub struct EventsDecoder<T: Config> {
     metadata: Metadata,
-    marker: PhantomData<T>,
+    marker: PhantomDataSendSync<T>,
 }
 
-impl<T> EventsDecoder<T>
-where
-    T: Config,
-{
+impl<T: Config> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {

@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::PhantomDataSendSync;
 use codec::{
     Decode,
     Encode,
@@ -43,28 +44,6 @@ use crate::Config;
 ///
 /// This is modified from the substrate version to allow passing in of the version, which is
 /// returned via `additional_signed()`.
-
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
-/// because regardless of the generic param, it is always possible to Send + Sync this).
-#[derive(Derivative, Encode, Decode, TypeInfo)]
-#[derivative(
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Debug(bound = ""),
-    Eq(bound = ""),
-    Default(bound = "")
-)]
-#[scale_info(skip_type_params(T))]
-pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
-
-unsafe impl<T> Send for PhantomDataSendSync<T> {}
-unsafe impl<T> Sync for PhantomDataSendSync<T> {}
-
-impl<T> PhantomDataSendSync<T> {
-    pub(crate) fn new() -> Self {
-        Self(core::marker::PhantomData)
-    }
-}
 
 /// Ensure the runtime version registered in the transaction is the same as at present.
 #[derive(Derivative, Encode, Decode, TypeInfo)]
