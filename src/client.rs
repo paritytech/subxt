@@ -40,33 +40,35 @@ use crate::{
     Config,
     Metadata,
 };
-use derivative::Derivative;
-use std::sync::Arc;
-use std::marker::PhantomData;
 use codec::Decode;
+use derivative::Derivative;
+use std::{
+    marker::PhantomData,
+    sync::Arc,
+};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-pub struct ClientBuilder<E> {
+pub struct ClientBuilder<E: Decode> {
     url: Option<String>,
-    client: Option<RpcClient>,
+    client: Option<RpcClient<E>>,
     page_size: Option<u32>,
-    _error: PhantomData<E>
+    _error: PhantomData<E>,
 }
 
-impl <E> ClientBuilder<E> {
+impl<E: Decode> ClientBuilder<E> {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
             url: None,
             client: None,
             page_size: None,
-            _error: PhantomData
+            _error: PhantomData,
         }
     }
 
     /// Sets the jsonrpsee client.
-    pub fn set_client<C: Into<RpcClient>>(mut self, client: C) -> Self {
+    pub fn set_client<C: Into<RpcClient<E>>>(mut self, client: C) -> Self {
         self.client = Some(client.into());
         self
     }
@@ -84,7 +86,7 @@ impl <E> ClientBuilder<E> {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Config>(self) -> Result<Client<T,E>, Error<E>> {
+    pub async fn build<T: Config>(self) -> Result<Client<T, E>, Error<E>> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -119,7 +121,7 @@ impl <E> ClientBuilder<E> {
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct Client<T: Config, E: Decode> {
-    rpc: Rpc<T>,
+    rpc: Rpc<T, E>,
     genesis_hash: T::Hash,
     metadata: Arc<Metadata>,
     events_decoder: EventsDecoder<T, E>,
@@ -128,7 +130,7 @@ pub struct Client<T: Config, E: Decode> {
     iter_page_size: u32,
 }
 
-impl<T: Config, E> std::fmt::Debug for Client<T, E> {
+impl<T: Config, E: Decode> std::fmt::Debug for Client<T, E> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
             .field("rpc", &"<Rpc>")
@@ -142,7 +144,7 @@ impl<T: Config, E> std::fmt::Debug for Client<T, E> {
     }
 }
 
-impl<T: Config, E> Client<T, E> {
+impl<T: Config, E: Decode> Client<T, E> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -166,12 +168,12 @@ impl<T: Config, E> Client<T, E> {
     }
 
     /// Returns the rpc client.
-    pub fn rpc(&self) -> &Rpc<T> {
+    pub fn rpc(&self) -> &Rpc<T, E> {
         &self.rpc
     }
 
     /// Create a client for accessing runtime storage
-    pub fn storage(&self) -> StorageClient<T> {
+    pub fn storage(&self) -> StorageClient<T, E> {
         StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
@@ -190,7 +192,7 @@ impl<T: Config, E> Client<T, E> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E> {
+pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode> {
     client: &'client Client<T, E>,
     call: C,
     marker: std::marker::PhantomData<(X, A, E)>,

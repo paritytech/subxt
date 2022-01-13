@@ -14,6 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::{
+    error::Error,
+    events::{
+        EventsDecoder,
+        RawEvent,
+    },
+    rpc::Rpc,
+    Config,
+    Event,
+    Phase,
+};
+use codec::Decode;
 use jsonrpsee::core::{
     client::Subscription,
     DeserializeOwned,
@@ -28,21 +40,9 @@ use sp_core::{
 use sp_runtime::traits::Header;
 use std::collections::VecDeque;
 
-use crate::{
-    error::Error,
-    events::{
-        EventsDecoder,
-        RawEvent,
-    },
-    rpc::Rpc,
-    Config,
-    Event,
-    Phase,
-};
-
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Config, E> {
+pub struct EventSubscription<'a, T: Config, E: Decode> {
     block_reader: BlockReader<'a, T, E>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
@@ -51,18 +51,20 @@ pub struct EventSubscription<'a, T: Config, E> {
     finished: bool,
 }
 
-enum BlockReader<'a, T: Config, E> {
+enum BlockReader<'a, T: Config, E: Decode> {
     Decoder {
-        subscription: EventStorageSubscription<T>,
+        subscription: EventStorageSubscription<T, E>,
         decoder: &'a EventsDecoder<T, E>,
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)>>),
+    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error<E>>)>>),
 }
 
-impl<'a, T: Config, E> BlockReader<'a, T, E> {
-    async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)> {
+impl<'a, T: Config, E: Decode> BlockReader<'a, T, E> {
+    async fn next(
+        &mut self,
+    ) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error<E>>)> {
         match self {
             BlockReader::Decoder {
                 subscription,
@@ -86,10 +88,10 @@ impl<'a, T: Config, E> BlockReader<'a, T, E> {
     }
 }
 
-impl<'a, T: Config, E> EventSubscription<'a, T, E> {
+impl<'a, T: Config, E: Decode> EventSubscription<'a, T, E> {
     /// Creates a new event subscription.
     pub fn new(
-        subscription: EventStorageSubscription<T>,
+        subscription: EventStorageSubscription<T, E>,
         decoder: &'a EventsDecoder<T, E>,
     ) -> Self {
         Self {
@@ -122,7 +124,7 @@ impl<'a, T: Config, E> EventSubscription<'a, T, E> {
     }
 
     /// Gets the next event.
-    pub async fn next(&mut self) -> Option<Result<RawEvent, Error>> {
+    pub async fn next(&mut self) -> Option<Result<RawEvent, Error<E>>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
                 return Some(Ok(raw_event))
@@ -181,16 +183,16 @@ impl From<SystemEvents> for StorageKey {
 }
 
 /// Event subscription to only fetch finalized storage changes.
-pub struct FinalizedEventStorageSubscription<T: Config> {
-    rpc: Rpc<T>,
+pub struct FinalizedEventStorageSubscription<T: Config, E> {
+    rpc: Rpc<T, E>,
     subscription: Subscription<T::Header>,
     storage_changes: VecDeque<StorageChangeSet<T::Hash>>,
     storage_key: StorageKey,
 }
 
-impl<T: Config> FinalizedEventStorageSubscription<T> {
+impl<T: Config, E> FinalizedEventStorageSubscription<T, E> {
     /// Creates a new finalized event storage subscription.
-    pub fn new(rpc: Rpc<T>, subscription: Subscription<T::Header>) -> Self {
+    pub fn new(rpc: Rpc<T, E>, subscription: Subscription<T::Header>) -> Self {
         Self {
             rpc,
             subscription,
@@ -219,14 +221,14 @@ impl<T: Config> FinalizedEventStorageSubscription<T> {
 }
 
 /// Wrapper over imported and finalized event subscriptions.
-pub enum EventStorageSubscription<T: Config> {
+pub enum EventStorageSubscription<T: Config, E> {
     /// Events that are InBlock
     Imported(Subscription<StorageChangeSet<T::Hash>>),
     /// Events that are Finalized
-    Finalized(FinalizedEventStorageSubscription<T>),
+    Finalized(FinalizedEventStorageSubscription<T, E>),
 }
 
-impl<T: Config> EventStorageSubscription<T> {
+impl<T: Config, E> EventStorageSubscription<T, E> {
     /// Gets the next change_set from the subscription.
     pub async fn next(&mut self) -> Option<StorageChangeSet<T::Hash>> {
         match self {

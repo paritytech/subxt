@@ -73,10 +73,10 @@ impl RawEvent {
 #[derivative(Clone(bound = ""), Debug(bound = ""))]
 pub struct EventsDecoder<T: Config, E: Decode> {
     metadata: Metadata,
-    marker: PhantomDataSendSync<(T,E)>,
+    marker: PhantomDataSendSync<(T, E)>,
 }
 
-impl<T: Config> EventsDecoder<T> {
+impl<T: Config, E: Decode> EventsDecoder<T, E> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {
@@ -219,30 +219,30 @@ impl<T: Config> EventsDecoder<T> {
             }
             TypeDef::Primitive(primitive) => {
                 match primitive {
-                    TypeDefPrimitive::Bool => decode_raw::<bool>(input, output),
+                    TypeDefPrimitive::Bool => decode_raw::<bool, _>(input, output),
                     TypeDefPrimitive::Char => {
                         Err(EventsDecodingError::UnsupportedPrimitive(
                             TypeDefPrimitive::Char,
                         )
                         .into())
                     }
-                    TypeDefPrimitive::Str => decode_raw::<String>(input, output),
-                    TypeDefPrimitive::U8 => decode_raw::<u8>(input, output),
-                    TypeDefPrimitive::U16 => decode_raw::<u16>(input, output),
-                    TypeDefPrimitive::U32 => decode_raw::<u32>(input, output),
-                    TypeDefPrimitive::U64 => decode_raw::<u64>(input, output),
-                    TypeDefPrimitive::U128 => decode_raw::<u128>(input, output),
+                    TypeDefPrimitive::Str => decode_raw::<String, _>(input, output),
+                    TypeDefPrimitive::U8 => decode_raw::<u8, _>(input, output),
+                    TypeDefPrimitive::U16 => decode_raw::<u16, _>(input, output),
+                    TypeDefPrimitive::U32 => decode_raw::<u32, _>(input, output),
+                    TypeDefPrimitive::U64 => decode_raw::<u64, _>(input, output),
+                    TypeDefPrimitive::U128 => decode_raw::<u128, _>(input, output),
                     TypeDefPrimitive::U256 => {
                         Err(EventsDecodingError::UnsupportedPrimitive(
                             TypeDefPrimitive::U256,
                         )
                         .into())
                     }
-                    TypeDefPrimitive::I8 => decode_raw::<i8>(input, output),
-                    TypeDefPrimitive::I16 => decode_raw::<i16>(input, output),
-                    TypeDefPrimitive::I32 => decode_raw::<i32>(input, output),
-                    TypeDefPrimitive::I64 => decode_raw::<i64>(input, output),
-                    TypeDefPrimitive::I128 => decode_raw::<i128>(input, output),
+                    TypeDefPrimitive::I8 => decode_raw::<i8, _>(input, output),
+                    TypeDefPrimitive::I16 => decode_raw::<i16, _>(input, output),
+                    TypeDefPrimitive::I32 => decode_raw::<i32, _>(input, output),
+                    TypeDefPrimitive::I64 => decode_raw::<i64, _>(input, output),
+                    TypeDefPrimitive::I128 => decode_raw::<i128, _>(input, output),
                     TypeDefPrimitive::I256 => {
                         Err(EventsDecodingError::UnsupportedPrimitive(
                             TypeDefPrimitive::I256,
@@ -258,18 +258,20 @@ impl<T: Config> EventsDecoder<T> {
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
                 let mut decode_compact_primitive = |primitive: &TypeDefPrimitive| {
                     match primitive {
-                        TypeDefPrimitive::U8 => decode_raw::<Compact<u8>>(input, output),
+                        TypeDefPrimitive::U8 => {
+                            decode_raw::<Compact<u8>, _>(input, output)
+                        }
                         TypeDefPrimitive::U16 => {
-                            decode_raw::<Compact<u16>>(input, output)
+                            decode_raw::<Compact<u16>, _>(input, output)
                         }
                         TypeDefPrimitive::U32 => {
-                            decode_raw::<Compact<u32>>(input, output)
+                            decode_raw::<Compact<u32>, _>(input, output)
                         }
                         TypeDefPrimitive::U64 => {
-                            decode_raw::<Compact<u64>>(input, output)
+                            decode_raw::<Compact<u64>, _>(input, output)
                         }
                         TypeDefPrimitive::U128 => {
-                            decode_raw::<Compact<u128>>(input, output)
+                            decode_raw::<Compact<u128>, _>(input, output)
                         }
                         prim => {
                             Err(EventsDecodingError::InvalidCompactPrimitive(

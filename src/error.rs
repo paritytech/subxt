@@ -24,9 +24,7 @@ use crate::{
 use core::fmt::Debug;
 use jsonrpsee::core::error::Error as RequestError;
 use sp_core::crypto::SecretStringError;
-use sp_runtime::{
-    transaction_validity::TransactionValidityError,
-};
+use sp_runtime::transaction_validity::TransactionValidityError;
 use thiserror::Error;
 
 /// Error enum.
@@ -57,7 +55,6 @@ pub enum Error<E> {
     #[error("Metadata: {0}")]
     Metadata(#[from] MetadataError),
     /// Runtime error.
-    // TODO [jsdw]: derive Debug on generated types so that we can show something useful here?
     #[error("Runtime error")]
     Runtime(E),
     /// Events decoding error.
@@ -71,25 +68,25 @@ pub enum Error<E> {
     Other(String),
 }
 
-impl <E> From<SecretStringError> for Error<E> {
+impl<E> From<SecretStringError> for Error<E> {
     fn from(error: SecretStringError) -> Self {
         Error::SecretString(error)
     }
 }
 
-impl <E> From<TransactionValidityError> for Error<E> {
+impl<E> From<TransactionValidityError> for Error<E> {
     fn from(error: TransactionValidityError) -> Self {
         Error::Invalid(error)
     }
 }
 
-impl <E> From<&str> for Error<E> {
+impl<E> From<&str> for Error<E> {
     fn from(error: &str) -> Self {
         Error::Other(error.into())
     }
 }
 
-impl <E> From<String> for Error<E> {
+impl<E> From<String> for Error<E> {
     fn from(error: String) -> Self {
         Error::Other(error)
     }

@@ -16,12 +16,12 @@
 
 use std::task::Poll;
 
+use crate::PhantomDataSendSync;
+use codec::Decode;
 use sp_core::storage::StorageKey;
 use sp_runtime::traits::Hash;
-use codec::Decode;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
-use crate::PhantomDataSendSync;
 
 use crate::{
     client::Client,
@@ -151,7 +151,9 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// may well indicate with some probability that the transaction will not make it into a block,
     /// there is no guarantee that this is true. Thus, we prefer to "play it safe" here. Use the lower
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
-    pub async fn wait_for_finalized_success(self) -> Result<TransactionEvents<T, E>, Error<E>> {
+    pub async fn wait_for_finalized_success(
+        self,
+    ) -> Result<TransactionEvents<T, E>, Error<E>> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
@@ -411,7 +413,7 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             block_hash: self.block_hash,
             ext_hash: self.ext_hash,
             events,
-            _error: PhantomDataSendSync::new()
+            _error: PhantomDataSendSync::new(),
         })
     }
 }
