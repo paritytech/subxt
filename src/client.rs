@@ -40,6 +40,7 @@ use crate::{
     Config,
     Metadata,
 };
+use derivative::Derivative;
 use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
@@ -111,7 +112,8 @@ impl ClientBuilder {
 }
 
 /// Client to interface with a substrate node.
-#[derive(Clone)]
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""))]
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,

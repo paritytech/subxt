@@ -132,11 +132,20 @@ impl StorageMapKey {
 }
 
 /// Client for querying runtime storage.
-#[derive(Clone)]
 pub struct StorageClient<'a, T: Config> {
     rpc: &'a Rpc<T>,
     metadata: &'a Metadata,
     iter_page_size: u32,
+}
+
+impl<'a, T: Config> Clone for StorageClient<'a, T> {
+    fn clone(&self) -> Self {
+        Self {
+            rpc: self.rpc,
+            metadata: self.metadata,
+            iter_page_size: self.iter_page_size,
+        }
+    }
 }
 
 impl<'a, T: Config> StorageClient<'a, T> {

@@ -14,16 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use codec::{
-    Codec,
-    Compact,
-    Decode,
-    Encode,
-    Error as CodecError,
-    Input,
-};
-use std::marker::PhantomData;
-
 use crate::{
     metadata::{
         EventMetadata,
@@ -33,8 +23,18 @@ use crate::{
     Error,
     Event,
     Metadata,
+    PhantomDataSendSync,
     Phase,
 };
+use codec::{
+    Codec,
+    Compact,
+    Decode,
+    Encode,
+    Error as CodecError,
+    Input,
+};
+use derivative::Derivative;
 use scale_info::{
     TypeDef,
     TypeDefPrimitive,
@@ -69,16 +69,14 @@ impl RawEvent {
 }
 
 /// Events decoder.
-#[derive(Debug, Clone)]
-pub struct EventsDecoder<T> {
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
+pub struct EventsDecoder<T: Config> {
     metadata: Metadata,
-    marker: PhantomData<T>,
+    marker: PhantomDataSendSync<T>,
 }
 
-impl<T> EventsDecoder<T>
-where
-    T: Config,
-{
+impl<T: Config> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {

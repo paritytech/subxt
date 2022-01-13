@@ -32,7 +32,10 @@ use sp_runtime::traits::{
 };
 
 /// Runtime types.
-pub trait Config: Clone + Default + Sized + Send + Sync + 'static {
+// Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
+// automatically applies a 'static bound to all generic types (including this one),
+// and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
+pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter + Member + Default + AtLeast32Bit + Copy + scale_info::TypeInfo;
@@ -83,8 +86,9 @@ pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
 /// Default set of commonly used types by Substrate runtimes.
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
-pub struct DefaultConfig;
+// Note: We only use this at the type level, so it should be impossible to
+// create an instance of it.
+pub enum DefaultConfig {}
 
 impl Config for DefaultConfig {
     type Index = u32;
