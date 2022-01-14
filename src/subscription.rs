@@ -42,7 +42,7 @@ use std::collections::VecDeque;
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Config, E: Decode> {
+pub struct EventSubscription<'a, T: Config, E: Decode = ()> {
     block_reader: BlockReader<'a, T, E>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,

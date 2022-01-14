@@ -50,14 +50,17 @@ pub fn generate_storage(
     quote! {
         pub mod storage {
             use super::#types_mod_ident;
+
+            type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+
             #( #storage_structs )*
 
             pub struct StorageApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
+                client: &'a ::subxt::Client<T, DispatchError>,
             }
 
             impl<'a, T: ::subxt::Config> StorageApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
+                pub fn new(client: &'a ::subxt::Client<T, DispatchError>) -> Self {
                     Self { client }
                 }
 
@@ -195,7 +198,7 @@ fn generate_storage_entry_fns(
             pub async fn #fn_name_iter(
                 &self,
                 hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::Error> {
+            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident, DispatchError>, ::subxt::Error<DispatchError>> {
                 self.client.storage().iter(hash).await
             }
         )
@@ -211,7 +214,7 @@ fn generate_storage_entry_fns(
             &self,
             #( #key_args, )*
             hash: ::core::option::Option<T::Hash>,
-        ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
+        ) -> ::core::result::Result<#return_ty, ::subxt::Error<DispatchError>> {
             let entry = #constructor;
             self.client.storage().#fetch(&entry, hash).await
         }
