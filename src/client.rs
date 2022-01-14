@@ -51,7 +51,7 @@ use std::{
 #[derive(Default)]
 pub struct ClientBuilder<E: Decode> {
     url: Option<String>,
-    client: Option<RpcClient<E>>,
+    client: Option<RpcClient>,
     page_size: Option<u32>,
     _error: PhantomData<E>,
 }
@@ -68,7 +68,7 @@ impl<E: Decode> ClientBuilder<E> {
     }
 
     /// Sets the jsonrpsee client.
-    pub fn set_client<C: Into<RpcClient<E>>>(mut self, client: C) -> Self {
+    pub fn set_client<C: Into<RpcClient>>(mut self, client: C) -> Self {
         self.client = Some(client.into());
         self
     }

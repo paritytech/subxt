@@ -33,7 +33,6 @@ use crate::{
     },
     Config,
     Metadata,
-    PhantomDataSendSync,
 };
 use codec::{
     Decode,
@@ -43,7 +42,6 @@ use core::{
     convert::TryInto,
     marker::PhantomData,
 };
-use derivative::Derivative;
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::{
     core::{
@@ -168,15 +166,8 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
 
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
-pub struct RpcClient<E> {
-    client: RpcClientInner,
-    _error: PhantomDataSendSync<E>,
-}
-
 #[derive(Clone)]
-enum RpcClientInner {
+pub enum RpcClient {
     /// JSONRPC client WebSocket transport.
     WebSocket(Arc<Client>),
     /// JSONRPC client HTTP transport.
@@ -184,28 +175,22 @@ enum RpcClientInner {
     Http(Arc<HttpClient>),
 }
 
-impl<E> RpcClient<E> {
+impl RpcClient {
     /// Create a new [`RpcClient`] from the given URL.
     ///
     /// Infers the protocol from the URL, supports:
     ///     - Websockets (`ws://`, `wss://`)
     ///     - Http (`http://`, `https://`)
-    pub async fn try_from_url(url: &str) -> Result<Self, Error<E>> {
+    pub async fn try_from_url(url: &str) -> Result<Self, RpcError> {
         if url.starts_with("ws://") || url.starts_with("wss://") {
             let client = WsClientBuilder::default()
                 .max_notifs_per_subscription(4096)
                 .build(url)
                 .await?;
-            Ok(RpcClient {
-                client: RpcClientInner::WebSocket(Arc::new(client)),
-                _error: PhantomDataSendSync::new(),
-            })
+            Ok(RpcClient::WebSocket(Arc::new(client)))
         } else {
             let client = HttpClientBuilder::default().build(&url)?;
-            Ok(RpcClient {
-                client: RpcClientInner::Http(Arc::new(client)),
-                _error: PhantomDataSendSync::new(),
-            })
+            Ok(RpcClient::Http(Arc::new(client)))
         }
     }
 
@@ -214,15 +199,15 @@ impl<E> RpcClient<E> {
         &self,
         method: &str,
         params: &[JsonValue],
-    ) -> Result<T, Error<E>> {
+    ) -> Result<T, RpcError> {
         let params = Some(params.into());
         log::debug!("request {}: {:?}", method, params);
-        let data = match &self.client {
-            RpcClientInner::WebSocket(inner) => {
-                inner.request(method, params).await.map_err(Into::into)
+        let data = match self {
+            RpcClient::WebSocket(inner) => {
+                inner.request(method, params).await
             }
-            RpcClientInner::Http(inner) => {
-                inner.request(method, params).await.map_err(Into::into)
+            RpcClient::Http(inner) => {
+                inner.request(method, params).await
             }
         };
         data
@@ -234,58 +219,44 @@ impl<E> RpcClient<E> {
         subscribe_method: &str,
         params: &[JsonValue],
         unsubscribe_method: &str,
-    ) -> Result<Subscription<T>, Error<E>> {
+    ) -> Result<Subscription<T>, RpcError> {
         let params = Some(params.into());
-        match &self.client {
-            RpcClientInner::WebSocket(inner) => {
+        match self {
+            RpcClient::WebSocket(inner) => {
                 inner
                     .subscribe(subscribe_method, params, unsubscribe_method)
                     .await
-                    .map_err(Into::into)
             }
-            RpcClientInner::Http(_) => {
+            RpcClient::Http(_) => {
                 Err(RpcError::Custom(
                     "Subscriptions not supported on HTTP transport".to_owned(),
-                )
-                .into())
+                ))
             }
         }
     }
 }
 
-impl<E> From<Client> for RpcClient<E> {
+impl From<Client> for RpcClient {
     fn from(client: Client) -> Self {
-        RpcClient {
-            client: RpcClientInner::WebSocket(Arc::new(client)),
-            _error: PhantomDataSendSync::new(),
-        }
+        RpcClient::WebSocket(Arc::new(client))
     }
 }
 
-impl<E> From<Arc<Client>> for RpcClient<E> {
+impl From<Arc<Client>> for RpcClient {
     fn from(client: Arc<Client>) -> Self {
-        RpcClient {
-            client: RpcClientInner::WebSocket(client),
-            _error: PhantomDataSendSync::new(),
-        }
+        RpcClient::WebSocket(client)
     }
 }
 
-impl<E> From<HttpClient> for RpcClient<E> {
+impl From<HttpClient> for RpcClient {
     fn from(client: HttpClient) -> Self {
-        RpcClient {
-            client: RpcClientInner::Http(Arc::new(client)),
-            _error: PhantomDataSendSync::new(),
-        }
+        RpcClient::Http(Arc::new(client))
     }
 }
 
-impl<E> From<Arc<HttpClient>> for RpcClient<E> {
+impl From<Arc<HttpClient>> for RpcClient {
     fn from(client: Arc<HttpClient>) -> Self {
-        RpcClient {
-            client: RpcClientInner::Http(client),
-            _error: PhantomDataSendSync::new(),
-        }
+        RpcClient::Http(client)
     }
 }
 
@@ -305,10 +276,10 @@ pub struct ReadProof<Hash> {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Config, E> {
+pub struct Rpc<T: Config, E = ()> {
     /// Rpc client for sending requests.
-    pub client: RpcClient<E>,
-    marker: PhantomData<T>,
+    pub client: RpcClient,
+    marker: PhantomData<(T,E)>,
 }
 
 impl<T: Config, E> Clone for Rpc<T, E> {
@@ -322,7 +293,7 @@ impl<T: Config, E> Clone for Rpc<T, E> {
 
 impl<T: Config, E> Rpc<T, E> {
     /// Create a new [`Rpc`]
-    pub fn new(client: RpcClient<E>) -> Self {
+    pub fn new(client: RpcClient) -> Self {
         Self {
             client,
             marker: PhantomData,

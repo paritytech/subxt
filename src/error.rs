@@ -68,6 +68,30 @@ pub enum Error<E> {
     Other(String),
 }
 
+impl <E> Error<E> {
+    /// [`Error`] is parameterised over the type of `Runtime` error that
+    /// it holds. This function allows us to map the Runtime error contained
+    /// within (if present) to a different type.
+    pub fn map_runtime_err<F,NewE>(self, f: F) -> Error<NewE>
+        where F: FnOnce(E) -> NewE
+    {
+        match self {
+            Error::Io(e) => Error::Io(e),
+            Error::Codec(e) => Error::Codec(e),
+            Error::Rpc(e) => Error::Rpc(e),
+            Error::Serialization(e) => Error::Serialization(e),
+            Error::SecretString(e) => Error::SecretString(e),
+            Error::Invalid(e) => Error::Invalid(e),
+            Error::InvalidMetadata(e) => Error::InvalidMetadata(e),
+            Error::Metadata(e) => Error::Metadata(e),
+            Error::Runtime(e) => Error::Runtime(f(e)),
+            Error::EventsDecoding(e) => Error::EventsDecoding(e),
+            Error::Transaction(e) => Error::Transaction(e),
+            Error::Other(e) => Error::Other(e),
+        }
+    }
+}
+
 impl<E> From<SecretStringError> for Error<E> {
     fn from(error: SecretStringError) -> Self {
         Error::SecretString(error)
