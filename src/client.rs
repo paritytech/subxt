@@ -17,7 +17,6 @@
 use futures::future;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
 
 use crate::{
     error::Error,
@@ -31,6 +30,7 @@ use crate::{
     rpc::{
         Rpc,
         RpcClient,
+        RuntimeVersion,
         SystemProperties,
     },
     storage::StorageClient,
@@ -138,7 +138,7 @@ impl<T: Config, E: Decode> std::fmt::Debug for Client<T, E> {
             .field("metadata", &"<Metadata>")
             .field("events_decoder", &"<EventsDecoder>")
             .field("properties", &self.properties)
-            .field("runtime_version", &self.runtime_version.to_string())
+            .field("runtime_version", &self.runtime_version)
             .field("iter_page_size", &self.iter_page_size)
             .finish()
     }

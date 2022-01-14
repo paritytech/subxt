@@ -181,8 +181,8 @@ async fn transfer_error() {
         .await;
 
     if let Err(Error::Runtime(DispatchError::Module { index, error })) = res {
-        assert_eq!(index, 123); // TODO fix (original: Balances)
-        assert_eq!(error, 123); // TODO fix (original: InsufficientBalance)
+        assert_eq!(index, 6); // Balances
+        assert_eq!(error, 2); // InsufficientBalance
     } else {
         panic!("expected a runtime module error");
     }
