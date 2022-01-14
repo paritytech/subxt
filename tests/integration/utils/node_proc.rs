@@ -14,6 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::Decode;
 use sp_keyring::AccountKeyring;
 use std::{
     ffi::{
@@ -36,23 +37,25 @@ use subxt::{
 };
 
 /// Spawn a local substrate node for testing subxt.
-pub struct TestNodeProcess<R: Config> {
+pub struct TestNodeProcess<R: Config, E: Decode> {
     proc: process::Child,
-    client: Client<R>,
+    client: Client<R, E>,
 }
 
-impl<R> Drop for TestNodeProcess<R>
+impl<R, E> Drop for TestNodeProcess<R, E>
 where
     R: Config,
+    E: Decode,
 {
     fn drop(&mut self) {
         let _ = self.kill();
     }
 }
 
-impl<R> TestNodeProcess<R>
+impl<R, E> TestNodeProcess<R, E>
 where
     R: Config,
+    E: Decode,
 {
     /// Construct a builder for spawning a test node process.
     pub fn build<S>(program: S) -> TestNodeProcessBuilder
@@ -74,7 +77,7 @@ where
     }
 
     /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> &Client<R> {
+    pub fn client(&self) -> &Client<R, E> {
         &self.client
     }
 }
@@ -113,9 +116,10 @@ impl TestNodeProcessBuilder {
     }
 
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
-    pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
+    pub async fn spawn<R, E>(&self) -> Result<TestNodeProcess<R, E>, String>
     where
         R: Config,
+        E: Decode,
     {
         let mut cmd = process::Command::new(&self.node_path);
         cmd.env("RUST_LOG", "error").arg("--dev").arg("--tmp");

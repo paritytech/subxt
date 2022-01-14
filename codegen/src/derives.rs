@@ -38,6 +38,7 @@ impl Default for GeneratedTypeDerives {
         let mut derives = Punctuated::new();
         derives.push(syn::parse_quote!(::subxt::codec::Encode));
         derives.push(syn::parse_quote!(::subxt::codec::Decode));
+        derives.push(syn::parse_quote!(Debug));
         Self::new(derives)
     }
 }

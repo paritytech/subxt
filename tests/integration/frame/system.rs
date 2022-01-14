@@ -15,7 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::system,
+    node_runtime::{
+        system,
+        DispatchError,
+    },
     pair_signer,
     test_context,
 };
@@ -24,7 +27,7 @@ use sp_keyring::AccountKeyring;
 use subxt::Signer;
 
 #[async_std::test]
-async fn storage_account() -> Result<(), subxt::Error> {
+async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
     let cxt = test_context().await;
@@ -40,7 +43,7 @@ async fn storage_account() -> Result<(), subxt::Error> {
 }
 
 #[async_std::test]
-async fn tx_remark_with_event() -> Result<(), subxt::Error> {
+async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;
 

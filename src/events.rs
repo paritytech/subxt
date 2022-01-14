@@ -394,7 +394,7 @@ mod tests {
         }
     }
 
-    fn init_decoder(pallets: Vec<PalletMetadata>) -> EventsDecoder<DefaultConfig> {
+    fn init_decoder(pallets: Vec<PalletMetadata>) -> EventsDecoder<DefaultConfig, ()> {
         let extrinsic = ExtrinsicMetadata {
             ty: meta_type::<()>(),
             version: 0,
@@ -403,7 +403,7 @@ mod tests {
         let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
         let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
         let metadata = Metadata::try_from(runtime_metadata).unwrap();
-        EventsDecoder::<DefaultConfig>::new(metadata)
+        EventsDecoder::<DefaultConfig, ()>::new(metadata)
     }
 
     #[test]

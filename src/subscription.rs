@@ -42,7 +42,7 @@ use std::collections::VecDeque;
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
-pub struct EventSubscription<'a, T: Config, E: Decode = ()> {
+pub struct EventSubscription<'a, T: Config, E: Decode> {
     block_reader: BlockReader<'a, T, E>,
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
@@ -301,7 +301,7 @@ mod tests {
         for block_filter in [None, Some(H256::from([1; 32]))] {
             for extrinsic_filter in [None, Some(1)] {
                 for event_filter in [None, Some(("b", "b"))] {
-                    let mut subscription: EventSubscription<DefaultConfig> =
+                    let mut subscription: EventSubscription<DefaultConfig, ()> =
                         EventSubscription {
                             block_reader: BlockReader::Mock(Box::new(
                                 vec![

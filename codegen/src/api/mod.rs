@@ -228,7 +228,7 @@ impl RuntimeGenerator {
                 pub type DefaultAccountData = self::system::storage::Account;
 
                 /// The default error type returned when there is a runtime issue.
-                type DispatchError = self::runtime_types::sp_runtime::DispatchError;
+                pub type DispatchError = self::runtime_types::sp_runtime::DispatchError;
 
                 impl ::subxt::AccountData<::subxt::DefaultConfig> for DefaultAccountData {
                     fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {

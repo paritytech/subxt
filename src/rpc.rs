@@ -203,12 +203,8 @@ impl RpcClient {
         let params = Some(params.into());
         log::debug!("request {}: {:?}", method, params);
         let data = match self {
-            RpcClient::WebSocket(inner) => {
-                inner.request(method, params).await
-            }
-            RpcClient::Http(inner) => {
-                inner.request(method, params).await
-            }
+            RpcClient::WebSocket(inner) => inner.request(method, params).await,
+            RpcClient::Http(inner) => inner.request(method, params).await,
         };
         data
     }
@@ -279,7 +275,7 @@ pub struct ReadProof<Hash> {
 pub struct Rpc<T: Config, E = ()> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
-    marker: PhantomData<(T,E)>,
+    marker: PhantomData<(T, E)>,
 }
 
 impl<T: Config, E> Clone for Rpc<T, E> {
