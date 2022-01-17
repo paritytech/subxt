@@ -28,7 +28,7 @@ pub struct ErrorDetails {
 
 impl ErrorDetails {
     fn emit_compile_error(err: &str) -> ErrorDetails {
-        let err_lit_str = syn::LitStr::new(&err, Span2::call_site());
+        let err_lit_str = syn::LitStr::new(err, Span2::call_site());
         ErrorDetails {
             type_def: quote!(),
             dispatch_error_impl_fn: quote!(compile_error!(#err_lit_str)),
