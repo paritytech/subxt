@@ -21,7 +21,10 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
 use crate::{
     error::Error,
@@ -165,7 +168,7 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
 
 /// This contains the runtime version information necessary to make transactions, as obtained from
 /// the RPC call `state_getRuntimeVersion`,
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
@@ -183,6 +186,11 @@ pub struct RuntimeVersion {
     ///
     /// It need *not* change when a new module is added or when a dispatchable is added.
     pub transaction_version: u32,
+
+    /// The other fields present may vary and aren't necessary for `subxt`; they are preserved in
+    /// this map.
+    #[serde(flatten)]
+    pub other: HashMap<String, serde_json::Value>,
 }
 
 /// Rpc client wrapper.
@@ -614,5 +622,36 @@ impl<T: Config, E> Rpc<T, E> {
     ) -> Result<bool, Error<E>> {
         let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_deser_runtime_version() {
+        let val: RuntimeVersion = serde_json::from_str(
+            r#"{
+            "specVersion": 123,
+            "transactionVersion": 456,
+            "foo": true,
+            "wibble": [1,2,3]
+        }"#,
+        )
+        .expect("deserializing failed");
+
+        let mut m = std::collections::HashMap::new();
+        m.insert("foo".to_owned(), serde_json::json!(true));
+        m.insert("wibble".to_owned(), serde_json::json!([1, 2, 3]));
+
+        assert_eq!(
+            val,
+            RuntimeVersion {
+                spec_version: 123,
+                transaction_version: 456,
+                other: m
+            }
+        );
     }
 }
