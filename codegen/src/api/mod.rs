@@ -17,6 +17,7 @@
 mod calls;
 mod events;
 mod storage;
+mod errors;
 
 use super::GeneratedTypeDerives;
 use crate::{
@@ -216,6 +217,10 @@ impl RuntimeGenerator {
                     pallet.calls.as_ref().map(|_| pallet_mod_name)
                 });
 
+        let error_details = errors::generate_error_details(&self.metadata);
+        let error_type = error_details.type_def;
+        let error_fn = error_details.dispatch_error_impl_fn;
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -229,6 +234,12 @@ impl RuntimeGenerator {
 
                 /// The default error type returned when there is a runtime issue.
                 pub type DispatchError = self::runtime_types::sp_runtime::DispatchError;
+
+                // Statically generate error information so that we don't need runtime metadata for it.
+                #error_type
+                impl DispatchError {
+                    #error_fn
+                }
 
                 impl ::subxt::AccountData<::subxt::DefaultConfig> for DefaultAccountData {
                     fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
