@@ -68,6 +68,7 @@ Please add your project to this list via a PR.
 - [xcm-cli](https://github.com/ascjones/xcm-cli) CLI for submitting XCM messages.
 - [phala-pherry](https://github.com/Phala-Network/phala-blockchain/tree/master/standalone/pherry) The relayer between Phala blockchain and the off-chain Secure workers.
 - [crunch](https://github.com/turboflakes/crunch) CLI to claim staking rewards in batch every Era or X hours for substrate-based chains.
+- [interbtc-clients](https://github.com/interlay/interbtc-clients) Client implementations for the interBTC parachain; notably the Vault / Relayer and Oracle.
 
 **Alternatives**
 
