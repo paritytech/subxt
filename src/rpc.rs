@@ -169,7 +169,7 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
 
 /// This contains the runtime version information necessary to make transactions, as obtained from
 /// the RPC call `state_getRuntimeVersion`,
-#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub struct RuntimeVersion {
     /// Version of the runtime specification. A full-node will not attempt to use its native
