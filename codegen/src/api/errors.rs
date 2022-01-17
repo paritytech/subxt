@@ -14,20 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_metadata::{
-    v14::RuntimeMetadataV14,
-};
+use frame_metadata::v14::RuntimeMetadataV14;
 use proc_macro2::{
-    TokenStream as TokenStream2,
     Span as Span2,
+    TokenStream as TokenStream2,
 };
-use quote::{
-    quote,
-};
+use quote::quote;
 
 pub struct ErrorDetails {
     pub type_def: TokenStream2,
-    pub dispatch_error_impl_fn: TokenStream2
+    pub dispatch_error_impl_fn: TokenStream2,
 }
 
 impl ErrorDetails {
@@ -35,7 +31,7 @@ impl ErrorDetails {
         let err_lit_str = syn::LitStr::new(&err, Span2::call_site());
         ErrorDetails {
             type_def: quote!(),
-            dispatch_error_impl_fn: quote!(compile_error!(#err_lit_str))
+            dispatch_error_impl_fn: quote!(compile_error!(#err_lit_str)),
         }
     }
 }
@@ -44,9 +40,10 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
     let errors = match pallet_errors(metadata) {
         Ok(errors) => errors,
         Err(e) => {
-            let err_string = format!("Failed to generate error details from metadata: {}", e);
+            let err_string =
+                format!("Failed to generate error details from metadata: {}", e);
             return ErrorDetails::emit_compile_error(&err_string)
-        },
+        }
     };
 
     let match_body_items = errors.into_iter().map(|err| {
@@ -56,7 +53,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         let pallet_name = err.pallet;
         let error_name = err.error;
 
-        quote!{
+        quote! {
             (#pallet_index, #error_index) => Some(ErrorDetails {
                 pallet: #pallet_name,
                 error: #error_name,
@@ -67,7 +64,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
 
     ErrorDetails {
         // A type we'll be returning that needs defining at the top level:
-        type_def: quote!{
+        type_def: quote! {
             pub struct ErrorDetails {
                 pub pallet: &'static str,
                 pub error: &'static str,
@@ -76,7 +73,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         },
         // A function which will live in an impl block for our DispatchError,
         // to statically return details for known error types:
-        dispatch_error_impl_fn: quote!{
+        dispatch_error_impl_fn: quote! {
             pub fn details(&self) -> Option<ErrorDetails> {
                 if let Self::Module { index, error } = self {
                     match (index, error) {
@@ -87,11 +84,13 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
                     None
                 }
             }
-        }
+        },
     }
 }
 
-fn pallet_errors(metadata: &RuntimeMetadataV14) -> Result<Vec<ErrorMetadata>, InvalidMetadataError> {
+fn pallet_errors(
+    metadata: &RuntimeMetadataV14,
+) -> Result<Vec<ErrorMetadata>, InvalidMetadataError> {
     let get_type_def_variant = |type_id: u32| {
         let ty = metadata
             .types
@@ -113,7 +112,7 @@ fn pallet_errors(metadata: &RuntimeMetadataV14) -> Result<Vec<ErrorMetadata>, In
                 Ok((pallet, type_def_variant))
             })
         })
-        .collect::<Result<Vec<(_,_)>, _>>()?;
+        .collect::<Result<Vec<(_, _)>, _>>()?;
 
     let errors = pallet_errors
         .iter()
@@ -157,8 +156,12 @@ pub enum InvalidMetadataError {
 impl std::fmt::Display for InvalidMetadataError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            InvalidMetadataError::MissingType(n) => write!(f, "Type {} missing from type registry", n),
-            InvalidMetadataError::TypeDefNotVariant(n) => write!(f, "Type {} was not a variant/enum type", n),
+            InvalidMetadataError::MissingType(n) => {
+                write!(f, "Type {} missing from type registry", n)
+            }
+            InvalidMetadataError::TypeDefNotVariant(n) => {
+                write!(f, "Type {} was not a variant/enum type", n)
+            }
         }
     }
 }

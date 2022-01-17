@@ -15,9 +15,9 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod calls;
+mod errors;
 mod events;
 mod storage;
-mod errors;
 
 use super::GeneratedTypeDerives;
 use crate::{
