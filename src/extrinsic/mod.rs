@@ -39,12 +39,12 @@ pub use self::{
 };
 
 use sp_runtime::traits::SignedExtension;
-use sp_version::RuntimeVersion;
 
 use crate::{
     Config,
     Encoded,
     Error,
+    rpc::RuntimeVersion,
 };
 
 /// UncheckedExtrinsic type.
