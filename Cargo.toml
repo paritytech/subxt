@@ -49,5 +49,4 @@ tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
 test-runtime = { path = "test-runtime" }
-
-sp-keyring = { version = "4.0.0-dev", package = "sp-keyring", git = "https://github.com/paritytech/substrate/", tag = "publish-sp-version-v4.0.0" }
+sp-keyring = { version = "4.0.0" }
