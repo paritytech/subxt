@@ -21,7 +21,10 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
 use codec::{
     Decode,
@@ -68,7 +71,6 @@ use sp_runtime::generic::{
     Block,
     SignedBlock,
 };
-use sp_version::RuntimeVersion;
 
 use crate::{
     error::Error,
@@ -163,6 +165,33 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
     Dropped,
     /// Transaction is no longer valid in the current state.
     Invalid,
+}
+
+/// This contains the runtime version information necessary to make transactions, as obtained from
+/// the RPC call `state_getRuntimeVersion`,
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeVersion {
+    /// Version of the runtime specification. A full-node will not attempt to use its native
+    /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
+    /// `spec_version` and `authoring_version` are the same between Wasm and native.
+    pub spec_version: u32,
+
+    /// All existing dispatches are fully compatible when this number doesn't change. If this
+    /// number changes, then `spec_version` must change, also.
+    ///
+    /// This number must change when an existing dispatchable (module ID, dispatch ID) is changed,
+    /// either through an alteration in its user-level semantics, a parameter
+    /// added/removed/changed, a dispatchable being removed, a module being removed, or a
+    /// dispatchable/module changing its index.
+    ///
+    /// It need *not* change when a new module is added or when a dispatchable is added.
+    pub transaction_version: u32,
+
+    /// The other fields present may vary and aren't necessary for `subxt`; they are preserved in
+    /// this map.
+    #[serde(flatten)]
+    pub other: HashMap<String, serde_json::Value>,
 }
 
 /// Rpc client wrapper.
@@ -595,5 +624,36 @@ impl<T: Config> Rpc<T> {
     ) -> Result<bool, Error> {
         let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_deser_runtime_version() {
+        let val: RuntimeVersion = serde_json::from_str(
+            r#"{
+            "specVersion": 123,
+            "transactionVersion": 456,
+            "foo": true,
+            "wibble": [1,2,3]
+        }"#,
+        )
+        .expect("deserializing failed");
+
+        let mut m = std::collections::HashMap::new();
+        m.insert("foo".to_owned(), serde_json::json!(true));
+        m.insert("wibble".to_owned(), serde_json::json!([1, 2, 3]));
+
+        assert_eq!(
+            val,
+            RuntimeVersion {
+                spec_version: 123,
+                transaction_version: 456,
+                other: m
+            }
+        );
     }
 }
