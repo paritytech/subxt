@@ -69,7 +69,7 @@ pub enum Error<E> {
 }
 
 impl<E> Error<E> {
-    /// [`Error`] is parameterised over the type of `Runtime` error that
+    /// [`enum@Error`] is parameterised over the type of `Runtime` error that
     /// it holds. This function allows us to map the Runtime error contained
     /// within (if present) to a different type.
     pub fn map_runtime_err<F, NewE>(self, f: F) -> Error<NewE>
