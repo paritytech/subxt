@@ -58,7 +58,7 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<DefaultConfig, DispatchError> {
+    fn client(&self) -> &Client<DefaultConfig> {
         self.cxt.client()
     }
 

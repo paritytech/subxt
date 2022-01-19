@@ -80,7 +80,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .wait_for_finalized_success()
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(err)) => {
-        let details = err.details().unwrap();
+        let details = err.inner().details().unwrap();
         assert_eq!(details.pallet, "Staking");
         assert_eq!(details.error, "NotController");
     });
@@ -122,7 +122,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .await;
 
     assert_matches!(nomination, Err(Error::Runtime(err)) => {
-        let details = err.details().unwrap();
+        let details = err.inner().details().unwrap();
         assert_eq!(details.pallet, "Staking");
         assert_eq!(details.error, "NotController");
     });
@@ -166,7 +166,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .await;
 
     assert_matches!(chill, Err(Error::Runtime(err)) => {
-        let details = err.details().unwrap();
+        let details = err.inner().details().unwrap();
         assert_eq!(details.pallet, "Staking");
         assert_eq!(details.error, "NotController");
     });
@@ -222,7 +222,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(err)) => {
-        let details = err.details().unwrap();
+        let details = err.inner().details().unwrap();
         assert_eq!(details.pallet, "Staking");
         assert_eq!(details.error, "AlreadyBonded");
     });

@@ -48,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let sub = api.client.rpc().subscribe_events().await?;
     let decoder = api.client.events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig, _>::new(sub, decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<polkadot::balances::events::Transfer>();
 
     api.tx()

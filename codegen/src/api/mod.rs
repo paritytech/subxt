@@ -251,16 +251,16 @@ impl RuntimeGenerator {
                 }
 
                 pub struct RuntimeApi<T: ::subxt::Config, X> {
-                    pub client: ::subxt::Client<T, DispatchError>,
+                    pub client: ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<X>,
                 }
 
-                impl<T, X> ::core::convert::From<::subxt::Client<T, DispatchError>> for RuntimeApi<T, X>
+                impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
-                    fn from(client: ::subxt::Client<T, DispatchError>) -> Self {
+                    fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client, marker: ::core::marker::PhantomData }
                     }
                 }
@@ -280,7 +280,7 @@ impl RuntimeGenerator {
                 }
 
                 pub struct StorageApi<'a, T: ::subxt::Config> {
-                    client: &'a ::subxt::Client<T, DispatchError>,
+                    client: &'a ::subxt::Client<T>,
                 }
 
                 impl<'a, T> StorageApi<'a, T>
@@ -295,7 +295,7 @@ impl RuntimeGenerator {
                 }
 
                 pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
-                    client: &'a ::subxt::Client<T, DispatchError>,
+                    client: &'a ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<(X, A)>,
                 }
 

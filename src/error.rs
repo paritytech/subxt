@@ -27,9 +27,17 @@ use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 use thiserror::Error;
 
-/// Error enum.
+/// An error that may contain some runtime error `E`
+pub type Error<E> = GenericError<RuntimeError<E>>;
+
+/// An error that will never contain a runtime error.
+pub type BasicError = GenericError<std::convert::Infallible>;
+
+/// The underlying error enum, generic over the type held by the `Runtime`
+/// variant. Prefer to use the [`Error<E>`] and [`BasicError`] aliases over
+/// using this type directly.
 #[derive(Debug, Error)]
-pub enum Error<E> {
+pub enum GenericError<E> {
     /// Io error.
     #[error("Io error: {0}")]
     Io(#[from] std::io::Error),
@@ -55,7 +63,7 @@ pub enum Error<E> {
     #[error("Metadata: {0}")]
     Metadata(#[from] MetadataError),
     /// Runtime error.
-    #[error("Runtime error")]
+    #[error("Runtime error: {0:?}")]
     Runtime(E),
     /// Events decoding error.
     #[error("Events decoding error: {0}")]
@@ -68,113 +76,84 @@ pub enum Error<E> {
     Other(String),
 }
 
-impl<E> Error<E> {
-    /// [`enum@Error`] is parameterised over the type of `Runtime` error that
-    /// it holds. This function allows us to map the Runtime error contained
-    /// within (if present) to a different type.
-    pub fn map_runtime_err<F, NewE>(self, f: F) -> Error<NewE>
+impl<E> GenericError<E> {
+    /// [`enum@GenericError`] is parameterised over the type that it holds in the `Runtime`
+    /// variant. This function allows us to map the Runtime error contained within (if present)
+    /// to a different type.
+    pub fn map_runtime_err<F, NewE>(self, f: F) -> GenericError<NewE>
     where
         F: FnOnce(E) -> NewE,
     {
         match self {
-            Error::Io(e) => Error::Io(e),
-            Error::Codec(e) => Error::Codec(e),
-            Error::Rpc(e) => Error::Rpc(e),
-            Error::Serialization(e) => Error::Serialization(e),
-            Error::SecretString(e) => Error::SecretString(e),
-            Error::Invalid(e) => Error::Invalid(e),
-            Error::InvalidMetadata(e) => Error::InvalidMetadata(e),
-            Error::Metadata(e) => Error::Metadata(e),
-            Error::Runtime(e) => Error::Runtime(f(e)),
-            Error::EventsDecoding(e) => Error::EventsDecoding(e),
-            Error::Transaction(e) => Error::Transaction(e),
-            Error::Other(e) => Error::Other(e),
+            GenericError::Io(e) => GenericError::Io(e),
+            GenericError::Codec(e) => GenericError::Codec(e),
+            GenericError::Rpc(e) => GenericError::Rpc(e),
+            GenericError::Serialization(e) => GenericError::Serialization(e),
+            GenericError::SecretString(e) => GenericError::SecretString(e),
+            GenericError::Invalid(e) => GenericError::Invalid(e),
+            GenericError::InvalidMetadata(e) => GenericError::InvalidMetadata(e),
+            GenericError::Metadata(e) => GenericError::Metadata(e),
+            GenericError::Runtime(e) => GenericError::Runtime(f(e)),
+            GenericError::EventsDecoding(e) => GenericError::EventsDecoding(e),
+            GenericError::Transaction(e) => GenericError::Transaction(e),
+            GenericError::Other(e) => GenericError::Other(e),
         }
     }
 }
 
-impl<E> From<SecretStringError> for Error<E> {
+impl BasicError {
+    /// Convert an [`BasicError`] into any
+    /// arbitrary [`Error<E>`].
+    pub fn into_error<E>(self) -> Error<E> {
+        self.map_runtime_err(|e| match e {})
+    }
+}
+
+impl<E> From<BasicError> for Error<E> {
+    fn from(err: BasicError) -> Self {
+        err.into_error()
+    }
+}
+
+impl<E> From<SecretStringError> for GenericError<E> {
     fn from(error: SecretStringError) -> Self {
-        Error::SecretString(error)
+        GenericError::SecretString(error)
     }
 }
 
-impl<E> From<TransactionValidityError> for Error<E> {
+impl<E> From<TransactionValidityError> for GenericError<E> {
     fn from(error: TransactionValidityError) -> Self {
-        Error::Invalid(error)
+        GenericError::Invalid(error)
     }
 }
 
-impl<E> From<&str> for Error<E> {
+impl<E> From<&str> for GenericError<E> {
     fn from(error: &str) -> Self {
-        Error::Other(error.into())
+        GenericError::Other(error.into())
     }
 }
 
-impl<E> From<String> for Error<E> {
+impl<E> From<String> for GenericError<E> {
     fn from(error: String) -> Self {
-        Error::Other(error)
+        GenericError::Other(error)
     }
 }
 
-// /// Runtime error.
-// #[derive(Clone, Debug, Eq, Error, PartialEq)]
-// pub enum RuntimeError {
-//     /// Module error.
-//     #[error("Runtime module error: {0}")]
-//     Module(PalletError),
-//     /// At least one consumer is remaining so the account cannot be destroyed.
-//     #[error("At least one consumer is remaining so the account cannot be destroyed.")]
-//     ConsumerRemaining,
-//     /// There are no providers so the account cannot be created.
-//     #[error("There are no providers so the account cannot be created.")]
-//     NoProviders,
-//     /// There are too many consumers so the account cannot be created.
-//     #[error("There are too many consumers so the account cannot be created.")]
-//     TooManyConsumers,
-//     /// Bad origin.
-//     #[error("Bad origin: throw by ensure_signed, ensure_root or ensure_none.")]
-//     BadOrigin,
-//     /// Cannot lookup.
-//     #[error("Cannot lookup some information required to validate the transaction.")]
-//     CannotLookup,
-//     /// Other error.
-//     #[error("Other error: {0}")]
-//     Other(String),
-// }
+/// This is used in the place of the `E` in [`GenericError<E>`] when we may have a
+/// Runtime Error. We use this wrapper so that it is possible to implement
+/// `From<Error<NoRuntimeError>` for `Error<RuntimeError<E>>`.
+///
+/// This should not be used as a type; prefer to use the alias [`Error<E>`] when referring
+/// to errors which may contain some Runtime error `E`.
+#[derive(Clone, Debug, PartialEq)]
+pub struct RuntimeError<E>(pub E);
 
-// impl RuntimeError {
-//     /// Converts a `DispatchError` into a subxt error.
-//     pub fn from_dispatch(
-//         metadata: &Metadata,
-//         error: DispatchError,
-//     ) -> Result<Self, Error> {
-//         match error {
-//             DispatchError::Module {
-//                 index,
-//                 error,
-//                 message: _,
-//             } => {
-//                 let error = metadata.error(index, error)?;
-//                 Ok(Self::Module(PalletError {
-//                     pallet: error.pallet().to_string(),
-//                     error: error.error().to_string(),
-//                     description: error.description().to_vec(),
-//                 }))
-//             }
-//             DispatchError::BadOrigin => Ok(Self::BadOrigin),
-//             DispatchError::CannotLookup => Ok(Self::CannotLookup),
-//             DispatchError::ConsumerRemaining => Ok(Self::ConsumerRemaining),
-//             DispatchError::NoProviders => Ok(Self::NoProviders),
-//             DispatchError::TooManyConsumers => Ok(Self::TooManyConsumers),
-//             DispatchError::Arithmetic(_math_error) => {
-//                 Ok(Self::Other("math_error".into()))
-//             }
-//             DispatchError::Token(_token_error) => Ok(Self::Other("token error".into())),
-//             DispatchError::Other(msg) => Ok(Self::Other(msg.to_string())),
-//         }
-//     }
-// }
+impl<E> RuntimeError<E> {
+    /// Extract the actual runtime error from this struct.
+    pub fn inner(self) -> E {
+        self.0
+    }
+}
 
 /// Module error.
 #[derive(Clone, Debug, Eq, Error, PartialEq)]

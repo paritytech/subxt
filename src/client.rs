@@ -19,7 +19,7 @@ use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
 
 use crate::{
-    error::Error,
+    error::BasicError,
     events::EventsDecoder,
     extrinsic::{
         self,
@@ -42,28 +42,23 @@ use crate::{
 };
 use codec::Decode;
 use derivative::Derivative;
-use std::{
-    marker::PhantomData,
-    sync::Arc,
-};
+use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
-pub struct ClientBuilder<E: Decode> {
+pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
-    _error: PhantomData<E>,
 }
 
-impl<E: Decode> ClientBuilder<E> {
+impl ClientBuilder {
     /// Creates a new ClientBuilder.
     pub fn new() -> Self {
         Self {
             url: None,
             client: None,
             page_size: None,
-            _error: PhantomData,
         }
     }
 
@@ -86,7 +81,7 @@ impl<E: Decode> ClientBuilder<E> {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Config>(self) -> Result<Client<T, E>, Error<E>> {
+    pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -120,17 +115,17 @@ impl<E: Decode> ClientBuilder<E> {
 /// Client to interface with a substrate node.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
-pub struct Client<T: Config, E: Decode> {
-    rpc: Rpc<T, E>,
+pub struct Client<T: Config> {
+    rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Arc<Metadata>,
-    events_decoder: EventsDecoder<T, E>,
+    events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     iter_page_size: u32,
 }
 
-impl<T: Config, E: Decode> std::fmt::Debug for Client<T, E> {
+impl<T: Config> std::fmt::Debug for Client<T> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("Client")
             .field("rpc", &"<Rpc>")
@@ -144,7 +139,7 @@ impl<T: Config, E: Decode> std::fmt::Debug for Client<T, E> {
     }
 }
 
-impl<T: Config, E: Decode> Client<T, E> {
+impl<T: Config> Client<T> {
     /// Returns the genesis hash.
     pub fn genesis(&self) -> &T::Hash {
         &self.genesis_hash
@@ -168,12 +163,12 @@ impl<T: Config, E: Decode> Client<T, E> {
     }
 
     /// Returns the rpc client.
-    pub fn rpc(&self) -> &Rpc<T, E> {
+    pub fn rpc(&self) -> &Rpc<T> {
         &self.rpc
     }
 
     /// Create a client for accessing runtime storage
-    pub fn storage(&self) -> StorageClient<T, E> {
+    pub fn storage(&self) -> StorageClient<T> {
         StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
@@ -186,14 +181,14 @@ impl<T: Config, E: Decode> Client<T, E> {
     }
 
     /// Returns the events decoder.
-    pub fn events_decoder(&self) -> &EventsDecoder<T, E> {
+    pub fn events_decoder(&self) -> &EventsDecoder<T> {
         &self.events_decoder
     }
 }
 
 /// A constructed call ready to be signed and submitted.
 pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode> {
-    client: &'client Client<T, E>,
+    client: &'client Client<T>,
     call: C,
     marker: std::marker::PhantomData<(X, A, E)>,
 }
@@ -207,7 +202,7 @@ where
     E: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
-    pub fn new(client: &'client Client<T, E>, call: C) -> Self {
+    pub fn new(client: &'client Client<T>, call: C) -> Self {
         Self {
             client,
             call,
@@ -222,15 +217,17 @@ where
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T, E>, Error<E>>
+    ) -> Result<TransactionProgress<'client, T, E>, BasicError>
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
+
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
+
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
@@ -248,7 +245,7 @@ where
     pub async fn sign_and_submit(
         self,
         signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<T::Hash, Error<E>>
+    ) -> Result<T::Hash, BasicError>
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
@@ -262,7 +259,7 @@ where
         &self,
         signer: &(dyn Signer<T, X> + Send + Sync),
         additional_params: X::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, X>, Error<E>>
+    ) -> Result<UncheckedExtrinsic<T, X>, BasicError>
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,

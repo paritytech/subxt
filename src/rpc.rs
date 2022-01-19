@@ -27,7 +27,7 @@ use std::{
 };
 
 use crate::{
-    error::Error,
+    error::BasicError,
     storage::StorageKeyPrefix,
     subscription::{
         EventStorageSubscription,
@@ -301,13 +301,13 @@ pub struct ReadProof<Hash> {
 }
 
 /// Client for substrate rpc interfaces
-pub struct Rpc<T: Config, E = ()> {
+pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: RpcClient,
-    marker: PhantomData<(T, E)>,
+    marker: PhantomData<T>,
 }
 
-impl<T: Config, E> Clone for Rpc<T, E> {
+impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
@@ -316,7 +316,7 @@ impl<T: Config, E> Clone for Rpc<T, E> {
     }
 }
 
-impl<T: Config, E> Rpc<T, E> {
+impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
@@ -330,7 +330,7 @@ impl<T: Config, E> Rpc<T, E> {
         &self,
         key: &StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, Error<E>> {
+    ) -> Result<Option<StorageData>, BasicError> {
         let params = &[to_json_value(key)?, to_json_value(hash)?];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
@@ -345,7 +345,7 @@ impl<T: Config, E> Rpc<T, E> {
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, Error<E>> {
+    ) -> Result<Vec<StorageKey>, BasicError> {
         let prefix = prefix.map(|p| p.to_storage_key());
         let params = &[
             to_json_value(prefix)?,
@@ -363,7 +363,7 @@ impl<T: Config, E> Rpc<T, E> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error<E>> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
         let params = &[
             to_json_value(keys)?,
             to_json_value(from)?,
@@ -380,7 +380,7 @@ impl<T: Config, E> Rpc<T, E> {
         &self,
         keys: &[StorageKey],
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error<E>> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
         let params = &[to_json_value(keys)?, to_json_value(at)?];
         self.client
             .request("state_queryStorageAt", params)
@@ -389,7 +389,7 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, Error<E>> {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
         let params = &[to_json_value(block_zero)?];
         let list_or_value: ListOrValue<Option<T::Hash>> =
@@ -403,7 +403,7 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, Error<E>> {
+    pub async fn metadata(&self) -> Result<Metadata, BasicError> {
         let bytes: Bytes = self.client.request("state_getMetadata", &[]).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
@@ -411,22 +411,22 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Fetch system properties
-    pub async fn system_properties(&self) -> Result<SystemProperties, Error<E>> {
+    pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
         Ok(self.client.request("system_properties", &[]).await?)
     }
 
     /// Fetch system chain
-    pub async fn system_chain(&self) -> Result<String, Error<E>> {
+    pub async fn system_chain(&self) -> Result<String, BasicError> {
         Ok(self.client.request("system_chain", &[]).await?)
     }
 
     /// Fetch system name
-    pub async fn system_name(&self) -> Result<String, Error<E>> {
+    pub async fn system_name(&self) -> Result<String, BasicError> {
         Ok(self.client.request("system_name", &[]).await?)
     }
 
     /// Fetch system version
-    pub async fn system_version(&self) -> Result<String, Error<E>> {
+    pub async fn system_version(&self) -> Result<String, BasicError> {
         Ok(self.client.request("system_version", &[]).await?)
     }
 
@@ -434,7 +434,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn header(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, Error<E>> {
+    ) -> Result<Option<T::Header>, BasicError> {
         let params = &[to_json_value(hash)?];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -444,7 +444,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, Error<E>> {
+    ) -> Result<Option<T::Hash>, BasicError> {
         let block_number = block_number.map(ListOrValue::Value);
         let params = &[to_json_value(block_number)?];
         let list_or_value = self.client.request("chain_getBlockHash", params).await?;
@@ -455,7 +455,7 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, Error<E>> {
+    pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
         let hash = self.client.request("chain_getFinalizedHead", &[]).await?;
         Ok(hash)
     }
@@ -464,7 +464,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, Error<E>> {
+    ) -> Result<Option<ChainBlock<T>>, BasicError> {
         let params = &[to_json_value(hash)?];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -475,7 +475,7 @@ impl<T: Config, E> Rpc<T, E> {
         &self,
         keys: Vec<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<ReadProof<T::Hash>, Error<E>> {
+    ) -> Result<ReadProof<T::Hash>, BasicError> {
         let params = &[to_json_value(keys)?, to_json_value(hash)?];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
@@ -485,7 +485,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn runtime_version(
         &self,
         at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, Error<E>> {
+    ) -> Result<RuntimeVersion, BasicError> {
         let params = &[to_json_value(at)?];
         let version = self
             .client
@@ -500,7 +500,7 @@ impl<T: Config, E> Rpc<T, E> {
     /// `subscribe_finalized_events` to ensure events are finalized.
     pub async fn subscribe_events(
         &self,
-    ) -> Result<EventStorageSubscription<T, E>, Error<E>> {
+    ) -> Result<EventStorageSubscription<T>, BasicError> {
         let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
         let params = &[to_json_value(keys)?];
 
@@ -514,7 +514,7 @@ impl<T: Config, E> Rpc<T, E> {
     /// Subscribe to finalized events.
     pub async fn subscribe_finalized_events(
         &self,
-    ) -> Result<EventStorageSubscription<T, E>, Error<E>> {
+    ) -> Result<EventStorageSubscription<T>, BasicError> {
         Ok(EventStorageSubscription::Finalized(
             FinalizedEventStorageSubscription::new(
                 self.clone(),
@@ -524,7 +524,7 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error<E>> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
         let subscription = self
             .client
             .subscribe("chain_subscribeNewHeads", &[], "chain_unsubscribeNewHeads")
@@ -536,7 +536,7 @@ impl<T: Config, E> Rpc<T, E> {
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> Result<Subscription<T::Header>, Error<E>> {
+    ) -> Result<Subscription<T::Header>, BasicError> {
         let subscription = self
             .client
             .subscribe(
@@ -552,7 +552,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn submit_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<T::Hash, Error<E>> {
+    ) -> Result<T::Hash, BasicError> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = &[to_json_value(bytes)?];
         let xt_hash = self
@@ -566,7 +566,7 @@ impl<T: Config, E> Rpc<T, E> {
     pub async fn watch_extrinsic<X: Encode>(
         &self,
         extrinsic: X,
-    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, Error<E>>
+    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
     {
         let bytes: Bytes = extrinsic.encode().into();
         let params = &[to_json_value(bytes)?];
@@ -587,7 +587,7 @@ impl<T: Config, E> Rpc<T, E> {
         key_type: String,
         suri: String,
         public: Bytes,
-    ) -> Result<(), Error<E>> {
+    ) -> Result<(), BasicError> {
         let params = &[
             to_json_value(key_type)?,
             to_json_value(suri)?,
@@ -598,7 +598,7 @@ impl<T: Config, E> Rpc<T, E> {
     }
 
     /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, Error<E>> {
+    pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
         Ok(self.client.request("author_rotateKeys", &[]).await?)
     }
 
@@ -607,7 +607,10 @@ impl<T: Config, E> Rpc<T, E> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error<E>> {
+    pub async fn has_session_keys(
+        &self,
+        session_keys: Bytes,
+    ) -> Result<bool, BasicError> {
         let params = &[to_json_value(session_keys)?];
         Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
@@ -619,7 +622,7 @@ impl<T: Config, E> Rpc<T, E> {
         &self,
         public_key: Bytes,
         key_type: String,
-    ) -> Result<bool, Error<E>> {
+    ) -> Result<bool, BasicError> {
         let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
         Ok(self.client.request("author_hasKey", params).await?)
     }

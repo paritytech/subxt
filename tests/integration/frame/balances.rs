@@ -181,7 +181,7 @@ async fn transfer_error() {
         .await;
 
     if let Err(Error::Runtime(err)) = res {
-        let details = err.details().unwrap();
+        let details = err.inner().details().unwrap();
         assert_eq!(details.pallet, "Balances");
         assert_eq!(details.error, "InsufficientBalance");
     } else {
@@ -198,7 +198,7 @@ async fn transfer_subscription() {
     let cxt = test_context().await;
     let sub = cxt.client().rpc().subscribe_events().await.unwrap();
     let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig, _>::new(sub, decoder);
+    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<balances::events::Transfer>();
 
     cxt.api

@@ -15,10 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    node_runtime::{
-        self,
-        DispatchError,
-    },
+    node_runtime,
     TestNodeProcess,
 };
 
@@ -40,7 +37,7 @@ pub type NodeRuntimeSignedExtra =
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
-) -> TestNodeProcess<DefaultConfig, DispatchError> {
+) -> TestNodeProcess<DefaultConfig> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
@@ -49,25 +46,25 @@ pub async fn test_node_process_with(
         SUBSTRATE_NODE_PATH.to_string()
     });
 
-    let proc = TestNodeProcess::<DefaultConfig, DispatchError>::build(path.as_str())
+    let proc = TestNodeProcess::<DefaultConfig>::build(path.as_str())
         .with_authority(key)
         .scan_for_open_ports()
-        .spawn::<DefaultConfig, DispatchError>()
+        .spawn::<DefaultConfig>()
         .await;
     proc.unwrap()
 }
 
-pub async fn test_node_process() -> TestNodeProcess<DefaultConfig, DispatchError> {
+pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
     test_node_process_with(AccountKeyring::Alice).await
 }
 
 pub struct TestContext {
-    pub node_proc: TestNodeProcess<DefaultConfig, DispatchError>,
+    pub node_proc: TestNodeProcess<DefaultConfig>,
     pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeSignedExtra>,
 }
 
 impl TestContext {
-    pub fn client(&self) -> &Client<DefaultConfig, DispatchError> {
+    pub fn client(&self) -> &Client<DefaultConfig> {
         &self.api.client
     }
 }

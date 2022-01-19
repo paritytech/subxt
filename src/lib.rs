@@ -79,6 +79,7 @@ pub use crate::{
         DefaultConfig,
     },
     error::{
+        BasicError,
         Error,
         PalletError,
         TransactionError,

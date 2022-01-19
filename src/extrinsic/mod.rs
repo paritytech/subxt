@@ -42,33 +42,33 @@ pub use self::{
 use sp_runtime::traits::SignedExtension;
 
 use crate::{
+    error::BasicError,
     rpc::RuntimeVersion,
     Config,
     Encoded,
-    Error,
 };
 
 /// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T, E> = sp_runtime::generic::UncheckedExtrinsic<
+pub type UncheckedExtrinsic<T, X> = sp_runtime::generic::UncheckedExtrinsic<
     <T as Config>::Address,
     Encoded,
     <T as Config>::Signature,
-    <E as SignedExtra<T>>::Extra,
+    <X as SignedExtra<T>>::Extra,
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T, E> =
-    sp_runtime::generic::SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>;
+pub type SignedPayload<T, X> =
+    sp_runtime::generic::SignedPayload<Encoded, <X as SignedExtra<T>>::Extra>;
 
 /// Creates a signed extrinsic
-pub async fn create_signed<T, X, E>(
+pub async fn create_signed<T, X>(
     runtime_version: &RuntimeVersion,
     genesis_hash: T::Hash,
     nonce: T::Index,
     call: Encoded,
     signer: &(dyn Signer<T, X> + Send + Sync),
     additional_params: X::Parameters,
-) -> Result<UncheckedExtrinsic<T, X>, Error<E>>
+) -> Result<UncheckedExtrinsic<T, X>, BasicError>
 where
     T: Config,
     X: SignedExtra<T>,

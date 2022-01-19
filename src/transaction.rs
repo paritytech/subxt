@@ -26,7 +26,9 @@ pub use sp_version::RuntimeVersion;
 use crate::{
     client::Client,
     error::{
+        BasicError,
         Error,
+        RuntimeError,
         TransactionError,
     },
     rpc::SubstrateTransactionStatus,
@@ -51,7 +53,8 @@ use jsonrpsee::core::{
 pub struct TransactionProgress<'client, T: Config, E: Decode> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
-    client: &'client Client<T, E>,
+    client: &'client Client<T>,
+    _error: PhantomDataSendSync<E>,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
@@ -62,13 +65,14 @@ impl<'client, T: Config, E: Decode> Unpin for TransactionProgress<'client, T, E>
 impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     pub(crate) fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
-        client: &'client Client<T, E>,
+        client: &'client Client<T>,
         ext_hash: T::Hash,
     ) -> Self {
         Self {
             sub: Some(sub),
             client,
             ext_hash,
+            _error: PhantomDataSendSync::new(),
         }
     }
 
@@ -77,7 +81,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// avoid importing that trait if you don't otherwise need it.
     pub async fn next_item(
         &mut self,
-    ) -> Option<Result<TransactionStatus<'client, T, E>, Error<E>>> {
+    ) -> Option<Result<TransactionStatus<'client, T, E>, BasicError>> {
         self.next().await
     }
 
@@ -94,7 +98,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
-    ) -> Result<TransactionInBlock<'client, T, E>, Error<E>> {
+    ) -> Result<TransactionInBlock<'client, T, E>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
@@ -124,7 +128,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
-    ) -> Result<TransactionInBlock<'client, T, E>, Error<E>> {
+    ) -> Result<TransactionInBlock<'client, T, E>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized! Return.
@@ -153,14 +157,14 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<TransactionEvents<T, E>, Error<E>> {
+    ) -> Result<TransactionEvents<T>, Error<E>> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
 impl<'client, T: Config, E: Decode> Stream for TransactionProgress<'client, T, E> {
-    type Item = Result<TransactionStatus<'client, T, E>, Error<E>>;
+    type Item = Result<TransactionStatus<'client, T, E>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -181,11 +185,11 @@ impl<'client, T: Config, E: Decode> Stream for TransactionProgress<'client, T, E
                         TransactionStatus::Broadcast(peers)
                     }
                     SubstrateTransactionStatus::InBlock(hash) => {
-                        TransactionStatus::InBlock(TransactionInBlock {
-                            block_hash: hash,
-                            ext_hash: self.ext_hash,
-                            client: self.client,
-                        })
+                        TransactionStatus::InBlock(TransactionInBlock::new(
+                            hash,
+                            self.ext_hash,
+                            self.client,
+                        ))
                     }
                     SubstrateTransactionStatus::Retracted(hash) => {
                         TransactionStatus::Retracted(hash)
@@ -210,11 +214,11 @@ impl<'client, T: Config, E: Decode> Stream for TransactionProgress<'client, T, E
                     }
                     SubstrateTransactionStatus::Finalized(hash) => {
                         self.sub = None;
-                        TransactionStatus::Finalized(TransactionInBlock {
-                            block_hash: hash,
-                            ext_hash: self.ext_hash,
-                            client: self.client,
-                        })
+                        TransactionStatus::Finalized(TransactionInBlock::new(
+                            hash,
+                            self.ext_hash,
+                            self.client,
+                        ))
                     }
                 }
             })
@@ -322,10 +326,24 @@ impl<'client, T: Config, E: Decode> TransactionStatus<'client, T, E> {
 pub struct TransactionInBlock<'client, T: Config, E: Decode> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
-    client: &'client Client<T, E>,
+    client: &'client Client<T>,
+    _error: PhantomDataSendSync<E>,
 }
 
 impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
+    pub(crate) fn new(
+        block_hash: T::Hash,
+        ext_hash: T::Hash,
+        client: &'client Client<T>,
+    ) -> Self {
+        Self {
+            block_hash,
+            ext_hash,
+            client,
+            _error: PhantomDataSendSync::new(),
+        }
+    }
+
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash
@@ -349,14 +367,14 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T, E>, Error<E>> {
+    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error<E>> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
         for ev in events.as_slice() {
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 let dispatch_error = E::decode(&mut &*ev.data)?;
-                return Err(Error::Runtime(dispatch_error))
+                return Err(Error::Runtime(RuntimeError(dispatch_error)))
             }
         }
 
@@ -369,13 +387,13 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<T, E>, Error<E>> {
+    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, Error<E>> {
         let block = self
             .client
             .rpc()
             .block(Some(self.block_hash))
             .await?
-            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
         let extrinsic_idx = block.block.extrinsics
             .iter()
@@ -385,7 +403,7 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             })
             // If we successfully obtain the block hash we think contains our
             // extrinsic, the extrinsic should be in there somewhere..
-            .ok_or(Error::Transaction(TransactionError::BlockHashNotFound))?;
+            .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
         let raw_events = self
             .client
@@ -413,7 +431,6 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             block_hash: self.block_hash,
             ext_hash: self.ext_hash,
             events,
-            _error: PhantomDataSendSync::new(),
         })
     }
 }
@@ -422,14 +439,13 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
 /// We can iterate over the events, or look for a specific one.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionEvents<T: Config, E: Decode> {
+pub struct TransactionEvents<T: Config> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     events: Vec<crate::RawEvent>,
-    _error: PhantomDataSendSync<E>,
 }
 
-impl<T: Config, E: Decode> TransactionEvents<T, E> {
+impl<T: Config> TransactionEvents<T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash
@@ -447,7 +463,7 @@ impl<T: Config, E: Decode> TransactionEvents<T, E> {
 
     /// Find all of the events matching the event type provided as a generic parameter. This
     /// will return an error if a matching event is found but cannot be properly decoded.
-    pub fn find_events<Ev: crate::Event>(&self) -> Result<Vec<Ev>, Error<E>> {
+    pub fn find_events<Ev: crate::Event>(&self) -> Result<Vec<Ev>, BasicError> {
         self.events
             .iter()
             .filter_map(|e| e.as_event::<Ev>().map_err(Into::into).transpose())
@@ -459,7 +475,7 @@ impl<T: Config, E: Decode> TransactionEvents<T, E> {
     ///
     /// Use [`TransactionEvents::find_events`], or iterate over [`TransactionEvents`] yourself
     /// if you'd like to handle multiple events of the same type.
-    pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, Error<E>> {
+    pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.events
             .iter()
             .filter_map(|e| e.as_event::<Ev>().transpose())
@@ -469,12 +485,12 @@ impl<T: Config, E: Decode> TransactionEvents<T, E> {
     }
 
     /// Find an event. Returns true if it was found.
-    pub fn has_event<Ev: crate::Event>(&self) -> Result<bool, Error<E>> {
+    pub fn has_event<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
         Ok(self.find_first_event::<Ev>()?.is_some())
     }
 }
 
-impl<T: Config, E: Decode> std::ops::Deref for TransactionEvents<T, E> {
+impl<T: Config> std::ops::Deref for TransactionEvents<T> {
     type Target = [crate::RawEvent];
     fn deref(&self) -> &Self::Target {
         &self.events

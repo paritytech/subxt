@@ -86,7 +86,7 @@ pub fn generate_calls(
             #( #call_structs )*
 
             pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
-                client: &'a ::subxt::Client<T, DispatchError>,
+                client: &'a ::subxt::Client<T>,
                 marker: ::core::marker::PhantomData<(X, A)>,
             }
 
@@ -96,7 +96,7 @@ pub fn generate_calls(
                 X: ::subxt::SignedExtra<T>,
                 A: ::subxt::AccountData<T>,
             {
-                pub fn new(client: &'a ::subxt::Client<T, DispatchError>) -> Self {
+                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client, marker: ::core::marker::PhantomData }
                 }
 
