@@ -63,7 +63,8 @@ pub struct TransactionProgress<'client, T: Config, E: Decode> {
 impl<'client, T: Config, E: Decode> Unpin for TransactionProgress<'client, T, E> {}
 
 impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
-    pub(crate) fn new(
+    /// Instantiate a new [`TransactionProgress`] from a custom subscription.
+    pub fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
         client: &'client Client<T>,
         ext_hash: T::Hash,
