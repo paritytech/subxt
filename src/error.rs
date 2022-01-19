@@ -25,7 +25,6 @@ use core::fmt::Debug;
 use jsonrpsee::core::error::Error as RequestError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
-use thiserror::Error;
 
 /// An error that may contain some runtime error `E`
 pub type Error<E> = GenericError<RuntimeError<E>>;
@@ -36,7 +35,7 @@ pub type BasicError = GenericError<std::convert::Infallible>;
 /// The underlying error enum, generic over the type held by the `Runtime`
 /// variant. Prefer to use the [`Error<E>`] and [`BasicError`] aliases over
 /// using this type directly.
-#[derive(Debug, Error)]
+#[derive(Debug, thiserror::Error)]
 pub enum GenericError<E> {
     /// Io error.
     #[error("Io error: {0}")]
@@ -156,7 +155,7 @@ impl<E> RuntimeError<E> {
 }
 
 /// Module error.
-#[derive(Clone, Debug, Eq, Error, PartialEq)]
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 #[error("{error} from {pallet}")]
 pub struct PalletError {
     /// The module where the error originated.
@@ -168,7 +167,7 @@ pub struct PalletError {
 }
 
 /// Transaction error.
-#[derive(Clone, Debug, Eq, Error, PartialEq)]
+#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 pub enum TransactionError {
     /// The finality subscription expired (after ~512 blocks we give up if the
     /// block hasn't yet been finalized).
