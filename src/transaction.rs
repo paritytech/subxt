@@ -57,7 +57,6 @@ pub struct TransactionProgress<'client, T: Config> {
 impl<'client, T: Config> Unpin for TransactionProgress<'client, T> {}
 
 impl<'client, T: Config> TransactionProgress<'client, T> {
-
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
