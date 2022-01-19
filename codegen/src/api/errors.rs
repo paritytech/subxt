@@ -36,6 +36,10 @@ impl ErrorDetails {
     }
 }
 
+/// The purpose of this is to enumerate all of the possible `(module_index, error_index)` error
+/// variants, so that we can convert `u8` error codes inside a generated `DispatchError` into
+/// nicer error strings with documentation. To do this, we emit the type we'll return instances of,
+/// and a function that returns such an instance for all of the error codes seen in the metadata.
 pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
     let errors = match pallet_errors(metadata) {
         Ok(errors) => errors,

@@ -140,7 +140,7 @@ impl<E> From<String> for GenericError<E> {
 
 /// This is used in the place of the `E` in [`GenericError<E>`] when we may have a
 /// Runtime Error. We use this wrapper so that it is possible to implement
-/// `From<Error<NoRuntimeError>` for `Error<RuntimeError<E>>`.
+/// `From<Error<Infallible>` for `Error<RuntimeError<E>>`.
 ///
 /// This should not be used as a type; prefer to use the alias [`Error<E>`] when referring
 /// to errors which may contain some Runtime error `E`.
