@@ -19,6 +19,7 @@ use crate::{
         balances,
         runtime_types,
         system,
+        DispatchError,
     },
     pair_signer,
     test_context,
@@ -33,13 +34,11 @@ use subxt::{
     DefaultConfig,
     Error,
     EventSubscription,
-    PalletError,
-    RuntimeError,
     Signer,
 };
 
 #[async_std::test]
-async fn tx_basic_transfer() -> Result<(), subxt::Error> {
+async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
@@ -111,7 +110,7 @@ async fn storage_total_issuance() {
 }
 
 #[async_std::test]
-async fn storage_balance_lock() -> Result<(), subxt::Error> {
+async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
@@ -181,13 +180,10 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
-    if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
-        let error2 = PalletError {
-            pallet: "Balances".into(),
-            error: "InsufficientBalance".into(),
-            description: vec!["Balance too low to send value".to_string()],
-        };
-        assert_eq!(error, error2);
+    if let Err(Error::Runtime(err)) = res {
+        let details = err.inner().details().unwrap();
+        assert_eq!(details.pallet, "Balances");
+        assert_eq!(details.error, "InsufficientBalance");
     } else {
         panic!("expected a runtime module error");
     }

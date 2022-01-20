@@ -79,9 +79,9 @@ pub use crate::{
         DefaultConfig,
     },
     error::{
+        BasicError,
         Error,
         PalletError,
-        RuntimeError,
         TransactionError,
     },
     events::{

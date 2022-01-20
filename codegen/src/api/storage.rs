@@ -50,6 +50,7 @@ pub fn generate_storage(
     quote! {
         pub mod storage {
             use super::#types_mod_ident;
+
             #( #storage_structs )*
 
             pub struct StorageApi<'a, T: ::subxt::Config> {
@@ -195,7 +196,7 @@ fn generate_storage_entry_fns(
             pub async fn #fn_name_iter(
                 &self,
                 hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::Error> {
+            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::BasicError> {
                 self.client.storage().iter(hash).await
             }
         )
@@ -211,7 +212,7 @@ fn generate_storage_entry_fns(
             &self,
             #( #key_args, )*
             hash: ::core::option::Option<T::Hash>,
-        ) -> ::core::result::Result<#return_ty, ::subxt::Error> {
+        ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
             let entry = #constructor;
             self.client.storage().#fetch(&entry, hash).await
         }

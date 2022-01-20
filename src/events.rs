@@ -15,12 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    error::BasicError,
     metadata::{
         EventMetadata,
         MetadataError,
     },
     Config,
-    Error,
     Event,
     Metadata,
     PhantomDataSendSync,
@@ -89,7 +89,7 @@ impl<T: Config> EventsDecoder<T> {
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    ) -> Result<Vec<(Phase, RawEvent)>, BasicError> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
         log::debug!("decoding {} events", len);
@@ -142,7 +142,7 @@ impl<T: Config> EventsDecoder<T> {
         event_metadata: &EventMetadata,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), BasicError> {
         log::debug!(
             "Decoding Event '{}::{}'",
             event_metadata.pallet(),
@@ -160,7 +160,7 @@ impl<T: Config> EventsDecoder<T> {
         type_id: u32,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), BasicError> {
         let ty = self
             .metadata
             .resolve_type(type_id)
@@ -169,7 +169,7 @@ impl<T: Config> EventsDecoder<T> {
         fn decode_raw<T: Codec>(
             input: &mut &[u8],
             output: &mut Vec<u8>,
-        ) -> Result<(), Error> {
+        ) -> Result<(), BasicError> {
             let decoded = T::decode(input)?;
             decoded.encode_to(output);
             Ok(())
@@ -190,7 +190,7 @@ impl<T: Config> EventsDecoder<T> {
                     .iter()
                     .find(|v| v.index() == variant_index)
                     .ok_or_else(|| {
-                        Error::Other(format!("Variant {} not found", variant_index))
+                        BasicError::Other(format!("Variant {} not found", variant_index))
                     })?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;

@@ -25,6 +25,7 @@ use crate::{
         },
         system,
         DefaultAccountData,
+        DispatchError,
     },
     test_context,
     NodeRuntimeSignedExtra,
@@ -67,7 +68,9 @@ impl ContractsTestContext {
         self.cxt.api.tx().contracts()
     }
 
-    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
+    async fn instantiate_with_code(
+        &self,
+    ) -> Result<(Hash, AccountId), Error<DispatchError>> {
         log::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
@@ -118,7 +121,7 @@ impl ContractsTestContext {
         code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<AccountId, Error> {
+    ) -> Result<AccountId, Error<DispatchError>> {
         // call instantiate extrinsic
         let result = self
             .contracts_tx()
@@ -147,7 +150,8 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TransactionProgress<'_, DefaultConfig>, Error> {
+    ) -> Result<TransactionProgress<'_, DefaultConfig, DispatchError>, Error<DispatchError>>
+    {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()
