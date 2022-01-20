@@ -113,7 +113,7 @@ fn pallet_errors(
     for pallet in &metadata.pallets {
         let error = match &pallet.error {
             Some(err) => err,
-            None => continue
+            None => continue,
         };
 
         let type_def_variant = get_type_def_variant(error.ty.id())?;
