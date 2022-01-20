@@ -16,7 +16,9 @@
 
 #[subxt::subxt(
     runtime_metadata_path = "examples/polkadot_metadata.scale",
-    generated_type_derives = "Clone"
+    // We can add (certain) custom derives to the generated types by providing
+    // a comma separated list to the below attribute. Most useful for adding `Clone`:
+    generated_type_derives = "Clone, Hash"
 )]
 pub mod polkadot {}
 
@@ -25,6 +27,6 @@ use polkadot::runtime_types::frame_support::PalletId;
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pallet_id = PalletId([1u8; 8]);
-    let _ = <PalletId as Clone>::clone(&pallet_id);
+    let _ = pallet_id.clone();
     Ok(())
 }
