@@ -76,7 +76,7 @@ pub enum GenericError<E> {
 }
 
 impl<E> GenericError<E> {
-    /// [`enum@GenericError`] is parameterised over the type that it holds in the `Runtime`
+    /// [`GenericError`] is parameterised over the type that it holds in the `Runtime`
     /// variant. This function allows us to map the Runtime error contained within (if present)
     /// to a different type.
     pub fn map_runtime_err<F, NewE>(self, f: F) -> GenericError<NewE>
