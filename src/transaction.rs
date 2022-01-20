@@ -388,7 +388,7 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, Error<E>> {
+    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
         let block = self
             .client
             .rpc()
