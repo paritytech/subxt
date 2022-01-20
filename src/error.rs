@@ -92,10 +92,11 @@ impl<E> GenericError<E> {
             GenericError::Invalid(e) => GenericError::Invalid(e),
             GenericError::InvalidMetadata(e) => GenericError::InvalidMetadata(e),
             GenericError::Metadata(e) => GenericError::Metadata(e),
-            GenericError::Runtime(e) => GenericError::Runtime(f(e)),
             GenericError::EventsDecoding(e) => GenericError::EventsDecoding(e),
             GenericError::Transaction(e) => GenericError::Transaction(e),
             GenericError::Other(e) => GenericError::Other(e),
+            // This is the only branch we really care about:
+            GenericError::Runtime(e) => GenericError::Runtime(f(e)),
         }
     }
 }

@@ -107,33 +107,26 @@ fn pallet_errors(
         }
     };
 
-    let pallet_errors = metadata
-        .pallets
-        .iter()
-        .filter_map(|pallet| {
-            pallet.error.as_ref().map(|error| {
-                let type_def_variant = get_type_def_variant(error.ty.id())?;
-                Ok((pallet, type_def_variant))
-            })
-        })
-        .collect::<Result<Vec<(_, _)>, _>>()?;
+    let mut pallet_errors = vec![];
+    for pallet in &metadata.pallets {
+        let error = match &pallet.error {
+            Some(err) => err,
+            None => continue
+        };
 
-    let errors = pallet_errors
-        .iter()
-        .flat_map(|(pallet, type_def_variant)| {
-            type_def_variant.variants().iter().map(move |var| {
-                ErrorMetadata {
-                    pallet_index: pallet.index,
-                    error_index: var.index(),
-                    pallet: pallet.name.clone(),
-                    error: var.name().clone(),
-                    variant: var.clone(),
-                }
-            })
-        })
-        .collect();
+        let type_def_variant = get_type_def_variant(error.ty.id())?;
+        for var in type_def_variant.variants().iter() {
+            pallet_errors.push(ErrorMetadata {
+                pallet_index: pallet.index,
+                error_index: var.index(),
+                pallet: pallet.name.clone(),
+                error: var.name().clone(),
+                variant: var.clone(),
+            });
+        }
+    }
 
-    Ok(errors)
+    Ok(pallet_errors)
 }
 
 #[derive(Clone, Debug)]
