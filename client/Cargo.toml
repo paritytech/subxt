@@ -37,6 +37,7 @@ sc-service = { git = "https://github.com/paritytech/substrate.git", branch = "ma
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
 env_logger = "0.8.2"
+tracing-subscriber = { version = "0.3.3", features = ["env-filter"] }
 node-cli = { git = "https://github.com/paritytech/substrate.git", branch = "master", default-features = false }
 tempdir = "0.3.7"
 subxt = { path = ".." }

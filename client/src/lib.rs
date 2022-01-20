@@ -84,6 +84,7 @@ impl TransportSenderT for Sender {
     type Error = SubxtClientError;
 
     async fn send(&mut self, msg: String) -> Result<(), Self::Error> {
+        log::info!("send: {:?}", msg);
         self.0.send(msg).await?;
         Ok(())
     }
@@ -95,6 +96,7 @@ impl TransportReceiverT for Receiver {
 
     async fn receive(&mut self) -> Result<String, Self::Error> {
         let msg = self.0.next().await.expect("channel should be open");
+        log::info!("rx: {:?}", msg);
         Ok(msg)
     }
 }
@@ -222,7 +224,6 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
         network.transport = TransportConfig::Normal {
             enable_mdns: true,
             allow_private_ipv4: true,
-            // wasm_external_transport: None,
         };
         let telemetry_endpoints = if let Some(port) = self.telemetry {
             let endpoints = TelemetryEndpoints::new(vec![(
@@ -248,9 +249,9 @@ impl<C: ChainSpec + 'static> SubxtClientConfig<C> {
             telemetry_endpoints,
             tokio_handle: self.tokio_handle,
             default_heap_pages: Default::default(),
-            disable_grandpa: Default::default(),
+            disable_grandpa: true,
             execution_strategies: Default::default(),
-            force_authoring: Default::default(),
+            force_authoring: true,
             keep_blocks: KeepBlocks::All,
             keystore_remote: Default::default(),
             offchain_worker: Default::default(),
