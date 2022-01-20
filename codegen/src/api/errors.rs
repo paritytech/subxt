@@ -21,8 +21,13 @@ use proc_macro2::{
 };
 use quote::quote;
 
+/// Tokens which allow us to provide static error information in the generated output.
 pub struct ErrorDetails {
+    /// This type definition will be used in the `dispatch_error_impl_fn` and is
+    /// expected to be generated somewhere in scope for that to be possible.
     pub type_def: TokenStream2,
+    // A function which will live in an impl block for our `DispatchError`,
+    // to statically return details for known error types:
     pub dispatch_error_impl_fn: TokenStream2,
 }
 
@@ -51,7 +56,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
     };
 
     let match_body_items = errors.into_iter().map(|err| {
-        let docs = err.description();
+        let docs = err.docs;
         let pallet_index = err.pallet_index;
         let error_index = err.error_index;
         let pallet_name = err.pallet;
@@ -67,7 +72,6 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
     });
 
     ErrorDetails {
-        // A type we'll be returning that needs defining at the top level:
         type_def: quote! {
             pub struct ErrorDetails {
                 pub pallet: &'static str,
@@ -75,8 +79,6 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
                 pub docs: &'static str,
             }
         },
-        // A function which will live in an impl block for our DispatchError,
-        // to statically return details for known error types:
         dispatch_error_impl_fn: quote! {
             pub fn details(&self) -> Option<ErrorDetails> {
                 if let Self::Module { index, error } = self {
@@ -121,7 +123,7 @@ fn pallet_errors(
                 error_index: var.index(),
                 pallet: pallet.name.clone(),
                 error: var.name().clone(),
-                variant: var.clone(),
+                docs: var.docs().join("\n"),
             });
         }
     }
@@ -129,23 +131,19 @@ fn pallet_errors(
     Ok(pallet_errors)
 }
 
+/// Information about each error that we find in the metadata;
+/// used to generate the static error information.
 #[derive(Clone, Debug)]
-pub struct ErrorMetadata {
+struct ErrorMetadata {
     pub pallet_index: u8,
     pub error_index: u8,
     pub pallet: String,
     pub error: String,
-    variant: scale_info::Variant<scale_info::form::PortableForm>,
-}
-
-impl ErrorMetadata {
-    pub fn description(&self) -> String {
-        self.variant.docs().join("\n")
-    }
+    pub docs: String,
 }
 
 #[derive(Debug)]
-pub enum InvalidMetadataError {
+enum InvalidMetadataError {
     MissingType(u32),
     TypeDefNotVariant(u32),
 }
