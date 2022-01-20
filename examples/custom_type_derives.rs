@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+#![allow(clippy::redundant_clone)]
+
 #[subxt::subxt(
     runtime_metadata_path = "examples/polkadot_metadata.scale",
     // We can add (certain) custom derives to the generated types by providing
