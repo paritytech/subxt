@@ -120,7 +120,7 @@ fn generate_storage_entry_fns(
                         fields.iter().map(|(_, field_type)| field_type);
                     let field_names = fields.iter().map(|(field_name, _)| field_name);
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( #( #tuple_struct_fields ),* );
+                        pub struct #entry_struct_ident( #( pub #tuple_struct_fields ),* );
                     };
                     let constructor =
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
