@@ -28,7 +28,7 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use syn::parse_quote;
 
 #[derive(Clone, Debug)]
@@ -67,7 +67,7 @@ impl TypePath {
     ///     a: Vec<Option<T>>, // the parent type param here is `T`
     /// }
     /// ```
-    pub fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    pub fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         match self {
             Self::Parameter(type_parameter) => {
                 acc.insert(type_parameter.clone());
@@ -195,7 +195,7 @@ impl TypePathType {
     ///     a: Vec<Option<T>>, // the parent type param here is `T`
     /// }
     /// ```
-    fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         for p in &self.params {
             p.parent_type_params(acc);
         }
@@ -236,7 +236,7 @@ impl quote::ToTokens for TypePathSubstitute {
 }
 
 impl TypePathSubstitute {
-    fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         for p in &self.params {
             p.parent_type_params(acc);
         }

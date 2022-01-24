@@ -17,12 +17,12 @@
 use super::TypeParameter;
 use crate::types::CompositeDefField;
 use quote::quote;
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefParameters {
     params: Vec<TypeParameter>,
-    unused: HashSet<TypeParameter>,
+    unused: BTreeSet<TypeParameter>,
 }
 
 impl TypeDefParameters {
@@ -34,7 +34,7 @@ impl TypeDefParameters {
     /// Update the set of unused type parameters by removing those that are used in the given
     /// fields.
     pub fn update_unused(&mut self, fields: &[CompositeDefField]) {
-        let mut used_type_params = HashSet::new();
+        let mut used_type_params = BTreeSet::new();
         for field in fields {
             field.type_path.parent_type_params(&mut used_type_params)
         }
@@ -48,13 +48,15 @@ impl TypeDefParameters {
         if self.unused.is_empty() {
             return None
         }
-        let mut params = self.unused.iter().collect::<Vec<_>>();
-
-        let params = if params.len() == 1 {
-            let param = &params[0];
+        let params = if self.unused.len() == 1 {
+            let param = self
+                .unused
+                .iter()
+                .next()
+                .expect("Checked for exactly one unused param");
             quote! { #param }
         } else {
-            params.sort();
+            let params = self.unused.iter();
             quote! { ( #( #params ), * ) }
         };
         Some(syn::parse_quote! { ::core::marker::PhantomData<#params> })
