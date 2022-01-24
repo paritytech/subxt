@@ -30,14 +30,14 @@ pub fn generate_constants(
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
     let constant_fns = constants.iter().map(|constant| {
-        let const_fn_ident = format_ident!("{}", constant.name.to_snake_case());
-        let const_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
+        let fn_name = format_ident!("{}", constant.name.to_snake_case());
+        let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
 
         let ref_slice = constant.value.as_slice();
 
         quote! {
-            pub fn #const_fn_ident(&self) -> #const_ty {
-                ::subxt::codec::Decode::decode(&mut &vec![#(#ref_slice,)*][..]).unwrap()
+            pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
+                Ok(::subxt::codec::Decode::decode(&mut &vec![#(#ref_slice,)*][..])?)
             }
         }
     });

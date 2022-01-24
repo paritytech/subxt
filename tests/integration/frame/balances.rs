@@ -263,6 +263,10 @@ async fn constant_existential_deposit() {
     assert_eq!(existential_deposit, 100_000_000_000_000);
     assert_eq!(
         existential_deposit,
-        cxt.api.constants().balances().existential_deposit()
+        cxt.api
+            .constants()
+            .balances()
+            .existential_deposit()
+            .unwrap()
     );
 }
