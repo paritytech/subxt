@@ -43,7 +43,7 @@ impl TypeDefParameters {
         }
     }
 
-    /// Construct a [`core::marker::PhantomData`] type for the type unused type params.
+    /// Construct a [`core::marker::PhantomData`] for the type unused type params.
     pub fn unused_params_phantom_data(&self) -> Option<syn::TypePath> {
         if self.unused.is_empty() {
             return None
