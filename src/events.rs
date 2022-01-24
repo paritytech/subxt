@@ -14,6 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::{
+    error::BasicError,
+    metadata::{
+        EventMetadata,
+        MetadataError,
+    },
+    Config,
+    Event,
+    Metadata,
+    PhantomDataSendSync,
+    Phase,
+};
 use codec::{
     Codec,
     Compact,
@@ -22,19 +34,7 @@ use codec::{
     Error as CodecError,
     Input,
 };
-use std::marker::PhantomData;
-
-use crate::{
-    metadata::{
-        EventMetadata,
-        MetadataError,
-    },
-    Config,
-    Error,
-    Event,
-    Metadata,
-    Phase,
-};
+use derivative::Derivative;
 use scale_info::{
     TypeDef,
     TypeDefPrimitive,
@@ -69,16 +69,14 @@ impl RawEvent {
 }
 
 /// Events decoder.
-#[derive(Debug, Clone)]
-pub struct EventsDecoder<T> {
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""), Debug(bound = ""))]
+pub struct EventsDecoder<T: Config> {
     metadata: Metadata,
-    marker: PhantomData<T>,
+    marker: PhantomDataSendSync<T>,
 }
 
-impl<T> EventsDecoder<T>
-where
-    T: Config,
-{
+impl<T: Config> EventsDecoder<T> {
     /// Creates a new `EventsDecoder`.
     pub fn new(metadata: Metadata) -> Self {
         Self {
@@ -91,7 +89,7 @@ where
     pub fn decode_events(
         &self,
         input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, Error> {
+    ) -> Result<Vec<(Phase, RawEvent)>, BasicError> {
         let compact_len = <Compact<u32>>::decode(input)?;
         let len = compact_len.0 as usize;
         log::debug!("decoding {} events", len);
@@ -144,7 +142,7 @@ where
         event_metadata: &EventMetadata,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), BasicError> {
         log::debug!(
             "Decoding Event '{}::{}'",
             event_metadata.pallet(),
@@ -162,7 +160,7 @@ where
         type_id: u32,
         input: &mut &[u8],
         output: &mut Vec<u8>,
-    ) -> Result<(), Error> {
+    ) -> Result<(), BasicError> {
         let ty = self
             .metadata
             .resolve_type(type_id)
@@ -171,7 +169,7 @@ where
         fn decode_raw<T: Codec>(
             input: &mut &[u8],
             output: &mut Vec<u8>,
-        ) -> Result<(), Error> {
+        ) -> Result<(), BasicError> {
             let decoded = T::decode(input)?;
             decoded.encode_to(output);
             Ok(())
@@ -187,13 +185,13 @@ where
             TypeDef::Variant(variant) => {
                 let variant_index = u8::decode(input)?;
                 variant_index.encode_to(output);
-                let variant =
-                    variant
-                        .variants()
-                        .get(variant_index as usize)
-                        .ok_or_else(|| {
-                            Error::Other(format!("Variant {} not found", variant_index))
-                        })?;
+                let variant = variant
+                    .variants()
+                    .iter()
+                    .find(|v| v.index() == variant_index)
+                    .ok_or_else(|| {
+                        BasicError::Other(format!("Variant {} not found", variant_index))
+                    })?;
                 for field in variant.fields() {
                     self.decode_type(field.ty().id(), input, output)?;
                 }
@@ -253,10 +251,10 @@ where
                     }
                 }
             }
-            TypeDef::Compact(_compact) => {
+            TypeDef::Compact(compact) => {
                 let inner = self
                     .metadata
-                    .resolve_type(type_id)
+                    .resolve_type(compact.type_param().id())
                     .ok_or(MetadataError::TypeNotFound(type_id))?;
                 let mut decode_compact_primitive = |primitive: &TypeDefPrimitive| {
                     match primitive {
@@ -339,35 +337,219 @@ pub enum EventsDecodingError {
     InvalidCompactType(String),
 }
 
-// #[cfg(test)]
-// mod tests {
-//     use super::*;
-//     use std::convert::TryFrom;
-//
-//     type DefaultConfig = crate::NodeTemplateRuntime;
-//
-//     #[test]
-//     fn test_decode_option() {
-//         let decoder = EventsDecoder::<DefaultConfig>::new(
-//             Metadata::default(),
-//         );
-//
-//         let value = Some(0u8);
-//         let input = value.encode();
-//         let mut output = Vec::<u8>::new();
-//         let mut errors = Vec::<RuntimeError>::new();
-//
-//         decoder
-//             .decode_raw_bytes(
-//                 &[EventArg::Option(Box::new(EventArg::Primitive(
-//                     "u8".to_string(),
-//                 )))],
-//                 &mut &input[..],
-//                 &mut output,
-//                 &mut errors,
-//             )
-//             .unwrap();
-//
-//         assert_eq!(output, vec![1, 0]);
-//     }
-// }
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::{
+        Config,
+        DefaultConfig,
+        Phase,
+    };
+    use frame_metadata::{
+        v14::{
+            ExtrinsicMetadata,
+            PalletEventMetadata,
+            PalletMetadata,
+            RuntimeMetadataLastVersion,
+        },
+        RuntimeMetadataPrefixed,
+    };
+    use scale_info::{
+        meta_type,
+        TypeInfo,
+    };
+    use std::convert::TryFrom;
+
+    #[derive(Encode)]
+    pub struct EventRecord<E: Encode> {
+        phase: Phase,
+        pallet_index: u8,
+        event: E,
+        topics: Vec<<DefaultConfig as Config>::Hash>,
+    }
+
+    fn event_record<E: Encode>(pallet_index: u8, event: E) -> EventRecord<E> {
+        EventRecord {
+            phase: Phase::Finalization,
+            pallet_index,
+            event,
+            topics: vec![],
+        }
+    }
+
+    fn pallet_metadata<E: TypeInfo + 'static>(pallet_index: u8) -> PalletMetadata {
+        let event = PalletEventMetadata {
+            ty: meta_type::<E>(),
+        };
+        PalletMetadata {
+            name: "Test",
+            storage: None,
+            calls: None,
+            event: Some(event),
+            constants: vec![],
+            error: None,
+            index: pallet_index,
+        }
+    }
+
+    fn init_decoder(pallets: Vec<PalletMetadata>) -> EventsDecoder<DefaultConfig> {
+        let extrinsic = ExtrinsicMetadata {
+            ty: meta_type::<()>(),
+            version: 0,
+            signed_extensions: vec![],
+        };
+        let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
+        let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
+        let metadata = Metadata::try_from(runtime_metadata).unwrap();
+        EventsDecoder::<DefaultConfig>::new(metadata)
+    }
+
+    #[test]
+    fn decode_single_event() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(1);
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn decode_multiple_events() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B,
+            C { a: u32 },
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event1 = Event::A(1);
+        let event2 = Event::B;
+        let event3 = Event::C { a: 3 };
+
+        let encoded_event1 = event1.encode();
+        let encoded_event2 = event2.encode();
+        let encoded_event3 = event3.encode();
+
+        let event_records = vec![
+            event_record(pallet_index, event1),
+            event_record(pallet_index, event2),
+            event_record(pallet_index, event3),
+        ];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event1[0]);
+        assert_eq!(events[0].1.data.0, encoded_event1[1..]);
+
+        assert_eq!(events[1].1.variant_index, encoded_event2[0]);
+        assert_eq!(events[1].1.data.0, encoded_event2[1..]);
+
+        assert_eq!(events[2].1.variant_index, encoded_event3[0]);
+        assert_eq!(events[2].1.data.0, encoded_event3[1..]);
+    }
+
+    #[test]
+    fn compact_event_field() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(#[codec(compact)] u32),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(u32::MAX);
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn compact_wrapper_struct_field() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(#[codec(compact)] CompactWrapper),
+        }
+
+        #[derive(Clone, codec::CompactAs, Encode, TypeInfo)]
+        struct CompactWrapper(u64);
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(CompactWrapper(0));
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+
+    #[test]
+    fn event_containing_explicit_index() {
+        #[derive(Clone, Encode, TypeInfo)]
+        #[repr(u8)]
+        #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
+        pub enum MyType {
+            B = 10u8,
+        }
+
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Event {
+            A(MyType),
+        }
+
+        let pallet_index = 0;
+        let pallet = pallet_metadata::<Event>(pallet_index);
+        let decoder = init_decoder(vec![pallet]);
+
+        let event = Event::A(MyType::B);
+        let encoded_event = event.encode();
+        let event_records = vec![event_record(pallet_index, event)];
+
+        let mut input = Vec::new();
+        event_records.encode_to(&mut input);
+
+        // this would panic if the explicit enum item index were not correctly used
+        let events = decoder.decode_events(&mut &input[..]).unwrap();
+
+        assert_eq!(events[0].1.variant_index, encoded_event[0]);
+        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+    }
+}

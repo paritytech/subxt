@@ -33,5 +33,4 @@ subxt-codegen = { version = "0.2.0", path = "../codegen" }
 pretty_assertions = "0.6.1"
 subxt = { path = ".." }
 trybuild = "1.0.38"
-
-sp-keyring = { git = "https://github.com/paritytech/substrate/", branch = "master" }
+sp-keyring = "4.0.0"

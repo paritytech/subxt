@@ -19,8 +19,9 @@ use crate::{
         balances,
         runtime_types,
         system,
-        DefaultConfig,
+        DispatchError,
     },
+    pair_signer,
     test_context,
 };
 use codec::Decode;
@@ -30,20 +31,16 @@ use sp_core::{
 };
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::{
-        PairSigner,
-        Signer,
-    },
+    DefaultConfig,
     Error,
     EventSubscription,
-    PalletError,
-    RuntimeError,
+    Signer,
 };
 
 #[async_std::test]
-async fn tx_basic_transfer() -> Result<(), subxt::Error> {
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
-    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
+async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address = bob.account_id().clone().into();
     let cxt = test_context().await;
     let api = &cxt.api;
@@ -113,8 +110,8 @@ async fn storage_total_issuance() {
 }
 
 #[async_std::test]
-async fn storage_balance_lock() -> Result<(), subxt::Error> {
-    let bob = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Bob.pair());
+async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
+    let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
     let cxt = test_context().await;
 
@@ -155,9 +152,9 @@ async fn storage_balance_lock() -> Result<(), subxt::Error> {
 #[async_std::test]
 async fn transfer_error() {
     env_logger::try_init().ok();
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
-    let hans = PairSigner::<DefaultConfig, _>::new(Pair::generate().0);
+    let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
     let cxt = test_context().await;
 
@@ -183,13 +180,10 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
-    if let Err(Error::Runtime(RuntimeError::Module(error))) = res {
-        let error2 = PalletError {
-            pallet: "Balances".into(),
-            error: "InsufficientBalance".into(),
-            description: vec!["Balance too low to send value".to_string()],
-        };
-        assert_eq!(error, error2);
+    if let Err(Error::Runtime(err)) = res {
+        let details = err.inner().details().unwrap();
+        assert_eq!(details.pallet, "Balances");
+        assert_eq!(details.error, "InsufficientBalance");
     } else {
         panic!("expected a runtime module error");
     }
@@ -198,7 +192,7 @@ async fn transfer_error() {
 #[async_std::test]
 async fn transfer_subscription() {
     env_logger::try_init().ok();
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
     let cxt = test_context().await;
@@ -230,7 +224,7 @@ async fn transfer_subscription() {
 #[async_std::test]
 async fn transfer_implicit_subscription() {
     env_logger::try_init().ok();
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
     let cxt = test_context().await;

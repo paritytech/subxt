@@ -14,6 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::{
+    error::BasicError,
+    events::{
+        EventsDecoder,
+        RawEvent,
+    },
+    rpc::Rpc,
+    Config,
+    Event,
+    Phase,
+};
 use jsonrpsee::core::{
     client::Subscription,
     DeserializeOwned,
@@ -27,18 +38,6 @@ use sp_core::{
 };
 use sp_runtime::traits::Header;
 use std::collections::VecDeque;
-
-use crate::{
-    error::Error,
-    events::{
-        EventsDecoder,
-        RawEvent,
-    },
-    rpc::Rpc,
-    Config,
-    Event,
-    Phase,
-};
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
@@ -58,11 +57,13 @@ enum BlockReader<'a, T: Config> {
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)>>),
+    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, BasicError>)>>),
 }
 
 impl<'a, T: Config> BlockReader<'a, T> {
-    async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)> {
+    async fn next(
+        &mut self,
+    ) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, BasicError>)> {
         match self {
             BlockReader::Decoder {
                 subscription,
@@ -117,12 +118,12 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     }
 
     /// Filters events by type.
-    pub fn filter_event<E: Event>(&mut self) {
-        self.event = Some((E::PALLET, E::EVENT));
+    pub fn filter_event<Ev: Event>(&mut self) {
+        self.event = Some((Ev::PALLET, Ev::EVENT));
     }
 
     /// Gets the next event.
-    pub async fn next(&mut self) -> Option<Result<RawEvent, Error>> {
+    pub async fn next(&mut self) -> Option<Result<RawEvent, BasicError>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
                 return Some(Ok(raw_event))
@@ -259,24 +260,8 @@ where
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::DefaultConfig;
     use sp_core::H256;
-    #[derive(Clone)]
-    struct MockConfig;
-
-    impl Config for MockConfig {
-        type Index = u32;
-        type BlockNumber = u32;
-        type Hash = sp_core::H256;
-        type Hashing = sp_runtime::traits::BlakeTwo256;
-        type AccountId = sp_runtime::AccountId32;
-        type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
-        type Header = sp_runtime::generic::Header<
-            Self::BlockNumber,
-            sp_runtime::traits::BlakeTwo256,
-        >;
-        type Signature = sp_runtime::MultiSignature;
-        type Extrinsic = sp_runtime::OpaqueExtrinsic;
-    }
 
     fn named_event(event_name: &str) -> RawEvent {
         RawEvent {
@@ -315,7 +300,7 @@ mod tests {
         for block_filter in [None, Some(H256::from([1; 32]))] {
             for extrinsic_filter in [None, Some(1)] {
                 for event_filter in [None, Some(("b", "b"))] {
-                    let mut subscription: EventSubscription<MockConfig> =
+                    let mut subscription: EventSubscription<DefaultConfig> =
                         EventSubscription {
                             block_reader: BlockReader::Mock(Box::new(
                                 vec![

@@ -22,6 +22,7 @@ mod signer;
 pub use self::{
     extra::{
         ChargeAssetTxPayment,
+        ChargeTransactionPayment,
         CheckGenesis,
         CheckMortality,
         CheckNonce,
@@ -29,6 +30,7 @@ pub use self::{
         CheckTxVersion,
         CheckWeight,
         DefaultExtra,
+        DefaultExtraWithTxPayment,
         SignedExtra,
     },
     signer::{
@@ -38,53 +40,50 @@ pub use self::{
 };
 
 use sp_runtime::traits::SignedExtension;
-use sp_version::RuntimeVersion;
 
 use crate::{
+    error::BasicError,
+    rpc::RuntimeVersion,
     Config,
     Encoded,
-    Error,
-    ExtrinsicExtraData,
 };
 
 /// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T> = sp_runtime::generic::UncheckedExtrinsic<
+pub type UncheckedExtrinsic<T, X> = sp_runtime::generic::UncheckedExtrinsic<
     <T as Config>::Address,
     Encoded,
     <T as Config>::Signature,
-    <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra,
+    <X as SignedExtra<T>>::Extra,
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T> = sp_runtime::generic::SignedPayload<
-    Encoded,
-    <<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra,
->;
+pub type SignedPayload<T, X> =
+    sp_runtime::generic::SignedPayload<Encoded, <X as SignedExtra<T>>::Extra>;
 
 /// Creates a signed extrinsic
-pub async fn create_signed<T>(
+pub async fn create_signed<T, X>(
     runtime_version: &RuntimeVersion,
     genesis_hash: T::Hash,
     nonce: T::Index,
     call: Encoded,
-    signer: &(dyn Signer<T> + Send + Sync),
-    additional_params: <T::Extra as SignedExtra<T>>::Parameters,
-) -> Result<UncheckedExtrinsic<T>, Error>
+    signer: &(dyn Signer<T, X> + Send + Sync),
+    additional_params: X::Parameters,
+) -> Result<UncheckedExtrinsic<T, X>, BasicError>
 where
-    T: Config + ExtrinsicExtraData<T>,
-    <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-        Send + Sync,
+    T: Config,
+    X: SignedExtra<T>,
+    <X::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let extra = <T as ExtrinsicExtraData<T>>::Extra::new(
+    let extra = X::new(
         spec_version,
         tx_version,
         nonce,
         genesis_hash,
         additional_params,
     );
-    let payload = SignedPayload::<T>::new(call, extra.extra())?;
+    let payload = SignedPayload::<T, X>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
 }

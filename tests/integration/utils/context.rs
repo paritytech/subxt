@@ -15,18 +15,25 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 pub use crate::{
-    node_runtime::{
-        self,
-        DefaultConfig,
-    },
+    node_runtime,
     TestNodeProcess,
 };
 
+use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
-use subxt::Client;
+use subxt::{
+    extrinsic::ChargeAssetTxPayment,
+    Client,
+    DefaultConfig,
+    DefaultExtraWithTxPayment,
+    PairSigner,
+};
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
+
+pub type NodeRuntimeSignedExtra =
+    DefaultExtraWithTxPayment<DefaultConfig, ChargeAssetTxPayment<DefaultConfig>>;
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
@@ -53,7 +60,7 @@ pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
 
 pub struct TestContext {
     pub node_proc: TestNodeProcess<DefaultConfig>,
-    pub api: node_runtime::RuntimeApi<DefaultConfig>,
+    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeSignedExtra>,
 }
 
 impl TestContext {
@@ -67,4 +74,10 @@ pub async fn test_context() -> TestContext {
     let node_proc = test_node_process_with(AccountKeyring::Alice).await;
     let api = node_proc.client().clone().to_runtime_api();
     TestContext { node_proc, api }
+}
+
+pub fn pair_signer(
+    pair: Pair,
+) -> PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair> {
+    PairSigner::new(pair)
 }

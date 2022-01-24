@@ -76,7 +76,7 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<'a, T, #call_struct_name> {
+                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, A, #call_struct_name, DispatchError> {
                     let call = #call_struct_name { #( #call_args, )* };
                     ::subxt::SubmittableExtrinsic::new(self.client, call)
                 }
@@ -88,18 +88,24 @@ pub fn generate_calls(
     quote! {
         pub mod calls {
             use super::#types_mod_ident;
+
+            type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+
             #( #call_structs )*
 
-            pub struct TransactionApi<'a, T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
                 client: &'a ::subxt::Client<T>,
+                marker: ::core::marker::PhantomData<(X, A)>,
             }
 
-            impl<'a, T: ::subxt::Config> TransactionApi<'a, T>
+            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
             where
-                T: ::subxt::Config + ::subxt::ExtrinsicExtraData<T>,
+                T: ::subxt::Config,
+                X: ::subxt::SignedExtra<T>,
+                A: ::subxt::AccountData<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
+                    Self { client, marker: ::core::marker::PhantomData }
                 }
 
                 #( #call_fns )*

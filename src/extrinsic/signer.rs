@@ -18,14 +18,11 @@
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 use super::{
+    SignedExtra,
     SignedPayload,
     UncheckedExtrinsic,
 };
-use crate::{
-    Config,
-    ExtrinsicExtraData,
-    SignedExtra,
-};
+use crate::Config;
 use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
@@ -36,7 +33,7 @@ use sp_runtime::traits::{
 
 /// Extrinsic signer.
 #[async_trait::async_trait]
-pub trait Signer<T: Config + ExtrinsicExtraData<T>> {
+pub trait Signer<T: Config, E: SignedExtra<T>> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
 
@@ -49,21 +46,23 @@ pub trait Signer<T: Config + ExtrinsicExtraData<T>> {
     /// refused the operation.
     async fn sign(
         &self,
-        extrinsic: SignedPayload<T>,
-    ) -> Result<UncheckedExtrinsic<T>, String>;
+        extrinsic: SignedPayload<T, E>,
+    ) -> Result<UncheckedExtrinsic<T, E>, String>;
 }
 
 /// Extrinsic signer using a private key.
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: Config, P: Pair> {
+pub struct PairSigner<T: Config, E, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
+    marker: std::marker::PhantomData<E>,
 }
 
-impl<T, P> PairSigner<T, P>
+impl<T, E, P> PairSigner<T, E, P>
 where
-    T: Config + ExtrinsicExtraData<T>,
+    T: Config,
+    E: SignedExtra<T>,
     T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
@@ -77,6 +76,7 @@ where
             account_id,
             nonce: None,
             signer,
+            marker: Default::default(),
         }
     }
 
@@ -97,11 +97,13 @@ where
 }
 
 #[async_trait::async_trait]
-impl<T, P> Signer<T> for PairSigner<T, P>
+impl<T, E, P> Signer<T, E> for PairSigner<T, E, P>
 where
-    T: Config + ExtrinsicExtraData<T>,
+    T: Config,
+    E: SignedExtra<T>,
     T::AccountId: Into<T::Address> + 'static,
-    <<<T as ExtrinsicExtraData<T>>::Extra as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned: Send + Sync + 'static,
+    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        Send + Sync + 'static,
     P: Pair + 'static,
     P::Signature: Into<T::Signature> + 'static,
 {
@@ -115,11 +117,11 @@ where
 
     async fn sign(
         &self,
-        extrinsic: SignedPayload<T>,
-    ) -> Result<UncheckedExtrinsic<T>, String> {
+        extrinsic: SignedPayload<T, E>,
+    ) -> Result<UncheckedExtrinsic<T, E>, String> {
         let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
         let (call, extra, _) = extrinsic.deconstruct();
-        let extrinsic = UncheckedExtrinsic::<T>::new_signed(
+        let extrinsic = UncheckedExtrinsic::<T, E>::new_signed(
             call,
             self.account_id.clone().into(),
             signature.into(),

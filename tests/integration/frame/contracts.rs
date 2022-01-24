@@ -24,9 +24,11 @@ use crate::{
             storage,
         },
         system,
-        DefaultConfig,
+        DefaultAccountData,
+        DispatchError,
     },
     test_context,
+    NodeRuntimeSignedExtra,
     TestContext,
 };
 use sp_core::sr25519::Pair;
@@ -34,6 +36,7 @@ use sp_runtime::MultiAddress;
 use subxt::{
     Client,
     Config,
+    DefaultConfig,
     Error,
     PairSigner,
     TransactionProgress,
@@ -41,7 +44,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;
@@ -59,11 +62,15 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig> {
+    fn contracts_tx(
+        &self,
+    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData> {
         self.cxt.api.tx().contracts()
     }
 
-    async fn instantiate_with_code(&self) -> Result<(Hash, AccountId), Error> {
+    async fn instantiate_with_code(
+        &self,
+    ) -> Result<(Hash, AccountId), Error<DispatchError>> {
         log::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
@@ -114,7 +121,7 @@ impl ContractsTestContext {
         code_hash: Hash,
         data: Vec<u8>,
         salt: Vec<u8>,
-    ) -> Result<AccountId, Error> {
+    ) -> Result<AccountId, Error<DispatchError>> {
         // call instantiate extrinsic
         let result = self
             .contracts_tx()
@@ -143,7 +150,8 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TransactionProgress<'_, DefaultConfig>, Error> {
+    ) -> Result<TransactionProgress<'_, DefaultConfig, DispatchError>, Error<DispatchError>>
+    {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()

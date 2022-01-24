@@ -14,10 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    SignedExtra,
-    StorageEntry,
-};
+use crate::StorageEntry;
 use codec::{
     Codec,
     Encode,
@@ -35,7 +32,10 @@ use sp_runtime::traits::{
 };
 
 /// Runtime types.
-pub trait Config: Clone + Sized + Send + Sync + 'static {
+// Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
+// automatically applies a 'static bound to all generic types (including this one),
+// and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
+pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter + Member + Default + AtLeast32Bit + Copy + scale_info::TypeInfo;
@@ -85,6 +85,24 @@ pub trait Config: Clone + Sized + Send + Sync + 'static {
 pub trait Parameter: Codec + EncodeLike + Clone + Eq + Debug {}
 impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 
+/// Default set of commonly used types by Substrate runtimes.
+// Note: We only use this at the type level, so it should be impossible to
+// create an instance of it.
+pub enum DefaultConfig {}
+
+impl Config for DefaultConfig {
+    type Index = u32;
+    type BlockNumber = u32;
+    type Hash = sp_core::H256;
+    type Hashing = sp_runtime::traits::BlakeTwo256;
+    type AccountId = sp_runtime::AccountId32;
+    type Address = sp_runtime::MultiAddress<Self::AccountId, u32>;
+    type Header =
+        sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
+    type Signature = sp_runtime::MultiSignature;
+    type Extrinsic = sp_runtime::OpaqueExtrinsic;
+}
+
 /// Trait to fetch data about an account.
 ///
 /// Should be implemented on a type implementing `StorageEntry`,
@@ -94,12 +112,4 @@ pub trait AccountData<T: Config>: StorageEntry {
     fn storage_entry(account_id: T::AccountId) -> Self;
     /// Get the nonce from the storage entry value.
     fn nonce(result: &<Self as StorageEntry>::Value) -> T::Index;
-}
-
-/// Trait to configure the extra data for an extrinsic.
-pub trait ExtrinsicExtraData<T: Config> {
-    /// The type of the [`StorageEntry`] which can be used to retrieve an account nonce.
-    type AccountData: AccountData<T>;
-    /// The type of extra data and additional signed data to be included in a transaction.
-    type Extra: SignedExtra<T> + Send + Sync + 'static;
 }

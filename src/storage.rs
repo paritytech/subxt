@@ -30,13 +30,13 @@ pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
 use crate::{
+    error::BasicError,
     metadata::{
         Metadata,
         MetadataError,
     },
     rpc::Rpc,
     Config,
-    Error,
     StorageHasher,
 };
 
@@ -132,11 +132,20 @@ impl StorageMapKey {
 }
 
 /// Client for querying runtime storage.
-#[derive(Clone)]
 pub struct StorageClient<'a, T: Config> {
     rpc: &'a Rpc<T>,
     metadata: &'a Metadata,
     iter_page_size: u32,
+}
+
+impl<'a, T: Config> Clone for StorageClient<'a, T> {
+    fn clone(&self) -> Self {
+        Self {
+            rpc: self.rpc,
+            metadata: self.metadata,
+            iter_page_size: self.iter_page_size,
+        }
+    }
 }
 
 impl<'a, T: Config> StorageClient<'a, T> {
@@ -154,7 +163,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<V>, Error> {
+    ) -> Result<Option<V>, BasicError> {
         if let Some(data) = self.rpc.storage(&key, hash).await? {
             Ok(Some(Decode::decode(&mut &data.0[..])?))
         } else {
@@ -167,7 +176,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         &self,
         key: StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, Error> {
+    ) -> Result<Option<StorageData>, BasicError> {
         self.rpc.storage(&key, hash).await
     }
 
@@ -176,7 +185,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         &self,
         store: &F,
         hash: Option<T::Hash>,
-    ) -> Result<Option<F::Value>, Error> {
+    ) -> Result<Option<F::Value>, BasicError> {
         let prefix = StorageKeyPrefix::new::<F>();
         let key = store.key().final_key(prefix);
         self.fetch_unhashed::<F::Value>(key, hash).await
@@ -187,7 +196,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         &self,
         store: &F,
         hash: Option<T::Hash>,
-    ) -> Result<F::Value, Error> {
+    ) -> Result<F::Value, BasicError> {
         if let Some(data) = self.fetch(store, hash).await? {
             Ok(data)
         } else {
@@ -205,7 +214,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
         self.rpc.query_storage(keys, from, to).await
     }
 
@@ -217,7 +226,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, Error> {
+    ) -> Result<Vec<StorageKey>, BasicError> {
         let prefix = StorageKeyPrefix::new::<F>();
         let keys = self
             .rpc
@@ -230,7 +239,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
     pub async fn iter<F: StorageEntry>(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<KeyIter<'a, T, F>, Error> {
+    ) -> Result<KeyIter<'a, T, F>, BasicError> {
         let hash = if let Some(hash) = hash {
             hash
         } else {
@@ -262,7 +271,7 @@ pub struct KeyIter<'a, T: Config, F: StorageEntry> {
 
 impl<'a, T: Config, F: StorageEntry> KeyIter<'a, T, F> {
     /// Returns the next key value pair from a map.
-    pub async fn next(&mut self) -> Result<Option<(StorageKey, F::Value)>, Error> {
+    pub async fn next(&mut self) -> Result<Option<(StorageKey, F::Value)>, BasicError> {
         loop {
             if let Some((k, v)) = self.buffer.pop() {
                 return Ok(Some((k, Decode::decode(&mut &v.0[..])?)))

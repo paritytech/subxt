@@ -48,9 +48,9 @@ impl GeneratedTypeDerives {
 impl Default for GeneratedTypeDerives {
     fn default() -> Self {
         let mut derives = Punctuated::new();
-        // All generated types should implement Encode and Decode by default.
-        derives.push(parse_quote!(::subxt::codec::Encode));
-        derives.push(parse_quote!(::subxt::codec::Decode));
+        derives.push(syn::parse_quote!(::subxt::codec::Encode));
+        derives.push(syn::parse_quote!(::subxt::codec::Decode));
+        derives.push(syn::parse_quote!(Debug));
         Self::new(derives)
     }
 }
