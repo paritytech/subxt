@@ -836,7 +836,7 @@ fn modules() {
                         }
 
                         #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
-                        pub struct Foo {}
+                        pub struct Foo;
                     }
 
                     pub mod c {
