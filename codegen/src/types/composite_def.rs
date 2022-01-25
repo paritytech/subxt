@@ -232,7 +232,7 @@ impl CompositeDefFields {
     ) -> TokenStream {
         match self {
             Self::NoFields => {
-                return if let Some(phantom_data) = phantom_data {
+                if let Some(phantom_data) = phantom_data {
                     quote! { ( #phantom_data ) }
                 } else {
                     quote! {}
