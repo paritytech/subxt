@@ -308,7 +308,7 @@ pub struct CompositeDefFieldType {
 }
 
 impl CompositeDefFieldType {
-    /// Construct a new [`CompositeDefField`].
+    /// Construct a new [`CompositeDefFieldType`].
     pub fn new(type_id: u32, type_path: TypePath, type_name: Option<String>) -> Self {
         CompositeDefFieldType {
             type_id,
