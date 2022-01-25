@@ -269,17 +269,6 @@ impl CompositeDefFields {
             }
         }
     }
-
-    /// If fields are named, returns all fields with their names, otherwise returns `None`.
-    pub fn named_fields(
-        &self,
-    ) -> Option<impl Iterator<Item = &(syn::Ident, CompositeDefFieldType)>> {
-        match self {
-            Self::Named(named_fields) => Some(named_fields.iter()),
-            Self::NoFields => Some([].iter()),
-            Self::Unnamed(_) => None,
-        }
-    }
 }
 
 /// Represents a field of a composite type to be generated.
