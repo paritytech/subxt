@@ -164,12 +164,12 @@ fn codegen<I: Input>(
         pub mod api {}
     );
 
-    let mut derives = GeneratedTypeDerives::default();
+    let mut p: Punctuated<syn::Path, syn::Token![,]> = Punctuated::new();
     for raw in raw_derives {
-        let mut p: Punctuated<syn::Path, syn::Token![,]> = Punctuated::new();
         p.push(Ident::new(&raw, Span::call_site()).into());
-        derives.append(p.iter().cloned());
     }
+    let mut derives = GeneratedTypeDerives::default();
+    derives.append(p.iter().cloned());
 
     let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);
