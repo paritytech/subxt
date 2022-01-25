@@ -119,10 +119,10 @@ impl quote::ToTokens for CompositeDef {
                 type_params,
                 field_visibility,
             } => {
-                let unused_phantom_marker = type_params.unused_params_phantom_data();
+                let phantom_data = type_params.unused_params_phantom_data();
                 let fields = self
                     .fields
-                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker);
+                    .to_struct_field_tokens(phantom_data, field_visibility.as_ref());
                 let trailing_semicolon = matches!(
                     self.fields,
                     CompositeDefFields::NoFields | CompositeDefFields::Unnamed(_)
@@ -135,7 +135,7 @@ impl quote::ToTokens for CompositeDef {
                 }
             }
             CompositeDefKind::EnumVariant => {
-                let fields = self.fields.field_tokens(None, None);
+                let fields = self.fields.to_enum_variant_field_tokens();
 
                 quote! {
                     #name #fields
@@ -224,11 +224,11 @@ impl CompositeDefFields {
         }
     }
 
-    /// Generate the code of the fields.
-    fn field_tokens(
+    /// Generate the code for fields which will compose a `struct`.
+    pub fn to_struct_field_tokens(
         &self,
-        visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
+        visibility: Option<&syn::Visibility>,
     ) -> TokenStream {
         match self {
             Self::NoFields => {
@@ -238,13 +238,17 @@ impl CompositeDefFields {
                     quote! {}
                 }
             }
-            Self::Named(fields) => {
+            Self::Named(ref fields) => {
                 let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
                     quote! { #compact_attr #visibility #name: #ty }
                 });
-                let marker = phantom_data
-                    .map(|phantom_data| quote!( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
+                let marker = phantom_data.map(|phantom_data| {
+                    quote!(
+                        #[codec(skip)]
+                        #visibility __subxt_unused_type_params: #phantom_data
+                    )
+                });
                 quote!(
                     {
                         #( #fields, )*
@@ -252,20 +256,44 @@ impl CompositeDefFields {
                     }
                 )
             }
-            Self::Unnamed(fields) => {
+            Self::Unnamed(ref fields) => {
                 let fields = fields.iter().map(|ty| {
                     let compact_attr = ty.compact_attr();
                     quote! { #compact_attr #visibility #ty }
                 });
-                let marker = phantom_data.map(
-                    |phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ),
-                );
+                let marker = phantom_data.map(|phantom_data| {
+                    quote!(
+                        #[codec(skip)]
+                        #visibility #phantom_data
+                    )
+                });
                 quote! {
                     (
                         #( #fields, )*
                         #marker
                     )
                 }
+            }
+        }
+    }
+
+    /// Generate the code for fields which will compose an `enum` variant.
+    pub fn to_enum_variant_field_tokens(&self) -> TokenStream {
+        match self {
+            Self::NoFields => quote! {},
+            Self::Named(ref fields) => {
+                let fields = fields.iter().map(|(name, ty)| {
+                    let compact_attr = ty.compact_attr();
+                    quote! { #compact_attr #name: #ty }
+                });
+                quote!( { #( #fields, )* } )
+            }
+            Self::Unnamed(ref fields) => {
+                let fields = fields.iter().map(|ty| {
+                    let compact_attr = ty.compact_attr();
+                    quote! { #compact_attr #ty }
+                });
+                quote! { ( #( #fields, )* ) }
             }
         }
     }
