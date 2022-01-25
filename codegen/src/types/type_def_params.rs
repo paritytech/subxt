@@ -19,6 +19,11 @@ use crate::types::CompositeDefFieldType;
 use quote::quote;
 use std::collections::BTreeSet;
 
+/// Represents the set of generic type parameters for generating a type definition e.g. the `T` in
+/// `Foo<T>`.
+///
+/// Additionally this allows generating a `PhantomData` type for any type params which are unused
+/// in the type definition itself.
 #[derive(Clone, Debug, Default)]
 pub struct TypeDefParameters {
     params: Vec<TypeParameter>,
@@ -26,6 +31,7 @@ pub struct TypeDefParameters {
 }
 
 impl TypeDefParameters {
+    /// Create a new [`TypeDefParameters`] instance.
     pub fn new(params: Vec<TypeParameter>) -> Self {
         let unused = params.iter().cloned().collect();
         Self { params, unused }
