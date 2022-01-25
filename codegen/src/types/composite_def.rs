@@ -276,8 +276,8 @@ impl CompositeDefFields {
     ) -> Option<impl Iterator<Item = &(syn::Ident, CompositeDefFieldType)>> {
         match self {
             Self::Named(named_fields) => Some(named_fields.iter()),
+            Self::NoFields => Some([].iter()),
             Self::Unnamed(_) => None,
-            Self::NoFields => None,
         }
     }
 }
