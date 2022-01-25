@@ -58,7 +58,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
     ) -> Self {
         let mut derives = type_gen.derives().clone();
-        let fields = fields_def.fields();
+        let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
             // any single field wrapper struct with a concrete unsigned int type can derive
@@ -120,19 +120,22 @@ impl quote::ToTokens for CompositeDef {
                 field_visibility,
             } => {
                 let unused_phantom_marker = type_params.unused_params_phantom_data();
-                let fields = self.fields.field_tokens(
-                    field_visibility.as_ref(),
-                    unused_phantom_marker,
-                    true,
-                );
+                let fields = self
+                    .fields
+                    .field_tokens(field_visibility.as_ref(), unused_phantom_marker);
+                let trailing_semicolon = matches!(
+                    self.fields,
+                    CompositeDefFields::NoFields | CompositeDefFields::Unnamed(_)
+                )
+                .then(|| quote!(;));
 
                 quote! {
                     #derives
-                    pub struct #name #type_params #fields
+                    pub struct #name #type_params #fields #trailing_semicolon
                 }
             }
             CompositeDefKind::EnumVariant => {
-                let fields = self.fields.field_tokens(None, None, false);
+                let fields = self.fields.field_tokens(None, None);
 
                 quote! {
                     #name #fields
@@ -160,27 +163,13 @@ pub enum CompositeDefKind {
 /// Encapsulates the composite fields, keeping the invariant that all fields are either named or
 /// unnamed.
 #[derive(Debug)]
-pub struct CompositeDefFields {
-    named: bool,
-    fields: Vec<CompositeDefField>,
+pub enum CompositeDefFields {
+    NoFields,
+    Named(Vec<(syn::Ident, CompositeDefFieldType)>),
+    Unnamed(Vec<CompositeDefFieldType>),
 }
 
 impl CompositeDefFields {
-    /// Construct a new set of fields, validating whether they are all named or unnamed.
-    pub fn new(name: &str, fields: Vec<CompositeDefField>) -> Self {
-        let named = fields.iter().all(|field| field.name.is_some());
-        let unnamed = fields.iter().all(|field| field.name.is_none());
-
-        if !named && !unnamed {
-            abort_call_site!(
-                "Struct '{}': Fields should either be all named or all unnamed.",
-                name,
-            )
-        }
-
-        Self { named, fields }
-    }
-
     /// Construct a new set of composite fields from the supplied [`::scale_info::Field`]s.
     pub fn from_scale_info_fields(
         name: &str,
@@ -188,26 +177,51 @@ impl CompositeDefFields {
         parent_type_params: &[TypeParameter],
         type_gen: &TypeGenerator,
     ) -> Self {
-        let composite_def_fields = fields
-            .iter()
-            .map(|field| {
-                let name = field.name().map(|f| format_ident!("{}", f));
-                let type_path =
-                    type_gen.resolve_type_path(field.ty().id(), parent_type_params);
-                CompositeDefField::new(
-                    name,
-                    field.ty().id(),
-                    type_path,
-                    field.type_name().cloned(),
-                )
-            })
-            .collect();
-        Self::new(name, composite_def_fields)
+        if fields.is_empty() {
+            return Self::NoFields
+        }
+
+        let mut named_fields = Vec::new();
+        let mut unnamed_fields = Vec::new();
+
+        for field in fields {
+            let type_path =
+                type_gen.resolve_type_path(field.ty().id(), parent_type_params);
+            let field_type = CompositeDefFieldType::new(
+                field.ty().id(),
+                type_path,
+                field.type_name().cloned(),
+            );
+
+            if let Some(name) = field.name() {
+                let field_name = format_ident!("{}", name);
+                named_fields.push((field_name, field_type))
+            } else {
+                unnamed_fields.push(field_type)
+            }
+        }
+
+        if !named_fields.is_empty() && !unnamed_fields.is_empty() {
+            abort_call_site!(
+                "'{}': Fields should either be all named or all unnamed.",
+                name,
+            )
+        }
+
+        if !named_fields.is_empty() {
+            Self::Named(named_fields)
+        } else {
+            Self::Unnamed(unnamed_fields)
+        }
     }
 
     /// Returns the set of composite fields.
-    pub fn fields(&self) -> &[CompositeDefField] {
-        &self.fields
+    pub fn field_types(&self) -> Box<dyn Iterator<Item = &CompositeDefFieldType> + '_> {
+        match self {
+            Self::NoFields => Box::new([].iter()),
+            Self::Named(named_fields) => Box::new(named_fields.iter().map(|(_, f)| f)),
+            Self::Unnamed(unnamed_fields) => Box::new(unnamed_fields.iter()),
+        }
     }
 
     /// Generate the code of the fields.
@@ -215,40 +229,43 @@ impl CompositeDefFields {
         &self,
         visibility: Option<&syn::Visibility>,
         phantom_data: Option<syn::TypePath>,
-        unnamed_trailing_semicolon: bool,
     ) -> TokenStream {
-        let trailing_semicolon = unnamed_trailing_semicolon.then(|| quote!(;));
-        if self.fields.is_empty() {
-            return if let Some(phantom_data) = phantom_data {
-                quote! { ( #phantom_data )#trailing_semicolon }
-            } else {
-                quote! { #trailing_semicolon }
-            }
-        }
-        let fields = self.fields.iter().map(|field| {
-            let compact_attr = field
-                .type_path
-                .is_compact()
-                .then(|| quote!( #[codec(compact)] ));
-            quote! { #compact_attr #visibility #field }
-        });
-        if self.named {
-            let marker = phantom_data
-                .map(|phantom_data| quote!( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
-            quote!(
-                {
-                    #( #fields, )*
-                    #marker
+        match self {
+            Self::NoFields => {
+                return if let Some(phantom_data) = phantom_data {
+                    quote! { ( #phantom_data ) }
+                } else {
+                    quote! {}
                 }
-            )
-        } else {
-            let marker = phantom_data
-                .map(|phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ));
-            quote! {
-                (
-                    #( #fields, )*
-                    #marker
-                )#trailing_semicolon
+            }
+            Self::Named(fields) => {
+                let fields = fields.iter().map(|(name, ty)| {
+                    let compact_attr = ty.compact_attr();
+                    quote! { #compact_attr #visibility #name: #ty }
+                });
+                let marker = phantom_data
+                    .map(|phantom_data| quote!( #[codec(skip)] #visibility __subxt_unused_type_params: #phantom_data ));
+                quote!(
+                    {
+                        #( #fields, )*
+                        #marker
+                    }
+                )
+            }
+            Self::Unnamed(fields) => {
+                let fields = fields.iter().map(|ty| {
+                    let compact_attr = ty.compact_attr();
+                    quote! { #compact_attr #visibility #ty }
+                });
+                let marker = phantom_data.map(
+                    |phantom_data| quote!( #[codec(skip)] #visibility #phantom_data ),
+                );
+                quote! {
+                    (
+                        #( #fields, )*
+                        #marker
+                    )
+                }
             }
         }
     }
@@ -256,38 +273,27 @@ impl CompositeDefFields {
     /// If fields are named, returns all fields with their names, otherwise returns `None`.
     pub fn named_fields(
         &self,
-    ) -> Option<impl Iterator<Item = (syn::Ident, &CompositeDefField)>> {
-        if self.named {
-            Some(self.fields.iter().map(|f| {
-                let type_name = f.name.as_ref().expect("All fields have names");
-                let ident = format_ident!("{}", type_name);
-                (ident, f)
-            }))
-        } else {
-            None
+    ) -> Option<impl Iterator<Item = &(syn::Ident, CompositeDefFieldType)>> {
+        match self {
+            Self::Named(named_fields) => Some(named_fields.iter()),
+            Self::Unnamed(_) => None,
+            Self::NoFields => None,
         }
     }
 }
 
 /// Represents a field of a composite type to be generated.
 #[derive(Debug)]
-pub struct CompositeDefField {
-    pub name: Option<syn::Ident>,
+pub struct CompositeDefFieldType {
     pub type_id: u32,
     pub type_path: TypePath,
     pub type_name: Option<String>,
 }
 
-impl CompositeDefField {
+impl CompositeDefFieldType {
     /// Construct a new [`CompositeDefField`].
-    pub fn new(
-        name: Option<syn::Ident>,
-        type_id: u32,
-        type_path: TypePath,
-        type_name: Option<String>,
-    ) -> Self {
-        CompositeDefField {
-            name,
+    pub fn new(type_id: u32, type_path: TypePath, type_name: Option<String>) -> Self {
+        CompositeDefFieldType {
             type_id,
             type_path,
             type_name,
@@ -301,14 +307,17 @@ impl CompositeDefField {
         // https://github.com/paritytech/scale-info/pull/82
         matches!(&self.type_name, Some(ty_name) if ty_name.contains("Box<"))
     }
+
+    /// Returns the `#[codec(compact)]` attribute if the type is compact.
+    fn compact_attr(&self) -> Option<TokenStream> {
+        self.type_path
+            .is_compact()
+            .then(|| quote!( #[codec(compact)] ))
+    }
 }
 
-impl quote::ToTokens for CompositeDefField {
+impl quote::ToTokens for CompositeDefFieldType {
     fn to_tokens(&self, tokens: &mut TokenStream) {
-        // Prepend the field name if it is a named field.
-        if let Some(ref name) = self.name {
-            tokens.extend(quote! { #name: })
-        }
         let ty_path = &self.type_path;
 
         if self.is_boxed() {

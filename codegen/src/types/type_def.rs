@@ -83,7 +83,7 @@ impl<'a> TypeDefGen<'a> {
                     type_params.params(),
                     type_gen,
                 );
-                type_params.update_unused(fields.fields());
+                type_params.update_unused(fields.field_types());
                 let composite_def = CompositeDef::struct_def(
                     &type_name,
                     type_params.clone(),
@@ -105,7 +105,7 @@ impl<'a> TypeDefGen<'a> {
                             type_params.params(),
                             type_gen,
                         );
-                        type_params.update_unused(fields.fields());
+                        type_params.update_unused(fields.field_types());
                         let variant_def =
                             CompositeDef::enum_variant_def(v.name(), fields);
                         (v.index(), variant_def)

@@ -45,7 +45,7 @@ use std::collections::{
 pub use self::{
     composite_def::{
         CompositeDef,
-        CompositeDefField,
+        CompositeDefFieldType,
         CompositeDefFields,
     },
     derives::GeneratedTypeDerives,

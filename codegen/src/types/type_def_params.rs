@@ -15,7 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::TypeParameter;
-use crate::types::CompositeDefField;
+use crate::types::CompositeDefFieldType;
 use quote::quote;
 use std::collections::BTreeSet;
 
@@ -33,7 +33,10 @@ impl TypeDefParameters {
 
     /// Update the set of unused type parameters by removing those that are used in the given
     /// fields.
-    pub fn update_unused(&mut self, fields: &[CompositeDefField]) {
+    pub fn update_unused<'a>(
+        &mut self,
+        fields: impl Iterator<Item = &'a CompositeDefFieldType>,
+    ) {
         let mut used_type_params = BTreeSet::new();
         for field in fields {
             field.type_path.parent_type_params(&mut used_type_params)
