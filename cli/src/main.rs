@@ -35,7 +35,6 @@ use std::{
 use structopt::StructOpt;
 use subxt_codegen::GeneratedTypeDerives;
 use syn::{
-    punctuated::Punctuated,
     Ident,
     __private::Span,
 };
@@ -164,7 +163,7 @@ fn codegen<I: Input>(
         pub mod api {}
     );
 
-    let mut p: Punctuated<syn::Path, syn::Token![,]> = Punctuated::new();
+    let mut p = Vec::<syn::Path>::new();
     for raw in raw_derives {
         p.push(Ident::new(&raw, Span::call_site()).into());
     }
