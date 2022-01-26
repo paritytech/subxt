@@ -228,10 +228,6 @@ impl RuntimeGenerator {
                 #( #modules )*
                 #types_mod
 
-                /// The default storage entry from which to fetch an account nonce, required for
-                /// constructing a transaction.
-                pub type DefaultAccountData = self::system::storage::Account;
-
                 /// The default error type returned when there is a runtime issue.
                 pub type DispatchError = self::runtime_types::sp_runtime::DispatchError;
 
@@ -241,40 +237,52 @@ impl RuntimeGenerator {
                     #error_fn
                 }
 
-                impl ::subxt::AccountData<::subxt::DefaultConfig> for DefaultAccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
-                        result.nonce
+                /// The default storage entry from which to fetch an account nonce, required for
+                /// constructing a transaction.
+                pub struct DefaultAccountData<T: ::subxt::Config>(::core::marker::PhantomData<T>);
+
+                impl<T> ::subxt::AccountData<T> for DefaultAccountData<T>
+                where
+                    T: ::subxt::Config,
+                {
+                    type StorageEntry = self::system::storage::Account;
+                    type AccountId = ::subxt::sp_core::crypto::AccountId32;
+
+                    fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> T::Index {
+                        result.nonce.into()
                     }
-                    fn storage_entry(account_id: <::subxt::DefaultConfig as ::subxt::Config>::AccountId) -> Self {
-                        Self(account_id)
+                    fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
+                        self::system::storage::Account(account_id)
                     }
                 }
 
-                pub struct RuntimeApi<T: ::subxt::Config, X> {
+                pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData<T>> {
                     pub client: ::subxt::Client<T>,
-                    marker: ::core::marker::PhantomData<X>,
+                    marker: ::core::marker::PhantomData<(X, A)>,
                 }
 
-                impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
+                impl<T, X, A> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X, A>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
+                    A: ::subxt::AccountData<T>,
                 {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client, marker: ::core::marker::PhantomData }
                     }
                 }
 
-                impl<'a, T, X> RuntimeApi<T, X>
+                impl<'a, T, X, A> RuntimeApi<T, X, A>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
+                    A: ::subxt::AccountData<T>,
                 {
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
 
-                    pub fn tx(&'a self) -> TransactionApi<'a, T, X, DefaultAccountData> {
+                    pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
                         TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
                 }

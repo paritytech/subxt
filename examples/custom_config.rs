@@ -16,16 +16,14 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    Config,
     ClientBuilder,
+    Config,
     DefaultConfig,
     DefaultExtra,
-    PairSigner
+    PairSigner,
 };
 
-#[subxt::subxt(
-    runtime_metadata_path = "examples/polkadot_metadata.scale",
-)]
+#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 #[derive(Clone, Debug, Default, Eq, PartialEq)]

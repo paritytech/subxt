@@ -221,6 +221,7 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData<T>>::AccountId: From<<T as Config>::AccountId>,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -249,6 +250,7 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData<T>>::AccountId: From<<T as Config>::AccountId>,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -263,11 +265,13 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData<T>>::AccountId: From<<T as Config>::AccountId>,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            let account_storage_entry = A::storage_entry(signer.account_id().clone());
+            let account_storage_entry =
+                A::storage_entry(signer.account_id().clone().into());
             let account_data = self
                 .client
                 .storage()
