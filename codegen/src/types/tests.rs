@@ -237,44 +237,34 @@ fn derive_compact_as_for_uint_wrapper_structs() {
             pub mod tests {
                 use super::root;
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct Su128 { pub a: ::core::primitive::u128, }
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct Su16 { pub a: ::core::primitive::u16, }
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct Su32 { pub a: ::core::primitive::u32, }
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct Su64 { pub a: ::core::primitive::u64, }
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct Su8 { pub a: ::core::primitive::u8, }
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct TSu128(pub ::core::primitive::u128,);
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct TSu16(pub ::core::primitive::u16,);
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct TSu32(pub ::core::primitive::u32,);
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct TSu64(pub ::core::primitive::u64,);
 
-                #[derive(::subxt::codec::CompactAs)]
-                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                 pub struct TSu8(pub ::core::primitive::u8,);
             }
         }
@@ -771,16 +761,15 @@ fn generics_with_alias_adds_phantom_data_marker() {
             quote! {
                 pub mod tests {
                     use super::root;
-                    #[derive(::subxt::codec::CompactAs)]
-                    #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                    #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug, ::subxt::codec::CompactAs)]
                     pub struct NamedFields<_0> {
                         pub b: ::core::primitive::u32,
-                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>,
+                        #[codec(skip)] pub __subxt_unused_type_params: ::core::marker::PhantomData<_0>
                     }
                     #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
                     pub struct UnnamedFields<_0, _1> (
                         pub (::core::primitive::u32, ::core::primitive::u32,),
-                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>,
+                        #[codec(skip)] pub ::core::marker::PhantomData<(_0, _1)>
                     );
                 }
             }
@@ -794,7 +783,7 @@ fn modules() {
         pub mod a {
             #[allow(unused)]
             #[derive(scale_info::TypeInfo)]
-            pub struct Foo {}
+            pub struct Foo;
 
             pub mod b {
                 #[allow(unused)]
@@ -847,7 +836,7 @@ fn modules() {
                         }
 
                         #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
-                        pub struct Foo {}
+                        pub struct Foo;
                     }
 
                     pub mod c {

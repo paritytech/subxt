@@ -22,8 +22,11 @@ mod storage;
 use super::GeneratedTypeDerives;
 use crate::{
     ir,
-    struct_def::StructDef,
-    types::TypeGenerator,
+    types::{
+        CompositeDef,
+        CompositeDefFields,
+        TypeGenerator,
+    },
 };
 use codec::Decode;
 use frame_metadata::{
@@ -316,21 +319,28 @@ impl RuntimeGenerator {
     }
 }
 
-pub fn generate_structs_from_variants(
-    type_gen: &TypeGenerator,
+pub fn generate_structs_from_variants<'a>(
+    type_gen: &'a TypeGenerator,
     type_id: u32,
     error_message_type_name: &str,
-) -> Vec<StructDef> {
+) -> Vec<CompositeDef> {
     let ty = type_gen.resolve_type(type_id);
     if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
         variant
             .variants()
             .iter()
             .map(|var| {
-                StructDef::new(
+                let fields = CompositeDefFields::from_scale_info_fields(
                     var.name(),
                     var.fields(),
-                    Some(syn::parse_quote!(pub)),
+                    &[],
+                    type_gen,
+                );
+                CompositeDef::struct_def(
+                    var.name(),
+                    Default::default(),
+                    fields,
+                    Some(parse_quote!(pub)),
                     type_gen,
                 )
             })

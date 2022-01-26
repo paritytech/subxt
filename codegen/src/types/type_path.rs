@@ -28,7 +28,7 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
-use std::collections::HashSet;
+use std::collections::BTreeSet;
 use syn::parse_quote;
 
 #[derive(Clone, Debug)]
@@ -67,7 +67,7 @@ impl TypePath {
     ///     a: Vec<Option<T>>, // the parent type param here is `T`
     /// }
     /// ```
-    pub fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    pub fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         match self {
             Self::Parameter(type_parameter) => {
                 acc.insert(type_parameter.clone());
@@ -173,7 +173,7 @@ impl TypePathType {
             }
             TypeDef::Compact(_) => {
                 let compact_type = &self.params[0];
-                syn::Type::Path(parse_quote! ( #compact_type ))
+                parse_quote! ( #compact_type )
             }
             TypeDef::BitSequence(_) => {
                 let bit_order_type = &self.params[0];
@@ -195,7 +195,7 @@ impl TypePathType {
     ///     a: Vec<Option<T>>, // the parent type param here is `T`
     /// }
     /// ```
-    fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         for p in &self.params {
             p.parent_type_params(acc);
         }
@@ -205,6 +205,7 @@ impl TypePathType {
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd, Hash)]
 pub struct TypeParameter {
     pub(super) concrete_type_id: u32,
+    pub(super) original_name: String,
     pub(super) name: proc_macro2::Ident,
 }
 
@@ -235,7 +236,7 @@ impl quote::ToTokens for TypePathSubstitute {
 }
 
 impl TypePathSubstitute {
-    fn parent_type_params(&self, acc: &mut HashSet<TypeParameter>) {
+    fn parent_type_params(&self, acc: &mut BTreeSet<TypeParameter>) {
         for p in &self.params {
             p.parent_type_params(acc);
         }
