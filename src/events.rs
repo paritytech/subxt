@@ -27,10 +27,7 @@ use crate::{
     Phase,
 };
 use bitvec::{
-    order::{
-        Lsb0,
-        Msb0,
-    },
+    order::Lsb0,
     vec::BitVec,
 };
 use codec::{
@@ -322,27 +319,30 @@ fn decode_and_consume_type(
             }
         }
         TypeDef::BitSequence(bitseq) => {
-            let bit_order_name = types
-                .resolve(bitseq.bit_order_type().id())
-                .ok_or(MetadataError::TypeNotFound(type_id))?
-                .path()
-                .ident();
-            let bit_order_name_str = bit_order_name.as_deref();
             let bit_store_def = types
                 .resolve(bitseq.bit_store_type().id())
                 .ok_or(MetadataError::TypeNotFound(type_id))?
                 .type_def();
 
-            match (bit_order_name_str, bit_store_def) {
-                (Some("Lsb0"), TypeDef::Primitive(TypeDefPrimitive::U8)) => {
+            // We just need to consume the correct number of bytes. Roughly, we encode this
+            // as a Compact<u32> length, and then a slice of T of that length, where T is the
+            // bit store type. So, we ignore the bit order and only care that the bit store type
+            // used lines up in terms of the number of bytes it will take to encode/decode it.
+            match bit_store_def {
+                TypeDef::Primitive(TypeDefPrimitive::U8) => {
                     consume_type::<BitVec<Lsb0, u8>>(input)
-                }
-                (Some("Msb0"), TypeDef::Primitive(TypeDefPrimitive::U8)) => {
-                    consume_type::<BitVec<Msb0, u8>>(input)
-                }
-                (_order, store) => {
+                },
+                TypeDef::Primitive(TypeDefPrimitive::U16) => {
+                    consume_type::<BitVec<Lsb0, u16>>(input)
+                },
+                TypeDef::Primitive(TypeDefPrimitive::U32) => {
+                    consume_type::<BitVec<Lsb0, u32>>(input)
+                },
+                TypeDef::Primitive(TypeDefPrimitive::U64) => {
+                    consume_type::<BitVec<Lsb0, u64>>(input)
+                },
+                store => {
                     return Err(EventsDecodingError::InvalidBitSequenceType(
-                        bit_order_name,
                         format!("{:?}", store),
                     )
                     .into())
@@ -365,9 +365,9 @@ pub enum EventsDecodingError {
     InvalidCompactType(String),
     /// Invalid bit sequence type; bit store type or bit order type used aren't supported.
     #[error(
-        "Invalid bit sequence type; bit order {0:?} and bit store type {1} not supported"
+        "Invalid bit sequence type; bit store type {0} is not supported"
     )]
-    InvalidBitSequenceType(Option<String>, String),
+    InvalidBitSequenceType(String),
 }
 
 #[cfg(test)]
@@ -453,7 +453,7 @@ mod tests {
     fn decode_and_consume_type_consumes_all_bytes<
         T: codec::Encode + scale_info::TypeInfo + 'static,
     >(
-        val: T,
+        val: T
     ) {
         let (type_id, registry) = singleton_type_registry::<T>();
         let bytes = val.encode();
@@ -614,11 +614,34 @@ mod tests {
 
     #[test]
     fn decode_bitvec() {
+        use bitvec::order::Msb0;
+
         decode_and_consume_type_consumes_all_bytes(
             bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
             bitvec::bitvec![Msb0, u8; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+        );
+
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Lsb0, u16; 0, 1, 1, 0, 1],
+        );
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Msb0, u16; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+        );
+
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Lsb0, u32; 0, 1, 1, 0, 1],
+        );
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Msb0, u32; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+        );
+
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Lsb0, u64; 0, 1, 1, 0, 1],
+        );
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![Msb0, u64; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
     }
 }
