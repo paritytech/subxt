@@ -26,10 +26,12 @@ use subxt::{
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
 
+/// Custom [`Config`] impl where the default types for the target chain differ from the
+/// [`DefaultConfig`]
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MyConfig;
 impl Config for MyConfig {
-    type Index = <DefaultConfig as Config>::Index;
+    type Index = u64; // this is different from the default `u32`
     type BlockNumber = <DefaultConfig as Config>::BlockNumber;
     type Hash = <DefaultConfig as Config>::Hash;
     type Hashing = <DefaultConfig as Config>::Hashing;
