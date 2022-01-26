@@ -327,7 +327,7 @@ fn decode_and_consume_type(
                 .ok_or(MetadataError::TypeNotFound(type_id))?
                 .path()
                 .ident();
-            let bit_order_name_str = bit_order_name.as_ref().map(|t| &**t);
+            let bit_order_name_str = bit_order_name.as_deref();
             let bit_store_def = types
                 .resolve(bitseq.bit_store_type().id())
                 .ok_or(MetadataError::TypeNotFound(type_id))?
