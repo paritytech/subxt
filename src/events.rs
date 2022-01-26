@@ -331,20 +331,21 @@ fn decode_and_consume_type(
             match bit_store_def {
                 TypeDef::Primitive(TypeDefPrimitive::U8) => {
                     consume_type::<BitVec<Lsb0, u8>>(input)
-                },
+                }
                 TypeDef::Primitive(TypeDefPrimitive::U16) => {
                     consume_type::<BitVec<Lsb0, u16>>(input)
-                },
+                }
                 TypeDef::Primitive(TypeDefPrimitive::U32) => {
                     consume_type::<BitVec<Lsb0, u32>>(input)
-                },
+                }
                 TypeDef::Primitive(TypeDefPrimitive::U64) => {
                     consume_type::<BitVec<Lsb0, u64>>(input)
-                },
+                }
                 store => {
-                    return Err(EventsDecodingError::InvalidBitSequenceType(
-                        format!("{:?}", store),
-                    )
+                    return Err(EventsDecodingError::InvalidBitSequenceType(format!(
+                        "{:?}",
+                        store
+                    ))
                     .into())
                 }
             }
@@ -364,9 +365,7 @@ pub enum EventsDecodingError {
     #[error("Invalid compact composite type {0}")]
     InvalidCompactType(String),
     /// Invalid bit sequence type; bit store type or bit order type used aren't supported.
-    #[error(
-        "Invalid bit sequence type; bit store type {0} is not supported"
-    )]
+    #[error("Invalid bit sequence type; bit store type {0} is not supported")]
     InvalidBitSequenceType(String),
 }
 
@@ -453,7 +452,7 @@ mod tests {
     fn decode_and_consume_type_consumes_all_bytes<
         T: codec::Encode + scale_info::TypeInfo + 'static,
     >(
-        val: T
+        val: T,
     ) {
         let (type_id, registry) = singleton_type_registry::<T>();
         let bytes = val.encode();
