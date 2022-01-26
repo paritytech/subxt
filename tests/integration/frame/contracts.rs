@@ -64,7 +64,11 @@ impl ContractsTestContext {
 
     fn contracts_tx(
         &self,
-    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData<DefaultConfig>> {
+    ) -> TransactionApi<
+        DefaultConfig,
+        NodeRuntimeSignedExtra,
+        DefaultAccountData<DefaultConfig>,
+    > {
         self.cxt.api.tx().contracts()
     }
 
