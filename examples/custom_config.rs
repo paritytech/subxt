@@ -31,7 +31,12 @@ pub mod polkadot {}
 #[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct MyConfig;
 impl Config for MyConfig {
-    type Index = u64; // this is different from the default `u32`
+    // This is different from the default `u32`.
+    //
+    // *Note* that in this example it does differ from the actual `Index` type in the
+    // polkadot runtime used, so some operations may fail. Normally when using a custom `Config`
+    // impl types MUST match exactly those used in the actual runtime.
+    type Index = u64;
     type BlockNumber = <DefaultConfig as Config>::BlockNumber;
     type Hash = <DefaultConfig as Config>::Hash;
     type Hashing = <DefaultConfig as Config>::Hashing;
@@ -52,12 +57,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let _ = api
+    let hash = api
         .tx()
         .balances()
         .transfer(dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
+
+    println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
 }
