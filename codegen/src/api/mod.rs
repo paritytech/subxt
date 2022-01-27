@@ -326,7 +326,7 @@ pub fn generate_structs_from_variants<'a, F>(
     error_message_type_name: &str,
 ) -> Vec<CompositeDef>
 where
-    F: Fn(&str) -> String,
+    F: Fn(&str) -> std::borrow::Cow<str>,
 {
     let ty = type_gen.resolve_type(type_id);
     if let scale_info::TypeDef::Variant(variant) = ty.type_def() {

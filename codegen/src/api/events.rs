@@ -32,7 +32,7 @@ pub fn generate_events(
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
         event.ty.id(),
-        |name| name.to_string(),
+        |name| name.into(),
         "Event",
     );
     let event_structs = struct_defs.iter().map(|struct_def| {

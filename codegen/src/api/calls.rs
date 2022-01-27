@@ -43,7 +43,7 @@ pub fn generate_calls(
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
-        |name| name.to_camel_case(),
+        |name| name.to_camel_case().into(),
         "Call",
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
