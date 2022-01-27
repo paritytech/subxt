@@ -261,4 +261,12 @@ async fn constant_existential_deposit() {
     let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
     let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);
+    assert_eq!(
+        existential_deposit,
+        cxt.api
+            .constants()
+            .balances()
+            .existential_deposit()
+            .unwrap()
+    );
 }

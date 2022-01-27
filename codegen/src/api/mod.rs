@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod calls;
+mod constants;
 mod errors;
 mod events;
 mod storage;
@@ -176,12 +177,23 @@ impl RuntimeGenerator {
                 quote!()
             };
 
+            let constants_mod = if !pallet.constants.is_empty() {
+                constants::generate_constants(
+                    &type_gen,
+                    &pallet.constants,
+                    types_mod_ident,
+                )
+            } else {
+                quote!()
+            };
+
             quote! {
                 pub mod #mod_name {
                     use super::#types_mod_ident;
                     #calls
                     #event
                     #storage_mod
+                    #constants_mod
                 }
             }
         });
@@ -207,6 +219,12 @@ impl RuntimeGenerator {
         };
 
         let mod_ident = item_mod_ir.ident;
+        let pallets_with_constants =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+                });
         let pallets_with_storage =
             pallets_with_mod_names
                 .iter()
@@ -273,6 +291,10 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
+                    pub fn constants(&'a self) -> ConstantsApi {
+                        ConstantsApi
+                    }
+
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
@@ -280,6 +302,17 @@ impl RuntimeGenerator {
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X, DefaultAccountData> {
                         TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
+                }
+
+                pub struct ConstantsApi;
+
+                impl ConstantsApi
+                {
+                    #(
+                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
+                            #pallets_with_constants::constants::ConstantsApi
+                        }
+                    )*
                 }
 
                 pub struct StorageApi<'a, T: ::subxt::Config> {
