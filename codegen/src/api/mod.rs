@@ -375,7 +375,7 @@ fn generate_default_account_data_impl(
             let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
             let account_data_ty = type_gen.resolve_type(value.id());
             let nonce_field = if let scale_info::TypeDef::Composite(composite) =
-            account_data_ty.type_def()
+                account_data_ty.type_def()
             {
                 composite
                     .fields()
@@ -412,7 +412,6 @@ fn generate_default_account_data_impl(
         }
     })
 }
-
 
 pub fn generate_structs_from_variants<'a>(
     type_gen: &'a TypeGenerator,
