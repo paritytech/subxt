@@ -336,7 +336,7 @@ where
             .map(|var| {
                 let struct_name = variant_to_struct_name(var.name());
                 let fields = CompositeDefFields::from_scale_info_fields(
-                    &struct_name,
+                    struct_name.as_ref(),
                     var.fields(),
                     &[],
                     type_gen,
