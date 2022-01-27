@@ -163,10 +163,10 @@ fn codegen<I: Input>(
         pub mod api {}
     );
 
-    let mut p = Vec::<syn::Path>::new();
-    for raw in raw_derives {
-        p.push(Ident::new(&raw, Span::call_site()).into());
-    }
+    let p: Vec<syn::Path> = raw_derives
+        .iter()
+        .map(|raw| Ident::new(&raw, Span::call_site()).into())
+        .collect();
     let mut derives = GeneratedTypeDerives::default();
     derives.append(p.iter().cloned());
 
