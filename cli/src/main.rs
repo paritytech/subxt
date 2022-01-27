@@ -33,6 +33,7 @@ use std::{
     path::PathBuf,
 };
 use structopt::StructOpt;
+use subxt_codegen::GeneratedTypeDerives;
 
 /// Utilities for working with substrate metadata for subxt.
 #[derive(Debug, StructOpt)]
@@ -70,6 +71,9 @@ enum Command {
         /// the path to the encoded metadata file.
         #[structopt(short, long, parse(from_os_str))]
         file: Option<PathBuf>,
+        /// Additional derives
+        #[structopt(long = "derive")]
+        derives: Vec<String>,
     },
 }
 
@@ -102,7 +106,7 @@ fn main() -> color_eyre::Result<()> {
                 }
             }
         }
-        Command::Codegen { url, file } => {
+        Command::Codegen { url, file, derives } => {
             if let Some(file) = file.as_ref() {
                 if url.is_some() {
                     eyre::bail!("specify one of `--url` or `--file` but not both")
@@ -111,7 +115,7 @@ fn main() -> color_eyre::Result<()> {
                 let mut file = fs::File::open(file)?;
                 let mut bytes = Vec::new();
                 file.read_to_end(&mut bytes)?;
-                codegen(&mut &bytes[..])?;
+                codegen(&mut &bytes[..], derives)?;
                 return Ok(())
             }
 
@@ -119,7 +123,7 @@ fn main() -> color_eyre::Result<()> {
                 url::Url::parse("http://localhost:9933").expect("default url is valid")
             });
             let (_, bytes) = fetch_metadata(&url)?;
-            codegen(&mut &bytes[..])?;
+            codegen(&mut &bytes[..], derives)?;
             Ok(())
         }
     }
@@ -145,13 +149,24 @@ fn fetch_metadata(url: &url::Url) -> color_eyre::Result<(String, Vec<u8>)> {
     Ok((hex_data, bytes))
 }
 
-fn codegen<I: Input>(encoded: &mut I) -> color_eyre::Result<()> {
+fn codegen<I: Input>(
+    encoded: &mut I,
+    raw_derives: Vec<String>,
+) -> color_eyre::Result<()> {
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(encoded)?;
     let generator = subxt_codegen::RuntimeGenerator::new(metadata);
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let runtime_api = generator.generate_runtime(item_mod, Default::default());
+
+    let p = raw_derives
+        .iter()
+        .map(|raw| syn::parse_str(&raw))
+        .collect::<Result<Vec<_>, _>>()?;
+    let mut derives = GeneratedTypeDerives::default();
+    derives.append(p.into_iter());
+
+    let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);
     Ok(())
 }

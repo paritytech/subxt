@@ -14,12 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+mod composite_def;
+mod derives;
 #[cfg(test)]
 mod tests;
 mod type_def;
+mod type_def_params;
 mod type_path;
 
-use super::GeneratedTypeDerives;
 use proc_macro2::{
     Ident,
     Span,
@@ -41,7 +43,14 @@ use std::collections::{
 };
 
 pub use self::{
+    composite_def::{
+        CompositeDef,
+        CompositeDefFieldType,
+        CompositeDefFields,
+    },
+    derives::GeneratedTypeDerives,
     type_def::TypeDefGen,
+    type_def_params::TypeDefParameters,
     type_path::{
         TypeParameter,
         TypePath,
@@ -49,6 +58,8 @@ pub use self::{
         TypePathType,
     },
 };
+
+pub type Field = scale_info::Field<PortableForm>;
 
 /// Generate a Rust module containing all types defined in the supplied [`PortableRegistry`].
 #[derive(Debug)]
@@ -126,7 +137,7 @@ impl<'a> TypeGenerator<'a> {
         if path.len() == 1 {
             child_mod
                 .types
-                .insert(ty.path().clone(), TypeDefGen { ty, type_gen: self });
+                .insert(ty.path().clone(), TypeDefGen::from_type(ty, self));
         } else {
             self.insert_type(ty, id, path[1..].to_vec(), root_mod_ident, child_mod)
         }

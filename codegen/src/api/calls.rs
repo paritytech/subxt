@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::types::TypeGenerator;
+use crate::types::{
+    CompositeDefFields,
+    TypeGenerator,
+};
 use frame_metadata::{
     PalletCallMetadata,
     PalletMetadata,
@@ -39,17 +42,29 @@ pub fn generate_calls(
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter()
         .map(|struct_def| {
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
-                .named_fields()
-                .unwrap_or_else(|| {
-                    abort_call_site!(
-                        "Call variant for type {} must have all named fields",
-                        call.ty.id()
-                    )
-                })
-                .iter()
-                .map(|(name, ty)| (quote!( #name: #ty ), name))
-                .unzip();
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
+                match struct_def.fields {
+                    CompositeDefFields::Named(ref named_fields) => {
+                        named_fields
+                            .iter()
+                            .map(|(name, field)| {
+                                let fn_arg_type = &field.type_path;
+                                let call_arg = if field.is_boxed() {
+                                    quote! { #name: ::std::boxed::Box::new(#name) }
+                                } else {
+                                    quote! { #name }
+                                };
+                                (quote!( #name: #fn_arg_type ), call_arg)
+                            })
+                            .unzip()
+                    }
+                    CompositeDefFields::NoFields => Default::default(),
+                    CompositeDefFields::Unnamed(_) =>
+                        abort_call_site!(
+                            "Call variant for type {} must have all named fields",
+                            call.ty.id()
+                        )
+                };
 
             let pallet_name = &pallet.name;
             let call_struct_name = &struct_def.name;

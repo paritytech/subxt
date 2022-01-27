@@ -15,9 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
+    CompositeDef,
+    CompositeDefFields,
+    GeneratedTypeDerives,
+    TypeDefParameters,
     TypeGenerator,
     TypeParameter,
-    TypePath,
 };
 use proc_macro2::TokenStream;
 use quote::{
@@ -26,12 +29,9 @@ use quote::{
 };
 use scale_info::{
     form::PortableForm,
-    Field,
     Type,
     TypeDef,
-    TypeDefPrimitive,
 };
-use std::collections::HashSet;
 use syn::parse_quote;
 
 /// Generates a Rust `struct` or `enum` definition based on the supplied [`scale-info::Type`].
@@ -40,17 +40,20 @@ use syn::parse_quote;
 /// generated types in the module.
 #[derive(Debug)]
 pub struct TypeDefGen<'a> {
-    /// The type generation context, allows resolving of type paths for the fields of the
-    /// generated type.
-    pub(super) type_gen: &'a TypeGenerator<'a>,
-    /// Contains the definition of the type to be generated.
-    pub(super) ty: Type<PortableForm>,
+    /// The type parameters of the type to be generated
+    type_params: TypeDefParameters,
+    /// The derives with which to annotate the generated type.
+    derives: &'a GeneratedTypeDerives,
+    /// The kind of type to be generated.
+    ty_kind: TypeDefGenKind,
 }
 
-impl<'a> quote::ToTokens for TypeDefGen<'a> {
-    fn to_tokens(&self, tokens: &mut TokenStream) {
-        let type_params = self
-            .ty
+impl<'a> TypeDefGen<'a> {
+    /// Construct a type definition for codegen from the given [`scale_info::Type`].
+    pub fn from_type(ty: Type<PortableForm>, type_gen: &'a TypeGenerator) -> Self {
+        let derives = type_gen.derives();
+
+        let type_params = ty
             .type_params()
             .iter()
             .enumerate()
@@ -60,6 +63,7 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                         let tp_name = format_ident!("_{}", i);
                         Some(TypeParameter {
                             concrete_type_id: ty.id(),
+                            original_name: tp.name().clone(),
                             name: tp_name,
                         })
                     }
@@ -68,267 +72,100 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
             })
             .collect::<Vec<_>>();
 
-        let type_name = self.ty.path().ident().map(|ident| {
-            let type_params = if !type_params.is_empty() {
-                quote! { < #( #type_params ),* > }
-            } else {
-                quote! {}
-            };
-            let ty = format_ident!("{}", ident);
-            let path = parse_quote! { #ty #type_params};
-            syn::Type::Path(path)
-        });
+        let mut type_params = TypeDefParameters::new(type_params);
 
-        let derives = self.type_gen.derives();
-
-        match self.ty.type_def() {
+        let ty_kind = match ty.type_def() {
             TypeDef::Composite(composite) => {
-                let type_name = type_name.expect("structs should have a name");
-                let (fields, _) =
-                    self.composite_fields(composite.fields(), &type_params, true);
-                let derive_as_compact = if composite.fields().len() == 1 {
-                    // any single field wrapper struct with a concrete unsigned int type can derive
-                    // CompactAs.
-                    let field = &composite.fields()[0];
-                    if !self
-                        .ty
-                        .type_params()
-                        .iter()
-                        .any(|tp| Some(tp.name()) == field.type_name())
-                    {
-                        let ty = self.type_gen.resolve_type(field.ty().id());
-                        if matches!(
-                            ty.type_def(),
-                            TypeDef::Primitive(
-                                TypeDefPrimitive::U8
-                                    | TypeDefPrimitive::U16
-                                    | TypeDefPrimitive::U32
-                                    | TypeDefPrimitive::U64
-                                    | TypeDefPrimitive::U128
-                            )
-                        ) {
-                            Some(quote!( #[derive(::subxt::codec::CompactAs)] ))
-                        } else {
-                            None
-                        }
-                    } else {
-                        None
-                    }
-                } else {
-                    None
-                };
-
-                let ty_toks = quote! {
-                    #derive_as_compact
-                    #derives
-                    pub struct #type_name #fields
-                };
-                tokens.extend(ty_toks);
+                let type_name = ty.path().ident().expect("structs should have a name");
+                let fields = CompositeDefFields::from_scale_info_fields(
+                    &type_name,
+                    composite.fields(),
+                    type_params.params(),
+                    type_gen,
+                );
+                type_params.update_unused(fields.field_types());
+                let composite_def = CompositeDef::struct_def(
+                    &type_name,
+                    type_params.clone(),
+                    fields,
+                    Some(parse_quote!(pub)),
+                    type_gen,
+                );
+                TypeDefGenKind::Struct(composite_def)
             }
             TypeDef::Variant(variant) => {
-                let type_name = type_name.expect("variants should have a name");
-                let mut variants = Vec::new();
-                let mut used_type_params = HashSet::new();
-                let type_params_set: HashSet<_> = type_params.iter().cloned().collect();
+                let type_name = ty.path().ident().expect("variants should have a name");
+                let variants = variant
+                    .variants()
+                    .iter()
+                    .map(|v| {
+                        let fields = CompositeDefFields::from_scale_info_fields(
+                            v.name(),
+                            v.fields(),
+                            type_params.params(),
+                            type_gen,
+                        );
+                        type_params.update_unused(fields.field_types());
+                        let variant_def =
+                            CompositeDef::enum_variant_def(v.name(), fields);
+                        (v.index(), variant_def)
+                    })
+                    .collect();
 
-                for v in variant.variants() {
-                    let variant_name = format_ident!("{}", v.name());
-                    let (fields, unused_type_params) = if v.fields().is_empty() {
-                        let unused = type_params_set.iter().cloned().collect::<Vec<_>>();
-                        (quote! {}, unused)
-                    } else {
-                        self.composite_fields(v.fields(), &type_params, false)
-                    };
-                    let index = proc_macro2::Literal::u8_unsuffixed(v.index());
-                    variants.push(quote! {
-                        #[codec(index = #index)]
-                        #variant_name #fields
-                    });
-                    let unused_params_set = unused_type_params.iter().cloned().collect();
-                    let used_params = type_params_set.difference(&unused_params_set);
+                TypeDefGenKind::Enum(type_name, variants)
+            }
+            _ => TypeDefGenKind::BuiltIn,
+        };
 
-                    for used_param in used_params {
-                        used_type_params.insert(used_param.clone());
-                    }
-                }
+        Self {
+            type_params,
+            derives,
+            ty_kind,
+        }
+    }
+}
 
-                let unused_type_params = type_params_set
-                    .difference(&used_type_params)
-                    .cloned()
+impl<'a> quote::ToTokens for TypeDefGen<'a> {
+    fn to_tokens(&self, tokens: &mut TokenStream) {
+        match &self.ty_kind {
+            TypeDefGenKind::Struct(composite) => composite.to_tokens(tokens),
+            TypeDefGenKind::Enum(type_name, variants) => {
+                let mut variants = variants
+                    .iter()
+                    .map(|(index, def)| {
+                        let index = proc_macro2::Literal::u8_unsuffixed(*index);
+                        quote! {
+                            #[codec(index = #index)]
+                            #def
+                        }
+                    })
                     .collect::<Vec<_>>();
-                if !unused_type_params.is_empty() {
-                    let phantom = Self::phantom_data(&unused_type_params);
+
+                if let Some(phantom) = self.type_params.unused_params_phantom_data() {
                     variants.push(quote! {
                         __Ignore(#phantom)
                     })
                 }
 
+                let enum_ident = format_ident!("{}", type_name);
+                let type_params = &self.type_params;
+                let derives = self.derives;
                 let ty_toks = quote! {
                     #derives
-                    pub enum #type_name {
+                    pub enum #enum_ident #type_params {
                         #( #variants, )*
                     }
                 };
                 tokens.extend(ty_toks);
             }
-            _ => (), // all built-in types should already be in scope
+            TypeDefGenKind::BuiltIn => (), /* all built-in types should already be in scope */
         }
     }
 }
 
-impl<'a> TypeDefGen<'a> {
-    fn composite_fields(
-        &self,
-        fields: &'a [Field<PortableForm>],
-        type_params: &'a [TypeParameter],
-        is_struct: bool,
-    ) -> (TokenStream, Vec<TypeParameter>) {
-        let named = fields.iter().all(|f| f.name().is_some());
-        let unnamed = fields.iter().all(|f| f.name().is_none());
-
-        fn unused_type_params<'a>(
-            type_params: &'a [TypeParameter],
-            types: impl Iterator<Item = &'a TypePath>,
-        ) -> Vec<TypeParameter> {
-            let mut used_type_params = HashSet::new();
-            for ty in types {
-                ty.parent_type_params(&mut used_type_params)
-            }
-            let type_params_set: HashSet<_> = type_params.iter().cloned().collect();
-            let mut unused = type_params_set
-                .difference(&used_type_params)
-                .cloned()
-                .collect::<Vec<_>>();
-            unused.sort();
-            unused
-        }
-
-        let ty_toks = |ty_name: &str, ty_path: &TypePath| {
-            if ty_name.contains("Box<") {
-                quote! { ::std::boxed::Box<#ty_path> }
-            } else {
-                quote! { #ty_path }
-            }
-        };
-
-        if named {
-            let fields = fields
-                .iter()
-                .map(|field| {
-                    let name = format_ident!(
-                        "{}",
-                        field.name().expect("named field without a name")
-                    );
-                    let ty = self
-                        .type_gen
-                        .resolve_type_path(field.ty().id(), type_params);
-                    (name, ty, field.type_name())
-                })
-                .collect::<Vec<_>>();
-
-            let mut fields_tokens = fields
-                .iter()
-                .map(|(name, ty, ty_name)| {
-                    let field_type = match ty_name {
-                        Some(ty_name) => {
-                            let ty = ty_toks(ty_name, ty);
-                            if is_struct {
-                                quote! ( pub #name: #ty )
-                            } else {
-                                quote! ( #name: #ty )
-                            }
-                        }
-                        None => {
-                            quote! ( #name: #ty )
-                        }
-                    };
-                    if ty.is_compact() {
-                        quote!( #[codec(compact)] #field_type  )
-                    } else {
-                        quote!( #field_type  )
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let unused_params =
-                unused_type_params(type_params, fields.iter().map(|(_, ty, _)| ty));
-
-            if is_struct && !unused_params.is_empty() {
-                let phantom = Self::phantom_data(&unused_params);
-                fields_tokens.push(quote! {
-                    #[codec(skip)] pub __subxt_unused_type_params: #phantom
-                })
-            }
-
-            let fields = quote! {
-                {
-                    #( #fields_tokens, )*
-                }
-            };
-            (fields, unused_params)
-        } else if unnamed {
-            let type_paths = fields
-                .iter()
-                .map(|field| {
-                    let ty = self
-                        .type_gen
-                        .resolve_type_path(field.ty().id(), type_params);
-                    (ty, field.type_name())
-                })
-                .collect::<Vec<_>>();
-            let mut fields_tokens = type_paths
-                .iter()
-                .map(|(ty, ty_name)| {
-                    let field_type = match ty_name {
-                        Some(ty_name) => {
-                            let ty = ty_toks(ty_name, ty);
-                            if is_struct {
-                                quote! { pub #ty }
-                            } else {
-                                quote! { #ty }
-                            }
-                        }
-                        None => {
-                            quote! { #ty }
-                        }
-                    };
-                    if ty.is_compact() {
-                        quote!( #[codec(compact)] #field_type  )
-                    } else {
-                        quote!( #field_type  )
-                    }
-                })
-                .collect::<Vec<_>>();
-
-            let unused_params =
-                unused_type_params(type_params, type_paths.iter().map(|(ty, _)| ty));
-
-            if is_struct && !unused_params.is_empty() {
-                let phantom_data = Self::phantom_data(&unused_params);
-                fields_tokens.push(quote! { #[codec(skip)] pub #phantom_data })
-            }
-
-            let fields = quote! { ( #( #fields_tokens, )* ) };
-            let fields_tokens = if is_struct {
-                // add a semicolon for tuple structs
-                quote! { #fields; }
-            } else {
-                fields
-            };
-
-            (fields_tokens, unused_params)
-        } else {
-            panic!("Fields must be either all named or all unnamed")
-        }
-    }
-
-    fn phantom_data(params: &[TypeParameter]) -> TokenStream {
-        let params = if params.len() == 1 {
-            let param = &params[0];
-            quote! { #param }
-        } else {
-            quote! { ( #( #params ), * ) }
-        };
-        quote! ( ::core::marker::PhantomData<#params> )
-    }
+#[derive(Debug)]
+pub enum TypeDefGenKind {
+    Struct(CompositeDef),
+    Enum(String, Vec<(u8, CompositeDef)>),
+    BuiltIn,
 }

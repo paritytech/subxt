@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod calls;
+mod constants;
 mod errors;
 mod events;
 mod storage;
@@ -22,8 +23,11 @@ mod storage;
 use super::GeneratedTypeDerives;
 use crate::{
     ir,
-    struct_def::StructDef,
-    types::TypeGenerator,
+    types::{
+        CompositeDef,
+        CompositeDefFields,
+        TypeGenerator,
+    },
 };
 use codec::Decode;
 use frame_metadata::{
@@ -176,12 +180,23 @@ impl RuntimeGenerator {
                 quote!()
             };
 
+            let constants_mod = if !pallet.constants.is_empty() {
+                constants::generate_constants(
+                    &type_gen,
+                    &pallet.constants,
+                    types_mod_ident,
+                )
+            } else {
+                quote!()
+            };
+
             quote! {
                 pub mod #mod_name {
                     use super::#types_mod_ident;
                     #calls
                     #event
                     #storage_mod
+                    #constants_mod
                 }
             }
         });
@@ -207,6 +222,12 @@ impl RuntimeGenerator {
         };
 
         let mod_ident = item_mod_ir.ident;
+        let pallets_with_constants =
+            pallets_with_mod_names
+                .iter()
+                .filter_map(|(pallet, pallet_mod_name)| {
+                    (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+                });
         let pallets_with_storage =
             pallets_with_mod_names
                 .iter()
@@ -274,6 +295,10 @@ impl RuntimeGenerator {
                     X: ::subxt::SignedExtra<T>,
                     A: ::subxt::AccountData,
                 {
+                    pub fn constants(&'a self) -> ConstantsApi {
+                        ConstantsApi
+                    }
+
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
                     }
@@ -281,6 +306,17 @@ impl RuntimeGenerator {
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
                         TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
+                }
+
+                pub struct ConstantsApi;
+
+                impl ConstantsApi
+                {
+                    #(
+                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
+                            #pallets_with_constants::constants::ConstantsApi
+                        }
+                    )*
                 }
 
                 pub struct StorageApi<'a, T: ::subxt::Config> {
@@ -339,7 +375,7 @@ fn generate_default_account_data_impl(
             let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
             let account_data_ty = type_gen.resolve_type(value.id());
             let nonce_field = if let scale_info::TypeDef::Composite(composite) =
-                account_data_ty.type_def()
+            account_data_ty.type_def()
             {
                 composite
                     .fields()
@@ -377,21 +413,29 @@ fn generate_default_account_data_impl(
     })
 }
 
-pub fn generate_structs_from_variants(
-    type_gen: &TypeGenerator,
+
+pub fn generate_structs_from_variants<'a>(
+    type_gen: &'a TypeGenerator,
     type_id: u32,
     error_message_type_name: &str,
-) -> Vec<StructDef> {
+) -> Vec<CompositeDef> {
     let ty = type_gen.resolve_type(type_id);
     if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
         variant
             .variants()
             .iter()
             .map(|var| {
-                StructDef::new(
+                let fields = CompositeDefFields::from_scale_info_fields(
                     var.name(),
                     var.fields(),
-                    Some(syn::parse_quote!(pub)),
+                    &[],
+                    type_gen,
+                );
+                CompositeDef::struct_def(
+                    var.name(),
+                    Default::default(),
+                    fields,
+                    Some(parse_quote!(pub)),
                     type_gen,
                 )
             })

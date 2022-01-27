@@ -14,7 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use syn::punctuated::Punctuated;
+use syn::{
+    parse_quote,
+    punctuated::Punctuated,
+};
 
 #[derive(Debug, Clone)]
 pub struct GeneratedTypeDerives {
@@ -26,10 +29,19 @@ impl GeneratedTypeDerives {
         Self { derives }
     }
 
+    /// Add `::subxt::codec::CompactAs` to the derives.
+    pub fn push_codec_compact_as(&mut self) {
+        self.derives.push(parse_quote!(::subxt::codec::CompactAs));
+    }
+
     pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
         for derive in derives {
             self.derives.push(derive)
         }
+    }
+
+    pub fn push(&mut self, derive: syn::Path) {
+        self.derives.push(derive);
     }
 }
 
@@ -45,9 +57,11 @@ impl Default for GeneratedTypeDerives {
 
 impl quote::ToTokens for GeneratedTypeDerives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        let derives = &self.derives;
-        tokens.extend(quote::quote! {
-            #[derive(#derives)]
-        })
+        if !self.derives.is_empty() {
+            let derives = &self.derives;
+            tokens.extend(quote::quote! {
+                #[derive(#derives)]
+            })
+        }
     }
 }
