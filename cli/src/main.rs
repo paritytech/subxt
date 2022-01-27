@@ -34,10 +34,6 @@ use std::{
 };
 use structopt::StructOpt;
 use subxt_codegen::GeneratedTypeDerives;
-use syn::{
-    Ident,
-    __private::Span,
-};
 
 /// Utilities for working with substrate metadata for subxt.
 #[derive(Debug, StructOpt)]
@@ -163,12 +159,12 @@ fn codegen<I: Input>(
         pub mod api {}
     );
 
-    let p: Vec<syn::Path> = raw_derives
+    let p = raw_derives
         .iter()
-        .map(|raw| Ident::new(&raw, Span::call_site()).into())
-        .collect();
+        .map(|raw| syn::parse_str(&raw))
+        .collect::<Result<Vec<_>, _>>()?;
     let mut derives = GeneratedTypeDerives::default();
-    derives.append(p.iter().cloned());
+    derives.append(p.into_iter());
 
     let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);
