@@ -67,7 +67,7 @@ impl ContractsTestContext {
     ) -> TransactionApi<
         DefaultConfig,
         NodeRuntimeSignedExtra,
-        DefaultAccountData<DefaultConfig>,
+        DefaultAccountData,
     > {
         self.cxt.api.tx().contracts()
     }
