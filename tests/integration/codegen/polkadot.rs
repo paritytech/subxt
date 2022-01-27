@@ -168,7 +168,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -805,7 +805,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1126,7 +1126,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1531,7 +1531,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1651,7 +1651,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1885,7 +1885,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2322,7 +2322,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2670,7 +2670,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -4331,7 +4331,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -4592,7 +4592,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -4848,7 +4848,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5265,7 +5265,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -6214,7 +6214,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -6616,7 +6616,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7007,7 +7007,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7369,7 +7369,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7569,7 +7569,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7832,7 +7832,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8178,7 +8178,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8416,7 +8416,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8660,7 +8660,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9214,7 +9214,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9609,7 +9609,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9977,7 +9977,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10358,7 +10358,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10613,7 +10613,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10948,7 +10948,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11420,7 +11420,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12065,7 +12065,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12163,7 +12163,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12346,7 +12346,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12614,7 +12614,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13334,7 +13334,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13406,7 +13406,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13524,7 +13524,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13862,7 +13862,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14577,7 +14577,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14841,7 +14841,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15021,7 +15021,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15382,7 +15382,7 @@ pub mod api {
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -21778,23 +21778,21 @@ pub mod api {
     }
     #[doc = r" The default storage entry from which to fetch an account nonce, required for"]
     #[doc = r" constructing a transaction."]
-    pub struct DefaultAccountData<T: ::subxt::Config>(::core::marker::PhantomData<T>);
-    impl<T> ::subxt::AccountData<T> for DefaultAccountData<T>
-    where
-        T: ::subxt::Config,
-    {
+    pub enum DefaultAccountData {}
+    impl ::subxt::AccountData for DefaultAccountData {
         type StorageEntry = self::system::storage::Account;
         type AccountId = ::subxt::sp_core::crypto::AccountId32;
+        type Nonce = ::core::primitive::u32;
         fn nonce(
             result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,
-        ) -> T::Index {
-            result.nonce.into()
+        ) -> Self::Nonce {
+            result.nonce
         }
         fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
             self::system::storage::Account(account_id)
         }
     }
-    pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData<T>> {
+    pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData> {
         pub client: ::subxt::Client<T>,
         marker: ::core::marker::PhantomData<(X, A)>,
     }
@@ -21802,7 +21800,7 @@ pub mod api {
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData<T>,
+        A: ::subxt::AccountData,
     {
         fn from(client: ::subxt::Client<T>) -> Self {
             Self {
@@ -21815,7 +21813,7 @@ pub mod api {
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData<T>,
+        A: ::subxt::AccountData,
     {
         pub fn storage(&'a self) -> StorageApi<'a, T> {
             StorageApi {
@@ -21982,7 +21980,7 @@ pub mod api {
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData<T>,
+        A: ::subxt::AccountData,
     {
         pub fn system(&self) -> system::calls::TransactionApi<'a, T, X, A> {
             system::calls::TransactionApi::new(self.client)

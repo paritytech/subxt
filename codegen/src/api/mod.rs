@@ -28,8 +28,10 @@ use crate::{
 use codec::Decode;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
+    PalletMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
+    StorageEntryType,
 };
 use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -38,6 +40,7 @@ use quote::{
     format_ident,
     quote,
 };
+use scale_info::form::PortableForm;
 use std::{
     collections::HashMap,
     fs,
@@ -221,6 +224,16 @@ impl RuntimeGenerator {
         let error_type = error_details.type_def;
         let error_fn = error_details.dispatch_error_impl_fn;
 
+        let default_account_data_ident = format_ident!("DefaultAccountData");
+        let default_account_data_impl = generate_default_account_data_impl(
+            &pallets_with_mod_names,
+            &default_account_data_ident,
+            &type_gen,
+        );
+        let type_parameter_default_impl = default_account_data_impl
+            .as_ref()
+            .map(|_| quote!( = #default_account_data_ident ));
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -237,26 +250,9 @@ impl RuntimeGenerator {
                     #error_fn
                 }
 
-                /// The default storage entry from which to fetch an account nonce, required for
-                /// constructing a transaction.
-                pub struct DefaultAccountData<T: ::subxt::Config>(::core::marker::PhantomData<T>);
+                #default_account_data_impl
 
-                impl<T> ::subxt::AccountData<T> for DefaultAccountData<T>
-                where
-                    T: ::subxt::Config,
-                {
-                    type StorageEntry = self::system::storage::Account;
-                    type AccountId = ::subxt::sp_core::crypto::AccountId32;
-
-                    fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> T::Index {
-                        result.nonce.into()
-                    }
-                    fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
-                        self::system::storage::Account(account_id)
-                    }
-                }
-
-                pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData<T>> {
+                pub struct RuntimeApi<T: ::subxt::Config, X, A #type_parameter_default_impl> {
                     pub client: ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<(X, A)>,
                 }
@@ -265,7 +261,7 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
-                    A: ::subxt::AccountData<T>,
+                    A: ::subxt::AccountData,
                 {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client, marker: ::core::marker::PhantomData }
@@ -276,7 +272,7 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
-                    A: ::subxt::AccountData<T>,
+                    A: ::subxt::AccountData,
                 {
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
                         StorageApi { client: &self.client }
@@ -311,7 +307,7 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
-                    A: ::subxt::AccountData<T>,
+                    A: ::subxt::AccountData,
                 {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X, A> {
@@ -322,6 +318,63 @@ impl RuntimeGenerator {
             }
         }
     }
+}
+
+fn generate_default_account_data_impl(
+    pallets_with_mod_names: &[(&PalletMetadata<PortableForm>, syn::Ident)],
+    default_impl_name: &syn::Ident,
+    type_gen: &TypeGenerator,
+) -> Option<TokenStream2> {
+    let storage = pallets_with_mod_names
+        .iter()
+        .find(|(pallet, _)| pallet.name == "System")
+        .and_then(|(pallet, _)| pallet.storage.as_ref())?;
+    let storage_entry = storage
+        .entries
+        .iter()
+        .find(|entry| entry.name == "Account")?;
+
+    let (account_id_ty, account_nonce_ty) =
+        if let StorageEntryType::Map { key, value, .. } = &storage_entry.ty {
+            let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
+            let account_data_ty = type_gen.resolve_type(value.id());
+            let nonce_field = if let scale_info::TypeDef::Composite(composite) =
+                account_data_ty.type_def()
+            {
+                composite
+                    .fields()
+                    .iter()
+                    .find(|f| f.name() == Some(&"nonce".to_string()))?
+            } else {
+                abort_call_site!("System::Account should be a `StorageEntryType::Map`")
+            };
+            let account_nonce_ty = type_gen.resolve_type_path(nonce_field.ty().id(), &[]);
+            (account_id_ty, account_nonce_ty)
+        } else {
+            abort_call_site!("System::Account should be a `StorageEntryType::Map`")
+        };
+
+    // this path to the storage entry depends on storage codegen.
+    let storage_entry_path = quote!(self::system::storage::Account);
+
+    Some(quote! {
+        /// The default storage entry from which to fetch an account nonce, required for
+        /// constructing a transaction.
+        pub enum #default_impl_name {}
+
+        impl ::subxt::AccountData for #default_impl_name {
+            type StorageEntry = #storage_entry_path;
+            type AccountId = #account_id_ty;
+            type Nonce = #account_nonce_ty;
+
+            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Nonce {
+                result.nonce
+            }
+            fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
+                #storage_entry_path(account_id)
+            }
+        }
+    })
 }
 
 pub fn generate_structs_from_variants(
