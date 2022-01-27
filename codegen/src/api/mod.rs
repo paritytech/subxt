@@ -289,7 +289,7 @@ impl RuntimeGenerator {
                     X: ::subxt::SignedExtra<T>,
                 {
                     pub fn constants(&'a self) -> ConstantsApi {
-                        ConstantsApi { }
+                        ConstantsApi
                     }
 
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
@@ -301,13 +301,13 @@ impl RuntimeGenerator {
                     }
                 }
 
-                pub struct ConstantsApi { }
+                pub struct ConstantsApi;
 
                 impl ConstantsApi
                 {
                     #(
                         pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
-                            #pallets_with_constants::constants::ConstantsApi::new()
+                            #pallets_with_constants::constants::ConstantsApi
                         }
                     )*
                 }

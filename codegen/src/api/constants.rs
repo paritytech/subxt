@@ -26,7 +26,7 @@ use scale_info::form::PortableForm;
 
 pub fn generate_constants(
     type_gen: &TypeGenerator,
-    constants: &Vec<PalletConstantMetadata<PortableForm>>,
+    constants: &[PalletConstantMetadata<PortableForm>],
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
     let constant_fns = constants.iter().map(|constant| {
@@ -37,7 +37,7 @@ pub fn generate_constants(
 
         quote! {
             pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-                Ok(::subxt::codec::Decode::decode(&mut &vec![#(#ref_slice,)*][..])?)
+                Ok(::subxt::codec::Decode::decode(&mut &[#(#ref_slice,)*][..])?)
             }
         }
     });
@@ -46,13 +46,9 @@ pub fn generate_constants(
         pub mod constants {
             use super::#types_mod_ident;
 
-            pub struct ConstantsApi { }
+            pub struct ConstantsApi;
 
             impl ConstantsApi {
-                pub fn new() -> Self {
-                    Self { }
-                }
-
                 #(#constant_fns)*
             }
         }
