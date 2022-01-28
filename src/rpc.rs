@@ -235,6 +235,7 @@ impl RpcClient {
             RpcClient::WebSocket(inner) => inner.request(method, params).await,
             RpcClient::Http(inner) => inner.request(method, params).await,
         };
+        log::debug!("response: {:?}", data);
         data
     }
 
