@@ -361,7 +361,7 @@ impl RuntimeGenerator {
 ///
 /// The account nonce is commonly stored in the `System` pallet's `Account` storage item. This
 /// function attempts to find that storage item, and if it is present will implement the
-/// [`subxt::AccountData`] trait for it. This allows the client to construct the appropriate
+/// `subxt::AccountData` trait for it. This allows the client to construct the appropriate
 /// storage key from the account id, and then retrieve the `nonce` from the resulting storage item.
 fn generate_default_account_data_impl(
     pallets_with_mod_names: &[(&PalletMetadata<PortableForm>, syn::Ident)],
