@@ -853,3 +853,36 @@ fn modules() {
         .to_string()
     )
 }
+
+#[test]
+fn dont_force_struct_names_camel_case() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct AB;
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<AB>());
+    let portable_types: PortableRegistry = registry.into();
+
+    let type_gen = TypeGenerator::new(
+        &portable_types,
+        "root",
+        Default::default(),
+        Default::default(),
+    );
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
+                pub struct AB;
+            }
+        }
+        .to_string()
+    )
+}

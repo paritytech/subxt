@@ -22,7 +22,10 @@ use frame_metadata::{
     PalletCallMetadata,
     PalletMetadata,
 };
-use heck::SnakeCase as _;
+use heck::{
+    CamelCase as _,
+    SnakeCase as _,
+};
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::{
@@ -37,8 +40,12 @@ pub fn generate_calls(
     call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs =
-        super::generate_structs_from_variants(type_gen, call.ty.id(), "Call");
+    let struct_defs = super::generate_structs_from_variants(
+        type_gen,
+        call.ty.id(),
+        |name| name.to_camel_case().into(),
+        "Call",
+    );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter()
         .map(|struct_def| {
