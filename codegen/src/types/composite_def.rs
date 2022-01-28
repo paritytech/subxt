@@ -22,7 +22,6 @@ use super::{
     TypeParameter,
     TypePath,
 };
-use heck::CamelCase as _;
 use proc_macro2::TokenStream;
 use proc_macro_error::abort_call_site;
 use quote::{
@@ -85,7 +84,7 @@ impl CompositeDef {
             }
         }
 
-        let name = format_ident!("{}", ident.to_camel_case());
+        let name = format_ident!("{}", ident);
 
         Self {
             name,

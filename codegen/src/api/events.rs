@@ -29,8 +29,12 @@ pub fn generate_events(
     event: &PalletEventMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs =
-        super::generate_structs_from_variants(type_gen, event.ty.id(), "Event");
+    let struct_defs = super::generate_structs_from_variants(
+        type_gen,
+        event.ty.id(),
+        |name| name.into(),
+        "Event",
+    );
     let event_structs = struct_defs.iter().map(|struct_def| {
         let pallet_name = &pallet.name;
         let event_struct = &struct_def.name;

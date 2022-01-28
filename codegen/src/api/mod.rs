@@ -352,19 +352,24 @@ impl RuntimeGenerator {
     }
 }
 
-pub fn generate_structs_from_variants<'a>(
+pub fn generate_structs_from_variants<'a, F>(
     type_gen: &'a TypeGenerator,
     type_id: u32,
+    variant_to_struct_name: F,
     error_message_type_name: &str,
-) -> Vec<CompositeDef> {
+) -> Vec<CompositeDef>
+where
+    F: Fn(&str) -> std::borrow::Cow<str>,
+{
     let ty = type_gen.resolve_type(type_id);
     if let scale_info::TypeDef::Variant(variant) = ty.type_def() {
         variant
             .variants()
             .iter()
             .map(|var| {
+                let struct_name = variant_to_struct_name(var.name());
                 let fields = CompositeDefFields::from_scale_info_fields(
-                    var.name(),
+                    struct_name.as_ref(),
                     var.fields(),
                     &[],
                     type_gen,
