@@ -46,7 +46,7 @@ pub struct EventSubscription<'a, T: Config> {
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
-    events: VecDeque<RawEvent>,
+    events: VecDeque<(<T as Config>::Hash, usize, RawEvent)>,
     finished: bool,
 }
 
@@ -63,7 +63,11 @@ enum BlockReader<'a, T: Config> {
 impl<'a, T: Config> BlockReader<'a, T> {
     async fn next(
         &mut self,
+<<<<<<< HEAD
     ) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, BasicError>)> {
+=======
+    ) -> Option<(T::Hash, Result<Vec<(usize, (Phase, RawEvent))>, Error>)> {
+>>>>>>> ae51587... implement next_context
         match self {
             BlockReader::Decoder {
                 subscription,
@@ -78,7 +82,8 @@ impl<'a, T: Config> BlockReader<'a, T> {
                     })
                     .collect();
 
-                let flattened_events = events.map(|x| x.into_iter().flatten().collect());
+                let flattened_events =
+                    events.map(|x| x.into_iter().flatten().enumerate().collect());
                 Some((change_set.block, flattened_events))
             }
             #[cfg(test)]
@@ -124,6 +129,15 @@ impl<'a, T: Config> EventSubscription<'a, T> {
 
     /// Gets the next event.
     pub async fn next(&mut self) -> Option<Result<RawEvent, BasicError>> {
+        self.next_context()
+            .await
+            .map(|res| res.map(|(_, _, event)| event))
+    }
+    /// Gets the next event with the associated block hash and its index
+    /// indicating where it occurred.
+    pub async fn next_context(
+        &mut self,
+    ) -> Option<Result<(<T as Config>::Hash, usize, RawEvent), BasicError>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
                 return Some(Ok(raw_event))
@@ -144,7 +158,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
             match events {
                 Err(err) => return Some(Err(err)),
                 Ok(raw_events) => {
-                    for (phase, raw) in raw_events {
+                    for (idx, (phase, raw)) in raw_events {
                         if let Some(ext_index) = self.extrinsic {
                             if !matches!(phase, Phase::ApplyExtrinsic(i) if i as usize == ext_index)
                             {
@@ -156,7 +170,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                                 continue
                             }
                         }
-                        self.events.push_back(raw);
+                        self.events.push_back((received_hash, idx, raw));
                     }
                 }
             }
