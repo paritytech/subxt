@@ -391,7 +391,7 @@ fn generate_default_account_data_impl(
                     .iter()
                     .find(|f| f.name() == Some(&"nonce".to_string()))?
             } else {
-                abort_call_site!("System::Account should be a `StorageEntryType::Map`")
+                abort_call_site!("Expected a `nonce` field in the account info struct")
             };
             let account_nonce_ty = type_gen.resolve_type_path(nonce_field.ty().id(), &[]);
             (account_id_ty, account_nonce_ty)
