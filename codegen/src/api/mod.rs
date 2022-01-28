@@ -356,6 +356,13 @@ impl RuntimeGenerator {
     }
 }
 
+/// Most chains require a valid account nonce as part of the extrinsic, so the default behaviour of
+/// the client is to fetch the nonce for the current account (if it has not been specified).
+///
+/// The account nonce is commonly stored in the `System` pallet's `Account` storage item. This
+/// function attempts to find that storage item, and if it is present will implement the
+/// [`subxt::AccountData`] trait for it. This allows the client to construct the appropriate
+/// storage key from the account id, and then retrieve the `nonce` from the resulting storage item.
 fn generate_default_account_data_impl(
     pallets_with_mod_names: &[(&PalletMetadata<PortableForm>, syn::Ident)],
     default_impl_name: &syn::Ident,
@@ -370,6 +377,8 @@ fn generate_default_account_data_impl(
         .iter()
         .find(|entry| entry.name == "Account")?;
 
+    // resolve the concrete types for `AccountId` (to build the key) and `Nonce` to extract the
+    // nonce value from the result.
     let (account_id_ty, account_nonce_ty) =
         if let StorageEntryType::Map { key, value, .. } = &storage_entry.ty {
             let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
