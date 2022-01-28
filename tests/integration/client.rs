@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -84,7 +84,7 @@ async fn chain_subscribe_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
     let mut blocks = client.rpc().subscribe_blocks().await.unwrap();
-    blocks.next().await.unwrap();
+    blocks.next().await.unwrap().unwrap();
 }
 
 #[async_std::test]
@@ -92,7 +92,7 @@ async fn chain_subscribe_finalized_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
     let mut blocks = client.rpc().subscribe_finalized_blocks().await.unwrap();
-    blocks.next().await.unwrap();
+    blocks.next().await.unwrap().unwrap();
 }
 
 #[async_std::test]
@@ -121,4 +121,13 @@ async fn test_iter() {
         i += 1;
     }
     assert_eq!(i, 13);
+}
+
+#[async_std::test]
+async fn fetch_system_info() {
+    let node_process = test_node_process().await;
+    let client = node_process.client();
+    assert_eq!(client.rpc().system_chain().await.unwrap(), "Development");
+    assert_eq!(client.rpc().system_name().await.unwrap(), "Substrate Node");
+    assert!(!client.rpc().system_version().await.unwrap().is_empty());
 }

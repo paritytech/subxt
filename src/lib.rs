@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -53,10 +53,8 @@ use codec::{
     DecodeAll,
     Encode,
 };
-use core::{
-    fmt::Debug,
-    marker::PhantomData,
-};
+use core::fmt::Debug;
+use derivative::Derivative;
 
 mod client;
 mod config;
@@ -81,9 +79,9 @@ pub use crate::{
         DefaultConfig,
     },
     error::{
+        BasicError,
         Error,
         PalletError,
-        RuntimeError,
         TransactionError,
     },
     events::{
@@ -166,7 +164,7 @@ impl codec::Encode for Encoded {
 }
 
 /// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode)]
+#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),
@@ -180,10 +178,17 @@ pub enum Phase {
 ///
 /// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
 /// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Debug, Eq, PartialEq, Default, Clone, Decode, Encode)]
+#[derive(Derivative, Encode, Decode)]
+#[derivative(
+    Debug(bound = ""),
+    Clone(bound = ""),
+    PartialEq(bound = ""),
+    Eq(bound = ""),
+    Default(bound = "")
+)]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
-    _phantom: PhantomData<T>,
+    _phantom: PhantomDataSendSync<T>,
 }
 
 impl<T: Decode> WrapperKeepOpaque<T> {
@@ -208,7 +213,31 @@ impl<T: Decode> WrapperKeepOpaque<T> {
     pub fn from_encoded(data: Vec<u8>) -> Self {
         Self {
             data,
-            _phantom: PhantomData,
+            _phantom: PhantomDataSendSync::new(),
         }
     }
 }
+
+/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
+/// because regardless of the generic param, it is always possible to Send + Sync this
+/// 0 size type).
+#[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]
+#[derivative(
+    Clone(bound = ""),
+    PartialEq(bound = ""),
+    Debug(bound = ""),
+    Eq(bound = ""),
+    Default(bound = "")
+)]
+#[scale_info(skip_type_params(T))]
+#[doc(hidden)]
+pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
+
+impl<T> PhantomDataSendSync<T> {
+    pub(crate) fn new() -> Self {
+        Self(core::marker::PhantomData)
+    }
+}
+
+unsafe impl<T> Send for PhantomDataSendSync<T> {}
+unsafe impl<T> Sync for PhantomDataSendSync<T> {}

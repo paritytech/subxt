@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -14,9 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::types::{
+use crate::{
+    error::BasicError,
+    events::{
+        EventsDecoder,
+        RawEvent,
+    },
+    rpc::Rpc,
+    Config,
+    Event,
+    Phase,
+};
+use jsonrpsee::core::{
+    client::Subscription,
     DeserializeOwned,
-    Subscription,
 };
 use sp_core::{
     storage::{
@@ -27,18 +38,6 @@ use sp_core::{
 };
 use sp_runtime::traits::Header;
 use std::collections::VecDeque;
-
-use crate::{
-    error::Error,
-    events::{
-        EventsDecoder,
-        RawEvent,
-    },
-    rpc::Rpc,
-    Config,
-    Event,
-    Phase,
-};
 
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
@@ -58,11 +57,13 @@ enum BlockReader<'a, T: Config> {
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)>>),
+    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, RawEvent)>, BasicError>)>>),
 }
 
 impl<'a, T: Config> BlockReader<'a, T> {
-    async fn next(&mut self) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, Error>)> {
+    async fn next(
+        &mut self,
+    ) -> Option<(T::Hash, Result<Vec<(Phase, RawEvent)>, BasicError>)> {
         match self {
             BlockReader::Decoder {
                 subscription,
@@ -117,12 +118,12 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     }
 
     /// Filters events by type.
-    pub fn filter_event<E: Event>(&mut self) {
-        self.event = Some((E::PALLET, E::EVENT));
+    pub fn filter_event<Ev: Event>(&mut self) {
+        self.event = Some((Ev::PALLET, Ev::EVENT));
     }
 
     /// Gets the next event.
-    pub async fn next(&mut self) -> Option<Result<RawEvent, Error>> {
+    pub async fn next(&mut self) -> Option<Result<RawEvent, BasicError>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
                 return Some(Ok(raw_event))
@@ -247,12 +248,12 @@ where
     T: DeserializeOwned,
 {
     match sub.next().await {
-        Ok(Some(next)) => Some(next),
-        Ok(None) => None,
-        Err(e) => {
+        Some(Ok(next)) => Some(next),
+        Some(Err(e)) => {
             log::error!("Subscription {} failed: {:?} dropping", sub_name, e);
             None
         }
+        None => None,
     }
 }
 

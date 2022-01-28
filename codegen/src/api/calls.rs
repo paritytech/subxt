@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -14,12 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::types::TypeGenerator;
+use crate::types::{
+    CompositeDefFields,
+    TypeGenerator,
+};
 use frame_metadata::{
     PalletCallMetadata,
     PalletMetadata,
 };
-use heck::SnakeCase as _;
+use heck::{
+    CamelCase as _,
+    SnakeCase as _,
+};
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::{
@@ -34,22 +40,38 @@ pub fn generate_calls(
     call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs =
-        super::generate_structs_from_variants(type_gen, call.ty.id(), "Call");
+    let struct_defs = super::generate_structs_from_variants(
+        type_gen,
+        call.ty.id(),
+        |name| name.to_camel_case().into(),
+        "Call",
+    );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter()
         .map(|struct_def| {
-            let (call_fn_args, call_args): (Vec<_>, Vec<_>) = struct_def
-                .named_fields()
-                .unwrap_or_else(|| {
-                    abort_call_site!(
-                        "Call variant for type {} must have all named fields",
-                        call.ty.id()
-                    )
-                })
-                .iter()
-                .map(|(name, ty)| (quote!( #name: #ty ), name))
-                .unzip();
+            let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
+                match struct_def.fields {
+                    CompositeDefFields::Named(ref named_fields) => {
+                        named_fields
+                            .iter()
+                            .map(|(name, field)| {
+                                let fn_arg_type = &field.type_path;
+                                let call_arg = if field.is_boxed() {
+                                    quote! { #name: ::std::boxed::Box::new(#name) }
+                                } else {
+                                    quote! { #name }
+                                };
+                                (quote!( #name: #fn_arg_type ), call_arg)
+                            })
+                            .unzip()
+                    }
+                    CompositeDefFields::NoFields => Default::default(),
+                    CompositeDefFields::Unnamed(_) =>
+                        abort_call_site!(
+                            "Call variant for type {} must have all named fields",
+                            call.ty.id()
+                        )
+                };
 
             let pallet_name = &pallet.name;
             let call_struct_name = &struct_def.name;
@@ -68,7 +90,7 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<'a, T, E, A, #call_struct_name> {
+                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, A, #call_struct_name, DispatchError> {
                     let call = #call_struct_name { #( #call_args, )* };
                     ::subxt::SubmittableExtrinsic::new(self.client, call)
                 }
@@ -80,17 +102,20 @@ pub fn generate_calls(
     quote! {
         pub mod calls {
             use super::#types_mod_ident;
+
+            type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+
             #( #call_structs )*
 
-            pub struct TransactionApi<'a, T: ::subxt::Config, E, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(E, A)>,
+                marker: ::core::marker::PhantomData<(X, A)>,
             }
 
-            impl<'a, T, E, A> TransactionApi<'a, T, E, A>
+            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
             where
                 T: ::subxt::Config,
-                E: ::subxt::SignedExtra<T>,
+                X: ::subxt::SignedExtra<T>,
                 A: ::subxt::AccountData<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {

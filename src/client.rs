@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -17,17 +17,18 @@
 use futures::future;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
 
 use crate::{
-    error::Error,
+    error::BasicError,
     events::EventsDecoder,
     extrinsic::{self, SignedExtra, Signer, UncheckedExtrinsic},
-    rpc::{Rpc, RpcClient, SystemProperties},
+    rpc::{Rpc, RpcClient, RuntimeVersion, SystemProperties},
     storage::StorageClient,
     transaction::TransactionProgress,
     AccountData, Call, Config, Metadata,
 };
+use codec::Decode;
+use derivative::Derivative;
 use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
@@ -67,7 +68,7 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
-    pub async fn build<T: Config>(self) -> Result<Client<T>, Error> {
+    pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
             client
         } else {
@@ -99,7 +100,8 @@ impl ClientBuilder {
 }
 
 /// Client to interface with a substrate node.
-#[derive(Clone)]
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""))]
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
@@ -118,7 +120,7 @@ impl<T: Config> std::fmt::Debug for Client<T> {
             .field("metadata", &"<Metadata>")
             .field("events_decoder", &"<EventsDecoder>")
             .field("properties", &self.properties)
-            .field("runtime_version", &self.runtime_version.to_string())
+            .field("runtime_version", &self.runtime_version)
             .field("iter_page_size", &self.iter_page_size)
             .finish()
     }
@@ -172,18 +174,19 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, E, A, C> {
+pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode> {
     client: &'client Client<T>,
     call: C,
-    marker: std::marker::PhantomData<(E, A)>,
+    marker: std::marker::PhantomData<(X, A, E)>,
 }
 
-impl<'client, T, E, A, C> SubmittableExtrinsic<'client, T, E, A, C>
+impl<'client, T, X, A, C, E> SubmittableExtrinsic<'client, T, X, A, C, E>
 where
     T: Config,
-    E: SignedExtra<T>,
+    X: SignedExtra<T>,
     A: AccountData<T>,
     C: Call + Send + Sync,
+    E: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
     pub fn new(client: &'client Client<T>, call: C) -> Self {
@@ -200,16 +203,18 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T>, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+    ) -> Result<TransactionProgress<'client, T, E>, BasicError>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
+
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
+
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
@@ -226,10 +231,10 @@ where
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-    ) -> Result<T::Hash, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+    ) -> Result<T::Hash, BasicError>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -239,11 +244,11 @@ where
     /// Creates a signed extrinsic.
     pub async fn create_signed(
         &self,
-        signer: &(dyn Signer<T, E> + Send + Sync),
-        additional_params: E::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, E>, Error>
+        signer: &(dyn Signer<T, X> + Send + Sync),
+        additional_params: X::Parameters,
+    ) -> Result<UncheckedExtrinsic<T, X>, BasicError>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
@@ -276,9 +281,9 @@ where
     }
 
     /// Creates a unsigned extrinsic.
-    pub fn create_unsigned(&self) -> Result<UncheckedExtrinsic<T, E>, Error>
+    pub fn create_unsigned(&self) -> Result<UncheckedExtrinsic<T, X>, BasicError>
     where
-        <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
     {
         let call = self
@@ -287,7 +292,7 @@ where
             .pallet(C::PALLET)
             .and_then(|pallet| pallet.encode_call(&self.call))?;
 
-        let signed = extrinsic::create_unsigned::<T, E>(call);
+        let signed = extrinsic::create_unsigned::<T, X>(call);
         Ok(signed)
     }
 }

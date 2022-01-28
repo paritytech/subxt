@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -21,8 +21,22 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::sync::Arc;
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
+use crate::{
+    error::BasicError,
+    storage::StorageKeyPrefix,
+    subscription::{
+        EventStorageSubscription,
+        FinalizedEventStorageSubscription,
+        SystemEvents,
+    },
+    Config,
+    Metadata,
+};
 use codec::{
     Decode,
     Encode,
@@ -33,25 +47,23 @@ use core::{
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 use jsonrpsee::{
+    core::{
+        client::{
+            Client,
+            ClientT,
+            Subscription,
+            SubscriptionClientT,
+        },
+        to_json_value,
+        DeserializeOwned,
+        Error as RpcError,
+        JsonValue,
+    },
     http_client::{
         HttpClient,
         HttpClientBuilder,
     },
-    types::{
-        to_json_value,
-        traits::{
-            Client,
-            SubscriptionClient,
-        },
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
-        Subscription,
-    },
-    ws_client::{
-        WsClient,
-        WsClientBuilder,
-    },
+    ws_client::WsClientBuilder,
 };
 use serde::{
     Deserialize,
@@ -69,19 +81,6 @@ use sp_core::{
 use sp_runtime::generic::{
     Block,
     SignedBlock,
-};
-use sp_version::RuntimeVersion;
-
-use crate::{
-    error::Error,
-    storage::StorageKeyPrefix,
-    subscription::{
-        EventStorageSubscription,
-        FinalizedEventStorageSubscription,
-        SystemEvents,
-    },
-    Config,
-    Metadata,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -167,12 +166,39 @@ pub enum SubstrateTransactionStatus<Hash, BlockHash> {
     Invalid,
 }
 
+/// This contains the runtime version information necessary to make transactions, as obtained from
+/// the RPC call `state_getRuntimeVersion`,
+#[derive(Debug, Clone, PartialEq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RuntimeVersion {
+    /// Version of the runtime specification. A full-node will not attempt to use its native
+    /// runtime in substitute for the on-chain Wasm runtime unless all of `spec_name`,
+    /// `spec_version` and `authoring_version` are the same between Wasm and native.
+    pub spec_version: u32,
+
+    /// All existing dispatches are fully compatible when this number doesn't change. If this
+    /// number changes, then `spec_version` must change, also.
+    ///
+    /// This number must change when an existing dispatchable (module ID, dispatch ID) is changed,
+    /// either through an alteration in its user-level semantics, a parameter
+    /// added/removed/changed, a dispatchable being removed, a module being removed, or a
+    /// dispatchable/module changing its index.
+    ///
+    /// It need *not* change when a new module is added or when a dispatchable is added.
+    pub transaction_version: u32,
+
+    /// The other fields present may vary and aren't necessary for `subxt`; they are preserved in
+    /// this map.
+    #[serde(flatten)]
+    pub other: HashMap<String, serde_json::Value>,
+}
+
 /// Rpc client wrapper.
 /// This is workaround because adding generic types causes the macros to fail.
 #[derive(Clone)]
 pub enum RpcClient {
     /// JSONRPC client WebSocket transport.
-    WebSocket(Arc<WsClient>),
+    WebSocket(Arc<Client>),
     /// JSONRPC client HTTP transport.
     // NOTE: Arc because `HttpClient` is not clone.
     Http(Arc<HttpClient>),
@@ -184,7 +210,7 @@ impl RpcClient {
     /// Infers the protocol from the URL, supports:
     ///     - Websockets (`ws://`, `wss://`)
     ///     - Http (`http://`, `https://`)
-    pub async fn try_from_url(url: &str) -> Result<Self, Error> {
+    pub async fn try_from_url(url: &str) -> Result<Self, RpcError> {
         if url.starts_with("ws://") || url.starts_with("wss://") {
             let client = WsClientBuilder::default()
                 .max_notifs_per_subscription(4096)
@@ -202,14 +228,12 @@ impl RpcClient {
         &self,
         method: &str,
         params: &[JsonValue],
-    ) -> Result<T, Error> {
+    ) -> Result<T, RpcError> {
         let params = Some(params.into());
         log::debug!("request {}: {:?}", method, params);
         let data = match self {
-            Self::WebSocket(inner) => {
-                inner.request(method, params).await.map_err(Into::into)
-            }
-            Self::Http(inner) => inner.request(method, params).await.map_err(Into::into),
+            RpcClient::WebSocket(inner) => inner.request(method, params).await,
+            RpcClient::Http(inner) => inner.request(method, params).await,
         };
         data
     }
@@ -220,33 +244,31 @@ impl RpcClient {
         subscribe_method: &str,
         params: &[JsonValue],
         unsubscribe_method: &str,
-    ) -> Result<Subscription<T>, Error> {
+    ) -> Result<Subscription<T>, RpcError> {
         let params = Some(params.into());
         match self {
-            Self::WebSocket(inner) => {
+            RpcClient::WebSocket(inner) => {
                 inner
                     .subscribe(subscribe_method, params, unsubscribe_method)
                     .await
-                    .map_err(Into::into)
             }
-            Self::Http(_) => {
+            RpcClient::Http(_) => {
                 Err(RpcError::Custom(
                     "Subscriptions not supported on HTTP transport".to_owned(),
-                )
-                .into())
+                ))
             }
         }
     }
 }
 
-impl From<WsClient> for RpcClient {
-    fn from(client: WsClient) -> Self {
+impl From<Client> for RpcClient {
+    fn from(client: Client) -> Self {
         RpcClient::WebSocket(Arc::new(client))
     }
 }
 
-impl From<Arc<WsClient>> for RpcClient {
-    fn from(client: Arc<WsClient>) -> Self {
+impl From<Arc<Client>> for RpcClient {
+    fn from(client: Arc<Client>) -> Self {
         RpcClient::WebSocket(client)
     }
 }
@@ -308,7 +330,7 @@ impl<T: Config> Rpc<T> {
         &self,
         key: &StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, Error> {
+    ) -> Result<Option<StorageData>, BasicError> {
         let params = &[to_json_value(key)?, to_json_value(hash)?];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
@@ -323,7 +345,7 @@ impl<T: Config> Rpc<T> {
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, Error> {
+    ) -> Result<Vec<StorageKey>, BasicError> {
         let prefix = prefix.map(|p| p.to_storage_key());
         let params = &[
             to_json_value(prefix)?,
@@ -341,7 +363,7 @@ impl<T: Config> Rpc<T> {
         keys: Vec<StorageKey>,
         from: T::Hash,
         to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
         let params = &[
             to_json_value(keys)?,
             to_json_value(from)?,
@@ -358,7 +380,7 @@ impl<T: Config> Rpc<T> {
         &self,
         keys: &[StorageKey],
         at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, Error> {
+    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
         let params = &[to_json_value(keys)?, to_json_value(at)?];
         self.client
             .request("state_queryStorageAt", params)
@@ -367,7 +389,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, Error> {
+    pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
         let params = &[to_json_value(block_zero)?];
         let list_or_value: ListOrValue<Option<T::Hash>> =
@@ -381,7 +403,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, Error> {
+    pub async fn metadata(&self) -> Result<Metadata, BasicError> {
         let bytes: Bytes = self.client.request("state_getMetadata", &[]).await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
@@ -389,15 +411,30 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Fetch system properties
-    pub async fn system_properties(&self) -> Result<SystemProperties, Error> {
+    pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
         Ok(self.client.request("system_properties", &[]).await?)
+    }
+
+    /// Fetch system chain
+    pub async fn system_chain(&self) -> Result<String, BasicError> {
+        Ok(self.client.request("system_chain", &[]).await?)
+    }
+
+    /// Fetch system name
+    pub async fn system_name(&self) -> Result<String, BasicError> {
+        Ok(self.client.request("system_name", &[]).await?)
+    }
+
+    /// Fetch system version
+    pub async fn system_version(&self) -> Result<String, BasicError> {
+        Ok(self.client.request("system_version", &[]).await?)
     }
 
     /// Get a header
     pub async fn header(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, Error> {
+    ) -> Result<Option<T::Header>, BasicError> {
         let params = &[to_json_value(hash)?];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
@@ -407,7 +444,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, Error> {
+    ) -> Result<Option<T::Hash>, BasicError> {
         let block_number = block_number.map(ListOrValue::Value);
         let params = &[to_json_value(block_number)?];
         let list_or_value = self.client.request("chain_getBlockHash", params).await?;
@@ -418,7 +455,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, Error> {
+    pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
         let hash = self.client.request("chain_getFinalizedHead", &[]).await?;
         Ok(hash)
     }
@@ -427,7 +464,7 @@ impl<T: Config> Rpc<T> {
     pub async fn block(
         &self,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, Error> {
+    ) -> Result<Option<ChainBlock<T>>, BasicError> {
         let params = &[to_json_value(hash)?];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
@@ -438,7 +475,7 @@ impl<T: Config> Rpc<T> {
         &self,
         keys: Vec<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<ReadProof<T::Hash>, Error> {
+    ) -> Result<ReadProof<T::Hash>, BasicError> {
         let params = &[to_json_value(keys)?, to_json_value(hash)?];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
@@ -448,7 +485,7 @@ impl<T: Config> Rpc<T> {
     pub async fn runtime_version(
         &self,
         at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, Error> {
+    ) -> Result<RuntimeVersion, BasicError> {
         let params = &[to_json_value(at)?];
         let version = self
             .client
@@ -461,7 +498,9 @@ impl<T: Config> Rpc<T> {
     ///
     /// *WARNING* these may not be included in the finalized chain, use
     /// `subscribe_finalized_events` to ensure events are finalized.
-    pub async fn subscribe_events(&self) -> Result<EventStorageSubscription<T>, Error> {
+    pub async fn subscribe_events(
+        &self,
+    ) -> Result<EventStorageSubscription<T>, BasicError> {
         let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
         let params = &[to_json_value(keys)?];
 
@@ -475,7 +514,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to finalized events.
     pub async fn subscribe_finalized_events(
         &self,
-    ) -> Result<EventStorageSubscription<T>, Error> {
+    ) -> Result<EventStorageSubscription<T>, BasicError> {
         Ok(EventStorageSubscription::Finalized(
             FinalizedEventStorageSubscription::new(
                 self.clone(),
@@ -485,7 +524,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, Error> {
+    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
         let subscription = self
             .client
             .subscribe("chain_subscribeNewHeads", &[], "chain_unsubscribeNewHeads")
@@ -497,7 +536,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to finalized blocks.
     pub async fn subscribe_finalized_blocks(
         &self,
-    ) -> Result<Subscription<T::Header>, Error> {
+    ) -> Result<Subscription<T::Header>, BasicError> {
         let subscription = self
             .client
             .subscribe(
@@ -510,10 +549,10 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<E: Encode>(
+    pub async fn submit_extrinsic<X: Encode>(
         &self,
-        extrinsic: E,
-    ) -> Result<T::Hash, Error> {
+        extrinsic: X,
+    ) -> Result<T::Hash, BasicError> {
         let bytes: Bytes = extrinsic.encode().into();
         let params = &[to_json_value(bytes)?];
         let xt_hash = self
@@ -524,10 +563,11 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
-    pub async fn watch_extrinsic<E: Encode>(
+    pub async fn watch_extrinsic<X: Encode>(
         &self,
-        extrinsic: E,
-    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, Error> {
+        extrinsic: X,
+    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
+    {
         let bytes: Bytes = extrinsic.encode().into();
         let params = &[to_json_value(bytes)?];
         let subscription = self
@@ -547,7 +587,7 @@ impl<T: Config> Rpc<T> {
         key_type: String,
         suri: String,
         public: Bytes,
-    ) -> Result<(), Error> {
+    ) -> Result<(), BasicError> {
         let params = &[
             to_json_value(key_type)?,
             to_json_value(suri)?,
@@ -558,7 +598,7 @@ impl<T: Config> Rpc<T> {
     }
 
     /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, Error> {
+    pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
         Ok(self.client.request("author_rotateKeys", &[]).await?)
     }
 
@@ -567,7 +607,10 @@ impl<T: Config> Rpc<T> {
     /// `session_keys` is the SCALE encoded session keys object from the runtime.
     ///
     /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(&self, session_keys: Bytes) -> Result<bool, Error> {
+    pub async fn has_session_keys(
+        &self,
+        session_keys: Bytes,
+    ) -> Result<bool, BasicError> {
         let params = &[to_json_value(session_keys)?];
         Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
@@ -579,8 +622,39 @@ impl<T: Config> Rpc<T> {
         &self,
         public_key: Bytes,
         key_type: String,
-    ) -> Result<bool, Error> {
+    ) -> Result<bool, BasicError> {
         let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn test_deser_runtime_version() {
+        let val: RuntimeVersion = serde_json::from_str(
+            r#"{
+            "specVersion": 123,
+            "transactionVersion": 456,
+            "foo": true,
+            "wibble": [1,2,3]
+        }"#,
+        )
+        .expect("deserializing failed");
+
+        let mut m = std::collections::HashMap::new();
+        m.insert("foo".to_owned(), serde_json::json!(true));
+        m.insert("wibble".to_owned(), serde_json::json!([1, 2, 3]));
+
+        assert_eq!(
+            val,
+            RuntimeVersion {
+                spec_version: 123,
+                transaction_version: 456,
+                other: m
+            }
+        );
     }
 }

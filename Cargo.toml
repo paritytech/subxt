@@ -24,7 +24,7 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.5.1", features = ["macros", "ws-client", "http-client"] }
+jsonrpsee = { version = "0.7.0", features = ["macros", "ws-client", "http-client", "client-ws-transport"] }
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
@@ -34,11 +34,12 @@ url = "2.2.1"
 
 subxt-macro = { version = "0.1.0", path = "macro" }
 
-sp-core = { package = "sp-core", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
-sp-runtime = { package = "sp-runtime", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
+sp-core = { package = "sp-core", git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }
+sp-runtime = { package = "sp-runtime", git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }
 sp-version = { package = "sp-version", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
 
 frame-metadata = "14.0.0"
+derivative = "2.2.0"
 
 [dev-dependencies]
 sp-arithmetic = { git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }

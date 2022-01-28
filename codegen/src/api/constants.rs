@@ -15,47 +15,42 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::types::TypeGenerator;
-use frame_metadata::{
-    PalletEventMetadata,
-    PalletMetadata,
-};
+use frame_metadata::PalletConstantMetadata;
+use heck::SnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
-use quote::quote;
+use quote::{
+    format_ident,
+    quote,
+};
 use scale_info::form::PortableForm;
 
-pub fn generate_events(
+pub fn generate_constants(
     type_gen: &TypeGenerator,
-    pallet: &PalletMetadata<PortableForm>,
-    event: &PalletEventMetadata<PortableForm>,
+    constants: &[PalletConstantMetadata<PortableForm>],
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs = super::generate_structs_from_variants(
-        type_gen,
-        event.ty.id(),
-        |name| name.into(),
-        "Event",
-    );
-    let event_structs = struct_defs.iter().map(|struct_def| {
-        let pallet_name = &pallet.name;
-        let event_struct = &struct_def.name;
-        let event_name = struct_def.name.to_string();
+    let constant_fns = constants.iter().map(|constant| {
+        let fn_name = format_ident!("{}", constant.name.to_snake_case());
+        let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
+
+        let ref_slice = constant.value.as_slice();
 
         quote! {
-            #struct_def
-
-            impl ::subxt::Event for #event_struct {
-                const PALLET: &'static str = #pallet_name;
-                const EVENT: &'static str = #event_name;
+            pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
+                Ok(::subxt::codec::Decode::decode(&mut &[#(#ref_slice,)*][..])?)
             }
         }
     });
-    let event_type = type_gen.resolve_type_path(event.ty.id(), &[]);
 
     quote! {
-        pub type Event = #event_type;
-        pub mod events {
+        pub mod constants {
             use super::#types_mod_ident;
-            #( #event_structs )*
+
+            pub struct ConstantsApi;
+
+            impl ConstantsApi {
+                #(#constant_fns)*
+            }
         }
     }
 }

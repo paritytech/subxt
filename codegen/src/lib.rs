@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -17,9 +17,7 @@
 //! Library to generate an API for a Substrate runtime from its metadata.
 
 mod api;
-mod derives;
 mod ir;
-mod struct_def;
 mod types;
 
 pub use self::{
@@ -27,5 +25,5 @@ pub use self::{
         generate_runtime_api,
         RuntimeGenerator,
     },
-    derives::GeneratedTypeDerives,
+    types::GeneratedTypeDerives,
 };

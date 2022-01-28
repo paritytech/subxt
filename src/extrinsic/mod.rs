@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -21,63 +21,63 @@ mod signer;
 
 pub use self::{
     extra::{
-        ChargeAssetTxPayment, CheckGenesis, CheckMortality, CheckNonce, CheckSpecVersion,
-        CheckTxVersion, CheckWeight, DefaultExtra, DefaultExtraWithTxPayment,
-        SignedExtra,
+        ChargeAssetTxPayment, ChargeTransactionPayment, CheckGenesis, CheckMortality,
+        CheckNonce, CheckSpecVersion, CheckTxVersion, CheckWeight, DefaultExtra,
+        DefaultExtraWithTxPayment, SignedExtra,
     },
     signer::{PairSigner, Signer},
 };
 
 use sp_runtime::traits::SignedExtension;
-use sp_version::RuntimeVersion;
 
-use crate::{Config, Encoded, Error};
+use crate::{error::BasicError, rpc::RuntimeVersion, Config, Encoded};
 
 /// UncheckedExtrinsic type.
-pub type UncheckedExtrinsic<T, E> = sp_runtime::generic::UncheckedExtrinsic<
+pub type UncheckedExtrinsic<T, X> = sp_runtime::generic::UncheckedExtrinsic<
     <T as Config>::Address,
     Encoded,
     <T as Config>::Signature,
-    <E as SignedExtra<T>>::Extra,
+    <X as SignedExtra<T>>::Extra,
 >;
 
 /// SignedPayload type.
-pub type SignedPayload<T, E> =
-    sp_runtime::generic::SignedPayload<Encoded, <E as SignedExtra<T>>::Extra>;
+pub type SignedPayload<T, X> =
+    sp_runtime::generic::SignedPayload<Encoded, <X as SignedExtra<T>>::Extra>;
 
 /// Creates a signed extrinsic
-pub async fn create_signed<T, E>(
+pub async fn create_signed<T, X>(
     runtime_version: &RuntimeVersion,
     genesis_hash: T::Hash,
     nonce: T::Index,
     call: Encoded,
-    signer: &(dyn Signer<T, E> + Send + Sync),
-    additional_params: E::Parameters,
-) -> Result<UncheckedExtrinsic<T, E>, Error>
+    signer: &(dyn Signer<T, X> + Send + Sync),
+    additional_params: X::Parameters,
+) -> Result<UncheckedExtrinsic<T, X>, BasicError>
 where
     T: Config,
-    E: SignedExtra<T>,
-    <E::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
+    X: SignedExtra<T>,
+    <X::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
     let spec_version = runtime_version.spec_version;
     let tx_version = runtime_version.transaction_version;
-    let extra = E::new(
+    let extra = X::new(
         spec_version,
         tx_version,
         nonce,
         genesis_hash,
         additional_params,
     );
-    let payload = SignedPayload::<T, E>::new(call, extra.extra())?;
+    let payload = SignedPayload::<T, X>::new(call, extra.extra())?;
     let signed = signer.sign(payload).await?;
     Ok(signed)
 }
 
 /// Creates an unsigned extrinsic
-pub fn create_unsigned<T, E>(call: Encoded) -> UncheckedExtrinsic<T, E>
+pub fn create_unsigned<T, X>(call: Encoded) -> UncheckedExtrinsic<T, X>
 where
     T: Config,
-    E: SignedExtra<T>,
+    X: SignedExtra<T>,
+    <X::Extra as SignedExtension>::AdditionalSigned: Send + Sync,
 {
-    UncheckedExtrinsic::<T, E>::new_unsigned(call)
+    UncheckedExtrinsic::<T, X>::new_unsigned(call)
 }
