@@ -357,7 +357,7 @@ impl RuntimeGenerator {
 }
 
 /// Most chains require a valid account nonce as part of the extrinsic, so the default behaviour of
-/// the client is to fetch the nonce for the current account (if it has not been specified).
+/// the client is to fetch the nonce for the current account.
 ///
 /// The account nonce is commonly stored in the `System` pallet's `Account` storage item. This
 /// function attempts to find that storage item, and if it is present will implement the
