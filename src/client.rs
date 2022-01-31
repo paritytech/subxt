@@ -222,7 +222,7 @@ where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Nonce: Into<<T as Config>::Index>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -252,7 +252,7 @@ where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Nonce: Into<<T as Config>::Index>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -268,7 +268,7 @@ where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Nonce: Into<<T as Config>::Index>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce

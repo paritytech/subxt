@@ -21782,10 +21782,10 @@ pub mod api {
     impl ::subxt::AccountData for DefaultAccountData {
         type StorageEntry = self::system::storage::Account;
         type AccountId = ::subxt::sp_core::crypto::AccountId32;
-        type Nonce = ::core::primitive::u32;
+        type Index = ::core::primitive::u32;
         fn nonce(
             result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,
-        ) -> Self::Nonce {
+        ) -> Self::Index {
             result.nonce
         }
         fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {

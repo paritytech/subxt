@@ -359,8 +359,8 @@ impl RuntimeGenerator {
 /// Most chains require a valid account nonce as part of the extrinsic, so the default behaviour of
 /// the client is to fetch the nonce for the current account.
 ///
-/// The account nonce is commonly stored in the `System` pallet's `Account` storage item. This
-/// function attempts to find that storage item, and if it is present will implement the
+/// The account index (aka nonce) is commonly stored in the `System` pallet's `Account` storage item.
+/// This function attempts to find that storage item, and if it is present will implement the
 /// `subxt::AccountData` trait for it. This allows the client to construct the appropriate
 /// storage key from the account id, and then retrieve the `nonce` from the resulting storage item.
 fn generate_default_account_data_impl(
@@ -377,8 +377,8 @@ fn generate_default_account_data_impl(
         .iter()
         .find(|entry| entry.name == "Account")?;
 
-    // resolve the concrete types for `AccountId` (to build the key) and `Nonce` to extract the
-    // nonce value from the result.
+    // resolve the concrete types for `AccountId` (to build the key) and `Index` to extract the
+    // account index (nonce) value from the result.
     let (account_id_ty, account_nonce_ty) =
         if let StorageEntryType::Map { key, value, .. } = &storage_entry.ty {
             let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
@@ -410,9 +410,9 @@ fn generate_default_account_data_impl(
         impl ::subxt::AccountData for #default_impl_name {
             type StorageEntry = #storage_entry_path;
             type AccountId = #account_id_ty;
-            type Nonce = #account_nonce_ty;
+            type Index = #account_nonce_ty;
 
-            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Nonce {
+            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
                 result.nonce
             }
             fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {

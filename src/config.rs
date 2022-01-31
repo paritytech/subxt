@@ -113,11 +113,11 @@ pub trait AccountData {
     type AccountId;
 
     /// The type of the account nonce returned from storage.
-    type Nonce;
+    type Index;
 
     /// Create a new storage entry key from the account id.
     fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry;
 
     /// Get the nonce from the storage entry value.
-    fn nonce(result: &<Self::StorageEntry as StorageEntry>::Value) -> Self::Nonce;
+    fn nonce(result: &<Self::StorageEntry as StorageEntry>::Value) -> Self::Index;
 }
