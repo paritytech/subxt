@@ -34,7 +34,7 @@ impl Config for MyConfig {
     // This is different from the default `u32`.
     //
     // *Note* that in this example it does differ from the actual `Index` type in the
-    // polkadot runtime used, so some operations may fail. Normally when using a custom `Config`
+    // polkadot runtime used, so some operations will fail. Normally when using a custom `Config`
     // impl types MUST match exactly those used in the actual runtime.
     type Index = u64;
     type BlockNumber = <DefaultConfig as Config>::BlockNumber;
