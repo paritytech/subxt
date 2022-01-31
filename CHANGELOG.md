@@ -6,6 +6,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2022-02-01
+
+### Codegen
+
+- fix compact unnamed fields ([#327](https://github.com/paritytech/substrate-subxt/issues/327))
+
+### Codegen
+
+- enum variant indices ([#308](https://github.com/paritytech/substrate-subxt/issues/308))
+
+### Deps
+
+- update jsonrpsee 0.3.0 ([#289](https://github.com/paritytech/substrate-subxt/issues/289))
+- update jsonrpsee 0.2.0 ([#285](https://github.com/paritytech/substrate-subxt/issues/285))
+
+### Fix
+
+- use index override when decoding enums in events ([#382](https://github.com/paritytech/substrate-subxt/issues/382))
+- also processess initialize and finalize events in event subscription ([#321](https://github.com/paritytech/substrate-subxt/issues/321))
+- keep processing a block's events after encountering a dispatch error ([#310](https://github.com/paritytech/substrate-subxt/issues/310))
+
 ## [0.15.0] - 2021-03-15
 
 ### Added
