@@ -116,7 +116,7 @@ pub fn generate_calls(
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client, marker: ::core::marker::PhantomData }

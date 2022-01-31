@@ -197,7 +197,7 @@ impl<'client, T, X, A, C, E> SubmittableExtrinsic<'client, T, X, A, C, E>
 where
     T: Config,
     X: SignedExtra<T>,
-    A: AccountData<T>,
+    A: AccountData,
     C: Call + Send + Sync,
     E: Decode,
 {
@@ -221,6 +221,8 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -249,6 +251,8 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -263,17 +267,20 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
+        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            let account_storage_entry = A::storage_entry(signer.account_id().clone());
+            let account_storage_entry =
+                A::storage_entry(signer.account_id().clone().into());
             let account_data = self
                 .client
                 .storage()
                 .fetch_or_default(&account_storage_entry, None)
                 .await?;
-            A::nonce(&account_data)
+            A::nonce(&account_data).into()
         };
         let call = self
             .client
