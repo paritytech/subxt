@@ -9,7 +9,7 @@ repository = "https://github.com/paritytech/substrate-subxt"
 documentation = "https://docs.rs/substrate-subxt-client"
 homepage = "https://www.parity.io/"
 description = "Deprecated. See https://github.com/paritytech/subxt."
-keywords = ["parity", "substrate", "blockchain"]
+keywords = ["deprecated", "parity", "substrate", "blockchain"]
 
 [dependencies]
 async-std = "1.8.0"

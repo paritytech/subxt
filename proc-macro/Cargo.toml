@@ -10,6 +10,7 @@ repository = "https://github.com/paritytech/substrate-subxt"
 documentation = "https://docs.rs/substrate-subxt"
 homepage = "https://www.parity.io/"
 description = "Deprecated: crate renamed to subxt-macro."
+keywords = ["deprecated"]
 
 [lib]
 proc-macro = true
