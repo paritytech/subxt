@@ -42,15 +42,26 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
 
-    Next, do a dry run to make sure that things seem sane:
+    The crates in this repository need publishing in a specific order, since they depend on each other.
+    Additionally, `subxt-macro` has a circular dev dependency on `subxt`, so we use `cargo hack` to remove
+    dev dependencies (and `--allow-dorty` to ignore the git changes as a result) to publish it.
+
+    So, first install `cargo hack` with `cargo install cargo hack`. Next, you can run something like the following
+    command to publish each crate in the required order (allowing a little time inbetween each to let `crates.io` catch up)
+    with what we've published).
+
     ```
-    cargo publish --dry-run
+    (cd macro && cargo hack publish --no-dev-deps --allow-dirty --dry-run) && \
+        sleep 5 && \
+        (cd codegen && cargo publish --dry-run) && \
+        sleep 5 && \
+        cargo publishd --dry-run && \
+        sleep 5 && \
+        (cd cli && cargo publish --dry-run);
     ```
 
-    If we're happy with everything, proceed with the release:
-    ```
-    cargo publish
-    ```
+    If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
+    you may just need to wait a little longer and then run the remaining portion of that command.
 
 9.  If the release was successful, then tag the commit that we released in the `master` branch with the
     version that we just released, for example:
