@@ -51,13 +51,13 @@ We also assume that ongoing work done is being merged directly to the `master` b
     with what we've published).
 
     ```
-    (cd macro && cargo hack publish --no-dev-deps --allow-dirty --dry-run) && \
+    (cd codegen && cargo publish) && \
         sleep 5 && \
-        (cd codegen && cargo publish --dry-run) && \
+        (cd macro && cargo hack publish --no-dev-deps --allow-dirty) && \
         sleep 5 && \
-        cargo publishd --dry-run && \
+        cargo publish && \
         sleep 5 && \
-        (cd cli && cargo publish --dry-run);
+        (cd cli && cargo publish);
     ```
 
     If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
