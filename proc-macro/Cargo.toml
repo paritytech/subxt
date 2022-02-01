@@ -9,7 +9,7 @@ license = "GPL-3.0"
 repository = "https://github.com/paritytech/substrate-subxt"
 documentation = "https://docs.rs/substrate-subxt"
 homepage = "https://www.parity.io/"
-description = "Deprecated: crate renamed to subxt-macro. Derive calls, events, storage and tests for interacting Substrate modules with substrate-subxt"
+description = "Deprecated: crate renamed to subxt-macro."
 
 [lib]
 proc-macro = true
