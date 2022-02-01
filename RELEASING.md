@@ -26,7 +26,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
-4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2.
+4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-codegen`, `subxt-macro`, `subxt` and `subxt-cli`.
 
 5.  Update `CHANGELOG.md` to reflect the difference between this release and last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
@@ -56,7 +56,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     version that we just released, for example:
 
     ```
-    git tag v0.17.0 # use the version number you've just published to crates.io, not this one
+    git tag -s v0.17.0 # use the version number you've just published to crates.io, not this one
     git push --tags
     ```
 
