@@ -312,17 +312,17 @@ mod tests {
                             phase.clone(),
                             // The event index
                             idx,
-                            {
-                                // set variant index so we can uniquely identify
-                                // the event, independently from the event index
-                                let mut event = event.clone();
-                                event.variant_index = (idx * 2) as u8;
-                                event
-                            }
+                            event.clone(),
                         ))
                     });
             }
         }
+
+        // set variant index so we can uniquely identify the event
+        events.iter_mut().enumerate().for_each(|(idx, event)| {
+            event.3.variant_index = idx as u8;
+        });
+
 
         let half_len = events.len() / 2;
 
@@ -407,17 +407,16 @@ mod tests {
                             phase.clone(),
                             // The event index
                             idx,
-                            {
-                                // set variant index so we can uniquely identify
-                                // the event, independently from the event index
-                                let mut event = event.clone();
-                                event.variant_index = (idx * 2) as u8;
-                                event
-                            }
+                            event.clone(),
                         ))
                     });
             }
         }
+
+        // set variant index so we can uniquely identify the event
+        events.iter_mut().enumerate().for_each(|(idx, event)| {
+            event.3.variant_index = idx as u8;
+        });
 
         let half_len = events.len() / 2;
 

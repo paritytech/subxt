@@ -45,8 +45,7 @@ async fn run() {
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
 
     // Run binary.
-    let port = next_open_port()
-        .expect("Cannot spawn substrate: no available ports in the given port range");
+    let port = 8833;
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
