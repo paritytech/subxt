@@ -8,7 +8,7 @@ license = "GPL-3.0"
 repository = "https://github.com/paritytech/substrate-subxt"
 documentation = "https://docs.rs/substrate-subxt-client"
 homepage = "https://www.parity.io/"
-description = "Embed a substrate node into your subxt application."
+description = "Deprecated. See https://github.com/paritytech/subxt. Embed a substrate node into your subxt application."
 keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]

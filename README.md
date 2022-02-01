@@ -1,3 +1,9 @@
+# DEPRECATED
+
+This crate has been renamed to `subxt` on Crates.io. Visit https://crates.io/crates/subxt for the new version, or go to See https://github.com/paritytech/subxt for the latest updates and progress.
+
+
+
 # subxt &middot; ![build](https://github.com/paritytech/substrate-subxt/workflows/Rust/badge.svg) [![Latest Version](https://img.shields.io/crates/v/substrate-subxt.svg)](https://crates.io/crates/substrate-subxt) [![Documentation](https://docs.rs/substrate-subxt/badge.svg)](https://docs.rs/substrate-subxt)
 
 A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/paritytech/substrate) node via RPC.
