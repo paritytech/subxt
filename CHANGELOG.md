@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.16.0] - 2022-02-01
 
+*Note*: This is a significant release which introduces support for V14 metadata and macro based codegen, as well as making many breaking changes to the API.
+
 ### Changed
 
 - Log debug message for JSON-RPC response ([#415](https://github.com/paritytech/subxt/pull/415))
