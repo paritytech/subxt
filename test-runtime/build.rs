@@ -54,6 +54,10 @@ async fn run() {
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
+        Err(ref e) if e.kind() == std::io::ErrorKind::NotFound => {
+            panic!("A substrate binary should be installed on your path for testing purposes. \
+            See https://github.com/paritytech/subxt/tree/master#integration-testing")
+        }
         Err(e) => {
             panic!("Cannot spawn substrate command '{}': {}", substrate_bin, e)
         }
