@@ -39,7 +39,7 @@ resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/enviro
 
 ### Initializing the API client
 
-API is still a work in progress. See [examples](./subxt/examples) for the current usage.
+API is still a work in progress. See [examples](./examples) for the current usage.
 
 ### Querying Storage
 
@@ -47,7 +47,7 @@ API is still a work in progress. See [tests](./subxt/tests/integration/frame) fo
 
 ### Submitting Extrinsics
 
-API is still a work in progress. See [examples](./subxt/examples/polkadot_balance_transfer.rs) for the current usage.
+API is still a work in progress. See [examples](./examples/examples/polkadot_balance_transfer.rs) for the current usage.
 
 ## Integration Testing
 
