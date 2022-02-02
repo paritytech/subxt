@@ -28,7 +28,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
 4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-codegen`, `subxt-macro`, `subxt` and `subxt-cli`.
 
-5.  Update `CHANGELOG.md` to reflect the difference between this release and last. If you're unsure of
+5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
     Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+is%3Aclosed) between the last release and
@@ -52,18 +52,18 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     ```
     (cd codegen && cargo publish) && \
-        sleep 5 && \
+        sleep 10 && \
         (cd macro && cargo hack publish --no-dev-deps --allow-dirty) && \
-        sleep 5 && \
+        sleep 10 && \
         cargo publish && \
-        sleep 5 && \
+        sleep 10 && \
         (cd cli && cargo publish);
     ```
 
     If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
     you may just need to wait a little longer and then run the remaining portion of that command.
 
-9.  If the release was successful, then tag the commit that we released in the `master` branch with the
+9.  If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
 
     ```
