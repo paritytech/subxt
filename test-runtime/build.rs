@@ -1,4 +1,4 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
 // This file is part of subxt.
 //
 // subxt is free software: you can redistribute it and/or modify
@@ -101,7 +101,7 @@ async fn run() {
         r#"
         #[subxt::subxt(
             runtime_metadata_path = "{}",
-            generated_type_derives = "Debug, Eq, PartialEq"
+            generated_type_derives = "Eq, PartialEq"
         )]
         pub mod node_runtime {{
             #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]

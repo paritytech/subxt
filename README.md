@@ -8,6 +8,8 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ## Usage
 
+Take a look in the [examples](./examples/examples) folder for various `subxt` usage examples.
+
 ### Downloading metadata from a Substrate node
 
 Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
@@ -26,7 +28,7 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ### Generating the runtime API from the downloaded metadata
 
-Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
+Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the
 target runtime:
 
 ```rust
@@ -34,20 +36,20 @@ target runtime:
 pub mod node_runtime { }
 ```
 
-**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml` 
+**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml`
 resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)), *not* relative to the source file.
 
 ### Initializing the API client
 
-API is still a work in progress. See [examples](./examples) for the current usage.
+API is still a work in progress. See [examples](./examples/examples) for the current usage.
 
 ### Querying Storage
 
-API is still a work in progress. See [tests](./tests/integration/frame) for the current usage.
+API is still a work in progress. See [tests](./subxt/tests/integration/frame) for the current usage.
 
 ### Submitting Extrinsics
 
-API is still a work in progress. See [examples](./examples/polkadot_balance_transfer.rs) for the current usage.
+API is still a work in progress. See [examples](./examples/examples/polkadot_balance_transfer.rs) for the current usage.
 
 ## Integration Testing
 
@@ -67,6 +69,8 @@ Please add your project to this list via a PR.
 - [cargo-contract](https://github.com/paritytech/cargo-contract/pull/79) CLI for interacting with Wasm smart contracts.
 - [xcm-cli](https://github.com/ascjones/xcm-cli) CLI for submitting XCM messages.
 - [phala-pherry](https://github.com/Phala-Network/phala-blockchain/tree/master/standalone/pherry) The relayer between Phala blockchain and the off-chain Secure workers.
+- [crunch](https://github.com/turboflakes/crunch) CLI to claim staking rewards in batch every Era or X hours for substrate-based chains.
+- [interbtc-clients](https://github.com/interlay/interbtc-clients) Client implementations for the interBTC parachain; notably the Vault / Relayer and Oracle.
 
 **Alternatives**
 

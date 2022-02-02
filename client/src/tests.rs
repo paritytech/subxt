@@ -27,13 +27,10 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
     PairSigner,
+    DefaultConfig,
+    DefaultExtra
 };
 use tempdir::TempDir;
-use test_runtime::node_runtime::{
-    self,
-    system,
-    DefaultConfig,
-};
 
 #[async_std::test]
 pub async fn test_embedded_client() {
@@ -74,12 +71,11 @@ pub async fn test_embedded_client() {
 
     let ext_client = ClientBuilder::new()
         .set_client(client)
-        .build::<DefaultConfig>()
+        .build()
         .await
         .unwrap();
 
-    let api: node_runtime::RuntimeApi<DefaultConfig> =
-        ext_client.clone().to_runtime_api();
+    let api: test_runtime::node_runtime::RuntimeApi<DefaultConfig, DefaultExtra<_>> = ext_client.clone().to_runtime_api();
 
     // verify that we can read storage
     api.storage()
@@ -88,7 +84,7 @@ pub async fn test_embedded_client() {
         .await
         .unwrap();
 
-    let alice = PairSigner::<DefaultConfig, _>::new(AccountKeyring::Alice.pair());
+    let alice = PairSigner::new(AccountKeyring::Alice.pair());
     let bob_address = AccountKeyring::Bob.to_account_id().into();
 
     // verify that we can call dispatchable functions
@@ -106,5 +102,5 @@ pub async fn test_embedded_client() {
     panic!("{:?}", events);
 
     // verify that we receive events
-    //assert!(success);
+    // assert!(success);
 }
