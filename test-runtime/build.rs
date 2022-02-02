@@ -161,7 +161,7 @@ fn next_open_port() -> Option<u16> {
     }
 }
 
-/// If the substrate process isn't explicilty killed on drop,
+/// If the substrate process isn't explicitly killed on drop,
 /// it seems that panics that occur while the command is running
 /// will leave it running and block the build step from ever finishing.
 /// Wrapping it in this prevents this from happening.
