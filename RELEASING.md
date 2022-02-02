@@ -55,7 +55,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
         sleep 10 && \
         (cd macro && cargo hack publish --no-dev-deps --allow-dirty) && \
         sleep 10 && \
-        cargo publish && \
+        (cd subxt && cargo publish) && \
         sleep 10 && \
         (cd cli && cargo publish);
     ```

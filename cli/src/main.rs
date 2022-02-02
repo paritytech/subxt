@@ -161,7 +161,7 @@ fn codegen<I: Input>(
 
     let p = raw_derives
         .iter()
-        .map(|raw| syn::parse_str(&raw))
+        .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
     let mut derives = GeneratedTypeDerives::default();
     derives.append(p.into_iter());

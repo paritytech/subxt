@@ -58,7 +58,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     let raw = sub.next().await.unwrap().unwrap();
-    let event = <polkadot::balances::events::Transfer as codec::Decode>::decode(
+    let event = <polkadot::balances::events::Transfer as subxt::codec::Decode>::decode(
         &mut &raw.data[..],
     );
     if let Ok(e) = event {

@@ -1,53 +1,10 @@
 [workspace]
-members = [".", "cli", "codegen", "macro", "test-runtime"]
 
-[package]
-name = "subxt"
-version = "0.16.0"
-authors = ["Parity Technologies <admin@parity.io>"]
-edition = "2021"
-
-license = "GPL-3.0"
-readme = "README.md"
-repository = "https://github.com/paritytech/subxt"
-documentation = "https://docs.rs/subxt"
-homepage = "https://www.parity.io/"
-description = "Submit extrinsics (transactions) to a substrate node via RPC"
-keywords = ["parity", "substrate", "blockchain"]
-include = ["Cargo.toml", "src/**/*.rs", "README.md", "LICENSE"]
-
-[dependencies]
-async-trait = "0.1.49"
-bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
-codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
-chameleon = "0.1.0"
-scale-info = { version = "1.0.0", features = ["bit-vec"] }
-futures = "0.3.13"
-hex = "0.4.3"
-jsonrpsee = { version = "0.8.0", features = ["ws-client", "http-client"] }
-log = "0.4.14"
-num-traits = { version = "0.2.14", default-features = false }
-serde = { version = "1.0.124", features = ["derive"] }
-serde_json = "1.0.64"
-thiserror = "1.0.24"
-url = "2.2.1"
-
-subxt-macro = { version = "0.16.0", path = "macro" }
-
-sp-core = { version = "4.0.0", default-features = false  }
-sp-runtime = { version = "4.0.0", default-features = false }
-sp-version = "4.0.0"
-
-frame-metadata = "14.0.0"
-derivative = "2.2.0"
-
-[dev-dependencies]
-sp-arithmetic = { version = "4.0.0", default-features = false }
-assert_matches = "1.5.0"
-async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
-env_logger = "0.9.0"
-tempdir = "0.3.7"
-wabt = "0.10.0"
-which = "4.0.2"
-test-runtime = { path = "test-runtime" }
-sp-keyring = "4.0.0"
+members = [
+    "cli",
+    "codegen",
+    "examples",
+    "macro",
+    "subxt",
+    "test-runtime"
+]

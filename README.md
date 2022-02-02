@@ -8,6 +8,8 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ## Usage
 
+Take a look in the [examples](./examples/examples) folder for various `subxt` usage examples.
+
 ### Downloading metadata from a Substrate node
 
 Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
@@ -26,7 +28,7 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ### Generating the runtime API from the downloaded metadata
 
-Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the 
+Declare a module and decorate it with the `subxt` attribute which points at the downloaded metadata for the
 target runtime:
 
 ```rust
@@ -34,20 +36,20 @@ target runtime:
 pub mod node_runtime { }
 ```
 
-**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml` 
+**Important:** `runtime_metadata_path` resolves to a path relative to the directory where your crate's `Cargo.toml`
 resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/environment-variables.html)), *not* relative to the source file.
 
 ### Initializing the API client
 
-API is still a work in progress. See [examples](./examples) for the current usage.
+API is still a work in progress. See [examples](./examples/examples) for the current usage.
 
 ### Querying Storage
 
-API is still a work in progress. See [tests](./tests/integration/frame) for the current usage.
+API is still a work in progress. See [tests](./subxt/tests/integration/frame) for the current usage.
 
 ### Submitting Extrinsics
 
-API is still a work in progress. See [examples](./examples/polkadot_balance_transfer.rs) for the current usage.
+API is still a work in progress. See [examples](./examples/examples/polkadot_balance_transfer.rs) for the current usage.
 
 ## Integration Testing
 
