@@ -40,6 +40,8 @@ use sp_runtime::traits::Header;
 use std::collections::VecDeque;
 
 
+#[derive(Debug)]
+#[cfg_attr(test, derive(PartialEq, Clone))]
 pub struct EventContext<T> {
     pub block: T,
     pub event_idx: usize,
@@ -404,7 +406,7 @@ mod tests {
 
     #[async_std::test]
     async fn test_context() {
-        let mut events: Vec<(H256, Phase, usize, RawEvent)> = vec![];
+        let mut events = vec![];
         // create all events
         for block_hash in [H256::from([0; 32]), H256::from([1; 32])] {
             for phase in [
@@ -417,20 +419,23 @@ mod tests {
                     .iter()
                     .enumerate()
                     .for_each(|(idx, event)| {
-                        events.push((
-                            block_hash,
-                            phase.clone(),
-                            // The event index
-                            idx,
-                            event.clone(),
-                        ))
+                        events.push(
+                            (
+                                phase.clone(),
+                                EventContext {
+                                    block: block_hash,
+                                    event_idx: idx,
+                                    event: event.clone(),
+                                }
+                            )
+                        );
                     });
             }
         }
 
         // set variant index so we can uniquely identify the event
-        events.iter_mut().enumerate().for_each(|(idx, event)| {
-            event.3.variant_index = idx as u8;
+        events.iter_mut().enumerate().for_each(|(idx, (_, ctx))| {
+            ctx.event.variant_index = idx as u8;
         });
 
         let half_len = events.len() / 2;
@@ -440,22 +445,22 @@ mod tests {
                 block_reader: BlockReader::Mock(Box::new(
                     vec![
                         (
-                            events[0].0,
+                            events[0].1.block,
                             Ok(events
                                 .iter()
                                 .take(half_len)
-                                .map(|(_, phase, idx, event)| {
-                                    (phase.clone(), *idx, event.clone())
+                                .map(|(phase, ctx)| {
+                                    (phase.clone(), ctx.event_idx, ctx.event.clone())
                                 })
                                 .collect()),
                         ),
                         (
-                            events[half_len].0,
+                            events[half_len].1.block,
                             Ok(events
                                 .iter()
                                 .skip(half_len)
-                                .map(|(_, phase, idx, event)| {
-                                    (phase.clone(), *idx, event.clone())
+                                .map(|(phase, ctx)| {
+                                    (phase.clone(), ctx.event_idx, ctx.event.clone())
                                 })
                                 .collect()),
                         ),
@@ -469,16 +474,14 @@ mod tests {
                 finished: false,
             };
 
-        let expected_events: Vec<(H256, Phase, usize, RawEvent)> = events.clone();
+        let expected_events = events.clone();
 
         for exp in expected_events {
             assert_eq!(
                 subscription.next_context().await.unwrap().unwrap(),
-                // (block_hash, event_idx, event)
-                (exp.0, exp.2, exp.3)
+                exp.1
             );
         }
         assert!(subscription.next().await.is_none());
     }
-
 }
