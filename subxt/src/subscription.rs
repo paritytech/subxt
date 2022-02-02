@@ -39,7 +39,8 @@ use sp_core::{
 use sp_runtime::traits::Header;
 use std::collections::VecDeque;
 
-
+/// Raw bytes for an Event, including the block hash where it occurred and its
+/// corresponding event index.
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq, Clone))]
 pub struct EventContext<T> {
@@ -92,8 +93,8 @@ impl<'a, T: Config> BlockReader<'a, T> {
                         x.into_iter()
                             .flatten()
                             .enumerate()
-                            .map(|(idx, (phase, raw))| {
-                                (phase, idx, raw)
+                            .map(|(event_idx, (phase, raw))| {
+                                (phase, event_idx, raw)
                             })
                             .collect()
                     });
@@ -152,7 +153,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     /// event index.
     pub async fn next_context(
         &mut self,
-    ) -> Option<Result<(<T as Config>::Hash, usize, RawEvent), BasicError>> {
+    ) -> Option<Result<EventContext<T::Hash>, BasicError>> {
         loop {
             if let Some(raw_event) = self.events.pop_front() {
                 return Some(Ok(raw_event))
