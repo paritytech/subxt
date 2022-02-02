@@ -35,6 +35,7 @@ use jsonrpsee::core::{
     async_trait,
     client::{
         Client as JsonRpcClient,
+        ClientBuilder as JsonRpcClientBuilder,
         TransportReceiverT,
         TransportSenderT,
     },
@@ -153,7 +154,9 @@ impl SubxtClient {
 
 impl From<SubxtClient> for JsonRpcClient {
     fn from(client: SubxtClient) -> Self {
-        (client.sender, client.receiver).into()
+        JsonRpcClientBuilder::default()
+            .request_timeout(std::time::Duration::from_secs(5 * 60))
+            .build(client.sender, client.receiver)
     }
 }
 

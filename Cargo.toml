@@ -7,6 +7,5 @@ members = [
     "macro",
     "subxt",
     "test-runtime",
-    # TODO(niklasad1): remove to separate repo
-    "client"
 ]
+exclude = ["client"]

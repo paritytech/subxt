@@ -26,18 +26,22 @@ use node_cli::service::NewFullBase;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
-    PairSigner,
     DefaultConfig,
-    DefaultExtra
+    DefaultExtra,
+    PairSigner,
 };
 use tempdir::TempDir;
+use test_runtime::node_runtime::{
+    self,
+    system,
+};
 
 #[async_std::test]
 pub async fn test_embedded_client() {
     tracing_subscriber::FmtSubscriber::builder()
-    .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-    .try_init()
-    .expect("setting default subscriber failed");
+        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
+        .try_init()
+        .expect("setting default subscriber failed");
 
     let tmp = TempDir::new("subxt-").expect("failed to create tempdir");
     let config = SubxtClientConfig {
@@ -56,7 +60,7 @@ pub async fn test_embedded_client() {
         chain_spec: node_cli::chain_spec::development_config(),
         role: Role::Authority(AccountKeyring::Alice),
         telemetry: None,
-        wasm_method: WasmExecutionMethod::Compiled,
+        wasm_method: WasmExecutionMethod::Interpreted,
         tokio_handle: tokio::runtime::Handle::current(),
     };
 
@@ -75,7 +79,8 @@ pub async fn test_embedded_client() {
         .await
         .unwrap();
 
-    let api: test_runtime::node_runtime::RuntimeApi<DefaultConfig, DefaultExtra<_>> = ext_client.clone().to_runtime_api();
+    let api: node_runtime::RuntimeApi<DefaultConfig, DefaultExtra<_>> =
+        ext_client.clone().to_runtime_api();
 
     // verify that we can read storage
     api.storage()
@@ -88,7 +93,7 @@ pub async fn test_embedded_client() {
     let bob_address = AccountKeyring::Bob.to_account_id().into();
 
     // verify that we can call dispatchable functions
-    let events = api
+    let success = api
         .tx()
         .balances()
         .transfer(bob_address, 100_000)
@@ -97,10 +102,10 @@ pub async fn test_embedded_client() {
         .unwrap()
         .wait_for_finalized_success()
         .await
+        .unwrap()
+        .has_event::<system::events::ExtrinsicSuccess>()
         .unwrap();
 
-    panic!("{:?}", events);
-
     // verify that we receive events
-    // assert!(success);
+    assert!(success);
 }

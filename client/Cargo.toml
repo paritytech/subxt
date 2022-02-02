@@ -22,23 +22,28 @@ log = "0.4.13"
 thiserror = "1.0.23"
 serde_json = "1"
 
-sc-client-db = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sp-keyring = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sc-network = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
-sc-service = { git = "https://github.com/paritytech/substrate.git", branch = "master" }
+sc-client-db = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
+sp-keyring = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
+sc-network = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
+sc-service = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
 
 tokio = { version = "1.16", features = ["rt-multi-thread"] }
 
 [target.'cfg(target_arch="x86_64")'.dependencies]
-sc-service = { git = "https://github.com/paritytech/substrate.git", branch = "master", default-features = false, features = [
-    "wasmtime",
-] }
+sc-service = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0", features = ["wasmtime"] }
 
 [dev-dependencies]
 async-std = { version = "1.8.0", features = ["attributes"] }
 env_logger = "0.9"
 tracing-subscriber = { version = "0.3.3", features = ["env-filter"] }
-node-cli = { git = "https://github.com/paritytech/substrate.git", branch = "master", default-features = false }
+node-cli = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0", default-features = false }
 tempdir = "0.3.7"
 subxt = { path = "../subxt" }
+# TODO(niklasad1): we should probably generate some other runtime because of the
+# tag i.e. not "master".
 test-runtime = { path = "../test-runtime" }
+
+[patch.crates-io]
+sp-core = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
+sp-runtime = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
+sp-version = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
