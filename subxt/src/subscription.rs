@@ -39,6 +39,13 @@ use sp_core::{
 use sp_runtime::traits::Header;
 use std::collections::VecDeque;
 
+
+pub struct EventContext<T> {
+    pub block: T,
+    pub event_idx: usize,
+    pub event: RawEvent,
+}
+
 /// Event subscription simplifies filtering a storage change set stream for
 /// events of interest.
 pub struct EventSubscription<'a, T: Config> {
@@ -46,7 +53,7 @@ pub struct EventSubscription<'a, T: Config> {
     block: Option<T::Hash>,
     extrinsic: Option<usize>,
     event: Option<(&'static str, &'static str)>,
-    events: VecDeque<(<T as Config>::Hash, usize, RawEvent)>,
+    events: VecDeque<EventContext<T::Hash>>,
     finished: bool,
 }
 
@@ -135,7 +142,9 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     pub async fn next(&mut self) -> Option<Result<RawEvent, BasicError>> {
         self.next_context()
             .await
-            .map(|res| res.map(|(_, _, event)| event))
+            .map(|res| {
+                res.map(|ctx| ctx.event)
+            })
     }
     /// Gets the next event with the associated block hash and its corresponding
     /// event index.
@@ -162,7 +171,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
             match events {
                 Err(err) => return Some(Err(err)),
                 Ok(raw_events) => {
-                    for (phase, idx, raw) in raw_events {
+                    for (phase, event_idx, raw) in raw_events {
                         if let Some(ext_index) = self.extrinsic {
                             if !matches!(phase, Phase::ApplyExtrinsic(i) if i as usize == ext_index)
                             {
@@ -174,7 +183,13 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                                 continue
                             }
                         }
-                        self.events.push_back((received_hash, idx, raw));
+                        self.events.push_back(
+                            EventContext {
+                                block: received_hash,
+                                event_idx: event_idx,
+                                event: raw
+                            }
+                        );
                     }
                 }
             }
