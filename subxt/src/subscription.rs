@@ -43,8 +43,8 @@ use std::collections::VecDeque;
 /// corresponding event index.
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq, Clone))]
-pub struct EventContext<T> {
-    pub block: T,
+pub struct EventContext<Hash> {
+    pub block_hash: Hash,
     pub event_idx: usize,
     pub event: RawEvent,
 }
@@ -188,7 +188,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                         }
                         self.events.push_back(
                             EventContext {
-                                block: received_hash,
+                                block_hash: received_hash,
                                 event_idx: event_idx,
                                 event: raw
                             }
@@ -424,7 +424,7 @@ mod tests {
                             (
                                 phase.clone(),
                                 EventContext {
-                                    block: block_hash,
+                                    block_hash: block_hash,
                                     event_idx: idx,
                                     event: event.clone(),
                                 }
@@ -446,7 +446,7 @@ mod tests {
                 block_reader: BlockReader::Mock(Box::new(
                     vec![
                         (
-                            events[0].1.block,
+                            events[0].1.block_hash,
                             Ok(events
                                 .iter()
                                 .take(half_len)
@@ -456,7 +456,7 @@ mod tests {
                                 .collect()),
                         ),
                         (
-                            events[half_len].1.block,
+                            events[half_len].1.block_hash,
                             Ok(events
                                 .iter()
                                 .skip(half_len)
