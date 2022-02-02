@@ -1,0 +1,9 @@
+[workspace]
+
+members = [
+    "cli",
+    "codegen",
+    "macro",
+    "subxt",
+    "test-runtime"
+]
