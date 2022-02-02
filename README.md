@@ -8,6 +8,8 @@ A library to **sub**mit e**xt**rinsics to a [substrate](https://github.com/parit
 
 ## Usage
 
+Take a look in the [examples](./examples/examples) folder for various `subxt` usage examples.
+
 ### Downloading metadata from a Substrate node
 
 Use the [`subxt-cli`](./cli) tool to download the metadata for your target runtime from a node.
@@ -39,7 +41,7 @@ resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/enviro
 
 ### Initializing the API client
 
-API is still a work in progress. See [examples](./examples) for the current usage.
+API is still a work in progress. See [examples](./examples/examples) for the current usage.
 
 ### Querying Storage
 
