@@ -76,7 +76,7 @@ async fn run() {
             // It might take a while for substrate node that spin up the RPC server.
             // Thus, the connection might get rejected a few times.
             let res =
-                match rpc::build_ws_client(&format!("ws://localhost:{}", port)).await {
+                match rpc::ws_client(&format!("ws://localhost:{}", port)).await {
                     Ok(c) => c.request("state_getMetadata", None).await,
                     Err(e) => Err(e),
                 };
