@@ -373,7 +373,10 @@ pub enum EventsDecodingError {
 mod tests {
     use super::*;
     use crate::{
-        error::GenericError::EventsDecoding,
+        error::GenericError::{
+            Codec,
+            EventsDecoding,
+        },
         events::EventsDecodingError::UnsupportedPrimitive,
         Config,
         DefaultConfig,
@@ -677,5 +680,33 @@ mod tests {
 
         decode_and_consume_type_consumes_all_bytes(1u128);
         decode_and_consume_type_consumes_all_bytes(1i128);
+    }
+
+    #[test]
+    fn decode_tuple() {
+        decode_and_consume_type_consumes_all_bytes(());
+
+        decode_and_consume_type_consumes_all_bytes((true,));
+
+        decode_and_consume_type_consumes_all_bytes((true, "str"));
+
+        // Incomplete bytes for decoding
+        let dummy_data = false.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<(bool, &'static str)>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Codec(_)));
+
+        // Incomplete bytes for decoding, with invalid char type
+        let dummy_data = (false, "str", 0u8).encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<(bool, &'static str, char)>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(
+            res,
+            Err(EventsDecoding(UnsupportedPrimitive(TypeDefPrimitive::Char)))
+        );
+        // The last byte (0x0 u8) should not be consumed
+        assert_eq!(dummy_cursor.len(), 1);
     }
 }
