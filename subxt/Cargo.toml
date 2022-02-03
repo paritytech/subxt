@@ -30,8 +30,8 @@ url = "2.2.1"
 
 subxt-macro = { version = "0.16.0", path = "../macro" }
 
-sp-core = { version = "4.0.0", default-features = false  }
-sp-runtime = { version = "4.0.0", default-features = false }
+sp-core = { version = "5.0.0", default-features = false  }
+sp-runtime = { version = "5.0.0", default-features = false }
 sp-version = "4.0.0"
 
 frame-metadata = "14.0.0"
@@ -46,4 +46,4 @@ tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
 test-runtime = { path = "../test-runtime" }
-sp-keyring = "4.0.0"
+sp-keyring = "5.0.0"
