@@ -26,12 +26,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust nightly toolchain
+      - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly
-          target: wasm32-unknown-unknown
+          toolchain: stable
           override: true
 
       - name: Rust Cache

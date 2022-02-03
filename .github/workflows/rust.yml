@@ -32,12 +32,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust nightly toolchain
+      - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2021-12-15
-          target: wasm32-unknown-unknown
+          toolchain: stable
           override: true
 
       - name: Rust Cache
@@ -60,7 +59,7 @@ jobs:
         uses: actions-rs/toolchain@v1
         with:
             profile: minimal
-            toolchain: nightly-2021-12-15
+            toolchain: nightly
             override: true
             components: rustfmt
 
@@ -114,12 +113,11 @@ jobs:
             mkdir -p ~/.local/bin
             mv substrate ~/.local/bin
 
-      - name: Install Rust nightly toolchain
+      - name: Install Rust stable toolchain
         uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: nightly-2021-12-15
-          target: wasm32-unknown-unknown
+          toolchain: stable
           override: true
 
       - name: Rust Cache
