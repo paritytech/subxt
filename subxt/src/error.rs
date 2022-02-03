@@ -155,18 +155,6 @@ impl<E> RuntimeError<E> {
     }
 }
 
-/// Module error.
-#[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
-#[error("{error} from {pallet}")]
-pub struct PalletError {
-    /// The module where the error originated.
-    pub pallet: String,
-    /// The actual error code.
-    pub error: String,
-    /// The error description.
-    pub description: Vec<String>,
-}
-
 /// Transaction error.
 #[derive(Clone, Debug, Eq, thiserror::Error, PartialEq)]
 pub enum TransactionError {
