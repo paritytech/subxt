@@ -711,10 +711,14 @@ mod tests {
     }
 
     #[test]
-    fn decode_array() {
+    fn decode_array_and_seq() {
         decode_and_consume_type_consumes_all_bytes([0]);
         decode_and_consume_type_consumes_all_bytes([1, 2, 3, 4, 5]);
         decode_and_consume_type_consumes_all_bytes([0; 500]);
         decode_and_consume_type_consumes_all_bytes(["str", "abc", "cde"]);
+
+        decode_and_consume_type_consumes_all_bytes(vec![0]);
+        decode_and_consume_type_consumes_all_bytes(vec![1, 2, 3, 4, 5]);
+        decode_and_consume_type_consumes_all_bytes(vec!["str", "abc", "cde"]);
     }
 }
