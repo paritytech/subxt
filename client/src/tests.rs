@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
+    substrate,
     DatabaseSource,
     KeystoreConfig,
     Role,
@@ -31,10 +32,6 @@ use subxt::{
     PairSigner,
 };
 use tempdir::TempDir;
-use test_runtime::node_runtime::{
-    self,
-    system,
-};
 
 #[async_std::test]
 pub async fn test_embedded_client() {
@@ -79,7 +76,7 @@ pub async fn test_embedded_client() {
         .await
         .unwrap();
 
-    let api: node_runtime::RuntimeApi<DefaultConfig, DefaultExtra<_>> =
+    let api: substrate::RuntimeApi<DefaultConfig, DefaultExtra<_>> =
         ext_client.clone().to_runtime_api();
 
     // verify that we can read storage
@@ -103,7 +100,7 @@ pub async fn test_embedded_client() {
         .wait_for_finalized_success()
         .await
         .unwrap()
-        .has_event::<system::events::ExtrinsicSuccess>()
+        .has_event::<substrate::system::events::ExtrinsicSuccess>()
         .unwrap();
 
     // verify that we receive events

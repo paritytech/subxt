@@ -16,10 +16,11 @@
 
 //! Client for embedding substrate nodes.
 
-#![deny(missing_docs)]
-
 #[cfg(test)]
 mod tests;
+
+#[subxt::subxt(runtime_metadata_path = "metadata.scale")]
+pub mod substrate {}
 
 use async_std::task;
 use futures::{

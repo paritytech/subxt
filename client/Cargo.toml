@@ -16,11 +16,13 @@ keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]
 async-std = { version = "1.8.0", features = ["tokio1"] }
+codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 futures = "0.3.9"
 jsonrpsee = { version = "0.8.0", features = ["async-client"] }
 log = "0.4.13"
-thiserror = "1.0.23"
 serde_json = "1"
+subxt = { path = "../subxt" }
+thiserror = "1.0.23"
 
 sc-client-db = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
 sp-keyring = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
@@ -38,10 +40,6 @@ env_logger = "0.9"
 tracing-subscriber = { version = "0.3.3", features = ["env-filter"] }
 node-cli = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0", default-features = false }
 tempdir = "0.3.7"
-subxt = { path = "../subxt" }
-# TODO(niklasad1): we should probably generate some other runtime because of the
-# tag i.e. not "master".
-test-runtime = { path = "../test-runtime" }
 
 [patch.crates-io]
 sp-core = { git = "https://github.com/paritytech/substrate.git", tag = "publish-sp-version-v4.0.0" }
