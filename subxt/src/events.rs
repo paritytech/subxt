@@ -373,10 +373,13 @@ pub enum EventsDecodingError {
 mod tests {
     use super::*;
     use crate::{
+        error::GenericError::EventsDecoding,
+        events::EventsDecodingError::UnsupportedPrimitive,
         Config,
         DefaultConfig,
         Phase,
     };
+    use assert_matches::assert_matches;
     use codec::Encode;
     use frame_metadata::{
         v14::{
@@ -642,5 +645,37 @@ mod tests {
         decode_and_consume_type_consumes_all_bytes(
             bitvec::bitvec![Msb0, u64; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
+    }
+
+    #[test]
+    fn decode_primitive() {
+        decode_and_consume_type_consumes_all_bytes(false);
+        decode_and_consume_type_consumes_all_bytes(true);
+
+        let dummy_data = vec![0u8];
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<char>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(
+            res,
+            Err(EventsDecoding(UnsupportedPrimitive(TypeDefPrimitive::Char)))
+        );
+
+        decode_and_consume_type_consumes_all_bytes("str".to_string());
+
+        decode_and_consume_type_consumes_all_bytes(1u8);
+        decode_and_consume_type_consumes_all_bytes(1i8);
+
+        decode_and_consume_type_consumes_all_bytes(1u16);
+        decode_and_consume_type_consumes_all_bytes(1i16);
+
+        decode_and_consume_type_consumes_all_bytes(1u32);
+        decode_and_consume_type_consumes_all_bytes(1i32);
+
+        decode_and_consume_type_consumes_all_bytes(1u64);
+        decode_and_consume_type_consumes_all_bytes(1i64);
+
+        decode_and_consume_type_consumes_all_bytes(1u128);
+        decode_and_consume_type_consumes_all_bytes(1i128);
     }
 }
