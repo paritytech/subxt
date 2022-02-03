@@ -709,4 +709,12 @@ mod tests {
         // The last byte (0x0 u8) should not be consumed
         assert_eq!(dummy_cursor.len(), 1);
     }
+
+    #[test]
+    fn decode_array() {
+        decode_and_consume_type_consumes_all_bytes([0]);
+        decode_and_consume_type_consumes_all_bytes([1, 2, 3, 4, 5]);
+        decode_and_consume_type_consumes_all_bytes([0; 500]);
+        decode_and_consume_type_consumes_all_bytes(["str", "abc", "cde"]);
+    }
 }
