@@ -753,4 +753,54 @@ mod tests {
         let res = decode_and_consume_type(INVALID_TYPE_ID, &reg, dummy_cursor);
         assert_matches!(res, Err(crate::error::GenericError::Metadata(_)));
     }
+
+    #[test]
+    fn decode_composite() {
+        #[derive(Clone, Encode, TypeInfo)]
+        struct Composite {}
+        decode_and_consume_type_consumes_all_bytes(Composite {});
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV2 {
+            id: u32,
+            name: String,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompositeV2 {
+            id: 10,
+            name: "str".to_string(),
+        });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV3<T> {
+            id: u32,
+            extra: T,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: vec![0, 1, 2],
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: ("str", 1),
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: CompositeV2 {
+                id: 2,
+                name: "str".to_string(),
+            },
+        });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV4(u32, bool);
+        decode_and_consume_type_consumes_all_bytes(CompositeV4(1, true));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV5(u32);
+        decode_and_consume_type_consumes_all_bytes(CompositeV5(1));
+    }
 }
