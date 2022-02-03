@@ -32,7 +32,6 @@ use subxt::{
     PairSigner,
 };
 use tempdir::TempDir;
-use test_runtime::node_runtime::{self, system};
 
 #[async_std::test]
 pub async fn test_embedded_client() {
