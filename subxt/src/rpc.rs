@@ -544,7 +544,7 @@ impl<T: Config> Rpc<T> {
 }
 
 /// Build WS RPC client from URL
-pub async fn build_ws_client(url: &str) -> Result<RpcClient, RpcError> {
+pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
     let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
