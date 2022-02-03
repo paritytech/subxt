@@ -376,6 +376,7 @@ mod tests {
         error::GenericError::{
             Codec,
             EventsDecoding,
+            Other,
         },
         events::EventsDecodingError::UnsupportedPrimitive,
         Config,
@@ -720,5 +721,36 @@ mod tests {
         decode_and_consume_type_consumes_all_bytes(vec![0]);
         decode_and_consume_type_consumes_all_bytes(vec![1, 2, 3, 4, 5]);
         decode_and_consume_type_consumes_all_bytes(vec!["str", "abc", "cde"]);
+    }
+
+    #[test]
+    fn decode_variant() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum EnumVar {
+            A,
+            B((&'static str, u8)),
+            C { named: i16 },
+        }
+        const INVALID_TYPE_ID: u32 = 1024;
+
+        decode_and_consume_type_consumes_all_bytes(EnumVar::A);
+        decode_and_consume_type_consumes_all_bytes(EnumVar::B(("str", 1)));
+        decode_and_consume_type_consumes_all_bytes(EnumVar::C { named: 1 });
+
+        // Invalid variant index
+        let dummy_data = 3u8.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<EnumVar>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Other(_)));
+
+        // Valid index, incomplete data
+        let dummy_data = 2u8.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Codec(_)));
+
+        let res = decode_and_consume_type(INVALID_TYPE_ID, &reg, dummy_cursor);
+        assert_matches!(res, Err(crate::error::GenericError::Metadata(_)));
     }
 }
