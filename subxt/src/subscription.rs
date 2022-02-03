@@ -67,7 +67,13 @@ enum BlockReader<'a, T: Config> {
     },
     /// Mock event listener for unit tests
     #[cfg(test)]
-    Mock(Box<dyn Iterator<Item = (T::Hash, Result<Vec<(Phase, usize, RawEvent)>, BasicError>)>>),
+    Mock(
+        Box<
+            dyn Iterator<
+                Item = (T::Hash, Result<Vec<(Phase, usize, RawEvent)>, BasicError>),
+            >,
+        >,
+    ),
 }
 
 impl<'a, T: Config> BlockReader<'a, T> {
@@ -88,16 +94,13 @@ impl<'a, T: Config> BlockReader<'a, T> {
                     })
                     .collect();
 
-                let flattened_events =
-                    events.map(|x| {
-                        x.into_iter()
-                            .flatten()
-                            .enumerate()
-                            .map(|(event_idx, (phase, raw))| {
-                                (phase, event_idx, raw)
-                            })
-                            .collect()
-                    });
+                let flattened_events = events.map(|x| {
+                    x.into_iter()
+                        .flatten()
+                        .enumerate()
+                        .map(|(event_idx, (phase, raw))| (phase, event_idx, raw))
+                        .collect()
+                });
                 Some((change_set.block, flattened_events))
             }
             #[cfg(test)]
@@ -145,9 +148,7 @@ impl<'a, T: Config> EventSubscription<'a, T> {
     pub async fn next(&mut self) -> Option<Result<RawEvent, BasicError>> {
         self.next_context()
             .await
-            .map(|res| {
-                res.map(|ctx| ctx.event)
-            })
+            .map(|res| res.map(|ctx| ctx.event))
     }
     /// Gets the next event with the associated block hash and its corresponding
     /// event index.
@@ -186,13 +187,11 @@ impl<'a, T: Config> EventSubscription<'a, T> {
                                 continue
                             }
                         }
-                        self.events.push_back(
-                            EventContext {
-                                block_hash: received_hash,
-                                event_idx: event_idx,
-                                event: raw
-                            }
-                        );
+                        self.events.push_back(EventContext {
+                            block_hash: received_hash,
+                            event_idx,
+                            event: raw,
+                        });
                     }
                 }
             }
@@ -341,7 +340,6 @@ mod tests {
             event.3.variant_index = idx as u8;
         });
 
-
         let half_len = events.len() / 2;
 
         for block_filter in [None, Some(H256::from([1; 32]))] {
@@ -381,7 +379,8 @@ mod tests {
                             finished: false,
                         };
 
-                    let mut expected_events: Vec<(H256, Phase, usize, RawEvent)> = events.clone();
+                    let mut expected_events: Vec<(H256, Phase, usize, RawEvent)> =
+                        events.clone();
 
                     if let Some(hash) = block_filter {
                         expected_events.retain(|(h, _, _, _)| h == &hash);
@@ -420,16 +419,14 @@ mod tests {
                     .iter()
                     .enumerate()
                     .for_each(|(idx, event)| {
-                        events.push(
-                            (
-                                phase.clone(),
-                                EventContext {
-                                    block_hash: block_hash,
-                                    event_idx: idx,
-                                    event: event.clone(),
-                                }
-                            )
-                        );
+                        events.push((
+                            phase.clone(),
+                            EventContext {
+                                block_hash,
+                                event_idx: idx,
+                                event: event.clone(),
+                            },
+                        ));
                     });
             }
         }
@@ -441,47 +438,43 @@ mod tests {
 
         let half_len = events.len() / 2;
 
-        let mut subscription: EventSubscription<DefaultConfig> =
-            EventSubscription {
-                block_reader: BlockReader::Mock(Box::new(
-                    vec![
-                        (
-                            events[0].1.block_hash,
-                            Ok(events
-                                .iter()
-                                .take(half_len)
-                                .map(|(phase, ctx)| {
-                                    (phase.clone(), ctx.event_idx, ctx.event.clone())
-                                })
-                                .collect()),
-                        ),
-                        (
-                            events[half_len].1.block_hash,
-                            Ok(events
-                                .iter()
-                                .skip(half_len)
-                                .map(|(phase, ctx)| {
-                                    (phase.clone(), ctx.event_idx, ctx.event.clone())
-                                })
-                                .collect()),
-                        ),
-                    ]
-                    .into_iter(),
-                )),
-                block: None,
-                extrinsic: None,
-                event: None,
-                events: Default::default(),
-                finished: false,
-            };
+        let mut subscription: EventSubscription<DefaultConfig> = EventSubscription {
+            block_reader: BlockReader::Mock(Box::new(
+                vec![
+                    (
+                        events[0].1.block_hash,
+                        Ok(events
+                            .iter()
+                            .take(half_len)
+                            .map(|(phase, ctx)| {
+                                (phase.clone(), ctx.event_idx, ctx.event.clone())
+                            })
+                            .collect()),
+                    ),
+                    (
+                        events[half_len].1.block_hash,
+                        Ok(events
+                            .iter()
+                            .skip(half_len)
+                            .map(|(phase, ctx)| {
+                                (phase.clone(), ctx.event_idx, ctx.event.clone())
+                            })
+                            .collect()),
+                    ),
+                ]
+                .into_iter(),
+            )),
+            block: None,
+            extrinsic: None,
+            event: None,
+            events: Default::default(),
+            finished: false,
+        };
 
         let expected_events = events.clone();
 
         for exp in expected_events {
-            assert_eq!(
-                subscription.next_context().await.unwrap().unwrap(),
-                exp.1
-            );
+            assert_eq!(subscription.next_context().await.unwrap().unwrap(), exp.1);
         }
         assert!(subscription.next().await.is_none());
     }
