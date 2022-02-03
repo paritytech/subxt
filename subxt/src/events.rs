@@ -803,4 +803,32 @@ mod tests {
         struct CompositeV5(u32);
         decode_and_consume_type_consumes_all_bytes(CompositeV5(1));
     }
+
+    #[test]
+    fn decode_compact() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Compact {
+            A(#[codec(compact)] u32),
+        }
+        decode_and_consume_type_consumes_all_bytes(Compact::A(1));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV2(#[codec(compact)] u32);
+        decode_and_consume_type_consumes_all_bytes(CompactV2(1));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV3 {
+            #[codec(compact)]
+            val: u32,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompactV3 { val: 1 });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV4<T> {
+            #[codec(compact)]
+            val: T,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 0u8 });
+        decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 1u16 });
+    }
 }
