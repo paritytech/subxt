@@ -35,7 +35,10 @@ use crate::{
         Metadata,
         MetadataError,
     },
-    rpc::Rpc,
+    rpc::{
+        Rpc,
+        SubxtRpcApiClient,
+    },
     Config,
     StorageHasher,
 };
@@ -164,7 +167,14 @@ impl<'a, T: Config> StorageClient<'a, T> {
         key: StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<V>, BasicError> {
-        if let Some(data) = self.rpc.storage(&key, hash).await? {
+        if let Some(data) =
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::storage(
+                &*self.rpc.client,
+                &key,
+                hash,
+            )
+            .await?
+        {
             Ok(Some(Decode::decode(&mut &data.0[..])?))
         } else {
             Ok(None)
@@ -177,7 +187,13 @@ impl<'a, T: Config> StorageClient<'a, T> {
         key: StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, BasicError> {
-        self.rpc.storage(&key, hash).await
+        SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::storage(
+            &*self.rpc.client,
+            &key,
+            hash,
+        )
+        .await
+        .map_err(Into::into)
     }
 
     /// Fetch a StorageKey with an optional block hash.
@@ -215,7 +231,14 @@ impl<'a, T: Config> StorageClient<'a, T> {
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        self.rpc.query_storage(keys, from, to).await
+        SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::query_storage(
+            &*self.rpc.client,
+            keys,
+            from,
+            to,
+        )
+        .await
+        .map_err(Into::into)
     }
 
     /// Fetch up to `count` keys for a storage map in lexicographic order.
@@ -227,10 +250,15 @@ impl<'a, T: Config> StorageClient<'a, T> {
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = StorageKeyPrefix::new::<F>();
-        let keys = self
-            .rpc
-            .storage_keys_paged(Some(prefix), count, start_key, hash)
+        let prefix = StorageKeyPrefix::new::<F>().to_storage_key();
+        let keys =
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::storage_keys_paged(
+                &*self.rpc.client,
+                Some(prefix),
+                count,
+                start_key,
+                hash,
+            )
             .await?;
         Ok(keys)
     }
@@ -243,10 +271,12 @@ impl<'a, T: Config> StorageClient<'a, T> {
         let hash = if let Some(hash) = hash {
             hash
         } else {
-            self.rpc
-                .block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed")
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::block_hash(
+                &*self.rpc.client,
+                None,
+            )
+            .await?
+            .expect("didn't pass a block number; qed")
         };
         Ok(KeyIter {
             client: self.clone(),
@@ -287,10 +317,12 @@ impl<'a, T: Config, F: StorageEntry> KeyIter<'a, T, F> {
 
                 self.start_key = keys.last().cloned();
 
-                let change_sets = self
-                    .client
-                    .rpc
-                    .query_storage_at(&keys, Some(self.hash))
+                let change_sets =
+                    SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::query_storage_at(
+                        &*self.client.rpc.client,
+                        &keys,
+                        Some(self.hash),
+                    )
                     .await?;
                 for change_set in change_sets {
                     for (k, v) in change_set.changes {

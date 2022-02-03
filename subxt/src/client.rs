@@ -31,6 +31,7 @@ use crate::{
         Rpc,
         RpcClient,
         RuntimeVersion,
+        SubxtRpcApiClient,
         SystemProperties,
     },
     storage::StorageClient,
@@ -89,14 +90,21 @@ impl ClientBuilder {
             crate::rpc::build_ws_client(url).await?
         };
         let rpc = Rpc::new(client);
-        let (metadata, genesis_hash, runtime_version, properties) = future::join4(
-            rpc.metadata(),
-            rpc.genesis_hash(),
-            rpc.runtime_version(None),
-            rpc.system_properties(),
+        let (metadata_bytes, genesis_hash, runtime_version, properties) = future::join4(
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::metadata(&*rpc),
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::genesis_hash(&*rpc),
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::runtime_version(
+                &*rpc, None,
+            ),
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::system_properties(
+                &*rpc,
+            ),
         )
         .await;
-        let metadata = metadata?;
+        let metadata_bytes = metadata_bytes?;
+        let meta: frame_metadata::RuntimeMetadataPrefixed =
+            Decode::decode(&mut &metadata_bytes[..])?;
+        let metadata: Metadata = meta.try_into()?;
 
         let events_decoder = EventsDecoder::new(metadata.clone());
 

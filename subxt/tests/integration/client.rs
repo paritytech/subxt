@@ -19,6 +19,11 @@ use crate::{
     test_node_process_with,
     utils::node_runtime::system,
 };
+use subxt::{
+    rpc::SubxtRpcApiClient,
+    Config,
+    DefaultConfig,
+};
 
 use sp_core::storage::{
     well_known_keys,
@@ -127,7 +132,22 @@ async fn test_iter() {
 async fn fetch_system_info() {
     let node_process = test_node_process().await;
     let client = node_process.client();
-    assert_eq!(client.rpc().system_chain().await.unwrap(), "Development");
-    assert_eq!(client.rpc().system_name().await.unwrap(), "Substrate Node");
-    assert!(!client.rpc().system_version().await.unwrap().is_empty());
+    let rpc = client.rpc().client.clone();
+
+    type Hash = <DefaultConfig as Config>::Hash;
+
+    assert_eq!(
+        SubxtRpcApiClient::<Hash>::system_chain(&*rpc)
+            .await
+            .unwrap(),
+        "Development"
+    );
+    assert_eq!(
+        SubxtRpcApiClient::<Hash>::system_name(&*rpc).await.unwrap(),
+        "Substrate Node"
+    );
+    assert!(!SubxtRpcApiClient::<Hash>::system_version(&*rpc)
+        .await
+        .unwrap()
+        .is_empty());
 }

@@ -31,7 +31,10 @@ use crate::{
         RuntimeError,
         TransactionError,
     },
-    rpc::SubstrateTransactionStatus,
+    rpc::{
+        SubstrateTransactionStatus,
+        SubxtRpcApiClient,
+    },
     subscription::SystemEvents,
     Config,
     Phase,
@@ -389,12 +392,12 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
     pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
-        let block = self
-            .client
-            .rpc()
-            .block(Some(self.block_hash))
-            .await?
-            .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
+        let block = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::block(
+            &*self.client.rpc().client,
+            Some(self.block_hash),
+        )
+        .await?
+        .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
         let extrinsic_idx = block.block.extrinsics
             .iter()
@@ -406,16 +409,14 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let raw_events = self
-            .client
-            .rpc()
-            .storage(
-                &StorageKey::from(SystemEvents::new()),
-                Some(self.block_hash),
-            )
-            .await?
-            .map(|s| s.0)
-            .unwrap_or_else(Vec::new);
+        let raw_events = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::storage(
+            &*self.client.rpc().client,
+            &StorageKey::from(SystemEvents::new()),
+            Some(self.block_hash),
+        )
+        .await?
+        .map(|s| s.0)
+        .unwrap_or_else(Vec::new);
 
         let events = self
             .client

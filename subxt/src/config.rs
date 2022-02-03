@@ -78,7 +78,13 @@ pub trait Config: 'static {
     type Signature: Verify + Encode + Send + Sync + 'static;
 
     /// Extrinsic type within blocks.
-    type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+    // TODO(niklasad1): I have no idea if this ok or not ^^
+    type Extrinsic: Parameter
+        + Extrinsic
+        + Debug
+        + MaybeSerializeDeserialize
+        + Send
+        + Sync;
 }
 
 /// Parameter trait copied from `substrate::frame_support`

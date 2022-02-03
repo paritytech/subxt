@@ -23,29 +23,22 @@
 
 use std::{
     collections::HashMap,
+    ops::Deref,
     sync::Arc,
 };
 
 use crate::{
     error::BasicError,
-    storage::StorageKeyPrefix,
     subscription::{
         EventStorageSubscription,
         FinalizedEventStorageSubscription,
         SystemEvents,
     },
     Config,
-    Metadata,
 };
-use codec::{
-    Decode,
-    Encode,
-};
-use core::{
-    convert::TryInto,
-    marker::PhantomData,
-};
-use frame_metadata::RuntimeMetadataPrefixed;
+use codec::Encode;
+use core::marker::PhantomData;
+use jsonrpsee::core::RpcResult;
 pub use jsonrpsee::{
     client_transport::ws::{
         InvalidUri,
@@ -67,6 +60,7 @@ pub use jsonrpsee::{
         Error as RpcError,
         JsonValue,
     },
+    proc_macros::rpc,
     rpc_params,
 };
 use serde::{
@@ -86,6 +80,132 @@ use sp_runtime::generic::{
     Block,
     SignedBlock,
 };
+
+/// subxt RPC API.
+#[rpc(client)]
+pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
+    /// Fetch a storage key
+    #[method(name = "state_getStorage")]
+    async fn storage(
+        &self,
+        key: &StorageKey,
+        hash: Option<Hash>,
+    ) -> RpcResult<Option<StorageData>>;
+
+    /// Returns the keys with prefix with pagination support.
+    /// Up to `count` keys will be returned.
+    /// If `start_key` is passed, return next keys in storage in lexicographic order.
+    #[method(name = "state_getKeysPaged")]
+    async fn storage_keys_paged(
+        &self,
+        prefix: Option<StorageKey>,
+        count: u32,
+        start_key: Option<StorageKey>,
+        hash: Option<Hash>,
+    ) -> RpcResult<Vec<StorageKey>>;
+
+    /// Query historical storage entries
+    #[method(name = "state_queryStorage")]
+    async fn query_storage(
+        &self,
+        keys: Vec<StorageKey>,
+        from: Hash,
+        to: Option<Hash>,
+    ) -> RpcResult<Vec<StorageChangeSet<Hash>>>;
+
+    /// Query historical storage entries
+    #[method(name = "state_queryStorageAt")]
+    async fn query_storage_at(
+        &self,
+        keys: &[StorageKey],
+        at: Option<Hash>,
+    ) -> RpcResult<Vec<StorageChangeSet<Hash>>>;
+
+    /// Fetch the genesis hash
+    #[method(name = "chain_getBlockHash")]
+    async fn genesis_hash(&self) -> RpcResult<Hash>;
+
+    /// Fetch the metadata as bytes.
+    #[method(name = "state_getMetadata")]
+    async fn metadata(&self) -> RpcResult<sp_core::Bytes>;
+
+    /// Fetch system properties
+    #[method(name = "system_properties")]
+    async fn system_properties(&self) -> RpcResult<SystemProperties>;
+
+    /// Fetch system chain
+    #[method(name = "system_chain")]
+    async fn system_chain(&self) -> RpcResult<String>;
+
+    /// Fetch system name
+    #[method(name = "system_name")]
+    async fn system_name(&self) -> RpcResult<String>;
+
+    /// Fetch system version
+    #[method(name = "system_version")]
+    async fn system_version(&self) -> RpcResult<String>;
+
+    /// Fetch the runtime version
+    #[method(name = "state_getRuntimeVersion")]
+    async fn runtime_version(&self, at: Option<Hash>) -> RpcResult<RuntimeVersion>;
+
+    /// Get a header
+    #[method(name = "state_getRuntimeVersion")]
+    async fn header(&self, hash: Option<Hash>) -> RpcResult<Option<Header>>;
+
+    /// Get a block hash, returns hash of latest block by default
+    #[method(name = "chain_getBlockHash")]
+    async fn block_hash(
+        &self,
+        block_number: Option<BlockNumber>,
+    ) -> RpcResult<Option<Hash>>;
+
+    /// Get a block hash of the latest finalized block
+    #[method(name = "chain_getFinalizedHead")]
+    async fn finalized_head(&self) -> RpcResult<Hash>;
+
+    /// Get proof of storage entries at a specific block's state.
+    #[method(name = "state_getReadProof")]
+    async fn read_proof(
+        &self,
+        keys: Vec<StorageKey>,
+        hash: Option<Hash>,
+    ) -> RpcResult<ReadProof<Hash>>;
+
+    /// Get a Block
+    #[method(name = "chain_getBlock")]
+    async fn block(
+        &self,
+        hash: Option<Hash>,
+    ) -> RpcResult<Option<SignedBlock<Block<Header, Xt>>>>;
+
+    /// Insert a key into the keystore.
+    #[method(name = "author_insertKey")]
+    async fn insert_key(
+        &self,
+        key_type: String,
+        suri: String,
+        public: Bytes,
+    ) -> RpcResult<()>;
+
+    /// Generate new session keys and returns the corresponding public keys.
+    #[method(name = "author_rotateKeys")]
+    async fn rotate_keys(&self) -> RpcResult<Bytes>;
+
+    /// Checks if the keystore has private keys for the given session public keys.
+    ///
+    /// `session_keys` is the SCALE encoded session keys object from the runtime.
+    ///
+    /// Returns `true` iff all private keys could be found.
+    #[method(name = "author_hasSessionKeys")]
+    async fn has_session_keys(&self, session_keys: Bytes) -> RpcResult<bool>;
+
+    /// Checks if the keystore has private keys for the given public key and key type.
+    ///
+    /// Returns `true` if a private key could be found.
+    #[method(name = "author_hasKey")]
+    async fn has_key(&self, public_key: Bytes, key_type: String) -> RpcResult<bool>;
+}
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -228,6 +348,14 @@ impl<T: Config> Clone for Rpc<T> {
     }
 }
 
+impl<T: Config> Deref for Rpc<T> {
+    type Target = RpcClient;
+
+    fn deref(&self) -> &Self::Target {
+        &*self.client
+    }
+}
+
 impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
@@ -235,175 +363,6 @@ impl<T: Config> Rpc<T> {
             client: Arc::new(client),
             marker: PhantomData,
         }
-    }
-
-    /// Fetch a storage key
-    pub async fn storage(
-        &self,
-        key: &StorageKey,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, BasicError> {
-        let params = rpc_params![key, hash];
-        let data = self.client.request("state_getStorage", params).await?;
-        Ok(data)
-    }
-
-    /// Returns the keys with prefix with pagination support.
-    /// Up to `count` keys will be returned.
-    /// If `start_key` is passed, return next keys in storage in lexicographic order.
-    pub async fn storage_keys_paged(
-        &self,
-        prefix: Option<StorageKeyPrefix>,
-        count: u32,
-        start_key: Option<StorageKey>,
-        hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = prefix.map(|p| p.to_storage_key());
-        let params = rpc_params![prefix, count, start_key, hash];
-        let data = self.client.request("state_getKeysPaged", params).await?;
-        Ok(data)
-    }
-
-    /// Query historical storage entries
-    pub async fn query_storage(
-        &self,
-        keys: Vec<StorageKey>,
-        from: T::Hash,
-        to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        let params = rpc_params![keys, from, to];
-        self.client
-            .request("state_queryStorage", params)
-            .await
-            .map_err(Into::into)
-    }
-
-    /// Query historical storage entries
-    pub async fn query_storage_at(
-        &self,
-        keys: &[StorageKey],
-        at: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        let params = rpc_params![keys, at];
-        self.client
-            .request("state_queryStorageAt", params)
-            .await
-            .map_err(Into::into)
-    }
-
-    /// Fetch the genesis hash
-    pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
-        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
-        let params = rpc_params![block_zero];
-        let list_or_value: ListOrValue<Option<T::Hash>> =
-            self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(genesis_hash) => {
-                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-            }
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
-    }
-
-    /// Fetch the metadata
-    pub async fn metadata(&self) -> Result<Metadata, BasicError> {
-        let bytes: Bytes = self
-            .client
-            .request("state_getMetadata", rpc_params![])
-            .await?;
-        let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
-        let metadata: Metadata = meta.try_into()?;
-        Ok(metadata)
-    }
-
-    /// Fetch system properties
-    pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
-        Ok(self
-            .client
-            .request("system_properties", rpc_params![])
-            .await?)
-    }
-
-    /// Fetch system chain
-    pub async fn system_chain(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_chain", rpc_params![]).await?)
-    }
-
-    /// Fetch system name
-    pub async fn system_name(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_name", rpc_params![]).await?)
-    }
-
-    /// Fetch system version
-    pub async fn system_version(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_version", rpc_params![]).await?)
-    }
-
-    /// Get a header
-    pub async fn header(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<T::Header>, BasicError> {
-        let params = rpc_params![hash];
-        let header = self.client.request("chain_getHeader", params).await?;
-        Ok(header)
-    }
-
-    /// Get a block hash, returns hash of latest block by default
-    pub async fn block_hash(
-        &self,
-        block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, BasicError> {
-        let block_number = block_number.map(ListOrValue::Value);
-        let params = rpc_params![block_number];
-        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(hash) => Ok(hash),
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
-    }
-
-    /// Get a block hash of the latest finalized block
-    pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
-        let hash = self
-            .client
-            .request("chain_getFinalizedHead", rpc_params![])
-            .await?;
-        Ok(hash)
-    }
-
-    /// Get a Block
-    pub async fn block(
-        &self,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<ChainBlock<T>>, BasicError> {
-        let params = rpc_params![hash];
-        let block = self.client.request("chain_getBlock", params).await?;
-        Ok(block)
-    }
-
-    /// Get proof of storage entries at a specific block's state.
-    pub async fn read_proof(
-        &self,
-        keys: Vec<StorageKey>,
-        hash: Option<T::Hash>,
-    ) -> Result<ReadProof<T::Hash>, BasicError> {
-        let params = rpc_params![keys, hash];
-        let proof = self.client.request("state_getReadProof", params).await?;
-        Ok(proof)
-    }
-
-    /// Fetch the runtime version
-    pub async fn runtime_version(
-        &self,
-        at: Option<T::Hash>,
-    ) -> Result<RuntimeVersion, BasicError> {
-        let params = rpc_params![at];
-        let version = self
-            .client
-            .request("state_getRuntimeVersion", params)
-            .await?;
-        Ok(version)
     }
 
     /// Subscribe to System Events that are imported into blocks.
@@ -495,51 +454,6 @@ impl<T: Config> Rpc<T> {
             )
             .await?;
         Ok(subscription)
-    }
-
-    /// Insert a key into the keystore.
-    pub async fn insert_key(
-        &self,
-        key_type: String,
-        suri: String,
-        public: Bytes,
-    ) -> Result<(), BasicError> {
-        let params = rpc_params![key_type, suri, public];
-        self.client.request("author_insertKey", params).await?;
-        Ok(())
-    }
-
-    /// Generate new session keys and returns the corresponding public keys.
-    pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
-        Ok(self
-            .client
-            .request("author_rotateKeys", rpc_params![])
-            .await?)
-    }
-
-    /// Checks if the keystore has private keys for the given session public keys.
-    ///
-    /// `session_keys` is the SCALE encoded session keys object from the runtime.
-    ///
-    /// Returns `true` iff all private keys could be found.
-    pub async fn has_session_keys(
-        &self,
-        session_keys: Bytes,
-    ) -> Result<bool, BasicError> {
-        let params = rpc_params![session_keys];
-        Ok(self.client.request("author_hasSessionKeys", params).await?)
-    }
-
-    /// Checks if the keystore has private keys for the given public key and key type.
-    ///
-    /// Returns `true` if a private key could be found.
-    pub async fn has_key(
-        &self,
-        public_key: Bytes,
-        key_type: String,
-    ) -> Result<bool, BasicError> {
-        let params = rpc_params![public_key, key_type];
-        Ok(self.client.request("author_hasKey", params).await?)
     }
 }
 

@@ -20,7 +20,10 @@ use crate::{
         EventsDecoder,
         RawEvent,
     },
-    rpc::Rpc,
+    rpc::{
+        Rpc,
+        SubxtRpcApiClient,
+    },
     Config,
     Event,
     Phase,
@@ -210,10 +213,13 @@ impl<T: Config> FinalizedEventStorageSubscription<T> {
                 read_subscription_response("HeaderSubscription", &mut self.subscription)
                     .await?;
             self.storage_changes.extend(
-                self.rpc
-                    .query_storage_at(&[self.storage_key.clone()], Some(header.hash()))
-                    .await
-                    .ok()?,
+                SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::query_storage_at(
+                    &*self.rpc.client,
+                    &[self.storage_key.clone()],
+                    Some(header.hash()),
+                )
+                .await
+                .ok()?,
             );
         }
     }
