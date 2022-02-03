@@ -6,5 +6,5 @@ members = [
     "examples",
     "macro",
     "subxt",
-    "test-runtime",
+    "test-runtime"
 ]
