@@ -14,10 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use jsonrpsee::{
-    core::client::ClientT,
-    http_client::HttpClientBuilder,
-};
 use std::{
     env,
     fs,
@@ -34,6 +30,10 @@ use std::{
     },
     thread,
     time,
+};
+use subxt::rpc::{
+    self,
+    ClientT,
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
@@ -54,7 +54,7 @@ async fn run() {
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
-        .arg(format!("--rpc-port={}", port))
+        .arg(format!("--ws-port={}", port))
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
@@ -67,15 +67,20 @@ async fn run() {
     let metadata_bytes: sp_core::Bytes = {
         const MAX_RETRIES: usize = 20;
         let mut retries = 0;
-        let rpc_client = HttpClientBuilder::default()
-            .build(&format!("http://localhost:{}", port))
-            .expect("valid URL; qed");
 
         loop {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
             }
-            let res = rpc_client.request("state_getMetadata", None).await;
+
+            // It might take a while for substrate node that spin up the RPC server.
+            // Thus, the connection might get rejected a few times.
+            let res =
+                match rpc::build_ws_client(&format!("ws://localhost:{}", port)).await {
+                    Ok(c) => c.request("state_getMetadata", None).await,
+                    Err(e) => Err(e),
+                };
+
             match res {
                 Ok(res) => {
                     let _ = cmd.kill();
