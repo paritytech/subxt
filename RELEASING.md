@@ -46,7 +46,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     Additionally, `subxt-macro` has a circular dev dependency on `subxt`, so we use `cargo hack` to remove
     dev dependencies (and `--allow-dirty` to ignore the git changes as a result) to publish it.
 
-    So, first install `cargo hack` with `cargo install cargo hack`. Next, you can run something like the following
+    So, first install [cargo-hack](https://docs.rs/crate/cargo-hack/latest) with `cargo install cargo-hack`. Next, you can run something like the following
     command to publish each crate in the required order (allowing a little time in between each to let `crates.io` catch up
     with what we've published).
 
