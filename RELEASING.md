@@ -31,7 +31,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
-    Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+is%3Aclosed) between the last release and
+    Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed) between the last release and
     this release branch should be noted.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
