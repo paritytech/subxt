@@ -47,7 +47,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     dev dependencies (and `--allow-dirty` to ignore the git changes as a result) to publish it.
 
     So, first install `cargo hack` with `cargo install cargo hack`. Next, you can run something like the following
-    command to publish each crate in the required order (allowing a little time inbetween each to let `crates.io` catch up)
+    command to publish each crate in the required order (allowing a little time in between each to let `crates.io` catch up
     with what we've published).
 
     ```
