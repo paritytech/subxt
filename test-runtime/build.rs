@@ -31,6 +31,10 @@ use std::{
     thread,
     time,
 };
+use subxt::rpc::{
+    self,
+    ClientT,
+};
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
@@ -50,7 +54,7 @@ async fn run() {
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
-        .arg(format!("--rpc-port={}", port))
+        .arg(format!("--ws-port={}", port))
         .spawn();
     let mut cmd = match cmd {
         Ok(cmd) => KillOnDrop(cmd),
@@ -63,16 +67,19 @@ async fn run() {
     let metadata_bytes: sp_core::Bytes = {
         const MAX_RETRIES: usize = 20;
         let mut retries = 0;
+
         loop {
             if retries >= MAX_RETRIES {
                 panic!("Cannot connect to substrate node after {} retries", retries);
             }
-            let res =
-                subxt::RpcClient::try_from_url(&format!("http://localhost:{}", port))
-                    .await
-                    .expect("should only error if malformed URL for an HTTP connection")
-                    .request("state_getMetadata", &[])
-                    .await;
+
+            // It might take a while for substrate node that spin up the RPC server.
+            // Thus, the connection might get rejected a few times.
+            let res = match rpc::ws_client(&format!("ws://localhost:{}", port)).await {
+                Ok(c) => c.request("state_getMetadata", None).await,
+                Err(e) => Err(e),
+            };
+
             match res {
                 Ok(res) => {
                     let _ = cmd.kill();

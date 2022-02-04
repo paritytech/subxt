@@ -46,10 +46,18 @@ use core::{
     marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
-use jsonrpsee::{
+pub use jsonrpsee::{
+    client_transport::ws::{
+        InvalidUri,
+        Receiver as WsReceiver,
+        Sender as WsSender,
+        Uri,
+        WsTransportClientBuilder,
+    },
     core::{
         client::{
-            Client,
+            Client as RpcClient,
+            ClientBuilder as RpcClientBuilder,
             ClientT,
             Subscription,
             SubscriptionClientT,
@@ -59,11 +67,7 @@ use jsonrpsee::{
         Error as RpcError,
         JsonValue,
     },
-    http_client::{
-        HttpClient,
-        HttpClientBuilder,
-    },
-    ws_client::WsClientBuilder,
+    rpc_params,
 };
 use serde::{
     Deserialize,
@@ -193,99 +197,6 @@ pub struct RuntimeVersion {
     pub other: HashMap<String, serde_json::Value>,
 }
 
-/// Rpc client wrapper.
-/// This is workaround because adding generic types causes the macros to fail.
-#[derive(Clone)]
-pub enum RpcClient {
-    /// JSONRPC client WebSocket transport.
-    WebSocket(Arc<Client>),
-    /// JSONRPC client HTTP transport.
-    // NOTE: Arc because `HttpClient` is not clone.
-    Http(Arc<HttpClient>),
-}
-
-impl RpcClient {
-    /// Create a new [`RpcClient`] from the given URL.
-    ///
-    /// Infers the protocol from the URL, supports:
-    ///     - Websockets (`ws://`, `wss://`)
-    ///     - Http (`http://`, `https://`)
-    pub async fn try_from_url(url: &str) -> Result<Self, RpcError> {
-        if url.starts_with("ws://") || url.starts_with("wss://") {
-            let client = WsClientBuilder::default()
-                .max_notifs_per_subscription(4096)
-                .build(url)
-                .await?;
-            Ok(RpcClient::WebSocket(Arc::new(client)))
-        } else {
-            let client = HttpClientBuilder::default().build(&url)?;
-            Ok(RpcClient::Http(Arc::new(client)))
-        }
-    }
-
-    /// Start a JSON-RPC request.
-    pub async fn request<'a, T: DeserializeOwned + std::fmt::Debug>(
-        &self,
-        method: &str,
-        params: &[JsonValue],
-    ) -> Result<T, RpcError> {
-        let params = Some(params.into());
-        log::debug!("request {}: {:?}", method, params);
-        let data = match self {
-            RpcClient::WebSocket(inner) => inner.request(method, params).await,
-            RpcClient::Http(inner) => inner.request(method, params).await,
-        };
-        log::debug!("response: {:?}", data);
-        data
-    }
-
-    /// Start a JSON-RPC Subscription.
-    pub async fn subscribe<'a, T: DeserializeOwned>(
-        &self,
-        subscribe_method: &str,
-        params: &[JsonValue],
-        unsubscribe_method: &str,
-    ) -> Result<Subscription<T>, RpcError> {
-        let params = Some(params.into());
-        match self {
-            RpcClient::WebSocket(inner) => {
-                inner
-                    .subscribe(subscribe_method, params, unsubscribe_method)
-                    .await
-            }
-            RpcClient::Http(_) => {
-                Err(RpcError::Custom(
-                    "Subscriptions not supported on HTTP transport".to_owned(),
-                ))
-            }
-        }
-    }
-}
-
-impl From<Client> for RpcClient {
-    fn from(client: Client) -> Self {
-        RpcClient::WebSocket(Arc::new(client))
-    }
-}
-
-impl From<Arc<Client>> for RpcClient {
-    fn from(client: Arc<Client>) -> Self {
-        RpcClient::WebSocket(client)
-    }
-}
-
-impl From<HttpClient> for RpcClient {
-    fn from(client: HttpClient) -> Self {
-        RpcClient::Http(Arc::new(client))
-    }
-}
-
-impl From<Arc<HttpClient>> for RpcClient {
-    fn from(client: Arc<HttpClient>) -> Self {
-        RpcClient::Http(client)
-    }
-}
-
 /// ReadProof struct returned by the RPC
 ///
 /// # Note
@@ -304,7 +215,7 @@ pub struct ReadProof<Hash> {
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
-    pub client: RpcClient,
+    pub client: Arc<RpcClient>,
     marker: PhantomData<T>,
 }
 
@@ -321,7 +232,7 @@ impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
         Self {
-            client,
+            client: Arc::new(client),
             marker: PhantomData,
         }
     }
@@ -332,7 +243,7 @@ impl<T: Config> Rpc<T> {
         key: &StorageKey,
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, BasicError> {
-        let params = &[to_json_value(key)?, to_json_value(hash)?];
+        let params = rpc_params![key, hash];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
@@ -348,12 +259,7 @@ impl<T: Config> Rpc<T> {
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
         let prefix = prefix.map(|p| p.to_storage_key());
-        let params = &[
-            to_json_value(prefix)?,
-            to_json_value(count)?,
-            to_json_value(start_key)?,
-            to_json_value(hash)?,
-        ];
+        let params = rpc_params![prefix, count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -365,11 +271,7 @@ impl<T: Config> Rpc<T> {
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        let params = &[
-            to_json_value(keys)?,
-            to_json_value(from)?,
-            to_json_value(to)?,
-        ];
+        let params = rpc_params![keys, from, to];
         self.client
             .request("state_queryStorage", params)
             .await
@@ -382,7 +284,7 @@ impl<T: Config> Rpc<T> {
         keys: &[StorageKey],
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        let params = &[to_json_value(keys)?, to_json_value(at)?];
+        let params = rpc_params![keys, at];
         self.client
             .request("state_queryStorageAt", params)
             .await
@@ -392,7 +294,7 @@ impl<T: Config> Rpc<T> {
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
         let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
-        let params = &[to_json_value(block_zero)?];
+        let params = rpc_params![block_zero];
         let list_or_value: ListOrValue<Option<T::Hash>> =
             self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
@@ -405,7 +307,10 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch the metadata
     pub async fn metadata(&self) -> Result<Metadata, BasicError> {
-        let bytes: Bytes = self.client.request("state_getMetadata", &[]).await?;
+        let bytes: Bytes = self
+            .client
+            .request("state_getMetadata", rpc_params![])
+            .await?;
         let meta: RuntimeMetadataPrefixed = Decode::decode(&mut &bytes[..])?;
         let metadata: Metadata = meta.try_into()?;
         Ok(metadata)
@@ -413,22 +318,25 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch system properties
     pub async fn system_properties(&self) -> Result<SystemProperties, BasicError> {
-        Ok(self.client.request("system_properties", &[]).await?)
+        Ok(self
+            .client
+            .request("system_properties", rpc_params![])
+            .await?)
     }
 
     /// Fetch system chain
     pub async fn system_chain(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_chain", &[]).await?)
+        Ok(self.client.request("system_chain", rpc_params![]).await?)
     }
 
     /// Fetch system name
     pub async fn system_name(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_name", &[]).await?)
+        Ok(self.client.request("system_name", rpc_params![]).await?)
     }
 
     /// Fetch system version
     pub async fn system_version(&self) -> Result<String, BasicError> {
-        Ok(self.client.request("system_version", &[]).await?)
+        Ok(self.client.request("system_version", rpc_params![]).await?)
     }
 
     /// Get a header
@@ -436,7 +344,7 @@ impl<T: Config> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<T::Header>, BasicError> {
-        let params = &[to_json_value(hash)?];
+        let params = rpc_params![hash];
         let header = self.client.request("chain_getHeader", params).await?;
         Ok(header)
     }
@@ -447,7 +355,7 @@ impl<T: Config> Rpc<T> {
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, BasicError> {
         let block_number = block_number.map(ListOrValue::Value);
-        let params = &[to_json_value(block_number)?];
+        let params = rpc_params![block_number];
         let list_or_value = self.client.request("chain_getBlockHash", params).await?;
         match list_or_value {
             ListOrValue::Value(hash) => Ok(hash),
@@ -457,7 +365,10 @@ impl<T: Config> Rpc<T> {
 
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
-        let hash = self.client.request("chain_getFinalizedHead", &[]).await?;
+        let hash = self
+            .client
+            .request("chain_getFinalizedHead", rpc_params![])
+            .await?;
         Ok(hash)
     }
 
@@ -466,7 +377,7 @@ impl<T: Config> Rpc<T> {
         &self,
         hash: Option<T::Hash>,
     ) -> Result<Option<ChainBlock<T>>, BasicError> {
-        let params = &[to_json_value(hash)?];
+        let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
     }
@@ -477,7 +388,7 @@ impl<T: Config> Rpc<T> {
         keys: Vec<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, BasicError> {
-        let params = &[to_json_value(keys)?, to_json_value(hash)?];
+        let params = rpc_params![keys, hash];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
     }
@@ -487,7 +398,7 @@ impl<T: Config> Rpc<T> {
         &self,
         at: Option<T::Hash>,
     ) -> Result<RuntimeVersion, BasicError> {
-        let params = &[to_json_value(at)?];
+        let params = rpc_params![at];
         let version = self
             .client
             .request("state_getRuntimeVersion", params)
@@ -503,7 +414,7 @@ impl<T: Config> Rpc<T> {
         &self,
     ) -> Result<EventStorageSubscription<T>, BasicError> {
         let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
-        let params = &[to_json_value(keys)?];
+        let params = rpc_params![keys];
 
         let subscription = self
             .client
@@ -528,7 +439,11 @@ impl<T: Config> Rpc<T> {
     pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
         let subscription = self
             .client
-            .subscribe("chain_subscribeNewHeads", &[], "chain_unsubscribeNewHeads")
+            .subscribe(
+                "chain_subscribeNewHeads",
+                rpc_params![],
+                "chain_unsubscribeNewHeads",
+            )
             .await?;
 
         Ok(subscription)
@@ -542,7 +457,7 @@ impl<T: Config> Rpc<T> {
             .client
             .subscribe(
                 "chain_subscribeFinalizedHeads",
-                &[],
+                rpc_params![],
                 "chain_unsubscribeFinalizedHeads",
             )
             .await?;
@@ -555,7 +470,7 @@ impl<T: Config> Rpc<T> {
         extrinsic: X,
     ) -> Result<T::Hash, BasicError> {
         let bytes: Bytes = extrinsic.encode().into();
-        let params = &[to_json_value(bytes)?];
+        let params = rpc_params![bytes];
         let xt_hash = self
             .client
             .request("author_submitExtrinsic", params)
@@ -570,7 +485,7 @@ impl<T: Config> Rpc<T> {
     ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
     {
         let bytes: Bytes = extrinsic.encode().into();
-        let params = &[to_json_value(bytes)?];
+        let params = rpc_params![bytes];
         let subscription = self
             .client
             .subscribe(
@@ -589,18 +504,17 @@ impl<T: Config> Rpc<T> {
         suri: String,
         public: Bytes,
     ) -> Result<(), BasicError> {
-        let params = &[
-            to_json_value(key_type)?,
-            to_json_value(suri)?,
-            to_json_value(public)?,
-        ];
+        let params = rpc_params![key_type, suri, public];
         self.client.request("author_insertKey", params).await?;
         Ok(())
     }
 
     /// Generate new session keys and returns the corresponding public keys.
     pub async fn rotate_keys(&self) -> Result<Bytes, BasicError> {
-        Ok(self.client.request("author_rotateKeys", &[]).await?)
+        Ok(self
+            .client
+            .request("author_rotateKeys", rpc_params![])
+            .await?)
     }
 
     /// Checks if the keystore has private keys for the given session public keys.
@@ -612,7 +526,7 @@ impl<T: Config> Rpc<T> {
         &self,
         session_keys: Bytes,
     ) -> Result<bool, BasicError> {
-        let params = &[to_json_value(session_keys)?];
+        let params = rpc_params![session_keys];
         Ok(self.client.request("author_hasSessionKeys", params).await?)
     }
 
@@ -624,9 +538,27 @@ impl<T: Config> Rpc<T> {
         public_key: Bytes,
         key_type: String,
     ) -> Result<bool, BasicError> {
-        let params = &[to_json_value(public_key)?, to_json_value(key_type)?];
+        let params = rpc_params![public_key, key_type];
         Ok(self.client.request("author_hasKey", params).await?)
     }
+}
+
+/// Build WS RPC client from URL
+pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
+    let (sender, receiver) = ws_transport(url).await?;
+    Ok(RpcClientBuilder::default()
+        .max_notifs_per_subscription(4096)
+        .build(sender, receiver))
+}
+
+async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
+    let url: Uri = url
+        .parse()
+        .map_err(|e: InvalidUri| RpcError::Transport(e.into()))?;
+    WsTransportClientBuilder::default()
+        .build(url)
+        .await
+        .map_err(|e| RpcError::Transport(e.into()))
 }
 
 #[cfg(test)]

@@ -86,7 +86,7 @@ impl ClientBuilder {
             client
         } else {
             let url = self.url.as_deref().unwrap_or("ws://127.0.0.1:9944");
-            RpcClient::try_from_url(url).await?
+            crate::rpc::ws_client(url).await?
         };
         let rpc = Rpc::new(client);
         let (metadata, genesis_hash, runtime_version, properties) = future::join4(
