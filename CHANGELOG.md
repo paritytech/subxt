@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.17.0] - 2022-02-04
 
 ### Added
+
 - Get event context on EventSubscription ([#423](https://github.com/paritytech/subxt/pull/423))
 
 ### Changed
