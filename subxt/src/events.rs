@@ -373,10 +373,17 @@ pub enum EventsDecodingError {
 mod tests {
     use super::*;
     use crate::{
+        error::GenericError::{
+            Codec,
+            EventsDecoding,
+            Other,
+        },
+        events::EventsDecodingError::UnsupportedPrimitive,
         Config,
         DefaultConfig,
         Phase,
     };
+    use assert_matches::assert_matches;
     use codec::Encode;
     use frame_metadata::{
         v14::{
@@ -642,5 +649,186 @@ mod tests {
         decode_and_consume_type_consumes_all_bytes(
             bitvec::bitvec![Msb0, u64; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
+    }
+
+    #[test]
+    fn decode_primitive() {
+        decode_and_consume_type_consumes_all_bytes(false);
+        decode_and_consume_type_consumes_all_bytes(true);
+
+        let dummy_data = vec![0u8];
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<char>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(
+            res,
+            Err(EventsDecoding(UnsupportedPrimitive(TypeDefPrimitive::Char)))
+        );
+
+        decode_and_consume_type_consumes_all_bytes("str".to_string());
+
+        decode_and_consume_type_consumes_all_bytes(1u8);
+        decode_and_consume_type_consumes_all_bytes(1i8);
+
+        decode_and_consume_type_consumes_all_bytes(1u16);
+        decode_and_consume_type_consumes_all_bytes(1i16);
+
+        decode_and_consume_type_consumes_all_bytes(1u32);
+        decode_and_consume_type_consumes_all_bytes(1i32);
+
+        decode_and_consume_type_consumes_all_bytes(1u64);
+        decode_and_consume_type_consumes_all_bytes(1i64);
+
+        decode_and_consume_type_consumes_all_bytes(1u128);
+        decode_and_consume_type_consumes_all_bytes(1i128);
+    }
+
+    #[test]
+    fn decode_tuple() {
+        decode_and_consume_type_consumes_all_bytes(());
+
+        decode_and_consume_type_consumes_all_bytes((true,));
+
+        decode_and_consume_type_consumes_all_bytes((true, "str"));
+
+        // Incomplete bytes for decoding
+        let dummy_data = false.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<(bool, &'static str)>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Codec(_)));
+
+        // Incomplete bytes for decoding, with invalid char type
+        let dummy_data = (false, "str", 0u8).encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<(bool, &'static str, char)>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(
+            res,
+            Err(EventsDecoding(UnsupportedPrimitive(TypeDefPrimitive::Char)))
+        );
+        // The last byte (0x0 u8) should not be consumed
+        assert_eq!(dummy_cursor.len(), 1);
+    }
+
+    #[test]
+    fn decode_array_and_seq() {
+        decode_and_consume_type_consumes_all_bytes([0]);
+        decode_and_consume_type_consumes_all_bytes([1, 2, 3, 4, 5]);
+        decode_and_consume_type_consumes_all_bytes([0; 500]);
+        decode_and_consume_type_consumes_all_bytes(["str", "abc", "cde"]);
+
+        decode_and_consume_type_consumes_all_bytes(vec![0]);
+        decode_and_consume_type_consumes_all_bytes(vec![1, 2, 3, 4, 5]);
+        decode_and_consume_type_consumes_all_bytes(vec!["str", "abc", "cde"]);
+    }
+
+    #[test]
+    fn decode_variant() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum EnumVar {
+            A,
+            B((&'static str, u8)),
+            C { named: i16 },
+        }
+        const INVALID_TYPE_ID: u32 = 1024;
+
+        decode_and_consume_type_consumes_all_bytes(EnumVar::A);
+        decode_and_consume_type_consumes_all_bytes(EnumVar::B(("str", 1)));
+        decode_and_consume_type_consumes_all_bytes(EnumVar::C { named: 1 });
+
+        // Invalid variant index
+        let dummy_data = 3u8.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let (id, reg) = singleton_type_registry::<EnumVar>();
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Other(_)));
+
+        // Valid index, incomplete data
+        let dummy_data = 2u8.encode();
+        let dummy_cursor = &mut &*dummy_data;
+        let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
+        assert_matches!(res, Err(Codec(_)));
+
+        let res = decode_and_consume_type(INVALID_TYPE_ID, &reg, dummy_cursor);
+        assert_matches!(res, Err(crate::error::GenericError::Metadata(_)));
+    }
+
+    #[test]
+    fn decode_composite() {
+        #[derive(Clone, Encode, TypeInfo)]
+        struct Composite {}
+        decode_and_consume_type_consumes_all_bytes(Composite {});
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV2 {
+            id: u32,
+            name: String,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompositeV2 {
+            id: 10,
+            name: "str".to_string(),
+        });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV3<T> {
+            id: u32,
+            extra: T,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: vec![0, 1, 2],
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: ("str", 1),
+        });
+        decode_and_consume_type_consumes_all_bytes(CompositeV3 {
+            id: 10,
+            extra: CompositeV2 {
+                id: 2,
+                name: "str".to_string(),
+            },
+        });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV4(u32, bool);
+        decode_and_consume_type_consumes_all_bytes(CompositeV4(1, true));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompositeV5(u32);
+        decode_and_consume_type_consumes_all_bytes(CompositeV5(1));
+    }
+
+    #[test]
+    fn decode_compact() {
+        #[derive(Clone, Encode, TypeInfo)]
+        enum Compact {
+            A(#[codec(compact)] u32),
+        }
+        decode_and_consume_type_consumes_all_bytes(Compact::A(1));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV2(#[codec(compact)] u32);
+        decode_and_consume_type_consumes_all_bytes(CompactV2(1));
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV3 {
+            #[codec(compact)]
+            val: u32,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompactV3 { val: 1 });
+
+        #[derive(Clone, Encode, TypeInfo)]
+        struct CompactV4<T> {
+            #[codec(compact)]
+            val: T,
+        }
+        decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 0u8 });
+        decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 1u16 });
     }
 }
