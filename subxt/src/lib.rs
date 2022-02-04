@@ -81,6 +81,7 @@ pub use crate::{
     error::{
         BasicError,
         Error,
+        GenericError,
         RuntimeError,
         TransactionError,
     },
