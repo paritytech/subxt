@@ -30,7 +30,7 @@ thiserror = "1.0.24"
 subxt-macro = { version = "0.17.0", path = "../macro" }
 
 sp-core = { version = "5.0.0", default-features = false  }
-sp-runtime = { version = "5.0.0", default-features = false }
+sp-runtime = "5.0.0"
 sp-version = "4.0.0"
 
 frame-metadata = "14.0.0"
