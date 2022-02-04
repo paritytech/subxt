@@ -52,11 +52,8 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
         ```
         (cd codegen && cargo publish --dry-run) && \
-            sleep 10 && \
             (cd macro && cargo publish --dry-run) && \
-            sleep 10 && \
             (cd subxt && cargo publish --dry-run) && \
-            sleep 10 && \
             (cd cli && cargo publish --dry-run);
         ```
 
