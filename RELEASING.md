@@ -40,28 +40,38 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
 8.  Now, we're ready to publish the release to crates.io.
 
-    Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
+    1.  Checkout `master`, ensuring we're looking at that latest merge (`git pull`).
 
-    The crates in this repository need publishing in a specific order, since they depend on each other.
-    Additionally, `subxt-macro` has a circular dev dependency on `subxt`, so we use `cargo hack` to remove
-    dev dependencies (and `--allow-dirty` to ignore the git changes as a result) to publish it.
+        ```
+        git checkout master && git pull
+        ```
 
-    So, first install [cargo-hack](https://docs.rs/crate/cargo-hack/latest) with `cargo install cargo-hack`. Next, you can run something like the following
-    command to publish each crate in the required order (allowing a little time in between each to let `crates.io` catch up
-    with what we've published).
+    2.  Perform a dry-run publish to ensure the crates can be correctly published.
 
-    ```
-    (cd codegen && cargo publish) && \
-        sleep 10 && \
-        (cd macro && cargo hack publish --no-dev-deps --allow-dirty) && \
-        sleep 10 && \
-        (cd subxt && cargo publish) && \
-        sleep 10 && \
-        (cd cli && cargo publish);
-    ```
+        The crates in this repository need publishing in a specific order, since they depend on each other.
 
-    If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
-    you may just need to wait a little longer and then run the remaining portion of that command.
+        ```
+        (cd codegen && cargo publish --dry-run) && \
+            (cd macro && cargo publish --dry-run) && \
+            (cd subxt && cargo publish --dry-run) && \
+            (cd cli && cargo publish --dry-run);
+        ```
+
+    3.  If the dry-run was successful, run the following command to publish each crate in the required order (allowing
+        a little time in between each to let crates.io catch up with what we've published).
+
+        ```
+        (cd codegen && cargo publish) && \
+            sleep 10 && \
+            (cd macro && cargo publish) && \
+            sleep 10 && \
+            (cd subxt && cargo publish) && \
+            sleep 10 && \
+            (cd cli && cargo publish);
+        ```
+
+        If you run into any issues regarding crates not being able to find suitable versions of other `subxt-*` crates,
+        you may just need to wait a little longer and then run the remaining portion of that command.
 
 9.  If the release was successful, tag the commit that we released in the `master` branch with the
     version that we just released, for example:
