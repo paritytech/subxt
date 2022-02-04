@@ -26,12 +26,12 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
-4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-codegen`, `subxt-macro`, `subxt` and `subxt-cli`.
+4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `test-runtime`.
 
 5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
-    Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+is%3Aclosed) between the last release and
+    Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed) between the last release and
     this release branch should be noted.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
@@ -46,8 +46,8 @@ We also assume that ongoing work done is being merged directly to the `master` b
     Additionally, `subxt-macro` has a circular dev dependency on `subxt`, so we use `cargo hack` to remove
     dev dependencies (and `--allow-dirty` to ignore the git changes as a result) to publish it.
 
-    So, first install `cargo hack` with `cargo install cargo hack`. Next, you can run something like the following
-    command to publish each crate in the required order (allowing a little time inbetween each to let `crates.io` catch up)
+    So, first install [cargo-hack](https://docs.rs/crate/cargo-hack/latest) with `cargo install cargo-hack`. Next, you can run something like the following
+    command to publish each crate in the required order (allowing a little time in between each to let `crates.io` catch up
     with what we've published).
 
     ```

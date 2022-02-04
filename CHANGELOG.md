@@ -6,6 +6,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2022-02-04
+
+### Added
+
+- introduce jsonrpsee client abstraction + kill HTTP support. ([#341](https://github.com/paritytech/subxt/pull/341))
+- Get event context on EventSubscription ([#423](https://github.com/paritytech/subxt/pull/423))
+
+### Changed
+
+- Add more tests for events.rs/decode_and_consume_type ([#430](https://github.com/paritytech/subxt/pull/430))
+- Update substrate dependencies ([#429](https://github.com/paritytech/subxt/pull/429))
+- export RuntimeError struct ([#427](https://github.com/paritytech/subxt/pull/427))
+- remove unused PalletError struct ([#425](https://github.com/paritytech/subxt/pull/425))
+- Move Subxt crate into a subfolder ([#424](https://github.com/paritytech/subxt/pull/424))
+- Add release checklist ([#418](https://github.com/paritytech/subxt/pull/418))
+
 ## [0.16.0] - 2022-02-01
 
 *Note*: This is a significant release which introduces support for V14 metadata and macro based codegen, as well as making many breaking changes to the API.
