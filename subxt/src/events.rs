@@ -45,7 +45,241 @@ use scale_info::{
 };
 use sp_core::Bytes;
 
-/// Raw bytes for an Event
+/// A collection of events obtained from a block.
+pub struct Events<'a, T: Config, Evs: Decode> {
+    metadata: &'a Metadata,
+    block_hash: T::Hash,
+    // Note; raw event bytes are prefixed with a Compact<u32> containing
+    // the number of events to be decoded. We should have stripped that off
+    // before storing the bytes here.
+    event_bytes: Vec<u8>,
+    num_events: u32,
+    _event_type: std::marker::PhantomData<Evs>
+}
+
+impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
+    /// Iterate over the events, statically decoding them as we go.
+    /// If an event is encountered that cannot be statically decoded,
+    /// a [`codec::Error`] will be returned.
+    ///
+    /// If the generated code does not know about all of the pallets that exist
+    /// in the runtime being targeted, it may not know about all of the
+    /// events either, and so this method should be avoided.
+    pub fn iter(&self) -> impl Iterator<Item=Result<EventDetails<Evs>, BasicError>> + '_ {
+        let event_bytes = &self.event_bytes;
+
+        let mut pos = 0;
+        let mut index = 0;
+        std::iter::from_fn(move || {
+            let cursor = &mut &event_bytes[pos..];
+            let start_len = cursor.len();
+
+            if start_len == 0 {
+                None
+            } else {
+                let mut decode_one_event = || -> Result<_, BasicError> {
+                    let phase = Phase::decode(cursor)?;
+                    let ev = Evs::decode(cursor)?;
+                    Ok((phase, ev))
+                };
+                match decode_one_event() {
+                    Ok((phase, event)) => {
+                        // Skip over decoded bytes in next iteration:
+                        pos += start_len - cursor.len();
+                        // Increment the index:
+                        index += 1;
+                        // Return the event details:
+                        Some(Ok(EventDetails { phase, index, event }))
+                    },
+                    Err(e) => {
+                        // Next iteration will return None:
+                        pos = event_bytes.len();
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+
+    /// Iterate over all of the events, using metadata to dynamically
+    /// decode them, and returning the raw bytes and other associated details.
+    /// This method is safe to use even if you do not statically know about
+    /// all of the possible events, since it uses metadata obtained at runtime
+    /// to break up the bytes into discrete events.
+    pub fn iter_raw(&self) -> impl Iterator<Item=Result<RawEventDetails, BasicError>> + '_ {
+        let event_bytes = &self.event_bytes;
+
+        let mut pos = 0;
+        let mut index = 0;
+        std::iter::from_fn(move || {
+            let cursor = &mut &event_bytes[pos..];
+            let start_len = cursor.len();
+
+            if start_len == 0 {
+                None
+            } else {
+                match decode_raw_event_details::<T>(&self.metadata, index, cursor) {
+                    Ok(raw_event) => {
+                        // Skip over decoded bytes in next iteration:
+                        pos += start_len - cursor.len();
+                        // Increment the index:
+                        index += 1;
+                        // Return the event details:
+                        Some(Ok(raw_event))
+                    },
+                    Err(e) => {
+                        // Next iteration will return None:
+                        pos = event_bytes.len();
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them until we find an event which decodes to the provided [`Ev`] type.
+    pub fn find_first<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+        self.iter_raw()
+            .filter_map(|e| e.ok())
+            .filter_map(|e| e.as_event::<Ev>().transpose())
+            .next()
+            .transpose()
+            .map_err(Into::into)
+    }
+
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them, collecting all events which decode to the provided [`Ev`] type.
+    pub fn find_all<Ev: Event>(&self) -> Result<Vec<Ev>, BasicError> {
+        self.iter_raw()
+            .filter_map(|e| e.ok())
+            .filter_map(|e| e.as_event::<Ev>().map_err(Into::into).transpose())
+            .collect()
+    }
+}
+
+/// A decoded event and associated details.
+pub struct EventDetails<Ev> {
+    /// When was the event produced?
+    pub phase: Phase,
+    /// What index is this event in the stored events for this block.
+    pub index: usize,
+    /// The event itself.
+    pub event: Ev
+}
+
+/// The raw bytes for an event with associated details.
+pub struct RawEventDetails {
+    /// When was the event produced?
+    pub phase: Phase,
+    /// What index is this event in the stored events for this block.
+    pub index: usize,
+    /// The name of the pallet from whence the Event originated.
+    pub pallet: String,
+    /// The index of the pallet from whence the Event originated.
+    pub pallet_index: u8,
+    /// The name of the pallet Event variant.
+    pub variant: String,
+    /// The index of the pallet Event variant.
+    pub variant_index: u8,
+    /// The raw Event data
+    pub data: Bytes,
+}
+
+impl RawEventDetails {
+    /// Attempt to decode this [`RawEventDetails`] into a specific event.
+    pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+        if self.pallet == E::PALLET && self.variant == E::EVENT {
+            Ok(Some(E::decode(&mut &self.data[..])?))
+        } else {
+            Ok(None)
+        }
+    }
+}
+
+// Attempt to dynamically decode a single event from our events input.
+fn decode_raw_event_details<T: Config>(metadata: &Metadata, index: usize, input: &mut &[u8]) -> Result<RawEventDetails, BasicError> {
+    // Decode basic event details:
+    let phase = Phase::decode(input)?;
+    let pallet_index = input.read_byte()?;
+    let variant_index = input.read_byte()?;
+    log::debug!(
+        "phase {:?}, pallet_index {}, event_variant: {}",
+        phase,
+        pallet_index,
+        variant_index
+    );
+    log::debug!("remaining input: {}", hex::encode(&input));
+
+    // Get metadata for the event:
+    let event_metadata = metadata.event(pallet_index, variant_index)?;
+    log::debug!(
+        "Decoding Event '{}::{}'",
+        event_metadata.pallet(),
+        event_metadata.event()
+    );
+
+    // Use metadata to figure out which bytes belong to this event:
+    let mut event_bytes = Vec::new();
+    for arg in event_metadata.variant().fields() {
+        let type_id = arg.ty().id();
+        let all_bytes = *input;
+        // consume some bytes, moving the cursor forward:
+        decode_and_consume_type(type_id, &metadata.runtime_metadata().types, input)?;
+        // count how many bytes were consumed based on remaining length:
+        let consumed_len = all_bytes.len() - input.len();
+        // move those consumed bytes to the output vec unaltered:
+        event_bytes.extend(&all_bytes[0..consumed_len]);
+    }
+
+    // topics come after the event data in EventRecord. They aren't used for
+    // anything at the moment, so just decode and throw them away.
+    let topics = Vec::<T::Hash>::decode(input)?;
+    log::debug!("topics: {:?}", topics);
+
+    Ok(RawEventDetails {
+        phase,
+        index,
+        pallet_index,
+        pallet: event_metadata.pallet().to_string(),
+        variant_index,
+        variant: event_metadata.event().to_string(),
+        data: event_bytes.into()
+    })
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// The raw bytes for an event and associated details.
 #[derive(Debug)]
 #[cfg_attr(test, derive(PartialEq, Clone))]
 pub struct RawEvent {
