@@ -62,7 +62,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         &mut &raw.data[..],
     );
     if let Ok(e) = event {
-        println!("Balance transfer success: value: {:?}", e.2);
+        println!("Balance transfer success: value: {:?}", e);
     } else {
         println!("Failed to subscribe to Balances::Transfer Event");
     }

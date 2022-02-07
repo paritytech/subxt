@@ -70,7 +70,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
-        println!("Balance transfer success: value: {:?}", event.2);
+        println!("Balance transfer success: value: {:?}", event);
     } else {
         println!("Failed to find Balances::Transfer Event");
     }
@@ -119,7 +119,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         let transfer_event =
             events.find_first_event::<polkadot::balances::events::Transfer>()?;
         if let Some(event) = transfer_event {
-            println!("Balance transfer success: value: {:?}", event.2);
+            println!("Balance transfer success: value: {:?}", event);
         } else {
             println!("Failed to find Balances::Transfer Event");
         }
@@ -166,7 +166,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             if let Some(event) = transfer_event {
                 println!(
                     "Balance transfer is now in block (but not finalized): value: {:?}",
-                    event.2
+                    event
                 );
             } else {
                 println!("Failed to find Balances::Transfer Event");
@@ -185,7 +185,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
                 events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
-                println!("Balance transfer success: value: {:?}", event.2);
+                println!("Balance transfer success: value: {:?}", event);
             } else {
                 println!("Failed to find Balances::Transfer Event");
             }
