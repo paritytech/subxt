@@ -37,7 +37,7 @@ OPTIONS:
 
 ## Codegen
 
-Use to invoke the `subxt-codegen` crate which is used by `subxt-macro` to generate the the runtime API and types. Useful
+Use to invoke the `subxt-codegen` crate which is used by `subxt-macro` to generate the runtime API and types. Useful
 for troubleshooting codegen as an alternative to `cargo expand`, and also provides the possibility of customizing the
 generated code if the macro does not produce the desired API. e.g.
 
