@@ -63,7 +63,7 @@ use futures::Future;
 /// Prefer to use `api.events().at(block_hash)` over calling this
 /// directly.
 #[doc(hidden)]
-pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
+pub async fn __private_at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
     let mut event_bytes = client
         .rpc()
         .storage(
@@ -97,14 +97,14 @@ pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Ha
 /// Note: these blocks haven't necessarily been finalised yet; prefer
 /// [`Events::subscribe_finalized()`] if that is important.
 #[doc(hidden)]
-pub async fn subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+pub async fn __private_subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
 #[doc(hidden)]
-pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+pub async fn __private_subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -174,7 +174,7 @@ impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
                 },
                 Some(Ok(block_header)) => {
                     use sp_runtime::traits::Header;
-                    mut_self.at = Some(Box::pin(at(mut_self.client, block_header.hash())));
+                    mut_self.at = Some(Box::pin(__private_at(mut_self.client, block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
                 }
             }
