@@ -462,7 +462,7 @@ where
                     type_gen,
                 );
                 CompositeDef::struct_def(
-                    var.name(),
+                    struct_name.as_ref(),
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),
