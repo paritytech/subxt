@@ -59,7 +59,7 @@ use derivative::Derivative;
 mod client;
 mod config;
 mod error;
-mod events;
+pub mod events;
 pub mod extrinsic;
 mod metadata;
 pub mod rpc;
@@ -86,6 +86,10 @@ pub use crate::{
         TransactionError,
     },
     events::{
+        Events,
+        EventDetails,
+        RawEventDetails,
+
         EventsDecoder,
         RawEvent,
     },

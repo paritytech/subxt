@@ -14,12 +14,16 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! For working with events.
+
 use crate::{
+    Client,
     error::BasicError,
     metadata::{
         EventMetadata,
         MetadataError,
     },
+    subscription::SystemEvents,
     Config,
     Event,
     Metadata,
@@ -44,8 +48,152 @@ use scale_info::{
     TypeDefPrimitive,
 };
 use sp_core::Bytes;
+use sp_core::storage::StorageKey;
+use futures::{Stream, FutureExt, StreamExt};
+use jsonrpsee::core::client::Subscription;
+use std::marker::Unpin;
+use std::task::Poll;
+use futures::Future;
 
-/// A collection of events obtained from a block.
+/// Obtain events at some block hash. The generic parameter is what we
+/// will attempt to decode each event into if using [`Events::iter()`],
+/// and is expected to be the outermost event enum that contains all of
+/// the possible events across all pallets.
+///
+/// Prefer to use `api.events().at(block_hash)` over calling this
+/// directly.
+#[doc(hidden)]
+pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
+    let mut event_bytes = client
+        .rpc()
+        .storage(
+            &StorageKey::from(SystemEvents::new()),
+            Some(block_hash),
+        )
+        .await?
+        .map(|s| s.0)
+        .unwrap_or_else(Vec::new);
+
+    // event_bytes is a SCALE encoded vector of events. So, pluck the
+    // compact encoded length from the front, leaving the remaining bytes
+    // for our iterating to decode.
+    let cursor = &mut &*event_bytes;
+    let num_events = <Compact<u32>>::decode(cursor)?.0;
+    let event_bytes_len = event_bytes.len();
+    let remaining_len = cursor.len();
+    event_bytes.drain(0 .. event_bytes_len - remaining_len);
+
+    Ok(Events {
+        metadata: client.metadata(),
+        block_hash,
+        event_bytes,
+        num_events,
+        _event_type: std::marker::PhantomData
+    })
+}
+
+/// Subscribe to events from blocks.
+///
+/// Note: these blocks haven't necessarily been finalised yet; prefer
+/// [`Events::subscribe_finalized()`] if that is important.
+#[doc(hidden)]
+pub async fn subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+    let block_subscription = client.rpc().subscribe_blocks().await?;
+    Ok(EventSubscription::new(client, block_subscription))
+}
+
+/// Subscribe to events from finalized blocks.
+#[doc(hidden)]
+pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+    let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
+    Ok(EventSubscription::new(client, block_subscription))
+}
+
+/// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
+pub struct EventSubscription<'a, T: Config, Evs: Decode + 'static> {
+    finished: bool,
+    client: &'a Client<T>,
+    block_header_subscription: Subscription<T::Header>,
+    at: Option<std::pin::Pin<Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + 'a>>>,
+    _event_type: std::marker::PhantomData<Evs>
+}
+
+impl <'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
+    fn new(client: &'a Client<T>, block_header_subscription: Subscription<T::Header>) -> Self {
+        EventSubscription {
+            finished: false,
+            client,
+            block_header_subscription,
+            at: None,
+            _event_type: std::marker::PhantomData
+        }
+    }
+}
+
+impl <'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
+
+/// We want Event Subscription to implement Stream. The below implementation is the rather verbose
+/// way to roughly implement the following function:
+///
+/// ```ignore
+/// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, BasicError>> + '_ {
+///     use futures::StreamExt;
+///     block_sub.then(move |block_header_res| async move {
+///         use sp_runtime::traits::Header;
+///         let block_header = block_header_res?;
+///         let block_hash = block_header.hash();
+///         at(client, block_hash).await
+///     })
+/// }
+/// ```
+///
+/// The advantage of this manual implementation is that we have a named type that we can derive
+/// things on and store and such.
+impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
+    type Item = Result<Events<'a, T, Evs>, BasicError>;
+
+    fn poll_next(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+        let mut_self = self.get_mut();
+
+        // We are finished; return None.
+        if mut_self.finished {
+            return Poll::Ready(None)
+        }
+
+        // If there isn't an `at` function yet that's busy resolving a block hash into
+        // some event details, then poll the block header subscription to get one.
+        if mut_self.at.is_none() {
+            match futures::ready!(mut_self.block_header_subscription.poll_next_unpin(cx)) {
+                None => {
+                    mut_self.finished = true;
+                    return Poll::Ready(None);
+                }
+                Some(Err(e)) => {
+                    mut_self.finished = true;
+                    return Poll::Ready(Some(Err(e.into())));
+                },
+                Some(Ok(block_header)) => {
+                    use sp_runtime::traits::Header;
+                    mut_self.at = Some(Box::pin(at(mut_self.client, block_header.hash())));
+                    // Continue, so that we poll this function future we've just created.
+                }
+            }
+        }
+
+        // If there is an `at` function stored, we are currently resolving a block header into
+        // some events, so poll that until it's ready.
+        if let Some(res) = &mut mut_self.at {
+            let events = futures::ready!(res.poll_unpin(cx));
+            mut_self.at = None;
+            return Poll::Ready(Some(events));
+        }
+
+        unreachable!()
+    }
+}
+
+/// A collection of events obtained from a block, bundled with the necessary
+/// information needed to decode and iterate over them.
 pub struct Events<'a, T: Config, Evs: Decode> {
     metadata: &'a Metadata,
     block_hash: T::Hash,
@@ -58,6 +206,16 @@ pub struct Events<'a, T: Config, Evs: Decode> {
 }
 
 impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
+    /// The number of events.
+    pub fn len(&self) -> u32 {
+        self.num_events
+    }
+
+    /// Return the block hash that these events are from.
+    pub fn block_hash(&self) -> T::Hash {
+        self.block_hash
+    }
+
     /// Iterate over the events, statically decoding them as we go.
     /// If an event is encountered that cannot be statically decoded,
     /// a [`codec::Error`] will be returned.
@@ -80,6 +238,7 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
                 let mut decode_one_event = || -> Result<_, BasicError> {
                     let phase = Phase::decode(cursor)?;
                     let ev = Evs::decode(cursor)?;
+                    let _topics = Vec::<T::Hash>::decode(cursor)?;
                     Ok((phase, ev))
                 };
                 match decode_one_event() {
@@ -104,8 +263,8 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them, and returning the raw bytes and other associated details.
     /// This method is safe to use even if you do not statically know about
-    /// all of the possible events, since it uses metadata obtained at runtime
-    /// to break up the bytes into discrete events.
+    /// all of the possible events; it splits events up using the metadata
+    /// obtained at runtime, which does.
     pub fn iter_raw(&self) -> impl Iterator<Item=Result<RawEventDetails, BasicError>> + '_ {
         let event_bytes = &self.event_bytes;
 
@@ -587,6 +746,7 @@ fn decode_and_consume_type(
     }
 }
 
+/// The possible errors that we can run into attempting to decode events.
 #[derive(Debug, thiserror::Error)]
 pub enum EventsDecodingError {
     /// Unsupported primitive type
