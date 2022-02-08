@@ -132,23 +132,23 @@ impl <'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
 
 impl <'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
 
-/// We want Event Subscription to implement Stream. The below implementation is the rather verbose
-/// way to roughly implement the following function:
-///
-/// ```ignore
-/// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, BasicError>> + '_ {
-///     use futures::StreamExt;
-///     block_sub.then(move |block_header_res| async move {
-///         use sp_runtime::traits::Header;
-///         let block_header = block_header_res?;
-///         let block_hash = block_header.hash();
-///         at(client, block_hash).await
-///     })
-/// }
-/// ```
-///
-/// The advantage of this manual implementation is that we have a named type that we can derive
-/// things on and store and such.
+// We want Event Subscription to implement Stream. The below implementation is the rather verbose
+// way to roughly implement the following function:
+//
+// ```
+// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, BasicError>> + '_ {
+//     use futures::StreamExt;
+//     block_sub.then(move |block_header_res| async move {
+//         use sp_runtime::traits::Header;
+//         let block_header = block_header_res?;
+//         let block_hash = block_header.hash();
+//         at(client, block_hash).await
+//     })
+// }
+// ```
+//
+// The advantage of this manual implementation is that we have a named type that we (and others)
+// can derive things on, store away, alias etc.
 impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
     type Item = Result<Events<'a, T, Evs>, BasicError>;
 
@@ -174,6 +174,8 @@ impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
                 },
                 Some(Ok(block_header)) => {
                     use sp_runtime::traits::Header;
+                    // TODO: We may be able to get rid of the per-item allocation
+                    // with https://github.com/oblique/reusable-box-future.
                     mut_self.at = Some(Box::pin(__private_at(mut_self.client, block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
                 }
