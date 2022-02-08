@@ -23,7 +23,6 @@ use crate::{
         EventMetadata,
         MetadataError,
     },
-    subscription::SystemEvents,
     Config,
     Event,
     Metadata,
@@ -47,8 +46,11 @@ use scale_info::{
     TypeDef,
     TypeDefPrimitive,
 };
-use sp_core::Bytes;
-use sp_core::storage::StorageKey;
+use sp_core::{
+    Bytes,
+    storage::StorageKey,
+    twox_128,
+};
 use futures::{Stream, FutureExt, StreamExt};
 use jsonrpsee::core::client::Subscription;
 use std::marker::Unpin;
@@ -67,7 +69,7 @@ pub async fn __private_at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_h
     let mut event_bytes = client
         .rpc()
         .storage(
-            &StorageKey::from(SystemEvents::new()),
+            &system_events_key(),
             Some(block_hash),
         )
         .await?
@@ -110,10 +112,13 @@ pub async fn __private_subscribe_finalized<T: Config, Evs: Decode + 'static>(cli
 }
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct EventSubscription<'a, T: Config, Evs: Decode + 'static> {
     finished: bool,
     client: &'a Client<T>,
     block_header_subscription: Subscription<T::Header>,
+    #[derivative(Debug="ignore")]
     at: Option<std::pin::Pin<Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + 'a>>>,
     _event_type: std::marker::PhantomData<Evs>
 }
@@ -152,31 +157,31 @@ impl <'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
 impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
     type Item = Result<Events<'a, T, Evs>, BasicError>;
 
-    fn poll_next(self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
-        let mut_self = self.get_mut();
+    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+        // let mut_self = self.get_mut();
 
         // We are finished; return None.
-        if mut_self.finished {
+        if self.finished {
             return Poll::Ready(None)
         }
 
         // If there isn't an `at` function yet that's busy resolving a block hash into
         // some event details, then poll the block header subscription to get one.
-        if mut_self.at.is_none() {
-            match futures::ready!(mut_self.block_header_subscription.poll_next_unpin(cx)) {
+        if self.at.is_none() {
+            match futures::ready!(self.block_header_subscription.poll_next_unpin(cx)) {
                 None => {
-                    mut_self.finished = true;
+                    self.finished = true;
                     return Poll::Ready(None);
                 }
                 Some(Err(e)) => {
-                    mut_self.finished = true;
+                    self.finished = true;
                     return Poll::Ready(Some(Err(e.into())));
                 },
                 Some(Ok(block_header)) => {
                     use sp_runtime::traits::Header;
                     // TODO: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
-                    mut_self.at = Some(Box::pin(__private_at(mut_self.client, block_header.hash())));
+                    self.at = Some(Box::pin(__private_at(self.client, block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
                 }
             }
@@ -184,9 +189,9 @@ impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
 
         // If there is an `at` function stored, we are currently resolving a block header into
         // some events, so poll that until it's ready.
-        if let Some(res) = &mut mut_self.at {
+        if let Some(res) = &mut self.at {
             let events = futures::ready!(res.poll_unpin(cx));
-            mut_self.at = None;
+            self.at = None;
             return Poll::Ready(Some(events));
         }
 
@@ -196,6 +201,8 @@ impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
 pub struct Events<'a, T: Config, Evs: Decode> {
     metadata: &'a Metadata,
     block_hash: T::Hash,
@@ -263,7 +270,9 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     }
 
     /// Iterate over all of the events, using metadata to dynamically
-    /// decode them, and returning the raw bytes and other associated details.
+    /// decode them as we go, and returning the raw bytes and other associated
+    /// details.
+    ///
     /// This method is safe to use even if you do not statically know about
     /// all of the possible events; it splits events up using the metadata
     /// obtained at runtime, which does.
@@ -320,13 +329,13 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
 }
 
 /// A decoded event and associated details.
-pub struct EventDetails<Ev> {
+pub struct EventDetails<Evs> {
     /// When was the event produced?
     pub phase: Phase,
     /// What index is this event in the stored events for this block.
     pub index: usize,
     /// The event itself.
-    pub event: Ev
+    pub event: Evs
 }
 
 /// The raw bytes for an event with associated details.
@@ -409,8 +418,11 @@ fn decode_raw_event_details<T: Config>(metadata: &Metadata, index: usize, input:
     })
 }
 
-
-
+fn system_events_key() -> StorageKey {
+    let mut storage_key = twox_128(b"System").to_vec();
+    storage_key.extend(twox_128(b"Events").to_vec());
+    StorageKey(storage_key)
+}
 
 
 

@@ -187,19 +187,20 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode> {
+pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode, Evs: Decode> {
     client: &'client Client<T>,
     call: C,
-    marker: std::marker::PhantomData<(X, A, E)>,
+    marker: std::marker::PhantomData<(X, A, E, Evs)>,
 }
 
-impl<'client, T, X, A, C, E> SubmittableExtrinsic<'client, T, X, A, C, E>
+impl<'client, T, X, A, C, E, Evs> SubmittableExtrinsic<'client, T, X, A, C, E, Evs>
 where
     T: Config,
     X: SignedExtra<T>,
     A: AccountData,
     C: Call + Send + Sync,
     E: Decode,
+    Evs: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
     pub fn new(client: &'client Client<T>, call: C) -> Self {
@@ -217,7 +218,7 @@ where
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T, E>, BasicError>
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
