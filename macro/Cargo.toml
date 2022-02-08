@@ -19,7 +19,7 @@ async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full"] }
 darling = "0.13.0"
 frame-metadata = "14.0"
-heck = "0.3.2"
+heck = "0.4.0"
 proc-macro2 = "1.0.24"
 proc-macro-crate = "0.1.5"
 proc-macro-error = "1.0.4"
