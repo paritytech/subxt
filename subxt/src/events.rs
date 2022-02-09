@@ -65,7 +65,7 @@ use futures::Future;
 /// Prefer to use `api.events().at(block_hash)` over calling this
 /// directly.
 #[doc(hidden)]
-pub async fn __private_at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
+pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
     let mut event_bytes = client
         .rpc()
         .storage(
@@ -99,14 +99,14 @@ pub async fn __private_at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_h
 /// Note: these blocks haven't necessarily been finalised yet; prefer
 /// [`Events::subscribe_finalized()`] if that is important.
 #[doc(hidden)]
-pub async fn __private_subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+pub async fn subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
 #[doc(hidden)]
-pub async fn __private_subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -137,7 +137,7 @@ impl <'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
 
 impl <'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
 
-// We want Event Subscription to implement Stream. The below implementation is the rather verbose
+// We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
 // way to roughly implement the following function:
 //
 // ```
@@ -181,7 +181,7 @@ impl <'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
                     use sp_runtime::traits::Header;
                     // TODO: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
-                    self.at = Some(Box::pin(__private_at(self.client, block_header.hash())));
+                    self.at = Some(Box::pin(at(self.client, block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
                 }
             }

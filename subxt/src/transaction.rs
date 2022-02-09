@@ -405,7 +405,7 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let events = crate::events::__private_at::<T,Evs>(self.client, self.block_hash).await?;
+        let events = crate::events::at::<T,Evs>(self.client, self.block_hash).await?;
 
         Ok(TransactionEvents {
             ext_hash: self.ext_hash,
