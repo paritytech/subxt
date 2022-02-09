@@ -858,132 +858,220 @@ mod tests {
             }
         ]);
     }
-/*
+
     #[test]
-    fn decode_multiple_events() {
-        #[derive(Clone, Encode, TypeInfo)]
+    fn dynamically_decode_multiple_events() {
+        #[derive(Clone, Copy, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
             A(u8),
-            B,
-            C { a: u32 },
+            B(bool)
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
         let event1 = Event::A(1);
-        let event2 = Event::B;
-        let event3 = Event::C { a: 3 };
+        let event2 = Event::B(true);
+        let event3 = Event::A(234);
 
-        let encoded_event1 = event1.encode();
-        let encoded_event2 = event2.encode();
-        let encoded_event3 = event3.encode();
+        let events = events::<Event>(&metadata, vec![
+            event_record(Phase::Initialization, event1),
+            event_record(Phase::ApplyExtrinsic(123), event2),
+            event_record(Phase::Finalization, event3),
+        ]);
 
-        let event_records = vec![
-            event_record(pallet_index, event1),
-            event_record(pallet_index, event2),
-            event_record(pallet_index, event3),
-        ];
+        let event_details: Vec<RawEventDetails> = events.iter_raw().collect::<Result<_,_>>().unwrap();
+        let event_bytes = |ev: Event| {
+            let mut bytes = ev.encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes.into()
+        };
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
-
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event1[0]);
-        assert_eq!(events[0].1.data.0, encoded_event1[1..]);
-
-        assert_eq!(events[1].1.variant_index, encoded_event2[0]);
-        assert_eq!(events[1].1.data.0, encoded_event2[1..]);
-
-        assert_eq!(events[2].1.variant_index, encoded_event3[0]);
-        assert_eq!(events[2].1.data.0, encoded_event3[1..]);
+        assert_eq!(event_details, vec![
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: event_bytes(event1)
+            },
+            RawEventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "B".to_string(),
+                variant_index: 1,
+                data: event_bytes(event2)
+            },
+            RawEventDetails {
+                index: 2,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: event_bytes(event3)
+            },
+        ]);
     }
 
     #[test]
     fn compact_event_field() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Encode, Decode, TypeInfo)]
         enum Event {
             A(#[codec(compact)] u32),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(u32::MAX);
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(&metadata, vec![
+            event_record(Phase::Finalization, Event::A(1))
+        ]);
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> = events.iter().collect::<Result<_,_>>().unwrap();
+        assert_eq!(event_details, vec![
+            EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(1))
+            }
+        ]);
 
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> = events.iter_raw().collect::<Result<_,_>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(1).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(event_details, vec![
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }
+        ]);
     }
 
     #[test]
     fn compact_wrapper_struct_field() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Decode, Debug, PartialEq, Encode, TypeInfo)]
         enum Event {
             A(#[codec(compact)] CompactWrapper),
         }
 
-        #[derive(Clone, codec::CompactAs, Encode, TypeInfo)]
+        #[derive(Clone, Decode, Debug, PartialEq, codec::CompactAs, Encode, TypeInfo)]
         struct CompactWrapper(u64);
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(CompactWrapper(0));
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(&metadata, vec![
+            event_record(Phase::Finalization, Event::A(CompactWrapper(1)))
+        ]);
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> = events.iter().collect::<Result<_,_>>().unwrap();
+        assert_eq!(event_details, vec![
+            EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(CompactWrapper(1)))
+            }
+        ]);
 
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> = events.iter_raw().collect::<Result<_,_>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(CompactWrapper(1)).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(event_details, vec![
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }
+        ]);
     }
 
     #[test]
     fn event_containing_explicit_index() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         #[repr(u8)]
         #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
         pub enum MyType {
             B = 10u8,
         }
 
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
             A(MyType),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(MyType::B);
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(&metadata, vec![
+            event_record(Phase::Finalization, Event::A(MyType::B))
+        ]);
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> = events.iter().collect::<Result<_,_>>().unwrap();
+        assert_eq!(event_details, vec![
+            EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(MyType::B))
+            }
+        ]);
 
-        // this would panic if the explicit enum item index were not correctly used
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> = events.iter_raw().collect::<Result<_,_>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(MyType::B).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(event_details, vec![
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }
+        ]);
     }
-*/
+
     #[test]
     fn decode_bitvec() {
         use bitvec::order::Msb0;

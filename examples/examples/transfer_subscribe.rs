@@ -66,7 +66,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .sign_and_submit(&signer)
                 .await
                 .unwrap();
-            async_std::task::sleep(Duration::from_secs(1)).await;
+            async_std::task::sleep(Duration::from_secs(10)).await;
         }
     });
 
