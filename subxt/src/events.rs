@@ -58,8 +58,9 @@ use futures::Future;
 /// and is expected to be the outermost event enum that contains all of
 /// the possible events across all pallets.
 ///
-/// Prefer to use `api.events().at(block_hash)` over calling this
-/// directly.
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().at(block_hash)` over calling this directly.
 #[doc(hidden)]
 pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Hash) -> Result<Events<'_, T, Evs>, BasicError> {
     let mut event_bytes = client
@@ -92,8 +93,12 @@ pub async fn at<T: Config, Evs: Decode>(client: &'_ Client<T>, block_hash: T::Ha
 
 /// Subscribe to events from blocks.
 ///
-/// Note: these blocks haven't necessarily been finalised yet; prefer
+/// **Note:** these blocks haven't necessarily been finalised yet; prefer
 /// [`Events::subscribe_finalized()`] if that is important.
+///
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().subscribe()` over calling this directly.
 #[doc(hidden)]
 pub async fn subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
@@ -101,6 +106,10 @@ pub async fn subscribe<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) 
 }
 
 /// Subscribe to events from finalized blocks.
+///
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().subscribe_finalized()` over calling this directly.
 #[doc(hidden)]
 pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(client: &'_ Client<T>) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
