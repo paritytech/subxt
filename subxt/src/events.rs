@@ -204,7 +204,7 @@ impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
                 }
                 Some(Ok(block_header)) => {
                     use sp_runtime::traits::Header;
-                    // TODO: We may be able to get rid of the per-item allocation
+                    // Note [jsdw]: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
                     self.at = Some(Box::pin(at(self.client, block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
