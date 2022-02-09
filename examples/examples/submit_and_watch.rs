@@ -66,8 +66,10 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .wait_for_finalized_success()
         .await?;
 
-    let transfer_event =
-        balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
+    let transfer_event = balance_transfer
+        .find::<polkadot::balances::events::Transfer>()
+        .next()
+        .transpose()?;
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);
@@ -107,8 +109,10 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     // the above, but does not check for success, and leaves it up to you:
     let events = balance_transfer.fetch_events().await?;
 
-    let failed_event =
-        events.find_first_event::<polkadot::system::events::ExtrinsicFailed>()?;
+    let failed_event = events
+        .find::<polkadot::system::events::ExtrinsicFailed>()
+        .next()
+        .transpose()?;
 
     if let Some(_ev) = failed_event {
         // We found a failed event; the transfer didn't succeed.
@@ -116,8 +120,10 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     } else {
         // We didn't find a failed event; the transfer succeeded. Find
         // more details about it to report..
-        let transfer_event =
-            events.find_first_event::<polkadot::balances::events::Transfer>()?;
+        let transfer_event = events
+            .find::<polkadot::balances::events::Transfer>()
+            .next()
+            .transpose()?;
         if let Some(event) = transfer_event {
             println!("Balance transfer success: value: {:?}", event.2);
         } else {
@@ -160,8 +166,10 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event =
-                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            let transfer_event = events
+                .find::<polkadot::balances::events::Transfer>()
+                .next()
+                .transpose()?;
 
             if let Some(event) = transfer_event {
                 println!(
@@ -181,8 +189,10 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event =
-                events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            let transfer_event = events
+                .find::<polkadot::balances::events::Transfer>()
+                .next()
+                .transpose()?;
 
             if let Some(event) = transfer_event {
                 println!("Balance transfer success: value: {:?}", event.2);

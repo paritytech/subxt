@@ -19,14 +19,10 @@
 use crate::{
     Client,
     error::BasicError,
-    metadata::{
-        EventMetadata,
-        MetadataError,
-    },
+    metadata::MetadataError,
     Config,
     Event,
     Metadata,
-    PhantomDataSendSync,
     Phase,
 };
 use bitvec::{
@@ -413,169 +409,11 @@ fn decode_raw_event_details<T: Config>(metadata: &Metadata, index: usize, input:
     })
 }
 
+// The storage key needed to access events.
 fn system_events_key() -> StorageKey {
     let mut storage_key = twox_128(b"System").to_vec();
     storage_key.extend(twox_128(b"Events").to_vec());
     StorageKey(storage_key)
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/// The raw bytes for an event and associated details.
-#[derive(Debug)]
-#[cfg_attr(test, derive(PartialEq, Clone))]
-pub struct RawEvent {
-    /// The name of the pallet from whence the Event originated.
-    pub pallet: String,
-    /// The index of the pallet from whence the Event originated.
-    pub pallet_index: u8,
-    /// The name of the pallet Event variant.
-    pub variant: String,
-    /// The index of the pallet Event variant.
-    pub variant_index: u8,
-    /// The raw Event data
-    pub data: Bytes,
-}
-
-impl RawEvent {
-    /// Attempt to decode this [`RawEvent`] into a specific event.
-    pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
-        if self.pallet == E::PALLET && self.variant == E::EVENT {
-            Ok(Some(E::decode(&mut &self.data[..])?))
-        } else {
-            Ok(None)
-        }
-    }
-}
-
-/// Events decoder.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
-pub struct EventsDecoder<T: Config> {
-    metadata: Metadata,
-    marker: PhantomDataSendSync<T>,
-}
-
-impl<T: Config> EventsDecoder<T> {
-    /// Creates a new `EventsDecoder`.
-    pub fn new(metadata: Metadata) -> Self {
-        Self {
-            metadata,
-            marker: Default::default(),
-        }
-    }
-
-    /// Decode events.
-    pub fn decode_events(
-        &self,
-        input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, BasicError> {
-        let compact_len = <Compact<u32>>::decode(input)?;
-        let len = compact_len.0 as usize;
-        log::debug!("decoding {} events", len);
-
-        let mut r = Vec::new();
-        for _ in 0..len {
-            // decode EventRecord
-            let phase = Phase::decode(input)?;
-            let pallet_index = input.read_byte()?;
-            let variant_index = input.read_byte()?;
-            log::debug!(
-                "phase {:?}, pallet_index {}, event_variant: {}",
-                phase,
-                pallet_index,
-                variant_index
-            );
-            log::debug!("remaining input: {}", hex::encode(&input));
-
-            let event_metadata = self.metadata.event(pallet_index, variant_index)?;
-
-            let mut event_data = Vec::<u8>::new();
-            let result = self.decode_raw_event(event_metadata, input, &mut event_data);
-            let raw = match result {
-                Ok(()) => {
-                    log::debug!("raw bytes: {}", hex::encode(&event_data),);
-
-                    let event = RawEvent {
-                        pallet: event_metadata.pallet().to_string(),
-                        pallet_index,
-                        variant: event_metadata.event().to_string(),
-                        variant_index,
-                        data: event_data.into(),
-                    };
-
-                    // topics come after the event data in EventRecord
-                    let topics = Vec::<T::Hash>::decode(input)?;
-                    log::debug!("topics: {:?}", topics);
-
-                    event
-                }
-                Err(err) => return Err(err),
-            };
-            r.push((phase.clone(), raw));
-        }
-        Ok(r)
-    }
-
-    fn decode_raw_event(
-        &self,
-        event_metadata: &EventMetadata,
-        input: &mut &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
-        log::debug!(
-            "Decoding Event '{}::{}'",
-            event_metadata.pallet(),
-            event_metadata.event()
-        );
-        for arg in event_metadata.variant().fields() {
-            let type_id = arg.ty().id();
-            self.decode_type(type_id, input, output)?
-        }
-        Ok(())
-    }
-
-    fn decode_type(
-        &self,
-        type_id: u32,
-        input: &mut &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
-        let all_bytes = *input;
-        // consume some bytes, moving the cursor forward:
-        decode_and_consume_type(type_id, &self.metadata.runtime_metadata().types, input)?;
-        // count how many bytes were consumed based on remaining length:
-        let consumed_len = all_bytes.len() - input.len();
-        // move those consumed bytes to the output vec unaltered:
-        output.extend(&all_bytes[0..consumed_len]);
-        Ok(())
-    }
 }
 
 // Given a type Id and a type registry, attempt to consume the bytes

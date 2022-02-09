@@ -64,7 +64,6 @@ pub mod extrinsic;
 mod metadata;
 pub mod rpc;
 pub mod storage;
-mod subscription;
 mod transaction;
 
 pub use crate::{
@@ -89,9 +88,6 @@ pub use crate::{
         Events,
         EventDetails,
         RawEventDetails,
-
-        EventsDecoder,
-        RawEvent,
     },
     extrinsic::{
         DefaultExtra,
@@ -117,11 +113,6 @@ pub use crate::{
         StorageEntry,
         StorageEntryKey,
         StorageMapKey,
-    },
-    subscription::{
-        EventStorageSubscription,
-        EventSubscription,
-        FinalizedEventStorageSubscription,
     },
     transaction::{
         TransactionEvents,

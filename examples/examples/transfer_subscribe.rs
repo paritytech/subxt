@@ -27,9 +27,10 @@ use subxt::{
     ClientBuilder,
     DefaultConfig,
     DefaultExtra,
-    EventSubscription,
     PairSigner,
 };
+use futures::StreamExt;
+use std::time::Duration;
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -38,33 +39,53 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
+    // Subscribe to any events that occur:
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
-
-    let sub = api.client.rpc().subscribe_events().await?;
-    let decoder = api.client.events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
-    sub.filter_event::<polkadot::balances::events::Transfer>();
-
-    api.tx()
-        .balances()
-        .transfer(dest, 10_000)
-        .sign_and_submit(&signer)
+    let mut event_sub = api
+        .events()
+        .subscribe()
         .await?;
 
-    let raw = sub.next().await.unwrap().unwrap();
-    let event = <polkadot::balances::events::Transfer as subxt::codec::Decode>::decode(
-        &mut &raw.data[..],
-    );
-    if let Ok(e) = event {
-        println!("Balance transfer success: value: {:?}", e.2);
-    } else {
-        println!("Failed to subscribe to Balances::Transfer Event");
+    // While this subscription is active, balance transfers are made somewhere:
+    async_std::task::spawn(async {
+        let signer = PairSigner::new(AccountKeyring::Alice.pair());
+        let api = ClientBuilder::new()
+            .build()
+            .await
+            .unwrap()
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+
+        // Make small balance transfers in a loop:
+        loop {
+            api.tx()
+                .balances()
+                .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
+                .sign_and_submit(&signer)
+                .await
+                .unwrap();
+            async_std::task::sleep(Duration::from_secs(1)).await;
+        }
+    });
+
+    // Our subscription will see the events emitted as a result of this:
+    while let Some(events) = event_sub.next().await {
+        let events = events?;
+
+        // Find the first transfer event, ignoring any others:
+        let transfer_event = events
+            .find::<polkadot::balances::events::Transfer>()
+            .next()
+            .transpose()?;
+
+        if let Some(ev) = transfer_event {
+            println!("Balance transfer success in block {:?}: value: {:?}", events.block_hash(), ev.2);
+        } else {
+            println!("No balance transfer event found in block {:?}", events.block_hash());
+        }
     }
+
     Ok(())
 }
