@@ -85,8 +85,8 @@ pub use crate::{
         TransactionError,
     },
     events::{
-        Events,
         EventDetails,
+        Events,
         RawEventDetails,
     },
     extrinsic::{

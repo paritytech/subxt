@@ -22,15 +22,15 @@
 //! polkadot --dev --tmp
 //! ```
 
+use futures::StreamExt;
 use sp_keyring::AccountKeyring;
+use std::time::Duration;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
     DefaultExtra,
     PairSigner,
 };
-use futures::StreamExt;
-use std::time::Duration;
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -44,10 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
-    let mut event_sub = api
-        .events()
-        .subscribe()
-        .await?;
+    let mut event_sub = api.events().subscribe().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
     async_std::task::spawn(async {
@@ -75,12 +72,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let events = events?;
 
         // Find the first transfer event, ignoring any others:
-        let transfer_event = events.find_first_event::<polkadot::balances::events::Transfer>()?;
+        let transfer_event =
+            events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
         if let Some(ev) = transfer_event {
-            println!("Balance transfer success in block {:?}: value: {:?}", events.block_hash(), ev.2);
+            println!(
+                "Balance transfer success in block {:?}: value: {:?}",
+                events.block_hash(),
+                ev.2
+            );
         } else {
-            println!("No balance transfer event found in block {:?}", events.block_hash());
+            println!(
+                "No balance transfer event found in block {:?}",
+                events.block_hash()
+            );
         }
     }
 

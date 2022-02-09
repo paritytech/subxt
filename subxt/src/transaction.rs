@@ -32,8 +32,8 @@ use crate::{
     },
     events::{
         self,
-        Events,
         EventDetails,
+        Events,
         RawEventDetails,
     },
     rpc::SubstrateTransactionStatus,
@@ -64,7 +64,10 @@ pub struct TransactionProgress<'client, T: Config, E: Decode, Evs: Decode> {
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<'client, T: Config, E: Decode, Evs: Decode> Unpin for TransactionProgress<'client, T, E, Evs> {}
+impl<'client, T: Config, E: Decode, Evs: Decode> Unpin
+    for TransactionProgress<'client, T, E, Evs>
+{
+}
 
 impl<'client, T: Config, E: Decode, Evs: Decode> TransactionProgress<'client, T, E, Evs> {
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
@@ -168,7 +171,9 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionProgress<'client, T,
     }
 }
 
-impl<'client, T: Config, E: Decode, Evs: Decode> Stream for TransactionProgress<'client, T, E, Evs> {
+impl<'client, T: Config, E: Decode, Evs: Decode> Stream
+    for TransactionProgress<'client, T, E, Evs>
+{
     type Item = Result<TransactionStatus<'client, T, E, Evs>, BasicError>;
 
     fn poll_next(
@@ -372,7 +377,9 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
@@ -393,7 +400,9 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<'client, T, Evs>, BasicError> {
+    pub async fn fetch_events(
+        &self,
+    ) -> Result<TransactionEvents<'client, T, Evs>, BasicError> {
         let block = self
             .client
             .rpc()
@@ -411,7 +420,7 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let events = events::at::<T,Evs>(self.client, self.block_hash).await?;
+        let events = events::at::<T, Evs>(self.client, self.block_hash).await?;
 
         Ok(TransactionEvents {
             ext_hash: self.ext_hash,
@@ -450,37 +459,38 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     /// Iterate over the statically decoded events associated with this transaction. Works
     /// in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item=Result<EventDetails<Evs>, BasicError>> + '_ {
-        self.events
-            .iter()
-            .filter(|ev| {
-                ev.as_ref()
-                  .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
-                  .unwrap_or(true) // Keep any errors
-            })
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = Result<EventDetails<Evs>, BasicError>> + '_ {
+        self.events.iter().filter(|ev| {
+            ev.as_ref()
+                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
+                .unwrap_or(true) // Keep any errors
+        })
     }
 
     /// Iterate over all of the raw events associated with this transaction. Works
     /// in the same way that [`events::Events::iter_raw()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter_raw(&self) -> impl Iterator<Item=Result<RawEventDetails, BasicError>> + '_ {
-        self.events
-            .iter_raw()
-            .filter(|ev| {
-                ev.as_ref()
-                  .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
-                  .unwrap_or(true) // Keep any errors.
-            })
+    pub fn iter_raw(
+        &self,
+    ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
+        self.events.iter_raw().filter(|ev| {
+            ev.as_ref()
+                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
+                .unwrap_or(true) // Keep any errors.
+        })
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.
     /// This will return an error if a matching event is found but cannot be properly decoded.
-    pub fn find<Ev: crate::Event>(&self) -> impl Iterator<Item=Result<Ev, BasicError>> + '_ {
-        self.iter_raw()
-            .filter_map(|ev| {
-                ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
-                  .transpose()
-            })
+    pub fn find<Ev: crate::Event>(
+        &self,
+    ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+        self.iter_raw().filter_map(|ev| {
+            ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
+                .transpose()
+        })
     }
 
     /// Iterate through the transaction events using metadata to dynamically decode and skip

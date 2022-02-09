@@ -151,8 +151,10 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>, Error<DispatchError>>
-    {
+    ) -> Result<
+        TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
+        Error<DispatchError>,
+    > {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()

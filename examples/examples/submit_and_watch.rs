@@ -66,7 +66,8 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .wait_for_finalized_success()
         .await?;
 
-    let transfer_event = balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
+    let transfer_event =
+        balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
         println!("Balance transfer success: value: {:?}", event.2);
@@ -117,7 +118,8 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     } else {
         // We didn't find a failed event; the transfer succeeded. Find
         // more details about it to report..
-        let transfer_event = events.find_first_event::<polkadot::balances::events::Transfer>()?;
+        let transfer_event =
+            events.find_first_event::<polkadot::balances::events::Transfer>()?;
         if let Some(event) = transfer_event {
             println!("Balance transfer success: value: {:?}", event.2);
         } else {
@@ -160,7 +162,8 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event = events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            let transfer_event =
+                events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
                 println!(
@@ -180,7 +183,8 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
             );
 
             let events = details.wait_for_success().await?;
-            let transfer_event = events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            let transfer_event =
+                events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
                 println!("Balance transfer success: value: {:?}", event.2);

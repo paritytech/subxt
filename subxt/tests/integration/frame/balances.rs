@@ -25,6 +25,7 @@ use crate::{
     test_context,
 };
 use codec::Decode;
+use futures::StreamExt;
 use sp_core::{
     sr25519::Pair,
     Pair as _,
@@ -34,7 +35,6 @@ use subxt::{
     Error,
     Signer,
 };
-use futures::StreamExt;
 
 #[async_std::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
@@ -194,15 +194,18 @@ async fn transfer_subscription() {
     let ctx = test_context().await;
 
     // Subscribe to all balance transfer events:
-    let event_sub = ctx.api
+    let event_sub = ctx
+        .api
         .events()
         .subscribe()
         .await
         .unwrap()
-        .filter_map(|events| async move {
-            let events = events.ok()?;
-            let e = events.find::<balances::events::Transfer>().next()?.ok();
-            e
+        .filter_map(|events| {
+            async move {
+                let events = events.ok()?;
+                let e = events.find::<balances::events::Transfer>().next()?.ok();
+                e
+            }
         });
 
     // Calling `.next()` on the above borrows it, and the `filter_map`
