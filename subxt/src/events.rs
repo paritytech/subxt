@@ -322,6 +322,12 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
             })
     }
 
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them, and return the first event found which decodes to the provided [`Ev`] type.
+    pub fn find_first_event<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+        self.find::<Ev>().next().transpose()
+    }
+
     /// Find an event that decodes to the type provided. Returns true if it was found.
     pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())

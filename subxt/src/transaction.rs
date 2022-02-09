@@ -30,6 +30,12 @@ use crate::{
         RuntimeError,
         TransactionError,
     },
+    events::{
+        self,
+        Events,
+        EventDetails,
+        RawEventDetails,
+    },
     rpc::SubstrateTransactionStatus,
     Config,
     Phase,
@@ -405,7 +411,7 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let events = crate::events::at::<T,Evs>(self.client, self.block_hash).await?;
+        let events = events::at::<T,Evs>(self.client, self.block_hash).await?;
 
         Ok(TransactionEvents {
             ext_hash: self.ext_hash,
@@ -422,7 +428,7 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
 pub struct TransactionEvents<'client, T: Config, Evs: Decode> {
     ext_hash: T::Hash,
     ext_idx: u32,
-    events: crate::events::Events<'client, T, Evs>,
+    events: Events<'client, T, Evs>,
 }
 
 impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
@@ -437,14 +443,14 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     }
 
     /// Return all of the events in the block that the transaction made it into.
-    pub fn all_events_in_block(&self) -> &crate::events::Events<'client, T, Evs> {
+    pub fn all_events_in_block(&self) -> &events::Events<'client, T, Evs> {
         &self.events
     }
 
     /// Iterate over the statically decoded events associated with this transaction. Works
-    /// in the same way that [`crate::events::Events::iter()`] does, with the
+    /// in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(&self) -> impl Iterator<Item=Result<crate::EventDetails<Evs>, BasicError>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item=Result<EventDetails<Evs>, BasicError>> + '_ {
         self.events
             .iter()
             .filter(|ev| {
@@ -455,9 +461,9 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     }
 
     /// Iterate over all of the raw events associated with this transaction. Works
-    /// in the same way that [`crate::events::Events::iter_raw()`] does, with the
+    /// in the same way that [`events::Events::iter_raw()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter_raw(&self) -> impl Iterator<Item=Result<crate::RawEventDetails, BasicError>> + '_ {
+    pub fn iter_raw(&self) -> impl Iterator<Item=Result<RawEventDetails, BasicError>> + '_ {
         self.events
             .iter_raw()
             .filter(|ev| {
@@ -467,14 +473,20 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
             })
     }
 
-    /// Find all of the events matching the event type provided as a generic parameter. This
-    /// will return an error if a matching event is found but cannot be properly decoded.
+    /// Find all of the transaction events matching the event type provided as a generic parameter.
+    /// This will return an error if a matching event is found but cannot be properly decoded.
     pub fn find<Ev: crate::Event>(&self) -> impl Iterator<Item=Result<Ev, BasicError>> + '_ {
         self.iter_raw()
             .filter_map(|ev| {
                 ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                   .transpose()
             })
+    }
+
+    /// Iterate through the transaction events using metadata to dynamically decode and skip
+    /// them, and return the first event found which decodes to the provided [`Ev`] type.
+    pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
+        self.find::<Ev>().next().transpose()
     }
 
     /// Find an event in those associated with this transaction. Returns true if it was found.

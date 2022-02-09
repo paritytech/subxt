@@ -31,11 +31,10 @@ use sp_core::{
 };
 use sp_keyring::AccountKeyring;
 use subxt::{
-    DefaultConfig,
     Error,
-    EventSubscription,
     Signer,
 };
+use futures::StreamExt;
 
 #[async_std::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
@@ -192,25 +191,36 @@ async fn transfer_error() {
 #[async_std::test]
 async fn transfer_subscription() {
     env_logger::try_init().ok();
+    let ctx = test_context().await;
+
+    // Subscribe to all events:
+    let mut event_sub = ctx.api
+        .events()
+        .subscribe()
+        .await?;
+
+    // Make a transfer:
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
-    let bob_addr = bob.clone().into();
-    let cxt = test_context().await;
-    let sub = cxt.client().rpc().subscribe_events().await.unwrap();
-    let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
-    sub.filter_event::<balances::events::Transfer>();
-
-    cxt.api
+    ctx.api
         .tx()
         .balances()
-        .transfer(bob_addr, 10_000)
+        .transfer(bob.clone(), 10_000)
         .sign_and_submit_then_watch(&alice)
         .await
         .unwrap();
 
-    let raw = sub.next().await.unwrap().unwrap();
-    let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
+    // Find the next transfer event in our subscription stream
+    // and check that it lines up:
+    let event = event_sub
+        .filter_map(|events| async move {
+            let events = events.ok()?;
+            events.find::<balances::events::Transfer>().next()?.ok()
+        })
+        .next()
+        .await
+        .unwrap();
+
     assert_eq!(
         event,
         balances::events::Transfer {

@@ -75,10 +75,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let events = events?;
 
         // Find the first transfer event, ignoring any others:
-        let transfer_event = events
-            .find::<polkadot::balances::events::Transfer>()
-            .next()
-            .transpose()?;
+        let transfer_event = events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
         if let Some(ev) = transfer_event {
             println!("Balance transfer success in block {:?}: value: {:?}", events.block_hash(), ev.2);
