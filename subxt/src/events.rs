@@ -308,23 +308,18 @@ impl <'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
-    /// them until we find an event which decodes to the provided [`Ev`] type.
-    pub fn find_first<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+    /// them, and return only those which should decode to the provided [`Ev`] type.
+    pub fn find<Ev: Event>(&self) -> impl Iterator<Item=Result<Ev, BasicError>> + '_ {
         self.iter_raw()
-            .filter_map(|e| e.ok())
-            .filter_map(|e| e.as_event::<Ev>().transpose())
-            .next()
-            .transpose()
-            .map_err(Into::into)
+            .filter_map(|ev| {
+                ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
+                  .transpose()
+            })
     }
 
-    /// Iterate through the events using metadata to dynamically decode and skip
-    /// them, collecting all events which decode to the provided [`Ev`] type.
-    pub fn find_all<Ev: Event>(&self) -> Result<Vec<Ev>, BasicError> {
-        self.iter_raw()
-            .filter_map(|e| e.ok())
-            .filter_map(|e| e.as_event::<Ev>().map_err(Into::into).transpose())
-            .collect()
+    /// Find an event that decodes to the type provided. Returns true if it was found.
+    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+        Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
 

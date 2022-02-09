@@ -469,31 +469,16 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
 
     /// Find all of the events matching the event type provided as a generic parameter. This
     /// will return an error if a matching event is found but cannot be properly decoded.
-    pub fn find_events<Ev: crate::Event>(&self) -> impl Iterator<Item=Result<Ev, BasicError>> + '_ {
+    pub fn find<Ev: crate::Event>(&self) -> impl Iterator<Item=Result<Ev, BasicError>> + '_ {
         self.iter_raw()
             .filter_map(|ev| {
                 ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                   .transpose()
             })
-    }
-
-    /// Find the first event that matches the event type provided as a generic parameter. This
-    /// will return an error if a matching event is found but cannot be properly decoded.
-    ///
-    /// Use [`TransactionEvents::find_events`], or iterate over [`TransactionEvents`] yourself
-    /// if you'd like to handle multiple events of the same type.
-    pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
-        self.iter_raw()
-            .filter_map(|ev| {
-                ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
-                  .transpose()
-            })
-            .next()
-            .transpose()
     }
 
     /// Find an event in those associated with this transaction. Returns true if it was found.
-    pub fn has_event<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
-        Ok(self.find_first_event::<Ev>()?.is_some())
+    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+        Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
