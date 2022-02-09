@@ -245,6 +245,12 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
         self.num_events
     }
 
+    /// Are there no events in this block?
+    // Note: mainly here to satisfy clippy.
+    pub fn is_empty(&self) -> bool {
+        self.num_events == 0
+    }
+
     /// Return the block hash that these events are from.
     pub fn block_hash(&self) -> T::Hash {
         self.block_hash
@@ -268,7 +274,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
             let cursor = &mut &event_bytes[pos..];
             let start_len = cursor.len();
 
-            if start_len == 0 {
+            if start_len == 0 || self.num_events == index {
                 None
             } else {
                 let mut decode_one_event = || -> Result<_, BasicError> {
@@ -318,10 +324,10 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
             let cursor = &mut &event_bytes[pos..];
             let start_len = cursor.len();
 
-            if start_len == 0 {
+            if start_len == 0 || self.num_events == index {
                 None
             } else {
-                match decode_raw_event_details::<T>(&self.metadata, index, cursor) {
+                match decode_raw_event_details::<T>(self.metadata, index, cursor) {
                     Ok(raw_event) => {
                         // Skip over decoded bytes in next iteration:
                         pos += start_len - cursor.len();
@@ -341,7 +347,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
-    /// them, and return only those which should decode to the provided [`Ev`] type.
+    /// them, and return only those which should decode to the provided `Ev` type.
     pub fn find<Ev: Event>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
         self.iter_raw().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
@@ -350,7 +356,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     }
 
     /// Iterate through the events using metadata to dynamically decode and skip
-    /// them, and return the first event found which decodes to the provided [`Ev`] type.
+    /// them, and return the first event found which decodes to the provided `Ev` type.
     pub fn find_first_event<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
@@ -367,7 +373,7 @@ pub struct EventDetails<Evs> {
     /// When was the event produced?
     pub phase: Phase,
     /// What index is this event in the stored events for this block.
-    pub index: usize,
+    pub index: u32,
     /// The event itself.
     pub event: Evs,
 }
@@ -378,7 +384,7 @@ pub struct RawEventDetails {
     /// When was the event produced?
     pub phase: Phase,
     /// What index is this event in the stored events for this block.
-    pub index: usize,
+    pub index: u32,
     /// The name of the pallet from whence the Event originated.
     pub pallet: String,
     /// The index of the pallet from whence the Event originated.
@@ -405,7 +411,7 @@ impl RawEventDetails {
 // Attempt to dynamically decode a single event from our events input.
 fn decode_raw_event_details<T: Config>(
     metadata: &Metadata,
-    index: usize,
+    index: u32,
     input: &mut &[u8],
 ) -> Result<RawEventDetails, BasicError> {
     // Decode basic event details:

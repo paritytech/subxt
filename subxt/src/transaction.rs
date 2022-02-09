@@ -494,7 +494,7 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     }
 
     /// Iterate through the transaction events using metadata to dynamically decode and skip
-    /// them, and return the first event found which decodes to the provided [`Ev`] type.
+    /// them, and return the first event found which decodes to the provided `Ev` type.
     pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
