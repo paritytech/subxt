@@ -107,10 +107,8 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     // the above, but does not check for success, and leaves it up to you:
     let events = balance_transfer.fetch_events().await?;
 
-    let failed_event = events
-        .find::<polkadot::system::events::ExtrinsicFailed>()
-        .next()
-        .transpose()?;
+    let failed_event =
+        events.find_first_event::<polkadot::system::events::ExtrinsicFailed>()?;
 
     if let Some(_ev) = failed_event {
         // We found a failed event; the transfer didn't succeed.
