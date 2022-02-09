@@ -180,7 +180,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .has_event::<staking::events::Chilled>()?;
+        .has::<staking::events::Chilled>()?;
     assert!(is_chilled);
 
     Ok(())
