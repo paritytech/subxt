@@ -103,10 +103,9 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     let event_sub = ctx.api.events().subscribe().await?.filter_map(|events| {
         async move {
             let events = events.ok()?;
-            let e = events
+            events
                 .find_first_event::<balances::events::Transfer>()
-                .ok()?;
-            e
+                .ok()?
         }
     });
 

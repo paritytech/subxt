@@ -14,11 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.11/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.13/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -70,7 +70,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         balance_transfer.find_first_event::<polkadot::balances::events::Transfer>()?;
 
     if let Some(event) = transfer_event {
-        println!("Balance transfer success: value: {:?}", event.2);
+        println!("Balance transfer success: {event:?}");
     } else {
         println!("Failed to find Balances::Transfer Event");
     }
@@ -119,7 +119,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         let transfer_event =
             events.find_first_event::<polkadot::balances::events::Transfer>()?;
         if let Some(event) = transfer_event {
-            println!("Balance transfer success: value: {:?}", event.2);
+            println!("Balance transfer success: {event:?}");
         } else {
             println!("Failed to find Balances::Transfer Event");
         }
@@ -165,8 +165,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
 
             if let Some(event) = transfer_event {
                 println!(
-                    "Balance transfer is now in block (but not finalized): value: {:?}",
-                    event.2
+                    "Balance transfer is now in block (but not finalized): {event:?}"
                 );
             } else {
                 println!("Failed to find Balances::Transfer Event");
@@ -185,7 +184,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
                 events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
             if let Some(event) = transfer_event {
-                println!("Balance transfer success: value: {:?}", event.2);
+                println!("Balance transfer success: {event:?}");
             } else {
                 println!("Failed to find Balances::Transfer Event");
             }

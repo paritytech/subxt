@@ -14,15 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.11/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.13/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
-use futures::StreamExt;
+use futures::{ future, stream, StreamExt };
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
@@ -35,6 +35,8 @@ use subxt::{
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
 
+/// Subscribe to all events, and then manually look through them and
+/// pluck out the events that we care about.
 #[async_std::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
@@ -44,9 +46,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
-    let mut event_sub = api.events().subscribe().await?;
 
-    // While this subscription is active, balance transfers are made somewhere:
+    // Subscribe to just balance transfer events, making use of `flat_map` and
+    // `filter_map` from the StreamExt trait to filter everything else out.
+    let mut transfer_events = api
+        .events()
+        .subscribe()
+        .await?
+        // Ignore errors returning events:
+        .filter_map(|events| future::ready(events.ok()))
+        // Map events to just those we care about:
+        .flat_map(|events| {
+            let transfer_events = events
+                .find::<polkadot::balances::events::Transfer>()
+                .collect::<Vec<_>>();
+            stream::iter(transfer_events)
+        });
+
+    // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
         let api = ClientBuilder::new()
@@ -55,11 +72,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap()
             .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-        // Make small balance transfers in a loop:
+        // Make small balance transfers from Alice to Bob in a loop:
         loop {
             api.tx()
                 .balances()
-                .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
+                .transfer(AccountKeyring::Bob.to_account_id().into(), 1_000_000_000)
                 .sign_and_submit(&signer)
                 .await
                 .unwrap();
@@ -67,26 +84,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    // Our subscription will see the events emitted as a result of this:
-    while let Some(events) = event_sub.next().await {
-        let events = events?;
-
-        // Find the first transfer event, ignoring any others:
-        let transfer_event =
-            events.find_first_event::<polkadot::balances::events::Transfer>()?;
-
-        if let Some(ev) = transfer_event {
-            println!(
-                "Balance transfer success in block {:?}: value: {:?}",
-                events.block_hash(),
-                ev.2
-            );
-        } else {
-            println!(
-                "No balance transfer event found in block {:?}",
-                events.block_hash()
-            );
-        }
+    // Our subscription will see all of the transfer events emitted as a result of this:
+    while let Some(transfer_event) = transfer_events.next().await {
+        println!("Balance transfer event: {transfer_event:?}");
     }
 
     Ok(())

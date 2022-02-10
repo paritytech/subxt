@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//!
+//! E.g.
+//! ```bash
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.13/polkadot" --output /usr/local/bin/polkadot --location
+//! polkadot --dev --tmp
+//! ```
+
 use subxt::{
     ClientBuilder,
     DefaultConfig,
@@ -42,9 +50,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?;
 
     if let Some(hash) = block_hash {
-        println!("Block hash for block number {}: {}", block_number, hash);
+        println!("Block hash for block number {block_number}: {hash}");
     } else {
-        println!("Block number {} not found.", block_number);
+        println!("Block number {block_number} not found.");
     }
 
     Ok(())
