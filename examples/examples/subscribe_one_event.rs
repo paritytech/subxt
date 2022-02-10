@@ -22,7 +22,11 @@
 //! polkadot --dev --tmp
 //! ```
 
-use futures::{ future, stream, StreamExt };
+use futures::{
+    future,
+    stream,
+    StreamExt,
+};
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
