@@ -16,7 +16,7 @@
 
 use crate::types::TypeGenerator;
 use frame_metadata::PalletConstantMetadata;
-use heck::SnakeCase as _;
+use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use quote::{
     format_ident,

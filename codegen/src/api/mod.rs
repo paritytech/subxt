@@ -54,7 +54,7 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
     StorageEntryType,
 };
-use heck::SnakeCase as _;
+use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::{
@@ -462,7 +462,7 @@ where
                     type_gen,
                 );
                 CompositeDef::struct_def(
-                    var.name(),
+                    struct_name.as_ref(),
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),
