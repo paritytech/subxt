@@ -15,7 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::{ balances, system },
+    node_runtime::{
+        balances,
+        system,
+    },
     pair_signer,
     test_context,
 };
@@ -29,11 +32,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
 
-    let mut event_sub = ctx
-        .api
-        .events()
-        .subscribe()
-        .await?;
+    let mut event_sub = ctx.api.events().subscribe().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is not finalized yet.
@@ -51,11 +50,7 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
 
-    let mut event_sub = ctx
-        .api
-        .events()
-        .subscribe_finalized()
-        .await?;
+    let mut event_sub = ctx.api.events().subscribe_finalized().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is the one we just finalized.
@@ -75,14 +70,12 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
     env_logger::try_init().ok();
     let ctx = test_context().await;
 
-    let mut event_sub = ctx
-        .api
-        .events()
-        .subscribe()
-        .await?;
+    let mut event_sub = ctx.api.events().subscribe().await?;
 
     for i in 0..3 {
-        let events = event_sub.next().await
+        let events = event_sub
+            .next()
+            .await
             .expect("events expected each block")?;
         let success_event = events
             .find_first_event::<system::events::ExtrinsicSuccess>()
@@ -107,18 +100,15 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     let ctx = test_context().await;
 
     // Subscribe to balance transfer events, ignoring all else.
-    let event_sub = ctx
-        .api
-        .events()
-        .subscribe()
-        .await?
-        .filter_map(|events| {
-            async move {
-                let events = events.ok()?;
-                let e = events.find_first_event::<balances::events::Transfer>().ok()?;
-                e
-            }
-        });
+    let event_sub = ctx.api.events().subscribe().await?.filter_map(|events| {
+        async move {
+            let events = events.ok()?;
+            let e = events
+                .find_first_event::<balances::events::Transfer>()
+                .ok()?;
+            e
+        }
+    });
 
     // Calling `.next()` on the above borrows it, and the `filter_map`
     // means it's no longer `Unpin`, so we pin it on the stack:
