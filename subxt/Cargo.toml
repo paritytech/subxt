@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.16.0"
+version = "0.17.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -27,10 +27,10 @@ serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
 
-subxt-macro = { version = "0.16.0", path = "../macro" }
+subxt-macro = { version = "0.17.0", path = "../macro" }
 
-sp-core = { version = "4.0.0", default-features = false  }
-sp-runtime = { version = "4.0.0", default-features = false }
+sp-core = { version = "5.0.0", default-features = false  }
+sp-runtime = "5.0.0"
 sp-version = "4.0.0"
 
 frame-metadata = "14.0.0"
@@ -45,4 +45,4 @@ tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
 test-runtime = { path = "../test-runtime" }
-sp-keyring = "4.0.0"
+sp-keyring = "5.0.0"

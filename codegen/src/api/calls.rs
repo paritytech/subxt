@@ -23,8 +23,8 @@ use frame_metadata::{
     PalletMetadata,
 };
 use heck::{
-    CamelCase as _,
-    SnakeCase as _,
+    ToSnakeCase as _,
+    ToUpperCamelCase as _,
 };
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
@@ -43,7 +43,7 @@ pub fn generate_calls(
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
-        |name| name.to_camel_case().into(),
+        |name| name.to_upper_camel_case().into(),
         "Call",
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs

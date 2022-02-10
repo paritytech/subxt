@@ -203,6 +203,10 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
     #[method(name = "author_hasKey")]
     async fn has_key(&self, public_key: Bytes, key_type: String) -> RpcResult<bool>;
 
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    #[method(name = "author_submitExtrinsic")]
+    async fn submit_extrinsic(&self, extrinsic: Bytes) -> RpcResult<Hash>;
+
     /// Subscribe to System Events that are imported into blocks.
     ///
     /// *WARNING* these may not be included in the finalized chain, use
@@ -225,10 +229,6 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
         item = SubstrateTransactionStatus<Hash, Hash>
     )]
     fn watch_extrinsic<X: Encode>(&self, xt: Bytes) -> RpcResult<()>;
-
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    #[method(name = "author_submitExtrinsic")]
-    async fn submit_extrinsic(&self, extrinsic: Bytes) -> RpcResult<Hash>;
 }
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -400,7 +400,7 @@ impl<T: Config> Rpc<T> {
 }
 
 /// Build WS RPC client from URL
-pub async fn build_ws_client(url: &str) -> Result<RpcClient, RpcError> {
+pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
     let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
