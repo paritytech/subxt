@@ -20,7 +20,9 @@ mod utils;
 #[cfg(test)]
 mod client;
 #[cfg(test)]
+mod events;
+#[cfg(test)]
 mod frame;
 
-pub use test_runtime::node_runtime;
-pub use utils::*;
+use test_runtime::node_runtime;
+use utils::*;

@@ -25,7 +25,6 @@ use crate::{
     test_context,
 };
 use codec::Decode;
-use futures::StreamExt;
 use sp_core::{
     sr25519::Pair,
     Pair as _,
@@ -186,54 +185,6 @@ async fn transfer_error() {
     } else {
         panic!("expected a runtime module error");
     }
-}
-
-#[async_std::test]
-async fn transfer_subscription() {
-    env_logger::try_init().ok();
-    let ctx = test_context().await;
-
-    // Subscribe to all balance transfer events:
-    let event_sub = ctx
-        .api
-        .events()
-        .subscribe()
-        .await
-        .unwrap()
-        .filter_map(|events| {
-            async move {
-                let events = events.ok()?;
-                let e = events.find::<balances::events::Transfer>().next()?.ok();
-                e
-            }
-        });
-
-    // Calling `.next()` on the above borrows it, and the `filter_map`
-    // means it's no longer `Unpin`, so we pin it on the stack:
-    futures::pin_mut!(event_sub);
-
-    // Make a transfer:
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id();
-    ctx.api
-        .tx()
-        .balances()
-        .transfer(bob.clone().into(), 10_000)
-        .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-
-    // Find the next transfer event in our subscription stream
-    // and check that it lines up:
-    let event = event_sub.next().await.unwrap();
-    assert_eq!(
-        event,
-        balances::events::Transfer {
-            from: alice.account_id().clone(),
-            to: bob.clone(),
-            amount: 10_000
-        }
-    );
 }
 
 #[async_std::test]

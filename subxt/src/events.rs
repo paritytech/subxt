@@ -82,8 +82,11 @@ pub async fn at<T: Config, Evs: Decode>(
     // event_bytes is a SCALE encoded vector of events. So, pluck the
     // compact encoded length from the front, leaving the remaining bytes
     // for our iterating to decode.
+    //
+    // Note: if we get no bytes back, avoid an error reading vec length
+    // and default to 0 events.
     let cursor = &mut &*event_bytes;
-    let num_events = <Compact<u32>>::decode(cursor)?.0;
+    let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
     let event_bytes_len = event_bytes.len();
     let remaining_len = cursor.len();
     event_bytes.drain(0..event_bytes_len - remaining_len);
