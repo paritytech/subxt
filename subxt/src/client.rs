@@ -41,7 +41,10 @@ use crate::{
     Config,
     Metadata,
 };
-use codec::Decode;
+use codec::{
+    Decode,
+    Encode,
+};
 use derivative::Derivative;
 use std::sync::Arc;
 
@@ -91,13 +94,16 @@ impl ClientBuilder {
         };
         let rpc = Rpc::new(client);
         let (metadata_bytes, genesis_hash, runtime_version, properties) = future::join4(
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::metadata(&*rpc),
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::genesis_hash(&*rpc),
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::metadata(rpc.inner()),
+            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::genesis_hash(
+                rpc.inner(),
+            ),
             SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::runtime_version(
-                &*rpc, None,
+                rpc.inner(),
+                None,
             ),
             SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::system_properties(
-                &*rpc,
+                rpc.inner(),
             ),
         )
         .await;
@@ -238,8 +244,14 @@ where
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
 
+        let bytes = extrinsic.encode().into();
+
         // Submit and watch for transaction progress.
-        let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
+        let sub = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::watch_extrinsic(
+            self.client.rpc().inner(),
+            bytes,
+        )
+        .await?;
 
         Ok(TransactionProgress::new(sub, self.client, ext_hash))
     }
@@ -262,8 +274,18 @@ where
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
         <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
-        self.client.rpc().submit_extrinsic(extrinsic).await
+        let bytes = self
+            .create_signed(signer, Default::default())
+            .await?
+            .encode()
+            .into();
+
+        SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::submit_extrinsic(
+            self.client.rpc().inner(),
+            bytes,
+        )
+        .await
+        .map_err(Into::into)
     }
 
     /// Creates a signed extrinsic.

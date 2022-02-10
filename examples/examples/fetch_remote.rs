@@ -15,10 +15,16 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use subxt::{
+    rpc::SubxtRpcApiClient,
     ClientBuilder,
+    Config,
     DefaultConfig,
     DefaultExtra,
 };
+
+type Hash = <DefaultConfig as Config>::Hash;
+type Header = <DefaultConfig as Config>::Header;
+type Extrinsic = <DefaultConfig as Config>::Header;
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -35,11 +41,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let block_number = 1;
 
-    let block_hash = api
-        .client
-        .rpc()
-        .block_hash(Some(block_number.into()))
-        .await?;
+    let block_hash = SubxtRpcApiClient::<Hash, Header, Extrinsic>::block_hash(
+        api.client.rpc().inner(),
+        Some(block_number.into()),
+    )
+    .await?;
 
     if let Some(hash) = block_hash {
         println!("Block hash for block number {}: {}", block_number, hash);

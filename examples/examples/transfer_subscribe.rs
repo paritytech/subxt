@@ -24,12 +24,19 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
+    rpc::SubxtRpcApiClient,
     ClientBuilder,
+    Config,
     DefaultConfig,
     DefaultExtra,
+    EventStorageSubscription,
     EventSubscription,
     PairSigner,
 };
+
+type Hash = <DefaultConfig as Config>::Hash;
+type Header = <DefaultConfig as Config>::Header;
+type Extrinsic = <DefaultConfig as Config>::Header;
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
@@ -46,7 +53,12 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-    let sub = api.client.rpc().subscribe_events().await?;
+    let sub = SubxtRpcApiClient::<Hash, Header, Extrinsic>::subscribe_events(
+        api.client.rpc().inner(),
+    )
+    .await?;
+
+    let sub = EventStorageSubscription::Imported(sub);
     let decoder = api.client.events_decoder();
     let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
     sub.filter_event::<polkadot::balances::events::Transfer>();

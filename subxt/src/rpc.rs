@@ -23,7 +23,6 @@
 
 use std::{
     collections::HashMap,
-    ops::Deref,
     sync::Arc,
 };
 
@@ -32,11 +31,9 @@ use crate::{
     subscription::{
         EventStorageSubscription,
         FinalizedEventStorageSubscription,
-        SystemEvents,
     },
     Config,
 };
-use codec::Encode;
 use core::marker::PhantomData;
 use jsonrpsee::core::RpcResult;
 pub use jsonrpsee::{
@@ -205,6 +202,33 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
     /// Returns `true` if a private key could be found.
     #[method(name = "author_hasKey")]
     async fn has_key(&self, public_key: Bytes, key_type: String) -> RpcResult<bool>;
+
+    /// Subscribe to System Events that are imported into blocks.
+    ///
+    /// *WARNING* these may not be included in the finalized chain, use
+    /// `subscribe_finalized_events` to ensure events are finalized.
+    #[subscription(name = "state_subscribeStorage", item = StorageChangeSet<Hash>)]
+    fn subscribe_events(&self) -> RpcResult<()>;
+
+    /// Subscribe to blocks.
+    #[subscription(name = "chain_subscribeNewHeads", item = Header)]
+    fn subscribe_blocks(&self) -> RpcResult<()>;
+
+    /// Subscribe to finalized blocks.
+    #[subscription(name = "chain_subscribeFinalizedHeads", item = Header)]
+    fn subscribe_finalized_blocks(&self) -> RpcResult<()>;
+
+    /// Create and submit an extrinsic and return a subscription to the events triggered.
+    #[subscription(
+        name = "author_submitAndWatchExtrinsic",
+        unsubscribe_aliases = ["author_unwatchExtrinsic"],
+        item = SubstrateTransactionStatus<Hash, Hash>
+    )]
+    fn watch_extrinsic<X: Encode>(&self, xt: Bytes) -> RpcResult<()>;
+
+    /// Create and submit an extrinsic and return corresponding Hash if successful
+    #[method(name = "author_submitExtrinsic")]
+    async fn submit_extrinsic(&self, extrinsic: Bytes) -> RpcResult<Hash>;
 }
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -348,14 +372,6 @@ impl<T: Config> Clone for Rpc<T> {
     }
 }
 
-impl<T: Config> Deref for Rpc<T> {
-    type Target = RpcClient;
-
-    fn deref(&self) -> &Self::Target {
-        &*self.client
-    }
-}
-
 impl<T: Config> Rpc<T> {
     /// Create a new [`Rpc`]
     pub fn new(client: RpcClient) -> Self {
@@ -365,21 +381,9 @@ impl<T: Config> Rpc<T> {
         }
     }
 
-    /// Subscribe to System Events that are imported into blocks.
-    ///
-    /// *WARNING* these may not be included in the finalized chain, use
-    /// `subscribe_finalized_events` to ensure events are finalized.
-    pub async fn subscribe_events(
-        &self,
-    ) -> Result<EventStorageSubscription<T>, BasicError> {
-        let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
-        let params = rpc_params![keys];
-
-        let subscription = self
-            .client
-            .subscribe("state_subscribeStorage", params, "state_unsubscribeStorage")
-            .await?;
-        Ok(EventStorageSubscription::Imported(subscription))
+    /// Get a reference to the client make calls.
+    pub fn inner(&self) -> &RpcClient {
+        &*self.client
     }
 
     /// Subscribe to finalized events.
@@ -389,71 +393,9 @@ impl<T: Config> Rpc<T> {
         Ok(EventStorageSubscription::Finalized(
             FinalizedEventStorageSubscription::new(
                 self.clone(),
-                self.subscribe_finalized_blocks().await?,
+                SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::subscribe_finalized_blocks(&*self.client).await?,
             ),
         ))
-    }
-
-    /// Subscribe to blocks.
-    pub async fn subscribe_blocks(&self) -> Result<Subscription<T::Header>, BasicError> {
-        let subscription = self
-            .client
-            .subscribe(
-                "chain_subscribeNewHeads",
-                rpc_params![],
-                "chain_unsubscribeNewHeads",
-            )
-            .await?;
-
-        Ok(subscription)
-    }
-
-    /// Subscribe to finalized blocks.
-    pub async fn subscribe_finalized_blocks(
-        &self,
-    ) -> Result<Subscription<T::Header>, BasicError> {
-        let subscription = self
-            .client
-            .subscribe(
-                "chain_subscribeFinalizedHeads",
-                rpc_params![],
-                "chain_unsubscribeFinalizedHeads",
-            )
-            .await?;
-        Ok(subscription)
-    }
-
-    /// Create and submit an extrinsic and return corresponding Hash if successful
-    pub async fn submit_extrinsic<X: Encode>(
-        &self,
-        extrinsic: X,
-    ) -> Result<T::Hash, BasicError> {
-        let bytes: Bytes = extrinsic.encode().into();
-        let params = rpc_params![bytes];
-        let xt_hash = self
-            .client
-            .request("author_submitExtrinsic", params)
-            .await?;
-        Ok(xt_hash)
-    }
-
-    /// Create and submit an extrinsic and return a subscription to the events triggered.
-    pub async fn watch_extrinsic<X: Encode>(
-        &self,
-        extrinsic: X,
-    ) -> Result<Subscription<SubstrateTransactionStatus<T::Hash, T::Hash>>, BasicError>
-    {
-        let bytes: Bytes = extrinsic.encode().into();
-        let params = rpc_params![bytes];
-        let subscription = self
-            .client
-            .subscribe(
-                "author_submitAndWatchExtrinsic",
-                params,
-                "author_unwatchExtrinsic",
-            )
-            .await?;
-        Ok(subscription)
     }
 }
 

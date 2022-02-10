@@ -78,7 +78,8 @@ pub trait Config: 'static {
     type Signature: Verify + Encode + Send + Sync + 'static;
 
     /// Extrinsic type within blocks.
-    // TODO(niklasad1): I have no idea if this ok or not ^^
+    // TODO(niklasad1): I have no idea if this ok or not ^^ => won't work otherwise
+    // because `jsonrpsee` requires `Deserialize + Send + Sync` for the return types.
     type Extrinsic: Parameter
         + Extrinsic
         + Debug
