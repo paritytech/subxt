@@ -80,11 +80,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // We can iterate, statically decoding all events if we want:
         println!("All events in block {block_hash:?}:");
+        println!("  Static event details:");
         for event in events.iter() {
-            println!("  {event:?}");
+            let event = event?;
+            println!("    {event:?}");
         }
 
-        // Or we candynamically find the first transfer event, ignoring any others:
+        // Or we can dynamically decode events:
+        println!("  Dynamic event details: {block_hash:?}:");
+        for event in events.iter_raw() {
+            let event = event?;
+            let is_balance_transfer = event.as_event::<polkadot::balances::events::Transfer>()?.is_some();
+            let pallet = event.pallet;
+            let variant = event.variant;
+            println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
+        }
+
+        // Or we can dynamically find the first transfer event, ignoring any others:
         let transfer_event =
             events.find_first_event::<polkadot::balances::events::Transfer>()?;
 
