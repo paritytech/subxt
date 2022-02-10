@@ -90,10 +90,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("  Dynamic event details: {block_hash:?}:");
         for event in events.iter_raw() {
             let event = event?;
-            let is_balance_transfer = event.as_event::<polkadot::balances::events::Transfer>()?.is_some();
+            let is_balance_transfer = event
+                .as_event::<polkadot::balances::events::Transfer>()?
+                .is_some();
             let pallet = event.pallet;
             let variant = event.variant;
-            println!("    {pallet}::{variant} (is balance transfer? {is_balance_transfer})");
+            println!(
+                "    {pallet}::{variant} (is balance transfer? {is_balance_transfer})"
+            );
         }
 
         // Or we can dynamically find the first transfer event, ignoring any others:
