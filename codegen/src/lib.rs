@@ -25,5 +25,8 @@ pub use self::{
         generate_runtime_api,
         RuntimeGenerator,
     },
-    types::GeneratedTypeDerives,
+    types::{
+        GeneratedTypeDerives,
+        TypeGenerator,
+    },
 };
