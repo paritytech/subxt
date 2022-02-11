@@ -265,7 +265,8 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     ///
     /// If the generated code does not know about all of the pallets that exist
     /// in the runtime being targeted, it may not know about all of the
-    /// events either, and so this method should be avoided.
+    /// events either, and so this method should be avoided in favout of [`Events::iter_raw()`],
+    /// which uses runtime metadata to skip over unknown events.
     pub fn iter(
         &self,
     ) -> impl Iterator<Item = Result<EventDetails<Evs>, BasicError>> + '_ {
@@ -300,7 +301,9 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
                         res
                     }
                     Err(e) => {
-                        // Next iteration will return None:
+                        // By setting the position to the "end" of the event bytes,
+                        // the cursor len will become 0 and the iterator will return `None`
+                        // from now on:
                         pos = event_bytes.len();
                         Some(Err(e))
                     }
@@ -340,7 +343,9 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
                         Some(Ok(raw_event))
                     }
                     Err(e) => {
-                        // Next iteration will return None:
+                        // By setting the position to the "end" of the event bytes,
+                        // the cursor len will become 0 and the iterator will return `None`
+                        // from now on:
                         pos = event_bytes.len();
                         Some(Err(e))
                     }
@@ -774,7 +779,16 @@ mod tests {
         for ev in event_records {
             ev.encode_to(&mut event_bytes);
         }
+        events_raw(metadata, event_bytes, num_events)
+    }
 
+    /// Much like [`events`], but takes pre-encoded events and event count, so that we can
+    /// mess with the bytes in tests if we need to.
+    fn events_raw<E: Decode + Encode>(
+        metadata: &'_ Metadata,
+        event_bytes: Vec<u8>,
+        num_events: u32,
+    ) -> Events<'_, DefaultConfig, AllEvents<E>> {
         Events {
             block_hash: <DefaultConfig as Config>::Hash::default(),
             event_bytes,
@@ -870,6 +884,59 @@ mod tests {
                 },
             ]
         );
+    }
+
+    #[test]
+    fn statically_decode_multiple_events_until_error() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B(bool),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode 2 events:
+        let mut event_bytes = vec![];
+        event_record(Phase::Initialization, Event::A(1)).encode_to(&mut event_bytes);
+        event_record(Phase::ApplyExtrinsic(123), Event::B(true))
+            .encode_to(&mut event_bytes);
+
+        // Push a few naff bytes to the end (a broken third event):
+        event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events_raw::<Event>(
+            &metadata,
+            event_bytes,
+            3, // 2 "good" events, and then it'll hit the naff bytes.
+        );
+
+        let mut events_iter = events.iter();
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            EventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                event: AllEvents::E(Event::A(1))
+            }
+        );
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            EventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                event: AllEvents::E(Event::B(true))
+            }
+        );
+
+        // We'll hit an error trying to decode the third event:
+        assert!(events_iter.next().unwrap().is_err());
+        // ... and then "None" from then on.
+        assert!(events_iter.next().is_none());
+        assert!(events_iter.next().is_none());
     }
 
     #[test]
@@ -980,6 +1047,74 @@ mod tests {
                 },
             ]
         );
+    }
+
+    #[test]
+    fn dynamically_decode_multiple_events_until_error() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B(bool),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode 2 events:
+        let mut event_bytes = vec![];
+        event_record(Phase::Initialization, Event::A(1)).encode_to(&mut event_bytes);
+        event_record(Phase::ApplyExtrinsic(123), Event::B(true))
+            .encode_to(&mut event_bytes);
+
+        // Push a few naff bytes to the end (a broken third event):
+        event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events_raw::<Event>(
+            &metadata,
+            event_bytes,
+            3, // 2 "good" events, and then it'll hit the naff bytes.
+        );
+
+        let event_bytes = |ev: Event| {
+            let mut bytes = ev.encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes.into()
+        };
+
+        let mut events_iter = events.iter_raw();
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: event_bytes(Event::A(1))
+            }
+        );
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            RawEventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "B".to_string(),
+                variant_index: 1,
+                data: event_bytes(Event::B(true))
+            }
+        );
+
+        // We'll hit an error trying to decode the third event:
+        assert!(events_iter.next().unwrap().is_err());
+        // ... and then "None" from then on.
+        assert!(events_iter.next().is_none());
+        assert!(events_iter.next().is_none());
     }
 
     #[test]
