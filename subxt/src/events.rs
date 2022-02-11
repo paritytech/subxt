@@ -186,8 +186,6 @@ impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
     ) -> std::task::Poll<Option<Self::Item>> {
-        // let mut_self = self.get_mut();
-
         // We are finished; return None.
         if self.finished {
             return Poll::Ready(None)
@@ -215,15 +213,15 @@ impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
             }
         }
 
-        // If there is an `at` function stored, we are currently resolving a block header into
-        // some events, so poll that until it's ready.
-        if let Some(res) = &mut self.at {
-            let events = futures::ready!(res.poll_unpin(cx));
-            self.at = None;
-            return Poll::Ready(Some(events))
-        }
-
-        unreachable!()
+        // If we get here, there will be an `at` function stored. Unwrap it and poll it to
+        // completion to get our events, throwing it away as soon as it is ready.
+        let at_fn = self
+            .at
+            .as_mut()
+            .expect("'at' function should have been set above'");
+        let events = futures::ready!(at_fn.poll_unpin(cx));
+        self.at = None;
+        Poll::Ready(Some(events))
     }
 }
 
