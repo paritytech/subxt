@@ -41,11 +41,12 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    // Subscribe to any events that occur:
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+
+    // Subscribe to any events that occur:
     let mut event_sub = api.events().subscribe().await?;
 
     // While this subscription is active, balance transfers are made somewhere:

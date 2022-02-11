@@ -59,7 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         // Ignore errors returning events:
         .filter_map(|events| future::ready(events.ok()))
-        // Map events to just those we care about:
+        // Map events to just the one we care about:
         .flat_map(|events| {
             let transfer_events = events
                 .find::<polkadot::balances::events::Transfer>()
