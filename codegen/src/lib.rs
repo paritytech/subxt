@@ -28,5 +28,6 @@ pub use self::{
     types::{
         GeneratedTypeDerives,
         TypeGenerator,
+        Module,
     },
 };

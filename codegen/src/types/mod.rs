@@ -221,6 +221,7 @@ impl<'a> TypeGenerator<'a> {
     }
 }
 
+/// Represents a Rust `mod`, containing generated types and child `mod`s.
 #[derive(Debug)]
 pub struct Module<'a> {
     name: Ident,
@@ -248,7 +249,8 @@ impl<'a> ToTokens for Module<'a> {
 }
 
 impl<'a> Module<'a> {
-    pub fn new(name: Ident, root_mod: Ident) -> Self {
+    /// Create a new [`Module`], with a reference to the root `mod` for resolving type paths.
+    pub(crate) fn new(name: Ident, root_mod: Ident) -> Self {
         Self {
             name,
             root_mod,
