@@ -209,6 +209,7 @@ impl RuntimeGenerator {
 
             quote! {
                 pub mod #mod_name {
+                    use super::root_mod;
                     use super::#types_mod_ident;
                     #calls
                     #event
@@ -275,6 +276,9 @@ impl RuntimeGenerator {
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
+                // Make it easy to access the root via `root_mod` at different levels:
+                use super::#mod_ident as root_mod;
+
                 #outer_event
                 #( #modules )*
                 #types_mod
