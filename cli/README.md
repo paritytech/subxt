@@ -7,10 +7,10 @@ USAGE:
 subxt <SUBCOMMAND>
 
 FLAGS:
--h, --help       
+-h, --help
 Prints help information
 
-    -V, --version    
+    -V, --version
             Prints version information
 
 
@@ -37,9 +37,9 @@ OPTIONS:
 
 ## Codegen
 
-Use to invoke the `subxt-codegen` crate which is used by `subxt-macro` to generate the the runtime API and types. Useful
-for troubleshooting codegen as an alternative to `cargo expand`, and also provides the possibility of customizing the 
-generated code if the macro does not produce the desired API. e.g. 
+Use to invoke the `subxt-codegen` crate which is used by `subxt-macro` to generate the runtime API and types. Useful
+for troubleshooting codegen as an alternative to `cargo expand`, and also provides the possibility to customize the
+generated code if the macro does not produce the desired API. e.g.
 
 `subxt codegen | rustfmt --edition=2018 --emit=stdout`
 
@@ -48,10 +48,10 @@ USAGE:
     subxt codegen [OPTIONS]
 
 OPTIONS:
-    -f, --file <file>    
+    -f, --file <file>
             the path to the encoded metadata file
 
-        --url <url>      
+        --url <url>
             the url of the substrate node to query for metadata for codegen
 
 ```
