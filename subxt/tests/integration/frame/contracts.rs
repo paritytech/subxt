@@ -209,7 +209,7 @@ async fn tx_call() {
         .api
         .storage()
         .contracts()
-        .contract_info_of(contract.clone(), None)
+        .contract_info_of(&contract, None)
         .await;
     assert!(contract_info.is_ok());
 

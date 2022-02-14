@@ -128,11 +128,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
         .find_first_event::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
+    let locked_account = AccountKeyring::Bob.to_account_id();
     let locks = cxt
         .api
         .storage()
         .balances()
-        .locks(AccountKeyring::Bob.to_account_id(), None)
+        .locks(&locked_account, None)
         .await?;
 
     assert_eq!(
