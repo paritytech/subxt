@@ -74,12 +74,13 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata<PortableForm>,
 ) -> (TokenStream2, TokenStream2) {
     let entry_struct_ident = format_ident!("{}", storage_entry.name);
-    let (fields, entry_struct, constructor, key_impl) = match storage_entry.ty {
+    let (fields, entry_struct, constructor, key_impl, should_ref) = match storage_entry.ty
+    {
         StorageEntryType::Plain(_) => {
             let entry_struct = quote!( pub struct #entry_struct_ident; );
             let constructor = quote!( #entry_struct_ident );
             let key_impl = quote!(::subxt::StorageEntryKey::Plain);
-            (vec![], entry_struct, constructor, key_impl)
+            (vec![], entry_struct, constructor, key_impl, false)
         }
         StorageEntryType::Map {
             ref key,
@@ -120,7 +121,7 @@ fn generate_storage_entry_fns(
                         fields.iter().map(|(_, field_type)| field_type);
                     let field_names = fields.iter().map(|(field_name, _)| field_name);
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( #( pub #tuple_struct_fields ),* );
+                        pub struct #entry_struct_ident <'a>( #( pub &'a #tuple_struct_fields ),* );
                     };
                     let constructor =
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
@@ -135,13 +136,20 @@ fn generate_storage_entry_fns(
                             vec![ #( #keys ),* ]
                         )
                     };
-                    (fields, entry_struct, constructor, key_impl)
+                    (fields, entry_struct, constructor, key_impl, true)
                 }
                 _ => {
+                    let should_ref = storage_entry.name != "Account";
+                    let (lifetime_param, lifetime_ref) = if should_ref {
+                        (quote!(<'a>), quote!(&'a))
+                    } else {
+                        (quote!(), quote!())
+                    };
+
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( pub #ty_path );
+                        pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_path );
                     };
                     let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
@@ -152,7 +160,7 @@ fn generate_storage_entry_fns(
                             vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
                         )
                     };
-                    (fields, entry_struct, constructor, key_impl)
+                    (fields, entry_struct, constructor, key_impl, should_ref)
                 }
             }
         }
@@ -178,10 +186,16 @@ fn generate_storage_entry_fns(
         }
     };
 
+    let (lifetime_param, reference, anon_lifetime) = if should_ref {
+        (quote!(<'a>), quote!(&), quote!(<'_>))
+    } else {
+        (quote!(), quote!(), quote!())
+    };
+
     let storage_entry_type = quote! {
         #entry_struct
 
-        impl ::subxt::StorageEntry for #entry_struct_ident {
+        impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
             const PALLET: &'static str = #pallet_name;
             const STORAGE: &'static str = #storage_name;
             type Value = #storage_entry_value_ty;
@@ -196,7 +210,7 @@ fn generate_storage_entry_fns(
             pub async fn #fn_name_iter(
                 &self,
                 hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::BasicError> {
+            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
                 self.client.storage().iter(hash).await
             }
         )
@@ -206,7 +220,7 @@ fn generate_storage_entry_fns(
 
     let key_args = fields
         .iter()
-        .map(|(field_name, field_type)| quote!( #field_name: #field_type ));
+        .map(|(field_name, field_type)| quote!( #field_name: #reference #field_type ));
     let client_fns = quote! {
         pub async fn #fn_name(
             &self,
