@@ -312,7 +312,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
 
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
-    /// details.
+    /// details. If an error occurs, all subsequent iterations return `None`.
     ///
     /// This method is safe to use even if you do not statically know about
     /// all of the possible events; it splits events up using the metadata
@@ -354,6 +354,10 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
+    /// If an error occurs, all subsequent iterations return `None`.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
     pub fn find<Ev: Event>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
         self.iter_raw().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
@@ -363,11 +367,17 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
     pub fn find_first_event<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 
     /// Find an event that decodes to the type provided. Returns true if it was found.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
     pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
@@ -376,7 +386,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
 /// A decoded event and associated details.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EventDetails<Evs> {
-    /// When was the event produced?
+    /// During which [`Phase`] was the event produced?
     pub phase: Phase,
     /// What index is this event in the stored events for this block.
     pub index: u32,
@@ -384,7 +394,8 @@ pub struct EventDetails<Evs> {
     pub event: Evs,
 }
 
-/// The raw bytes for an event with associated details.
+/// The raw bytes for an event with associated details about
+/// where and when it was emitted.
 #[derive(Debug, Clone, PartialEq)]
 pub struct RawEventDetails {
     /// When was the event produced?
@@ -1181,7 +1192,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let events = events::<Event>(
             &metadata,
             vec![event_record(
@@ -1243,7 +1254,7 @@ mod tests {
         let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
-        // construst an Events object to iterate them:
+        // construct an Events object to iterate them:
         let events = events::<Event>(
             &metadata,
             vec![event_record(Phase::Finalization, Event::A(MyType::B))],

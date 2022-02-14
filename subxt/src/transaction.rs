@@ -456,8 +456,9 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
         &self.events
     }
 
-    /// Iterate over the statically decoded events associated with this transaction. Works
-    /// in the same way that [`events::Events::iter()`] does, with the
+    /// Iterate over the statically decoded events associated with this transaction.
+    ///
+    /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter(
         &self,
@@ -469,8 +470,9 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
         })
     }
 
-    /// Iterate over all of the raw events associated with this transaction. Works
-    /// in the same way that [`events::Events::iter_raw()`] does, with the
+    /// Iterate over all of the raw events associated with this transaction.
+    ///
+    /// This works in the same way that [`events::Events::iter_raw()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter_raw(
         &self,
@@ -483,7 +485,9 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     }
 
     /// Find all of the transaction events matching the event type provided as a generic parameter.
-    /// This will return an error if a matching event is found but cannot be properly decoded.
+    ///
+    /// This works in the same way that [`events::Events::find()`] does, with the
+    /// exception that it filters out events not related to the submitted extrinsic.
     pub fn find<Ev: crate::Event>(
         &self,
     ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
@@ -495,11 +499,17 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
 
     /// Iterate through the transaction events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
+    ///
+    /// This works in the same way that [`events::Events::find_first_event()`] does, with the
+    /// exception that it ignores events not related to the submitted extrinsic.
     pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 
     /// Find an event in those associated with this transaction. Returns true if it was found.
+    ///
+    /// This works in the same way that [`events::Events::has()`] does, with the
+    /// exception that it ignores events not related to the submitted extrinsic.
     pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
