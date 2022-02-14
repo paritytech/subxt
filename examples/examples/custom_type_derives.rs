@@ -24,7 +24,7 @@
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    generated_type_derives = "Clone, PartialEq"
+    generated_type_derives = "Clone, PartialEq, Hash"
 )]
 pub mod polkadot {}
 
