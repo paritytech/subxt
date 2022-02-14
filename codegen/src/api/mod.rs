@@ -454,11 +454,11 @@ fn generate_default_account_data_impl(
             type AccountId = #account_id_ty;
             type Index = #account_nonce_ty;
 
-            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
-                result.nonce
-            }
             fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
                 #storage_entry_path(account_id)
+            }
+            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
+                result.nonce
             }
         }
     })
