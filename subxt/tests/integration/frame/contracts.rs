@@ -18,6 +18,7 @@ use sp_keyring::AccountKeyring;
 
 use crate::{
     node_runtime::{
+        self,
         contracts::{
             calls::TransactionApi,
             events,
@@ -150,8 +151,10 @@ impl ContractsTestContext {
         &self,
         contract: AccountId,
         input_data: Vec<u8>,
-    ) -> Result<TransactionProgress<'_, DefaultConfig, DispatchError>, Error<DispatchError>>
-    {
+    ) -> Result<
+        TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
+        Error<DispatchError>,
+    > {
         log::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()

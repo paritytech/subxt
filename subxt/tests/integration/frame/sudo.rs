@@ -48,7 +48,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .has_event::<sudo::events::Sudid>()?;
+        .has::<sudo::events::Sudid>()?;
 
     assert!(found_event);
     Ok(())
@@ -74,7 +74,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>>
         .await?
         .wait_for_finalized_success()
         .await?
-        .has_event::<sudo::events::Sudid>()?;
+        .has::<sudo::events::Sudid>()?;
 
     assert!(found_event);
     Ok(())

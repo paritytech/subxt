@@ -209,6 +209,7 @@ impl RuntimeGenerator {
 
             quote! {
                 pub mod #mod_name {
+                    use super::root_mod;
                     use super::#types_mod_ident;
                     #calls
                     #event
@@ -275,6 +276,9 @@ impl RuntimeGenerator {
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
+                // Make it easy to access the root via `root_mod` at different levels:
+                use super::#mod_ident as root_mod;
+
                 #outer_event
                 #( #modules )*
                 #types_mod
@@ -323,12 +327,33 @@ impl RuntimeGenerator {
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
                         TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
+
+                    pub fn events(&'a self) -> EventsApi<'a, T> {
+                        EventsApi { client: &self.client }
+                    }
+                }
+
+                pub struct EventsApi<'a, T: ::subxt::Config> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl <'a, T: ::subxt::Config> EventsApi<'a, T> {
+                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::at::<T, Event>(self.client, block_hash).await
+                    }
+
+                    pub async fn subscribe(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::subscribe::<T, Event>(self.client).await
+                    }
+
+                    pub async fn subscribe_finalized(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
+                    }
                 }
 
                 pub struct ConstantsApi;
 
-                impl ConstantsApi
-                {
+                impl ConstantsApi {
                     #(
                         pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
                             #pallets_with_constants::constants::ConstantsApi

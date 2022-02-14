@@ -18,7 +18,6 @@ use std::task::Poll;
 
 use crate::PhantomDataSendSync;
 use codec::Decode;
-use sp_core::storage::StorageKey;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
 pub use sp_version::RuntimeVersion;
@@ -31,8 +30,13 @@ use crate::{
         RuntimeError,
         TransactionError,
     },
+    events::{
+        self,
+        EventDetails,
+        Events,
+        RawEventDetails,
+    },
     rpc::SubstrateTransactionStatus,
-    subscription::SystemEvents,
     Config,
     Phase,
 };
@@ -50,19 +54,22 @@ use jsonrpsee::core::{
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionProgress<'client, T: Config, E: Decode> {
+pub struct TransactionProgress<'client, T: Config, E: Decode, Evs: Decode> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: &'client Client<T>,
-    _error: PhantomDataSendSync<E>,
+    _error: PhantomDataSendSync<(E, Evs)>,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<'client, T: Config, E: Decode> Unpin for TransactionProgress<'client, T, E> {}
+impl<'client, T: Config, E: Decode, Evs: Decode> Unpin
+    for TransactionProgress<'client, T, E, Evs>
+{
+}
 
-impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
+impl<'client, T: Config, E: Decode, Evs: Decode> TransactionProgress<'client, T, E, Evs> {
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
@@ -82,7 +89,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// avoid importing that trait if you don't otherwise need it.
     pub async fn next_item(
         &mut self,
-    ) -> Option<Result<TransactionStatus<'client, T, E>, BasicError>> {
+    ) -> Option<Result<TransactionStatus<'client, T, E, Evs>, BasicError>> {
         self.next().await
     }
 
@@ -99,7 +106,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
-    ) -> Result<TransactionInBlock<'client, T, E>, BasicError> {
+    ) -> Result<TransactionInBlock<'client, T, E, Evs>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
@@ -129,7 +136,7 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
-    ) -> Result<TransactionInBlock<'client, T, E>, BasicError> {
+    ) -> Result<TransactionInBlock<'client, T, E, Evs>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized! Return.
@@ -158,14 +165,16 @@ impl<'client, T: Config, E: Decode> TransactionProgress<'client, T, E> {
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<TransactionEvents<T>, Error<E>> {
+    ) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
-impl<'client, T: Config, E: Decode> Stream for TransactionProgress<'client, T, E> {
-    type Item = Result<TransactionStatus<'client, T, E>, BasicError>;
+impl<'client, T: Config, E: Decode, Evs: Decode> Stream
+    for TransactionProgress<'client, T, E, Evs>
+{
+    type Item = Result<TransactionStatus<'client, T, E, Evs>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -274,7 +283,7 @@ impl<'client, T: Config, E: Decode> Stream for TransactionProgress<'client, T, E
 /// or that finality gadget is lagging behind.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub enum TransactionStatus<'client, T: Config, E: Decode> {
+pub enum TransactionStatus<'client, T: Config, E: Decode, Evs: Decode> {
     /// The transaction is part of the "future" queue.
     Future,
     /// The transaction is part of the "ready" queue.
@@ -282,7 +291,7 @@ pub enum TransactionStatus<'client, T: Config, E: Decode> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// The transaction has been included in a block with given hash.
-    InBlock(TransactionInBlock<'client, T, E>),
+    InBlock(TransactionInBlock<'client, T, E, Evs>),
     /// The block this transaction was included in has been retracted,
     /// probably because it did not make it onto the blocks which were
     /// finalized.
@@ -291,7 +300,7 @@ pub enum TransactionStatus<'client, T: Config, E: Decode> {
     /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
     /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TransactionInBlock<'client, T, E>),
+    Finalized(TransactionInBlock<'client, T, E, Evs>),
     /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
@@ -301,10 +310,10 @@ pub enum TransactionStatus<'client, T: Config, E: Decode> {
     Invalid,
 }
 
-impl<'client, T: Config, E: Decode> TransactionStatus<'client, T, E> {
+impl<'client, T: Config, E: Decode, Evs: Decode> TransactionStatus<'client, T, E, Evs> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T, E>> {
+    pub fn as_finalized(&self) -> Option<&TransactionInBlock<'client, T, E, Evs>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None,
@@ -313,7 +322,7 @@ impl<'client, T: Config, E: Decode> TransactionStatus<'client, T, E> {
 
     /// A convenience method to return the `InBlock` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::InBlock`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T, E>> {
+    pub fn as_in_block(&self) -> Option<&TransactionInBlock<'client, T, E, Evs>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None,
@@ -324,14 +333,14 @@ impl<'client, T: Config, E: Decode> TransactionStatus<'client, T, E> {
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionInBlock<'client, T: Config, E: Decode> {
+pub struct TransactionInBlock<'client, T: Config, E: Decode, Evs: Decode> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: &'client Client<T>,
-    _error: PhantomDataSendSync<E>,
+    _error: PhantomDataSendSync<(E, Evs)>,
 }
 
-impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
+impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, E, Evs> {
     pub(crate) fn new(
         block_hash: T::Hash,
         ext_hash: T::Hash,
@@ -368,11 +377,14 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error<E>> {
+    pub async fn wait_for_success(
+        &self,
+    ) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
-        for ev in events.as_slice() {
+        for ev in events.iter_raw() {
+            let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 let dispatch_error = E::decode(&mut &*ev.data)?;
                 return Err(Error::Runtime(RuntimeError(dispatch_error)))
@@ -388,7 +400,9 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
+    pub async fn fetch_events(
+        &self,
+    ) -> Result<TransactionEvents<'client, T, Evs>, BasicError> {
         let block = self
             .client
             .rpc()
@@ -406,31 +420,11 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let raw_events = self
-            .client
-            .rpc()
-            .storage(
-                &StorageKey::from(SystemEvents::new()),
-                Some(self.block_hash),
-            )
-            .await?
-            .map(|s| s.0)
-            .unwrap_or_else(Vec::new);
-
-        let events = self
-            .client
-            .events_decoder()
-            .decode_events(&mut &*raw_events)?
-            .into_iter()
-            .filter(move |(phase, _raw)| {
-                phase == &Phase::ApplyExtrinsic(extrinsic_idx as u32)
-            })
-            .map(|(_phase, event)| event)
-            .collect();
+        let events = events::at::<T, Evs>(self.client, self.block_hash).await?;
 
         Ok(TransactionEvents {
-            block_hash: self.block_hash,
             ext_hash: self.ext_hash,
+            ext_idx: extrinsic_idx as u32,
             events,
         })
     }
@@ -440,16 +434,16 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
 /// We can iterate over the events, or look for a specific one.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionEvents<T: Config> {
-    block_hash: T::Hash,
+pub struct TransactionEvents<'client, T: Config, Evs: Decode> {
     ext_hash: T::Hash,
-    events: Vec<crate::RawEvent>,
+    ext_idx: u32,
+    events: Events<'client, T, Evs>,
 }
 
-impl<T: Config> TransactionEvents<T> {
+impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
-        self.block_hash
+        self.events.block_hash()
     }
 
     /// Return the hash of the extrinsic.
@@ -457,43 +451,66 @@ impl<T: Config> TransactionEvents<T> {
         self.ext_hash
     }
 
-    /// Return a slice of the returned events.
-    pub fn as_slice(&self) -> &[crate::RawEvent] {
+    /// Return all of the events in the block that the transaction made it into.
+    pub fn all_events_in_block(&self) -> &events::Events<'client, T, Evs> {
         &self.events
     }
 
-    /// Find all of the events matching the event type provided as a generic parameter. This
-    /// will return an error if a matching event is found but cannot be properly decoded.
-    pub fn find_events<Ev: crate::Event>(&self) -> Result<Vec<Ev>, BasicError> {
-        self.events
-            .iter()
-            .filter_map(|e| e.as_event::<Ev>().map_err(Into::into).transpose())
-            .collect()
-    }
-
-    /// Find the first event that matches the event type provided as a generic parameter. This
-    /// will return an error if a matching event is found but cannot be properly decoded.
+    /// Iterate over the statically decoded events associated with this transaction.
     ///
-    /// Use [`TransactionEvents::find_events`], or iterate over [`TransactionEvents`] yourself
-    /// if you'd like to handle multiple events of the same type.
+    /// This works in the same way that [`events::Events::iter()`] does, with the
+    /// exception that it filters out events not related to the submitted extrinsic.
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = Result<EventDetails<Evs>, BasicError>> + '_ {
+        self.events.iter().filter(|ev| {
+            ev.as_ref()
+                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
+                .unwrap_or(true) // Keep any errors
+        })
+    }
+
+    /// Iterate over all of the raw events associated with this transaction.
+    ///
+    /// This works in the same way that [`events::Events::iter_raw()`] does, with the
+    /// exception that it filters out events not related to the submitted extrinsic.
+    pub fn iter_raw(
+        &self,
+    ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
+        self.events.iter_raw().filter(|ev| {
+            ev.as_ref()
+                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
+                .unwrap_or(true) // Keep any errors.
+        })
+    }
+
+    /// Find all of the transaction events matching the event type provided as a generic parameter.
+    ///
+    /// This works in the same way that [`events::Events::find()`] does, with the
+    /// exception that it filters out events not related to the submitted extrinsic.
+    pub fn find<Ev: crate::Event>(
+        &self,
+    ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+        self.iter_raw().filter_map(|ev| {
+            ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
+                .transpose()
+        })
+    }
+
+    /// Iterate through the transaction events using metadata to dynamically decode and skip
+    /// them, and return the first event found which decodes to the provided `Ev` type.
+    ///
+    /// This works in the same way that [`events::Events::find_first_event()`] does, with the
+    /// exception that it ignores events not related to the submitted extrinsic.
     pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
-        self.events
-            .iter()
-            .filter_map(|e| e.as_event::<Ev>().transpose())
-            .next()
-            .transpose()
-            .map_err(Into::into)
+        self.find::<Ev>().next().transpose()
     }
 
-    /// Find an event. Returns true if it was found.
-    pub fn has_event<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
-        Ok(self.find_first_event::<Ev>()?.is_some())
-    }
-}
-
-impl<T: Config> std::ops::Deref for TransactionEvents<T> {
-    type Target = [crate::RawEvent];
-    fn deref(&self) -> &Self::Target {
-        &self.events
+    /// Find an event in those associated with this transaction. Returns true if it was found.
+    ///
+    /// This works in the same way that [`events::Events::has()`] does, with the
+    /// exception that it ignores events not related to the submitted extrinsic.
+    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+        Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }

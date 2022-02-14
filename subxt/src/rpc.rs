@@ -29,11 +29,6 @@ use std::{
 use crate::{
     error::BasicError,
     storage::StorageKeyPrefix,
-    subscription::{
-        EventStorageSubscription,
-        FinalizedEventStorageSubscription,
-        SystemEvents,
-    },
     Config,
     Metadata,
 };
@@ -404,35 +399,6 @@ impl<T: Config> Rpc<T> {
             .request("state_getRuntimeVersion", params)
             .await?;
         Ok(version)
-    }
-
-    /// Subscribe to System Events that are imported into blocks.
-    ///
-    /// *WARNING* these may not be included in the finalized chain, use
-    /// `subscribe_finalized_events` to ensure events are finalized.
-    pub async fn subscribe_events(
-        &self,
-    ) -> Result<EventStorageSubscription<T>, BasicError> {
-        let keys = Some(vec![StorageKey::from(SystemEvents::new())]);
-        let params = rpc_params![keys];
-
-        let subscription = self
-            .client
-            .subscribe("state_subscribeStorage", params, "state_unsubscribeStorage")
-            .await?;
-        Ok(EventStorageSubscription::Imported(subscription))
-    }
-
-    /// Subscribe to finalized events.
-    pub async fn subscribe_finalized_events(
-        &self,
-    ) -> Result<EventStorageSubscription<T>, BasicError> {
-        Ok(EventStorageSubscription::Finalized(
-            FinalizedEventStorageSubscription::new(
-                self.clone(),
-                self.subscribe_finalized_blocks().await?,
-            ),
-        ))
     }
 
     /// Subscribe to blocks.

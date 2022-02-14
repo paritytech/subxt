@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-pub use crate::{
+pub(crate) use crate::{
     node_runtime,
     TestNodeProcess,
 };
