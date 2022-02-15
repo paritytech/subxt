@@ -35,7 +35,7 @@ async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
         .api
         .storage()
         .system()
-        .account(alice.account_id().clone(), None)
+        .account(alice.account_id(), None)
         .await;
 
     assert_matches!(account_info, Ok(_));
