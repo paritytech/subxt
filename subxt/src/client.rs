@@ -20,7 +20,6 @@ pub use sp_runtime::traits::SignedExtension;
 
 use crate::{
     error::BasicError,
-    events::EventsDecoder,
     extrinsic::{
         self,
         SignedExtra,
@@ -98,13 +97,10 @@ impl ClientBuilder {
         .await;
         let metadata = metadata?;
 
-        let events_decoder = EventsDecoder::new(metadata.clone());
-
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
             metadata: Arc::new(metadata),
-            events_decoder,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             iter_page_size: self.page_size.unwrap_or(10),
@@ -119,7 +115,6 @@ pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
     metadata: Arc<Metadata>,
-    events_decoder: EventsDecoder<T>,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     iter_page_size: u32,
@@ -179,27 +174,23 @@ impl<T: Config> Client<T> {
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
     }
-
-    /// Returns the events decoder.
-    pub fn events_decoder(&self) -> &EventsDecoder<T> {
-        &self.events_decoder
-    }
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode> {
+pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode, Evs: Decode> {
     client: &'client Client<T>,
     call: C,
-    marker: std::marker::PhantomData<(X, A, E)>,
+    marker: std::marker::PhantomData<(X, A, E, Evs)>,
 }
 
-impl<'client, T, X, A, C, E> SubmittableExtrinsic<'client, T, X, A, C, E>
+impl<'client, T, X, A, C, E, Evs> SubmittableExtrinsic<'client, T, X, A, C, E, Evs>
 where
     T: Config,
     X: SignedExtra<T>,
     A: AccountData,
     C: Call + Send + Sync,
     E: Decode,
+    Evs: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
     pub fn new(client: &'client Client<T>, call: C) -> Self {
@@ -217,7 +208,7 @@ where
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T, E>, BasicError>
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,

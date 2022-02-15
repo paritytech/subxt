@@ -14,16 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! For working with events.
+
 use crate::{
     error::BasicError,
-    metadata::{
-        EventMetadata,
-        MetadataError,
-    },
+    metadata::MetadataError,
+    Client,
     Config,
     Event,
     Metadata,
-    PhantomDataSendSync,
     Phase,
 };
 use bitvec::{
@@ -38,17 +37,371 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
+use futures::{
+    Future,
+    FutureExt,
+    Stream,
+    StreamExt,
+};
+use jsonrpsee::core::client::Subscription;
 use scale_info::{
     PortableRegistry,
     TypeDef,
     TypeDefPrimitive,
 };
-use sp_core::Bytes;
+use sp_core::{
+    storage::StorageKey,
+    twox_128,
+    Bytes,
+};
+use std::{
+    marker::Unpin,
+    task::Poll,
+};
 
-/// Raw bytes for an Event
-#[derive(Debug)]
-#[cfg_attr(test, derive(PartialEq, Clone))]
-pub struct RawEvent {
+/// Obtain events at some block hash. The generic parameter is what we
+/// will attempt to decode each event into if using [`Events::iter()`],
+/// and is expected to be the outermost event enum that contains all of
+/// the possible events across all pallets.
+///
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().at(block_hash)` over calling this directly.
+#[doc(hidden)]
+pub async fn at<T: Config, Evs: Decode>(
+    client: &'_ Client<T>,
+    block_hash: T::Hash,
+) -> Result<Events<'_, T, Evs>, BasicError> {
+    let mut event_bytes = client
+        .rpc()
+        .storage(&system_events_key(), Some(block_hash))
+        .await?
+        .map(|s| s.0)
+        .unwrap_or_else(Vec::new);
+
+    // event_bytes is a SCALE encoded vector of events. So, pluck the
+    // compact encoded length from the front, leaving the remaining bytes
+    // for our iterating to decode.
+    //
+    // Note: if we get no bytes back, avoid an error reading vec length
+    // and default to 0 events.
+    let cursor = &mut &*event_bytes;
+    let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
+    let event_bytes_len = event_bytes.len();
+    let remaining_len = cursor.len();
+    event_bytes.drain(0..event_bytes_len - remaining_len);
+
+    Ok(Events {
+        metadata: client.metadata(),
+        block_hash,
+        event_bytes,
+        num_events,
+        _event_type: std::marker::PhantomData,
+    })
+}
+
+/// Subscribe to events from blocks.
+///
+/// **Note:** these blocks haven't necessarily been finalised yet; prefer
+/// [`Events::subscribe_finalized()`] if that is important.
+///
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().subscribe()` over calling this directly.
+#[doc(hidden)]
+pub async fn subscribe<T: Config, Evs: Decode + 'static>(
+    client: &'_ Client<T>,
+) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+    let block_subscription = client.rpc().subscribe_blocks().await?;
+    Ok(EventSubscription::new(client, block_subscription))
+}
+
+/// Subscribe to events from finalized blocks.
+///
+/// **Note:** This function is hidden from the documentation
+/// and is exposed only to be called via the codegen. Thus, prefer to use
+/// `api.events().subscribe_finalized()` over calling this directly.
+#[doc(hidden)]
+pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
+    client: &'_ Client<T>,
+) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+    let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
+    Ok(EventSubscription::new(client, block_subscription))
+}
+
+/// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
+pub struct EventSubscription<'a, T: Config, Evs: Decode + 'static> {
+    finished: bool,
+    client: &'a Client<T>,
+    block_header_subscription: Subscription<T::Header>,
+    #[derivative(Debug = "ignore")]
+    at: Option<
+        std::pin::Pin<
+            Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + 'a>,
+        >,
+    >,
+    _event_type: std::marker::PhantomData<Evs>,
+}
+
+impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
+    fn new(
+        client: &'a Client<T>,
+        block_header_subscription: Subscription<T::Header>,
+    ) -> Self {
+        EventSubscription {
+            finished: false,
+            client,
+            block_header_subscription,
+            at: None,
+            _event_type: std::marker::PhantomData,
+        }
+    }
+}
+
+impl<'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
+
+// We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
+// way to roughly implement the following function:
+//
+// ```
+// fn subscribe_events<T: Config, Evs: Decode>(client: &'_ Client<T>, block_sub: Subscription<T::Header>) -> impl Stream<Item=Result<Events<'_, T, Evs>, BasicError>> + '_ {
+//     use futures::StreamExt;
+//     block_sub.then(move |block_header_res| async move {
+//         use sp_runtime::traits::Header;
+//         let block_header = block_header_res?;
+//         let block_hash = block_header.hash();
+//         at(client, block_hash).await
+//     })
+// }
+// ```
+//
+// The advantage of this manual implementation is that we have a named type that we (and others)
+// can derive things on, store away, alias etc.
+impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
+    type Item = Result<Events<'a, T, Evs>, BasicError>;
+
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
+        // We are finished; return None.
+        if self.finished {
+            return Poll::Ready(None)
+        }
+
+        // If there isn't an `at` function yet that's busy resolving a block hash into
+        // some event details, then poll the block header subscription to get one.
+        if self.at.is_none() {
+            match futures::ready!(self.block_header_subscription.poll_next_unpin(cx)) {
+                None => {
+                    self.finished = true;
+                    return Poll::Ready(None)
+                }
+                Some(Err(e)) => {
+                    self.finished = true;
+                    return Poll::Ready(Some(Err(e.into())))
+                }
+                Some(Ok(block_header)) => {
+                    use sp_runtime::traits::Header;
+                    // Note [jsdw]: We may be able to get rid of the per-item allocation
+                    // with https://github.com/oblique/reusable-box-future.
+                    self.at = Some(Box::pin(at(self.client, block_header.hash())));
+                    // Continue, so that we poll this function future we've just created.
+                }
+            }
+        }
+
+        // If we get here, there will be an `at` function stored. Unwrap it and poll it to
+        // completion to get our events, throwing it away as soon as it is ready.
+        let at_fn = self
+            .at
+            .as_mut()
+            .expect("'at' function should have been set above'");
+        let events = futures::ready!(at_fn.poll_unpin(cx));
+        self.at = None;
+        Poll::Ready(Some(events))
+    }
+}
+
+/// A collection of events obtained from a block, bundled with the necessary
+/// information needed to decode and iterate over them.
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
+pub struct Events<'a, T: Config, Evs: Decode> {
+    metadata: &'a Metadata,
+    block_hash: T::Hash,
+    // Note; raw event bytes are prefixed with a Compact<u32> containing
+    // the number of events to be decoded. We should have stripped that off
+    // before storing the bytes here.
+    event_bytes: Vec<u8>,
+    num_events: u32,
+    _event_type: std::marker::PhantomData<Evs>,
+}
+
+impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
+    /// The number of events.
+    pub fn len(&self) -> u32 {
+        self.num_events
+    }
+
+    /// Are there no events in this block?
+    // Note: mainly here to satisfy clippy.
+    pub fn is_empty(&self) -> bool {
+        self.num_events == 0
+    }
+
+    /// Return the block hash that these events are from.
+    pub fn block_hash(&self) -> T::Hash {
+        self.block_hash
+    }
+
+    /// Iterate over the events, statically decoding them as we go.
+    /// If an event is encountered that cannot be statically decoded,
+    /// a [`codec::Error`] will be returned.
+    ///
+    /// If the generated code does not know about all of the pallets that exist
+    /// in the runtime being targeted, it may not know about all of the
+    /// events either, and so this method should be avoided in favout of [`Events::iter_raw()`],
+    /// which uses runtime metadata to skip over unknown events.
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = Result<EventDetails<Evs>, BasicError>> + '_ {
+        let event_bytes = &self.event_bytes;
+
+        let mut pos = 0;
+        let mut index = 0;
+        std::iter::from_fn(move || {
+            let cursor = &mut &event_bytes[pos..];
+            let start_len = cursor.len();
+
+            if start_len == 0 || self.num_events == index {
+                None
+            } else {
+                let mut decode_one_event = || -> Result<_, BasicError> {
+                    let phase = Phase::decode(cursor)?;
+                    let ev = Evs::decode(cursor)?;
+                    let _topics = Vec::<T::Hash>::decode(cursor)?;
+                    Ok((phase, ev))
+                };
+                match decode_one_event() {
+                    Ok((phase, event)) => {
+                        // Skip over decoded bytes in next iteration:
+                        pos += start_len - cursor.len();
+                        // Gather the event details before incrementing the index for the next iter.
+                        let res = Some(Ok(EventDetails {
+                            phase,
+                            index,
+                            event,
+                        }));
+                        index += 1;
+                        res
+                    }
+                    Err(e) => {
+                        // By setting the position to the "end" of the event bytes,
+                        // the cursor len will become 0 and the iterator will return `None`
+                        // from now on:
+                        pos = event_bytes.len();
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+
+    /// Iterate over all of the events, using metadata to dynamically
+    /// decode them as we go, and returning the raw bytes and other associated
+    /// details. If an error occurs, all subsequent iterations return `None`.
+    ///
+    /// This method is safe to use even if you do not statically know about
+    /// all of the possible events; it splits events up using the metadata
+    /// obtained at runtime, which does.
+    pub fn iter_raw(
+        &self,
+    ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
+        let event_bytes = &self.event_bytes;
+
+        let mut pos = 0;
+        let mut index = 0;
+        std::iter::from_fn(move || {
+            let cursor = &mut &event_bytes[pos..];
+            let start_len = cursor.len();
+
+            if start_len == 0 || self.num_events == index {
+                None
+            } else {
+                match decode_raw_event_details::<T>(self.metadata, index, cursor) {
+                    Ok(raw_event) => {
+                        // Skip over decoded bytes in next iteration:
+                        pos += start_len - cursor.len();
+                        // Increment the index:
+                        index += 1;
+                        // Return the event details:
+                        Some(Ok(raw_event))
+                    }
+                    Err(e) => {
+                        // By setting the position to the "end" of the event bytes,
+                        // the cursor len will become 0 and the iterator will return `None`
+                        // from now on:
+                        pos = event_bytes.len();
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them, and return only those which should decode to the provided `Ev` type.
+    /// If an error occurs, all subsequent iterations return `None`.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
+    pub fn find<Ev: Event>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+        self.iter_raw().filter_map(|ev| {
+            ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
+                .transpose()
+        })
+    }
+
+    /// Iterate through the events using metadata to dynamically decode and skip
+    /// them, and return the first event found which decodes to the provided `Ev` type.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
+    pub fn find_first_event<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+        self.find::<Ev>().next().transpose()
+    }
+
+    /// Find an event that decodes to the type provided. Returns true if it was found.
+    ///
+    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
+    /// use even if you do not statically know about all of the possible events.
+    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+        Ok(self.find::<Ev>().next().transpose()?.is_some())
+    }
+}
+
+/// A decoded event and associated details.
+#[derive(Debug, Clone, PartialEq)]
+pub struct EventDetails<Evs> {
+    /// During which [`Phase`] was the event produced?
+    pub phase: Phase,
+    /// What index is this event in the stored events for this block.
+    pub index: u32,
+    /// The event itself.
+    pub event: Evs,
+}
+
+/// The raw bytes for an event with associated details about
+/// where and when it was emitted.
+#[derive(Debug, Clone, PartialEq)]
+pub struct RawEventDetails {
+    /// When was the event produced?
+    pub phase: Phase,
+    /// What index is this event in the stored events for this block.
+    pub index: u32,
     /// The name of the pallet from whence the Event originated.
     pub pallet: String,
     /// The index of the pallet from whence the Event originated.
@@ -61,8 +414,8 @@ pub struct RawEvent {
     pub data: Bytes,
 }
 
-impl RawEvent {
-    /// Attempt to decode this [`RawEvent`] into a specific event.
+impl RawEventDetails {
+    /// Attempt to decode this [`RawEventDetails`] into a specific event.
     pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
             Ok(Some(E::decode(&mut &self.data[..])?))
@@ -72,108 +425,66 @@ impl RawEvent {
     }
 }
 
-/// Events decoder.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""), Debug(bound = ""))]
-pub struct EventsDecoder<T: Config> {
-    metadata: Metadata,
-    marker: PhantomDataSendSync<T>,
-}
+// Attempt to dynamically decode a single event from our events input.
+fn decode_raw_event_details<T: Config>(
+    metadata: &Metadata,
+    index: u32,
+    input: &mut &[u8],
+) -> Result<RawEventDetails, BasicError> {
+    // Decode basic event details:
+    let phase = Phase::decode(input)?;
+    let pallet_index = input.read_byte()?;
+    let variant_index = input.read_byte()?;
+    log::debug!(
+        "phase {:?}, pallet_index {}, event_variant: {}",
+        phase,
+        pallet_index,
+        variant_index
+    );
+    log::debug!("remaining input: {}", hex::encode(&input));
 
-impl<T: Config> EventsDecoder<T> {
-    /// Creates a new `EventsDecoder`.
-    pub fn new(metadata: Metadata) -> Self {
-        Self {
-            metadata,
-            marker: Default::default(),
-        }
-    }
+    // Get metadata for the event:
+    let event_metadata = metadata.event(pallet_index, variant_index)?;
+    log::debug!(
+        "Decoding Event '{}::{}'",
+        event_metadata.pallet(),
+        event_metadata.event()
+    );
 
-    /// Decode events.
-    pub fn decode_events(
-        &self,
-        input: &mut &[u8],
-    ) -> Result<Vec<(Phase, RawEvent)>, BasicError> {
-        let compact_len = <Compact<u32>>::decode(input)?;
-        let len = compact_len.0 as usize;
-        log::debug!("decoding {} events", len);
-
-        let mut r = Vec::new();
-        for _ in 0..len {
-            // decode EventRecord
-            let phase = Phase::decode(input)?;
-            let pallet_index = input.read_byte()?;
-            let variant_index = input.read_byte()?;
-            log::debug!(
-                "phase {:?}, pallet_index {}, event_variant: {}",
-                phase,
-                pallet_index,
-                variant_index
-            );
-            log::debug!("remaining input: {}", hex::encode(&input));
-
-            let event_metadata = self.metadata.event(pallet_index, variant_index)?;
-
-            let mut event_data = Vec::<u8>::new();
-            let result = self.decode_raw_event(event_metadata, input, &mut event_data);
-            let raw = match result {
-                Ok(()) => {
-                    log::debug!("raw bytes: {}", hex::encode(&event_data),);
-
-                    let event = RawEvent {
-                        pallet: event_metadata.pallet().to_string(),
-                        pallet_index,
-                        variant: event_metadata.event().to_string(),
-                        variant_index,
-                        data: event_data.into(),
-                    };
-
-                    // topics come after the event data in EventRecord
-                    let topics = Vec::<T::Hash>::decode(input)?;
-                    log::debug!("topics: {:?}", topics);
-
-                    event
-                }
-                Err(err) => return Err(err),
-            };
-            r.push((phase.clone(), raw));
-        }
-        Ok(r)
-    }
-
-    fn decode_raw_event(
-        &self,
-        event_metadata: &EventMetadata,
-        input: &mut &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
-        log::debug!(
-            "Decoding Event '{}::{}'",
-            event_metadata.pallet(),
-            event_metadata.event()
-        );
-        for arg in event_metadata.variant().fields() {
-            let type_id = arg.ty().id();
-            self.decode_type(type_id, input, output)?
-        }
-        Ok(())
-    }
-
-    fn decode_type(
-        &self,
-        type_id: u32,
-        input: &mut &[u8],
-        output: &mut Vec<u8>,
-    ) -> Result<(), BasicError> {
+    // Use metadata to figure out which bytes belong to this event:
+    let mut event_bytes = Vec::new();
+    for arg in event_metadata.variant().fields() {
+        let type_id = arg.ty().id();
         let all_bytes = *input;
         // consume some bytes, moving the cursor forward:
-        decode_and_consume_type(type_id, &self.metadata.runtime_metadata().types, input)?;
+        decode_and_consume_type(type_id, &metadata.runtime_metadata().types, input)?;
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
-        output.extend(&all_bytes[0..consumed_len]);
-        Ok(())
+        event_bytes.extend(&all_bytes[0..consumed_len]);
     }
+
+    // topics come after the event data in EventRecord. They aren't used for
+    // anything at the moment, so just decode and throw them away.
+    let topics = Vec::<T::Hash>::decode(input)?;
+    log::debug!("topics: {:?}", topics);
+
+    Ok(RawEventDetails {
+        phase,
+        index,
+        pallet_index,
+        pallet: event_metadata.pallet().to_string(),
+        variant_index,
+        variant: event_metadata.event().to_string(),
+        data: event_bytes.into(),
+    })
+}
+
+// The storage key needed to access events.
+fn system_events_key() -> StorageKey {
+    let mut storage_key = twox_128(b"System").to_vec();
+    storage_key.extend(twox_128(b"Events").to_vec());
+    StorageKey(storage_key)
 }
 
 // Given a type Id and a type registry, attempt to consume the bytes
@@ -353,6 +664,7 @@ fn decode_and_consume_type(
     }
 }
 
+/// The possible errors that we can run into attempting to decode events.
 #[derive(Debug, thiserror::Error)]
 pub enum EventsDecodingError {
     /// Unsupported primitive type
@@ -402,23 +714,32 @@ mod tests {
 
     type TypeId = scale_info::interner::UntrackedSymbol<std::any::TypeId>;
 
+    /// An "outer" events enum containing exactly one event.
+    #[derive(Encode, Decode, TypeInfo, Clone, Debug, PartialEq)]
+    pub enum AllEvents<Ev> {
+        E(Ev),
+    }
+
+    /// This encodes to the same format an event is expected to encode to
+    /// in node System.Events storage.
     #[derive(Encode)]
     pub struct EventRecord<E: Encode> {
         phase: Phase,
-        pallet_index: u8,
-        event: E,
+        event: AllEvents<E>,
         topics: Vec<<DefaultConfig as Config>::Hash>,
     }
 
-    fn event_record<E: Encode>(pallet_index: u8, event: E) -> EventRecord<E> {
+    /// Build an EventRecord, which encoded events in the format expected
+    /// to be handed back from storage queries to System.Events.
+    fn event_record<E: Encode>(phase: Phase, event: E) -> EventRecord<E> {
         EventRecord {
-            phase: Phase::Finalization,
-            pallet_index,
-            event,
+            phase,
+            event: AllEvents::E(event),
             topics: vec![],
         }
     }
 
+    /// Build a type registry that knows about the single type provided.
     fn singleton_type_registry<T: scale_info::TypeInfo + 'static>(
     ) -> (TypeId, PortableRegistry) {
         let m = scale_info::MetaType::new::<T>();
@@ -429,31 +750,61 @@ mod tests {
         (id, portable_registry)
     }
 
-    fn pallet_metadata<E: TypeInfo + 'static>(pallet_index: u8) -> PalletMetadata {
-        let event = PalletEventMetadata {
-            ty: meta_type::<E>(),
-        };
-        PalletMetadata {
+    /// Build fake metadata consisting of a single pallet that knows
+    /// about the event type provided.
+    fn metadata<E: TypeInfo + 'static>() -> Metadata {
+        let pallets = vec![PalletMetadata {
             name: "Test",
             storage: None,
             calls: None,
-            event: Some(event),
+            event: Some(PalletEventMetadata {
+                ty: meta_type::<E>(),
+            }),
             constants: vec![],
             error: None,
-            index: pallet_index,
-        }
-    }
+            index: 0,
+        }];
 
-    fn init_decoder(pallets: Vec<PalletMetadata>) -> EventsDecoder<DefaultConfig> {
         let extrinsic = ExtrinsicMetadata {
             ty: meta_type::<()>(),
             version: 0,
             signed_extensions: vec![],
         };
+
         let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
         let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
-        let metadata = Metadata::try_from(runtime_metadata).unwrap();
-        EventsDecoder::<DefaultConfig>::new(metadata)
+
+        Metadata::try_from(runtime_metadata).unwrap()
+    }
+
+    /// Build an `Events` object for test purposes, based on the details provided,
+    /// and with a default block hash.
+    fn events<E: Decode + Encode>(
+        metadata: &'_ Metadata,
+        event_records: Vec<EventRecord<E>>,
+    ) -> Events<'_, DefaultConfig, AllEvents<E>> {
+        let num_events = event_records.len() as u32;
+        let mut event_bytes = Vec::new();
+        for ev in event_records {
+            ev.encode_to(&mut event_bytes);
+        }
+        events_raw(metadata, event_bytes, num_events)
+    }
+
+    /// Much like [`events`], but takes pre-encoded events and event count, so that we can
+    /// mess with the bytes in tests if we need to.
+    fn events_raw<E: Decode + Encode>(
+        metadata: &'_ Metadata,
+        event_bytes: Vec<u8>,
+        num_events: u32,
+    ) -> Events<'_, DefaultConfig, AllEvents<E>> {
+        Events {
+            block_hash: <DefaultConfig as Config>::Hash::default(),
+            event_bytes,
+            metadata,
+            num_events,
+            _event_type: std::marker::PhantomData,
+        }
     }
 
     fn decode_and_consume_type_consumes_all_bytes<
@@ -470,152 +821,478 @@ mod tests {
     }
 
     #[test]
-    fn decode_single_event() {
-        #[derive(Clone, Encode, TypeInfo)]
+    fn statically_decode_single_event() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
             A(u8),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(1);
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(
+            &metadata,
+            vec![event_record(Phase::Finalization, Event::A(1))],
+        );
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
-
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        let event_details: Vec<EventDetails<AllEvents<Event>>> =
+            events.iter().collect::<Result<_, _>>().unwrap();
+        assert_eq!(
+            event_details,
+            vec![EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(1))
+            }]
+        );
     }
 
     #[test]
-    fn decode_multiple_events() {
-        #[derive(Clone, Encode, TypeInfo)]
+    fn statically_decode_multiple_events() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
             A(u8),
-            B,
-            C { a: u32 },
+            B(bool),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(
+            &metadata,
+            vec![
+                event_record(Phase::Initialization, Event::A(1)),
+                event_record(Phase::ApplyExtrinsic(123), Event::B(true)),
+                event_record(Phase::Finalization, Event::A(234)),
+            ],
+        );
+
+        let event_details: Vec<EventDetails<AllEvents<Event>>> =
+            events.iter().collect::<Result<_, _>>().unwrap();
+        assert_eq!(
+            event_details,
+            vec![
+                EventDetails {
+                    index: 0,
+                    phase: Phase::Initialization,
+                    event: AllEvents::E(Event::A(1))
+                },
+                EventDetails {
+                    index: 1,
+                    phase: Phase::ApplyExtrinsic(123),
+                    event: AllEvents::E(Event::B(true))
+                },
+                EventDetails {
+                    index: 2,
+                    phase: Phase::Finalization,
+                    event: AllEvents::E(Event::A(234))
+                },
+            ]
+        );
+    }
+
+    #[test]
+    fn statically_decode_multiple_events_until_error() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B(bool),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode 2 events:
+        let mut event_bytes = vec![];
+        event_record(Phase::Initialization, Event::A(1)).encode_to(&mut event_bytes);
+        event_record(Phase::ApplyExtrinsic(123), Event::B(true))
+            .encode_to(&mut event_bytes);
+
+        // Push a few naff bytes to the end (a broken third event):
+        event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events_raw::<Event>(
+            &metadata,
+            event_bytes,
+            3, // 2 "good" events, and then it'll hit the naff bytes.
+        );
+
+        let mut events_iter = events.iter();
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            EventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                event: AllEvents::E(Event::A(1))
+            }
+        );
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            EventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                event: AllEvents::E(Event::B(true))
+            }
+        );
+
+        // We'll hit an error trying to decode the third event:
+        assert!(events_iter.next().unwrap().is_err());
+        // ... and then "None" from then on.
+        assert!(events_iter.next().is_none());
+        assert!(events_iter.next().is_none());
+    }
+
+    #[test]
+    fn dynamically_decode_single_event() {
+        #[derive(Clone, Copy, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let event = Event::A(1);
+        let events = events::<Event>(
+            &metadata,
+            vec![event_record(Phase::ApplyExtrinsic(123), event)],
+        );
+
+        let event_details: Vec<RawEventDetails> =
+            events.iter_raw().collect::<Result<_, _>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = event.encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+
+        assert_eq!(
+            event_details,
+            vec![RawEventDetails {
+                index: 0,
+                phase: Phase::ApplyExtrinsic(123),
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }]
+        );
+    }
+
+    #[test]
+    fn dynamically_decode_multiple_events() {
+        #[derive(Clone, Copy, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B(bool),
+        }
+
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
         let event1 = Event::A(1);
-        let event2 = Event::B;
-        let event3 = Event::C { a: 3 };
+        let event2 = Event::B(true);
+        let event3 = Event::A(234);
 
-        let encoded_event1 = event1.encode();
-        let encoded_event2 = event2.encode();
-        let encoded_event3 = event3.encode();
+        let events = events::<Event>(
+            &metadata,
+            vec![
+                event_record(Phase::Initialization, event1),
+                event_record(Phase::ApplyExtrinsic(123), event2),
+                event_record(Phase::Finalization, event3),
+            ],
+        );
 
-        let event_records = vec![
-            event_record(pallet_index, event1),
-            event_record(pallet_index, event2),
-            event_record(pallet_index, event3),
-        ];
+        let event_details: Vec<RawEventDetails> =
+            events.iter_raw().collect::<Result<_, _>>().unwrap();
+        let event_bytes = |ev: Event| {
+            let mut bytes = ev.encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes.into()
+        };
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        assert_eq!(
+            event_details,
+            vec![
+                RawEventDetails {
+                    index: 0,
+                    phase: Phase::Initialization,
+                    pallet: "Test".to_string(),
+                    pallet_index: 0,
+                    variant: "A".to_string(),
+                    variant_index: 0,
+                    data: event_bytes(event1)
+                },
+                RawEventDetails {
+                    index: 1,
+                    phase: Phase::ApplyExtrinsic(123),
+                    pallet: "Test".to_string(),
+                    pallet_index: 0,
+                    variant: "B".to_string(),
+                    variant_index: 1,
+                    data: event_bytes(event2)
+                },
+                RawEventDetails {
+                    index: 2,
+                    phase: Phase::Finalization,
+                    pallet: "Test".to_string(),
+                    pallet_index: 0,
+                    variant: "A".to_string(),
+                    variant_index: 0,
+                    data: event_bytes(event3)
+                },
+            ]
+        );
+    }
 
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
+    #[test]
+    fn dynamically_decode_multiple_events_until_error() {
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        enum Event {
+            A(u8),
+            B(bool),
+        }
 
-        assert_eq!(events[0].1.variant_index, encoded_event1[0]);
-        assert_eq!(events[0].1.data.0, encoded_event1[1..]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        assert_eq!(events[1].1.variant_index, encoded_event2[0]);
-        assert_eq!(events[1].1.data.0, encoded_event2[1..]);
+        // Encode 2 events:
+        let mut event_bytes = vec![];
+        event_record(Phase::Initialization, Event::A(1)).encode_to(&mut event_bytes);
+        event_record(Phase::ApplyExtrinsic(123), Event::B(true))
+            .encode_to(&mut event_bytes);
 
-        assert_eq!(events[2].1.variant_index, encoded_event3[0]);
-        assert_eq!(events[2].1.data.0, encoded_event3[1..]);
+        // Push a few naff bytes to the end (a broken third event):
+        event_bytes.extend_from_slice(&[3, 127, 45, 0, 2]);
+
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events_raw::<Event>(
+            &metadata,
+            event_bytes,
+            3, // 2 "good" events, and then it'll hit the naff bytes.
+        );
+
+        let event_bytes = |ev: Event| {
+            let mut bytes = ev.encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes.into()
+        };
+
+        let mut events_iter = events.iter_raw();
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            RawEventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: event_bytes(Event::A(1))
+            }
+        );
+        assert_eq!(
+            events_iter.next().unwrap().unwrap(),
+            RawEventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "B".to_string(),
+                variant_index: 1,
+                data: event_bytes(Event::B(true))
+            }
+        );
+
+        // We'll hit an error trying to decode the third event:
+        assert!(events_iter.next().unwrap().is_err());
+        // ... and then "None" from then on.
+        assert!(events_iter.next().is_none());
+        assert!(events_iter.next().is_none());
     }
 
     #[test]
     fn compact_event_field() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Encode, Decode, TypeInfo)]
         enum Event {
             A(#[codec(compact)] u32),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(u32::MAX);
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construst an Events object to iterate them:
+        let events = events::<Event>(
+            &metadata,
+            vec![event_record(Phase::Finalization, Event::A(1))],
+        );
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> =
+            events.iter().collect::<Result<_, _>>().unwrap();
+        assert_eq!(
+            event_details,
+            vec![EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(1))
+            }]
+        );
 
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> =
+            events.iter_raw().collect::<Result<_, _>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(1).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(
+            event_details,
+            vec![RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }]
+        );
     }
 
     #[test]
     fn compact_wrapper_struct_field() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Decode, Debug, PartialEq, Encode, TypeInfo)]
         enum Event {
             A(#[codec(compact)] CompactWrapper),
         }
 
-        #[derive(Clone, codec::CompactAs, Encode, TypeInfo)]
+        #[derive(Clone, Decode, Debug, PartialEq, codec::CompactAs, Encode, TypeInfo)]
         struct CompactWrapper(u64);
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(CompactWrapper(0));
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construct an Events object to iterate them:
+        let events = events::<Event>(
+            &metadata,
+            vec![event_record(
+                Phase::Finalization,
+                Event::A(CompactWrapper(1)),
+            )],
+        );
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> =
+            events.iter().collect::<Result<_, _>>().unwrap();
+        assert_eq!(
+            event_details,
+            vec![EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(CompactWrapper(1)))
+            }]
+        );
 
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> =
+            events.iter_raw().collect::<Result<_, _>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(CompactWrapper(1)).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(
+            event_details,
+            vec![RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }]
+        );
     }
 
     #[test]
     fn event_containing_explicit_index() {
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         #[repr(u8)]
         #[allow(trivial_numeric_casts, clippy::unnecessary_cast)] // required because the Encode derive produces a warning otherwise
         pub enum MyType {
             B = 10u8,
         }
 
-        #[derive(Clone, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
             A(MyType),
         }
 
-        let pallet_index = 0;
-        let pallet = pallet_metadata::<Event>(pallet_index);
-        let decoder = init_decoder(vec![pallet]);
+        // Create fake metadata that knows about our single event, above:
+        let metadata = metadata::<Event>();
 
-        let event = Event::A(MyType::B);
-        let encoded_event = event.encode();
-        let event_records = vec![event_record(pallet_index, event)];
+        // Encode our events in the format we expect back from a node, and
+        // construct an Events object to iterate them:
+        let events = events::<Event>(
+            &metadata,
+            vec![event_record(Phase::Finalization, Event::A(MyType::B))],
+        );
 
-        let mut input = Vec::new();
-        event_records.encode_to(&mut input);
+        // Statically decode:
+        let event_details: Vec<EventDetails<AllEvents<Event>>> =
+            events.iter().collect::<Result<_, _>>().unwrap();
+        assert_eq!(
+            event_details,
+            vec![EventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                event: AllEvents::E(Event::A(MyType::B))
+            }]
+        );
 
-        // this would panic if the explicit enum item index were not correctly used
-        let events = decoder.decode_events(&mut &input[..]).unwrap();
-
-        assert_eq!(events[0].1.variant_index, encoded_event[0]);
-        assert_eq!(events[0].1.data.0, encoded_event[1..]);
+        // Dynamically decode:
+        let event_details: Vec<RawEventDetails> =
+            events.iter_raw().collect::<Result<_, _>>().unwrap();
+        let expected_event_data = {
+            let mut bytes = Event::A(MyType::B).encode();
+            // Strip variant tag off event bytes:
+            bytes.drain(0..1);
+            bytes
+        };
+        assert_eq!(
+            event_details,
+            vec![RawEventDetails {
+                index: 0,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                data: expected_event_data.into()
+            }]
+        );
     }
 
     #[test]

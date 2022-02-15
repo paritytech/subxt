@@ -59,12 +59,11 @@ use derivative::Derivative;
 mod client;
 mod config;
 mod error;
-mod events;
+pub mod events;
 pub mod extrinsic;
 mod metadata;
 pub mod rpc;
 pub mod storage;
-mod subscription;
 mod transaction;
 
 pub use crate::{
@@ -86,8 +85,9 @@ pub use crate::{
         TransactionError,
     },
     events::{
-        EventsDecoder,
-        RawEvent,
+        EventDetails,
+        Events,
+        RawEventDetails,
     },
     extrinsic::{
         DefaultExtra,
@@ -113,11 +113,6 @@ pub use crate::{
         StorageEntry,
         StorageEntryKey,
         StorageMapKey,
-    },
-    subscription::{
-        EventStorageSubscription,
-        EventSubscription,
-        FinalizedEventStorageSubscription,
     },
     transaction::{
         TransactionEvents,
@@ -185,7 +180,8 @@ pub enum Phase {
     Clone(bound = ""),
     PartialEq(bound = ""),
     Eq(bound = ""),
-    Default(bound = "")
+    Default(bound = ""),
+    Hash(bound = "")
 )]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
@@ -228,7 +224,8 @@ impl<T: Decode> WrapperKeepOpaque<T> {
     PartialEq(bound = ""),
     Debug(bound = ""),
     Eq(bound = ""),
-    Default(bound = "")
+    Default(bound = ""),
+    Hash(bound = "")
 )]
 #[scale_info(skip_type_params(T))]
 #[doc(hidden)]

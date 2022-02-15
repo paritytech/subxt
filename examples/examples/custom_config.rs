@@ -14,6 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//!
+//! E.g.
+//! ```bash
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.13/polkadot" --output /usr/local/bin/polkadot --location
+//! polkadot --dev --tmp
+//! ```
+
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,

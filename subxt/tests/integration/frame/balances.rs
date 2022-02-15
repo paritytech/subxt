@@ -31,9 +31,7 @@ use sp_core::{
 };
 use sp_keyring::AccountKeyring;
 use subxt::{
-    DefaultConfig,
     Error,
-    EventSubscription,
     Signer,
 };
 
@@ -187,38 +185,6 @@ async fn transfer_error() {
     } else {
         panic!("expected a runtime module error");
     }
-}
-
-#[async_std::test]
-async fn transfer_subscription() {
-    env_logger::try_init().ok();
-    let alice = pair_signer(AccountKeyring::Alice.pair());
-    let bob = AccountKeyring::Bob.to_account_id();
-    let bob_addr = bob.clone().into();
-    let cxt = test_context().await;
-    let sub = cxt.client().rpc().subscribe_events().await.unwrap();
-    let decoder = cxt.client().events_decoder();
-    let mut sub = EventSubscription::<DefaultConfig>::new(sub, decoder);
-    sub.filter_event::<balances::events::Transfer>();
-
-    cxt.api
-        .tx()
-        .balances()
-        .transfer(bob_addr, 10_000)
-        .sign_and_submit_then_watch(&alice)
-        .await
-        .unwrap();
-
-    let raw = sub.next().await.unwrap().unwrap();
-    let event = balances::events::Transfer::decode(&mut &raw.data[..]).unwrap();
-    assert_eq!(
-        event,
-        balances::events::Transfer {
-            from: alice.account_id().clone(),
-            to: bob.clone(),
-            amount: 10_000
-        }
-    );
 }
 
 #[async_std::test]
