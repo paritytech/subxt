@@ -167,6 +167,23 @@ impl<T: Config> Client<T> {
         StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
+    /// Fetch the current nonce for the given account id.
+    pub async fn fetch_nonce<A: AccountData>(
+        &self,
+        account: &T::AccountId,
+    ) -> Result<T::Index, BasicError>
+    where
+        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
+        <A as AccountData>::Index: Into<<T as Config>::Index>,
+    {
+        let account_storage_entry = A::storage_entry(account.clone().into());
+        let account_data = self
+            .storage()
+            .fetch_or_default(&account_storage_entry, None)
+            .await?;
+        Ok(A::nonce(&account_data).into())
+    }
+
     /// Convert the client to a runtime api wrapper for custom runtime access.
     ///
     /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
@@ -264,14 +281,7 @@ where
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            let account_storage_entry =
-                A::storage_entry(signer.account_id().clone().into());
-            let account_data = self
-                .client
-                .storage()
-                .fetch_or_default(&account_storage_entry, None)
-                .await?;
-            A::nonce(&account_data).into()
+            self.client.fetch_nonce::<A>(signer.account_id()).await?
         };
         let call = self
             .client
