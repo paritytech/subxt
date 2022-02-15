@@ -74,7 +74,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
 
     let dispatch_error_def = metadata.types
         .types()
-        .into_iter()
+        .iter()
         .find(|&ty| {
             let path = ty.ty().path().segments();
             path.len() == 2 && path[0] == "sp_runtime" && path[1] == "DispatchError"
