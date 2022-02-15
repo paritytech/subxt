@@ -377,8 +377,23 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
-            pub struct Account(pub ::subxt::sp_core::crypto::AccountId32);
-            impl ::subxt::StorageEntry for Account {
+            pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
+            pub struct AccountDefaultData(pub ::subxt::sp_core::crypto::AccountId32);
+            impl ::subxt::StorageEntry for Account<'_> {
+                const PALLET: &'static str = "System";
+                const STORAGE: &'static str = "Account";
+                type Value = runtime_types::frame_system::AccountInfo<
+                    ::core::primitive::u32,
+                    runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
+                >;
+                fn key(&self) -> ::subxt::StorageEntryKey {
+                    ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
+                        &self.0,
+                        ::subxt::StorageHasher::Blake2_128Concat,
+                    )])
+                }
+            }
+            impl ::subxt::StorageEntry for AccountDefaultData {
                 const PALLET: &'static str = "System";
                 const STORAGE: &'static str = "Account";
                 type Value = runtime_types::frame_system::AccountInfo<
@@ -553,7 +568,7 @@ pub mod api {
                 }
                 pub async fn account(
                     &self,
-                    _0: ::subxt::sp_core::crypto::AccountId32,
+                    _0: &::subxt::sp_core::crypto::AccountId32,
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     runtime_types::frame_system::AccountInfo<
@@ -571,7 +586,7 @@ pub mod api {
                     &self,
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
-                    ::subxt::KeyIter<'a, T, Account>,
+                    ::subxt::KeyIter<'a, T, Account<'a>>,
                     ::subxt::BasicError,
                 > {
                     self.client.storage().iter(hash).await
@@ -2745,8 +2760,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
-            pub struct Account(pub ::subxt::sp_core::crypto::AccountId32);
-            impl ::subxt::StorageEntry for Account {
+            pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
+            impl ::subxt::StorageEntry for Account<'_> {
                 const PALLET: &'static str = "Balances";
                 const STORAGE: &'static str = "Account";
                 type Value =
@@ -2814,7 +2829,7 @@ pub mod api {
                 }
                 pub async fn account(
                     &self,
-                    _0: ::subxt::sp_core::crypto::AccountId32,
+                    _0: &::subxt::sp_core::crypto::AccountId32,
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
@@ -2827,7 +2842,7 @@ pub mod api {
                     &self,
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
-                    ::subxt::KeyIter<'a, T, Account>,
+                    ::subxt::KeyIter<'a, T, Account<'a>>,
                     ::subxt::BasicError,
                 > {
                     self.client.storage().iter(hash).await
@@ -27777,13 +27792,13 @@ pub mod api {
         type StorageEntry = self::system::storage::Account;
         type AccountId = ::subxt::sp_core::crypto::AccountId32;
         type Index = ::core::primitive::u32;
+        fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
+            self::system::storage::Account(account_id)
+        }
         fn nonce(
             result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,
         ) -> Self::Index {
             result.nonce
-        }
-        fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
-            self::system::storage::Account(account_id)
         }
     }
     pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData> {
