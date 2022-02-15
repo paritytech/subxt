@@ -20,6 +20,7 @@ use proc_macro2::{
     TokenStream as TokenStream2,
 };
 use quote::quote;
+use scale_info::{ TypeDef };
 
 /// Tokens which allow us to provide static error information in the generated output.
 pub struct ErrorDetails {
@@ -71,15 +72,54 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         }
     });
 
-    ErrorDetails {
-        type_def: quote! {
-            pub struct ErrorDetails {
-                pub pallet: &'static str,
-                pub error: &'static str,
-                pub docs: &'static str,
+    let dispatch_error_def = metadata.types
+        .types()
+        .into_iter()
+        .find(|&ty| {
+            let path = ty.ty().path().segments();
+            path.len() == 2 && path[0] == "sp_runtime" && path[1] == "DispatchError"
+        })
+        .expect("sp_runtime::DispatchError type expected in metadata")
+        .ty()
+        .type_def();
+
+    // Slightly older versions of substrate have a `DispatchError::Module { index, error }`
+    // variant. Newer versions have something like a `DispatchError::Module (Details)` variant.
+    // We check to see which type of variant we're dealing with based on the metadata, and
+    // generate the correct code to handle either older or newer substrate versions.
+    let module_variant_is_struct =
+        if let TypeDef::Variant(details) = dispatch_error_def {
+            let module_variant = details
+                .variants()
+                .iter()
+                .find(|variant| variant.name() == "Module")
+                .expect("DispatchError::Module variant expected in metadata");
+            let are_fields_named = module_variant
+                .fields()
+                .get(0)
+                .expect("DispatchError::Module expected to contain 1 or more fields")
+                .name()
+                .is_some();
+            are_fields_named
+        } else {
+            false
+        };
+
+    let dispatch_error_impl_fn = if module_variant_is_struct {
+        quote! {
+            pub fn details(&self) -> Option<ErrorDetails> {
+                if let Self::Module { error, index } = self {
+                    match (index, error) {
+                        #( #match_body_items ),*,
+                        _ => None
+                    }
+                } else {
+                    None
+                }
             }
-        },
-        dispatch_error_impl_fn: quote! {
+        }
+    } else {
+        quote! {
             pub fn details(&self) -> Option<ErrorDetails> {
                 if let Self::Module (module_error) = self {
                     match (module_error.index, module_error.error) {
@@ -90,7 +130,18 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
                     None
                 }
             }
+        }
+    };
+
+    ErrorDetails {
+        type_def: quote! {
+            pub struct ErrorDetails {
+                pub pallet: &'static str,
+                pub error: &'static str,
+                pub docs: &'static str,
+            }
         },
+        dispatch_error_impl_fn
     }
 }
 
