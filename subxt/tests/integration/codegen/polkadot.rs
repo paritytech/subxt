@@ -27789,11 +27789,11 @@ pub mod api {
     #[doc = r" constructing a transaction."]
     pub enum DefaultAccountData {}
     impl ::subxt::AccountData for DefaultAccountData {
-        type StorageEntry = self::system::storage::Account;
+        type StorageEntry = self::system::storage::AccountDefaultData;
         type AccountId = ::subxt::sp_core::crypto::AccountId32;
         type Index = ::core::primitive::u32;
         fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
-            self::system::storage::Account(account_id)
+            self::system::storage::AccountDefaultData(account_id)
         }
         fn nonce(
             result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,
