@@ -148,8 +148,24 @@ fn generate_storage_entry_fns(
 
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
+                    // `::system::storage::Account` was utilized as associated type `StorageEntry`
+                    // for `::subxt::AccountData` implementation of generated `DefaultAccountData`.
+                    // Due to changes in the storage API, `::system::storage::Account` cannot be
+                    // used without specifying a lifetime. To satisfy `::subxt::AccountData`
+                    // implementation, a non-reference wrapper `AccountDefaultData` is generated.
+                    let wrapper_struct =
+                        if pallet.name == "System" && storage_entry.name == "Account" {
+                            let wrapper_struct_ident =
+                                format_ident!("{}DefaultData", storage_entry.name);
+                            quote!(
+                                pub struct #wrapper_struct_ident ( pub #ty_path );
+                            )
+                        } else {
+                            quote!()
+                        };
                     let entry_struct = quote! {
                         pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_path );
+                        #wrapper_struct
                     };
                     let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
