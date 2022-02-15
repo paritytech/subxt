@@ -284,7 +284,7 @@ impl RuntimeGenerator {
                 #types_mod
 
                 /// The default error type returned when there is a runtime issue.
-                pub type DispatchError = self::runtime_types::sp_runtime::DispatchError;
+                pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
 
                 // Statically generate error information so that we don't need runtime metadata for it.
                 #error_type
