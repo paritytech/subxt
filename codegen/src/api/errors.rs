@@ -77,7 +77,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         .types
         .types()
         .iter()
-        .find(|&ty| ty.ty().path().segments() == &["sp_runtime", "DispatchError"])
+        .find(|&ty| ty.ty().path().segments() == ["sp_runtime", "DispatchError"])
         .unwrap_or_else(|| {
             abort_call_site!("sp_runtime::DispatchError type expected in metadata")
         })
