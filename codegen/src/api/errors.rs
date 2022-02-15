@@ -19,6 +19,7 @@ use proc_macro2::{
     Span as Span2,
     TokenStream as TokenStream2,
 };
+use proc_macro_error::abort_call_site;
 use quote::quote;
 use scale_info::TypeDef;
 
@@ -76,11 +77,10 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         .types
         .types()
         .iter()
-        .find(|&ty| {
-            let path = ty.ty().path().segments();
-            path.len() == 2 && path[0] == "sp_runtime" && path[1] == "DispatchError"
+        .find(|&ty| ty.ty().path().segments() == &["sp_runtime", "DispatchError"])
+        .unwrap_or_else(|| {
+            abort_call_site!("sp_runtime::DispatchError type expected in metadata")
         })
-        .expect("sp_runtime::DispatchError type expected in metadata")
         .ty()
         .type_def();
 
@@ -93,11 +93,17 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
             .variants()
             .iter()
             .find(|variant| variant.name() == "Module")
-            .expect("DispatchError::Module variant expected in metadata");
+            .unwrap_or_else(|| {
+                abort_call_site!("DispatchError::Module variant expected in metadata")
+            });
         let are_fields_named = module_variant
             .fields()
             .get(0)
-            .expect("DispatchError::Module expected to contain 1 or more fields")
+            .unwrap_or_else(|| {
+                abort_call_site!(
+                    "DispatchError::Module expected to contain 1 or more fields"
+                )
+            })
             .name()
             .is_some();
         are_fields_named
