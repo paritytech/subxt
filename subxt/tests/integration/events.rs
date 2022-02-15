@@ -38,9 +38,9 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
     // associated block hash is not finalized yet.
     let events = event_sub.next().await.unwrap()?;
     let event_block_hash = events.block_hash();
-    let finalized_hash = ctx.api.client.rpc().finalized_head().await?;
+    let current_block_hash = ctx.api.client.rpc().block_hash(None).await?.unwrap();
 
-    assert_ne!(event_block_hash, finalized_hash);
+    assert_eq!(event_block_hash, current_block_hash);
     Ok(())
 }
 
