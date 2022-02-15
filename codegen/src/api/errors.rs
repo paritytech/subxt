@@ -20,7 +20,7 @@ use proc_macro2::{
     TokenStream as TokenStream2,
 };
 use quote::quote;
-use scale_info::{ TypeDef };
+use scale_info::TypeDef;
 
 /// Tokens which allow us to provide static error information in the generated output.
 pub struct ErrorDetails {
@@ -72,7 +72,8 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
         }
     });
 
-    let dispatch_error_def = metadata.types
+    let dispatch_error_def = metadata
+        .types
         .types()
         .iter()
         .find(|&ty| {
@@ -87,23 +88,22 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
     // variant. Newer versions have something like a `DispatchError::Module (Details)` variant.
     // We check to see which type of variant we're dealing with based on the metadata, and
     // generate the correct code to handle either older or newer substrate versions.
-    let module_variant_is_struct =
-        if let TypeDef::Variant(details) = dispatch_error_def {
-            let module_variant = details
-                .variants()
-                .iter()
-                .find(|variant| variant.name() == "Module")
-                .expect("DispatchError::Module variant expected in metadata");
-            let are_fields_named = module_variant
-                .fields()
-                .get(0)
-                .expect("DispatchError::Module expected to contain 1 or more fields")
-                .name()
-                .is_some();
-            are_fields_named
-        } else {
-            false
-        };
+    let module_variant_is_struct = if let TypeDef::Variant(details) = dispatch_error_def {
+        let module_variant = details
+            .variants()
+            .iter()
+            .find(|variant| variant.name() == "Module")
+            .expect("DispatchError::Module variant expected in metadata");
+        let are_fields_named = module_variant
+            .fields()
+            .get(0)
+            .expect("DispatchError::Module expected to contain 1 or more fields")
+            .name()
+            .is_some();
+        are_fields_named
+    } else {
+        false
+    };
 
     let dispatch_error_impl_fn = if module_variant_is_struct {
         quote! {
@@ -141,7 +141,7 @@ pub fn generate_error_details(metadata: &RuntimeMetadataV14) -> ErrorDetails {
                 pub docs: &'static str,
             }
         },
-        dispatch_error_impl_fn
+        dispatch_error_impl_fn,
     }
 }
 
