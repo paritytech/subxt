@@ -192,16 +192,20 @@ fn generate_storage_entry_fns(
         (quote!(), quote!(), quote!())
     };
 
+    let storage_entry_impl = quote! (
+        const PALLET: &'static str = #pallet_name;
+        const STORAGE: &'static str = #storage_name;
+        type Value = #storage_entry_value_ty;
+        fn key(&self) -> ::subxt::StorageEntryKey {
+            #key_impl
+        }
+    );
+
     let storage_entry_type = quote! {
         #entry_struct
 
         impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
-            const PALLET: &'static str = #pallet_name;
-            const STORAGE: &'static str = #storage_name;
-            type Value = #storage_entry_value_ty;
-            fn key(&self) -> ::subxt::StorageEntryKey {
-                #key_impl
-            }
+            #storage_entry_impl
         }
     };
 
