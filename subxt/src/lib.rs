@@ -243,7 +243,7 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// [`ElectionScore`] overrides any generated instance of `sp_npos_elections::ElectionScore` found
 /// in the metadata, so that we can add some extra derives required for it to be used as the key
 /// in a [`std::collections::BTreeMap`].
-#[derive(Encode, Decode, Debug, PartialOrd, Ord, PartialEq, Eq)]
+#[derive(Encode, Decode, Debug, PartialEq, Eq)]
 pub struct ElectionScore {
     /// The minimal winner, in terms of total backing stake.
     ///
@@ -257,4 +257,23 @@ pub struct ElectionScore {
     ///
     /// Ths parameter should be minimized.
     pub sum_stake_squared: u128,
+}
+
+// These are copied from the original impl; they don't affect encoding/decoding but help
+// to keep the ordering the same if we then work with the decoded results.
+impl Ord for ElectionScore {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        // we delegate this to the lexicographic cmp of slices`, and to incorporate that we want the
+        // third element to be minimized, we swap them.
+        [self.minimal_stake, self.sum_stake, other.sum_stake_squared].cmp(&[
+            other.minimal_stake,
+            other.sum_stake,
+            self.sum_stake_squared,
+        ])
+    }
+}
+impl PartialOrd for ElectionScore {
+    fn partial_cmp(&self, other: &Self) -> Option<std::cmp::Ordering> {
+        Some(self.cmp(other))
+    }
 }
