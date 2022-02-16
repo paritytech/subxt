@@ -53,8 +53,8 @@ fn default_validator_prefs() -> ValidatorPrefs {
 #[async_std::test]
 async fn validate_with_controller_account() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let cxt = test_context().await;
-    cxt.api
+    let ctx = test_context().await;
+    ctx.api
         .tx()
         .staking()
         .validate(default_validator_prefs())
@@ -69,8 +69,8 @@ async fn validate_with_controller_account() {
 #[async_std::test]
 async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
-    let cxt = test_context().await;
-    let announce_validator = cxt
+    let ctx = test_context().await;
+    let announce_validator = ctx
         .api
         .tx()
         .staking()
@@ -80,9 +80,9 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .wait_for_finalized_success()
         .await;
     assert_matches!(announce_validator, Err(Error::Runtime(err)) => {
-        let details = err.inner().details().unwrap();
-        assert_eq!(details.pallet, "Staking");
-        assert_eq!(details.error, "NotController");
+        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
     Ok(())
 }
@@ -91,9 +91,9 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
 async fn nominate_with_controller_account() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
-    let cxt = test_context().await;
+    let ctx = test_context().await;
 
-    cxt.api
+    ctx.api
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
@@ -109,9 +109,9 @@ async fn nominate_with_controller_account() {
 async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let bob = pair_signer(AccountKeyring::Bob.pair());
-    let cxt = test_context().await;
+    let ctx = test_context().await;
 
-    let nomination = cxt
+    let nomination = ctx
         .api
         .tx()
         .staking()
@@ -122,9 +122,9 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .await;
 
     assert_matches!(nomination, Err(Error::Runtime(err)) => {
-        let details = err.inner().details().unwrap();
-        assert_eq!(details.pallet, "Staking");
-        assert_eq!(details.error, "NotController");
+        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
     Ok(())
 }
@@ -134,10 +134,10 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let bob_stash = pair_signer(get_from_seed("Bob//stash"));
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let cxt = test_context().await;
+    let ctx = test_context().await;
 
     // this will fail the second time, which is why this is one test, not two
-    cxt.api
+    ctx.api
         .tx()
         .staking()
         .nominate(vec![bob_stash.account_id().clone().into()])
@@ -146,7 +146,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await?;
 
-    let ledger = cxt
+    let ledger = ctx
         .api
         .storage()
         .staking()
@@ -155,7 +155,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .unwrap();
     assert_eq!(alice_stash.account_id(), &ledger.stash);
 
-    let chill = cxt
+    let chill = ctx
         .api
         .tx()
         .staking()
@@ -166,12 +166,12 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .await;
 
     assert_matches!(chill, Err(Error::Runtime(err)) => {
-        let details = err.inner().details().unwrap();
-        assert_eq!(details.pallet, "Staking");
-        assert_eq!(details.error, "NotController");
+        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "NotController");
     });
 
-    let is_chilled = cxt
+    let is_chilled = ctx
         .api
         .tx()
         .staking()
@@ -189,9 +189,9 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
 #[async_std::test]
 async fn tx_bond() -> Result<(), Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let cxt = test_context().await;
+    let ctx = test_context().await;
 
-    let bond = cxt
+    let bond = ctx
         .api
         .tx()
         .staking()
@@ -207,7 +207,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
 
     assert!(bond.is_ok());
 
-    let bond_again = cxt
+    let bond_again = ctx
         .api
         .tx()
         .staking()
@@ -222,25 +222,25 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .await;
 
     assert_matches!(bond_again, Err(Error::Runtime(err)) => {
-        let details = err.inner().details().unwrap();
-        assert_eq!(details.pallet, "Staking");
-        assert_eq!(details.error, "AlreadyBonded");
+        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
+        assert_eq!(details.pallet(), "Staking");
+        assert_eq!(details.error(), "AlreadyBonded");
     });
     Ok(())
 }
 
 #[async_std::test]
 async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
-    let cxt = test_context().await;
-    let history_depth = cxt.api.storage().staking().history_depth(None).await?;
+    let ctx = test_context().await;
+    let history_depth = ctx.api.storage().staking().history_depth(None).await?;
     assert_eq!(history_depth, 84);
     Ok(())
 }
 
 #[async_std::test]
 async fn storage_current_era() -> Result<(), Error<DispatchError>> {
-    let cxt = test_context().await;
-    let _current_era = cxt
+    let ctx = test_context().await;
+    let _current_era = ctx
         .api
         .storage()
         .staking()
@@ -252,8 +252,8 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
 
 #[async_std::test]
 async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
-    let cxt = test_context().await;
-    let current_era_result = cxt
+    let ctx = test_context().await;
+    let current_era_result = ctx
         .api
         .storage()
         .staking()

@@ -98,6 +98,7 @@ pub use crate::{
         UncheckedExtrinsic,
     },
     metadata::{
+        ErrorMetadata,
         Metadata,
         MetadataError,
         PalletMetadata,

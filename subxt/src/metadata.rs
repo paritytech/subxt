@@ -183,6 +183,7 @@ impl PalletMetadata {
     }
 }
 
+/// Metadata for specific events.
 #[derive(Clone, Debug)]
 pub struct EventMetadata {
     pallet: String,
@@ -207,6 +208,7 @@ impl EventMetadata {
     }
 }
 
+/// Metadata for specific errors.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
     pallet: String,
