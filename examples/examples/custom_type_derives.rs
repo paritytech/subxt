@@ -22,9 +22,9 @@
     runtime_metadata_path = "examples/polkadot_metadata.scale",
     // We can add (certain) custom derives to the generated types by providing
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
-    // The derives that we can add ultiamtely is limited to the traits that the base
+    // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    generated_type_derives = "Clone, PartialEq"
+    generated_type_derives = "Clone, PartialEq, Hash"
 )]
 pub mod polkadot {}
 

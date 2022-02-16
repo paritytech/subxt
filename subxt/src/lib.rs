@@ -180,7 +180,8 @@ pub enum Phase {
     Clone(bound = ""),
     PartialEq(bound = ""),
     Eq(bound = ""),
-    Default(bound = "")
+    Default(bound = ""),
+    Hash(bound = "")
 )]
 pub struct WrapperKeepOpaque<T> {
     data: Vec<u8>,
@@ -223,7 +224,8 @@ impl<T: Decode> WrapperKeepOpaque<T> {
     PartialEq(bound = ""),
     Debug(bound = ""),
     Eq(bound = ""),
-    Default(bound = "")
+    Default(bound = ""),
+    Hash(bound = "")
 )]
 #[scale_info(skip_type_params(T))]
 #[doc(hidden)]
