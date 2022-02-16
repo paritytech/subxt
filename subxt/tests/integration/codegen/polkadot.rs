@@ -1214,7 +1214,7 @@ pub mod api {
                     )])
                 }
             }
-            pub struct Lookup<'a>(pub &'a ::std::vec::Vec<::core::primitive::u8>);
+            pub struct Lookup<'a>(pub &'a [::core::primitive::u8]);
             impl ::subxt::StorageEntry for Lookup<'_> {
                 const PALLET: &'static str = "Scheduler";
                 const STORAGE: &'static str = "Lookup";
@@ -1256,7 +1256,7 @@ pub mod api {
                 }
                 pub async fn lookup(
                     &self,
-                    _0: &::std::vec::Vec<::core::primitive::u8>,
+                    _0: &[::core::primitive::u8],
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     ::core::option::Option<(
@@ -5139,7 +5139,7 @@ pub mod api {
             }
             pub struct ConcurrentReportsIndex<'a>(
                 pub &'a [::core::primitive::u8; 16usize],
-                pub &'a ::std::vec::Vec<::core::primitive::u8>,
+                pub &'a [::core::primitive::u8],
             );
             impl ::subxt::StorageEntry for ConcurrentReportsIndex<'_> {
                 const PALLET: &'static str = "Offences";
@@ -5211,7 +5211,7 @@ pub mod api {
                 pub async fn concurrent_reports_index(
                     &self,
                     _0: &[::core::primitive::u8; 16usize],
-                    _1: &::std::vec::Vec<::core::primitive::u8>,
+                    _1: &[::core::primitive::u8],
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<::subxt::sp_core::H256>,
@@ -5413,7 +5413,7 @@ pub mod api {
             }
             pub struct KeyOwner<'a>(
                 pub &'a runtime_types::sp_core::crypto::KeyTypeId,
-                pub &'a ::std::vec::Vec<::core::primitive::u8>,
+                pub &'a [::core::primitive::u8],
             );
             impl ::subxt::StorageEntry for KeyOwner<'_> {
                 const PALLET: &'static str = "Session";
@@ -5505,7 +5505,7 @@ pub mod api {
                 pub async fn key_owner(
                     &self,
                     _0: &runtime_types::sp_core::crypto::KeyTypeId,
-                    _1: &::std::vec::Vec<::core::primitive::u8>,
+                    _1: &[::core::primitive::u8],
                     hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
