@@ -442,8 +442,8 @@ fn generate_default_account_data_impl(
         };
 
     // this path to the storage entry depends on storage codegen.
-    // AccountDefaultData contains the same data as Account does, but without references.
-    let storage_entry_path = quote!(self::system::storage::AccountDefaultData);
+    // AccountOwned contains the same data as Account does, but without references.
+    let storage_entry_path = quote!(self::system::storage::AccountOwned);
 
     Some(quote! {
         /// The default storage entry from which to fetch an account nonce, required for

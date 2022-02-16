@@ -378,7 +378,7 @@ pub mod api {
         pub mod storage {
             use super::runtime_types;
             pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
-            pub struct AccountDefaultData(pub ::subxt::sp_core::crypto::AccountId32);
+            pub struct AccountOwned(pub ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Account<'_> {
                 const PALLET: &'static str = "System";
                 const STORAGE: &'static str = "Account";
@@ -393,7 +393,7 @@ pub mod api {
                     )])
                 }
             }
-            impl ::subxt::StorageEntry for AccountDefaultData {
+            impl ::subxt::StorageEntry for AccountOwned {
                 const PALLET: &'static str = "System";
                 const STORAGE: &'static str = "Account";
                 type Value = runtime_types::frame_system::AccountInfo<
@@ -27789,11 +27789,11 @@ pub mod api {
     #[doc = r" constructing a transaction."]
     pub enum DefaultAccountData {}
     impl ::subxt::AccountData for DefaultAccountData {
-        type StorageEntry = self::system::storage::AccountDefaultData;
+        type StorageEntry = self::system::storage::AccountOwned;
         type AccountId = ::subxt::sp_core::crypto::AccountId32;
         type Index = ::core::primitive::u32;
         fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
-            self::system::storage::AccountDefaultData(account_id)
+            self::system::storage::AccountOwned(account_id)
         }
         fn nonce(
             result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,

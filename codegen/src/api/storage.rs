@@ -75,7 +75,7 @@ fn generate_storage_entry_fns(
 ) -> (TokenStream2, TokenStream2) {
     let entry_struct_ident = format_ident!("{}", storage_entry.name);
     let is_account_wrapper = pallet.name == "System" && storage_entry.name == "Account";
-    let wrapper_struct_ident = format_ident!("{}DefaultData", storage_entry.name);
+    let wrapper_struct_ident = format_ident!("{}Owned", storage_entry.name);
     let (fields, entry_struct, constructor, key_impl, should_ref) = match storage_entry.ty
     {
         StorageEntryType::Plain(_) => {
@@ -149,7 +149,7 @@ fn generate_storage_entry_fns(
                     // for `::subxt::AccountData` implementation of generated `DefaultAccountData`.
                     // Due to changes in the storage API, `::system::storage::Account` cannot be
                     // used without specifying a lifetime. To satisfy `::subxt::AccountData`
-                    // implementation, a non-reference wrapper `AccountDefaultData` is generated.
+                    // implementation, a non-reference wrapper `AccountOwned` is generated.
                     let wrapper_struct = if is_account_wrapper {
                         quote!(
                             pub struct #wrapper_struct_ident ( pub #ty_path );
