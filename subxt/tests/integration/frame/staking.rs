@@ -150,7 +150,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .api
         .storage()
         .staking()
-        .ledger(&alice.account_id(), None)
+        .ledger(alice.account_id(), None)
         .await?
         .unwrap();
     assert_eq!(alice_stash.account_id(), &ledger.stash);
