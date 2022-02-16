@@ -147,6 +147,10 @@ impl RuntimeGenerator {
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
             ),
+            (
+                "sp_npos_elections::ElectionScore",
+                parse_quote!(::subxt::ElectionScore),
+            ),
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {
