@@ -119,8 +119,14 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
                     // toddo: [AJ] use unzip here?
-                    let tuple_struct_fields =
-                        fields.iter().map(|(_, field_type)| field_type);
+                    let tuple_struct_fields = fields.iter().map(|(_, field_type)| {
+                        // If the field type is `::std::vec::Vec<T>` obtain the type parameter and
+                        // surround with slice brackets. Otherwise, utilize the field_type as is.
+                        match field_type.vec_type_param() {
+                            Some(ty) => quote!([#ty]),
+                            None => quote!(#field_type),
+                        }
+                    });
                     let field_names = fields.iter().map(|(field_name, _)| field_name);
                     let entry_struct = quote! {
                         pub struct #entry_struct_ident <'a>( #( pub &'a #tuple_struct_fields ),* );
@@ -157,8 +163,15 @@ fn generate_storage_entry_fns(
                     } else {
                         quote!()
                     };
+
+                    // `ty_path` can be `std::vec::Vec<T>`. In such cases, the entry struct
+                    // should contain a slice reference.
+                    let ty_slice = match ty_path.vec_type_param() {
+                        Some(ty) => quote!([#ty]),
+                        None => quote!(#ty_path),
+                    };
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_path );
+                        pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_slice );
                         #wrapper_struct
                     };
                     let constructor = quote!( #entry_struct_ident(_0) );
@@ -247,9 +260,16 @@ fn generate_storage_entry_fns(
         quote!()
     };
 
-    let key_args = fields
-        .iter()
-        .map(|(field_name, field_type)| quote!( #field_name: #reference #field_type ));
+    let key_args = fields.iter().map(|(field_name, field_type)| {
+        // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
+        // interface should generate a reference. In such cases, the vector ultimately is
+        // a slice.
+        let field_ty = match field_type.vec_type_param() {
+            Some(ty) if should_ref => quote!([#ty]),
+            _ => quote!(#field_type),
+        };
+        quote!( #field_name: #reference #field_ty )
+    });
     let client_fns = quote! {
         pub async fn #fn_name(
             &self,
