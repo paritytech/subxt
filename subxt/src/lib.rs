@@ -245,16 +245,16 @@ unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 /// in a [`std::collections::BTreeMap`].
 #[derive(Encode, Decode, Debug, PartialOrd, Ord, PartialEq, Eq)]
 pub struct ElectionScore {
-	/// The minimal winner, in terms of total backing stake.
-	///
-	/// This parameter should be maximized.
-	pub minimal_stake: u128,
-	/// The sum of the total backing of all winners.
-	///
-	/// This parameter should maximized
-	pub sum_stake: u128,
-	/// The sum squared of the total backing of all winners, aka. the variance.
-	///
-	/// Ths parameter should be minimized.
-	pub sum_stake_squared: u128,
+    /// The minimal winner, in terms of total backing stake.
+    ///
+    /// This parameter should be maximized.
+    pub minimal_stake: u128,
+    /// The sum of the total backing of all winners.
+    ///
+    /// This parameter should maximized
+    pub sum_stake: u128,
+    /// The sum squared of the total backing of all winners, aka. the variance.
+    ///
+    /// Ths parameter should be minimized.
+    pub sum_stake_squared: u128,
 }
