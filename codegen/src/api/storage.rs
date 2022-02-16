@@ -146,7 +146,7 @@ fn generate_storage_entry_fns(
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
                     // `::system::storage::Account` was utilized as associated type `StorageEntry`
-                    // for `::subxt::AccountData` implementation of generated `DefaultAccountData`.
+                    // for `::subxt::AccountData` implementation by the generated `DefaultAccountData`.
                     // Due to changes in the storage API, `::system::storage::Account` cannot be
                     // used without specifying a lifetime. To satisfy `::subxt::AccountData`
                     // implementation, a non-reference wrapper `AccountOwned` is generated.
@@ -211,6 +211,9 @@ fn generate_storage_entry_fns(
         }
     );
 
+    // The wrapper account must implement the same trait as the counter-part Account,
+    // with the same pallet and storage. This continues the implementation of the wrapper
+    // generated with the Account.
     let wrapper_entry_impl = if is_account_wrapper {
         quote!(
             impl ::subxt::StorageEntry for #wrapper_struct_ident {
