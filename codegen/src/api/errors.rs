@@ -20,13 +20,13 @@ use proc_macro_error::abort_call_site;
 use quote::quote;
 use scale_info::TypeDef;
 
-/// The aim of this is to attach a `details` function to our runtime error struct
-/// which takes runtime metadata (this is important; we can generate error info from
-/// compile time metadata, but using runtime metadata gives a certain amount of flexibility
-/// in case the node we're talking to doesn't exactly line up what we've assumed from codegen.
-/// This is also why we resolve pallet indexes for calls at runtime; they might differ between
-/// static codegen and node we're quering.
-pub fn generate_error_details_fn(metadata: &RuntimeMetadataV14) -> TokenStream2 {
+/// The aim of this is to implement the [`::subxt::HasModuleError`] trait for
+/// the generated `DispatchError`, so that we can obtain the module error details,
+/// if applicable, from it.
+pub fn generate_has_module_error_impl(
+    metadata: &RuntimeMetadataV14,
+    types_mod_ident: &syn::Ident,
+) -> TokenStream2 {
     let dispatch_error_def = metadata
         .types
         .types()
@@ -65,25 +65,28 @@ pub fn generate_error_details_fn(metadata: &RuntimeMetadataV14) -> TokenStream2 
         false
     };
 
-    // Return a function that will obtain error details given some metadata.
-    if module_variant_is_struct {
+    let trait_fn_body = if module_variant_is_struct {
         quote! {
-            pub fn details<'a>(&self, metadata: &'a ::subxt::Metadata) -> Result<Option<&'a ::subxt::ErrorMetadata>, ::subxt::MetadataError> {
-                if let &Self::Module { index, error } = self {
-                    metadata.error(index, error).map(Some)
-                } else {
-                    Ok(None)
-                }
+            if let &Self::Module { index, error } = self {
+                Some((index, error))
+            } else {
+                None
             }
         }
     } else {
         quote! {
-            pub fn details<'a>(&self, metadata: &'a ::subxt::Metadata) -> Result<Option<&'a ::subxt::ErrorMetadata>, ::subxt::MetadataError> {
-                if let Self::Module (module_error) = self {
-                    metadata.error(module_error.index, module_error.error).map(Some)
-                } else {
-                    Ok(None)
-                }
+            if let Self::Module (module_error) = self {
+                Some((module_error.index, module_error.error))
+            } else {
+                None
+            }
+        }
+    };
+
+    quote! {
+        impl ::subxt::HasModuleError for #types_mod_ident::sp_runtime::DispatchError {
+            fn module_error_indices(&self) -> Option<(u8,u8)> {
+                #trait_fn_body
             }
         }
     }

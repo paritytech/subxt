@@ -1,4 +1,3 @@
-// Note [jsdw]: generated with polkadot 0.9.13-82616422d0-aarch64-macos
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
@@ -27565,15 +27564,12 @@ pub mod api {
     }
     #[doc = r" The default error type returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
-    impl DispatchError {
-        pub fn details<'a>(
-            &self,
-            metadata: &'a ::subxt::Metadata,
-        ) -> Result<Option<&'a ::subxt::ErrorMetadata>, ::subxt::MetadataError> {
+    impl ::subxt::HasModuleError for runtime_types::sp_runtime::DispatchError {
+        fn module_error_indices(&self) -> Option<(u8, u8)> {
             if let &Self::Module { index, error } = self {
-                metadata.error(index, error).map(Some)
+                Some((index, error))
             } else {
-                Ok(None)
+                None
             }
         }
     }

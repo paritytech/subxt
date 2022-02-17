@@ -79,10 +79,9 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .await?
         .wait_for_finalized_success()
         .await;
-    assert_matches!(announce_validator, Err(Error::Runtime(err)) => {
-        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+    assert_matches!(announce_validator, Err(Error::Module(err)) => {
+        assert_eq!(err.pallet, "Staking");
+        assert_eq!(err.error, "NotController");
     });
     Ok(())
 }
@@ -121,10 +120,9 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(nomination, Err(Error::Runtime(err)) => {
-        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+    assert_matches!(nomination, Err(Error::Module(err)) => {
+        assert_eq!(err.pallet, "Staking");
+        assert_eq!(err.error, "NotController");
     });
     Ok(())
 }
@@ -165,10 +163,9 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(chill, Err(Error::Runtime(err)) => {
-        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "NotController");
+    assert_matches!(chill, Err(Error::Module(err)) => {
+        assert_eq!(err.pallet, "Staking");
+        assert_eq!(err.error, "NotController");
     });
 
     let is_chilled = ctx
@@ -221,10 +218,9 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await;
 
-    assert_matches!(bond_again, Err(Error::Runtime(err)) => {
-        let details = err.inner().details(ctx.api.client.metadata()).unwrap().unwrap();
-        assert_eq!(details.pallet(), "Staking");
-        assert_eq!(details.error(), "AlreadyBonded");
+    assert_matches!(bond_again, Err(Error::Module(err)) => {
+        assert_eq!(err.pallet, "Staking");
+        assert_eq!(err.error, "AlreadyBonded");
     });
     Ok(())
 }

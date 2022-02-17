@@ -265,7 +265,8 @@ impl RuntimeGenerator {
                     pallet.calls.as_ref().map(|_| pallet_mod_name)
                 });
 
-        let error_details_fn = errors::generate_error_details_fn(&self.metadata);
+        let has_module_error_impl =
+            errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
 
         let default_account_data_ident = format_ident!("DefaultAccountData");
         let default_account_data_impl = generate_default_account_data_impl(
@@ -289,11 +290,8 @@ impl RuntimeGenerator {
 
                 /// The default error type returned when there is a runtime issue.
                 pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
-
-                // Attach a handy helper function to our runtime error to obtain more info.
-                impl DispatchError {
-                    #error_details_fn
-                }
+                // Impl HasModuleError on DispatchError so we can pluck out module error details.
+                #has_module_error_impl
 
                 #default_account_data_impl
 

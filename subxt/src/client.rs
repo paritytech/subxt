@@ -19,7 +19,10 @@ use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
 
 use crate::{
-    error::BasicError,
+    error::{
+        BasicError,
+        HasModuleError,
+    },
     extrinsic::{
         self,
         SignedExtra,
@@ -206,7 +209,7 @@ where
     X: SignedExtra<T>,
     A: AccountData,
     C: Call + Send + Sync,
-    E: Decode,
+    E: Decode + HasModuleError,
     Evs: Decode,
 {
     /// Create a new [`SubmittableExtrinsic`].
