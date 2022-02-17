@@ -20,7 +20,7 @@ use proc_macro_error::abort_call_site;
 use quote::quote;
 use scale_info::TypeDef;
 
-/// The aim of this is to implement the [`::subxt::HasModuleError`] trait for
+/// The aim of this is to implement the `::subxt::HasModuleError` trait for
 /// the generated `DispatchError`, so that we can obtain the module error details,
 /// if applicable, from it.
 pub fn generate_has_module_error_impl(
