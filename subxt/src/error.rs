@@ -70,6 +70,9 @@ pub enum GenericError<E> {
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
+    #[error("Module error: {0}")]
+    /// An error from the `Module` variant of the generated `DispatchError`.
+    Module(ModuleError),
     /// Other error.
     #[error("Other error: {0}")]
     Other(String),
@@ -94,6 +97,7 @@ impl<E> GenericError<E> {
             GenericError::Metadata(e) => GenericError::Metadata(e),
             GenericError::EventsDecoding(e) => GenericError::EventsDecoding(e),
             GenericError::Transaction(e) => GenericError::Transaction(e),
+            GenericError::Module(e) => GenericError::Module(e),
             GenericError::Other(e) => GenericError::Other(e),
             // This is the only branch we really care about:
             GenericError::Runtime(e) => GenericError::Runtime(f(e)),
@@ -166,4 +170,25 @@ pub enum TransactionError {
     /// This is probably because the block was retracted before being finalized.
     #[error("The block containing the transaction can no longer be found (perhaps it was on a non-finalized fork?)")]
     BlockHashNotFound,
+}
+
+/// Details about a module error that has occurred.
+#[derive(Clone, Debug, thiserror::Error)]
+#[error("{pallet}: {error}\n\n{}", .description.join("\n"))]
+pub struct ModuleError {
+    /// The name of the pallet that the error came from.
+    pub pallet: String,
+    /// The name of the error.
+    pub error: String,
+    /// A description of the error.
+    pub description: Vec<String>,
+}
+
+/// This trait is automatically implemented for the generated `DispatchError`,
+/// so that we can pluck out information about the `Module` error variant, if`
+/// it exists.
+pub trait HasModuleError {
+    /// If the error has a `Module` variant, return a tuple of the
+    /// pallet index and error index. Else, return `None`.
+    fn module_error_indices(&self) -> Option<(u8, u8)>;
 }

@@ -81,6 +81,7 @@ pub use crate::{
         BasicError,
         Error,
         GenericError,
+        HasModuleError,
         RuntimeError,
         TransactionError,
     },
@@ -98,6 +99,7 @@ pub use crate::{
         UncheckedExtrinsic,
     },
     metadata::{
+        ErrorMetadata,
         Metadata,
         MetadataError,
         PalletMetadata,

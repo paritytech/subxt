@@ -27,6 +27,8 @@ use crate::{
     error::{
         BasicError,
         Error,
+        HasModuleError,
+        ModuleError,
         RuntimeError,
         TransactionError,
     },
@@ -54,7 +56,7 @@ use jsonrpsee::core::{
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionProgress<'client, T: Config, E: Decode, Evs: Decode> {
+pub struct TransactionProgress<'client, T: Config, E, Evs> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: &'client Client<T>,
@@ -64,12 +66,11 @@ pub struct TransactionProgress<'client, T: Config, E: Decode, Evs: Decode> {
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<'client, T: Config, E: Decode, Evs: Decode> Unpin
-    for TransactionProgress<'client, T, E, Evs>
-{
-}
+impl<'client, T: Config, E, Evs> Unpin for TransactionProgress<'client, T, E, Evs> {}
 
-impl<'client, T: Config, E: Decode, Evs: Decode> TransactionProgress<'client, T, E, Evs> {
+impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
+    TransactionProgress<'client, T, E, Evs>
+{
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
@@ -171,7 +172,7 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionProgress<'client, T,
     }
 }
 
-impl<'client, T: Config, E: Decode, Evs: Decode> Stream
+impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode> Stream
     for TransactionProgress<'client, T, E, Evs>
 {
     type Item = Result<TransactionStatus<'client, T, E, Evs>, BasicError>;
@@ -340,7 +341,9 @@ pub struct TransactionInBlock<'client, T: Config, E: Decode, Evs: Decode> {
     _error: PhantomDataSendSync<(E, Evs)>,
 }
 
-impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, E, Evs> {
+impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
+    TransactionInBlock<'client, T, E, Evs>
+{
     pub(crate) fn new(
         block_hash: T::Hash,
         ext_hash: T::Hash,
@@ -387,7 +390,18 @@ impl<'client, T: Config, E: Decode, Evs: Decode> TransactionInBlock<'client, T, 
             let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 let dispatch_error = E::decode(&mut &*ev.data)?;
-                return Err(Error::Runtime(RuntimeError(dispatch_error)))
+                if let Some((pallet_idx, error_idx)) =
+                    dispatch_error.module_error_indices()
+                {
+                    let details = self.client.metadata().error(pallet_idx, error_idx)?;
+                    return Err(Error::Module(ModuleError {
+                        pallet: details.pallet().to_string(),
+                        error: details.error().to_string(),
+                        description: details.description().to_vec(),
+                    }))
+                } else {
+                    return Err(Error::Runtime(RuntimeError(dispatch_error)))
+                }
             }
         }
 
