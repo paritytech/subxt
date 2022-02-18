@@ -145,7 +145,7 @@ fn generate_storage_entry_fns(
                         // If there is one hasher, then however many fields we have, we want to hash a
                         // tuple of them using the one hasher we're told about. This corresponds to a
                         // StorageMap.
-                        let hasher = hashers.get(0).expect("checked for 1 hashed");
+                        let hasher = hashers.get(0).expect("checked for 1 hasher");
                         let items =
                             (0..tuple.fields().len()).into_iter().map(|field_idx| {
                                 let index = syn::Index::from(field_idx);
