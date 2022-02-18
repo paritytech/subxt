@@ -155,9 +155,9 @@ async fn transfer_error() {
     let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
-    let cxt = test_context().await;
+    let ctx = test_context().await;
 
-    cxt.api
+    ctx.api
         .tx()
         .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
@@ -168,7 +168,7 @@ async fn transfer_error() {
         .await
         .unwrap();
 
-    let res = cxt
+    let res = ctx
         .api
         .tx()
         .balances()
@@ -179,10 +179,9 @@ async fn transfer_error() {
         .wait_for_finalized_success()
         .await;
 
-    if let Err(Error::Runtime(err)) = res {
-        let details = err.inner().details().unwrap();
-        assert_eq!(details.pallet, "Balances");
-        assert_eq!(details.error, "InsufficientBalance");
+    if let Err(Error::Module(err)) = res {
+        assert_eq!(err.pallet, "Balances");
+        assert_eq!(err.error, "InsufficientBalance");
     } else {
         panic!("expected a runtime module error");
     }
