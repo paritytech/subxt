@@ -54,7 +54,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
         .api
         .storage()
         .system()
-        .account(alice.into(), None)
+        .account(alice, None)
         .await?;
     assert_eq!(entry.nonce, 1);
 
@@ -93,7 +93,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
         .api
         .storage()
         .assets()
-        .approvals(99, alice.into(), bob.into(), None)
+        .approvals(99, alice, bob, None)
         .await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
