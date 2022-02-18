@@ -116,8 +116,8 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
 
-                    let field_names = fields.iter().map(|(n,_)| n);
-                    let field_types = fields.iter().map(|(_,t)| t);
+                    let field_names = fields.iter().map(|(n, _)| n);
+                    let field_types = fields.iter().map(|(_, t)| t);
 
                     let entry_struct = quote! {
                         pub struct #entry_struct_ident( #( pub #field_types ),* );
@@ -136,7 +136,7 @@ fn generate_storage_entry_fns(
                                 let index = syn::Index::from(field_idx);
                                 quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
                             });
-                        quote!{
+                        quote! {
                             ::subxt::StorageEntryKey::Map(
                                 vec![ #( #keys ),* ]
                             )
@@ -146,13 +146,12 @@ fn generate_storage_entry_fns(
                         // tuple of them using the one hasher we're told about. This corresponds to a
                         // StorageMap.
                         let hasher = hashers.get(0).expect("checked for 1 hashed");
-                        let items = (0..tuple.fields().len()).into_iter().map(
-                            |field_idx| {
+                        let items =
+                            (0..tuple.fields().len()).into_iter().map(|field_idx| {
                                 let index = syn::Index::from(field_idx);
                                 quote!( &self.#index )
-                            }
-                        );
-                        quote!{
+                            });
+                        quote! {
                             ::subxt::StorageEntryKey::Map(
                                 vec![ ::subxt::StorageMapKey::new(&(#( #items ),*), #hasher) ]
                             )
