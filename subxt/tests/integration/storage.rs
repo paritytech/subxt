@@ -50,12 +50,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
         .await?;
 
     // Look up the nonce for the user (we expect it to be 1).
-    let entry = ctx
-        .api
-        .storage()
-        .system()
-        .account(alice, None)
-        .await?;
+    let entry = ctx.api.storage().system().account(alice, None).await?;
     assert_eq!(entry.nonce, 1);
 
     Ok(())
