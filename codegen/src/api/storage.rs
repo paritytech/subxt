@@ -126,9 +126,9 @@ fn generate_storage_entry_fns(
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
 
                     let key_impl = if hashers.len() == fields.len() {
-                        // If the number of hashers matches the number of fields, we're dealing with a
-                        // StorageNMap, and each field should be hashed separately according to the
-                        // corresponding hasher.
+                        // If the number of hashers matches the number of fields, we're dealing with
+                        // something shaped like a StorageNMap, and each field should be hashed separately
+                        // according to the corresponding hasher.
                         let keys = (0..tuple.fields().len())
                             .into_iter()
                             .zip(hashers)
