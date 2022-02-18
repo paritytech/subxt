@@ -15,7 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::DispatchError,
+    node_runtime::{
+        self,
+        DispatchError,
+    },
     pair_signer,
     test_context,
 };
@@ -53,6 +56,45 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let entry = ctx.api.storage().system().account(alice, None).await?;
     assert_eq!(entry.nonce, 1);
 
+    Ok(())
+}
+
+// This fails until the fix in https://github.com/paritytech/subxt/pull/458 is introduced.
+// Here we create a key that looks a bit like a StorageNMap key, but should in fact be
+// treated as a StorageKey (ie we should hash both values together with one hasher, rather
+// than hash both values separately, or ignore the second value).
+#[async_std::test]
+async fn storage_n_mapish_key_is_properly_created(
+) -> Result<(), subxt::Error<DispatchError>> {
+    use codec::Encode;
+    use node_runtime::{
+        runtime_types::sp_core::crypto::KeyTypeId,
+        session::storage::KeyOwner,
+    };
+    use subxt::{
+        storage::StorageKeyPrefix,
+        StorageEntry,
+    };
+
+    // This is what the generate code hashes a `session().key_owner(..)` key into:
+    let actual_key_bytes = KeyOwner(KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8])
+        .key()
+        .final_key(StorageKeyPrefix::new::<KeyOwner>())
+        .0;
+
+    // Let's manually hash to what we assume it should be and compare:
+    let expected_key_bytes = {
+        // Hash the prefix to the storage entry:
+        let mut bytes = sp_core::twox_128("Session".as_bytes()).to_vec();
+        bytes.extend(&sp_core::twox_128("KeyOwner".as_bytes())[..]);
+        // twox64_concat a *tuple* of the args expected:
+        let suffix = (KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8]).encode();
+        bytes.extend(&sp_core::twox_64(&suffix));
+        bytes.extend(&suffix);
+        bytes
+    };
+
+    assert_eq!(actual_key_bytes, expected_key_bytes);
     Ok(())
 }
 
