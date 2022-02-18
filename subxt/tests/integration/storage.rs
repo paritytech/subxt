@@ -76,7 +76,7 @@ async fn storage_n_mapish_key_is_properly_created(
         StorageEntry,
     };
 
-    // This is what the generate code hashes a `session().key_owner(..)` key into:
+    // This is what the generated code hashes a `session().key_owner(..)` key into:
     let actual_key_bytes = KeyOwner(KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8])
         .key()
         .final_key(StorageKeyPrefix::new::<KeyOwner>())
