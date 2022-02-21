@@ -147,11 +147,13 @@ impl RuntimeGenerator {
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
             ),
-            // We override this because it's used as a key in a BTreeMap, and so we
-            // need to implement some extra derives for it for that to compile.
             (
-                "sp_npos_elections::ElectionScore",
-                parse_quote!(::subxt::ElectionScore),
+                "BTreeMap",
+                parse_quote!(::subxt::KeyedVec)
+            ),
+            (
+                "BTreeSet",
+                parse_quote!(::std::vec::Vec)
             ),
         ]
         .iter()
