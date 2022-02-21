@@ -129,8 +129,9 @@ fn generate_storage_entry_fns(
                         // If the number of hashers matches the number of fields, we're dealing with
                         // something shaped like a StorageNMap, and each field should be hashed separately
                         // according to the corresponding hasher.
-                        let keys = (0..fields.len())
-                            .zip(hashers)
+                        let keys = hashers
+                            .into_iter()
+                            .enumerate()
                             .map(|(field_idx, hasher)| {
                                 let index = syn::Index::from(field_idx);
                                 quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
