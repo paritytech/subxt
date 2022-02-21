@@ -23,6 +23,8 @@ mod client;
 mod events;
 #[cfg(test)]
 mod frame;
+#[cfg(test)]
+mod storage;
 
 use test_runtime::node_runtime;
 use utils::*;
