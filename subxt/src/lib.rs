@@ -243,5 +243,6 @@ unsafe impl<T> Send for PhantomDataSendSync<T> {}
 unsafe impl<T> Sync for PhantomDataSendSync<T> {}
 
 /// This represents a key-value collection and is SCALE compatible
-/// with collections like BTreeMap and BTreeSet
+/// with collections like BTreeMap. This has the same type params
+/// as `BTreeMap` which allows us to easily swap the two during codegen.
 pub type KeyedVec<K, V> = Vec<(K, V)>;
