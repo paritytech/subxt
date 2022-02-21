@@ -136,7 +136,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
         .await?;
 
     assert_eq!(
-        locks,
+        locks.0,
         vec![runtime_types::pallet_balances::BalanceLock {
             id: *b"staking ",
             amount: 100_000_000_000_000,
