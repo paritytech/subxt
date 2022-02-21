@@ -147,14 +147,8 @@ impl RuntimeGenerator {
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
             ),
-            (
-                "BTreeMap",
-                parse_quote!(::subxt::KeyedVec)
-            ),
-            (
-                "BTreeSet",
-                parse_quote!(::std::vec::Vec)
-            ),
+            ("BTreeMap", parse_quote!(::subxt::KeyedVec)),
+            ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {
