@@ -103,7 +103,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     let ctx = test_context().await;
 
     // Boilerplate; we create a new asset class with ID 99, and then
-    // we "approveTransfer" of some of this asset class. This Gives us an
+    // we "approveTransfer" of some of this asset class. This gives us an
     // entry in the `Approvals` StorageNMap that we can try to look up.
     let signer = pair_signer(AccountKeyring::Alice.pair());
     let alice = AccountKeyring::Alice.to_account_id();
