@@ -28,7 +28,9 @@ use sp_keyring::AccountKeyring;
 async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
 
-    // Look up a plain value
+    // Look up a plain value. Wait long enough that we don't get the genesis block data,
+    // because it may have no storage associated with it.
+    async_std::task::sleep(std::time::Duration::from_secs(6));
     let entry = ctx.api.storage().timestamp().now(None).await?;
     assert!(entry > 0);
 
