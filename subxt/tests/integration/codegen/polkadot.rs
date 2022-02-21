@@ -1,3 +1,4 @@
+// Note [jsdw]: generated from polkadot 0.9.13-82616422d0-aarch64-macos
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
@@ -20073,9 +20074,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
-                    pub struct BoundedBTreeMap<_0, _1>(
-                        pub ::std::collections::BTreeMap<_0, _1>,
-                    );
+                    pub struct BoundedBTreeMap<_0, _1>(pub ::subxt::KeyedVec<_0, _1>);
                 }
                 pub mod bounded_vec {
                     use super::runtime_types;
@@ -23047,7 +23046,7 @@ pub mod api {
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct EraRewardPoints<_0> {
                 pub total: ::core::primitive::u32,
-                pub individual: ::std::collections::BTreeMap<_0, ::core::primitive::u32>,
+                pub individual: ::subxt::KeyedVec<_0, ::core::primitive::u32>,
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Exposure<_0, _1> {
