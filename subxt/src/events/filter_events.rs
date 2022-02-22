@@ -17,14 +17,14 @@
 //! Filtering individual events from subscriptions.
 
 use super::{
-    Events,
     EventSubscription,
+    Events,
 };
 use crate::{
     BasicError,
     Config,
     Event,
-    Phase
+    Phase,
 };
 use codec::Decode;
 use futures::{
@@ -43,7 +43,16 @@ use std::{
 /// exactly one of these will be `Some(event)` each iteration.
 pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     sub: EventSubscription<'a, T, Evs>,
-    events: Option<Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash,Filter::ReturnType>, BasicError>> + 'a>>,
+    events: Option<
+        Box<
+            dyn Iterator<
+                    Item = Result<
+                        FilteredEventDetails<T::Hash, Filter::ReturnType>,
+                        BasicError,
+                    >,
+                > + 'a,
+        >,
+    >,
 }
 
 impl<'a, T: Config, Evs, Filter: EventFilter> Unpin for FilterEvents<'a, T, Evs, Filter> {}
@@ -57,7 +66,7 @@ impl<'a, T: Config, Evs, Filter: EventFilter> FilterEvents<'a, T, Evs, Filter> {
 impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
     for FilterEvents<'a, T, Evs, Filter>
 {
-    type Item = Result<FilteredEventDetails<T::Hash,Filter::ReturnType>, BasicError>;
+    type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, BasicError>;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -94,7 +103,7 @@ pub struct FilteredEventDetails<BlockHash, Evs> {
     /// A type containing an event that we've filtered on.
     /// Depending on the filter type, this may be a tuple
     /// or a single event.
-    pub event: Evs
+    pub event: Evs,
 }
 
 /// This trait is implemented for tuples of Event types; any such tuple (up to size 8) can be
@@ -105,7 +114,14 @@ pub trait EventFilter: private::Sealed {
     /// Filter the events based on the type implementing this trait.
     fn filter<'a, T: Config, Evs: Decode + 'static>(
         events: Events<'a, T, Evs>,
-    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Self::ReturnType>, BasicError>> + 'a>;
+    ) -> Box<
+        dyn Iterator<
+                Item = Result<
+                    FilteredEventDetails<T::Hash, Self::ReturnType>,
+                    BasicError,
+                >,
+            > + 'a,
+    >;
 }
 
 // Prevent userspace implementations of the above trait; the interface is not considered stable
@@ -122,7 +138,9 @@ impl<Ev: Event> EventFilter for (Ev,) {
     type ReturnType = Ev;
     fn filter<'a, T: Config, Evs: Decode + 'static>(
         events: Events<'a, T, Evs>,
-    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>> + 'a> {
+    ) -> Box<
+        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>> + 'a,
+    > {
         let block_hash = events.block_hash();
         let mut iter = events.into_iter_raw();
         Box::new(std::iter::from_fn(move || {
@@ -138,8 +156,8 @@ impl<Ev: Event> EventFilter for (Ev,) {
                     // We found a match; return our tuple.
                     return Some(Ok(FilteredEventDetails {
                         phase: raw_event.phase,
-                        block_hash: block_hash,
-                        event: event
+                        block_hash,
+                        event,
                     }))
                 }
                 if let Err(e) = ev {
