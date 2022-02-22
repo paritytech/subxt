@@ -17,13 +17,14 @@
 //! Filtering individual events from subscriptions.
 
 use super::{
+    Events,
     EventSubscription,
-    RawEventDetails,
 };
 use crate::{
     BasicError,
     Config,
     Event,
+    Phase
 };
 use codec::Decode;
 use futures::{
@@ -42,7 +43,7 @@ use std::{
 /// exactly one of these will be `Some(event)` each iteration.
 pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     sub: EventSubscription<'a, T, Evs>,
-    events: Option<Box<dyn Iterator<Item = Result<Filter::ReturnType, BasicError>> + 'a>>,
+    events: Option<Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash,Filter::ReturnType>, BasicError>> + 'a>>,
 }
 
 impl<'a, T: Config, Evs, Filter: EventFilter> Unpin for FilterEvents<'a, T, Evs, Filter> {}
@@ -56,7 +57,7 @@ impl<'a, T: Config, Evs, Filter: EventFilter> FilterEvents<'a, T, Evs, Filter> {
 impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
     for FilterEvents<'a, T, Evs, Filter>
 {
-    type Item = Result<Filter::ReturnType, BasicError>;
+    type Item = Result<FilteredEventDetails<T::Hash,Filter::ReturnType>, BasicError>;
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
         cx: &mut std::task::Context<'_>,
@@ -77,11 +78,23 @@ impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
                 None => return Poll::Ready(None),
                 Some(Err(e)) => return Poll::Ready(Some(Err(e))),
                 Some(Ok(events)) => {
-                    self.events = Some(Filter::filter(events.into_iter_raw()));
+                    self.events = Some(Filter::filter(events));
                 }
             };
         }
     }
+}
+
+#[derive(Debug, Clone, Eq, PartialEq)]
+pub struct FilteredEventDetails<BlockHash, Evs> {
+    /// During which [`Phase`] was the event produced?
+    pub phase: Phase,
+    /// Hash of the block that this event came from.
+    pub block_hash: BlockHash,
+    /// A type containing an event that we've filtered on.
+    /// Depending on the filter type, this may be a tuple
+    /// or a single event.
+    pub event: Evs
 }
 
 /// This trait is implemented for tuples of Event types; any such tuple (up to size 8) can be
@@ -90,9 +103,9 @@ pub trait EventFilter: private::Sealed {
     /// The type we'll be handed back from filtering.
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
-    fn filter<'a>(
-        events: impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a,
-    ) -> Box<dyn Iterator<Item = Result<Self::ReturnType, BasicError>> + 'a>;
+    fn filter<'a, T: Config, Evs: Decode + 'static>(
+        events: Events<'a, T, Evs>,
+    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Self::ReturnType>, BasicError>> + 'a>;
 }
 
 // Prevent userspace implementations of the above trait; the interface is not considered stable
@@ -107,21 +120,27 @@ pub(crate) mod private {
 impl<Ev: Event> private::Sealed for (Ev,) {}
 impl<Ev: Event> EventFilter for (Ev,) {
     type ReturnType = Ev;
-    fn filter<'a>(
-        mut events: impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a,
-    ) -> Box<dyn Iterator<Item = Result<Ev, BasicError>> + 'a> {
+    fn filter<'a, T: Config, Evs: Decode + 'static>(
+        events: Events<'a, T, Evs>,
+    ) -> Box<dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>> + 'a> {
+        let block_hash = events.block_hash();
+        let mut iter = events.into_iter_raw();
         Box::new(std::iter::from_fn(move || {
-            for ev in events.by_ref() {
+            for ev in iter.by_ref() {
                 // Forward any error immediately:
-                let ev = match ev {
+                let raw_event = match ev {
                     Ok(ev) => ev,
                     Err(e) => return Some(Err(e)),
                 };
                 // Try decoding each type until we hit a match or an error:
-                let ev = ev.as_event::<Ev>();
-                if let Ok(Some(ev)) = ev {
+                let ev = raw_event.as_event::<Ev>();
+                if let Ok(Some(event)) = ev {
                     // We found a match; return our tuple.
-                    return Some(Ok(ev))
+                    return Some(Ok(FilteredEventDetails {
+                        phase: raw_event.phase,
+                        block_hash: block_hash,
+                        event: event
+                    }))
                 }
                 if let Err(e) = ev {
                     // We hit an error. Return it.
@@ -139,30 +158,34 @@ macro_rules! impl_event_filter {
         impl <$($ty: Event),+> private::Sealed for ( $($ty,)+ ) {}
         impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
-            fn filter<'a>(
-                mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a
-            ) -> Box<dyn Iterator<Item=Result<Self::ReturnType, BasicError>> + 'a> {
-                // Return an iterator that populates exactly 1 of the tuple options each,
-                // iteration, or bails with None if none of them could be populated.
+            fn filter<'a, T: Config, Evs: Decode + 'static>(
+                events: Events<'a, T, Evs>
+            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + 'a> {
+                let block_hash = events.block_hash();
+                let mut iter = events.into_iter_raw();
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
-                    for ev in events.by_ref() {
+                    for ev in iter.by_ref() {
                         // Forward any error immediately:
-                        let ev = match ev {
+                        let raw_event = match ev {
                             Ok(ev) => ev,
                             Err(e) => return Some(Err(e))
                         };
                         // Try decoding each type until we hit a match or an error:
                         $({
-                            let ev = ev.as_event::<$ty>();
+                            let ev = raw_event.as_event::<$ty>();
                             if let Ok(Some(ev)) = ev {
                                 // We found a match; return our tuple.
                                 out.$idx = Some(ev);
-                                return Some(Ok(out));
+                                return Some(Ok(FilteredEventDetails {
+                                    phase: raw_event.phase,
+                                    block_hash: block_hash,
+                                    event: out
+                                }))
                             }
                             if let Err(e) = ev {
-                                    // We hit an error. Return it.
-                                    return Some(Err(e.into()))
+                                // We hit an error. Return it.
+                                return Some(Err(e.into()))
                             }
                         })+
                     }

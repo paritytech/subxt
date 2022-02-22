@@ -79,16 +79,20 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Our subscription will see all of the balance events we're filtering on:
     while let Some(ev) = balance_events.next().await {
-        let ev = ev?;
+        let event_details = ev?;
 
-        if let (Some(withdraw), _, _) = &ev {
-            println!("Withdraw event: {withdraw:?}");
+        let block_hash = event_details.block_hash;
+        let event = event_details.event;
+        println!("Event at {:?}:", block_hash);
+
+        if let (Some(withdraw), _, _) = &event {
+            println!("  Withdraw event: {withdraw:?}");
         }
-        if let (_, Some(transfer), _) = &ev {
-            println!("Transfer event: {transfer:?}");
+        if let (_, Some(transfer), _) = &event {
+            println!("  Transfer event: {transfer:?}");
         }
-        if let (_, _, Some(deposit)) = &ev {
-            println!("Deposit event: {deposit:?}");
+        if let (_, _, Some(deposit)) = &event {
+            println!("  Deposit event: {deposit:?}");
         }
     }
 
