@@ -94,6 +94,9 @@ impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
     }
 }
 
+/// This is returned from the [`FilterEvents`] impl of [`Stream`]. It contains
+/// some type representing an event we've filtered on, along with couple of additional
+/// pieces of information about that event.
 #[derive(Debug, Clone, Eq, PartialEq)]
 pub struct FilteredEventDetails<BlockHash, Evs> {
     /// During which [`Phase`] was the event produced?
