@@ -35,8 +35,11 @@ use std::{
     task::Poll,
 };
 
-/// A stream which returns tuples containing exactly one of the
-/// given event types back on each iteration.
+/// A stream which filters events based on the `Filter` param provided.
+/// If `Filter` is a 1-tuple of a single `Event` type, it will return every
+/// instance of that event as it's found. If `filter` is ` tuple of multiple
+/// `Event` types, it will return a corresponding tuple of `Option`s, where
+/// exactly one of these will be `Some(event)` each iteration.
 pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     sub: EventSubscription<'a, T, Evs>,
     events: Option<Box<dyn Iterator<Item = Result<Filter::ReturnType, BasicError>> + 'a>>,
@@ -136,7 +139,9 @@ macro_rules! impl_event_filter {
         impl <$($ty: Event),+> private::Sealed for ( $($ty,)+ ) {}
         impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
-            fn filter<'a>(mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<Self::ReturnType, BasicError>> + 'a> {
+            fn filter<'a>(
+                mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a
+            ) -> Box<dyn Iterator<Item=Result<Self::ReturnType, BasicError>> + 'a> {
                 // Return an iterator that populates exactly 1 of the tuple options each,
                 // iteration, or bails with None if none of them could be populated.
                 Box::new(std::iter::from_fn(move || {
