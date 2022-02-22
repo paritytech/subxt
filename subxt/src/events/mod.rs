@@ -36,4 +36,5 @@ pub use events_type::{
 pub use filter_events::{
     EventFilter,
     FilterEvents,
+    FilteredEventDetails,
 };
