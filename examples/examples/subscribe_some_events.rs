@@ -50,15 +50,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Subscribe to several balance related events. If we ask for more than one event,
     // we'll be given a correpsonding tuple of `Option`'s, with exactly one
     // variant populated each time.
-    let mut balance_events = api
-        .events()
-        .subscribe()
-        .await?
-        .filter_events::<(
-            polkadot::balances::events::Withdraw,
-            polkadot::balances::events::Transfer,
-            polkadot::balances::events::Deposit,
-        )>();
+    let mut balance_events = api.events().subscribe().await?.filter_events::<(
+        polkadot::balances::events::Withdraw,
+        polkadot::balances::events::Transfer,
+        polkadot::balances::events::Deposit,
+    )>();
 
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {
@@ -86,13 +82,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         match ev? {
             (Some(withdraw), _, _) => {
                 println!("Withdraw event: {withdraw:?}");
-            },
+            }
             (_, Some(transfer), _) => {
                 println!("Transfer event: {transfer:?}");
-            },
+            }
             (_, _, Some(deposit)) => {
                 println!("Deposit event: {deposit:?}");
-            },
+            }
             _ => {
                 unreachable!();
             }

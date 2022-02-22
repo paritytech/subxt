@@ -16,26 +16,24 @@
 
 //! For working with events.
 
-mod events;
-mod filter_events;
 mod decoding;
 mod event_subscription;
+mod events_type;
+mod filter_events;
 
-pub use events::{
-    at,
-    Events,
-    EventDetails,
-    RawEventDetails,
-};
+pub use decoding::EventsDecodingError;
 pub use event_subscription::{
     subscribe,
     subscribe_finalized,
     EventSubscription,
 };
+pub use events_type::{
+    at,
+    EventDetails,
+    Events,
+    RawEventDetails,
+};
 pub use filter_events::{
     EventFilter,
     FilterEvents,
-};
-pub use decoding::{
-    EventsDecodingError,
 };

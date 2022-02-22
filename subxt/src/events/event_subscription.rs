@@ -21,9 +21,7 @@ use crate::{
     Client,
     Config,
 };
-use codec::{
-    Decode,
-};
+use codec::Decode;
 use derivative::Derivative;
 use futures::{
     Future,
@@ -39,12 +37,12 @@ use std::{
 
 pub use super::{
     at,
-    Events,
     EventDetails,
-    RawEventDetails,
+    EventFilter,
+    Events,
     EventsDecodingError,
     FilterEvents,
-    EventFilter,
+    RawEventDetails,
 };
 
 /// Subscribe to events from blocks.
@@ -107,7 +105,9 @@ impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
     }
 
     /// Return only specific events based on the types provided.
-    pub fn filter_events<EvFilter: EventFilter>(self) -> FilterEvents<'a, T, Evs, EvFilter> {
+    pub fn filter_events<EvFilter: EventFilter>(
+        self,
+    ) -> FilterEvents<'a, T, Evs, EvFilter> {
         FilterEvents::new(self)
     }
 }

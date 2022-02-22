@@ -53,9 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .events()
         .subscribe()
         .await?
-        .filter_events::<(
-            polkadot::balances::events::Transfer,
-        )>();
+        .filter_events::<(polkadot::balances::events::Transfer,)>();
 
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {

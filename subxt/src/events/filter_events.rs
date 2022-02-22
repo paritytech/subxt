@@ -16,34 +16,48 @@
 
 //! Filtering individual events from subscriptions.
 
+use super::{
+    EventSubscription,
+    RawEventDetails,
+};
+use crate::{
+    BasicError,
+    Config,
+    Event,
+};
 use codec::Decode;
-use super::{ RawEventDetails, EventSubscription };
-use crate::{ Config, BasicError, Event };
-use futures::{ Stream, StreamExt };
-use std::task::Poll;
-use std::marker::Unpin;
+use futures::{
+    Stream,
+    StreamExt,
+};
+use std::{
+    marker::Unpin,
+    task::Poll,
+};
 
 /// A stream which returns tuples containing exactly one of the
 /// given event types back on each iteration.
 pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     sub: EventSubscription<'a, T, Evs>,
-    events: Option<Box<dyn Iterator<Item=Result<Filter::ReturnType, BasicError>> + 'a>>
+    events: Option<Box<dyn Iterator<Item = Result<Filter::ReturnType, BasicError>> + 'a>>,
 }
 
-impl <'a, T: Config, Evs, Filter: EventFilter> Unpin for FilterEvents<'a, T, Evs, Filter> {}
+impl<'a, T: Config, Evs, Filter: EventFilter> Unpin for FilterEvents<'a, T, Evs, Filter> {}
 
-impl <'a, T: Config, Evs, Filter: EventFilter> FilterEvents<'a, T, Evs, Filter> {
-    pub (crate) fn new(sub: EventSubscription<'a, T, Evs>) -> Self {
-        Self {
-            sub,
-            events: None
-        }
+impl<'a, T: Config, Evs, Filter: EventFilter> FilterEvents<'a, T, Evs, Filter> {
+    pub(crate) fn new(sub: EventSubscription<'a, T, Evs>) -> Self {
+        Self { sub, events: None }
     }
 }
 
-impl <'a, T: Config, Evs: Decode, Filter: EventFilter> Stream for FilterEvents<'a, T, Evs, Filter> {
+impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
+    for FilterEvents<'a, T, Evs, Filter>
+{
     type Item = Result<Filter::ReturnType, BasicError>;
-    fn poll_next(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Option<Self::Item>> {
+    fn poll_next(
+        mut self: std::pin::Pin<&mut Self>,
+        cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Option<Self::Item>> {
         loop {
             // Drain the current events we're iterating over first:
             if let Some(events_iter) = self.events.as_mut() {
@@ -73,34 +87,38 @@ pub trait EventFilter: private::Sealed {
     /// The type we'll be handed back from filtering.
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
-    fn filter<'a>(events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<Self::ReturnType, BasicError>> + 'a>;
+    fn filter<'a>(
+        events: impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a,
+    ) -> Box<dyn Iterator<Item = Result<Self::ReturnType, BasicError>> + 'a>;
 }
 
 // Prevent userspace implementations of the above trait; the interface is not considered stable
 // and is not a particularly nice API to work with (particularly because it involves boxing, which
 // would be nice to get rid of eventually).
-pub (crate) mod private {
+pub(crate) mod private {
     pub trait Sealed {}
 }
 
 // A special case impl for searching for a tuple of exactly one event (in this case, we don't
 // need to return an `(Option<Event>,)`; we can just return `Event`.
-impl <Ev: Event> private::Sealed for (Ev,) {}
-impl <Ev: Event> EventFilter for (Ev,) {
+impl<Ev: Event> private::Sealed for (Ev,) {}
+impl<Ev: Event> EventFilter for (Ev,) {
     type ReturnType = Ev;
-    fn filter<'a>(mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<Ev, BasicError>> + 'a> {
+    fn filter<'a>(
+        mut events: impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a,
+    ) -> Box<dyn Iterator<Item = Result<Ev, BasicError>> + 'a> {
         Box::new(std::iter::from_fn(move || {
-            while let Some(ev) = events.next() {
+            for ev in events.by_ref() {
                 // Forward any error immediately:
                 let ev = match ev {
                     Ok(ev) => ev,
-                    Err(e) => return Some(Err(e.into()))
+                    Err(e) => return Some(Err(e)),
                 };
                 // Try decoding each type until we hit a match or an error:
                 let ev = ev.as_event::<Ev>();
                 if let Ok(Some(ev)) = ev {
                     // We found a match; return our tuple.
-                    return Some(Ok(ev));
+                    return Some(Ok(ev))
                 }
                 if let Err(e) = ev {
                     // We hit an error. Return it.
@@ -123,11 +141,11 @@ macro_rules! impl_event_filter {
                 // iteration, or bails with None if none of them could be populated.
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
-                    while let Some(ev) = events.next() {
+                    for ev in events.by_ref() {
                         // Forward any error immediately:
                         let ev = match ev {
                             Ok(ev) => ev,
-                            Err(e) => return Some(Err(e.into()))
+                            Err(e) => return Some(Err(e))
                         };
                         // Try decoding each type until we hit a match or an error:
                         $({
@@ -157,4 +175,3 @@ impl_event_filter!(A 0, B 1, C 2, D 3, E 4);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
-

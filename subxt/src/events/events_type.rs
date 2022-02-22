@@ -16,6 +16,7 @@
 
 //! A representation of a block of events.
 
+use super::decoding;
 use crate::{
     error::BasicError,
     Client,
@@ -32,11 +33,10 @@ use codec::{
 };
 use derivative::Derivative;
 use sp_core::{
-    Bytes,
-    twox_128,
     storage::StorageKey,
+    twox_128,
+    Bytes,
 };
-use super::decoding;
 
 /// Obtain events at some block hash. The generic parameter is what we
 /// will attempt to decode each event into if using [`Events::iter()`],
@@ -361,7 +361,11 @@ fn decode_raw_event_details<T: Config>(
         let type_id = arg.ty().id();
         let all_bytes = *input;
         // consume some bytes, moving the cursor forward:
-        decoding::decode_and_consume_type(type_id, &metadata.runtime_metadata().types, input)?;
+        decoding::decode_and_consume_type(
+            type_id,
+            &metadata.runtime_metadata().types,
+            input,
+        )?;
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
@@ -489,8 +493,6 @@ mod tests {
             _event_type: std::marker::PhantomData,
         }
     }
-
-
 
     #[test]
     fn statically_decode_single_event() {

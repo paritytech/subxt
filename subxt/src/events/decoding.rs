@@ -232,18 +232,14 @@ pub enum EventsDecodingError {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{
-        error::GenericError::{
-            Codec,
-            EventsDecoding,
-            Other,
-        },
+    use crate::error::GenericError::{
+        Codec,
+        EventsDecoding,
+        Other,
     };
     use assert_matches::assert_matches;
     use codec::Encode;
-    use scale_info::{
-        TypeInfo,
-    };
+    use scale_info::TypeInfo;
 
     type TypeId = scale_info::interner::UntrackedSymbol<std::any::TypeId>;
 
@@ -315,7 +311,9 @@ mod tests {
         let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
         assert_matches!(
             res,
-            Err(EventsDecoding(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::Char)))
+            Err(EventsDecoding(EventsDecodingError::UnsupportedPrimitive(
+                TypeDefPrimitive::Char
+            )))
         );
 
         decode_and_consume_type_consumes_all_bytes("str".to_string());
@@ -358,7 +356,9 @@ mod tests {
         let res = decode_and_consume_type(id.id(), &reg, dummy_cursor);
         assert_matches!(
             res,
-            Err(EventsDecoding(EventsDecodingError::UnsupportedPrimitive(TypeDefPrimitive::Char)))
+            Err(EventsDecoding(EventsDecodingError::UnsupportedPrimitive(
+                TypeDefPrimitive::Char
+            )))
         );
         // The last byte (0x0 u8) should not be consumed
         assert_eq!(dummy_cursor.len(), 1);
@@ -484,5 +484,4 @@ mod tests {
         decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 0u8 });
         decode_and_consume_type_consumes_all_bytes(CompactV4 { val: 1u16 });
     }
-
 }
