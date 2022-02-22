@@ -274,7 +274,7 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn find_first_event<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 

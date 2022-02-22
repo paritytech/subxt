@@ -103,7 +103,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         // Or we can dynamically find the first transfer event, ignoring any others:
         let transfer_event =
-            events.find_first_event::<polkadot::balances::events::Transfer>()?;
+            events.find_first::<polkadot::balances::events::Transfer>()?;
 
         if let Some(ev) = transfer_event {
             println!("  - Balance transfer success: value: {:?}", ev.amount);
