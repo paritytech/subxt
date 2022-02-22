@@ -47,14 +47,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-    // Subscribe to just balance transfer events, making use of `filter_events`
-    // to select a single event type (note the 1-tuple) to filter out and return.
-    let mut transfer_events = api
+    // Subscribe to several balance related events. If we ask for more than one event,
+    // we'll be given a correpsonding tuple of `Option`'s, with exactly one
+    // variant populated each time.
+    let mut balance_events = api
         .events()
         .subscribe()
         .await?
         .filter_events::<(
+            polkadot::balances::events::Withdraw,
             polkadot::balances::events::Transfer,
+            polkadot::balances::events::Deposit,
         )>();
 
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
@@ -78,9 +81,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    // Our subscription will see all of the transfer events emitted as a result of this:
-    while let Some(transfer_event) = transfer_events.next().await {
-        println!("Balance transfer event: {transfer_event:?}");
+    // Our subscription will see all of the balance events we're filtering on:
+    while let Some(ev) = balance_events.next().await {
+        match ev? {
+            (Some(withdraw), _, _) => {
+                println!("Withdraw event: {withdraw:?}");
+            },
+            (_, Some(transfer), _) => {
+                println!("Transfer event: {transfer:?}");
+            },
+            (_, _, Some(deposit)) => {
+                println!("Deposit event: {deposit:?}");
+            },
+            _ => {
+                unreachable!();
+            }
+        }
     }
 
     Ok(())

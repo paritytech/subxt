@@ -27,7 +27,6 @@ use std::marker::Unpin;
 /// given event types back on each iteration.
 pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     sub: EventSubscription<'a, T, Evs>,
-    // Once we get a block back, we'll
     events: Option<Box<dyn Iterator<Item=Result<Filter::ReturnType, BasicError>> + 'a>>
 }
 
@@ -86,12 +85,10 @@ pub (crate) mod private {
 
 // A special case impl for searching for a tuple of exactly one event (in this case, we don't
 // need to return an `(Option<Event>,)`; we can just return `Event`.
-impl <A: Event> private::Sealed for (A,) {}
-impl <A: Event> EventFilter for (A,) {
-    type ReturnType = A;
-    fn filter<'a>(mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<A, BasicError>> + 'a> {
-        // Return an iterator that populates exactly 1 of the tuple options each pass,
-        // or bails with None if none of them could be populated.
+impl <Ev: Event> private::Sealed for (Ev,) {}
+impl <Ev: Event> EventFilter for (Ev,) {
+    type ReturnType = Ev;
+    fn filter<'a>(mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<Ev, BasicError>> + 'a> {
         Box::new(std::iter::from_fn(move || {
             while let Some(ev) = events.next() {
                 // Forward any error immediately:
@@ -100,7 +97,7 @@ impl <A: Event> EventFilter for (A,) {
                     Err(e) => return Some(Err(e.into()))
                 };
                 // Try decoding each type until we hit a match or an error:
-                let ev = ev.as_event::<A>();
+                let ev = ev.as_event::<Ev>();
                 if let Ok(Some(ev)) = ev {
                     // We found a match; return our tuple.
                     return Some(Ok(ev));
@@ -122,8 +119,8 @@ macro_rules! impl_event_filter {
         impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
             fn filter<'a>(mut events: impl Iterator<Item=Result<RawEventDetails, BasicError>> + 'a) -> Box<dyn Iterator<Item=Result<Self::ReturnType, BasicError>> + 'a> {
-                // Return an iterator that populates exactly 1 of the tuple options each pass,
-                // or bails with None if none of them could be populated.
+                // Return an iterator that populates exactly 1 of the tuple options each,
+                // iteration, or bails with None if none of them could be populated.
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
                     while let Some(ev) = events.next() {
