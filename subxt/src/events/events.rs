@@ -213,6 +213,49 @@ impl<'a, T: Config, Evs: Decode> Events<'a, T, Evs> {
         })
     }
 
+    /// Iterate over all of the events, using metadata to dynamically
+    /// decode them as we go, and returning the raw bytes and other associated
+    /// details. If an error occurs, all subsequent iterations return `None`.
+    ///
+    /// This method is safe to use even if you do not statically know about
+    /// all of the possible events; it splits events up using the metadata
+    /// obtained at runtime, which does.
+    ///
+    /// Unlike [`Events::iter_raw()`] this consumes `self`, which can be useful
+    /// if you need to store the iterator somewhere and avoid lifetime issues.
+    pub fn into_iter_raw(
+        self,
+    ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a {
+        let mut pos = 0;
+        let mut index = 0;
+        std::iter::from_fn(move || {
+            let cursor = &mut &self.event_bytes[pos..];
+            let start_len = cursor.len();
+
+            if start_len == 0 || self.num_events == index {
+                None
+            } else {
+                match decode_raw_event_details::<T>(self.metadata, index, cursor) {
+                    Ok(raw_event) => {
+                        // Skip over decoded bytes in next iteration:
+                        pos += start_len - cursor.len();
+                        // Increment the index:
+                        index += 1;
+                        // Return the event details:
+                        Some(Ok(raw_event))
+                    }
+                    Err(e) => {
+                        // By setting the position to the "end" of the event bytes,
+                        // the cursor len will become 0 and the iterator will return `None`
+                        // from now on:
+                        pos = self.event_bytes.len();
+                        Some(Err(e))
+                    }
+                }
+            }
+        })
+    }
+
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
