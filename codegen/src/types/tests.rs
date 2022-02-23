@@ -686,8 +686,8 @@ fn generate_bitvec() {
     #[allow(unused)]
     #[derive(TypeInfo)]
     struct S {
-        lsb: BitVec<Lsb0, u8>,
-        msb: BitVec<Msb0, u16>,
+        lsb: BitVec<u8, Lsb0>,
+        msb: BitVec<u16, Msb0>,
     }
 
     let mut registry = Registry::new();
