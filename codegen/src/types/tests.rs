@@ -710,8 +710,8 @@ fn generate_bitvec() {
                 use super::root;
                 #[derive(::subxt::codec::Encode, ::subxt::codec::Decode, Debug)]
                 pub struct S {
-                    pub lsb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Lsb0, ::core::primitive::u8>,
-                    pub msb: ::subxt::bitvec::vec::BitVec<root::bitvec::order::Msb0, ::core::primitive::u16>,
+                    pub lsb: ::subxt::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
+                    pub msb: ::subxt::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
                 }
             }
         }
