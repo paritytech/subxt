@@ -388,8 +388,9 @@ fn decode_raw_event_details<T: Config>(
     })
 }
 
+/// Event related test utilities made use of outside this module.
 #[cfg(test)]
-mod tests {
+pub(crate) mod test_utils {
     use super::*;
     use crate::{
         Config,
@@ -415,7 +416,7 @@ mod tests {
     /// An "outer" events enum containing exactly one event.
     #[derive(Encode, Decode, TypeInfo, Clone, Debug, PartialEq)]
     pub enum AllEvents<Ev> {
-        E(Ev),
+        Test(Ev),
     }
 
     /// This encodes to the same format an event is expected to encode to
@@ -429,17 +430,17 @@ mod tests {
 
     /// Build an EventRecord, which encoded events in the format expected
     /// to be handed back from storage queries to System.Events.
-    fn event_record<E: Encode>(phase: Phase, event: E) -> EventRecord<E> {
+    pub fn event_record<E: Encode>(phase: Phase, event: E) -> EventRecord<E> {
         EventRecord {
             phase,
-            event: AllEvents::E(event),
+            event: AllEvents::Test(event),
             topics: vec![],
         }
     }
 
     /// Build fake metadata consisting of a single pallet that knows
     /// about the event type provided.
-    fn metadata<E: TypeInfo + 'static>() -> Metadata {
+    pub fn metadata<E: TypeInfo + 'static>() -> Metadata {
         let pallets = vec![PalletMetadata {
             name: "Test",
             storage: None,
@@ -466,7 +467,7 @@ mod tests {
 
     /// Build an `Events` object for test purposes, based on the details provided,
     /// and with a default block hash.
-    fn events<E: Decode + Encode>(
+    pub fn events<E: Decode + Encode>(
         metadata: &'_ Metadata,
         event_records: Vec<EventRecord<E>>,
     ) -> Events<'_, DefaultConfig, AllEvents<E>> {
@@ -480,7 +481,7 @@ mod tests {
 
     /// Much like [`events`], but takes pre-encoded events and event count, so that we can
     /// mess with the bytes in tests if we need to.
-    fn events_raw<E: Decode + Encode>(
+    pub fn events_raw<E: Decode + Encode>(
         metadata: &'_ Metadata,
         event_bytes: Vec<u8>,
         num_events: u32,
@@ -493,6 +494,23 @@ mod tests {
             _event_type: std::marker::PhantomData,
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        test_utils::{
+            event_record,
+            events,
+            events_raw,
+            metadata,
+            AllEvents,
+        },
+        *,
+    };
+    use crate::Phase;
+    use codec::Encode;
+    use scale_info::TypeInfo;
 
     #[test]
     fn statically_decode_single_event() {
@@ -518,7 +536,7 @@ mod tests {
             vec![EventDetails {
                 index: 0,
                 phase: Phase::Finalization,
-                event: AllEvents::E(Event::A(1))
+                event: AllEvents::Test(Event::A(1))
             }]
         );
     }
@@ -553,17 +571,17 @@ mod tests {
                 EventDetails {
                     index: 0,
                     phase: Phase::Initialization,
-                    event: AllEvents::E(Event::A(1))
+                    event: AllEvents::Test(Event::A(1))
                 },
                 EventDetails {
                     index: 1,
                     phase: Phase::ApplyExtrinsic(123),
-                    event: AllEvents::E(Event::B(true))
+                    event: AllEvents::Test(Event::B(true))
                 },
                 EventDetails {
                     index: 2,
                     phase: Phase::Finalization,
-                    event: AllEvents::E(Event::A(234))
+                    event: AllEvents::Test(Event::A(234))
                 },
             ]
         );
@@ -603,7 +621,7 @@ mod tests {
             EventDetails {
                 index: 0,
                 phase: Phase::Initialization,
-                event: AllEvents::E(Event::A(1))
+                event: AllEvents::Test(Event::A(1))
             }
         );
         assert_eq!(
@@ -611,7 +629,7 @@ mod tests {
             EventDetails {
                 index: 1,
                 phase: Phase::ApplyExtrinsic(123),
-                event: AllEvents::E(Event::B(true))
+                event: AllEvents::Test(Event::B(true))
             }
         );
 
@@ -825,7 +843,7 @@ mod tests {
             vec![EventDetails {
                 index: 0,
                 phase: Phase::Finalization,
-                event: AllEvents::E(Event::A(1))
+                event: AllEvents::Test(Event::A(1))
             }]
         );
 
@@ -883,7 +901,7 @@ mod tests {
             vec![EventDetails {
                 index: 0,
                 phase: Phase::Finalization,
-                event: AllEvents::E(Event::A(CompactWrapper(1)))
+                event: AllEvents::Test(Event::A(CompactWrapper(1)))
             }]
         );
 
@@ -942,7 +960,7 @@ mod tests {
             vec![EventDetails {
                 index: 0,
                 phase: Phase::Finalization,
-                event: AllEvents::E(Event::A(MyType::B))
+                event: AllEvents::Test(Event::A(MyType::B))
             }]
         );
 

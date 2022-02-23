@@ -232,3 +232,187 @@ impl_event_filter!(A 0, B 1, C 2, D 3, E 4);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5, G 6);
 impl_event_filter!(A 0, B 1, C 2, D 3, E 4, F 5, G 6, H 7);
+
+#[cfg(test)]
+mod test {
+    use super::{
+        super::events_type::test_utils::{
+            event_record,
+            events,
+            metadata,
+            AllEvents,
+        },
+        *,
+    };
+    use crate::{
+        Config,
+        DefaultConfig,
+        Metadata,
+    };
+    use codec::Encode;
+    use futures::{
+        stream,
+        Stream,
+        StreamExt,
+    };
+    use scale_info::TypeInfo;
+
+    // Some pretend events in a pallet
+    #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+    enum PalletEvents {
+        A(EventA),
+        B(EventB),
+        C(EventC),
+    }
+
+    // An event in our pallet that we can filter on.
+    #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+    struct EventA(u8);
+    impl crate::Event for EventA {
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "A";
+    }
+
+    // An event in our pallet that we can filter on.
+    #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+    struct EventB(bool);
+    impl crate::Event for EventB {
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "B";
+    }
+
+    // An event in our pallet that we can filter on.
+    #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
+    struct EventC(u8, bool);
+    impl crate::Event for EventC {
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "C";
+    }
+
+    // A stream of fake events for us to try filtering on.
+    fn events_stream(
+        metadata: &'_ Metadata,
+    ) -> impl Stream<
+        Item = Result<Events<'_, DefaultConfig, AllEvents<PalletEvents>>, BasicError>,
+    > {
+        stream::iter(vec![
+            events::<PalletEvents>(
+                &metadata,
+                vec![
+                    event_record(Phase::Initialization, PalletEvents::A(EventA(1))),
+                    event_record(Phase::ApplyExtrinsic(0), PalletEvents::B(EventB(true))),
+                    event_record(Phase::Finalization, PalletEvents::A(EventA(2))),
+                ],
+            ),
+            events::<PalletEvents>(
+                &metadata,
+                vec![event_record(
+                    Phase::ApplyExtrinsic(1),
+                    PalletEvents::B(EventB(false)),
+                )],
+            ),
+            events::<PalletEvents>(
+                &metadata,
+                vec![
+                    event_record(Phase::ApplyExtrinsic(2), PalletEvents::B(EventB(true))),
+                    event_record(Phase::ApplyExtrinsic(3), PalletEvents::A(EventA(3))),
+                ],
+            ),
+        ])
+        .map(|item| Ok::<_, BasicError>(item))
+    }
+
+    #[async_std::test]
+    async fn filter_one_event_from_stream() {
+        let metadata = metadata::<PalletEvents>();
+
+        // Filter out fake event stream to select events matching `EventA` only.
+        let actual: Vec<_> =
+            FilterEvents::<_, DefaultConfig, (EventA,)>::new(events_stream(&metadata))
+                .map(|e| e.unwrap())
+                .collect()
+                .await;
+
+        let expected = vec![
+            FilteredEventDetails {
+                phase: Phase::Initialization,
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: EventA(1),
+            },
+            FilteredEventDetails {
+                phase: Phase::Finalization,
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: EventA(2),
+            },
+            FilteredEventDetails {
+                phase: Phase::ApplyExtrinsic(3),
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: EventA(3),
+            },
+        ];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[async_std::test]
+    async fn filter_some_events_from_stream() {
+        let metadata = metadata::<PalletEvents>();
+
+        // Filter out fake event stream to select events matching `EventA` or `EventB`.
+        let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
+            events_stream(&metadata),
+        )
+        .map(|e| e.unwrap())
+        .collect()
+        .await;
+
+        let expected = vec![
+            FilteredEventDetails {
+                phase: Phase::Initialization,
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (Some(EventA(1)), None),
+            },
+            FilteredEventDetails {
+                phase: Phase::ApplyExtrinsic(0),
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (None, Some(EventB(true))),
+            },
+            FilteredEventDetails {
+                phase: Phase::Finalization,
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (Some(EventA(2)), None),
+            },
+            FilteredEventDetails {
+                phase: Phase::ApplyExtrinsic(1),
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (None, Some(EventB(false))),
+            },
+            FilteredEventDetails {
+                phase: Phase::ApplyExtrinsic(2),
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (None, Some(EventB(true))),
+            },
+            FilteredEventDetails {
+                phase: Phase::ApplyExtrinsic(3),
+                block_hash: <DefaultConfig as Config>::Hash::default(),
+                event: (Some(EventA(3)), None),
+            },
+        ];
+
+        assert_eq!(actual, expected);
+    }
+
+    #[async_std::test]
+    async fn filter_no_events_from_stream() {
+        let metadata = metadata::<PalletEvents>();
+
+        // Filter out fake event stream to select events matching `EventC` (none exist).
+        let actual: Vec<_> =
+            FilterEvents::<_, DefaultConfig, (EventC,)>::new(events_stream(&metadata))
+                .map(|e| e.unwrap())
+                .collect()
+                .await;
+
+        assert_eq!(actual, vec![]);
+    }
+}
