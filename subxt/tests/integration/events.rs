@@ -100,12 +100,11 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     let ctx = test_context().await;
 
     // Subscribe to balance transfer events, ignoring all else.
-    let event_sub = ctx.api.events().subscribe().await?.filter_map(|events| {
-        async move {
-            let events = events.ok()?;
-            events.find_first::<balances::events::Transfer>().ok()?
-        }
-    });
+    let event_sub = ctx.api
+        .events()
+        .subscribe()
+        .await?
+        .filter_events::<(balances::events::Transfer,)>();
 
     // Calling `.next()` on the above borrows it, and the `filter_map`
     // means it's no longer `Unpin`, so we pin it on the stack:
@@ -123,7 +122,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 
     // Wait for the next balance transfer event in our subscription stream
     // and check that it lines up:
-    let event = event_sub.next().await.unwrap();
+    let event = event_sub.next().await.unwrap().unwrap().event;
     assert_eq!(
         event,
         balances::events::Transfer {
