@@ -106,7 +106,7 @@ impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
 
     /// Return only specific events matching the tuple of 1 or more event
     /// types that has been provided as the `Filter` type parameter.
-    pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'a, T, Evs, Filter> {
+    pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'a, Self, T, Filter> {
         FilterEvents::new(self)
     }
 }

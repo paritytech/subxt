@@ -16,10 +16,7 @@
 
 //! Filtering individual events from subscriptions.
 
-use super::{
-    EventSubscription,
-    Events,
-};
+use super::Events;
 use crate::{
     BasicError,
     Config,
@@ -41,8 +38,12 @@ use std::{
 /// instance of that event as it's found. If `filter` is ` tuple of multiple
 /// `Event` types, it will return a corresponding tuple of `Option`s, where
 /// exactly one of these will be `Some(event)` each iteration.
-pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
-    sub: EventSubscription<'a, T, Evs>,
+pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
+    // A subscription; in order for the Stream impl to apply, this will
+    // impl `Stream<Item = Result<Events<'a, T, Evs>, BasicError>> + Unpin + 'a`.
+    sub: Sub,
+    // Each time we get Events from our subscription, they are stored here
+    // and iterated through in future stream iterations until exhausted.
     events: Option<
         Box<
             dyn Iterator<
@@ -55,16 +56,23 @@ pub struct FilterEvents<'a, T: Config, Evs: 'static, Filter: EventFilter> {
     >,
 }
 
-impl<'a, T: Config, Evs, Filter: EventFilter> Unpin for FilterEvents<'a, T, Evs, Filter> {}
+impl<'a, Sub: 'a, T: Config, Filter: EventFilter> Unpin
+    for FilterEvents<'a, Sub, T, Filter>
+{
+}
 
-impl<'a, T: Config, Evs, Filter: EventFilter> FilterEvents<'a, T, Evs, Filter> {
-    pub(crate) fn new(sub: EventSubscription<'a, T, Evs>) -> Self {
+impl<'a, Sub: 'a, T: Config, Filter: EventFilter> FilterEvents<'a, Sub, T, Filter> {
+    pub(crate) fn new(sub: Sub) -> Self {
         Self { sub, events: None }
     }
 }
 
-impl<'a, T: Config, Evs: Decode, Filter: EventFilter> Stream
-    for FilterEvents<'a, T, Evs, Filter>
+impl<'a, Sub, T, Evs, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
+where
+    Sub: Stream<Item = Result<Events<'a, T, Evs>, BasicError>> + Unpin + 'a,
+    T: Config,
+    Evs: Decode + 'static,
+    Filter: EventFilter,
 {
     type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, BasicError>;
     fn poll_next(
