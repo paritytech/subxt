@@ -100,7 +100,8 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     let ctx = test_context().await;
 
     // Subscribe to balance transfer events, ignoring all else.
-    let event_sub = ctx.api
+    let event_sub = ctx
+        .api
         .events()
         .subscribe()
         .await?
