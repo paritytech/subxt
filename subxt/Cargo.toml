@@ -14,7 +14,7 @@ keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]
 async-trait = "0.1.49"
-bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
+bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 chameleon = "0.1.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
