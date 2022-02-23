@@ -297,7 +297,7 @@ mod test {
     > {
         stream::iter(vec![
             events::<PalletEvents>(
-                &metadata,
+                metadata,
                 vec![
                     event_record(Phase::Initialization, PalletEvents::A(EventA(1))),
                     event_record(Phase::ApplyExtrinsic(0), PalletEvents::B(EventB(true))),
@@ -305,21 +305,21 @@ mod test {
                 ],
             ),
             events::<PalletEvents>(
-                &metadata,
+                metadata,
                 vec![event_record(
                     Phase::ApplyExtrinsic(1),
                     PalletEvents::B(EventB(false)),
                 )],
             ),
             events::<PalletEvents>(
-                &metadata,
+                metadata,
                 vec![
                     event_record(Phase::ApplyExtrinsic(2), PalletEvents::B(EventB(true))),
                     event_record(Phase::ApplyExtrinsic(3), PalletEvents::A(EventA(3))),
                 ],
             ),
         ])
-        .map(|item| Ok::<_, BasicError>(item))
+        .map(Ok::<_, BasicError>)
     }
 
     #[async_std::test]
