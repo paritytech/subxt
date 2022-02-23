@@ -14,7 +14,7 @@ description = "Generate an API for interacting with a substrate node from FRAME 
 async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 darling = "0.13.0"
-frame-metadata = "14.0"
+frame-metadata = "15.0.0"
 heck = "0.4.0"
 proc-macro2 = "1.0.24"
 proc-macro-crate = "0.1.5"

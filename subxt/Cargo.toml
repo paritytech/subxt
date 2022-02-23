@@ -33,7 +33,7 @@ sp-core = { version = "5.0.0", default-features = false  }
 sp-runtime = "5.0.0"
 sp-version = "4.0.0"
 
-frame-metadata = "14.0.0"
+frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
 [dev-dependencies]
