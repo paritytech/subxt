@@ -6,6 +6,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+-  Update scale-info and parity-scale-codec requirements ([#462](https://github.com/paritytech/subxt/pull/462))
+
 ## [0.17.0] - 2022-02-04
 
 ### Added
