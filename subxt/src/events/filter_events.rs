@@ -200,7 +200,7 @@ macro_rules! impl_event_filter {
                                 out.$idx = Some(ev);
                                 return Some(Ok(FilteredEventDetails {
                                     phase: raw_event.phase,
-                                    block_hash: block_hash,
+                                    block_hash,
                                     event: out
                                 }))
                             }
