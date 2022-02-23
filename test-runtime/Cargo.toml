@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 subxt = { path = "../subxt" }
 sp-runtime = "5.0.0"
-codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
 subxt = { path = "../subxt" }
