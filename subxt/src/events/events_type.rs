@@ -388,7 +388,7 @@ fn decode_raw_event_details<T: Config>(
     })
 }
 
-/// Event related test utilities made use of outside this module.
+/// Event related test utilities used outside this module.
 #[cfg(test)]
 pub(crate) mod test_utils {
     use super::*;
