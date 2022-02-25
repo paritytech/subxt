@@ -202,6 +202,26 @@ pub struct ReadProof<Hash> {
     pub proof: Vec<Bytes>,
 }
 
+/// Statistics of a block returned by the `dev_getBlockStats` RPC.
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockStats {
+    /// The length in bytes of the storage proof produced by executing the block.
+    pub witness_len: u64,
+    /// The length in bytes of the storage proof after compaction.
+    pub witness_compact_len: u64,
+    /// Length of the block in bytes.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub block_len: u64,
+    /// Number of extrinsics in the block.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub num_extrinsics: u64,
+}
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
@@ -372,6 +392,20 @@ impl<T: Config> Rpc<T> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
+    }
+
+    /// Reexecute the specified `block_hash` and gather statistics while doing so.
+    ///
+    /// This function requires the specified block and its parent to be available
+    /// at the queried node. If either the specified block or the parent is pruned,
+    /// this function will return `None`.
+    pub async fn block_stats(
+        &self,
+        block_hash: T::Hash,
+    ) -> Result<Option<BlockStats>, BasicError> {
+        let params = rpc_params![hash];
+        let stats = self.client.request("dev_getBlockStats", params).await?;
+        Ok(stats)
     }
 
     /// Get proof of storage entries at a specific block's state.
