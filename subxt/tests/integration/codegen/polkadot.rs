@@ -1,4 +1,3 @@
-// Note [jsdw]: generated from polkadot 0.9.13-82616422d0-aarch64-macos
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
@@ -4411,7 +4410,7 @@ pub mod api {
                 >;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
+                        &(&self.0, &self.1),
                         ::subxt::StorageHasher::Twox64Concat,
                     )])
                 }
@@ -5422,7 +5421,7 @@ pub mod api {
                 type Value = ::subxt::sp_core::crypto::AccountId32;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
+                        &(&self.0, &self.1),
                         ::subxt::StorageHasher::Twox64Concat,
                     )])
                 }
@@ -16185,7 +16184,7 @@ pub mod api {
                     runtime_types::polkadot_parachain::primitives::ValidationCodeHash;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
+                        &(&self.0, &self.1),
                         ::subxt::StorageHasher::Twox64Concat,
                     )])
                 }
@@ -18769,7 +18768,7 @@ pub mod api {
                 type Value = ::core::primitive::u128;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
+                        &(&self.0, &self.1),
                         ::subxt::StorageHasher::Twox64Concat,
                     )])
                 }
