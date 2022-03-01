@@ -88,7 +88,7 @@ impl TypePath {
 
         match ty.ty.type_def() {
             TypeDef::Sequence(_) => Some(&ty.params[0]),
-            _ => None
+            _ => None,
         }
     }
 }
