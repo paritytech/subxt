@@ -189,16 +189,16 @@ pub fn decode_and_consume_type(
             // used lines up in terms of the number of bytes it will take to encode/decode it.
             match bit_store_def {
                 TypeDef::Primitive(TypeDefPrimitive::U8) => {
-                    consume_type::<BitVec<Lsb0, u8>>(input)
+                    consume_type::<BitVec<u8, Lsb0>>(input)
                 }
                 TypeDef::Primitive(TypeDefPrimitive::U16) => {
-                    consume_type::<BitVec<Lsb0, u16>>(input)
+                    consume_type::<BitVec<u16, Lsb0>>(input)
                 }
                 TypeDef::Primitive(TypeDefPrimitive::U32) => {
-                    consume_type::<BitVec<Lsb0, u32>>(input)
+                    consume_type::<BitVec<u32, Lsb0>>(input)
                 }
                 TypeDef::Primitive(TypeDefPrimitive::U64) => {
-                    consume_type::<BitVec<Lsb0, u64>>(input)
+                    consume_type::<BitVec<u64, Lsb0>>(input)
                 }
                 store => {
                     return Err(EventsDecodingError::InvalidBitSequenceType(format!(
@@ -272,31 +272,31 @@ mod tests {
         use bitvec::order::Msb0;
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u8, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u8; 0, 1, 1, 0, 1, 0, 1, 0, 0],
-        );
-
-        decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u16; 0, 1, 1, 0, 1],
-        );
-        decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u16; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u8, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u32; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u16, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u32; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u16, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u64; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u32, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u64; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u32, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+        );
+
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![u64, Lsb0; 0, 1, 1, 0, 1],
+        );
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![u64, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
     }
 
@@ -434,7 +434,7 @@ mod tests {
         });
         decode_and_consume_type_consumes_all_bytes(CompositeV3 {
             id: 10,
-            extra: bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+            extra: bitvec::bitvec![u8, Lsb0; 0, 1, 1, 0, 1],
         });
         decode_and_consume_type_consumes_all_bytes(CompositeV3 {
             id: 10,
