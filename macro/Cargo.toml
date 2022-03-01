@@ -33,4 +33,4 @@ subxt-codegen = { path = "../codegen", version = "0.17.0" }
 pretty_assertions = "1.0.0"
 subxt = { path = "../subxt" }
 trybuild = "1.0.38"
-sp-keyring = "5.0.0"
+sp-keyring = "6.0.0"
