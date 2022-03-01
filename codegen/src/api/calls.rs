@@ -23,8 +23,8 @@ use frame_metadata::{
     PalletMetadata,
 };
 use heck::{
-    CamelCase as _,
-    SnakeCase as _,
+    ToSnakeCase as _,
+    ToUpperCamelCase as _,
 };
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
@@ -43,7 +43,7 @@ pub fn generate_calls(
     let struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
-        |name| name.to_camel_case().into(),
+        |name| name.to_upper_camel_case().into(),
         "Call",
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
@@ -90,7 +90,7 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, A, #call_struct_name, DispatchError> {
+                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, A, #call_struct_name, DispatchError, root_mod::Event> {
                     let call = #call_struct_name { #( #call_args, )* };
                     ::subxt::SubmittableExtrinsic::new(self.client, call)
                 }
@@ -101,6 +101,7 @@ pub fn generate_calls(
 
     quote! {
         pub mod calls {
+            use super::root_mod;
             use super::#types_mod_ident;
 
             type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
@@ -116,7 +117,7 @@ pub fn generate_calls(
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData<T>,
+                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client, marker: ::core::marker::PhantomData }

@@ -1,6 +1,6 @@
 [package]
 name = "subxt-codegen"
-version = "0.2.0"
+version = "0.17.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -15,7 +15,7 @@ async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
 darling = "0.13.0"
 frame-metadata = "14.0"
-heck = "0.3.2"
+heck = "0.4.0"
 proc-macro2 = "1.0.24"
 proc-macro-crate = "0.1.5"
 proc-macro-error = "1.0.4"
@@ -25,4 +25,4 @@ scale-info = { version = "1.0.0", features = ["bit-vec"] }
 
 [dev-dependencies]
 bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
-pretty_assertions = "0.6.1"
+pretty_assertions = "1.0.0"

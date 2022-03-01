@@ -14,6 +14,23 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! Generate code for submitting extrinsics and query storage of a Substrate runtime.
+//!
+//! ## Note
+//!
+//! By default the codegen will search for the `System` pallet's `Account` storage item, which is
+//! the conventional location where an account's index (aka nonce) is stored.
+//!
+//! If this `System::Account` storage item is discovered, then it is assumed that:
+//!
+//!   1. The type of the storage item is a `struct` (aka a composite type)
+//!   2. There exists a field called `nonce` which contains the account index.
+//!
+//! These assumptions are based on the fact that the `frame_system::AccountInfo` type is the default
+//! configured type, and that the vast majority of chain configurations will use this.
+//!
+//! If either of these conditions are not satisfied, the codegen will fail.
+
 mod calls;
 mod constants;
 mod errors;
@@ -32,16 +49,19 @@ use crate::{
 use codec::Decode;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
+    PalletMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
+    StorageEntryType,
 };
-use heck::SnakeCase as _;
+use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
 };
+use scale_info::form::PortableForm;
 use std::{
     collections::HashMap,
     fs,
@@ -127,6 +147,12 @@ impl RuntimeGenerator {
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
             ),
+            // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
+            // can cause an issue with generated code that doesn't impl `Ord` by default.
+            // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
+            // suitable type params) avoids these issues.
+            ("BTreeMap", parse_quote!(::subxt::KeyedVec)),
+            ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {
@@ -189,6 +215,7 @@ impl RuntimeGenerator {
 
             quote! {
                 pub mod #mod_name {
+                    use super::root_mod;
                     use super::#types_mod_ident;
                     #calls
                     #event
@@ -238,58 +265,57 @@ impl RuntimeGenerator {
                     pallet.calls.as_ref().map(|_| pallet_mod_name)
                 });
 
-        let error_details = errors::generate_error_details(&self.metadata);
-        let error_type = error_details.type_def;
-        let error_fn = error_details.dispatch_error_impl_fn;
+        let has_module_error_impl =
+            errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
+
+        let default_account_data_ident = format_ident!("DefaultAccountData");
+        let default_account_data_impl = generate_default_account_data_impl(
+            &pallets_with_mod_names,
+            &default_account_data_ident,
+            &type_gen,
+        );
+        let type_parameter_default_impl = default_account_data_impl
+            .as_ref()
+            .map(|_| quote!( = #default_account_data_ident ));
 
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
+                // Make it easy to access the root via `root_mod` at different levels:
+                use super::#mod_ident as root_mod;
+
                 #outer_event
                 #( #modules )*
                 #types_mod
 
-                /// The default storage entry from which to fetch an account nonce, required for
-                /// constructing a transaction.
-                pub type DefaultAccountData = self::system::storage::Account;
-
                 /// The default error type returned when there is a runtime issue.
-                pub type DispatchError = self::runtime_types::sp_runtime::DispatchError;
+                pub type DispatchError = #types_mod_ident::sp_runtime::DispatchError;
+                // Impl HasModuleError on DispatchError so we can pluck out module error details.
+                #has_module_error_impl
 
-                // Statically generate error information so that we don't need runtime metadata for it.
-                #error_type
-                impl DispatchError {
-                    #error_fn
-                }
+                #default_account_data_impl
 
-                impl ::subxt::AccountData<::subxt::DefaultConfig> for DefaultAccountData {
-                    fn nonce(result: &<Self as ::subxt::StorageEntry>::Value) -> <::subxt::DefaultConfig as ::subxt::Config>::Index {
-                        result.nonce
-                    }
-                    fn storage_entry(account_id: <::subxt::DefaultConfig as ::subxt::Config>::AccountId) -> Self {
-                        Self(account_id)
-                    }
-                }
-
-                pub struct RuntimeApi<T: ::subxt::Config, X> {
+                pub struct RuntimeApi<T: ::subxt::Config, X, A #type_parameter_default_impl> {
                     pub client: ::subxt::Client<T>,
-                    marker: ::core::marker::PhantomData<X>,
+                    marker: ::core::marker::PhantomData<(X, A)>,
                 }
 
-                impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
+                impl<T, X, A> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X, A>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
+                    A: ::subxt::AccountData,
                 {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client, marker: ::core::marker::PhantomData }
                     }
                 }
 
-                impl<'a, T, X> RuntimeApi<T, X>
+                impl<'a, T, X, A> RuntimeApi<T, X, A>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
+                    A: ::subxt::AccountData,
                 {
                     pub fn constants(&'a self) -> ConstantsApi {
                         ConstantsApi
@@ -299,15 +325,36 @@ impl RuntimeGenerator {
                         StorageApi { client: &self.client }
                     }
 
-                    pub fn tx(&'a self) -> TransactionApi<'a, T, X, DefaultAccountData> {
+                    pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
                         TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
+                    }
+
+                    pub fn events(&'a self) -> EventsApi<'a, T> {
+                        EventsApi { client: &self.client }
+                    }
+                }
+
+                pub struct EventsApi<'a, T: ::subxt::Config> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl <'a, T: ::subxt::Config> EventsApi<'a, T> {
+                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::at::<T, Event>(self.client, block_hash).await
+                    }
+
+                    pub async fn subscribe(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::subscribe::<T, Event>(self.client).await
+                    }
+
+                    pub async fn subscribe_finalized(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                        ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
                     }
                 }
 
                 pub struct ConstantsApi;
 
-                impl ConstantsApi
-                {
+                impl ConstantsApi {
                     #(
                         pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
                             #pallets_with_constants::constants::ConstantsApi
@@ -339,7 +386,7 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
-                    A: ::subxt::AccountData<T>,
+                    A: ::subxt::AccountData,
                 {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X, A> {
@@ -350,6 +397,72 @@ impl RuntimeGenerator {
             }
         }
     }
+}
+
+/// Most chains require a valid account nonce as part of the extrinsic, so the default behaviour of
+/// the client is to fetch the nonce for the current account.
+///
+/// The account index (aka nonce) is commonly stored in the `System` pallet's `Account` storage item.
+/// This function attempts to find that storage item, and if it is present will implement the
+/// `subxt::AccountData` trait for it. This allows the client to construct the appropriate
+/// storage key from the account id, and then retrieve the `nonce` from the resulting storage item.
+fn generate_default_account_data_impl(
+    pallets_with_mod_names: &[(&PalletMetadata<PortableForm>, syn::Ident)],
+    default_impl_name: &syn::Ident,
+    type_gen: &TypeGenerator,
+) -> Option<TokenStream2> {
+    let storage = pallets_with_mod_names
+        .iter()
+        .find(|(pallet, _)| pallet.name == "System")
+        .and_then(|(pallet, _)| pallet.storage.as_ref())?;
+    let storage_entry = storage
+        .entries
+        .iter()
+        .find(|entry| entry.name == "Account")?;
+
+    // resolve the concrete types for `AccountId` (to build the key) and `Index` to extract the
+    // account index (nonce) value from the result.
+    let (account_id_ty, account_nonce_ty) =
+        if let StorageEntryType::Map { key, value, .. } = &storage_entry.ty {
+            let account_id_ty = type_gen.resolve_type_path(key.id(), &[]);
+            let account_data_ty = type_gen.resolve_type(value.id());
+            let nonce_field = if let scale_info::TypeDef::Composite(composite) =
+                account_data_ty.type_def()
+            {
+                composite
+                    .fields()
+                    .iter()
+                    .find(|f| f.name() == Some(&"nonce".to_string()))?
+            } else {
+                abort_call_site!("Expected a `nonce` field in the account info struct")
+            };
+            let account_nonce_ty = type_gen.resolve_type_path(nonce_field.ty().id(), &[]);
+            (account_id_ty, account_nonce_ty)
+        } else {
+            abort_call_site!("System::Account should be a `StorageEntryType::Map`")
+        };
+
+    // this path to the storage entry depends on storage codegen.
+    let storage_entry_path = quote!(self::system::storage::Account);
+
+    Some(quote! {
+        /// The default storage entry from which to fetch an account nonce, required for
+        /// constructing a transaction.
+        pub enum #default_impl_name {}
+
+        impl ::subxt::AccountData for #default_impl_name {
+            type StorageEntry = #storage_entry_path;
+            type AccountId = #account_id_ty;
+            type Index = #account_nonce_ty;
+
+            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
+                result.nonce
+            }
+            fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
+                #storage_entry_path(account_id)
+            }
+        }
+    })
 }
 
 pub fn generate_structs_from_variants<'a, F>(
@@ -375,7 +488,7 @@ where
                     type_gen,
                 );
                 CompositeDef::struct_def(
-                    var.name(),
+                    struct_name.as_ref(),
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),

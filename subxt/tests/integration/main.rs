@@ -14,20 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Library to generate an API for a Substrate runtime from its metadata.
+mod codegen;
+mod utils;
 
-mod api;
-mod ir;
-mod types;
+#[cfg(test)]
+mod client;
+#[cfg(test)]
+mod events;
+#[cfg(test)]
+mod frame;
+#[cfg(test)]
+mod storage;
 
-pub use self::{
-    api::{
-        generate_runtime_api,
-        RuntimeGenerator,
-    },
-    types::{
-        GeneratedTypeDerives,
-        Module,
-        TypeGenerator,
-    },
-};
+use test_runtime::node_runtime;
+use utils::*;

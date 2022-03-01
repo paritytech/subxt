@@ -23,7 +23,7 @@ use frame_metadata::{
     StorageEntryType,
     StorageHasher,
 };
-use heck::SnakeCase as _;
+use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::{
@@ -115,26 +115,56 @@ fn generate_storage_entry_fns(
                             (field_name, field_type)
                         })
                         .collect::<Vec<_>>();
-                    // toddo: [AJ] use unzip here?
-                    let tuple_struct_fields =
-                        fields.iter().map(|(_, field_type)| field_type);
-                    let field_names = fields.iter().map(|(field_name, _)| field_name);
+
+                    let field_names = fields.iter().map(|(n, _)| n);
+                    let field_types = fields.iter().map(|(_, t)| t);
+
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( #( pub #tuple_struct_fields ),* );
+                        pub struct #entry_struct_ident( #( pub #field_types ),* );
                     };
                     let constructor =
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
-                    let keys = (0..tuple.fields().len()).into_iter().zip(hashers).map(
-                        |(field, hasher)| {
-                            let index = syn::Index::from(field);
-                            quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
-                        },
-                    );
-                    let key_impl = quote! {
-                        ::subxt::StorageEntryKey::Map(
-                            vec![ #( #keys ),* ]
+
+                    let key_impl = if hashers.len() == fields.len() {
+                        // If the number of hashers matches the number of fields, we're dealing with
+                        // something shaped like a StorageNMap, and each field should be hashed separately
+                        // according to the corresponding hasher.
+                        let keys = hashers
+                            .into_iter()
+                            .enumerate()
+                            .map(|(field_idx, hasher)| {
+                                let index = syn::Index::from(field_idx);
+                                quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
+                            });
+                        quote! {
+                            ::subxt::StorageEntryKey::Map(
+                                vec![ #( #keys ),* ]
+                            )
+                        }
+                    } else if hashers.len() == 1 {
+                        // If there is one hasher, then however many fields we have, we want to hash a
+                        // tuple of them using the one hasher we're told about. This corresponds to a
+                        // StorageMap.
+                        let hasher = hashers.get(0).expect("checked for 1 hasher");
+                        let items = (0..fields.len()).map(|field_idx| {
+                            let index = syn::Index::from(field_idx);
+                            quote!( &self.#index )
+                        });
+                        quote! {
+                            ::subxt::StorageEntryKey::Map(
+                                vec![ ::subxt::StorageMapKey::new(&(#( #items ),*), #hasher) ]
+                            )
+                        }
+                    } else {
+                        // If we hit this condition, we don't know how to handle the number of hashes vs fields
+                        // that we've been handed, so abort.
+                        abort_call_site!(
+                            "Number of hashers ({}) does not equal 1 for StorageMap, or match number of fields ({}) for StorageNMap",
+                            hashers.len(),
+                            fields.len()
                         )
                     };
+
                     (fields, entry_struct, constructor, key_impl)
                 }
                 _ => {
