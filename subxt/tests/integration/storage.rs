@@ -55,7 +55,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
         .await?;
 
     // Look up the nonce for the user (we expect it to be 1).
-    let entry = ctx.api.storage().system().account(alice, None).await?;
+    let entry = ctx.api.storage().system().account(&alice, None).await?;
     assert_eq!(entry.nonce, 1);
 
     Ok(())
@@ -79,7 +79,7 @@ async fn storage_n_mapish_key_is_properly_created(
     };
 
     // This is what the generated code hashes a `session().key_owner(..)` key into:
-    let actual_key_bytes = KeyOwner(KeyTypeId([1, 2, 3, 4]), vec![5u8, 6, 7, 8])
+    let actual_key_bytes = KeyOwner(&KeyTypeId([1, 2, 3, 4]), &vec![5u8, 6, 7, 8])
         .key()
         .final_key(StorageKeyPrefix::new::<KeyOwner>())
         .0;
@@ -132,7 +132,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
         .api
         .storage()
         .assets()
-        .approvals(99, alice, bob, None)
+        .approvals(&99, &alice, &bob, None)
         .await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
