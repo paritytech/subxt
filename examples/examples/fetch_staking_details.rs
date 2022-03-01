@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-d96d3bea85-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
