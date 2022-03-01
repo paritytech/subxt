@@ -41,15 +41,22 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
+    // Subscribe to any events that occur:
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-    // Subscribe to any events that occur:
-    let mut event_sub = api.events().subscribe().await?;
+    // Subscribe to several balance related events. If we ask for more than one event,
+    // we'll be given a correpsonding tuple of `Option`'s, with exactly one
+    // variant populated each time.
+    let mut balance_events = api.events().subscribe().await?.filter_events::<(
+        polkadot::balances::events::Withdraw,
+        polkadot::balances::events::Transfer,
+        polkadot::balances::events::Deposit,
+    )>();
 
-    // While this subscription is active, balance transfers are made somewhere:
+    // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
         let api = ClientBuilder::new()
@@ -58,57 +65,34 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .unwrap()
             .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-        let mut transfer_amount = 1_000_000_000;
-
         // Make small balance transfers from Alice to Bob in a loop:
         loop {
             api.tx()
                 .balances()
-                .transfer(AccountKeyring::Bob.to_account_id().into(), transfer_amount)
+                .transfer(AccountKeyring::Bob.to_account_id().into(), 1_000_000_000)
                 .sign_and_submit(&signer)
                 .await
                 .unwrap();
-
             async_std::task::sleep(Duration::from_secs(10)).await;
-            transfer_amount += 100_000_000;
         }
     });
 
-    // Our subscription will see the events emitted as a result of this:
-    while let Some(events) = event_sub.next().await {
-        let events = events?;
-        let block_hash = events.block_hash();
+    // Our subscription will see all of the balance events we're filtering on:
+    while let Some(ev) = balance_events.next().await {
+        let event_details = ev?;
 
-        // We can iterate, statically decoding all events if we want:
-        println!("All events in block {block_hash:?}:");
-        println!("  Static event details:");
-        for event in events.iter() {
-            let event = event?;
-            println!("    {event:?}");
+        let block_hash = event_details.block_hash;
+        let event = event_details.event;
+        println!("Event at {:?}:", block_hash);
+
+        if let (Some(withdraw), _, _) = &event {
+            println!("  Withdraw event: {withdraw:?}");
         }
-
-        // Or we can dynamically decode events:
-        println!("  Dynamic event details: {block_hash:?}:");
-        for event in events.iter_raw() {
-            let event = event?;
-            let is_balance_transfer = event
-                .as_event::<polkadot::balances::events::Transfer>()?
-                .is_some();
-            let pallet = event.pallet;
-            let variant = event.variant;
-            println!(
-                "    {pallet}::{variant} (is balance transfer? {is_balance_transfer})"
-            );
+        if let (_, Some(transfer), _) = &event {
+            println!("  Transfer event: {transfer:?}");
         }
-
-        // Or we can dynamically find the first transfer event, ignoring any others:
-        let transfer_event =
-            events.find_first::<polkadot::balances::events::Transfer>()?;
-
-        if let Some(ev) = transfer_event {
-            println!("  - Balance transfer success: value: {:?}", ev.amount);
-        } else {
-            println!("  - No balance transfer event found in this block");
+        if let (_, _, Some(deposit)) = &event {
+            println!("  Deposit event: {deposit:?}");
         }
     }
 

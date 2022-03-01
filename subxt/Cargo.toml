@@ -14,10 +14,10 @@ keywords = ["parity", "substrate", "blockchain"]
 
 [dependencies]
 async-trait = "0.1.49"
-bitvec = { version = "0.20.1", default-features = false, features = ["alloc"] }
-codec = { package = "parity-scale-codec", version = "2", default-features = false, features = ["derive", "full", "bit-vec"] }
+bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
+codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 chameleon = "0.1.0"
-scale-info = { version = "1.0.0", features = ["bit-vec"] }
+scale-info = { version = "2.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
 jsonrpsee = { version = "0.8.0", features = ["async-client", "client-ws-transport"] }
@@ -33,11 +33,11 @@ sp-core = { package = "sp-core", git = "https://github.com/tide-labs/substrate",
 sp-runtime = { package = "sp-runtime", git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }
 sp-version = { package = "sp-version", git = "https://github.com/tide-labs/substrate", branch = "tidechain" }
 
-frame-metadata = "14.0.0"
+frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
 [dev-dependencies]
-sp-arithmetic = { version = "4.0.0", default-features = false }
+sp-arithmetic = { version = "5.0.0", default-features = false }
 assert_matches = "1.5.0"
 async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
 env_logger = "0.9.0"
@@ -45,4 +45,4 @@ tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
 test-runtime = { path = "../test-runtime" }
-sp-keyring = "5.0.0"
+sp-keyring = "6.0.0"
