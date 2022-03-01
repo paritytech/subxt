@@ -22,11 +22,7 @@
 //! polkadot --dev --tmp
 //! ```
 
-use futures::{
-    future,
-    stream,
-    StreamExt,
-};
+use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
@@ -51,21 +47,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-    // Subscribe to just balance transfer events, making use of `flat_map` and
-    // `filter_map` from the StreamExt trait to filter everything else out.
+    // Subscribe to just balance transfer events, making use of `filter_events`
+    // to select a single event type (note the 1-tuple) to filter out and return.
     let mut transfer_events = api
         .events()
         .subscribe()
         .await?
-        // Ignore errors returning events:
-        .filter_map(|events| future::ready(events.ok()))
-        // Map events to just the one we care about:
-        .flat_map(|events| {
-            let transfer_events = events
-                .find::<polkadot::balances::events::Transfer>()
-                .collect::<Vec<_>>();
-            stream::iter(transfer_events)
-        });
+        .filter_events::<(polkadot::balances::events::Transfer,)>();
 
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {
