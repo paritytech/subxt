@@ -249,12 +249,11 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
 #[async_std::test]
 async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
     let cxt = test_context().await;
-    let eras = 0;
     let current_era_result = cxt
         .api
         .storage()
         .staking()
-        .eras_reward_points(&eras, None)
+        .eras_reward_points(&0, None)
         .await;
     assert!(current_era_result.is_ok());
 
