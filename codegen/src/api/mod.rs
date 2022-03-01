@@ -147,12 +147,12 @@ impl RuntimeGenerator {
                 "frame_support::traits::misc::WrapperKeepOpaque",
                 parse_quote!(::subxt::WrapperKeepOpaque),
             ),
-            // We override this because it's used as a key in a BTreeMap, and so we
-            // need to implement some extra derives for it for that to compile.
-            (
-                "sp_npos_elections::ElectionScore",
-                parse_quote!(::subxt::ElectionScore),
-            ),
+            // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
+            // can cause an issue with generated code that doesn't impl `Ord` by default.
+            // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
+            // suitable type params) avoids these issues.
+            ("BTreeMap", parse_quote!(::subxt::KeyedVec)),
+            ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()
         .map(|(path, substitute): &(&str, syn::TypePath)| {

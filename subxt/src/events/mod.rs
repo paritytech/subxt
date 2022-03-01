@@ -14,17 +14,27 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod codegen;
-mod utils;
+//! For working with events.
 
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod events;
-#[cfg(test)]
-mod frame;
-#[cfg(test)]
-mod storage;
+mod decoding;
+mod event_subscription;
+mod events_type;
+mod filter_events;
 
-use test_runtime::node_runtime;
-use utils::*;
+pub use decoding::EventsDecodingError;
+pub use event_subscription::{
+    subscribe,
+    subscribe_finalized,
+    EventSubscription,
+};
+pub use events_type::{
+    at,
+    EventDetails,
+    Events,
+    RawEventDetails,
+};
+pub use filter_events::{
+    EventFilter,
+    FilterEvents,
+    FilteredEventDetails,
+};

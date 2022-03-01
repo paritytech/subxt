@@ -514,9 +514,9 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     /// Iterate through the transaction events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
     ///
-    /// This works in the same way that [`events::Events::find_first_event()`] does, with the
+    /// This works in the same way that [`events::Events::find_first()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_first_event<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 

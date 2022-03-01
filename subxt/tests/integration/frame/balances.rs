@@ -63,11 +63,11 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
         .wait_for_finalized_success()
         .await?;
     let event = events
-        .find_first_event::<balances::events::Transfer>()
+        .find_first::<balances::events::Transfer>()
         .expect("Failed to decode balances::events::Transfer")
         .expect("Failed to find balances::events::Transfer");
     let _extrinsic_success = events
-        .find_first_event::<system::events::ExtrinsicSuccess>()
+        .find_first::<system::events::ExtrinsicSuccess>()
         .expect("Failed to decode ExtrinisicSuccess")
         .expect("Failed to find ExtrinisicSuccess");
 
@@ -125,7 +125,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
         .await?
         .wait_for_finalized_success()
         .await?
-        .find_first_event::<system::events::ExtrinsicSuccess>()?
+        .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
     let locked_account = AccountKeyring::Bob.to_account_id();
@@ -206,7 +206,7 @@ async fn transfer_implicit_subscription() {
         .wait_for_finalized_success()
         .await
         .unwrap()
-        .find_first_event::<balances::events::Transfer>()
+        .find_first::<balances::events::Transfer>()
         .expect("Can decode events")
         .expect("Can find balance transfer event");
 
