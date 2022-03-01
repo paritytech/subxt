@@ -272,31 +272,31 @@ mod tests {
         use bitvec::order::Msb0;
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u8, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u8; 0, 1, 1, 0, 1, 0, 1, 0, 0],
-        );
-
-        decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u16; 0, 1, 1, 0, 1],
-        );
-        decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u16; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u8, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u32; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u16, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u32; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u16, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
 
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Lsb0, u64; 0, 1, 1, 0, 1],
+            bitvec::bitvec![u32, Lsb0; 0, 1, 1, 0, 1],
         );
         decode_and_consume_type_consumes_all_bytes(
-            bitvec::bitvec![Msb0, u64; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+            bitvec::bitvec![u32, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
+        );
+
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![u64, Lsb0; 0, 1, 1, 0, 1],
+        );
+        decode_and_consume_type_consumes_all_bytes(
+            bitvec::bitvec![u64, Msb0; 0, 1, 1, 0, 1, 0, 1, 0, 0],
         );
     }
 
@@ -434,7 +434,7 @@ mod tests {
         });
         decode_and_consume_type_consumes_all_bytes(CompositeV3 {
             id: 10,
-            extra: bitvec::bitvec![Lsb0, u8; 0, 1, 1, 0, 1],
+            extra: bitvec::bitvec![u8, Lsb0; 0, 1, 1, 0, 1],
         });
         decode_and_consume_type_consumes_all_bytes(CompositeV3 {
             id: 10,
