@@ -16,7 +16,7 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.17.0", path = "../codegen" }
+subxt-codegen = { version = "0.18.0", path = "../codegen" }
 # parse command line args
 structopt = "0.3.25"
 # make the request to a substrate node to get the metadata
