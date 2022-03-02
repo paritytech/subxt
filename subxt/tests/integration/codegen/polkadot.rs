@@ -24083,8 +24083,8 @@ pub mod api {
                 )]
                 pub struct AvailabilityBitfield(
                     pub  ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                 );
                 #[derive(
@@ -24099,8 +24099,8 @@ pub mod api {
                         runtime_types::polkadot_primitives::v0::ValidityAttestation,
                     >,
                     pub validator_indices: ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                 }
                 #[derive(
@@ -25459,12 +25459,12 @@ pub mod api {
                     pub descriptor:
                         runtime_types::polkadot_primitives::v1::CandidateDescriptor<_0>,
                     pub availability_votes: ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                     pub backers: ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                     pub relay_parent_number: _1,
                     pub backed_in_number: _1,
@@ -25591,12 +25591,12 @@ pub mod api {
                 )]
                 pub struct PvfCheckActiveVoteState<_0> {
                     pub votes_accept: ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                     pub votes_reject: ::subxt::bitvec::vec::BitVec<
-                        ::subxt::bitvec::order::Lsb0,
                         ::core::primitive::u8,
+                        ::subxt::bitvec::order::Lsb0,
                     >,
                     pub age: _0,
                     pub created_at: _0,
