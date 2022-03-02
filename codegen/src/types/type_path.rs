@@ -76,6 +76,21 @@ impl TypePath {
             Self::Substitute(sub) => sub.parent_type_params(acc),
         }
     }
+
+    /// Gets the vector type parameter if the data is represented as `TypeDef::Sequence`.
+    ///
+    /// **Note:** Utilized for transforming `std::vec::Vec<T>` into slices `&[T]` for the storage API.
+    pub fn vec_type_param(&self) -> Option<&TypePath> {
+        let ty = match self {
+            TypePath::Type(ty) => ty,
+            _ => return None,
+        };
+
+        match ty.ty.type_def() {
+            TypeDef::Sequence(_) => Some(&ty.params[0]),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Clone, Debug)]

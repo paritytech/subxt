@@ -74,12 +74,15 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata<PortableForm>,
 ) -> (TokenStream2, TokenStream2) {
     let entry_struct_ident = format_ident!("{}", storage_entry.name);
-    let (fields, entry_struct, constructor, key_impl) = match storage_entry.ty {
+    let is_account_wrapper = pallet.name == "System" && storage_entry.name == "Account";
+    let wrapper_struct_ident = format_ident!("{}Owned", storage_entry.name);
+    let (fields, entry_struct, constructor, key_impl, should_ref) = match storage_entry.ty
+    {
         StorageEntryType::Plain(_) => {
             let entry_struct = quote!( pub struct #entry_struct_ident; );
             let constructor = quote!( #entry_struct_ident );
             let key_impl = quote!(::subxt::StorageEntryKey::Plain);
-            (vec![], entry_struct, constructor, key_impl)
+            (vec![], entry_struct, constructor, key_impl, false)
         }
         StorageEntryType::Map {
             ref key,
@@ -117,10 +120,18 @@ fn generate_storage_entry_fns(
                         .collect::<Vec<_>>();
 
                     let field_names = fields.iter().map(|(n, _)| n);
-                    let field_types = fields.iter().map(|(_, t)| t);
+                    let field_types = fields.iter().map(|(_, t)| {
+                        // If the field type is `::std::vec::Vec<T>` obtain the type parameter and
+                        // surround with slice brackets. Otherwise, utilize the field_type as is.
+                        match t.vec_type_param() {
+                            Some(ty) => quote!([#ty]),
+                            None => quote!(#t),
+                        }
+                    });
 
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( #( pub #field_types ),* );
+                        pub struct #entry_struct_ident <'a>( #( pub &'a #field_types ),* );
+
                     };
                     let constructor =
                         quote!( #entry_struct_ident( #( #field_names ),* ) );
@@ -165,13 +176,35 @@ fn generate_storage_entry_fns(
                         )
                     };
 
-                    (fields, entry_struct, constructor, key_impl)
+                    (fields, entry_struct, constructor, key_impl, true)
                 }
                 _ => {
+                    let (lifetime_param, lifetime_ref) = (quote!(<'a>), quote!(&'a));
+
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
+                    // `::system::storage::Account` was utilized as associated type `StorageEntry`
+                    // for `::subxt::AccountData` implementation by the generated `DefaultAccountData`.
+                    // Due to changes in the storage API, `::system::storage::Account` cannot be
+                    // used without specifying a lifetime. To satisfy `::subxt::AccountData`
+                    // implementation, a non-reference wrapper `AccountOwned` is generated.
+                    let wrapper_struct = if is_account_wrapper {
+                        quote!(
+                            pub struct #wrapper_struct_ident ( pub #ty_path );
+                        )
+                    } else {
+                        quote!()
+                    };
+
+                    // `ty_path` can be `std::vec::Vec<T>`. In such cases, the entry struct
+                    // should contain a slice reference.
+                    let ty_slice = match ty_path.vec_type_param() {
+                        Some(ty) => quote!([#ty]),
+                        None => quote!(#ty_path),
+                    };
                     let entry_struct = quote! {
-                        pub struct #entry_struct_ident( pub #ty_path );
+                        pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_slice );
+                        #wrapper_struct
                     };
                     let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
@@ -182,7 +215,7 @@ fn generate_storage_entry_fns(
                             vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
                         )
                     };
-                    (fields, entry_struct, constructor, key_impl)
+                    (fields, entry_struct, constructor, key_impl, true)
                 }
             }
         }
@@ -208,17 +241,42 @@ fn generate_storage_entry_fns(
         }
     };
 
+    let (lifetime_param, reference, anon_lifetime) = if should_ref {
+        (quote!(<'a>), quote!(&), quote!(<'_>))
+    } else {
+        (quote!(), quote!(), quote!())
+    };
+
+    let storage_entry_impl = quote! (
+        const PALLET: &'static str = #pallet_name;
+        const STORAGE: &'static str = #storage_name;
+        type Value = #storage_entry_value_ty;
+        fn key(&self) -> ::subxt::StorageEntryKey {
+            #key_impl
+        }
+    );
+
+    // The wrapper account must implement the same trait as the counter-part Account,
+    // with the same pallet and storage. This continues the implementation of the wrapper
+    // generated with the Account.
+    let wrapper_entry_impl = if is_account_wrapper {
+        quote!(
+            impl ::subxt::StorageEntry for #wrapper_struct_ident {
+                #storage_entry_impl
+            }
+        )
+    } else {
+        quote!()
+    };
+
     let storage_entry_type = quote! {
         #entry_struct
 
-        impl ::subxt::StorageEntry for #entry_struct_ident {
-            const PALLET: &'static str = #pallet_name;
-            const STORAGE: &'static str = #storage_name;
-            type Value = #storage_entry_value_ty;
-            fn key(&self) -> ::subxt::StorageEntryKey {
-                #key_impl
-            }
+        impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
+            #storage_entry_impl
         }
+
+        #wrapper_entry_impl
     };
 
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
@@ -226,7 +284,7 @@ fn generate_storage_entry_fns(
             pub async fn #fn_name_iter(
                 &self,
                 hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident>, ::subxt::BasicError> {
+            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
                 self.client.storage().iter(hash).await
             }
         )
@@ -234,9 +292,16 @@ fn generate_storage_entry_fns(
         quote!()
     };
 
-    let key_args = fields
-        .iter()
-        .map(|(field_name, field_type)| quote!( #field_name: #field_type ));
+    let key_args = fields.iter().map(|(field_name, field_type)| {
+        // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
+        // interface should generate a reference. In such cases, the vector ultimately is
+        // a slice.
+        let field_ty = match field_type.vec_type_param() {
+            Some(ty) if should_ref => quote!([#ty]),
+            _ => quote!(#field_type),
+        };
+        quote!( #field_name: #reference #field_ty )
+    });
     let client_fns = quote! {
         pub async fn #fn_name(
             &self,
