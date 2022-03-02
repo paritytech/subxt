@@ -4,11 +4,28 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.18.0] - 2022-03-02
+
+### Added
+
+- Expose method to fetch nonce via `Client` ([#451](https://github.com/paritytech/subxt/pull/451))
 
 ### Changed
 
--  Update scale-info and parity-scale-codec requirements ([#462](https://github.com/paritytech/subxt/pull/462))
+- Reference key storage api ([#447](https://github.com/paritytech/subxt/pull/447))
+- Filter one or multiple events by type from an EventSubscription ([#461](https://github.com/paritytech/subxt/pull/461))
+- New Event Subscription API ([#442](https://github.com/paritytech/subxt/pull/442))
+- Distinct handling for N fields + 1 hasher vs N fields + N hashers ([#458](https://github.com/paritytech/subxt/pull/458))
+- Update scale-info and parity-scale-codec requirements ([#462](https://github.com/paritytech/subxt/pull/462))
+- Substitute BTreeMap/BTreeSet generated types for Vec ([#459](https://github.com/paritytech/subxt/pull/459))
+- Obtain DispatchError::Module info dynamically ([#453](https://github.com/paritytech/subxt/pull/453))
+- Add hardcoded override to ElectionScore ([#455](https://github.com/paritytech/subxt/pull/455))
+- DispatchError::Module is now a tuple variant in latest Substrate ([#439](https://github.com/paritytech/subxt/pull/439))
+- Fix flaky event subscription test ([#450](https://github.com/paritytech/subxt/pull/450))
+- Improve documentation ([#449](https://github.com/paritytech/subxt/pull/449))
+- Export `codegen::TypeGenerator` ([#444](https://github.com/paritytech/subxt/pull/444))
+- Fix conversion of `Call` struct names to UpperCamelCase ([#441](https://github.com/paritytech/subxt/pull/441))
+- Update release documentation with dry-run ([#435](https://github.com/paritytech/subxt/pull/435))
 
 ## [0.17.0] - 2022-02-04
 
