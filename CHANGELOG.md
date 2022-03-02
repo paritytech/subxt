@@ -8,7 +8,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- Reference key storage api ([#447](https://github.com/paritytech/subxt/pull/447))
 - Filter one or multiple events by type from an EventSubscription ([#461](https://github.com/paritytech/subxt/pull/461))
 - Distinct handling for N fields + 1 hasher vs N fields + N hashers ([#458](https://github.com/paritytech/subxt/pull/458))
 - Add hardcoded override to ElectionScore ([#455](https://github.com/paritytech/subxt/pull/455))
@@ -17,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Reference key storage api ([#447](https://github.com/paritytech/subxt/pull/447))
 - Update scale-info and parity-scale-codec requirements ([#462](https://github.com/paritytech/subxt/pull/462))
 - Substitute BTreeMap/BTreeSet generated types for Vec ([#459](https://github.com/paritytech/subxt/pull/459))
 - Obtain DispatchError::Module info dynamically ([#453](https://github.com/paritytech/subxt/pull/453))
