@@ -56,9 +56,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Alice account id:        {:?}", alice_id);
 
     // Get Alice' Stash account ID
-    //
-    // *Note*: This is pre-funded, as declared in the [genesis state]
-    // (https://github.com/substrate-developer-hub/substrate-node-template/blob/main/node/src/chain_spec.rs#L49)
     let alice_stash_id: AccountId32 = sr25519::Pair::from_string("//Alice//stash", None)
         .expect("Could not obtain stash signer pair")
         .public()
