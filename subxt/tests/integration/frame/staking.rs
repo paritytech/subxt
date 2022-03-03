@@ -148,7 +148,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .api
         .storage()
         .staking()
-        .ledger(alice.account_id().clone(), None)
+        .ledger(alice.account_id(), None)
         .await?
         .unwrap();
     assert_eq!(alice_stash.account_id(), &ledger.stash);
@@ -248,12 +248,12 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
 
 #[async_std::test]
 async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
-    let ctx = test_context().await;
-    let current_era_result = ctx
+    let cxt = test_context().await;
+    let current_era_result = cxt
         .api
         .storage()
         .staking()
-        .eras_reward_points(0, None)
+        .eras_reward_points(&0, None)
         .await;
     assert!(current_era_result.is_ok());
 

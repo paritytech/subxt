@@ -46,12 +46,12 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let alice_pre = api
         .storage()
         .system()
-        .account(alice.account_id().clone(), None)
+        .account(alice.account_id(), None)
         .await?;
     let bob_pre = api
         .storage()
         .system()
-        .account(bob.account_id().clone(), None)
+        .account(bob.account_id(), None)
         .await?;
 
     let events = api
@@ -81,12 +81,12 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let alice_post = api
         .storage()
         .system()
-        .account(alice.account_id().clone(), None)
+        .account(alice.account_id(), None)
         .await?;
     let bob_post = api
         .storage()
         .system()
-        .account(bob.account_id().clone(), None)
+        .account(bob.account_id(), None)
         .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
@@ -128,11 +128,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
+    let locked_account = AccountKeyring::Bob.to_account_id();
     let locks = cxt
         .api
         .storage()
         .balances()
-        .locks(AccountKeyring::Bob.to_account_id(), None)
+        .locks(&locked_account, None)
         .await?;
 
     assert_eq!(

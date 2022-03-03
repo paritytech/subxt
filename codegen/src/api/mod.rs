@@ -443,7 +443,8 @@ fn generate_default_account_data_impl(
         };
 
     // this path to the storage entry depends on storage codegen.
-    let storage_entry_path = quote!(self::system::storage::Account);
+    // AccountOwned contains the same data as Account does, but without references.
+    let storage_entry_path = quote!(self::system::storage::AccountOwned);
 
     Some(quote! {
         /// The default storage entry from which to fetch an account nonce, required for
@@ -455,11 +456,11 @@ fn generate_default_account_data_impl(
             type AccountId = #account_id_ty;
             type Index = #account_nonce_ty;
 
-            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
-                result.nonce
-            }
             fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
                 #storage_entry_path(account_id)
+            }
+            fn nonce(result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value) -> Self::Index {
+                result.nonce
             }
         }
     })
