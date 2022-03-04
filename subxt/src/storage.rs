@@ -26,7 +26,6 @@ use sp_core::storage::{
     StorageKey,
 };
 pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
 use std::marker::PhantomData;
 
 use crate::{
