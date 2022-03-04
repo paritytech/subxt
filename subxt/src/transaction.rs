@@ -20,7 +20,6 @@ use crate::PhantomDataSendSync;
 use codec::Decode;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
-pub use sp_version::RuntimeVersion;
 
 use crate::{
     client::Client,
