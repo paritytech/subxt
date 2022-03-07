@@ -31,6 +31,7 @@ use crate::{
     storage::StorageKeyPrefix,
     Config,
     Metadata,
+    PhantomDataSendSync,
 };
 use codec::{
     Decode,
@@ -38,7 +39,6 @@ use codec::{
 };
 use core::{
     convert::TryInto,
-    marker::PhantomData,
 };
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
@@ -211,14 +211,14 @@ pub struct ReadProof<Hash> {
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
     pub client: Arc<RpcClient>,
-    marker: PhantomData<T>,
+    _marker: PhantomDataSendSync<T>,
 }
 
 impl<T: Config> Clone for Rpc<T> {
     fn clone(&self) -> Self {
         Self {
             client: self.client.clone(),
-            marker: PhantomData,
+            _marker: PhantomDataSendSync::new(),
         }
     }
 }
@@ -228,7 +228,7 @@ impl<T: Config> Rpc<T> {
     pub fn new(client: RpcClient) -> Self {
         Self {
             client: Arc::new(client),
-            marker: PhantomData,
+            _marker: PhantomDataSendSync::new(),
         }
     }
 

@@ -51,7 +51,7 @@ pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
                         FilteredEventDetails<T::Hash, Filter::ReturnType>,
                         BasicError,
                     >,
-                > + 'a,
+                > + Send + 'a,
         >,
     >,
 }
@@ -131,7 +131,7 @@ pub trait EventFilter: private::Sealed {
                     FilteredEventDetails<T::Hash, Self::ReturnType>,
                     BasicError,
                 >,
-            > + 'a,
+            > + Send + 'a,
     >;
 }
 
@@ -150,7 +150,7 @@ impl<Ev: Event> EventFilter for (Ev,) {
     fn filter<'a, T: Config, Evs: Decode + 'static>(
         events: Events<'a, T, Evs>,
     ) -> Box<
-        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>> + 'a,
+        dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>> + Send + 'a,
     > {
         let block_hash = events.block_hash();
         let mut iter = events.into_iter_raw();
@@ -189,7 +189,7 @@ macro_rules! impl_event_filter {
             type ReturnType = ( $(Option<$ty>,)+ );
             fn filter<'a, T: Config, Evs: Decode + 'static>(
                 events: Events<'a, T, Evs>
-            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + 'a> {
+            ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
                 let block_hash = events.block_hash();
                 let mut iter = events.into_iter_raw();
                 Box::new(std::iter::from_fn(move || {

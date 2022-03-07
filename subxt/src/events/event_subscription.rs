@@ -84,7 +84,7 @@ pub struct EventSubscription<'a, T: Config, Evs: 'static> {
     #[derivative(Debug = "ignore")]
     at: Option<
         std::pin::Pin<
-            Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + 'a>,
+            Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + Send + 'a>,
         >,
     >,
     _event_type: std::marker::PhantomData<Evs>,
@@ -174,4 +174,18 @@ impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
         self.at = None;
         Poll::Ready(Some(events))
     }
+}
+
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    // Ensure `EventSubscription` can be sent; only actually a compile-time check.
+    #[test]
+    fn check_sendability() {
+        fn assert_send<T: Send>() {}
+        assert_send::<EventSubscription<crate::DefaultConfig, ()>>();
+    }
+
 }
