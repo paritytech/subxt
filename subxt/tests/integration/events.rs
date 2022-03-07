@@ -138,7 +138,8 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 
 // This is just a compile-time check that we can subscribe to events in
 // a context that requires the event subscription/filtering to be Send-able.
-// We test a typical use of EventSubscription and FilterEvents
+// We test a typical use of EventSubscription and FilterEvents. We don't need
+// to run this code; just check that it compiles.
 #[allow(unused)]
 async fn check_events_are_sendable() {
     // check that EventSubscription can be used across await points.
@@ -151,7 +152,6 @@ async fn check_events_are_sendable() {
             // if `event_sub` doesn't implement Send, we can't hold
             // it across an await point inside of a tokio::spawn, which
             // requires Send. This will lead to a compile error.
-            break
         }
 
         Ok::<_, subxt::BasicError>(())
@@ -172,7 +172,6 @@ async fn check_events_are_sendable() {
             // if `event_sub` doesn't implement Send, we can't hold
             // it across an await point inside of a tokio::spawn, which
             // requires Send; This will lead to a compile error.
-            break
         }
 
         Ok::<_, subxt::BasicError>(())
