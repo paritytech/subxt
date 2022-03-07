@@ -37,9 +37,7 @@ use codec::{
     Decode,
     Encode,
 };
-use core::{
-    convert::TryInto,
-};
+use core::convert::TryInto;
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{

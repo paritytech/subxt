@@ -176,7 +176,6 @@ impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
     }
 }
 
-
 #[cfg(test)]
 mod test {
     use super::*;
@@ -187,5 +186,4 @@ mod test {
         fn assert_send<T: Send>() {}
         assert_send::<EventSubscription<crate::DefaultConfig, ()>>();
     }
-
 }
