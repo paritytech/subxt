@@ -37,7 +37,13 @@ resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/enviro
 
 ### Initializing the API client
 
-API is still a work in progress. See [examples](./examples/examples) for the current usage.
+```rust
+let api = ClientBuilder::new()
+    .set_url("wss://rpc.polkadot.io:443")
+    .build()
+    .await?
+    .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+```
 
 ### Querying Storage
 
