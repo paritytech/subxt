@@ -56,7 +56,7 @@ pub use super::{
 #[doc(hidden)]
 pub async fn subscribe<T: Config, Evs: Decode + 'static>(
     client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, JsonRpcSub<T::Header>, T, Evs>, BasicError> {
+) -> Result<EventSubscription<'_, EventSub<T::Header>, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -69,7 +69,7 @@ pub async fn subscribe<T: Config, Evs: Decode + 'static>(
 #[doc(hidden)]
 pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
     client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, BoxedJsonRpcSub<T::Header>, T, Evs>, BasicError> {
+) -> Result<EventSubscription<'_, FinalizedEventSub<T::Header>, T, Evs>, BasicError> {
     let block_subscription = client
         .rpc()
         .subscribe_finalized_blocks()
@@ -78,16 +78,16 @@ pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
-/// A jsonrpsee subscription stream that has been `Box::pin`-ned. This is a part of
-/// the `EventSubscription` type for `subscribe_finalized`, because it needs to do additional
-/// work on top of the basic `Subscription`.
+/// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
+/// in codegen from `subscribe_finalized`, and so is exposed here to be used there.
 #[doc(hidden)]
-pub type BoxedJsonRpcSub<Header> = BoxStream<'static, Result<Header, jsonrpsee::core::Error>>;
+#[doc(hidden)]
+pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, jsonrpsee::core::Error>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
-/// in codegen, and so is exposed here to be used there.
+/// in codegen from `subscribe`, and so is exposed here to be used there.
 #[doc(hidden)]
-pub type JsonRpcSub<Item> = Subscription<Item>;
+pub type EventSub<Item> = Subscription<Item>;
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
@@ -207,7 +207,7 @@ mod test {
     #[allow(unused)]
     fn check_sendability() {
         fn assert_send<T: Send>() {}
-        assert_send::<EventSubscription<JsonRpcSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
-        assert_send::<EventSubscription<BoxedJsonRpcSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
+        assert_send::<EventSubscription<EventSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
+        assert_send::<EventSubscription<FinalizedEventSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
     }
 }

@@ -27849,13 +27849,13 @@ pub mod api {
         }
         pub async fn subscribe(
             &self,
-        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::JsonRpcSub<T::Header>, T, Event>, ::subxt::BasicError>
+        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::EventSub<T::Header>, T, Event>, ::subxt::BasicError>
         {
             ::subxt::events::subscribe::<T, Event>(self.client).await
         }
         pub async fn subscribe_finalized(
             &self,
-        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::BoxedJsonRpcSub<T::Header>, T, Event>, ::subxt::BasicError>
+        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<T::Header>, T, Event>, ::subxt::BasicError>
         {
             ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
         }
