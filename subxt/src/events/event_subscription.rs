@@ -126,6 +126,7 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
+/// Return a Stream of all block headers starting from `current_block_num` and ending just before `end_num`.
 fn get_block_headers<'a, T: Config>(
     client: &'a Client<T>,
     mut current_block_num: T::BlockNumber,
