@@ -57,7 +57,7 @@ Call the generated `RuntimeApi::storage()` method, followed by the `pallet_name(
 
 So in order to query `Balances::TotalIssuance`:
 
-```
+```rust
 let total_issuance = api
     .storage()
     .balances()
@@ -68,7 +68,25 @@ let total_issuance = api
 
 ### Submitting Extrinsics
 
-API is still a work in progress. See [examples](./examples/examples/polkadot_balance_transfer.rs) for the current usage.
+Submit an extrinsic, returning success once the transaction is validated and accepted into the pool:
+
+```rust
+use sp_keyring::AccountKeyring;
+use subxt::PairSigner;
+
+let signer = PairSigner::new(AccountKeyring::Alice.pair());
+let dest = AccountKeyring::Bob.to_account_id().into();
+
+let tx_hash = api
+    .tx()
+    .balances()
+    .transfer(dest, 10_000)
+    .sign_and_submit(&signer)
+    .await?;
+```
+
+For more advanced usage, which can wait for block inclusion and return any events triggered by the extrinsic, see the
+[balance transfer example](./examples/examples/balance_transfer.rs).
 
 ## Integration Testing
 
