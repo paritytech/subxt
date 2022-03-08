@@ -135,3 +135,45 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 
     Ok(())
 }
+
+// This is just a compile-time check that we can subscribe to events in
+// a context that requires the event subscription/filtering to be Send-able.
+// We test a typical use of EventSubscription and FilterEvents. We don't need
+// to run this code; just check that it compiles.
+#[allow(unused)]
+async fn check_events_are_sendable() {
+    // check that EventSubscription can be used across await points.
+    async_std::task::spawn(async {
+        let ctx = test_context().await;
+
+        let mut event_sub = ctx.api.events().subscribe().await?;
+
+        while let Some(ev) = event_sub.next().await {
+            // if `event_sub` doesn't implement Send, we can't hold
+            // it across an await point inside of a tokio::spawn, which
+            // requires Send. This will lead to a compile error.
+        }
+
+        Ok::<_, subxt::BasicError>(())
+    });
+
+    // Check that FilterEvents can be used across await points.
+    async_std::task::spawn(async {
+        let ctx = test_context().await;
+
+        let mut event_sub = ctx
+            .api
+            .events()
+            .subscribe()
+            .await?
+            .filter_events::<(balances::events::Transfer,)>();
+
+        while let Some(ev) = event_sub.next().await {
+            // if `event_sub` doesn't implement Send, we can't hold
+            // it across an await point inside of a tokio::spawn, which
+            // requires Send; This will lead to a compile error.
+        }
+
+        Ok::<_, subxt::BasicError>(())
+    });
+}
