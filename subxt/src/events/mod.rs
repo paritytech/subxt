@@ -26,6 +26,8 @@ pub use event_subscription::{
     subscribe,
     subscribe_finalized,
     EventSubscription,
+    JsonRpcSub,
+    BoxedJsonRpcSub,
 };
 pub use events_type::{
     at,

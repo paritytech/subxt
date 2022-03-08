@@ -27,7 +27,7 @@ use futures::{
     Future,
     FutureExt,
     Stream,
-    StreamExt,
+    StreamExt, stream::BoxStream,
 };
 use jsonrpsee::core::client::Subscription;
 use std::{
@@ -56,7 +56,7 @@ pub use super::{
 #[doc(hidden)]
 pub async fn subscribe<T: Config, Evs: Decode + 'static>(
     client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
+) -> Result<EventSubscription<'_, JsonRpcSub<T::Header>, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -69,18 +69,33 @@ pub async fn subscribe<T: Config, Evs: Decode + 'static>(
 #[doc(hidden)]
 pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
     client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, T, Evs>, BasicError> {
-    let block_subscription = client.rpc().subscribe_finalized_blocks().await?;
-    Ok(EventSubscription::new(client, block_subscription))
+) -> Result<EventSubscription<'_, BoxedJsonRpcSub<T::Header>, T, Evs>, BasicError> {
+    let block_subscription = client
+        .rpc()
+        .subscribe_finalized_blocks()
+        .await?
+        .map(|s| s);
+    Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
+
+/// A jsonrpsee subscription stream that has been `Box::pin`-ned. This is a part of
+/// the `EventSubscription` type for `subscribe_finalized`, because it needs to do additional
+/// work on top of the basic `Subscription`.
+#[doc(hidden)]
+pub type BoxedJsonRpcSub<Header> = BoxStream<'static, Result<Header, jsonrpsee::core::Error>>;
+
+/// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
+/// in codegen, and so is exposed here to be used there.
+#[doc(hidden)]
+pub type JsonRpcSub<Item> = Subscription<Item>;
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-pub struct EventSubscription<'a, T: Config, Evs: 'static> {
+#[derivative(Debug(bound = "Sub: std::fmt::Debug"))]
+pub struct EventSubscription<'a, Sub, T: Config, Evs: 'static> {
     finished: bool,
     client: &'a Client<T>,
-    block_header_subscription: Subscription<T::Header>,
+    block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
         std::pin::Pin<
@@ -90,10 +105,13 @@ pub struct EventSubscription<'a, T: Config, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
+impl<'a, Sub, T: Config, Evs: Decode> EventSubscription<'a, Sub, T, Evs>
+where
+    Sub: Stream<Item = Result<T::Header, jsonrpsee::core::Error>> + Unpin + 'static
+{
     fn new(
         client: &'a Client<T>,
-        block_header_subscription: Subscription<T::Header>,
+        block_header_subscription: Sub,
     ) -> Self {
         EventSubscription {
             finished: false,
@@ -111,7 +129,7 @@ impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
     }
 }
 
-impl<'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
+impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin for EventSubscription<'a, Sub, T, Evs> {}
 
 // We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
 // way to roughly implement the following function:
@@ -130,7 +148,12 @@ impl<'a, T: Config, Evs: Decode> Unpin for EventSubscription<'a, T, Evs> {}
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<'a, T: Config, Evs: Decode> Stream for EventSubscription<'a, T, Evs> {
+impl<'a, Sub, T, Evs> Stream for EventSubscription<'a, Sub, T, Evs>
+where
+    T: Config,
+    Evs: Decode,
+    Sub: Stream<Item = Result<T::Header, jsonrpsee::core::Error>> + Unpin + 'static
+{
     type Item = Result<Events<'a, T, Evs>, BasicError>;
 
     fn poll_next(
@@ -181,9 +204,10 @@ mod test {
     use super::*;
 
     // Ensure `EventSubscription` can be sent; only actually a compile-time check.
-    #[test]
+    #[allow(unused)]
     fn check_sendability() {
         fn assert_send<T: Send>() {}
-        assert_send::<EventSubscription<crate::DefaultConfig, ()>>();
+        assert_send::<EventSubscription<JsonRpcSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
+        assert_send::<EventSubscription<BoxedJsonRpcSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
     }
 }
