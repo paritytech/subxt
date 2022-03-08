@@ -103,44 +103,59 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
                     Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
                 };
 
-                // This is the block number that we have returned details for already.
-                let start_block_number =
-                    last_finalized_block_number.unwrap_or(*header.number());
-                // This latest finalized block number that we want to fetch all details up to.
+                // This is one after the last block we returned details for last time.
+                let start_block_num = last_finalized_block_number
+                    .map(|n| n + One::one())
+                    .unwrap_or(*header.number());
+
+                // We want all previous details up to, but not including this current block num.
                 let end_block_number = *header.number();
-                // On the next iteration, we'll start from this end block.
-                last_finalized_block_number = Some(end_block_number);
 
                 // Iterate over all of the previous blocks we need headers for, ignoring the current block
                 // (which we already have the header info for):
-                let prev_block_numbers = std::iter::from_fn({
-                    let mut curr_block_number = start_block_number;
-                    move || {
-                        if curr_block_number == end_block_number {
-                            None
-                        } else {
-                            curr_block_number = curr_block_number + One::one();
-                            Some(curr_block_number)
-                        }
-                    }
-                });
+                let previous_headers =
+                    get_block_headers(client, start_block_num, end_block_number);
 
-                // Produce a stream of all of the previous headers that finalization skipped over.
-                let old_headers = stream::iter(prev_block_numbers)
-                    .then(move |n| {
-                        async move {
-                            let hash = client.rpc().block_hash_internal(n).await?;
-                            let header = client.rpc().header(hash).await?;
-                            Ok::<_, BasicError>(header)
-                        }
-                    })
-                    .filter_map(|h| async { h.transpose() });
+                // On the next iteration, we'll get details starting just after this end block.
+                last_finalized_block_number = Some(end_block_number);
 
                 // Return a combination of any previous headers plus the new header.
-                Either::Right(old_headers.chain(stream::once(async { Ok(header) })))
+                Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
             });
 
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
+}
+
+fn get_block_headers<'a, T: Config>(
+    client: &'a Client<T>,
+    mut current_block_num: T::BlockNumber,
+    end_num: T::BlockNumber,
+) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + 'a {
+    // Iterate over all of the previous blocks we need headers for. We go from (start_num..end_num).
+    // If start_num == end_num, return nothing.
+    let block_numbers = std::iter::from_fn(move || {
+        let res = if current_block_num == end_num {
+            None
+        } else {
+            Some(current_block_num)
+        };
+
+        current_block_num = current_block_num + One::one();
+        res
+    });
+
+    // Produce a stream of all of the previous headers that finalization skipped over.
+    let block_headers = stream::iter(block_numbers)
+        .then(move |n| {
+            async move {
+                let hash = client.rpc().block_hash_internal(n).await?;
+                let header = client.rpc().header(hash).await?;
+                Ok::<_, BasicError>(header)
+            }
+        })
+        .filter_map(|h| async { h.transpose() });
+
+    Box::pin(block_headers)
 }
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
