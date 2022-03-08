@@ -38,6 +38,8 @@ resides ([`CARGO_MANIFEST_DIR`](https://doc.rust-lang.org/cargo/reference/enviro
 ### Initializing the API client
 
 ```rust
+use subxt::{ClientBuilder, DefaultConfig, DefaultExtra};
+
 let api = ClientBuilder::new()
     .set_url("wss://rpc.polkadot.io:443")
     .build()
@@ -51,7 +53,18 @@ chain.
 
 ### Querying Storage
 
-API is still a work in progress. See [tests](./subxt/tests/integration/frame) for the current usage.
+Call the generated `RuntimeApi::storage()` method, followed by the `pallet_name()` and then the `storage_item_name()`. 
+
+So in order to query `Balances::TotalIssuance`:
+
+```
+let total_issuance = api
+    .storage()
+    .balances()
+    .total_issuance(None)
+    .await
+    .unwrap()
+```
 
 ### Submitting Extrinsics
 
