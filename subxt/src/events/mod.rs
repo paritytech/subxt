@@ -25,8 +25,8 @@ pub use decoding::EventsDecodingError;
 pub use event_subscription::{
     subscribe,
     subscribe_finalized,
-    EventSubscription,
     EventSub,
+    EventSubscription,
     FinalizedEventSub,
 };
 pub use events_type::{

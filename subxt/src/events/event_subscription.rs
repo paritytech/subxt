@@ -24,23 +24,23 @@ use crate::{
 use codec::Decode;
 use derivative::Derivative;
 use futures::{
-    Future,
-    FutureExt,
-    Stream,
-    StreamExt,
+    future::Either,
     stream::{
         self,
         BoxStream,
     },
-    future::Either,
+    Future,
+    FutureExt,
+    Stream,
+    StreamExt,
 };
 use jsonrpsee::core::client::Subscription;
+use num_traits::One;
+use sp_runtime::traits::Header;
 use std::{
     marker::Unpin,
     task::Poll,
 };
-use sp_runtime::traits::Header;
-use num_traits::One;
 
 pub use super::{
     at,
@@ -77,10 +77,9 @@ pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
 pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
     client: &'a Client<T>,
 ) -> Result<EventSubscription<'a, FinalizedEventSub<'a, T::Header>, T, Evs>, BasicError> {
-    let last_finalized_block_hash = client
-        .rpc()
-        .finalized_head()
-        .await?;
+    // fetch the last finalised block details immediately, so that we'll get
+    // events from this block onwards.
+    let last_finalized_block_hash = client.rpc().finalized_head().await?;
 
     let mut last_finalized_block_number = client
         .rpc()
@@ -88,51 +87,55 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
         .await?
         .map(|h| *h.number());
 
-    let block_subscription = client
-        .rpc()
-        .subscribe_finalized_blocks()
-        .await?
-        .flat_map(move |s| {
-            // Get the header, or return a stream containing just the error.
-            let header = match s {
-                Ok(header) => header,
-                Err(e) => return Either::Left(stream::once(async { Err(e) }))
-            };
+    let block_subscription =
+        client
+            .rpc()
+            .subscribe_finalized_blocks()
+            .await?
+            .flat_map(move |s| {
+                // Get the header, or return a stream containing just the error. Our EventSubscription
+                // stream will return `None` as soon as it hits an error like this.
+                let header = match s {
+                    Ok(header) => header,
+                    Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
+                };
 
-            // Figure out the blocks to get headers for; everything from one after the
-            // last finalized block to the block number we got back from the stream.
-            let mut curr_block_number = last_finalized_block_number
-                .unwrap_or(*header.number());
-            let end_block_number = *header.number();
+                // This is the block number that we have returned details for already.
+                let start_block_number =
+                    last_finalized_block_number.unwrap_or(*header.number());
+                // This latest finalized block number that we want to fetch all details up to.
+                let end_block_number = *header.number();
+                // On the next iteration, we'll start from this end block.
+                last_finalized_block_number = Some(end_block_number);
 
-            // Update the last finalized block to the one we're going to return details for.
-            last_finalized_block_number = Some(end_block_number);
-
-            // Iterate over all of the previous blocks we need headers for:
-            let prev_block_numbers = std::iter::from_fn(move || {
-                if curr_block_number == end_block_number {
-                    None
-                } else {
-                    curr_block_number = curr_block_number + One::one();
-                    Some(curr_block_number)
-                }
-            });
-
-            stream::iter(prev_block_numbers)
-                .map(|n| async move {
-                    let hash = client
-                        .rpc()
-                        .block_hash_internal(n)
-                        .await?;
-                    let header = client
-                        .rpc()
-                        .header(hash)
-                        .await?;
-                    Ok::<_,BasicError>(header)
+                // Iterate over all of the previous blocks we need headers for, ignoring the current block
+                // (which we already have the header info for):
+                let prev_block_numbers = std::iter::from_fn({
+                    let mut curr_block_number = start_block_number;
+                    move || {
+                        if curr_block_number == end_block_number {
+                            None
+                        } else {
+                            curr_block_number = curr_block_number + One::one();
+                            Some(curr_block_number)
+                        }
+                    }
                 });
 
-            Either::Right(stream::once(async { Ok(header) }))
-        });
+                // Produce a stream of all of the previous headers that finalization skipped over.
+                let old_headers = stream::iter(prev_block_numbers)
+                    .then(move |n| {
+                        async move {
+                            let hash = client.rpc().block_hash_internal(n).await?;
+                            let header = client.rpc().header(hash).await?;
+                            Ok::<_, BasicError>(header)
+                        }
+                    })
+                    .filter_map(|h| async { h.transpose() });
+
+                // Return a combination of any previous headers plus the new header.
+                Either::Right(old_headers.chain(stream::once(async { Ok(header) })))
+            });
 
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
@@ -140,8 +143,7 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe_finalized`, and so is exposed here to be used there.
 #[doc(hidden)]
-#[doc(hidden)]
-pub type FinalizedEventSub<'a, Header> = BoxStream<'a, Result<Header, jsonrpsee::core::Error>>;
+pub type FinalizedEventSub<'a, Header> = BoxStream<'a, Result<Header, BasicError>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and so is exposed here to be used there.
@@ -164,14 +166,12 @@ pub struct EventSubscription<'a, Sub, T: Config, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<'a, Sub, T: Config, Evs: Decode, E: Into<BasicError>> EventSubscription<'a, Sub, T, Evs>
+impl<'a, Sub, T: Config, Evs: Decode, E: Into<BasicError>>
+    EventSubscription<'a, Sub, T, Evs>
 where
-    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a
+    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
 {
-    fn new(
-        client: &'a Client<T>,
-        block_header_subscription: Sub,
-    ) -> Self {
+    fn new(client: &'a Client<T>, block_header_subscription: Sub) -> Self {
         EventSubscription {
             finished: false,
             client,
@@ -188,7 +188,10 @@ where
     }
 }
 
-impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin for EventSubscription<'a, Sub, T, Evs> {}
+impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin
+    for EventSubscription<'a, Sub, T, Evs>
+{
+}
 
 // We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
 // way to roughly implement the following function:
@@ -212,7 +215,7 @@ where
     T: Config,
     Evs: Decode,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
-    E: Into<BasicError>
+    E: Into<BasicError>,
 {
     type Item = Result<Events<'a, T, Evs>, BasicError>;
 
@@ -266,7 +269,19 @@ mod test {
     #[allow(unused)]
     fn check_sendability() {
         fn assert_send<T: Send>() {}
-        assert_send::<EventSubscription<EventSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
-        assert_send::<EventSubscription<FinalizedEventSub<<crate::DefaultConfig as Config>::Header>, crate::DefaultConfig, ()>>();
+        assert_send::<
+            EventSubscription<
+                EventSub<<crate::DefaultConfig as Config>::Header>,
+                crate::DefaultConfig,
+                (),
+            >,
+        >();
+        assert_send::<
+            EventSubscription<
+                FinalizedEventSub<<crate::DefaultConfig as Config>::Header>,
+                crate::DefaultConfig,
+                (),
+            >,
+        >();
     }
 }
