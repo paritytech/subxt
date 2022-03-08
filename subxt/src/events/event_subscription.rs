@@ -87,6 +87,9 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
         .await?
         .map(|h| *h.number());
 
+    // The complexity here is because the finalized block subscription may skip over
+    // some blocks, so here we attempt to ensure that we pay attention to every block
+    // that was skipped over as well as the latest block we were told about.
     let block_subscription =
         client
             .rpc()
@@ -141,12 +144,12 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 }
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
-/// in codegen from `subscribe_finalized`, and so is exposed here to be used there.
+/// in codegen from `subscribe_finalized`, and is exposed to be used in codegen.
 #[doc(hidden)]
 pub type FinalizedEventSub<'a, Header> = BoxStream<'a, Result<Header, BasicError>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
-/// in codegen from `subscribe`, and so is exposed here to be used there.
+/// in codegen from `subscribe`, and is exposed to be used in codegen.
 #[doc(hidden)]
 pub type EventSub<Item> = Subscription<Item>;
 
