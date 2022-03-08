@@ -355,6 +355,23 @@ impl<T: Config> Rpc<T> {
         }
     }
 
+    /// Get a block hash given a T::BlockNumber from our config.
+    /// This may not be useful externally, but we need to be able to
+    /// get detail for T::BlockNumbers.
+    #[doc(hidden)]
+    pub async fn block_hash_internal(
+        &self,
+        block_number: T::BlockNumber,
+    ) -> Result<Option<T::Hash>, BasicError> {
+        let block_number = ListOrValue::Value(block_number);
+        let params = rpc_params![block_number];
+        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
+        match list_or_value {
+            ListOrValue::Value(hash) => Ok(hash),
+            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
+        }
+    }
+
     /// Get a block hash of the latest finalized block
     pub async fn finalized_head(&self) -> Result<T::Hash, BasicError> {
         let hash = self

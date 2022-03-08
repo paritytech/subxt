@@ -27,13 +27,20 @@ use futures::{
     Future,
     FutureExt,
     Stream,
-    StreamExt, stream::BoxStream,
+    StreamExt,
+    stream::{
+        self,
+        BoxStream,
+    },
+    future::Either,
 };
 use jsonrpsee::core::client::Subscription;
 use std::{
     marker::Unpin,
     task::Poll,
 };
+use sp_runtime::traits::Header;
+use num_traits::One;
 
 pub use super::{
     at,
@@ -54,9 +61,9 @@ pub use super::{
 /// and is exposed only to be called via the codegen. Thus, prefer to use
 /// `api.events().subscribe()` over calling this directly.
 #[doc(hidden)]
-pub async fn subscribe<T: Config, Evs: Decode + 'static>(
-    client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, EventSub<T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
+    client: &'a Client<T>,
+) -> Result<EventSubscription<'a, EventSub<T::Header>, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -67,14 +74,66 @@ pub async fn subscribe<T: Config, Evs: Decode + 'static>(
 /// and is exposed only to be called via the codegen. Thus, prefer to use
 /// `api.events().subscribe_finalized()` over calling this directly.
 #[doc(hidden)]
-pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
-    client: &'_ Client<T>,
-) -> Result<EventSubscription<'_, FinalizedEventSub<T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
+    client: &'a Client<T>,
+) -> Result<EventSubscription<'a, FinalizedEventSub<'a, T::Header>, T, Evs>, BasicError> {
+    let last_finalized_block_hash = client
+        .rpc()
+        .finalized_head()
+        .await?;
+
+    let mut last_finalized_block_number = client
+        .rpc()
+        .header(Some(last_finalized_block_hash))
+        .await?
+        .map(|h| *h.number());
+
     let block_subscription = client
         .rpc()
         .subscribe_finalized_blocks()
         .await?
-        .map(|s| s);
+        .flat_map(move |s| {
+            // Get the header, or return a stream containing just the error.
+            let header = match s {
+                Ok(header) => header,
+                Err(e) => return Either::Left(stream::once(async { Err(e) }))
+            };
+
+            // Figure out the blocks to get headers for; everything from one after the
+            // last finalized block to the block number we got back from the stream.
+            let mut curr_block_number = last_finalized_block_number
+                .unwrap_or(*header.number());
+            let end_block_number = *header.number();
+
+            // Update the last finalized block to the one we're going to return details for.
+            last_finalized_block_number = Some(end_block_number);
+
+            // Iterate over all of the previous blocks we need headers for:
+            let prev_block_numbers = std::iter::from_fn(move || {
+                if curr_block_number == end_block_number {
+                    None
+                } else {
+                    curr_block_number = curr_block_number + One::one();
+                    Some(curr_block_number)
+                }
+            });
+
+            stream::iter(prev_block_numbers)
+                .map(|n| async move {
+                    let hash = client
+                        .rpc()
+                        .block_hash_internal(n)
+                        .await?;
+                    let header = client
+                        .rpc()
+                        .header(hash)
+                        .await?;
+                    Ok::<_,BasicError>(header)
+                });
+
+            Either::Right(stream::once(async { Ok(header) }))
+        });
+
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
@@ -82,7 +141,7 @@ pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
 /// in codegen from `subscribe_finalized`, and so is exposed here to be used there.
 #[doc(hidden)]
 #[doc(hidden)]
-pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, jsonrpsee::core::Error>>;
+pub type FinalizedEventSub<'a, Header> = BoxStream<'a, Result<Header, jsonrpsee::core::Error>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and so is exposed here to be used there.
@@ -105,9 +164,9 @@ pub struct EventSubscription<'a, Sub, T: Config, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<'a, Sub, T: Config, Evs: Decode> EventSubscription<'a, Sub, T, Evs>
+impl<'a, Sub, T: Config, Evs: Decode, E: Into<BasicError>> EventSubscription<'a, Sub, T, Evs>
 where
-    Sub: Stream<Item = Result<T::Header, jsonrpsee::core::Error>> + Unpin + 'static
+    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a
 {
     fn new(
         client: &'a Client<T>,
@@ -148,11 +207,12 @@ impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin for EventSubscription<'a, Sub
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<'a, Sub, T, Evs> Stream for EventSubscription<'a, Sub, T, Evs>
+impl<'a, Sub, T, Evs, E> Stream for EventSubscription<'a, Sub, T, Evs>
 where
     T: Config,
     Evs: Decode,
-    Sub: Stream<Item = Result<T::Header, jsonrpsee::core::Error>> + Unpin + 'static
+    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
+    E: Into<BasicError>
 {
     type Item = Result<Events<'a, T, Evs>, BasicError>;
 
@@ -178,7 +238,6 @@ where
                     return Poll::Ready(Some(Err(e.into())))
                 }
                 Some(Ok(block_header)) => {
-                    use sp_runtime::traits::Header;
                     // Note [jsdw]: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
                     self.at = Some(Box::pin(at(self.client, block_header.hash())));

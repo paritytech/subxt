@@ -27855,7 +27855,7 @@ pub mod api {
         }
         pub async fn subscribe_finalized(
             &self,
-        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<T::Header>, T, Event>, ::subxt::BasicError>
+        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<'a, T::Header>, T, Event>, ::subxt::BasicError>
         {
             ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
         }
