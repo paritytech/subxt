@@ -90,9 +90,6 @@ pub struct EventSubscription<'a, T: Config, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-unsafe impl<'a, T: Config, Evs: Decode> Send for EventSubscription<'a, T, Evs> {}
-unsafe impl<'a, T: Config, Evs: Decode> Sync for EventSubscription<'a, T, Evs> {}
-
 impl<'a, T: Config, Evs: Decode> EventSubscription<'a, T, Evs> {
     fn new(
         client: &'a Client<T>,

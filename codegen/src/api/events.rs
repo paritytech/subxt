@@ -43,9 +43,6 @@ pub fn generate_events(
         quote! {
             #struct_def
 
-            unsafe impl Send for #event_struct {}
-            unsafe impl Sync for #event_struct {}
-
             impl ::subxt::Event for #event_struct {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;

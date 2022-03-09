@@ -57,15 +57,6 @@ pub struct FilterEvents<'a, Sub: 'a, T: Config, Filter: EventFilter> {
     >,
 }
 
-unsafe impl<'a, Sub, T: Config, Filter: EventFilter> Send
-    for FilterEvents<'a, Sub, T, Filter>
-{
-}
-unsafe impl<'a, Sub, T: Config, Filter: EventFilter> Sync
-    for FilterEvents<'a, Sub, T, Filter>
-{
-}
-
 impl<'a, Sub: 'a, T: Config, Filter: EventFilter> Unpin
     for FilterEvents<'a, Sub, T, Filter>
 {
