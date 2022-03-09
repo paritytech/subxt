@@ -25,6 +25,7 @@ pub use decoding::EventsDecodingError;
 pub use event_subscription::{
     subscribe,
     subscribe_finalized,
+    subscribe_to_block_headers_filling_in_gaps,
     EventSub,
     EventSubscription,
     FinalizedEventSub,

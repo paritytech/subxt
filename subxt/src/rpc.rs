@@ -91,7 +91,7 @@ use sp_runtime::generic::{
 #[serde(untagged)]
 pub enum NumberOrHex {
     /// The number represented directly.
-    Number(u128),
+    Number(u64),
     /// Hex representation of the number.
     Hex(U256),
 }
@@ -122,7 +122,7 @@ macro_rules! into_block_number {
         )+
     }
 }
-into_block_number!(u8 u16 u32 u64 u128);
+into_block_number!(u8 u16 u32 u64);
 
 /// Arbitrary properties defined in the chain spec as a JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;

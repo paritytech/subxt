@@ -57,8 +57,8 @@ pub use super::{
 /// [`Events::subscribe_finalized()`] if that is important.
 ///
 /// **Note:** This function is hidden from the documentation
-/// and is exposed only to be called via the codegen. Thus, prefer to use
-/// `api.events().subscribe()` over calling this directly.
+/// and is exposed only to be called via the codegen. It may
+/// break between minor releases.
 #[doc(hidden)]
 pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
     client: &'a Client<T>,
@@ -70,78 +70,79 @@ pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
 /// Subscribe to events from finalized blocks.
 ///
 /// **Note:** This function is hidden from the documentation
-/// and is exposed only to be called via the codegen. Thus, prefer to use
-/// `api.events().subscribe_finalized()` over calling this directly.
+/// and is exposed only to be called via the codegen. It may
+/// break between minor releases.
 #[doc(hidden)]
 pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
     client: &'a Client<T>,
 ) -> Result<EventSubscription<'a, FinalizedEventSub<'a, T::Header>, T, Evs>, BasicError> {
     // fetch the last finalised block details immediately, so that we'll get
-    // events from this block onwards.
+    // events for each block after this one.
     let last_finalized_block_hash = client.rpc().finalized_head().await?;
-
-    let mut last_finalized_block_number = client
+    let last_finalized_block_number = client
         .rpc()
         .header(Some(last_finalized_block_hash))
         .await?
         .map(|h| (*h.number()).into());
 
-    // The complexity here is because the finalized block subscription may skip over
-    // some blocks, so here we attempt to ensure that we pay attention to every block
-    // that was skipped over as well as the latest block we were told about.
-    let block_subscription =
-        client
-            .rpc()
-            .subscribe_finalized_blocks()
-            .await?
-            .flat_map(move |s| {
-                // Get the header, or return a stream containing just the error. Our EventSubscription
-                // stream will return `None` as soon as it hits an error like this.
-                let header = match s {
-                    Ok(header) => header,
-                    Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
-                };
-
-                // We want all previous details up to, but not including this current block num.
-                let end_block_number = (*header.number()).into();
-
-                // This is one after the last block we returned details for last time.
-                let start_block_num = last_finalized_block_number
-                    .map(|n| n + 1)
-                    .unwrap_or(end_block_number);
-
-                // Iterate over all of the previous blocks we need headers for, ignoring the current block
-                // (which we already have the header info for):
-                let previous_headers =
-                    get_block_headers(client, start_block_num, end_block_number);
-
-                // On the next iteration, we'll get details starting just after this end block.
-                last_finalized_block_number = Some(end_block_number);
-
-                // Return a combination of any previous headers plus the new header.
-                Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
-            });
+    // Fill in any gaps between the block above and the finalized blocks reported.
+    let block_subscription = subscribe_to_block_headers_filling_in_gaps(
+        client,
+        last_finalized_block_number,
+        client.rpc().subscribe_finalized_blocks().await?,
+    );
 
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
-/// Return a Stream of all block headers starting from `current_block_num` and ending just before `end_num`.
-fn get_block_headers<T: Config>(
-    client: &'_ Client<T>,
-    start_num: u128,
-    end_num: u128,
-) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + '_ {
-    let block_headers = stream::iter(start_num..end_num)
-        .then(move |n| {
-            async move {
-                let hash = client.rpc().block_hash(Some(n.into())).await?;
-                let header = client.rpc().header(hash).await?;
-                Ok::<_, BasicError>(header)
-            }
-        })
-        .filter_map(|h| async { h.transpose() });
+/// Take a subscription that returns block headers, and if any block numbers are missed out
+/// betweem the block number provided and what's returned from the subscription, we fill in
+/// the gaps and get hold of all intermediate block headers.
+///
+/// **Note:** This is exposed so that we can run integration tests on it, but otherwise
+/// should not be used directly and may break between minor releases.
+#[doc(hidden)]
+pub fn subscribe_to_block_headers_filling_in_gaps<'a, S, E, T: Config>(
+    client: &'a Client<T>,
+    mut last_block_num: Option<u64>,
+    sub: S,
+) -> impl Stream<Item = Result<T::Header, BasicError>> + Send + 'a
+where
+    S: Stream<Item = Result<T::Header, E>> + Send + 'a,
+    E: Into<BasicError> + Send + 'static,
+{
+    sub.flat_map(move |s| {
+        // Get the header, or return a stream containing just the error. Our EventSubscription
+        // stream will return `None` as soon as it hits an error like this.
+        let header = match s {
+            Ok(header) => header,
+            Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
+        };
 
-    Box::pin(block_headers)
+        // We want all previous details up to, but not including this current block num.
+        let end_block_num = (*header.number()).into();
+
+        // This is one after the last block we returned details for last time.
+        let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
+
+        // Iterate over all of the previous blocks we need headers for, ignoring the current block
+        // (which we already have the header info for):
+        let previous_headers = stream::iter(start_block_num..end_block_num)
+            .then(move |n| {
+                async move {
+                    let hash = client.rpc().block_hash(Some(n.into())).await?;
+                    let header = client.rpc().header(hash).await?;
+                    Ok::<_, BasicError>(header)
+                }
+            })
+            .filter_map(|h| async { h.transpose() });
+
+        // On the next iteration, we'll get details starting just after this end block.
+        last_block_num = Some(end_block_num);
+
+        // Return a combination of any previous headers plus the new header.
+        Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
+    })
 }
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
