@@ -128,24 +128,10 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 /// Return a Stream of all block headers starting from `current_block_num` and ending just before `end_num`.
 fn get_block_headers<T: Config>(
     client: &'_ Client<T>,
-    mut current_block_num: u128,
+    start_num: u128,
     end_num: u128,
 ) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + '_ {
-    // Iterate over all of the previous blocks we need headers for. We go from (start_num..end_num).
-    // If start_num == end_num, return nothing.
-    let block_numbers = std::iter::from_fn(move || {
-        let res = if current_block_num == end_num {
-            None
-        } else {
-            Some(current_block_num)
-        };
-
-        current_block_num += 1;
-        res
-    });
-
-    // Produce a stream of all of the previous headers that finalization skipped over.
-    let block_headers = stream::iter(block_numbers)
+    let block_headers = stream::iter(start_num..end_num)
         .then(move |n| {
             async move {
                 let hash = client.rpc().block_hash(Some(n.into())).await?;
