@@ -146,8 +146,9 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
 
     let ctx = test_context().await;
 
-    // Manually subscribe to the next 4 finalized block headers, but deliberately
-    // filter out two in the middle.
+    // Manually subscribe to the next 6 finalized block headers, but deliberately
+    // filter out some in the middle so we get back b _ _ b _ b. This guarantees
+    // that there will be some gaps, even if there aren't any from the subscription.
     let some_finalized_blocks = ctx
         .api
         .client
@@ -155,10 +156,10 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
         .subscribe_finalized_blocks()
         .await?
         .enumerate()
-        .take(4)
+        .take(6)
         .filter(|(n, _)| {
             let n = *n;
-            async move { n == 0 || n == 3 }
+            async move { n == 0 || n == 3 || n == 5 }
         })
         .map(|(_, h)| h);
 
