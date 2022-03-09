@@ -47,9 +47,7 @@ pub trait Config: 'static {
         + Copy
         + core::hash::Hash
         + core::str::FromStr
-        + num_traits::One
-        + core::ops::Add<Output = Self::BlockNumber>
-        + MaybeSerializeDeserialize;
+        + Into<u128>;
 
     /// The output of the `Hashing` function.
     type Hash: Parameter

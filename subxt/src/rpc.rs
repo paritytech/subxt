@@ -91,7 +91,7 @@ use sp_runtime::generic::{
 #[serde(untagged)]
 pub enum NumberOrHex {
     /// The number represented directly.
-    Number(u64),
+    Number(u128),
     /// Hex representation of the number.
     Hex(U256),
 }
@@ -110,11 +110,19 @@ impl From<NumberOrHex> for BlockNumber {
     }
 }
 
-impl From<u32> for BlockNumber {
-    fn from(x: u32) -> Self {
-        NumberOrHex::Number(x.into()).into()
+// All unsigned ints can be converted into a BlockNumber:
+macro_rules! into_block_number {
+    ($($t: ty)+) => {
+        $(
+            impl From<$t> for BlockNumber {
+                fn from(x: $t) -> Self {
+                    NumberOrHex::Number(x.into()).into()
+                }
+            }
+        )+
     }
 }
+into_block_number!(u8 u16 u32 u64 u128);
 
 /// Arbitrary properties defined in the chain spec as a JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
@@ -330,19 +338,6 @@ impl<T: Config> Rpc<T> {
     pub async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> Result<Option<T::Hash>, BasicError> {
-        let params = rpc_params![block_number];
-        let block_hash = self.client.request("chain_getBlockHash", params).await?;
-        Ok(block_hash)
-    }
-
-    /// Get a block hash given a T::BlockNumber from our config.
-    /// This may not be useful externally, but we need to be able to
-    /// get detail for T::BlockNumbers.
-    #[doc(hidden)]
-    pub async fn block_hash_internal(
-        &self,
-        block_number: T::BlockNumber,
     ) -> Result<Option<T::Hash>, BasicError> {
         let params = rpc_params![block_number];
         let block_hash = self.client.request("chain_getBlockHash", params).await?;

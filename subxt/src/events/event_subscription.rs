@@ -35,7 +35,6 @@ use futures::{
     StreamExt,
 };
 use jsonrpsee::core::client::Subscription;
-use num_traits::One;
 use sp_runtime::traits::Header;
 use std::{
     marker::Unpin,
@@ -85,7 +84,7 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
         .rpc()
         .header(Some(last_finalized_block_hash))
         .await?
-        .map(|h| *h.number());
+        .map(|h| (*h.number()).into());
 
     // The complexity here is because the finalized block subscription may skip over
     // some blocks, so here we attempt to ensure that we pay attention to every block
@@ -103,13 +102,13 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
                     Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
                 };
 
+                // We want all previous details up to, but not including this current block num.
+                let end_block_number = (*header.number()).into();
+
                 // This is one after the last block we returned details for last time.
                 let start_block_num = last_finalized_block_number
-                    .map(|n| n + One::one())
-                    .unwrap_or(*header.number());
-
-                // We want all previous details up to, but not including this current block num.
-                let end_block_number = *header.number();
+                    .map(|n| n + 1)
+                    .unwrap_or(end_block_number);
 
                 // Iterate over all of the previous blocks we need headers for, ignoring the current block
                 // (which we already have the header info for):
@@ -129,8 +128,8 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 /// Return a Stream of all block headers starting from `current_block_num` and ending just before `end_num`.
 fn get_block_headers<'a, T: Config>(
     client: &'a Client<T>,
-    mut current_block_num: T::BlockNumber,
-    end_num: T::BlockNumber,
+    mut current_block_num: u128,
+    end_num: u128,
 ) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + 'a {
     // Iterate over all of the previous blocks we need headers for. We go from (start_num..end_num).
     // If start_num == end_num, return nothing.
@@ -141,7 +140,7 @@ fn get_block_headers<'a, T: Config>(
             Some(current_block_num)
         };
 
-        current_block_num = current_block_num + One::one();
+        current_block_num = current_block_num + 1;
         res
     });
 
@@ -149,7 +148,7 @@ fn get_block_headers<'a, T: Config>(
     let block_headers = stream::iter(block_numbers)
         .then(move |n| {
             async move {
-                let hash = client.rpc().block_hash_internal(n).await?;
+                let hash = client.rpc().block_hash(Some(n.into())).await?;
                 let header = client.rpc().header(hash).await?;
                 Ok::<_, BasicError>(header)
             }
