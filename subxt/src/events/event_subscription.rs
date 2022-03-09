@@ -126,11 +126,11 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 }
 
 /// Return a Stream of all block headers starting from `current_block_num` and ending just before `end_num`.
-fn get_block_headers<'a, T: Config>(
-    client: &'a Client<T>,
+fn get_block_headers<T: Config>(
+    client: &'_ Client<T>,
     mut current_block_num: u128,
     end_num: u128,
-) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + 'a {
+) -> impl Stream<Item = Result<T::Header, BasicError>> + Unpin + Send + '_ {
     // Iterate over all of the previous blocks we need headers for. We go from (start_num..end_num).
     // If start_num == end_num, return nothing.
     let block_numbers = std::iter::from_fn(move || {
@@ -140,7 +140,7 @@ fn get_block_headers<'a, T: Config>(
             Some(current_block_num)
         };
 
-        current_block_num = current_block_num + 1;
+        current_block_num += 1;
         res
     });
 
