@@ -163,7 +163,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
         })
         .map(|(_, h)| h);
 
-    // This should spot the gap in the middle and fill it back in.
+    // This should spot any gaps in the middle and fill them back in.
     let all_finalized_blocks = subscribe_to_block_headers_filling_in_gaps(
         &ctx.api.client,
         None,
