@@ -41,7 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
-    let block_number = 1;
+    let block_number = 1u32;
 
     let block_hash = api
         .client
