@@ -343,11 +343,11 @@ impl RuntimeGenerator {
                         ::subxt::events::at::<T, Event>(self.client, block_hash).await
                     }
 
-                    pub async fn subscribe(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                    pub async fn subscribe(&self) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::EventSub<T::Header>, T, Event>, ::subxt::BasicError> {
                         ::subxt::events::subscribe::<T, Event>(self.client).await
                     }
 
-                    pub async fn subscribe_finalized(&self) -> Result<::subxt::events::EventSubscription<'a, T, Event>, ::subxt::BasicError> {
+                    pub async fn subscribe_finalized(&self) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<'a, T::Header>, T, Event>, ::subxt::BasicError> {
                         ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
                     }
                 }

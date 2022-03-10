@@ -46,7 +46,8 @@ pub trait Config: 'static {
         + Default
         + Copy
         + core::hash::Hash
-        + core::str::FromStr;
+        + core::str::FromStr
+        + Into<u64>;
 
     /// The output of the `Hashing` function.
     type Hash: Parameter

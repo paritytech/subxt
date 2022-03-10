@@ -96,16 +96,6 @@ pub enum NumberOrHex {
     Hex(U256),
 }
 
-/// RPC list or value wrapper.
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-#[serde(untagged)]
-pub enum ListOrValue<T> {
-    /// A list of values of given type.
-    List(Vec<T>),
-    /// A single value of given type.
-    Value(T),
-}
-
 /// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
@@ -120,11 +110,19 @@ impl From<NumberOrHex> for BlockNumber {
     }
 }
 
-impl From<u32> for BlockNumber {
-    fn from(x: u32) -> Self {
-        NumberOrHex::Number(x.into()).into()
+// All unsigned ints can be converted into a BlockNumber:
+macro_rules! into_block_number {
+    ($($t: ty)+) => {
+        $(
+            impl From<$t> for BlockNumber {
+                fn from(x: $t) -> Self {
+                    NumberOrHex::Number(x.into()).into()
+                }
+            }
+        )+
     }
 }
+into_block_number!(u8 u16 u32 u64);
 
 /// Arbitrary properties defined in the chain spec as a JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
@@ -285,16 +283,11 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
-        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
+        let block_zero = 0u32;
         let params = rpc_params![block_zero];
-        let list_or_value: ListOrValue<Option<T::Hash>> =
+        let genesis_hash: Option<T::Hash> =
             self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(genesis_hash) => {
-                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-            }
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
+        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
     }
 
     /// Fetch the metadata
@@ -346,13 +339,9 @@ impl<T: Config> Rpc<T> {
         &self,
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, BasicError> {
-        let block_number = block_number.map(ListOrValue::Value);
         let params = rpc_params![block_number];
-        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(hash) => Ok(hash),
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
+        let block_hash = self.client.request("chain_getBlockHash", params).await?;
+        Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
