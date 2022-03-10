@@ -44,7 +44,5 @@ function generate_changelog() {
 # Get latest release tag.
 tag=$($GIT_BIN describe --match "v[0-9]*" --abbrev=0 origin/master) || log_error 'Failed to obtain the latest release tag'
 log_info "Latest release tag: $tag"
-# TODO: verify that the tag is part of an actual release
-$GIT_BIN verify-tag "$tag" > /dev/null 2>&1 || log_error 'Failed to verify tag'
 
 generate_changelog "$tag"
