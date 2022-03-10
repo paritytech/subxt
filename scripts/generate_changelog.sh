@@ -4,6 +4,16 @@
 
 set -eu
 
+function usage() {
+    cat <<HELP_USAGE
+This script obtains the changelog between the latest release tag and origin/master.
+
+Usage: $0 [-h]
+
+    -h  Print help message.
+HELP_USAGE
+}
+
 function log_error() {
     echo "Error:" "$@" >&2
     exit 1
@@ -12,6 +22,15 @@ function log_error() {
 function log_info() {
     echo -e "[+]" "$@"
 }
+
+while getopts "h?" opt; do
+    case "$opt" in
+        h|\?)
+            usage
+            exit 0
+            ;;
+    esac
+done
 
 GIT_BIN=$(which git) || log_error 'git is not installed. Please follow https://github.com/git-guides/install-git for instructions'
 
