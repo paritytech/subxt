@@ -30,6 +30,10 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
+use sp_runtime::{
+    AccountId32,
+    MultiAddress,
+};
 use subxt::{
     Error,
     Signer,
@@ -91,6 +95,44 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
+    Ok(())
+}
+
+#[async_std::test]
+async fn multiple_transfers_work_nonce_incremented(
+) -> Result<(), subxt::Error<DispatchError>> {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();
+    let cxt = test_context().await;
+    let api = &cxt.api;
+
+    let bob_pre = api
+        .storage()
+        .system()
+        .account(bob.account_id(), None)
+        .await?;
+
+    for _ in 0..3 {
+        api
+            .tx()
+            .balances()
+            .transfer(bob_address.clone(), 10_000)
+            .sign_and_submit_then_watch(&alice)
+            .await?
+            .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
+            .await?
+            .wait_for_success()
+            .await?;
+    }
+
+    let bob_post = api
+        .storage()
+        .system()
+        .account(bob.account_id(), None)
+        .await?;
+
+    assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
     Ok(())
 }
 

@@ -324,6 +324,17 @@ impl<T: Config> Rpc<T> {
         Ok(self.client.request("system_version", rpc_params![]).await?)
     }
 
+    /// Fetch the current nonce for the given account ID.
+    pub async fn system_account_next_index(
+        &self,
+        account: &T::AccountId,
+    ) -> Result<T::Index, BasicError> {
+        Ok(self
+            .client
+            .request("system_accountNextIndex", rpc_params![account])
+            .await?)
+    }
+
     /// Get a header
     pub async fn header(
         &self,
