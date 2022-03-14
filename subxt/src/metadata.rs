@@ -19,7 +19,10 @@ use std::{
     convert::TryFrom,
 };
 
-use codec::Error as CodecError;
+use codec::{
+    Encode,
+    Error as CodecError,
+};
 
 use frame_metadata::{
     PalletConstantMetadata,
@@ -38,6 +41,7 @@ use scale_info::{
     form::PortableForm,
     Field,
     Type,
+    TypeDef,
     Variant,
 };
 
@@ -409,11 +413,67 @@ impl<'a> MetadataHashable<'a> {
         MetadataHashable::hash(&bytes)
     }
 
+    fn get_type_def_uid(&self, ty_def: &TypeDef<PortableForm>) -> [u8; 32] {
+        let bytes = match ty_def {
+            TypeDef::Composite(composite) => {
+                let mut bytes = Vec::new();
+                for field in composite.fields() {
+                    bytes.extend(self.get_field_uid(field));
+                }
+                bytes
+            }
+            TypeDef::Variant(variant) => {
+                let mut bytes = Vec::new();
+                for var in variant.variants() {
+                    bytes.extend(self.get_variant_uid(var));
+                }
+                bytes
+            }
+            TypeDef::Sequence(sequence) => {
+                let mut bytes = Vec::new();
+                bytes.extend(self.get_type_uid(sequence.type_param().id()));
+                bytes
+            }
+            TypeDef::Array(array) => {
+                let mut bytes = Vec::new();
+                bytes.extend(array.len().to_be_bytes());
+                bytes.extend(self.get_type_uid(array.type_param().id()));
+                bytes
+            }
+            TypeDef::Tuple(tuple) => {
+                let mut bytes = Vec::new();
+                for field in tuple.fields() {
+                    bytes.extend(self.get_type_uid(field.id()));
+                }
+                bytes
+            }
+            TypeDef::Primitive(primitive) => {
+                let mut bytes = Vec::new();
+                bytes.extend(primitive.encode());
+                bytes
+            }
+            TypeDef::Compact(compact) => {
+                let mut bytes = Vec::new();
+                bytes.extend(self.get_type_uid(compact.type_param().id()));
+                bytes
+            }
+            TypeDef::BitSequence(bitseq) => {
+                let mut bytes = Vec::new();
+                bytes.extend(self.get_type_uid(bitseq.bit_order_type().id()));
+                bytes.extend(self.get_type_uid(bitseq.bit_store_type().id()));
+                bytes
+            }
+        };
+
+        MetadataHashable::hash(&bytes)
+    }
+
     pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
         let ty = self.metadata.types.resolve(id).unwrap();
 
         let mut bytes = ty.path().segments().concat().into_bytes();
-        // Note: extend with recursive typedef.
+        let ty_def = ty.type_def();
+        bytes.extend(self.get_type_def_uid(ty_def));
 
         MetadataHashable::hash(&bytes)
     }
