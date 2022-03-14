@@ -30,7 +30,10 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use sp_runtime::{MultiAddress, AccountId32};
+use sp_runtime::{
+    AccountId32,
+    MultiAddress,
+};
 use subxt::{
     Error,
     Signer,
@@ -96,7 +99,8 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 }
 
 #[async_std::test]
-async fn multiple_transfers_work_nonce_incremented() -> Result<(), subxt::Error<DispatchError>> {
+async fn multiple_transfers_work_nonce_incremented(
+) -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();

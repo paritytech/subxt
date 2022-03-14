@@ -174,7 +174,10 @@ impl<T: Config> Client<T> {
         &self,
         account: &T::AccountId,
     ) -> Result<T::Index, BasicError> {
-        use jsonrpsee::{ rpc_params, core::client::ClientT };
+        use jsonrpsee::{
+            core::client::ClientT,
+            rpc_params,
+        };
         let account_nonce: T::Index = self
             .rpc()
             .client

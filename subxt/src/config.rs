@@ -71,9 +71,7 @@ pub trait Config: 'static {
     type Hashing: Hash<Output = Self::Hash>;
 
     /// The user account identifier type for the runtime.
-    type AccountId: Parameter
-        + Member
-        + serde::Serialize;
+    type AccountId: Parameter + Member + serde::Serialize;
 
     /// The address type. This instead of `<frame_system::Trait::Lookup as StaticLookup>::Source`.
     type Address: Codec + Clone + PartialEq;
