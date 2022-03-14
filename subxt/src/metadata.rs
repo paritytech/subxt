@@ -380,6 +380,15 @@ pub struct MetadataHashable<'a> {
     metadata: &'a RuntimeMetadataLastVersion,
 }
 
+#[repr(u8)]
+enum MetadataHashableIDs {
+    Field,
+    Variant,
+    TypeDef,
+    Type,
+    Pallet,
+}
+
 impl<'a> MetadataHashable<'a> {
     pub fn new(metadata: &'a RuntimeMetadataLastVersion) -> Self {
         Self { metadata }
@@ -390,7 +399,7 @@ impl<'a> MetadataHashable<'a> {
     }
 
     fn get_field_uid(&self, field: &Field<PortableForm>) -> [u8; 32] {
-        let mut bytes = Vec::new();
+        let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
         if let Some(name) = field.name() {
             bytes.extend(name.as_bytes());
@@ -404,7 +413,7 @@ impl<'a> MetadataHashable<'a> {
     }
 
     fn get_variant_uid(&self, var: &Variant<PortableForm>) -> [u8; 32] {
-        let mut bytes = Vec::new();
+        let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
         bytes.extend(var.name().as_bytes());
         for field in var.fields() {
@@ -415,7 +424,9 @@ impl<'a> MetadataHashable<'a> {
     }
 
     fn get_type_def_uid(&self, ty_def: &TypeDef<PortableForm>) -> [u8; 32] {
-        let bytes = match ty_def {
+        let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
+
+        let data = match ty_def {
             TypeDef::Composite(composite) => {
                 let mut bytes = Vec::new();
                 for field in composite.fields() {
@@ -465,14 +476,15 @@ impl<'a> MetadataHashable<'a> {
                 bytes
             }
         };
-
+        bytes.extend(data);
         MetadataHashable::hash(&bytes)
     }
 
     pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
         let ty = self.metadata.types.resolve(id).unwrap();
 
-        let mut bytes = ty.path().segments().concat().into_bytes();
+        let mut bytes = vec![MetadataHashableIDs::Type as u8];
+        bytes.extend(ty.path().segments().concat().into_bytes());
         let ty_def = ty.type_def();
         bytes.extend(self.get_type_def_uid(ty_def));
 
@@ -483,7 +495,7 @@ impl<'a> MetadataHashable<'a> {
         &self,
         pallet: &frame_metadata::PalletMetadata<PortableForm>,
     ) -> [u8; 32] {
-        let mut bytes = Vec::new();
+        let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
 
         if let Some(ref calls) = pallet.calls {
             bytes.extend(self.get_type_uid(calls.ty.id()));
