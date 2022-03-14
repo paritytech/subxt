@@ -36,6 +36,7 @@ use crate::{
 };
 use scale_info::{
     form::PortableForm,
+    Field,
     Type,
     Variant,
 };
@@ -377,5 +378,32 @@ pub struct MetadataHashable<'a> {
 impl<'a> MetadataHashable<'a> {
     pub fn new(metadata: &'a RuntimeMetadataLastVersion) -> Self {
         Self { metadata }
+    }
+
+    fn hash(bytes: &[u8]) -> [u8; 32] {
+        sp_core::hashing::sha2_256(bytes)
+    }
+
+    fn get_field_uid(&self, field: &Field<PortableForm>) -> [u8; 32] {
+        let mut bytes = Vec::new();
+
+        if let Some(name) = field.name() {
+            bytes.extend(name.as_bytes());
+        }
+        if let Some(ty_name) = field.type_name() {
+            bytes.extend(ty_name.as_bytes());
+        }
+        bytes.extend(self.get_type_uid(field.ty().id()));
+
+        MetadataHashable::hash(&bytes)
+    }
+
+    pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
+        let ty = self.metadata.types.resolve(id).unwrap();
+
+        let mut bytes = ty.path().segments().concat().into_bytes();
+        // Note: extend with recursive typedef.
+
+        MetadataHashable::hash(&bytes)
     }
 }
