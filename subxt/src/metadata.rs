@@ -15,7 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use std::{
-    collections::HashMap,
+    collections::{
+        HashMap,
+        HashSet,
+    },
     convert::TryFrom,
 };
 
@@ -398,7 +401,11 @@ impl<'a> MetadataHashable<'a> {
         sp_core::hashing::sha2_256(bytes)
     }
 
-    fn get_field_uid(&self, field: &Field<PortableForm>) -> [u8; 32] {
+    fn get_field_uid(
+        &self,
+        field: &Field<PortableForm>,
+        set: &mut HashSet<u32>,
+    ) -> [u8; 32] {
         let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
         if let Some(name) = field.name() {
@@ -407,55 +414,63 @@ impl<'a> MetadataHashable<'a> {
         if let Some(ty_name) = field.type_name() {
             bytes.extend(ty_name.as_bytes());
         }
-        bytes.extend(self.get_type_uid(field.ty().id()));
+        bytes.extend(self.get_type_uid_internal(field.ty().id(), set));
 
         MetadataHashable::hash(&bytes)
     }
 
-    fn get_variant_uid(&self, var: &Variant<PortableForm>) -> [u8; 32] {
+    fn get_variant_uid(
+        &self,
+        var: &Variant<PortableForm>,
+        set: &mut HashSet<u32>,
+    ) -> [u8; 32] {
         let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
         bytes.extend(var.name().as_bytes());
         for field in var.fields() {
-            bytes.extend(self.get_field_uid(field));
+            bytes.extend(self.get_field_uid(field, set));
         }
 
         MetadataHashable::hash(&bytes)
     }
 
-    fn get_type_def_uid(&self, ty_def: &TypeDef<PortableForm>) -> [u8; 32] {
+    fn get_type_def_uid(
+        &self,
+        ty_def: &TypeDef<PortableForm>,
+        set: &mut HashSet<u32>,
+    ) -> [u8; 32] {
         let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
 
         let data = match ty_def {
             TypeDef::Composite(composite) => {
                 let mut bytes = Vec::new();
                 for field in composite.fields() {
-                    bytes.extend(self.get_field_uid(field));
+                    bytes.extend(self.get_field_uid(field, set));
                 }
                 bytes
             }
             TypeDef::Variant(variant) => {
                 let mut bytes = Vec::new();
                 for var in variant.variants() {
-                    bytes.extend(self.get_variant_uid(var));
+                    bytes.extend(self.get_variant_uid(var, set));
                 }
                 bytes
             }
             TypeDef::Sequence(sequence) => {
                 let mut bytes = Vec::new();
-                bytes.extend(self.get_type_uid(sequence.type_param().id()));
+                bytes.extend(self.get_type_uid_internal(sequence.type_param().id(), set));
                 bytes
             }
             TypeDef::Array(array) => {
                 let mut bytes = Vec::new();
                 bytes.extend(array.len().to_be_bytes());
-                bytes.extend(self.get_type_uid(array.type_param().id()));
+                bytes.extend(self.get_type_uid_internal(array.type_param().id(), set));
                 bytes
             }
             TypeDef::Tuple(tuple) => {
                 let mut bytes = Vec::new();
                 for field in tuple.fields() {
-                    bytes.extend(self.get_type_uid(field.id()));
+                    bytes.extend(self.get_type_uid_internal(field.id(), set));
                 }
                 bytes
             }
@@ -466,13 +481,17 @@ impl<'a> MetadataHashable<'a> {
             }
             TypeDef::Compact(compact) => {
                 let mut bytes = Vec::new();
-                bytes.extend(self.get_type_uid(compact.type_param().id()));
+                bytes.extend(self.get_type_uid_internal(compact.type_param().id(), set));
                 bytes
             }
             TypeDef::BitSequence(bitseq) => {
                 let mut bytes = Vec::new();
-                bytes.extend(self.get_type_uid(bitseq.bit_order_type().id()));
-                bytes.extend(self.get_type_uid(bitseq.bit_store_type().id()));
+                bytes.extend(
+                    self.get_type_uid_internal(bitseq.bit_order_type().id(), set),
+                );
+                bytes.extend(
+                    self.get_type_uid_internal(bitseq.bit_store_type().id(), set),
+                );
                 bytes
             }
         };
@@ -480,15 +499,25 @@ impl<'a> MetadataHashable<'a> {
         MetadataHashable::hash(&bytes)
     }
 
-    pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
+    fn get_type_uid_internal(&self, id: u32, set: &mut HashSet<u32>) -> [u8; 32] {
         let ty = self.metadata.types.resolve(id).unwrap();
 
         let mut bytes = vec![MetadataHashableIDs::Type as u8];
         bytes.extend(ty.path().segments().concat().into_bytes());
+        // Guard against recursive types
+        if !set.insert(id) {
+            return MetadataHashable::hash(&bytes)
+        }
+
         let ty_def = ty.type_def();
-        bytes.extend(self.get_type_def_uid(ty_def));
+        bytes.extend(self.get_type_def_uid(ty_def, set));
 
         MetadataHashable::hash(&bytes)
+    }
+
+    pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
+        let mut set = HashSet::<u32>::new();
+        self.get_type_uid_internal(id, &mut set)
     }
 
     pub fn get_pallet_uid(
@@ -496,20 +525,21 @@ impl<'a> MetadataHashable<'a> {
         pallet: &frame_metadata::PalletMetadata<PortableForm>,
     ) -> [u8; 32] {
         let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
+        let mut set = HashSet::<u32>::new();
 
         if let Some(ref calls) = pallet.calls {
-            bytes.extend(self.get_type_uid(calls.ty.id()));
+            bytes.extend(self.get_type_uid_internal(calls.ty.id(), &mut set));
         }
         if let Some(ref event) = pallet.event {
-            bytes.extend(self.get_type_uid(event.ty.id()));
+            bytes.extend(self.get_type_uid_internal(event.ty.id(), &mut set));
         }
         for constant in pallet.constants.iter() {
             bytes.extend(constant.name.as_bytes());
             bytes.extend(&constant.value);
-            bytes.extend(self.get_type_uid(constant.ty.id()));
+            bytes.extend(self.get_type_uid_internal(constant.ty.id(), &mut set));
         }
         if let Some(ref error) = pallet.error {
-            bytes.extend(self.get_type_uid(error.ty.id()));
+            bytes.extend(self.get_type_uid_internal(error.ty.id(), &mut set));
         }
         if let Some(ref storage) = pallet.storage {
             bytes.extend(storage.prefix.as_bytes());
@@ -518,7 +548,7 @@ impl<'a> MetadataHashable<'a> {
                 bytes.extend(entry.modifier.encode());
                 match &entry.ty {
                     StorageEntryType::Plain(ty) => {
-                        bytes.extend(self.get_type_uid(ty.id()));
+                        bytes.extend(self.get_type_uid_internal(ty.id(), &mut set));
                     }
                     StorageEntryType::Map {
                         hashers,
@@ -526,8 +556,8 @@ impl<'a> MetadataHashable<'a> {
                         value,
                     } => {
                         bytes.extend(hashers.encode());
-                        bytes.extend(self.get_type_uid(key.id()));
-                        bytes.extend(self.get_type_uid(value.id()));
+                        bytes.extend(self.get_type_uid_internal(key.id(), &mut set));
+                        bytes.extend(self.get_type_uid_internal(value.id(), &mut set));
                     }
                 }
                 bytes.extend(&entry.default);
