@@ -14,17 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use codec::{
+    Encode,
+    Error as CodecError,
+};
 use std::{
     collections::{
         HashMap,
         HashSet,
     },
     convert::TryFrom,
-};
-
-use codec::{
-    Encode,
-    Error as CodecError,
+    sync::Mutex,
 };
 
 use frame_metadata::{
@@ -36,6 +36,7 @@ use frame_metadata::{
     StorageEntryType,
     META_RESERVED,
 };
+use lazy_static::lazy_static;
 
 use crate::{
     Call,
@@ -500,6 +501,15 @@ impl<'a> MetadataHashable<'a> {
     }
 
     fn get_type_uid_internal(&self, id: u32, set: &mut HashSet<u32>) -> [u8; 32] {
+        lazy_static! {
+            static ref CACHED_UID: Mutex<HashMap<u32, [u8; 32]>> =
+                Mutex::new(HashMap::new());
+        }
+
+        if let Some(cached) = CACHED_UID.lock().unwrap().get(&id) {
+            return cached.clone()
+        }
+
         let ty = self.metadata.types.resolve(id).unwrap();
 
         let mut bytes = vec![MetadataHashableIDs::Type as u8];
@@ -512,7 +522,9 @@ impl<'a> MetadataHashable<'a> {
         let ty_def = ty.type_def();
         bytes.extend(self.get_type_def_uid(ty_def, set));
 
-        MetadataHashable::hash(&bytes)
+        let uid = MetadataHashable::hash(&bytes);
+        CACHED_UID.lock().unwrap().insert(id, uid);
+        uid
     }
 
     pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
