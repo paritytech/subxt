@@ -37,7 +37,6 @@ use crate::{
     },
     storage::StorageClient,
     transaction::TransactionProgress,
-    AccountData,
     Call,
     Config,
     Metadata,
@@ -171,20 +170,17 @@ impl<T: Config> Client<T> {
     }
 
     /// Fetch the current nonce for the given account id.
-    pub async fn fetch_nonce<A: AccountData>(
+    pub async fn fetch_nonce(
         &self,
         account: &T::AccountId,
-    ) -> Result<T::Index, BasicError>
-    where
-        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Index: Into<<T as Config>::Index>,
-    {
-        let account_storage_entry = A::storage_entry(account.clone().into());
-        let account_data = self
-            .storage()
-            .fetch_or_default(&account_storage_entry, None)
+    ) -> Result<T::Index, BasicError> {
+        use jsonrpsee::{ rpc_params, core::client::ClientT };
+        let account_nonce: T::Index = self
+            .rpc()
+            .client
+            .request("system_accountNextIndex", rpc_params![account])
             .await?;
-        Ok(A::nonce(&account_data).into())
+        Ok(account_nonce)
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
@@ -197,17 +193,16 @@ impl<T: Config> Client<T> {
 }
 
 /// A constructed call ready to be signed and submitted.
-pub struct SubmittableExtrinsic<'client, T: Config, X, A, C, E: Decode, Evs: Decode> {
+pub struct SubmittableExtrinsic<'client, T: Config, X, C, E: Decode, Evs: Decode> {
     client: &'client Client<T>,
     call: C,
-    marker: std::marker::PhantomData<(X, A, E, Evs)>,
+    marker: std::marker::PhantomData<(X, E, Evs)>,
 }
 
-impl<'client, T, X, A, C, E, Evs> SubmittableExtrinsic<'client, T, X, A, C, E, Evs>
+impl<'client, T, X, C, E, Evs> SubmittableExtrinsic<'client, T, X, C, E, Evs>
 where
     T: Config,
     X: SignedExtra<T>,
-    A: AccountData,
     C: Call + Send + Sync,
     E: Decode + HasModuleError,
     Evs: Decode,
@@ -232,8 +227,6 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
-        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -262,8 +255,6 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
-        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -278,13 +269,11 @@ where
     where
         <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
             Send + Sync + 'static,
-        <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
-        <A as AccountData>::Index: Into<<T as Config>::Index>,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            self.client.fetch_nonce::<A>(signer.account_id()).await?
+            self.client.fetch_nonce(signer.account_id()).await?
         };
         let call = self
             .client

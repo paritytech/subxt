@@ -25,7 +25,6 @@ use crate::{
             storage,
         },
         system,
-        DefaultAccountData,
         DispatchError,
     },
     test_context,
@@ -65,7 +64,7 @@ impl ContractsTestContext {
 
     fn contracts_tx(
         &self,
-    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData> {
+    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra> {
         self.cxt.api.tx().contracts()
     }
 
