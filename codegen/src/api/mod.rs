@@ -49,10 +49,8 @@ use crate::{
 use codec::Decode;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
-    PalletMetadata,
     RuntimeMetadata,
     RuntimeMetadataPrefixed,
-    StorageEntryType,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
@@ -61,7 +59,6 @@ use quote::{
     format_ident,
     quote,
 };
-use scale_info::form::PortableForm;
 use std::{
     collections::HashMap,
     fs,
