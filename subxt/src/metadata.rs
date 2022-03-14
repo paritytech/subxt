@@ -366,3 +366,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         })
     }
 }
+
+/// Wrapper to obtain unique deterministic hashed identifiers from portable type ids.
+///
+/// **Note:** Used to determine API compatibility between generated interface and dynamic metadata.
+pub struct MetadataHashable<'a> {
+    metadata: &'a RuntimeMetadataLastVersion,
+}
+
+impl<'a> MetadataHashable<'a> {
+    pub fn new(metadata: &'a RuntimeMetadataLastVersion) -> Self {
+        Self { metadata }
+    }
+}
