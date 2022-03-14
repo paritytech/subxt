@@ -30,6 +30,7 @@ use frame_metadata::{
     RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
     StorageEntryMetadata,
+    StorageEntryType,
     META_RESERVED,
 };
 
@@ -474,6 +475,52 @@ impl<'a> MetadataHashable<'a> {
         let mut bytes = ty.path().segments().concat().into_bytes();
         let ty_def = ty.type_def();
         bytes.extend(self.get_type_def_uid(ty_def));
+
+        MetadataHashable::hash(&bytes)
+    }
+
+    pub fn get_pallet_uid(
+        &self,
+        pallet: &frame_metadata::PalletMetadata<PortableForm>,
+    ) -> [u8; 32] {
+        let mut bytes = Vec::new();
+
+        if let Some(ref calls) = pallet.calls {
+            bytes.extend(self.get_type_uid(calls.ty.id()));
+        }
+        if let Some(ref event) = pallet.event {
+            bytes.extend(self.get_type_uid(event.ty.id()));
+        }
+        for constant in pallet.constants.iter() {
+            bytes.extend(constant.name.as_bytes());
+            bytes.extend(&constant.value);
+            bytes.extend(self.get_type_uid(constant.ty.id()));
+        }
+        if let Some(ref error) = pallet.error {
+            bytes.extend(self.get_type_uid(error.ty.id()));
+        }
+        if let Some(ref storage) = pallet.storage {
+            bytes.extend(storage.prefix.as_bytes());
+            for entry in storage.entries.iter() {
+                bytes.extend(entry.name.as_bytes());
+                bytes.extend(entry.modifier.encode());
+                match &entry.ty {
+                    StorageEntryType::Plain(ty) => {
+                        bytes.extend(self.get_type_uid(ty.id()));
+                    }
+                    StorageEntryType::Map {
+                        hashers,
+                        key,
+                        value,
+                    } => {
+                        bytes.extend(hashers.encode());
+                        bytes.extend(self.get_type_uid(key.id()));
+                        bytes.extend(self.get_type_uid(value.id()));
+                    }
+                }
+                bytes.extend(&entry.default);
+            }
+        }
 
         MetadataHashable::hash(&bytes)
     }
