@@ -398,6 +398,17 @@ impl<'a> MetadataHashable<'a> {
         MetadataHashable::hash(&bytes)
     }
 
+    fn get_variant_uid(&self, var: &Variant<PortableForm>) -> [u8; 32] {
+        let mut bytes = Vec::new();
+
+        bytes.extend(var.name().as_bytes());
+        for field in var.fields() {
+            bytes.extend(self.get_field_uid(field));
+        }
+
+        MetadataHashable::hash(&bytes)
+    }
+
     pub fn get_type_uid(&self, id: u32) -> [u8; 32] {
         let ty = self.metadata.types.resolve(id).unwrap();
 
