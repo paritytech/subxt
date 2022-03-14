@@ -169,23 +169,6 @@ impl<T: Config> Client<T> {
         StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
     }
 
-    /// Fetch the current nonce for the given account id.
-    pub async fn fetch_nonce(
-        &self,
-        account: &T::AccountId,
-    ) -> Result<T::Index, BasicError> {
-        use jsonrpsee::{
-            core::client::ClientT,
-            rpc_params,
-        };
-        let account_nonce: T::Index = self
-            .rpc()
-            .client
-            .request("system_accountNextIndex", rpc_params![account])
-            .await?;
-        Ok(account_nonce)
-    }
-
     /// Convert the client to a runtime api wrapper for custom runtime access.
     ///
     /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
@@ -276,7 +259,10 @@ where
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
-            self.client.fetch_nonce(signer.account_id()).await?
+            self.client
+                .rpc()
+                .system_account_next_index(signer.account_id())
+                .await?
         };
         let call = self
             .client
