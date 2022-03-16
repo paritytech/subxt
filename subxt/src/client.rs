@@ -41,10 +41,12 @@ use crate::{
     Call,
     Config,
     Metadata,
+    MetadataError,
 };
 use codec::Decode;
 use derivative::Derivative;
 use std::sync::Arc;
+use heck::ToSnakeCase as _;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -193,6 +195,22 @@ impl<T: Config> Client<T> {
     /// to the target runtime.
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
+    }
+
+    /// Obtain the pallet unique identifier.
+    pub fn pallet_uid(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
+        let metadata = self.metadata.runtime_metadata();
+        // Note: fetch name from codegen to avoid `to_snake_case()`.
+        let pallet = match metadata
+            .pallets
+            .iter()
+            .find(|pallet| pallet.name.to_snake_case() == name)
+        {
+            Some(pallet) => pallet,
+            _ => return Err(MetadataError::PalletNotFound(name.to_string())),
+        };
+
+        Ok(self.metadata.metadata_hashable().get_pallet_uid(pallet))
     }
 }
 

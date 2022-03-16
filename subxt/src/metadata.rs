@@ -130,6 +130,11 @@ impl Metadata {
     pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
         &self.metadata.metadata()
     }
+
+    /// Return the hashable metadata wrapper.
+    pub fn metadata_hashable(&self) -> &MetadataHashable {
+        &self.metadata
+    }
 }
 
 /// Metadata for a specific pallet.
