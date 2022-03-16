@@ -79,6 +79,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            37u8, 183u8, 119u8, 167u8, 8u8, 95u8, 41u8, 8u8, 32u8, 100u8, 142u8, 67u8,
+            123u8, 89u8, 58u8, 63u8, 169u8, 232u8, 182u8, 162u8, 216u8, 158u8, 39u8,
+            210u8, 205u8, 66u8, 135u8, 137u8, 202u8, 165u8, 185u8, 74u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -875,6 +880,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            113u8, 36u8, 228u8, 165u8, 87u8, 212u8, 39u8, 103u8, 182u8, 184u8, 213u8,
+            203u8, 237u8, 44u8, 26u8, 245u8, 144u8, 224u8, 238u8, 213u8, 40u8, 55u8,
+            102u8, 40u8, 210u8, 82u8, 242u8, 192u8, 169u8, 190u8, 193u8, 122u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -1317,6 +1327,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            0u8, 48u8, 196u8, 87u8, 93u8, 145u8, 176u8, 146u8, 160u8, 3u8, 225u8, 64u8,
+            101u8, 194u8, 153u8, 127u8, 198u8, 199u8, 148u8, 218u8, 73u8, 161u8, 46u8,
+            200u8, 182u8, 30u8, 48u8, 124u8, 162u8, 161u8, 210u8, 138u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -1557,6 +1572,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            232u8, 37u8, 32u8, 78u8, 202u8, 94u8, 55u8, 22u8, 241u8, 121u8, 180u8, 50u8,
+            12u8, 28u8, 90u8, 100u8, 186u8, 125u8, 113u8, 81u8, 167u8, 216u8, 250u8,
+            224u8, 227u8, 169u8, 223u8, 159u8, 104u8, 30u8, 37u8, 164u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -2035,6 +2055,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            140u8, 185u8, 224u8, 32u8, 110u8, 148u8, 133u8, 6u8, 99u8, 111u8, 242u8,
+            12u8, 7u8, 114u8, 141u8, 46u8, 19u8, 7u8, 107u8, 194u8, 15u8, 148u8, 165u8,
+            60u8, 161u8, 109u8, 140u8, 229u8, 194u8, 228u8, 136u8, 14u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -2148,6 +2173,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            172u8, 23u8, 172u8, 62u8, 112u8, 210u8, 164u8, 79u8, 37u8, 74u8, 254u8,
+            135u8, 92u8, 245u8, 116u8, 102u8, 59u8, 151u8, 3u8, 39u8, 228u8, 65u8, 43u8,
+            171u8, 93u8, 178u8, 94u8, 86u8, 13u8, 162u8, 253u8, 140u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -2417,6 +2447,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            72u8, 192u8, 22u8, 110u8, 23u8, 163u8, 29u8, 89u8, 222u8, 171u8, 180u8,
+            214u8, 144u8, 228u8, 99u8, 148u8, 20u8, 202u8, 100u8, 252u8, 74u8, 135u8,
+            203u8, 180u8, 117u8, 18u8, 35u8, 14u8, 180u8, 108u8, 255u8, 238u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -2935,6 +2970,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            131u8, 76u8, 30u8, 87u8, 38u8, 114u8, 180u8, 253u8, 85u8, 146u8, 253u8,
+            131u8, 81u8, 29u8, 176u8, 244u8, 235u8, 56u8, 187u8, 207u8, 227u8, 172u8,
+            219u8, 109u8, 21u8, 123u8, 214u8, 146u8, 157u8, 194u8, 220u8, 187u8,
+        ];
         pub mod storage {
             use super::runtime_types;
             pub struct NextFeeMultiplier;
@@ -3030,6 +3070,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            43u8, 34u8, 171u8, 115u8, 51u8, 70u8, 118u8, 203u8, 126u8, 215u8, 232u8,
+            35u8, 126u8, 73u8, 17u8, 226u8, 116u8, 157u8, 216u8, 70u8, 194u8, 176u8,
+            70u8, 200u8, 183u8, 30u8, 213u8, 107u8, 24u8, 94u8, 171u8, 183u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -3185,6 +3230,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            174u8, 193u8, 88u8, 209u8, 193u8, 253u8, 157u8, 137u8, 74u8, 20u8, 34u8,
+            38u8, 52u8, 130u8, 151u8, 216u8, 17u8, 255u8, 157u8, 95u8, 180u8, 220u8,
+            148u8, 164u8, 138u8, 102u8, 116u8, 39u8, 249u8, 65u8, 129u8, 223u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -5101,6 +5151,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            174u8, 125u8, 4u8, 143u8, 19u8, 168u8, 195u8, 16u8, 204u8, 99u8, 150u8,
+            225u8, 207u8, 136u8, 216u8, 245u8, 207u8, 55u8, 54u8, 101u8, 22u8, 61u8,
+            177u8, 223u8, 51u8, 130u8, 237u8, 184u8, 252u8, 210u8, 50u8, 237u8,
+        ];
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -5257,12 +5312,22 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            229u8, 45u8, 156u8, 80u8, 140u8, 80u8, 35u8, 71u8, 52u8, 77u8, 140u8, 7u8,
+            173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
+            240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
+        ];
     }
     pub mod session {
         use super::{
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            112u8, 163u8, 54u8, 231u8, 25u8, 201u8, 181u8, 124u8, 24u8, 14u8, 192u8,
+            71u8, 175u8, 250u8, 105u8, 233u8, 144u8, 35u8, 1u8, 114u8, 122u8, 193u8,
+            206u8, 23u8, 115u8, 128u8, 236u8, 11u8, 4u8, 133u8, 8u8, 161u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -5531,6 +5596,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            198u8, 21u8, 69u8, 78u8, 145u8, 119u8, 31u8, 21u8, 122u8, 74u8, 60u8, 138u8,
+            116u8, 22u8, 14u8, 70u8, 93u8, 254u8, 109u8, 182u8, 77u8, 120u8, 30u8, 57u8,
+            255u8, 9u8, 172u8, 239u8, 50u8, 122u8, 76u8, 245u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -5842,6 +5912,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            56u8, 234u8, 129u8, 99u8, 110u8, 26u8, 138u8, 65u8, 209u8, 75u8, 129u8,
+            185u8, 110u8, 73u8, 29u8, 133u8, 34u8, 220u8, 88u8, 11u8, 168u8, 126u8,
+            191u8, 92u8, 152u8, 249u8, 115u8, 125u8, 232u8, 96u8, 25u8, 218u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -6079,12 +6154,22 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            229u8, 45u8, 156u8, 80u8, 140u8, 80u8, 35u8, 71u8, 52u8, 77u8, 140u8, 7u8,
+            173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
+            240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
+        ];
     }
     pub mod democracy {
         use super::{
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            205u8, 183u8, 152u8, 255u8, 30u8, 134u8, 54u8, 237u8, 55u8, 242u8, 173u8,
+            190u8, 33u8, 172u8, 212u8, 39u8, 85u8, 136u8, 114u8, 104u8, 7u8, 138u8,
+            144u8, 53u8, 175u8, 68u8, 73u8, 6u8, 151u8, 120u8, 130u8, 8u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -7458,6 +7543,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            26u8, 150u8, 56u8, 255u8, 77u8, 216u8, 95u8, 99u8, 91u8, 121u8, 131u8, 158u8,
+            60u8, 121u8, 184u8, 73u8, 183u8, 56u8, 125u8, 210u8, 34u8, 42u8, 135u8, 16u8,
+            68u8, 114u8, 186u8, 203u8, 180u8, 192u8, 113u8, 102u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -7908,6 +7998,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            250u8, 107u8, 157u8, 244u8, 210u8, 77u8, 10u8, 12u8, 208u8, 212u8, 143u8,
+            130u8, 31u8, 242u8, 246u8, 33u8, 186u8, 153u8, 189u8, 188u8, 67u8, 46u8,
+            184u8, 205u8, 235u8, 160u8, 165u8, 154u8, 99u8, 52u8, 219u8, 162u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -8358,6 +8453,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            104u8, 149u8, 185u8, 243u8, 222u8, 53u8, 113u8, 84u8, 220u8, 255u8, 91u8,
+            67u8, 185u8, 181u8, 56u8, 239u8, 234u8, 255u8, 244u8, 71u8, 188u8, 134u8,
+            120u8, 231u8, 115u8, 150u8, 136u8, 135u8, 209u8, 107u8, 89u8, 30u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -8826,6 +8926,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            212u8, 91u8, 245u8, 54u8, 45u8, 43u8, 60u8, 198u8, 124u8, 139u8, 237u8,
+            237u8, 191u8, 98u8, 117u8, 221u8, 105u8, 32u8, 103u8, 242u8, 246u8, 6u8,
+            75u8, 244u8, 192u8, 86u8, 46u8, 17u8, 76u8, 83u8, 18u8, 184u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -9105,6 +9210,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            104u8, 134u8, 242u8, 40u8, 43u8, 158u8, 211u8, 15u8, 203u8, 121u8, 213u8,
+            207u8, 175u8, 162u8, 15u8, 218u8, 55u8, 207u8, 42u8, 30u8, 28u8, 230u8,
+            194u8, 199u8, 239u8, 91u8, 76u8, 3u8, 117u8, 195u8, 204u8, 36u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -9471,6 +9581,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            189u8, 221u8, 77u8, 183u8, 55u8, 17u8, 231u8, 74u8, 151u8, 25u8, 187u8, 55u8,
+            255u8, 163u8, 250u8, 182u8, 253u8, 20u8, 235u8, 121u8, 184u8, 118u8, 232u8,
+            243u8, 124u8, 182u8, 208u8, 155u8, 253u8, 90u8, 204u8, 181u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -9876,6 +9991,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            171u8, 51u8, 89u8, 147u8, 8u8, 44u8, 198u8, 231u8, 255u8, 195u8, 200u8, 44u8,
+            104u8, 166u8, 186u8, 63u8, 228u8, 143u8, 88u8, 239u8, 211u8, 94u8, 28u8,
+            192u8, 129u8, 65u8, 2u8, 60u8, 108u8, 83u8, 233u8, 169u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -10190,6 +10310,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            135u8, 3u8, 241u8, 52u8, 13u8, 111u8, 74u8, 46u8, 225u8, 21u8, 81u8, 144u8,
+            138u8, 162u8, 210u8, 26u8, 97u8, 93u8, 117u8, 148u8, 96u8, 21u8, 246u8,
+            148u8, 127u8, 111u8, 215u8, 124u8, 248u8, 23u8, 234u8, 134u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -10371,6 +10496,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            139u8, 121u8, 92u8, 57u8, 238u8, 91u8, 211u8, 110u8, 148u8, 141u8, 200u8,
+            207u8, 108u8, 104u8, 94u8, 2u8, 196u8, 78u8, 127u8, 76u8, 65u8, 243u8, 141u8,
+            167u8, 165u8, 135u8, 109u8, 167u8, 222u8, 81u8, 81u8, 190u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -11146,6 +11276,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            73u8, 41u8, 85u8, 33u8, 187u8, 142u8, 141u8, 146u8, 60u8, 235u8, 61u8, 3u8,
+            53u8, 168u8, 127u8, 180u8, 220u8, 230u8, 208u8, 37u8, 200u8, 40u8, 84u8,
+            48u8, 135u8, 65u8, 115u8, 231u8, 100u8, 180u8, 93u8, 144u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -11699,6 +11834,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            182u8, 7u8, 205u8, 124u8, 196u8, 237u8, 158u8, 248u8, 92u8, 132u8, 120u8,
+            248u8, 140u8, 253u8, 83u8, 0u8, 106u8, 62u8, 43u8, 109u8, 199u8, 175u8, 37u8,
+            234u8, 98u8, 224u8, 61u8, 226u8, 5u8, 156u8, 65u8, 1u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -12083,6 +12223,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            193u8, 164u8, 64u8, 58u8, 15u8, 0u8, 122u8, 3u8, 216u8, 82u8, 183u8, 51u8,
+            231u8, 248u8, 105u8, 195u8, 85u8, 252u8, 225u8, 71u8, 34u8, 33u8, 128u8,
+            133u8, 63u8, 176u8, 85u8, 168u8, 75u8, 40u8, 193u8, 226u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -12637,6 +12782,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            239u8, 74u8, 197u8, 81u8, 183u8, 251u8, 104u8, 105u8, 1u8, 211u8, 5u8, 78u8,
+            211u8, 32u8, 171u8, 132u8, 16u8, 165u8, 152u8, 62u8, 72u8, 88u8, 43u8, 0u8,
+            113u8, 109u8, 216u8, 216u8, 208u8, 175u8, 215u8, 157u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -13006,6 +13156,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            251u8, 89u8, 100u8, 156u8, 203u8, 73u8, 67u8, 119u8, 217u8, 204u8, 207u8,
+            80u8, 107u8, 252u8, 77u8, 78u8, 123u8, 126u8, 176u8, 124u8, 195u8, 32u8,
+            137u8, 185u8, 243u8, 183u8, 84u8, 46u8, 87u8, 55u8, 44u8, 170u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -13537,6 +13692,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            16u8, 188u8, 245u8, 125u8, 87u8, 13u8, 191u8, 122u8, 221u8, 35u8, 181u8,
+            216u8, 195u8, 88u8, 225u8, 213u8, 24u8, 224u8, 137u8, 157u8, 249u8, 68u8,
+            175u8, 5u8, 35u8, 72u8, 125u8, 86u8, 10u8, 122u8, 114u8, 19u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -13904,12 +14064,22 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            229u8, 45u8, 156u8, 80u8, 140u8, 80u8, 35u8, 71u8, 52u8, 77u8, 140u8, 7u8,
+            173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
+            240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
+        ];
     }
     pub mod configuration {
         use super::{
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            154u8, 93u8, 248u8, 155u8, 44u8, 183u8, 198u8, 149u8, 118u8, 144u8, 22u8,
+            100u8, 96u8, 57u8, 132u8, 36u8, 234u8, 255u8, 47u8, 160u8, 0u8, 109u8, 105u8,
+            24u8, 43u8, 2u8, 117u8, 36u8, 135u8, 137u8, 164u8, 167u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -15259,6 +15429,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            137u8, 243u8, 66u8, 10u8, 155u8, 132u8, 249u8, 34u8, 185u8, 115u8, 252u8,
+            127u8, 103u8, 36u8, 179u8, 178u8, 210u8, 200u8, 155u8, 228u8, 195u8, 176u8,
+            106u8, 90u8, 17u8, 195u8, 159u8, 3u8, 48u8, 86u8, 210u8, 5u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -15363,6 +15538,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            28u8, 221u8, 124u8, 169u8, 15u8, 131u8, 222u8, 153u8, 200u8, 125u8, 26u8,
+            9u8, 161u8, 54u8, 185u8, 82u8, 154u8, 161u8, 225u8, 23u8, 160u8, 163u8, 56u8,
+            134u8, 171u8, 1u8, 88u8, 120u8, 63u8, 254u8, 164u8, 223u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -15539,6 +15719,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            198u8, 171u8, 106u8, 37u8, 160u8, 45u8, 203u8, 51u8, 166u8, 163u8, 176u8,
+            76u8, 165u8, 26u8, 182u8, 12u8, 73u8, 83u8, 91u8, 218u8, 189u8, 29u8, 99u8,
+            76u8, 216u8, 115u8, 144u8, 95u8, 61u8, 114u8, 211u8, 15u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -15655,6 +15840,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            16u8, 241u8, 107u8, 11u8, 247u8, 92u8, 121u8, 194u8, 29u8, 120u8, 111u8,
+            127u8, 247u8, 22u8, 68u8, 47u8, 0u8, 233u8, 236u8, 156u8, 0u8, 58u8, 69u8,
+            31u8, 3u8, 175u8, 136u8, 159u8, 152u8, 253u8, 139u8, 120u8,
+        ];
         pub mod storage {
             use super::runtime_types;
             pub struct ValidatorGroups;
@@ -15789,6 +15979,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            146u8, 162u8, 158u8, 139u8, 57u8, 22u8, 205u8, 124u8, 41u8, 196u8, 41u8,
+            50u8, 110u8, 49u8, 129u8, 227u8, 56u8, 241u8, 0u8, 117u8, 140u8, 149u8,
+            194u8, 151u8, 22u8, 170u8, 36u8, 221u8, 245u8, 129u8, 131u8, 216u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -16727,6 +16922,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            66u8, 55u8, 21u8, 157u8, 13u8, 89u8, 9u8, 24u8, 3u8, 66u8, 108u8, 168u8,
+            63u8, 25u8, 112u8, 105u8, 143u8, 161u8, 100u8, 38u8, 32u8, 102u8, 206u8,
+            216u8, 85u8, 174u8, 115u8, 254u8, 241u8, 132u8, 56u8, 155u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -16825,6 +17025,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            232u8, 243u8, 212u8, 63u8, 171u8, 55u8, 54u8, 246u8, 55u8, 9u8, 185u8, 106u8,
+            167u8, 114u8, 38u8, 185u8, 155u8, 80u8, 127u8, 196u8, 44u8, 78u8, 43u8, 82u8,
+            28u8, 207u8, 228u8, 218u8, 108u8, 8u8, 236u8, 18u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -16940,6 +17145,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            169u8, 133u8, 49u8, 47u8, 18u8, 213u8, 145u8, 139u8, 141u8, 19u8, 214u8,
+            193u8, 94u8, 103u8, 228u8, 22u8, 48u8, 75u8, 33u8, 59u8, 156u8, 187u8, 207u8,
+            42u8, 205u8, 122u8, 221u8, 39u8, 62u8, 88u8, 236u8, 3u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -17238,6 +17448,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            10u8, 60u8, 54u8, 51u8, 14u8, 45u8, 38u8, 41u8, 75u8, 156u8, 61u8, 47u8,
+            123u8, 86u8, 145u8, 140u8, 122u8, 120u8, 195u8, 141u8, 22u8, 100u8, 243u8,
+            77u8, 233u8, 119u8, 150u8, 255u8, 40u8, 64u8, 71u8, 213u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -17879,6 +18094,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            157u8, 209u8, 134u8, 215u8, 23u8, 139u8, 0u8, 61u8, 92u8, 225u8, 119u8, 54u8,
+            141u8, 198u8, 224u8, 100u8, 115u8, 37u8, 244u8, 74u8, 247u8, 50u8, 201u8,
+            5u8, 248u8, 251u8, 145u8, 108u8, 66u8, 70u8, 44u8, 114u8,
+        ];
         pub mod storage {
             use super::runtime_types;
             pub struct AssignmentKeysUnsafe;
@@ -17970,6 +18190,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            20u8, 159u8, 244u8, 174u8, 158u8, 44u8, 3u8, 39u8, 13u8, 106u8, 33u8, 145u8,
+            95u8, 7u8, 42u8, 219u8, 58u8, 146u8, 151u8, 210u8, 250u8, 35u8, 29u8, 143u8,
+            184u8, 138u8, 171u8, 53u8, 150u8, 69u8, 75u8, 186u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -18329,6 +18554,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            1u8, 22u8, 56u8, 250u8, 65u8, 9u8, 164u8, 9u8, 21u8, 130u8, 181u8, 181u8,
+            62u8, 170u8, 48u8, 240u8, 22u8, 66u8, 213u8, 1u8, 236u8, 237u8, 136u8, 95u8,
+            196u8, 190u8, 85u8, 55u8, 43u8, 111u8, 13u8, 136u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -18547,6 +18777,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            163u8, 72u8, 232u8, 229u8, 23u8, 6u8, 45u8, 88u8, 33u8, 153u8, 112u8, 147u8,
+            189u8, 14u8, 135u8, 18u8, 243u8, 167u8, 162u8, 192u8, 140u8, 112u8, 68u8,
+            69u8, 7u8, 26u8, 134u8, 135u8, 26u8, 74u8, 40u8, 63u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -18910,6 +19145,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            11u8, 28u8, 251u8, 185u8, 217u8, 161u8, 30u8, 99u8, 18u8, 38u8, 11u8, 2u8,
+            55u8, 163u8, 113u8, 43u8, 23u8, 227u8, 89u8, 9u8, 239u8, 60u8, 62u8, 61u8,
+            67u8, 16u8, 141u8, 48u8, 204u8, 107u8, 200u8, 191u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -19452,6 +19692,11 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        pub static PALLET_HASH: [u8; 32] = [
+            207u8, 40u8, 140u8, 174u8, 78u8, 207u8, 4u8, 209u8, 44u8, 118u8, 112u8,
+            198u8, 17u8, 36u8, 192u8, 107u8, 206u8, 213u8, 76u8, 204u8, 177u8, 116u8,
+            62u8, 250u8, 209u8, 133u8, 108u8, 17u8, 159u8, 212u8, 240u8, 127u8,
+        ];
         pub mod calls {
             use super::{
                 root_mod,
@@ -27849,14 +28094,28 @@ pub mod api {
         }
         pub async fn subscribe(
             &self,
-        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::EventSub<T::Header>, T, Event>, ::subxt::BasicError>
-        {
+        ) -> Result<
+            ::subxt::events::EventSubscription<
+                'a,
+                ::subxt::events::EventSub<T::Header>,
+                T,
+                Event,
+            >,
+            ::subxt::BasicError,
+        > {
             ::subxt::events::subscribe::<T, Event>(self.client).await
         }
         pub async fn subscribe_finalized(
             &self,
-        ) -> Result<::subxt::events::EventSubscription<'a, ::subxt::events::FinalizedEventSub<'a, T::Header>, T, Event>, ::subxt::BasicError>
-        {
+        ) -> Result<
+            ::subxt::events::EventSubscription<
+                'a,
+                ::subxt::events::FinalizedEventSub<'a, T::Header>,
+                T,
+                Event,
+            >,
+            ::subxt::BasicError,
+        > {
             ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
         }
     }
@@ -27961,148 +28220,582 @@ pub mod api {
     where
         T: ::subxt::Config,
     {
-        pub fn system(&self) -> system::storage::StorageApi<'a, T> {
-            system::storage::StorageApi::new(self.client)
+        pub fn system(
+            &self,
+        ) -> Result<system::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(system))?;
+            if system::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(system),
+                ))
+            } else {
+                Ok(system::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn scheduler(&self) -> scheduler::storage::StorageApi<'a, T> {
-            scheduler::storage::StorageApi::new(self.client)
+        pub fn scheduler(
+            &self,
+        ) -> Result<scheduler::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(scheduler))?;
+            if scheduler::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(scheduler),
+                ))
+            } else {
+                Ok(scheduler::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn preimage(&self) -> preimage::storage::StorageApi<'a, T> {
-            preimage::storage::StorageApi::new(self.client)
+        pub fn preimage(
+            &self,
+        ) -> Result<preimage::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(preimage))?;
+            if preimage::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(preimage),
+                ))
+            } else {
+                Ok(preimage::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn babe(&self) -> babe::storage::StorageApi<'a, T> {
-            babe::storage::StorageApi::new(self.client)
+        pub fn babe(
+            &self,
+        ) -> Result<babe::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(babe))?;
+            if babe::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(babe),
+                ))
+            } else {
+                Ok(babe::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn timestamp(&self) -> timestamp::storage::StorageApi<'a, T> {
-            timestamp::storage::StorageApi::new(self.client)
+        pub fn timestamp(
+            &self,
+        ) -> Result<timestamp::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(timestamp))?;
+            if timestamp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(timestamp),
+                ))
+            } else {
+                Ok(timestamp::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn indices(&self) -> indices::storage::StorageApi<'a, T> {
-            indices::storage::StorageApi::new(self.client)
+        pub fn indices(
+            &self,
+        ) -> Result<indices::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(indices))?;
+            if indices::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(indices),
+                ))
+            } else {
+                Ok(indices::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn balances(&self) -> balances::storage::StorageApi<'a, T> {
-            balances::storage::StorageApi::new(self.client)
+        pub fn balances(
+            &self,
+        ) -> Result<balances::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(balances))?;
+            if balances::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(balances),
+                ))
+            } else {
+                Ok(balances::storage::StorageApi::new(self.client))
+            }
         }
         pub fn transaction_payment(
             &self,
-        ) -> transaction_payment::storage::StorageApi<'a, T> {
-            transaction_payment::storage::StorageApi::new(self.client)
+        ) -> Result<transaction_payment::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(transaction_payment))?;
+            if transaction_payment::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(transaction_payment),
+                ))
+            } else {
+                Ok(transaction_payment::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn authorship(&self) -> authorship::storage::StorageApi<'a, T> {
-            authorship::storage::StorageApi::new(self.client)
+        pub fn authorship(
+            &self,
+        ) -> Result<authorship::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(authorship))?;
+            if authorship::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(authorship),
+                ))
+            } else {
+                Ok(authorship::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn staking(&self) -> staking::storage::StorageApi<'a, T> {
-            staking::storage::StorageApi::new(self.client)
+        pub fn staking(
+            &self,
+        ) -> Result<staking::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(staking))?;
+            if staking::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(staking),
+                ))
+            } else {
+                Ok(staking::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn offences(&self) -> offences::storage::StorageApi<'a, T> {
-            offences::storage::StorageApi::new(self.client)
+        pub fn offences(
+            &self,
+        ) -> Result<offences::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(offences))?;
+            if offences::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(offences),
+                ))
+            } else {
+                Ok(offences::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn session(&self) -> session::storage::StorageApi<'a, T> {
-            session::storage::StorageApi::new(self.client)
+        pub fn session(
+            &self,
+        ) -> Result<session::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(session))?;
+            if session::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(session),
+                ))
+            } else {
+                Ok(session::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn grandpa(&self) -> grandpa::storage::StorageApi<'a, T> {
-            grandpa::storage::StorageApi::new(self.client)
+        pub fn grandpa(
+            &self,
+        ) -> Result<grandpa::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(grandpa))?;
+            if grandpa::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(grandpa),
+                ))
+            } else {
+                Ok(grandpa::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn im_online(&self) -> im_online::storage::StorageApi<'a, T> {
-            im_online::storage::StorageApi::new(self.client)
+        pub fn im_online(
+            &self,
+        ) -> Result<im_online::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(im_online))?;
+            if im_online::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(im_online),
+                ))
+            } else {
+                Ok(im_online::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn democracy(&self) -> democracy::storage::StorageApi<'a, T> {
-            democracy::storage::StorageApi::new(self.client)
+        pub fn democracy(
+            &self,
+        ) -> Result<democracy::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(democracy))?;
+            if democracy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(democracy),
+                ))
+            } else {
+                Ok(democracy::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn council(&self) -> council::storage::StorageApi<'a, T> {
-            council::storage::StorageApi::new(self.client)
+        pub fn council(
+            &self,
+        ) -> Result<council::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(council))?;
+            if council::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(council),
+                ))
+            } else {
+                Ok(council::storage::StorageApi::new(self.client))
+            }
         }
         pub fn technical_committee(
             &self,
-        ) -> technical_committee::storage::StorageApi<'a, T> {
-            technical_committee::storage::StorageApi::new(self.client)
+        ) -> Result<technical_committee::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(technical_committee))?;
+            if technical_committee::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(technical_committee),
+                ))
+            } else {
+                Ok(technical_committee::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn phragmen_election(&self) -> phragmen_election::storage::StorageApi<'a, T> {
-            phragmen_election::storage::StorageApi::new(self.client)
+        pub fn phragmen_election(
+            &self,
+        ) -> Result<phragmen_election::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(phragmen_election))?;
+            if phragmen_election::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(phragmen_election),
+                ))
+            } else {
+                Ok(phragmen_election::storage::StorageApi::new(self.client))
+            }
         }
         pub fn technical_membership(
             &self,
-        ) -> technical_membership::storage::StorageApi<'a, T> {
-            technical_membership::storage::StorageApi::new(self.client)
+        ) -> Result<
+            technical_membership::storage::StorageApi<'a, T>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(technical_membership))?;
+            if technical_membership::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(technical_membership),
+                ))
+            } else {
+                Ok(technical_membership::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn treasury(&self) -> treasury::storage::StorageApi<'a, T> {
-            treasury::storage::StorageApi::new(self.client)
+        pub fn treasury(
+            &self,
+        ) -> Result<treasury::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(treasury))?;
+            if treasury::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(treasury),
+                ))
+            } else {
+                Ok(treasury::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn claims(&self) -> claims::storage::StorageApi<'a, T> {
-            claims::storage::StorageApi::new(self.client)
+        pub fn claims(
+            &self,
+        ) -> Result<claims::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(claims))?;
+            if claims::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(claims),
+                ))
+            } else {
+                Ok(claims::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn vesting(&self) -> vesting::storage::StorageApi<'a, T> {
-            vesting::storage::StorageApi::new(self.client)
+        pub fn vesting(
+            &self,
+        ) -> Result<vesting::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(vesting))?;
+            if vesting::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(vesting),
+                ))
+            } else {
+                Ok(vesting::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn identity(&self) -> identity::storage::StorageApi<'a, T> {
-            identity::storage::StorageApi::new(self.client)
+        pub fn identity(
+            &self,
+        ) -> Result<identity::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(identity))?;
+            if identity::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(identity),
+                ))
+            } else {
+                Ok(identity::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn proxy(&self) -> proxy::storage::StorageApi<'a, T> {
-            proxy::storage::StorageApi::new(self.client)
+        pub fn proxy(
+            &self,
+        ) -> Result<proxy::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(proxy))?;
+            if proxy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(proxy),
+                ))
+            } else {
+                Ok(proxy::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn multisig(&self) -> multisig::storage::StorageApi<'a, T> {
-            multisig::storage::StorageApi::new(self.client)
+        pub fn multisig(
+            &self,
+        ) -> Result<multisig::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(multisig))?;
+            if multisig::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(multisig),
+                ))
+            } else {
+                Ok(multisig::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn bounties(&self) -> bounties::storage::StorageApi<'a, T> {
-            bounties::storage::StorageApi::new(self.client)
+        pub fn bounties(
+            &self,
+        ) -> Result<bounties::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(bounties))?;
+            if bounties::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(bounties),
+                ))
+            } else {
+                Ok(bounties::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn tips(&self) -> tips::storage::StorageApi<'a, T> {
-            tips::storage::StorageApi::new(self.client)
+        pub fn tips(
+            &self,
+        ) -> Result<tips::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(tips))?;
+            if tips::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(tips),
+                ))
+            } else {
+                Ok(tips::storage::StorageApi::new(self.client))
+            }
         }
         pub fn election_provider_multi_phase(
             &self,
-        ) -> election_provider_multi_phase::storage::StorageApi<'a, T> {
-            election_provider_multi_phase::storage::StorageApi::new(self.client)
+        ) -> Result<
+            election_provider_multi_phase::storage::StorageApi<'a, T>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self
+                .client
+                .pallet_uid(stringify!(election_provider_multi_phase))?;
+            if election_provider_multi_phase::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(election_provider_multi_phase),
+                ))
+            } else {
+                Ok(election_provider_multi_phase::storage::StorageApi::new(
+                    self.client,
+                ))
+            }
         }
-        pub fn bags_list(&self) -> bags_list::storage::StorageApi<'a, T> {
-            bags_list::storage::StorageApi::new(self.client)
+        pub fn bags_list(
+            &self,
+        ) -> Result<bags_list::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(bags_list))?;
+            if bags_list::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(bags_list),
+                ))
+            } else {
+                Ok(bags_list::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn configuration(&self) -> configuration::storage::StorageApi<'a, T> {
-            configuration::storage::StorageApi::new(self.client)
+        pub fn configuration(
+            &self,
+        ) -> Result<configuration::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(configuration))?;
+            if configuration::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(configuration),
+                ))
+            } else {
+                Ok(configuration::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn paras_shared(&self) -> paras_shared::storage::StorageApi<'a, T> {
-            paras_shared::storage::StorageApi::new(self.client)
+        pub fn paras_shared(
+            &self,
+        ) -> Result<paras_shared::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(paras_shared))?;
+            if paras_shared::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(paras_shared),
+                ))
+            } else {
+                Ok(paras_shared::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn para_inclusion(&self) -> para_inclusion::storage::StorageApi<'a, T> {
-            para_inclusion::storage::StorageApi::new(self.client)
+        pub fn para_inclusion(
+            &self,
+        ) -> Result<para_inclusion::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(para_inclusion))?;
+            if para_inclusion::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_inclusion),
+                ))
+            } else {
+                Ok(para_inclusion::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn para_inherent(&self) -> para_inherent::storage::StorageApi<'a, T> {
-            para_inherent::storage::StorageApi::new(self.client)
+        pub fn para_inherent(
+            &self,
+        ) -> Result<para_inherent::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(para_inherent))?;
+            if para_inherent::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_inherent),
+                ))
+            } else {
+                Ok(para_inherent::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn para_scheduler(&self) -> para_scheduler::storage::StorageApi<'a, T> {
-            para_scheduler::storage::StorageApi::new(self.client)
+        pub fn para_scheduler(
+            &self,
+        ) -> Result<para_scheduler::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(para_scheduler))?;
+            if para_scheduler::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_scheduler),
+                ))
+            } else {
+                Ok(para_scheduler::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn paras(&self) -> paras::storage::StorageApi<'a, T> {
-            paras::storage::StorageApi::new(self.client)
+        pub fn paras(
+            &self,
+        ) -> Result<paras::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(paras))?;
+            if paras::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(paras),
+                ))
+            } else {
+                Ok(paras::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn initializer(&self) -> initializer::storage::StorageApi<'a, T> {
-            initializer::storage::StorageApi::new(self.client)
+        pub fn initializer(
+            &self,
+        ) -> Result<initializer::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(initializer))?;
+            if initializer::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(initializer),
+                ))
+            } else {
+                Ok(initializer::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn dmp(&self) -> dmp::storage::StorageApi<'a, T> {
-            dmp::storage::StorageApi::new(self.client)
+        pub fn dmp(
+            &self,
+        ) -> Result<dmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(dmp))?;
+            if dmp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(dmp),
+                ))
+            } else {
+                Ok(dmp::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn ump(&self) -> ump::storage::StorageApi<'a, T> {
-            ump::storage::StorageApi::new(self.client)
+        pub fn ump(
+            &self,
+        ) -> Result<ump::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(ump))?;
+            if ump::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(ump),
+                ))
+            } else {
+                Ok(ump::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn hrmp(&self) -> hrmp::storage::StorageApi<'a, T> {
-            hrmp::storage::StorageApi::new(self.client)
+        pub fn hrmp(
+            &self,
+        ) -> Result<hrmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(hrmp))?;
+            if hrmp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(hrmp),
+                ))
+            } else {
+                Ok(hrmp::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn para_session_info(&self) -> para_session_info::storage::StorageApi<'a, T> {
-            para_session_info::storage::StorageApi::new(self.client)
+        pub fn para_session_info(
+            &self,
+        ) -> Result<para_session_info::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(para_session_info))?;
+            if para_session_info::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_session_info),
+                ))
+            } else {
+                Ok(para_session_info::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn registrar(&self) -> registrar::storage::StorageApi<'a, T> {
-            registrar::storage::StorageApi::new(self.client)
+        pub fn registrar(
+            &self,
+        ) -> Result<registrar::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(registrar))?;
+            if registrar::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(registrar),
+                ))
+            } else {
+                Ok(registrar::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn slots(&self) -> slots::storage::StorageApi<'a, T> {
-            slots::storage::StorageApi::new(self.client)
+        pub fn slots(
+            &self,
+        ) -> Result<slots::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+            let hash = self.client.pallet_uid(stringify!(slots))?;
+            if slots::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(slots),
+                ))
+            } else {
+                Ok(slots::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn auctions(&self) -> auctions::storage::StorageApi<'a, T> {
-            auctions::storage::StorageApi::new(self.client)
+        pub fn auctions(
+            &self,
+        ) -> Result<auctions::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(auctions))?;
+            if auctions::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(auctions),
+                ))
+            } else {
+                Ok(auctions::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn crowdloan(&self) -> crowdloan::storage::StorageApi<'a, T> {
-            crowdloan::storage::StorageApi::new(self.client)
+        pub fn crowdloan(
+            &self,
+        ) -> Result<crowdloan::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(crowdloan))?;
+            if crowdloan::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(crowdloan),
+                ))
+            } else {
+                Ok(crowdloan::storage::StorageApi::new(self.client))
+            }
         }
-        pub fn xcm_pallet(&self) -> xcm_pallet::storage::StorageApi<'a, T> {
-            xcm_pallet::storage::StorageApi::new(self.client)
+        pub fn xcm_pallet(
+            &self,
+        ) -> Result<xcm_pallet::storage::StorageApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(xcm_pallet))?;
+            if xcm_pallet::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(xcm_pallet),
+                ))
+            } else {
+                Ok(xcm_pallet::storage::StorageApi::new(self.client))
+            }
         }
     }
     pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
@@ -28115,141 +28808,573 @@ pub mod api {
         X: ::subxt::SignedExtra<T>,
         A: ::subxt::AccountData,
     {
-        pub fn system(&self) -> system::calls::TransactionApi<'a, T, X, A> {
-            system::calls::TransactionApi::new(self.client)
+        pub fn system(
+            &self,
+        ) -> Result<system::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(system))?;
+            if system::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(system),
+                ))
+            } else {
+                Ok(system::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn scheduler(&self) -> scheduler::calls::TransactionApi<'a, T, X, A> {
-            scheduler::calls::TransactionApi::new(self.client)
+        pub fn scheduler(
+            &self,
+        ) -> Result<scheduler::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(scheduler))?;
+            if scheduler::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(scheduler),
+                ))
+            } else {
+                Ok(scheduler::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn preimage(&self) -> preimage::calls::TransactionApi<'a, T, X, A> {
-            preimage::calls::TransactionApi::new(self.client)
+        pub fn preimage(
+            &self,
+        ) -> Result<preimage::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(preimage))?;
+            if preimage::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(preimage),
+                ))
+            } else {
+                Ok(preimage::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn babe(&self) -> babe::calls::TransactionApi<'a, T, X, A> {
-            babe::calls::TransactionApi::new(self.client)
+        pub fn babe(
+            &self,
+        ) -> Result<babe::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(babe))?;
+            if babe::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(babe),
+                ))
+            } else {
+                Ok(babe::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn timestamp(&self) -> timestamp::calls::TransactionApi<'a, T, X, A> {
-            timestamp::calls::TransactionApi::new(self.client)
+        pub fn timestamp(
+            &self,
+        ) -> Result<timestamp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(timestamp))?;
+            if timestamp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(timestamp),
+                ))
+            } else {
+                Ok(timestamp::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn indices(&self) -> indices::calls::TransactionApi<'a, T, X, A> {
-            indices::calls::TransactionApi::new(self.client)
+        pub fn indices(
+            &self,
+        ) -> Result<indices::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(indices))?;
+            if indices::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(indices),
+                ))
+            } else {
+                Ok(indices::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn balances(&self) -> balances::calls::TransactionApi<'a, T, X, A> {
-            balances::calls::TransactionApi::new(self.client)
+        pub fn balances(
+            &self,
+        ) -> Result<balances::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(balances))?;
+            if balances::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(balances),
+                ))
+            } else {
+                Ok(balances::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn authorship(&self) -> authorship::calls::TransactionApi<'a, T, X, A> {
-            authorship::calls::TransactionApi::new(self.client)
+        pub fn authorship(
+            &self,
+        ) -> Result<authorship::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(authorship))?;
+            if authorship::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(authorship),
+                ))
+            } else {
+                Ok(authorship::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn staking(&self) -> staking::calls::TransactionApi<'a, T, X, A> {
-            staking::calls::TransactionApi::new(self.client)
+        pub fn staking(
+            &self,
+        ) -> Result<staking::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(staking))?;
+            if staking::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(staking),
+                ))
+            } else {
+                Ok(staking::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn session(&self) -> session::calls::TransactionApi<'a, T, X, A> {
-            session::calls::TransactionApi::new(self.client)
+        pub fn session(
+            &self,
+        ) -> Result<session::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(session))?;
+            if session::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(session),
+                ))
+            } else {
+                Ok(session::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn grandpa(&self) -> grandpa::calls::TransactionApi<'a, T, X, A> {
-            grandpa::calls::TransactionApi::new(self.client)
+        pub fn grandpa(
+            &self,
+        ) -> Result<grandpa::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(grandpa))?;
+            if grandpa::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(grandpa),
+                ))
+            } else {
+                Ok(grandpa::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn im_online(&self) -> im_online::calls::TransactionApi<'a, T, X, A> {
-            im_online::calls::TransactionApi::new(self.client)
+        pub fn im_online(
+            &self,
+        ) -> Result<im_online::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(im_online))?;
+            if im_online::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(im_online),
+                ))
+            } else {
+                Ok(im_online::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn democracy(&self) -> democracy::calls::TransactionApi<'a, T, X, A> {
-            democracy::calls::TransactionApi::new(self.client)
+        pub fn democracy(
+            &self,
+        ) -> Result<democracy::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(democracy))?;
+            if democracy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(democracy),
+                ))
+            } else {
+                Ok(democracy::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn council(&self) -> council::calls::TransactionApi<'a, T, X, A> {
-            council::calls::TransactionApi::new(self.client)
+        pub fn council(
+            &self,
+        ) -> Result<council::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(council))?;
+            if council::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(council),
+                ))
+            } else {
+                Ok(council::calls::TransactionApi::new(self.client))
+            }
         }
         pub fn technical_committee(
             &self,
-        ) -> technical_committee::calls::TransactionApi<'a, T, X, A> {
-            technical_committee::calls::TransactionApi::new(self.client)
+        ) -> Result<
+            technical_committee::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(technical_committee))?;
+            if technical_committee::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(technical_committee),
+                ))
+            } else {
+                Ok(technical_committee::calls::TransactionApi::new(self.client))
+            }
         }
         pub fn phragmen_election(
             &self,
-        ) -> phragmen_election::calls::TransactionApi<'a, T, X, A> {
-            phragmen_election::calls::TransactionApi::new(self.client)
+        ) -> Result<
+            phragmen_election::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(phragmen_election))?;
+            if phragmen_election::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(phragmen_election),
+                ))
+            } else {
+                Ok(phragmen_election::calls::TransactionApi::new(self.client))
+            }
         }
         pub fn technical_membership(
             &self,
-        ) -> technical_membership::calls::TransactionApi<'a, T, X, A> {
-            technical_membership::calls::TransactionApi::new(self.client)
+        ) -> Result<
+            technical_membership::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(technical_membership))?;
+            if technical_membership::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(technical_membership),
+                ))
+            } else {
+                Ok(technical_membership::calls::TransactionApi::new(
+                    self.client,
+                ))
+            }
         }
-        pub fn treasury(&self) -> treasury::calls::TransactionApi<'a, T, X, A> {
-            treasury::calls::TransactionApi::new(self.client)
+        pub fn treasury(
+            &self,
+        ) -> Result<treasury::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(treasury))?;
+            if treasury::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(treasury),
+                ))
+            } else {
+                Ok(treasury::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn claims(&self) -> claims::calls::TransactionApi<'a, T, X, A> {
-            claims::calls::TransactionApi::new(self.client)
+        pub fn claims(
+            &self,
+        ) -> Result<claims::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(claims))?;
+            if claims::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(claims),
+                ))
+            } else {
+                Ok(claims::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn vesting(&self) -> vesting::calls::TransactionApi<'a, T, X, A> {
-            vesting::calls::TransactionApi::new(self.client)
+        pub fn vesting(
+            &self,
+        ) -> Result<vesting::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(vesting))?;
+            if vesting::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(vesting),
+                ))
+            } else {
+                Ok(vesting::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn utility(&self) -> utility::calls::TransactionApi<'a, T, X, A> {
-            utility::calls::TransactionApi::new(self.client)
+        pub fn utility(
+            &self,
+        ) -> Result<utility::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(utility))?;
+            if utility::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(utility),
+                ))
+            } else {
+                Ok(utility::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn identity(&self) -> identity::calls::TransactionApi<'a, T, X, A> {
-            identity::calls::TransactionApi::new(self.client)
+        pub fn identity(
+            &self,
+        ) -> Result<identity::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(identity))?;
+            if identity::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(identity),
+                ))
+            } else {
+                Ok(identity::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn proxy(&self) -> proxy::calls::TransactionApi<'a, T, X, A> {
-            proxy::calls::TransactionApi::new(self.client)
+        pub fn proxy(
+            &self,
+        ) -> Result<proxy::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(proxy))?;
+            if proxy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(proxy),
+                ))
+            } else {
+                Ok(proxy::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn multisig(&self) -> multisig::calls::TransactionApi<'a, T, X, A> {
-            multisig::calls::TransactionApi::new(self.client)
+        pub fn multisig(
+            &self,
+        ) -> Result<multisig::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(multisig))?;
+            if multisig::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(multisig),
+                ))
+            } else {
+                Ok(multisig::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn bounties(&self) -> bounties::calls::TransactionApi<'a, T, X, A> {
-            bounties::calls::TransactionApi::new(self.client)
+        pub fn bounties(
+            &self,
+        ) -> Result<bounties::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(bounties))?;
+            if bounties::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(bounties),
+                ))
+            } else {
+                Ok(bounties::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn tips(&self) -> tips::calls::TransactionApi<'a, T, X, A> {
-            tips::calls::TransactionApi::new(self.client)
+        pub fn tips(
+            &self,
+        ) -> Result<tips::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(tips))?;
+            if tips::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(tips),
+                ))
+            } else {
+                Ok(tips::calls::TransactionApi::new(self.client))
+            }
         }
         pub fn election_provider_multi_phase(
             &self,
-        ) -> election_provider_multi_phase::calls::TransactionApi<'a, T, X, A> {
-            election_provider_multi_phase::calls::TransactionApi::new(self.client)
+        ) -> Result<
+            election_provider_multi_phase::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self
+                .client
+                .pallet_uid(stringify!(election_provider_multi_phase))?;
+            if election_provider_multi_phase::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(election_provider_multi_phase),
+                ))
+            } else {
+                Ok(election_provider_multi_phase::calls::TransactionApi::new(
+                    self.client,
+                ))
+            }
         }
-        pub fn bags_list(&self) -> bags_list::calls::TransactionApi<'a, T, X, A> {
-            bags_list::calls::TransactionApi::new(self.client)
+        pub fn bags_list(
+            &self,
+        ) -> Result<bags_list::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(bags_list))?;
+            if bags_list::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(bags_list),
+                ))
+            } else {
+                Ok(bags_list::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn configuration(&self) -> configuration::calls::TransactionApi<'a, T, X, A> {
-            configuration::calls::TransactionApi::new(self.client)
+        pub fn configuration(
+            &self,
+        ) -> Result<
+            configuration::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(configuration))?;
+            if configuration::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(configuration),
+                ))
+            } else {
+                Ok(configuration::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn paras_shared(&self) -> paras_shared::calls::TransactionApi<'a, T, X, A> {
-            paras_shared::calls::TransactionApi::new(self.client)
+        pub fn paras_shared(
+            &self,
+        ) -> Result<
+            paras_shared::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(paras_shared))?;
+            if paras_shared::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(paras_shared),
+                ))
+            } else {
+                Ok(paras_shared::calls::TransactionApi::new(self.client))
+            }
         }
         pub fn para_inclusion(
             &self,
-        ) -> para_inclusion::calls::TransactionApi<'a, T, X, A> {
-            para_inclusion::calls::TransactionApi::new(self.client)
+        ) -> Result<
+            para_inclusion::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(para_inclusion))?;
+            if para_inclusion::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_inclusion),
+                ))
+            } else {
+                Ok(para_inclusion::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn para_inherent(&self) -> para_inherent::calls::TransactionApi<'a, T, X, A> {
-            para_inherent::calls::TransactionApi::new(self.client)
+        pub fn para_inherent(
+            &self,
+        ) -> Result<
+            para_inherent::calls::TransactionApi<'a, T, X, A>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.pallet_uid(stringify!(para_inherent))?;
+            if para_inherent::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(para_inherent),
+                ))
+            } else {
+                Ok(para_inherent::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn paras(&self) -> paras::calls::TransactionApi<'a, T, X, A> {
-            paras::calls::TransactionApi::new(self.client)
+        pub fn paras(
+            &self,
+        ) -> Result<paras::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(paras))?;
+            if paras::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(paras),
+                ))
+            } else {
+                Ok(paras::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn initializer(&self) -> initializer::calls::TransactionApi<'a, T, X, A> {
-            initializer::calls::TransactionApi::new(self.client)
+        pub fn initializer(
+            &self,
+        ) -> Result<initializer::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(initializer))?;
+            if initializer::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(initializer),
+                ))
+            } else {
+                Ok(initializer::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn dmp(&self) -> dmp::calls::TransactionApi<'a, T, X, A> {
-            dmp::calls::TransactionApi::new(self.client)
+        pub fn dmp(
+            &self,
+        ) -> Result<dmp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(dmp))?;
+            if dmp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(dmp),
+                ))
+            } else {
+                Ok(dmp::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn ump(&self) -> ump::calls::TransactionApi<'a, T, X, A> {
-            ump::calls::TransactionApi::new(self.client)
+        pub fn ump(
+            &self,
+        ) -> Result<ump::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(ump))?;
+            if ump::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(ump),
+                ))
+            } else {
+                Ok(ump::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn hrmp(&self) -> hrmp::calls::TransactionApi<'a, T, X, A> {
-            hrmp::calls::TransactionApi::new(self.client)
+        pub fn hrmp(
+            &self,
+        ) -> Result<hrmp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(hrmp))?;
+            if hrmp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(hrmp),
+                ))
+            } else {
+                Ok(hrmp::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn registrar(&self) -> registrar::calls::TransactionApi<'a, T, X, A> {
-            registrar::calls::TransactionApi::new(self.client)
+        pub fn registrar(
+            &self,
+        ) -> Result<registrar::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(registrar))?;
+            if registrar::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(registrar),
+                ))
+            } else {
+                Ok(registrar::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn slots(&self) -> slots::calls::TransactionApi<'a, T, X, A> {
-            slots::calls::TransactionApi::new(self.client)
+        pub fn slots(
+            &self,
+        ) -> Result<slots::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(slots))?;
+            if slots::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(slots),
+                ))
+            } else {
+                Ok(slots::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn auctions(&self) -> auctions::calls::TransactionApi<'a, T, X, A> {
-            auctions::calls::TransactionApi::new(self.client)
+        pub fn auctions(
+            &self,
+        ) -> Result<auctions::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(auctions))?;
+            if auctions::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(auctions),
+                ))
+            } else {
+                Ok(auctions::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn crowdloan(&self) -> crowdloan::calls::TransactionApi<'a, T, X, A> {
-            crowdloan::calls::TransactionApi::new(self.client)
+        pub fn crowdloan(
+            &self,
+        ) -> Result<crowdloan::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(crowdloan))?;
+            if crowdloan::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(crowdloan),
+                ))
+            } else {
+                Ok(crowdloan::calls::TransactionApi::new(self.client))
+            }
         }
-        pub fn xcm_pallet(&self) -> xcm_pallet::calls::TransactionApi<'a, T, X, A> {
-            xcm_pallet::calls::TransactionApi::new(self.client)
+        pub fn xcm_pallet(
+            &self,
+        ) -> Result<xcm_pallet::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        {
+            let hash = self.client.pallet_uid(stringify!(xcm_pallet))?;
+            if xcm_pallet::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    stringify!(xcm_pallet),
+                ))
+            } else {
+                Ok(xcm_pallet::calls::TransactionApi::new(self.client))
+            }
         }
     }
 }
