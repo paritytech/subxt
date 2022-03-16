@@ -41,8 +41,8 @@ use std::{
 
 use lazy_static::lazy_static;
 
-pub struct MetadataHashable<'a> {
-    metadata: &'a RuntimeMetadataLastVersion,
+pub struct MetadataHashable {
+    metadata: RuntimeMetadataLastVersion,
 }
 
 #[repr(u8)]
@@ -54,9 +54,13 @@ enum MetadataHashableIDs {
     Pallet,
 }
 
-impl<'a> MetadataHashable<'a> {
-    pub fn new(metadata: &'a RuntimeMetadataLastVersion) -> Self {
+impl MetadataHashable {
+    pub fn new(metadata: RuntimeMetadataLastVersion) -> Self {
         Self { metadata }
+    }
+
+    pub fn metadata(&self) -> &RuntimeMetadataLastVersion {
+        &self.metadata
     }
 
     fn hash(bytes: &[u8]) -> [u8; 32] {
