@@ -387,8 +387,13 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                 {
                     #(
-                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
-                            #pallets_with_storage::storage::StorageApi::new(self.client)
+                        pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
+                            let hash = self.client.pallet_uid(stringify!(#pallets_with_storage))?;
+                            if #pallets_with_storage::PALLET_HASH != hash {
+                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_storage)))
+                            } else {
+                                Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
+                            }
                         }
                     )*
                 }
@@ -405,8 +410,13 @@ impl RuntimeGenerator {
                     A: ::subxt::AccountData,
                 {
                     #(
-                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X, A> {
-                            #pallets_with_calls::calls::TransactionApi::new(self.client)
+                        pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError> {
+                            let hash = self.client.pallet_uid(stringify!(#pallets_with_calls))?;
+                            if #pallets_with_calls::PALLET_HASH != hash {
+                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_calls)))
+                            } else {
+                                Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
+                            }
                         }
                     )*
                 }
