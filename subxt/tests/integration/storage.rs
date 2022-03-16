@@ -31,7 +31,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
     // Look up a plain value. Wait long enough that we don't get the genesis block data,
     // because it may have no storage associated with it.
     async_std::task::sleep(std::time::Duration::from_secs(6)).await;
-    let entry = ctx.api.storage().timestamp().now(None).await?;
+    let entry = ctx.api.storage().timestamp()?.now(None).await?;
     assert!(entry > 0);
 
     Ok(())
@@ -47,7 +47,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
     // Do some transaction to bump the Alice nonce to 1:
     ctx.api
         .tx()
-        .system()
+        .system()?
         .remark(vec![1, 2, 3, 4, 5])
         .sign_and_submit_then_watch(&signer)
         .await?
@@ -55,7 +55,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
         .await?;
 
     // Look up the nonce for the user (we expect it to be 1).
-    let entry = ctx.api.storage().system().account(&alice, None).await?;
+    let entry = ctx.api.storage().system()?.account(&alice, None).await?;
     assert_eq!(entry.nonce, 1);
 
     Ok(())
@@ -112,7 +112,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     let bob = AccountKeyring::Bob.to_account_id();
     ctx.api
         .tx()
-        .assets()
+        .assets()?
         .create(99, alice.clone().into(), 1)
         .sign_and_submit_then_watch(&signer)
         .await?
@@ -120,7 +120,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
         .await?;
     ctx.api
         .tx()
-        .assets()
+        .assets()?
         .approve_transfer(99, bob.clone().into(), 123)
         .sign_and_submit_then_watch(&signer)
         .await?
@@ -131,7 +131,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     let entry = ctx
         .api
         .storage()
-        .assets()
+        .assets()?
         .approvals(&99, &alice, &bob, None)
         .await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));

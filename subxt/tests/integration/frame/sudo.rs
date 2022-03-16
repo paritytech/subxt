@@ -42,7 +42,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
     let found_event = cxt
         .api
         .tx()
-        .sudo()
+        .sudo()?
         .sudo(call)
         .sign_and_submit_then_watch(&alice)
         .await?
@@ -68,7 +68,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>>
     let found_event = cxt
         .api
         .tx()
-        .sudo()
+        .sudo()?
         .sudo_unchecked_weight(call, 0)
         .sign_and_submit_then_watch(&alice)
         .await?

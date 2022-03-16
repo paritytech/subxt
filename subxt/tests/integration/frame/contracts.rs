@@ -66,7 +66,7 @@ impl ContractsTestContext {
     fn contracts_tx(
         &self,
     ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData> {
-        self.cxt.api.tx().contracts()
+        self.cxt.api.tx().contracts().unwrap()
     }
 
     async fn instantiate_with_code(
@@ -85,7 +85,7 @@ impl ContractsTestContext {
             .cxt
             .api
             .tx()
-            .contracts()
+            .contracts()?
             .instantiate_with_code(
                 100_000_000_000_000_000, // endowment
                 500_000_000_000,         // gas_limit
@@ -209,6 +209,7 @@ async fn tx_call() {
         .api
         .storage()
         .contracts()
+        .unwrap()
         .contract_info_of(&contract, None)
         .await;
     assert!(contract_info.is_ok());

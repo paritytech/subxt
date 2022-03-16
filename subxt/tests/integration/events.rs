@@ -116,7 +116,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     let bob = AccountKeyring::Bob.to_account_id();
     ctx.api
         .tx()
-        .balances()
+        .balances()?
         .transfer(bob.clone().into(), 10_000)
         .sign_and_submit_then_watch(&alice)
         .await?;

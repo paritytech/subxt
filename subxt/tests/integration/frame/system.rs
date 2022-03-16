@@ -34,7 +34,7 @@ async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
     let account_info = cxt
         .api
         .storage()
-        .system()
+        .system()?
         .account(alice.account_id(), None)
         .await;
 
@@ -50,7 +50,7 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
     let found_event = cxt
         .api
         .tx()
-        .system()
+        .system()?
         .remark_with_event(b"remarkable".to_vec())
         .sign_and_submit_then_watch(&alice)
         .await?
