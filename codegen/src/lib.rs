@@ -23,6 +23,7 @@ mod types;
 pub use self::{
     api::{
         generate_runtime_api,
+        metadata::MetadataHashable,
         RuntimeGenerator,
     },
     types::{
