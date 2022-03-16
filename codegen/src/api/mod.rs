@@ -40,6 +40,7 @@ mod storage;
 
 use super::GeneratedTypeDerives;
 use crate::{
+    api::metadata::MetadataHashable,
     ir,
     types::{
         CompositeDef,
@@ -165,6 +166,8 @@ impl RuntimeGenerator {
             type_substitutes.insert(path.to_string(), substitute.clone());
         }
 
+        let metadata_hasher = MetadataHashable::new(&self.metadata);
+
         let type_gen = TypeGenerator::new(
             &self.metadata.types,
             "runtime_types",
@@ -186,6 +189,8 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
+            let pallet_hash = metadata_hasher.get_pallet_uid(pallet);
+
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
             } else {
@@ -218,6 +223,7 @@ impl RuntimeGenerator {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
+                    pub static PALLET_HASH: [u8; 32] = [ #(#pallet_hash,)* ];
                     #calls
                     #event
                     #storage_mod
