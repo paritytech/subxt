@@ -41,6 +41,7 @@ use std::{
 
 use lazy_static::lazy_static;
 
+#[derive(Clone, Debug)]
 pub struct MetadataHashable {
     metadata: RuntimeMetadataLastVersion,
 }
