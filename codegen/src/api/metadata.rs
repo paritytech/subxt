@@ -62,12 +62,8 @@ fn get_field_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
-    if let Some(name) = field.name() {
-        bytes.extend(name.as_bytes());
-    }
-    if let Some(ty_name) = field.type_name() {
-        bytes.extend(ty_name.as_bytes());
-    }
+    bytes.extend(field.name().encode());
+    bytes.extend(field.type_name().encode());
     bytes.extend(get_type_hash(registry, field.ty().id(), set));
 
     hash(&bytes)
