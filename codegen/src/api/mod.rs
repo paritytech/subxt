@@ -293,7 +293,7 @@ impl RuntimeGenerator {
         let type_parameter_default_impl = default_account_data_impl
             .as_ref()
             .map(|_| quote!( = #default_account_data_ident ));
-
+        let metadata_hash = self.metadata.get_metadata_uid();
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
@@ -316,14 +316,20 @@ impl RuntimeGenerator {
                     marker: ::core::marker::PhantomData<(X, A)>,
                 }
 
-                impl<T, X, A> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X, A>
+                impl<T, X, A> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X, A>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                     A: ::subxt::AccountData,
                 {
-                    fn from(client: ::subxt::Client<T>) -> Self {
-                        Self { client, marker: ::core::marker::PhantomData }
+                    type Error = ::subxt::MetadataError;
+                    fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
+                        static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
+                        if client.metadata_uid() != METADATA_HASH {
+                            Err(::subxt::MetadataError::IncompatibleMetadata)
+                        } else {
+                            Ok(Self { client, marker: ::core::marker::PhantomData })
+                        }
                     }
                 }
 

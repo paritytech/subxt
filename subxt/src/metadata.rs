@@ -79,6 +79,9 @@ pub enum MetadataError {
     /// Runtime pallet metadata is incompatible with the static one.
     #[error("Pallet {0} has incompatible metadata")]
     IncompatiblePalletMetadata(&'static str),
+    /// Runtime metadata is not fully compatible with the static one.
+    #[error("Node metadata is not fully compatible")]
+    IncompatibleMetadata,
 }
 
 /// Runtime metadata.

@@ -244,4 +244,10 @@ impl MetadataHashable {
 
         MetadataHashable::hash(&bytes)
     }
+
+    pub fn get_metadata_uid(&self) -> [u8; 32] {
+        // Note: Order by pallets and use `get_pallet_uid`.
+        let bytes = self.metadata.encode();
+        MetadataHashable::hash(&bytes)
+    }
 }

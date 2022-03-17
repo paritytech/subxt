@@ -212,6 +212,11 @@ impl<T: Config> Client<T> {
 
         Ok(self.metadata.metadata_hashable().get_pallet_uid(pallet))
     }
+
+    /// Obtain the full metadata identifier.
+    pub fn metadata_uid(&self) -> [u8; 32] {
+        self.metadata.metadata_hashable().get_metadata_uid()
+    }
 }
 
 /// A constructed call ready to be signed and submitted.
