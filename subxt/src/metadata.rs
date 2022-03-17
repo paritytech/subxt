@@ -38,7 +38,6 @@ use scale_info::{
     Type,
     Variant,
 };
-use subxt_codegen::MetadataHashable;
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
@@ -87,7 +86,7 @@ pub enum MetadataError {
 /// Runtime metadata.
 #[derive(Clone, Debug)]
 pub struct Metadata {
-    metadata: MetadataHashable,
+    metadata: RuntimeMetadataLastVersion,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
@@ -129,16 +128,11 @@ impl Metadata {
 
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
-        self.runtime_metadata().types.resolve(id)
+        self.metadata.types.resolve(id)
     }
 
     /// Return the runtime metadata.
     pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
-        &self.metadata.metadata()
-    }
-
-    /// Return the hashable metadata wrapper.
-    pub fn metadata_hashable(&self) -> &MetadataHashable {
         &self.metadata
     }
 }
@@ -370,7 +364,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .collect();
 
         Ok(Self {
-            metadata: MetadataHashable::new(metadata),
+            metadata,
             pallets,
             events,
             errors,
