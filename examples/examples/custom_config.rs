@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, DefaultExtra<MyConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, DefaultExtra<MyConfig>>>()?;
 
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
