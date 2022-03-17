@@ -28043,16 +28043,26 @@ pub mod api {
         pub client: ::subxt::Client<T>,
         marker: ::core::marker::PhantomData<(X, A)>,
     }
-    impl<T, X, A> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X, A>
+    impl<T, X, A> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X, A>
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
         A: ::subxt::AccountData,
     {
-        fn from(client: ::subxt::Client<T>) -> Self {
-            Self {
-                client,
-                marker: ::core::marker::PhantomData,
+        type Error = ::subxt::MetadataError;
+        fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
+            static METADATA_HASH: [u8; 32] = [
+                81u8, 113u8, 22u8, 75u8, 102u8, 155u8, 224u8, 232u8, 179u8, 199u8, 217u8,
+                64u8, 219u8, 183u8, 171u8, 82u8, 125u8, 82u8, 130u8, 73u8, 156u8, 214u8,
+                226u8, 40u8, 125u8, 170u8, 70u8, 70u8, 4u8, 153u8, 192u8, 81u8,
+            ];
+            if client.metadata_uid() != METADATA_HASH {
+                Err(::subxt::MetadataError::IncompatibleMetadata)
+            } else {
+                Ok(Self {
+                    client,
+                    marker: ::core::marker::PhantomData,
+                })
             }
         }
     }
