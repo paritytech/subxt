@@ -344,7 +344,7 @@ impl RuntimeGenerator {
                     }
 
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
-                        StorageApi { client: &self.client }
+                        StorageApi { client: &self.client, skip_pallet_validation: false }
                     }
 
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
@@ -386,16 +386,22 @@ impl RuntimeGenerator {
 
                 pub struct StorageApi<'a, T: ::subxt::Config> {
                     client: &'a ::subxt::Client<T>,
+                    skip_pallet_validation: bool,
                 }
 
                 impl<'a, T> StorageApi<'a, T>
                 where
                     T: ::subxt::Config,
                 {
+                    pub fn skip_pallet_validation(mut self) -> Self {
+                        self.skip_pallet_validation = true;
+                        self
+                    }
+
                     #(
                         pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
                             let hash = self.client.pallet_uid(stringify!(#pallets_with_storage))?;
-                            if #pallets_with_storage::PALLET_HASH != hash {
+                            if !self.skip_pallet_validation && #pallets_with_storage::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_storage)))
                             } else {
                                 Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
