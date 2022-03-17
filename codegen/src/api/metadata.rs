@@ -68,7 +68,7 @@ fn get_field_uid(
     if let Some(ty_name) = field.type_name() {
         bytes.extend(ty_name.as_bytes());
     }
-    bytes.extend(get_type_uid_internal(registry, field.ty().id(), set));
+    bytes.extend(get_type_uid(registry, field.ty().id(), set));
 
     hash(&bytes)
 }
@@ -112,7 +112,7 @@ fn get_type_def_uid(
         }
         TypeDef::Sequence(sequence) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_uid_internal(
+            bytes.extend(get_type_uid(
                 registry,
                 sequence.type_param().id(),
                 set,
@@ -122,7 +122,7 @@ fn get_type_def_uid(
         TypeDef::Array(array) => {
             let mut bytes = Vec::new();
             bytes.extend(array.len().to_be_bytes());
-            bytes.extend(get_type_uid_internal(
+            bytes.extend(get_type_uid(
                 registry,
                 array.type_param().id(),
                 set,
@@ -132,7 +132,7 @@ fn get_type_def_uid(
         TypeDef::Tuple(tuple) => {
             let mut bytes = Vec::new();
             for field in tuple.fields() {
-                bytes.extend(get_type_uid_internal(registry, field.id(), set));
+                bytes.extend(get_type_uid(registry, field.id(), set));
             }
             bytes
         }
@@ -143,7 +143,7 @@ fn get_type_def_uid(
         }
         TypeDef::Compact(compact) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_uid_internal(
+            bytes.extend(get_type_uid(
                 registry,
                 compact.type_param().id(),
                 set,
@@ -152,12 +152,12 @@ fn get_type_def_uid(
         }
         TypeDef::BitSequence(bitseq) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_uid_internal(
+            bytes.extend(get_type_uid(
                 registry,
                 bitseq.bit_order_type().id(),
                 set,
             ));
-            bytes.extend(get_type_uid_internal(
+            bytes.extend(get_type_uid(
                 registry,
                 bitseq.bit_store_type().id(),
                 set,
@@ -169,7 +169,7 @@ fn get_type_def_uid(
     hash(&bytes)
 }
 
-fn get_type_uid_internal(
+fn get_type_uid(
     registry: &PortableRegistry,
     id: u32,
     set: &mut HashSet<u32>,
@@ -199,11 +199,6 @@ fn get_type_uid_internal(
     uid
 }
 
-pub fn get_type_uid(registry: &PortableRegistry, id: u32) -> [u8; 32] {
-    let mut set = HashSet::<u32>::new();
-    get_type_uid_internal(registry, id, &mut set)
-}
-
 pub fn get_pallet_uid(
     registry: &PortableRegistry,
     pallet: &frame_metadata::PalletMetadata<PortableForm>,
@@ -212,18 +207,18 @@ pub fn get_pallet_uid(
     let mut set = HashSet::<u32>::new();
 
     if let Some(ref calls) = pallet.calls {
-        bytes.extend(get_type_uid_internal(registry, calls.ty.id(), &mut set));
+        bytes.extend(get_type_uid(registry, calls.ty.id(), &mut set));
     }
     if let Some(ref event) = pallet.event {
-        bytes.extend(get_type_uid_internal(registry, event.ty.id(), &mut set));
+        bytes.extend(get_type_uid(registry, event.ty.id(), &mut set));
     }
     for constant in pallet.constants.iter() {
         bytes.extend(constant.name.as_bytes());
         bytes.extend(&constant.value);
-        bytes.extend(get_type_uid_internal(registry, constant.ty.id(), &mut set));
+        bytes.extend(get_type_uid(registry, constant.ty.id(), &mut set));
     }
     if let Some(ref error) = pallet.error {
-        bytes.extend(get_type_uid_internal(registry, error.ty.id(), &mut set));
+        bytes.extend(get_type_uid(registry, error.ty.id(), &mut set));
     }
     if let Some(ref storage) = pallet.storage {
         bytes.extend(storage.prefix.as_bytes());
@@ -232,7 +227,7 @@ pub fn get_pallet_uid(
             bytes.extend(entry.modifier.encode());
             match &entry.ty {
                 StorageEntryType::Plain(ty) => {
-                    bytes.extend(get_type_uid_internal(registry, ty.id(), &mut set));
+                    bytes.extend(get_type_uid(registry, ty.id(), &mut set));
                 }
                 StorageEntryType::Map {
                     hashers,
@@ -240,8 +235,8 @@ pub fn get_pallet_uid(
                     value,
                 } => {
                     bytes.extend(hashers.encode());
-                    bytes.extend(get_type_uid_internal(registry, key.id(), &mut set));
-                    bytes.extend(get_type_uid_internal(registry, value.id(), &mut set));
+                    bytes.extend(get_type_uid(registry, key.id(), &mut set));
+                    bytes.extend(get_type_uid(registry, value.id(), &mut set));
                 }
             }
             bytes.extend(&entry.default);
