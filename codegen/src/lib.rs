@@ -23,7 +23,11 @@ mod types;
 pub use self::{
     api::{
         generate_runtime_api,
-        metadata::MetadataHashable,
+        metadata::{
+            get_metadata_uid,
+            get_pallet_uid,
+            MetadataHashable,
+        },
         RuntimeGenerator,
     },
     types::{
