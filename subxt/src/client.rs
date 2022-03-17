@@ -222,7 +222,7 @@ impl<T: Config> Client<T> {
             Some(pallet) => pallet,
             _ => return Err(MetadataError::PalletNotFound(name.to_string())),
         };
-        Ok(subxt_codegen::get_pallet_uid(
+        Ok(subxt_codegen::get_pallet_hash(
             &self.metadata.runtime_metadata().types,
             pallet,
         ))
@@ -235,7 +235,7 @@ impl<T: Config> Client<T> {
 
     /// Obtain the full metadata identifier.
     pub fn metadata_uid(&self) -> [u8; 32] {
-        subxt_codegen::get_metadata_uid(self.metadata.runtime_metadata())
+        subxt_codegen::get_metadata_hash(self.metadata.runtime_metadata())
     }
 }
 

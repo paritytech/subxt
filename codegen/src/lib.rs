@@ -24,8 +24,8 @@ pub use self::{
     api::{
         generate_runtime_api,
         metadata::{
-            get_metadata_uid,
-            get_pallet_uid,
+            get_metadata_hash,
+            get_pallet_hash,
         },
         RuntimeGenerator,
     },
