@@ -47,6 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>()?;
     let hash = api
         .tx()
+        .skip_pallet_validation()
         .balances()?
         .transfer(dest, 10_000)
         .sign_and_submit(&signer)

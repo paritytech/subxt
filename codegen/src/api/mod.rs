@@ -348,7 +348,7 @@ impl RuntimeGenerator {
                     }
 
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
-                        TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
+                        TransactionApi { client: &self.client, skip_pallet_validation: false, marker: ::core::marker::PhantomData }
                     }
 
                     pub fn events(&'a self) -> EventsApi<'a, T> {
@@ -406,6 +406,7 @@ impl RuntimeGenerator {
 
                 pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
                     client: &'a ::subxt::Client<T>,
+                    skip_pallet_validation: bool,
                     marker: ::core::marker::PhantomData<(X, A)>,
                 }
 
@@ -415,10 +416,15 @@ impl RuntimeGenerator {
                     X: ::subxt::SignedExtra<T>,
                     A: ::subxt::AccountData,
                 {
+                    pub fn skip_pallet_validation(mut self) -> Self {
+                        self.skip_pallet_validation = true;
+                        self
+                    }
+
                     #(
                         pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError> {
                             let hash = self.client.pallet_uid(stringify!(#pallets_with_calls))?;
-                            if #pallets_with_calls::PALLET_HASH != hash {
+                            if !self.skip_pallet_validation && #pallets_with_calls::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_calls)))
                             } else {
                                 Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
