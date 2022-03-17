@@ -26,7 +26,6 @@ pub use self::{
         metadata::{
             get_metadata_uid,
             get_pallet_uid,
-            MetadataHashable,
         },
         RuntimeGenerator,
     },

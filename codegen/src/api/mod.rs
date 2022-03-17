@@ -40,7 +40,10 @@ mod storage;
 
 use super::GeneratedTypeDerives;
 use crate::{
-    api::metadata::MetadataHashable,
+    api::metadata::{
+        get_metadata_uid,
+        get_pallet_uid,
+    },
     ir,
     types::{
         CompositeDef,
@@ -105,23 +108,15 @@ where
 }
 
 pub struct RuntimeGenerator {
-    metadata: MetadataHashable,
+    metadata: RuntimeMetadataV14,
 }
 
 impl RuntimeGenerator {
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
-            RuntimeMetadata::V14(v14) => {
-                Self {
-                    metadata: MetadataHashable::new(v14),
-                }
-            }
+            RuntimeMetadata::V14(v14) => Self { metadata: v14 },
             _ => panic!("Unsupported metadata version {:?}", metadata.1),
         }
-    }
-
-    fn runtime_metadata(&self) -> &RuntimeMetadataV14 {
-        self.metadata.metadata()
     }
 
     pub fn generate_runtime(
@@ -175,7 +170,7 @@ impl RuntimeGenerator {
         }
 
         let type_gen = TypeGenerator::new(
-            &self.runtime_metadata().types,
+            &self.metadata.types,
             "runtime_types",
             type_substitutes,
             derives.clone(),
@@ -183,7 +178,7 @@ impl RuntimeGenerator {
         let types_mod = type_gen.generate_types_mod();
         let types_mod_ident = types_mod.ident();
         let pallets_with_mod_names = self
-            .runtime_metadata()
+            .metadata
             .pallets
             .iter()
             .map(|pallet| {
@@ -195,7 +190,7 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let pallet_hash = self.metadata.get_pallet_uid(pallet);
+            let pallet_hash = get_pallet_uid(&self.metadata.types, pallet);
 
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
@@ -238,19 +233,18 @@ impl RuntimeGenerator {
             }
         });
 
-        let outer_event_variants =
-            self.runtime_metadata().pallets.iter().filter_map(|p| {
-                let variant_name = format_ident!("{}", p.name);
-                let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
-                let index = proc_macro2::Literal::u8_unsuffixed(p.index);
+        let outer_event_variants = self.metadata.pallets.iter().filter_map(|p| {
+            let variant_name = format_ident!("{}", p.name);
+            let mod_name = format_ident!("{}", p.name.to_string().to_snake_case());
+            let index = proc_macro2::Literal::u8_unsuffixed(p.index);
 
-                p.event.as_ref().map(|_| {
-                    quote! {
-                        #[codec(index = #index)]
-                        #variant_name(#mod_name::Event),
-                    }
-                })
-            });
+            p.event.as_ref().map(|_| {
+                quote! {
+                    #[codec(index = #index)]
+                    #variant_name(#mod_name::Event),
+                }
+            })
+        });
 
         let outer_event = quote! {
             #derives
@@ -279,10 +273,8 @@ impl RuntimeGenerator {
                     pallet.calls.as_ref().map(|_| pallet_mod_name)
                 });
 
-        let has_module_error_impl = errors::generate_has_module_error_impl(
-            self.runtime_metadata(),
-            types_mod_ident,
-        );
+        let has_module_error_impl =
+            errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
 
         let default_account_data_ident = format_ident!("DefaultAccountData");
         let default_account_data_impl = generate_default_account_data_impl(
@@ -293,7 +285,7 @@ impl RuntimeGenerator {
         let type_parameter_default_impl = default_account_data_impl
             .as_ref()
             .map(|_| quote!( = #default_account_data_ident ));
-        let metadata_hash = self.metadata.get_metadata_uid();
+        let metadata_hash = get_metadata_uid(&self.metadata);
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
