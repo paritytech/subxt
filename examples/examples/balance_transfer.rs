@@ -41,6 +41,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let dest = AccountKeyring::Bob.to_account_id().into();
 
     let api = ClientBuilder::new()
+        .skip_metadata_validation()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>()?;

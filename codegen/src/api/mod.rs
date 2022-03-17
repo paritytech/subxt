@@ -325,7 +325,7 @@ impl RuntimeGenerator {
                     type Error = ::subxt::MetadataError;
                     fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
                         static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if client.metadata_uid() != METADATA_HASH {
+                        if !client.skip_metadata_validation() && client.metadata_uid() != METADATA_HASH {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(Self { client, marker: ::core::marker::PhantomData })
