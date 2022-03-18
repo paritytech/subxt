@@ -317,7 +317,7 @@ impl RuntimeGenerator {
                     type Error = ::subxt::MetadataError;
                     fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
                         static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if !client.skip_metadata_validation() && client.metadata_uid() != METADATA_HASH {
+                        if !client.skip_metadata_validation() && client.metadata().metadata_uid() != METADATA_HASH {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(Self { client, marker: ::core::marker::PhantomData })
@@ -392,7 +392,7 @@ impl RuntimeGenerator {
 
                     #(
                         pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-                            let hash = self.client.pallet_uid(stringify!(#pallets_with_storage))?;
+                            let hash = self.client.metadata().pallet_uid(stringify!(#pallets_with_storage))?;
                             if !self.skip_pallet_validation && #pallets_with_storage::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_storage)))
                             } else {
@@ -421,7 +421,7 @@ impl RuntimeGenerator {
 
                     #(
                         pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError> {
-                            let hash = self.client.pallet_uid(stringify!(#pallets_with_calls))?;
+                            let hash = self.client.metadata().pallet_uid(stringify!(#pallets_with_calls))?;
                             if !self.skip_pallet_validation && #pallets_with_calls::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_calls)))
                             } else {
