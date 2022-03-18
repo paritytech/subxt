@@ -32,15 +32,10 @@ use scale_info::{
     TypeDef,
     Variant,
 };
-use std::{
-    collections::{
-        HashMap,
-        HashSet,
-    },
-    sync::Mutex,
+use std::collections::{
+    HashMap,
+    HashSet,
 };
-
-use lazy_static::lazy_static;
 
 #[repr(u8)]
 enum MetadataHashableIDs {
@@ -59,12 +54,13 @@ fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
     visited_ids: &mut HashSet<u32>,
+    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
     field.name().encode_to(&mut bytes);
     field.type_name().encode_to(&mut bytes);
-    bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids));
+    bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids, cache));
 
     hash(&bytes)
 }
@@ -73,12 +69,13 @@ fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
     visited_ids: &mut HashSet<u32>,
+    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
     var.name().encode_to(&mut bytes);
     for field in var.fields() {
-        bytes.extend(get_field_hash(registry, field, visited_ids));
+        bytes.extend(get_field_hash(registry, field, visited_ids, cache));
     }
 
     hash(&bytes)
@@ -88,6 +85,7 @@ fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
     visited_ids: &mut HashSet<u32>,
+    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
 
@@ -95,32 +93,42 @@ fn get_type_def_hash(
         TypeDef::Composite(composite) => {
             let mut bytes = Vec::new();
             for field in composite.fields() {
-                bytes.extend(get_field_hash(registry, field, visited_ids));
+                bytes.extend(get_field_hash(registry, field, visited_ids, cache));
             }
             bytes
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
             for var in variant.variants() {
-                bytes.extend(get_variant_hash(registry, var, visited_ids));
+                bytes.extend(get_variant_hash(registry, var, visited_ids, cache));
             }
             bytes
         }
         TypeDef::Sequence(sequence) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, sequence.type_param().id(), visited_ids));
+            bytes.extend(get_type_hash(
+                registry,
+                sequence.type_param().id(),
+                visited_ids,
+                cache,
+            ));
             bytes
         }
         TypeDef::Array(array) => {
             let mut bytes = Vec::new();
             array.len().encode_to(&mut bytes);
-            bytes.extend(get_type_hash(registry, array.type_param().id(), visited_ids));
+            bytes.extend(get_type_hash(
+                registry,
+                array.type_param().id(),
+                visited_ids,
+                cache,
+            ));
             bytes
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = Vec::new();
             for field in tuple.fields() {
-                bytes.extend(get_type_hash(registry, field.id(), visited_ids));
+                bytes.extend(get_type_hash(registry, field.id(), visited_ids, cache));
             }
             bytes
         }
@@ -131,13 +139,28 @@ fn get_type_def_hash(
         }
         TypeDef::Compact(compact) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, compact.type_param().id(), visited_ids));
+            bytes.extend(get_type_hash(
+                registry,
+                compact.type_param().id(),
+                visited_ids,
+                cache,
+            ));
             bytes
         }
         TypeDef::BitSequence(bitseq) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, bitseq.bit_order_type().id(), visited_ids));
-            bytes.extend(get_type_hash(registry, bitseq.bit_store_type().id(), visited_ids));
+            bytes.extend(get_type_hash(
+                registry,
+                bitseq.bit_order_type().id(),
+                visited_ids,
+                cache,
+            ));
+            bytes.extend(get_type_hash(
+                registry,
+                bitseq.bit_store_type().id(),
+                visited_ids,
+                cache,
+            ));
             bytes
         }
     };
@@ -149,12 +172,9 @@ fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
     visited_ids: &mut HashSet<u32>,
+    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
-    lazy_static! {
-        static ref CACHED_UID: Mutex<HashMap<u32, [u8; 32]>> = Mutex::new(HashMap::new());
-    }
-
-    if let Some(cached) = CACHED_UID.lock().unwrap().get(&id) {
+    if let Some(cached) = cache.types.get(&id) {
         return *cached
     }
 
@@ -168,33 +188,54 @@ fn get_type_hash(
     }
 
     let ty_def = ty.type_def();
-    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids));
+    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids, cache));
 
     let uid = hash(&bytes);
-    CACHED_UID.lock().unwrap().insert(id, uid);
+    cache.types.insert(id, uid);
     uid
 }
 
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
     pallet: &frame_metadata::PalletMetadata<PortableForm>,
+    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
     let mut visited_ids = HashSet::<u32>::new();
 
     if let Some(ref calls) = pallet.calls {
-        bytes.extend(get_type_hash(registry, calls.ty.id(), &mut visited_ids));
+        bytes.extend(get_type_hash(
+            registry,
+            calls.ty.id(),
+            &mut visited_ids,
+            cache,
+        ));
     }
     if let Some(ref event) = pallet.event {
-        bytes.extend(get_type_hash(registry, event.ty.id(), &mut visited_ids));
+        bytes.extend(get_type_hash(
+            registry,
+            event.ty.id(),
+            &mut visited_ids,
+            cache,
+        ));
     }
     for constant in pallet.constants.iter() {
         bytes.extend(constant.name.as_bytes());
         bytes.extend(&constant.value);
-        bytes.extend(get_type_hash(registry, constant.ty.id(), &mut visited_ids));
+        bytes.extend(get_type_hash(
+            registry,
+            constant.ty.id(),
+            &mut visited_ids,
+            cache,
+        ));
     }
     if let Some(ref error) = pallet.error {
-        bytes.extend(get_type_hash(registry, error.ty.id(), &mut visited_ids));
+        bytes.extend(get_type_hash(
+            registry,
+            error.ty.id(),
+            &mut visited_ids,
+            cache,
+        ));
     }
     if let Some(ref storage) = pallet.storage {
         bytes.extend(storage.prefix.as_bytes());
@@ -203,7 +244,12 @@ pub fn get_pallet_hash(
             entry.modifier.encode_to(&mut bytes);
             match &entry.ty {
                 StorageEntryType::Plain(ty) => {
-                    bytes.extend(get_type_hash(registry, ty.id(), &mut visited_ids));
+                    bytes.extend(get_type_hash(
+                        registry,
+                        ty.id(),
+                        &mut visited_ids,
+                        cache,
+                    ));
                 }
                 StorageEntryType::Map {
                     hashers,
@@ -211,8 +257,18 @@ pub fn get_pallet_hash(
                     value,
                 } => {
                     hashers.encode_to(&mut bytes);
-                    bytes.extend(get_type_hash(registry, key.id(), &mut visited_ids));
-                    bytes.extend(get_type_hash(registry, value.id(), &mut visited_ids));
+                    bytes.extend(get_type_hash(
+                        registry,
+                        key.id(),
+                        &mut visited_ids,
+                        cache,
+                    ));
+                    bytes.extend(get_type_hash(
+                        registry,
+                        value.id(),
+                        &mut visited_ids,
+                        cache,
+                    ));
                 }
             }
             bytes.extend(&entry.default);
@@ -226,4 +282,16 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
     // Note: Order by pallets and use `get_pallet_uid`.
     let bytes = metadata.encode();
     hash(&bytes)
+}
+
+pub struct MetadataHasherCache {
+    pub(crate) types: HashMap<u32, [u8; 32]>,
+}
+
+impl MetadataHasherCache {
+    pub fn new() -> Self {
+        Self {
+            types: HashMap::new(),
+        }
+    }
 }

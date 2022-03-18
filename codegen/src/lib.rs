@@ -26,6 +26,7 @@ pub use self::{
         metadata::{
             get_metadata_hash,
             get_pallet_hash,
+            MetadataHasherCache,
         },
         RuntimeGenerator,
     },

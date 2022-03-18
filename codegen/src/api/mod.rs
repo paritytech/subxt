@@ -43,6 +43,7 @@ use crate::{
     api::metadata::{
         get_metadata_hash,
         get_pallet_hash,
+        MetadataHasherCache,
     },
     ir,
     types::{
@@ -189,8 +190,11 @@ impl RuntimeGenerator {
             })
             .collect::<Vec<_>>();
 
+        let mut metadata_cache = MetadataHasherCache::new();
+
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let pallet_hash = get_pallet_hash(&self.metadata.types, pallet);
+            let pallet_hash =
+                get_pallet_hash(&self.metadata.types, pallet, &mut metadata_cache);
 
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
