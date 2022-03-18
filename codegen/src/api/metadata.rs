@@ -58,13 +58,13 @@ fn hash(bytes: &[u8]) -> [u8; 32] {
 fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
-    set: &mut HashSet<u32>,
+    visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
     field.name().encode_to(&mut bytes);
     field.type_name().encode_to(&mut bytes);
-    bytes.extend(get_type_hash(registry, field.ty().id(), set));
+    bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids));
 
     hash(&bytes)
 }
@@ -72,13 +72,13 @@ fn get_field_hash(
 fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
-    set: &mut HashSet<u32>,
+    visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
     var.name().encode_to(&mut bytes);
     for field in var.fields() {
-        bytes.extend(get_field_hash(registry, field, set));
+        bytes.extend(get_field_hash(registry, field, visited_ids));
     }
 
     hash(&bytes)
@@ -87,7 +87,7 @@ fn get_variant_hash(
 fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
-    set: &mut HashSet<u32>,
+    visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
 
@@ -95,32 +95,32 @@ fn get_type_def_hash(
         TypeDef::Composite(composite) => {
             let mut bytes = Vec::new();
             for field in composite.fields() {
-                bytes.extend(get_field_hash(registry, field, set));
+                bytes.extend(get_field_hash(registry, field, visited_ids));
             }
             bytes
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
             for var in variant.variants() {
-                bytes.extend(get_variant_hash(registry, var, set));
+                bytes.extend(get_variant_hash(registry, var, visited_ids));
             }
             bytes
         }
         TypeDef::Sequence(sequence) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, sequence.type_param().id(), set));
+            bytes.extend(get_type_hash(registry, sequence.type_param().id(), visited_ids));
             bytes
         }
         TypeDef::Array(array) => {
             let mut bytes = Vec::new();
             array.len().encode_to(&mut bytes);
-            bytes.extend(get_type_hash(registry, array.type_param().id(), set));
+            bytes.extend(get_type_hash(registry, array.type_param().id(), visited_ids));
             bytes
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = Vec::new();
             for field in tuple.fields() {
-                bytes.extend(get_type_hash(registry, field.id(), set));
+                bytes.extend(get_type_hash(registry, field.id(), visited_ids));
             }
             bytes
         }
@@ -131,13 +131,13 @@ fn get_type_def_hash(
         }
         TypeDef::Compact(compact) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, compact.type_param().id(), set));
+            bytes.extend(get_type_hash(registry, compact.type_param().id(), visited_ids));
             bytes
         }
         TypeDef::BitSequence(bitseq) => {
             let mut bytes = Vec::new();
-            bytes.extend(get_type_hash(registry, bitseq.bit_order_type().id(), set));
-            bytes.extend(get_type_hash(registry, bitseq.bit_store_type().id(), set));
+            bytes.extend(get_type_hash(registry, bitseq.bit_order_type().id(), visited_ids));
+            bytes.extend(get_type_hash(registry, bitseq.bit_store_type().id(), visited_ids));
             bytes
         }
     };
@@ -148,7 +148,7 @@ fn get_type_def_hash(
 fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
-    set: &mut HashSet<u32>,
+    visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     lazy_static! {
         static ref CACHED_UID: Mutex<HashMap<u32, [u8; 32]>> = Mutex::new(HashMap::new());
@@ -163,12 +163,12 @@ fn get_type_hash(
     let mut bytes = vec![MetadataHashableIDs::Type as u8];
     ty.path().segments().encode_to(&mut bytes);
     // Guard against recursive types
-    if !set.insert(id) {
+    if !visited_ids.insert(id) {
         return hash(&bytes)
     }
 
     let ty_def = ty.type_def();
-    bytes.extend(get_type_def_hash(registry, ty_def, set));
+    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids));
 
     let uid = hash(&bytes);
     CACHED_UID.lock().unwrap().insert(id, uid);
@@ -180,21 +180,21 @@ pub fn get_pallet_hash(
     pallet: &frame_metadata::PalletMetadata<PortableForm>,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
-    let mut set = HashSet::<u32>::new();
+    let mut visited_ids = HashSet::<u32>::new();
 
     if let Some(ref calls) = pallet.calls {
-        bytes.extend(get_type_hash(registry, calls.ty.id(), &mut set));
+        bytes.extend(get_type_hash(registry, calls.ty.id(), &mut visited_ids));
     }
     if let Some(ref event) = pallet.event {
-        bytes.extend(get_type_hash(registry, event.ty.id(), &mut set));
+        bytes.extend(get_type_hash(registry, event.ty.id(), &mut visited_ids));
     }
     for constant in pallet.constants.iter() {
         bytes.extend(constant.name.as_bytes());
         bytes.extend(&constant.value);
-        bytes.extend(get_type_hash(registry, constant.ty.id(), &mut set));
+        bytes.extend(get_type_hash(registry, constant.ty.id(), &mut visited_ids));
     }
     if let Some(ref error) = pallet.error {
-        bytes.extend(get_type_hash(registry, error.ty.id(), &mut set));
+        bytes.extend(get_type_hash(registry, error.ty.id(), &mut visited_ids));
     }
     if let Some(ref storage) = pallet.storage {
         bytes.extend(storage.prefix.as_bytes());
@@ -203,7 +203,7 @@ pub fn get_pallet_hash(
             entry.modifier.encode_to(&mut bytes);
             match &entry.ty {
                 StorageEntryType::Plain(ty) => {
-                    bytes.extend(get_type_hash(registry, ty.id(), &mut set));
+                    bytes.extend(get_type_hash(registry, ty.id(), &mut visited_ids));
                 }
                 StorageEntryType::Map {
                     hashers,
@@ -211,8 +211,8 @@ pub fn get_pallet_hash(
                     value,
                 } => {
                     hashers.encode_to(&mut bytes);
-                    bytes.extend(get_type_hash(registry, key.id(), &mut set));
-                    bytes.extend(get_type_hash(registry, value.id(), &mut set));
+                    bytes.extend(get_type_hash(registry, key.id(), &mut visited_ids));
+                    bytes.extend(get_type_hash(registry, value.id(), &mut visited_ids));
                 }
             }
             bytes.extend(&entry.default);
