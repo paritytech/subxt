@@ -138,7 +138,7 @@ impl Metadata {
     }
 
     /// Obtain the pallet unique identifier.
-    pub fn pallet_uid(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
+    pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
         let metadata = self.runtime_metadata();
         // Note: fetch name from codegen to avoid `to_snake_case()`.
         let pallet = match metadata
@@ -153,7 +153,7 @@ impl Metadata {
     }
 
     /// Obtain the full metadata identifier.
-    pub fn metadata_uid(&self) -> [u8; 32] {
+    pub fn metadata_hash(&self) -> [u8; 32] {
         subxt_codegen::get_metadata_hash(self.runtime_metadata())
     }
 }
