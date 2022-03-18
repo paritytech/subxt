@@ -62,8 +62,8 @@ fn get_field_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
-    bytes.extend(field.name().encode());
-    bytes.extend(field.type_name().encode());
+    field.name().encode_to(&mut bytes);
+    field.type_name().encode_to(&mut bytes);
     bytes.extend(get_type_hash(registry, field.ty().id(), set));
 
     hash(&bytes)
@@ -76,7 +76,7 @@ fn get_variant_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
-    bytes.extend(var.name().as_bytes());
+    var.name().encode_to(&mut bytes);
     for field in var.fields() {
         bytes.extend(get_field_hash(registry, field, set));
     }
@@ -113,7 +113,7 @@ fn get_type_def_hash(
         }
         TypeDef::Array(array) => {
             let mut bytes = Vec::new();
-            bytes.extend(array.len().to_be_bytes());
+            array.len().encode_to(&mut bytes);
             bytes.extend(get_type_hash(registry, array.type_param().id(), set));
             bytes
         }
@@ -126,7 +126,7 @@ fn get_type_def_hash(
         }
         TypeDef::Primitive(primitive) => {
             let mut bytes = Vec::new();
-            bytes.extend(primitive.encode());
+            primitive.encode_to(&mut bytes);
             bytes
         }
         TypeDef::Compact(compact) => {
@@ -161,7 +161,7 @@ fn get_type_hash(
     let ty = registry.resolve(id).unwrap();
 
     let mut bytes = vec![MetadataHashableIDs::Type as u8];
-    bytes.extend(ty.path().segments().concat().into_bytes());
+    ty.path().segments().encode_to(&mut bytes);
     // Guard against recursive types
     if !set.insert(id) {
         return hash(&bytes)
@@ -200,7 +200,7 @@ pub fn get_pallet_hash(
         bytes.extend(storage.prefix.as_bytes());
         for entry in storage.entries.iter() {
             bytes.extend(entry.name.as_bytes());
-            bytes.extend(entry.modifier.encode());
+            entry.modifier.encode_to(&mut bytes);
             match &entry.ty {
                 StorageEntryType::Plain(ty) => {
                     bytes.extend(get_type_hash(registry, ty.id(), &mut set));
@@ -210,7 +210,7 @@ pub fn get_pallet_hash(
                     key,
                     value,
                 } => {
-                    bytes.extend(hashers.encode());
+                    hashers.encode_to(&mut bytes);
                     bytes.extend(get_type_hash(registry, key.id(), &mut set));
                     bytes.extend(get_type_hash(registry, value.id(), &mut set));
                 }
