@@ -38,13 +38,14 @@ mod events;
 pub mod metadata;
 mod storage;
 
+use subxt_metadata::{
+    get_metadata_hash,
+    get_pallet_hash,
+    MetadataHasherCache,
+};
+
 use super::GeneratedTypeDerives;
 use crate::{
-    api::metadata::{
-        get_metadata_hash,
-        get_pallet_hash,
-        MetadataHasherCache,
-    },
     ir,
     types::{
         CompositeDef,

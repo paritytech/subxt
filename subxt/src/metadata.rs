@@ -149,8 +149,8 @@ impl Metadata {
             Some(pallet) => pallet,
             _ => return Err(MetadataError::PalletNotFound(name.to_string())),
         };
-        let mut cache = subxt_codegen::MetadataHasherCache::new();
-        Ok(subxt_codegen::get_pallet_hash(
+        let mut cache = subxt_metadata::MetadataHasherCache::new();
+        Ok(subxt_metadata::get_pallet_hash(
             &metadata.types,
             pallet,
             &mut cache,
@@ -159,8 +159,8 @@ impl Metadata {
 
     /// Obtain the full metadata identifier.
     pub fn metadata_hash(&self) -> [u8; 32] {
-        let mut cache = subxt_codegen::MetadataHasherCache::new();
-        subxt_codegen::get_metadata_hash(self.runtime_metadata(), &mut cache)
+        let mut cache = subxt_metadata::MetadataHasherCache::new();
+        subxt_metadata::get_metadata_hash(self.runtime_metadata(), &mut cache)
     }
 }
 

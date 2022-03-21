@@ -29,6 +29,7 @@ thiserror = "1.0.24"
 
 subxt-codegen = { version = "0.18.1", path = "../codegen" }
 subxt-macro = { version = "0.18.1", path = "../macro" }
+subxt-metadata = { path = "../metadata", version = "0.18.1" }
 
 sp-core = { version = "6.0.0", default-features = false  }
 sp-runtime = "6.0.0"
