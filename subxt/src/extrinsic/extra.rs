@@ -29,9 +29,93 @@ use sp_runtime::{
     },
     transaction_validity::TransactionValidityError,
 };
+use codec::Compact;
 
 use crate::Config;
 
+pub trait ExtrinsicParams<T: Config> {
+    type OtherParams: Default;
+
+    fn new(
+        spec_version: u32,
+        tx_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+        other_params: Self::OtherParams,
+    ) -> Self;
+
+    fn encode_extra_to(&self, v: &mut Vec<u8>);
+    fn encode_additional_to(&self, v: &mut Vec<u8>);
+}
+
+pub struct DefaultExtra<T: Config> {
+    era: Era,
+    nonce: T::Index,
+    tip: u128,
+    spec_version: u32,
+    transaction_version: u32,
+    genesis_hash: T::Hash,
+    mortality_checkpoint: T::Hash,
+    marker: std::marker::PhantomData<T>
+}
+
+pub struct DefaultExtraBuilder<T: Config> {
+    era: Era,
+    mortality_checkpoint: Option<T::Hash>,
+    tip: u128,
+}
+
+impl <T: Config> Default for DefaultExtraBuilder<T> {
+    fn default() -> Self {
+        Self {
+            era: Era::Immortal,
+            mortality_checkpoint: None,
+            tip: 0
+        }
+    }
+}
+
+impl <T: Config> ExtrinsicParams<T> for DefaultExtra<T> {
+    // This is how we can pass values at runtime:
+    type OtherParams = DefaultExtraBuilder<T>;
+
+    fn new(
+        // Provided from subxt client:
+        spec_version: u32,
+        transaction_version: u32,
+        nonce: T::Index,
+        genesis_hash: T::Hash,
+        // Provided externally:
+        other_params: Self::OtherParams,
+    ) -> Self {
+        DefaultExtra {
+            era: other_params.era,
+            mortality_checkpoint: other_params.mortality_checkpoint.unwrap_or(genesis_hash),
+            tip: other_params.tip,
+            nonce,
+            spec_version,
+            transaction_version,
+            genesis_hash,
+            marker: std::marker::PhantomData,
+        }
+    }
+
+    // And this is how we turn the params into our extra/additional SCALE
+    // bytes as needed for extrinsic construction:
+    fn encode_extra_to(&self, v: &mut Vec<u8>) {
+        let nonce: u64 = self.nonce.into();
+        (self.era, Compact(nonce), Compact(self.tip)).encode_to(v);
+    }
+    fn encode_additional_to(&self, v: &mut Vec<u8>) {
+        (
+            self.spec_version,
+            self.transaction_version,
+            self.genesis_hash,
+            self.mortality_checkpoint
+        ).encode_to(v);
+    }
+}
+/*
 /// Extra type.
 // pub type Extra<T> = <<T as Config>::Extra as SignedExtra<T>>::Extra;
 
@@ -479,3 +563,4 @@ where
 ///
 /// Note that this must match the `SignedExtra` type in the target runtime's extrinsic definition.
 pub type DefaultExtra<T> = DefaultExtraWithTxPayment<T, ChargeTransactionPayment<T>>;
+*/

@@ -91,11 +91,10 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
-        DefaultExtraWithTxPayment,
+        DefaultExtraBuilder,
+        ExtrinsicParams,
         PairSigner,
-        SignedExtra,
         Signer,
-        UncheckedExtrinsic,
     },
     metadata::{
         ErrorMetadata,
