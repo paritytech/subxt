@@ -192,9 +192,9 @@ fn get_type_hash(
     let ty_def = ty.type_def();
     bytes.extend(get_type_def_hash(registry, ty_def, visited_ids, cache));
 
-    let uid = hash(&bytes);
-    cache.types.insert(id, uid);
-    uid
+    let type_hash = hash(&bytes);
+    cache.types.insert(id, type_hash);
+    type_hash
 }
 
 fn get_extrinsic_hash(
@@ -238,6 +238,10 @@ pub fn get_pallet_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
     let mut visited_ids = HashSet::<u32>::new();
+
+    if let Some(cached) = cache.pallets.get(&pallet.name) {
+        return *cached
+    }
 
     if let Some(ref calls) = pallet.calls {
         bytes.extend(get_type_hash(
@@ -311,7 +315,9 @@ pub fn get_pallet_hash(
         }
     }
 
-    hash(&bytes)
+    let pallet_hash = hash(&bytes);
+    cache.pallets.insert(pallet.name.clone(), pallet_hash);
+    pallet_hash
 }
 
 pub fn get_metadata_hash(
@@ -356,12 +362,14 @@ pub fn get_metadata_hash(
 
 pub struct MetadataHasherCache {
     pub(crate) types: HashMap<u32, [u8; 32]>,
+    pub(crate) pallets: HashMap<String, [u8; 32]>,
 }
 
 impl MetadataHasherCache {
     pub fn new() -> Self {
         Self {
             types: HashMap::new(),
+            pallets: HashMap::new(),
         }
     }
 }
