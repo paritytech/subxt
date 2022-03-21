@@ -39,6 +39,7 @@ use crate::{
     transaction::TransactionProgress,
     Call,
     Config,
+    Encoded,
     Metadata,
 };
 use codec::Decode;
@@ -246,16 +247,49 @@ where
         self.client.rpc().submit_extrinsic(extrinsic).await
     }
 
+    // /// Creates a signed extrinsic.
+    // pub async fn create_signed(
+    //     &self,
+    //     signer: &(dyn Signer<T, X> + Send + Sync),
+    //     additional_params: X::Parameters,
+    // ) -> Result<UncheckedExtrinsic<T, X>, BasicError>
+    // where
+    //     <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
+    //         Send + Sync + 'static,
+    // {
+    //     let account_nonce = if let Some(nonce) = signer.nonce() {
+    //         nonce
+    //     } else {
+    //         self.client
+    //             .rpc()
+    //             .system_account_next_index(signer.account_id())
+    //             .await?
+    //     };
+    //     let call = self
+    //         .client
+    //         .metadata()
+    //         .pallet(C::PALLET)
+    //         .and_then(|pallet| pallet.encode_call(&self.call))?;
+
+    //     let signed = extrinsic::create_signed(
+    //         &self.client.runtime_version,
+    //         self.client.genesis_hash,
+    //         account_nonce,
+    //         call,
+    //         signer,
+    //         additional_params,
+    //     )
+    //     .await?;
+    //     Ok(signed)
+    // }
+
     /// Creates a signed extrinsic.
     pub async fn create_signed(
         &self,
         signer: &(dyn Signer<T, X> + Send + Sync),
         additional_params: X::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, X>, BasicError>
-    where
-        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync + 'static,
-    {
+    ) -> Result<Encoded, BasicError> {
+        // 1. get nonce
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
@@ -264,21 +298,64 @@ where
                 .system_account_next_index(signer.account_id())
                 .await?
         };
-        let call = self
-            .client
-            .metadata()
-            .pallet(C::PALLET)
-            .and_then(|pallet| pallet.encode_call(&self.call))?;
 
-        let signed = extrinsic::create_signed(
-            &self.client.runtime_version,
-            self.client.genesis_hash,
+        // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
+        let call_data: Vec<u8> = {
+            let mut encoded = Vec::new();
+            let pallet = self
+                .client
+                .metadata()
+                .pallet(C::PALLET)?;
+            encoded.push(pallet.index());
+            encoded.push(pallet.call_index::<C>()?);
+            self.call.encode_to(&mut encoded);
+            encoded
+        };
+
+        // 3. construct our custom additional/extra params.
+        let additional_and_extra_params = X::new(
+            self.client.runtime_version.spec_version,
+            self.client.runtime_version.transaction_version,
             account_nonce,
-            call,
-            signer,
+            self.client.genesis_hash,
             additional_params,
-        )
-        .await?;
-        Ok(signed)
+        );
+
+        // 4. construct payload to be signed
+        let payload_to_be_signed = {
+            let mut encoded = call_data.clone();
+            additional_and_extra_params.encode_extra_to(&mut encoded);
+            additional_and_extra_params.encode_additional_to(&mut encoded);
+            encoded
+        };
+
+        // 5. Create signature from this.
+        let signature_bytes: Vec<u8> = signer.sign(&payload_to_be_signed);
+
+        // 6. Encode extrinsic, now that we have the parts we need.
+        // (this may not be 100% correct but should be close enough for this example)
+        let extrinsic = {
+            let mut encoded_inner = Vec::new();
+            // "is signed" + transaction protocol version (4)
+            (b10000000 + 4u8).encode_to(&mut encoded_inner);
+            // from address for signature
+            signer.account_id().encode_to(&mut encoded_inner);
+            // the signature bytes
+            signature_bytes.encode_to(&mut encoded_inner);
+            // attach custom extra params
+            additional_and_extra_params.encode_extra_to(&mut encoded_inner);
+            // and now, call data
+            encoded_inner.extend(&mut call_data);
+            // now, prefix byte length:
+            let len = Compact(encoded_inner.len());
+            let mut encoded = Vec::new();
+            len.encode_to(&mut encoded);
+            encoded.extend(&mut encoded_inner);
+            encoded
+        };
+
+        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
+        // maybe we can just return the raw bytes..
+        Encoded(extrinsic)
     }
 }
