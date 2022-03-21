@@ -32,7 +32,6 @@ use frame_metadata::{
 
 use crate::{
     Call,
-    Encoded,
 };
 use scale_info::{
     form::PortableForm,

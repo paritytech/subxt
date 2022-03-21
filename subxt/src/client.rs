@@ -201,6 +201,20 @@ where
         }
     }
 
+    /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
+    /// to construct the "signed extra" and "additional" payloads needed by the extrinsic.
+    ///
+    /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
+    /// and obtain details about it, once it has made it into a block.
+    pub async fn sign_and_submit_then_watch_default(
+        self,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
+    where X::OtherParams: Default
+    {
+        self.sign_and_submit_then_watch(signer, Default::default()).await
+    }
+
     /// Creates and signs an extrinsic and submits it to the chain.
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
@@ -208,9 +222,12 @@ where
     pub async fn sign_and_submit_then_watch(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError> {
+        other_params: X::OtherParams,
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
+    where X::OtherParams: Default
+    {
         // Sign the call data to create our extrinsic.
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
+        let extrinsic = self.create_signed(signer, other_params).await?;
 
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
@@ -219,6 +236,25 @@ where
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
         Ok(TransactionProgress::new(sub, self.client, ext_hash))
+    }
+
+    /// Creates and signs an extrinsic and submits to the chain for block inclusion. Passes
+    /// default parameters to construct the "signed extra" and "additional" payloads needed
+    /// by the extrinsic.
+    ///
+    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// and has been included in the transaction pool.
+    pub async fn sign_and_submit_default(
+        self,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<T::Hash, BasicError>
+    where X::OtherParams: Default
+    {
+        self.sign_and_submit(signer, Default::default()).await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.
@@ -232,16 +268,19 @@ where
     pub async fn sign_and_submit(
         self,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<T::Hash, BasicError> {
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
+        other_params: X::OtherParams,
+    ) -> Result<T::Hash, BasicError>
+    where X::OtherParams: Default
+    {
+        let extrinsic = self.create_signed(signer, other_params).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
     }
 
-    /// Creates a signed extrinsic.
+    /// Creates a returns a raw signed extrinsic, without submitting it.
     pub async fn create_signed(
         &self,
         signer: &(dyn Signer<T> + Send + Sync),
-        additional_params: X::OtherParams,
+        other_params: X::OtherParams,
     ) -> Result<Encoded, BasicError> {
         // 1. get nonce
         let account_nonce = if let Some(nonce) = signer.nonce() {
@@ -272,7 +311,7 @@ where
             self.client.runtime_version.transaction_version,
             account_nonce,
             self.client.genesis_hash,
-            additional_params,
+            other_params,
         );
 
         // 4. construct payload to be signed
@@ -280,7 +319,11 @@ where
             let mut encoded = call_data.clone();
             additional_and_extra_params.encode_extra_to(&mut encoded);
             additional_and_extra_params.encode_additional_to(&mut encoded);
-            encoded
+            if encoded.len() > 256 {
+                sp_core::blake2_256(&encoded).to_vec()
+            } else {
+                encoded
+            }
         };
 
         // 5. Encode extrinsic, now that we have the parts we need.

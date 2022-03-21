@@ -25,6 +25,10 @@ use sp_runtime::traits::{
     Verify,
 };
 
+/// Signing transactions requires a [`Signer`]. This is responsible for
+/// providing the "from" account that the transaction is being signed by,
+/// as well as actually signing a SCALE encoded payload. Optionally, a
+/// signer can also provide the nonce for the transaction to use.
 pub trait Signer<T: Config> {
     /// Returns the account id.
     fn account_id(&self) -> &T::AccountId;
@@ -39,8 +43,10 @@ pub trait Signer<T: Config> {
     fn encode_signature_to(&self, signer_payload: &[u8], out: &mut Vec<u8>);
 }
 
+
+/// A [`Signer`] implementation that can be constructed from an [`Pair`].
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: Config, P: sp_core::Pair> {
+pub struct PairSigner<T: Config, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
@@ -52,9 +58,9 @@ where
     T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
-    P: sp_core::Pair,
+    P: Pair,
 {
-    /// Creates a new `Signer` from a `Pair`.
+    /// Creates a new [`Signer`] from a [`Pair`].
     pub fn new(signer: P) -> Self {
         let account_id =
             <T::Signature as Verify>::Signer::from(signer.public()).into_account();
@@ -65,7 +71,8 @@ where
         }
     }
 
-    /// Sets the nonce to a new value.
+    /// Sets the nonce to a new value. By default, the nonce will
+    /// be retrieved from the node. Setting one here will override that.
     pub fn set_nonce(&mut self, nonce: T::Index) {
         self.nonce = Some(nonce);
     }
@@ -75,7 +82,7 @@ where
         self.nonce = self.nonce.map(|nonce| nonce + 1u32.into());
     }
 
-    /// Returns the signer.
+    /// Returns the [`Pair`] implementation used to construct this.
     pub fn signer(&self) -> &P {
         &self.signer
     }

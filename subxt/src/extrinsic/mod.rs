@@ -23,7 +23,7 @@ pub use self::{
     extra::{
         ExtrinsicParams,
         DefaultExtra,
-        DefaultExtraBuilder,
+        DefaultExtraParams,
     },
     signer::{
         PairSigner,

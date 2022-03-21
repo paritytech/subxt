@@ -91,7 +91,7 @@ pub use crate::{
     },
     extrinsic::{
         DefaultExtra,
-        DefaultExtraBuilder,
+        DefaultExtraParams,
         ExtrinsicParams,
         PairSigner,
         Signer,
