@@ -32,6 +32,8 @@ use std::collections::{
     HashSet,
 };
 
+/// Internal byte representation for various metadata types utilized for
+/// generating deterministic hashes between different rust versions.
 #[repr(u8)]
 enum MetadataHashableIDs {
     Field,
@@ -42,10 +44,12 @@ enum MetadataHashableIDs {
     Extrinsic,
 }
 
+/// Hashing function utilized internally.
 fn hash(bytes: &[u8]) -> [u8; 32] {
     sp_core::hashing::sha2_256(bytes)
 }
 
+/// Obtain the hash representation of a `scale_info::Field`.
 fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
@@ -61,6 +65,7 @@ fn get_field_hash(
     hash(&bytes)
 }
 
+/// Obtain the hash representation of a `scale_info::Variant`.
 fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
@@ -77,6 +82,7 @@ fn get_variant_hash(
     hash(&bytes)
 }
 
+/// Obtain the hash representation of a `scale_info::TypeDef`.
 fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
@@ -164,6 +170,7 @@ fn get_type_def_hash(
     hash(&bytes)
 }
 
+/// Obtain the hash representation of a `scale_info::Type` identified by id.
 fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
@@ -191,6 +198,7 @@ fn get_type_hash(
     type_hash
 }
 
+/// Obtain the hash representation of a `frame_metadata::ExtrinsicMetadata`.
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata<PortableForm>,
@@ -225,6 +233,7 @@ fn get_extrinsic_hash(
     hash(&bytes)
 }
 
+/// Obtain the hash representation of a `frame_metadata::PalletMetadata`.
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
     pallet: &frame_metadata::PalletMetadata<PortableForm>,
@@ -314,6 +323,7 @@ pub fn get_pallet_hash(
     pallet_hash
 }
 
+/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`.
 pub fn get_metadata_hash(
     metadata: &RuntimeMetadataLastVersion,
     cache: &mut MetadataHasherCache,
@@ -354,12 +364,16 @@ pub fn get_metadata_hash(
     hash(&bytes)
 }
 
+/// Metadata hasher internal cache.
 pub struct MetadataHasherCache {
+    /// Cache of the types obtained from `get_type_hash`.
     pub(crate) types: HashMap<u32, [u8; 32]>,
+    /// Cache of the pallets obtained from `get_pallet_hash`.
     pub(crate) pallets: HashMap<String, [u8; 32]>,
 }
 
 impl MetadataHasherCache {
+    /// Creates an empty `MetadataHasherCache`.
     pub fn new() -> Self {
         Self {
             types: HashMap::new(),
