@@ -22,6 +22,7 @@
 
 use codec::Encode;
 use frame_metadata::{
+    ExtrinsicMetadata,
     RuntimeMetadataLastVersion,
     StorageEntryType,
 };
@@ -44,6 +45,7 @@ enum MetadataHashableIDs {
     TypeDef,
     Type,
     Pallet,
+    Extrinsic,
 }
 
 fn hash(bytes: &[u8]) -> [u8; 32] {
@@ -193,6 +195,40 @@ fn get_type_hash(
     let uid = hash(&bytes);
     cache.types.insert(id, uid);
     uid
+}
+
+fn get_extrinsic_hash(
+    registry: &PortableRegistry,
+    extrinsic: &ExtrinsicMetadata<PortableForm>,
+    cache: &mut MetadataHasherCache,
+) -> [u8; 32] {
+    let mut visited_ids = HashSet::<u32>::new();
+    let mut bytes = vec![MetadataHashableIDs::Extrinsic as u8];
+
+    bytes.extend(get_type_hash(
+        registry,
+        extrinsic.ty.id(),
+        &mut visited_ids,
+        cache,
+    ));
+    bytes.push(extrinsic.version);
+    for signed_extension in extrinsic.signed_extensions.iter() {
+        signed_extension.identifier.encode_to(&mut bytes);
+        bytes.extend(get_type_hash(
+            registry,
+            signed_extension.ty.id(),
+            &mut visited_ids,
+            cache,
+        ));
+        bytes.extend(get_type_hash(
+            registry,
+            signed_extension.additional_signed.id(),
+            &mut visited_ids,
+            cache,
+        ));
+    }
+
+    hash(&bytes)
 }
 
 pub fn get_pallet_hash(
