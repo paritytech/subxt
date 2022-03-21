@@ -35,7 +35,6 @@ mod calls;
 mod constants;
 mod errors;
 mod events;
-pub mod metadata;
 mod storage;
 
 use subxt_metadata::{

@@ -23,11 +23,6 @@ mod types;
 pub use self::{
     api::{
         generate_runtime_api,
-        metadata::{
-            get_metadata_hash,
-            get_pallet_hash,
-            MetadataHasherCache,
-        },
         RuntimeGenerator,
     },
     types::{
