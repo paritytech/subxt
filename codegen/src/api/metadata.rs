@@ -365,3 +365,9 @@ impl MetadataHasherCache {
         }
     }
 }
+
+impl Default for MetadataHasherCache {
+    fn default() -> Self {
+        Self::new()
+    }
+}
