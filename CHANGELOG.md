@@ -8,11 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Return events from blocks skipped over during Finalization, too ([#473](git@github.com:paritytech/subxt/pull/473))
-- Use RPC call to get account nonce ([#476](git@github.com:paritytech/subxt/pull/476))
-- Add script to generate release changelog based on commits ([#465](git@github.com:paritytech/subxt/pull/465))
-- README updates ([#472](git@github.com:paritytech/subxt/pull/472))
-- Make EventSubscription and FilterEvents Send-able ([#471](git@github.com:paritytech/subxt/pull/471))
+- Return events from blocks skipped over during Finalization, too ([#473](https://github.com/paritytech/subxt/pull/473))
+- Use RPC call to get account nonce ([#476](https://github.com/paritytech/subxt/pull/476))
+- Add script to generate release changelog based on commits ([#465](https://github.com/paritytech/subxt/pull/465))
+- README updates ([#472](https://github.com/paritytech/subxt/pull/472))
+- Make EventSubscription and FilterEvents Send-able ([#471](https://github.com/paritytech/subxt/pull/471))
 
 ## [0.18.1] - 2022-03-04
 
