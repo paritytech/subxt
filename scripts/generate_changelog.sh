@@ -4,6 +4,8 @@
 
 set -eu
 
+REMOTE_LINK="https://github.com/paritytech/subxt/pull/"
+
 function usage() {
     cat <<HELP_USAGE
 This script obtains the changelog between the latest release tag and origin/master.
@@ -37,8 +39,6 @@ GIT_BIN=$(which git) || log_error 'git is not installed. Please follow https://g
 # Generate the changelog between the provided tag and origin/master.
 function generate_changelog() {
     local tag="$1"
-    # From the remote origin url, get a link to pull requests.
-    remote_link=$($GIT_BIN config --get remote.origin.url | sed 's/\.git/\/pull\//g') || log_error 'Failed to get remote origin url'
 
     prs=$($GIT_BIN --no-pager log --pretty=format:"%s" "$tag"..origin/master) || log_error 'Failed to obtain commit list'
 
@@ -52,7 +52,7 @@ function generate_changelog() {
         fi
 
         # Generate a valid PR link.
-        pr_link="$remote_link$pr_number"
+        pr_link="$REMOTE_LINK$pr_number"
         # Generate the link as markdown.
         pr_md_link=" ([#$pr_number]($pr_link))"
         # Print the changelog line as `- commit-title pr-link`.
