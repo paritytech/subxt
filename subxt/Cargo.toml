@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.18.1"
+version = "0.19.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -26,7 +26,7 @@ serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
 
-subxt-macro = { version = "0.18.1", path = "../macro" }
+subxt-macro = { version = "0.19.0", path = "../macro" }
 
 sp-core = { version = "6.0.0", default-features = false  }
 sp-runtime = "6.0.0"
