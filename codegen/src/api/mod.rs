@@ -191,6 +191,7 @@ impl RuntimeGenerator {
             .collect::<Vec<_>>();
 
         let mut metadata_cache = MetadataHasherCache::new();
+        let metadata_hash = get_metadata_hash(&self.metadata, &mut metadata_cache);
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let pallet_hash =
@@ -289,7 +290,6 @@ impl RuntimeGenerator {
         let type_parameter_default_impl = default_account_data_impl
             .as_ref()
             .map(|_| quote!( = #default_account_data_ident ));
-        let metadata_hash = get_metadata_hash(&self.metadata);
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {

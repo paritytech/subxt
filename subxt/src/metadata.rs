@@ -159,7 +159,8 @@ impl Metadata {
 
     /// Obtain the full metadata identifier.
     pub fn metadata_hash(&self) -> [u8; 32] {
-        subxt_codegen::get_metadata_hash(self.runtime_metadata())
+        let mut cache = subxt_codegen::MetadataHasherCache::new();
+        subxt_codegen::get_metadata_hash(self.runtime_metadata(), &mut cache)
     }
 }
 
