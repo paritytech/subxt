@@ -314,16 +314,17 @@ pub fn get_pallet_hash(
     hash(&bytes)
 }
 
-pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
-    let mut cache = MetadataHasherCache::new();
-
+pub fn get_metadata_hash(
+    metadata: &RuntimeMetadataLastVersion,
+    cache: &mut MetadataHasherCache,
+) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets: Vec<(String, [u8; 32])> = metadata
         .pallets
         .iter()
         .map(|pallet| {
             let name = pallet.name.clone();
-            let hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
+            let hash = get_pallet_hash(&metadata.types, pallet, cache);
             (name, hash)
         })
         .collect();
@@ -339,7 +340,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
     bytes.extend(get_extrinsic_hash(
         &metadata.types,
         &metadata.extrinsic,
-        &mut cache,
+        cache,
     ));
 
     let mut visited_ids = HashSet::<u32>::new();
@@ -347,7 +348,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
         &metadata.types,
         metadata.ty.id(),
         &mut visited_ids,
-        &mut cache,
+        cache,
     ));
 
     hash(&bytes)
