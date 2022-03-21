@@ -279,8 +279,27 @@ pub fn get_pallet_hash(
 }
 
 pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
-    // Note: Order by pallets and use `get_pallet_uid`.
-    let bytes = metadata.encode();
+    let mut cache = MetadataHasherCache::new();
+
+    // Collect all pairs of (pallet name, pallet hash).
+    let mut pallets: Vec<(String, [u8; 32])> = metadata
+        .pallets
+        .iter()
+        .map(|pallet| {
+            let name = pallet.name.clone();
+            let hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
+            (name, hash)
+        })
+        .collect();
+    // Sort by pallet name to create a deterministic representation of the underlying metadata.
+    pallets.sort_by_key(|key| key.1);
+
+    // Note: pallet name is excluded from hashing.
+    let mut bytes = Vec::with_capacity(pallets.len() * 32);
+    for (_, hash) in pallets.iter() {
+        bytes.extend(hash)
+    }
+
     hash(&bytes)
 }
 
