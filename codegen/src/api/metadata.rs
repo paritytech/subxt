@@ -336,6 +336,20 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
         bytes.extend(hash)
     }
 
+    bytes.extend(get_extrinsic_hash(
+        &metadata.types,
+        &metadata.extrinsic,
+        &mut cache,
+    ));
+
+    let mut visited_ids = HashSet::<u32>::new();
+    bytes.extend(get_type_hash(
+        &metadata.types,
+        metadata.ty.id(),
+        &mut visited_ids,
+        &mut cache,
+    ));
+
     hash(&bytes)
 }
 
