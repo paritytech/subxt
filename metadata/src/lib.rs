@@ -342,7 +342,9 @@ pub fn get_metadata_hash(
     pallets.sort_by_key(|key| key.1);
 
     // Note: pallet name is excluded from hashing.
-    let mut bytes = Vec::with_capacity(pallets.len() * 32);
+    // Each pallet has a hash of 32 bytes, and the vector is extended with
+    // extrinsic hash and metadata ty hash (2 * 32).
+    let mut bytes = Vec::with_capacity(pallets.len() * 32 + 64);
     for (_, hash) in pallets.iter() {
         bytes.extend(hash)
     }
