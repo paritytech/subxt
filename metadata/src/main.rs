@@ -23,6 +23,10 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
     META_RESERVED,
 };
+use std::collections::{
+    hash_map::Entry,
+    HashMap,
+};
 use structopt::StructOpt;
 use subxt_metadata::{
     get_metadata_hash,
@@ -52,15 +56,28 @@ fn main() -> color_eyre::Result<()> {
 
     match args.command {
         Command::Compatibility { nodes } => {
+            let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
             for node in nodes.iter() {
                 let metadata = fetch_metadata(node)?;
                 let hash = metadata_hash(&metadata);
-                println!(
-                    "Node {:?} has metadata hash {:?}",
-                    node.as_str(),
-                    hex::encode(hash)
-                );
+                let hex_hash = hex::encode(hash);
+                println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
+
+                match compatibility_map.entry(hex_hash) {
+                    Entry::Occupied(mut o) => {
+                        o.get_mut().push(node.as_str().to_string());
+                    }
+                    Entry::Vacant(v) => {
+                        v.insert(vec![node.as_str().to_string()]);
+                    }
+                };
             }
+
+            println!(
+                "\nCompatible nodes\n{}",
+                serde_json::to_string_pretty(&compatibility_map)
+                    .context("Failed to parse compatibility map")?
+            );
         }
     }
     Ok(())
