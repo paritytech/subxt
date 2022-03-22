@@ -90,9 +90,11 @@ pub use crate::{
         RawEventDetails,
     },
     extrinsic::{
-        DefaultExtra,
-        DefaultExtraParams,
         ExtrinsicParams,
+        SubstrateExtrinsicParams,
+        SubstrateExtrinsicParamsBuilder,
+        PolkadotExtrinsicParams,
+        PolkadotExtrinsicParamsBuilder,
         PairSigner,
         Signer,
     },

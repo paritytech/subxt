@@ -22,11 +22,14 @@ use sp_runtime::{
 };
 use codec::Compact;
 
-use crate::Config;
+use crate::{
+    Config,
+    Encoded,
+};
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are signed and used in transactions.
-/// see [`DefaultExtra`] for an implementation that is compatible with
+/// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
 pub trait ExtrinsicParams<T: Config> {
     /// Thexe parameters can be provided to the constructor along with
@@ -56,16 +59,91 @@ pub trait ExtrinsicParams<T: Config> {
     fn encode_additional_to(&self, v: &mut Vec<u8>);
 }
 
+/// A struct representing the signed extra and additional parameters required
+/// to construct a transaction for the default substrate node.
+pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
+
+/// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
+/// This is what you provide to methods like [`crate::Client::sign_and_submit`].
+pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
+
+/// A struct representing the signed extra and additional parameters required
+/// to construct a transaction for a polkadot node.
+pub type PolkadotExtrinsicParams<T> = BaseExtrinsicParams<T, PlainTip>;
+
+/// A builder which leads to [`PolkadotExtrinsicParams`] being constructed.
+/// This is what you provide to methods like [`crate::Client::sign_and_submit`].
+pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, PlainTip>;
+
+/// A plain tip payment.
+#[derive(Copy, Clone, Encode)]
+pub struct PlainTip {
+    tip: Compact<u128>
+}
+
+impl PlainTip {
+    /// Create a new tip of the amount provided.
+    pub fn new(amount: u128) -> Self {
+        PlainTip {
+            tip: Compact(amount)
+        }
+    }
+}
+
+impl Default for PlainTip {
+    fn default() -> Self {
+        PlainTip {
+            tip: Compact(0),
+        }
+    }
+}
+
+/// A tip payment made in the form of a specific asset.
+#[derive(Copy, Clone, Encode)]
+pub struct AssetTip {
+    tip: Compact<u128>,
+    asset: Option<u32>
+}
+
+impl AssetTip {
+    /// Create a new tip of the amount provided.
+    pub fn new(amount: u128) -> Self {
+        AssetTip {
+            tip: Compact(amount),
+            asset: None
+        }
+    }
+
+    /// Designate the tip as being of a particular asset class.
+    pub fn of_asset(mut self, asset: u32) -> Self {
+        self.asset = Some(asset);
+        self
+    }
+}
+
+impl Default for AssetTip {
+    fn default() -> Self {
+        Self {
+            tip: Compact(0),
+            asset: None
+        }
+    }
+}
+
 /// An implementation of [`ExtrinsicParams`] that is suitable for constructing
 /// extrinsics that can be sent to a node with the same signed extra and additional
-/// parameters as a Polkadot node. If your node differs in the "signed extra" and
+/// parameters as a Polkadot/Substrate node. Prefer to use [`SubstrateExtrinsicParams`]
+/// for a version of this tailored towards Substrate, or [`PolkadotExtrinsicParams`]
+/// for a version tailored to Polkadot.
+///
+/// If your node differs in the "signed extra" and
 /// "additional" parameters expected to be sent/signed with a transaction, then you'll
 /// need to define your own struct which implements [`ExtrinsicParams`] and provides
 /// back the custom extra and additional parameters you require.
-pub struct DefaultExtra<T: Config> {
+pub struct BaseExtrinsicParams<T: Config, Tip> {
     era: Era,
     nonce: T::Index,
-    tip: u128,
+    tip: Tip,
     spec_version: u32,
     transaction_version: u32,
     genesis_hash: T::Hash,
@@ -73,17 +151,19 @@ pub struct DefaultExtra<T: Config> {
     marker: std::marker::PhantomData<T>
 }
 
-/// The set of parameters which can be provided in order to customise our [`DefaultExtra`]
-/// values. These implement [`Default`] so that [`DefaultExtra`] can be used with
-/// convenience methods like [`crate::Client::sign_and_submit_default`].
-pub struct DefaultExtraParams<T: Config> {
+/// The set of parameters which can be provided in order to customise our [`BaseExtrinsicParams`]
+/// values. These implement [`Default`] so that [`BaseExtrinsicParams`] can be used with
+/// convenience methods like [`crate::Client::sign_and_submit_default`]. Prefer to use
+/// [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards Substrate, or
+/// [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+pub struct BaseExtrinsicParamsBuilder<T: Config, Tip> {
     era: Era,
     mortality_checkpoint: Option<T::Hash>,
-    tip: u128,
+    tip: Tip,
 }
 
-impl <T: Config> DefaultExtraParams<T> {
-    /// Instantiate the default set of [`DefaultExtraParams`]
+impl <T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
+    /// Instantiate the default set of [`BaseExtrinsicParamsBuilder`]
     pub fn new() -> Self {
         Self::default()
     }
@@ -97,24 +177,24 @@ impl <T: Config> DefaultExtraParams<T> {
 
     /// Set the tip you'd like to give to the block author
     /// for this transaction.
-    pub fn tip<Tip: Into<u128>>(mut self, tip: Tip) -> Self {
-        self.tip = tip.into();
+    pub fn tip(mut self, tip: Tip) -> Self {
+        self.tip = tip;
         self
     }
 }
 
-impl <T: Config> Default for DefaultExtraParams<T> {
+impl <T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     fn default() -> Self {
         Self {
             era: Era::Immortal,
             mortality_checkpoint: None,
-            tip: 0
+            tip: Tip::default()
         }
     }
 }
 
-impl <T: Config> ExtrinsicParams<T> for DefaultExtra<T> {
-    type OtherParams = DefaultExtraParams<T>;
+impl <T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
+    type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(
         // Provided from subxt client:
@@ -125,7 +205,7 @@ impl <T: Config> ExtrinsicParams<T> for DefaultExtra<T> {
         // Provided externally:
         other_params: Self::OtherParams,
     ) -> Self {
-        DefaultExtra {
+        BaseExtrinsicParams {
             era: other_params.era,
             mortality_checkpoint: other_params.mortality_checkpoint.unwrap_or(genesis_hash),
             tip: other_params.tip,
@@ -139,7 +219,8 @@ impl <T: Config> ExtrinsicParams<T> for DefaultExtra<T> {
 
     fn encode_extra_to(&self, v: &mut Vec<u8>) {
         let nonce: u64 = self.nonce.into();
-        (self.era, Compact(nonce), Compact(self.tip)).encode_to(v);
+        let tip = Encoded(self.tip.encode());
+        (self.era, Compact(nonce), tip).encode_to(v);
     }
 
     fn encode_additional_to(&self, v: &mut Vec<u8>) {

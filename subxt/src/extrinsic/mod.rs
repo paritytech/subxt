@@ -16,14 +16,16 @@
 
 //! Create signed or unsigned extrinsics.
 
-mod extra;
+mod params;
 mod signer;
 
 pub use self::{
-    extra::{
+    params::{
         ExtrinsicParams,
-        DefaultExtra,
-        DefaultExtraParams,
+        PolkadotExtrinsicParams,
+        PolkadotExtrinsicParamsBuilder,
+        SubstrateExtrinsicParams,
+        SubstrateExtrinsicParamsBuilder,
     },
     signer::{
         PairSigner,

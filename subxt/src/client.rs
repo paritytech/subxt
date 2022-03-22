@@ -293,16 +293,16 @@ where
         };
 
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-        let call_data: Vec<u8> = {
-            let mut encoded = Vec::new();
+        let call_data = {
+            let mut bytes = Vec::new();
             let pallet = self
                 .client
                 .metadata()
                 .pallet(C::PALLET)?;
-            encoded.push(pallet.index());
-            encoded.push(pallet.call_index::<C>()?);
-            self.call.encode_to(&mut encoded);
-            encoded
+            bytes.push(pallet.index());
+            bytes.push(pallet.call_index::<C>()?);
+            self.call.encode_to(&mut bytes);
+            Encoded(bytes)
         };
 
         // 3. construct our custom additional/extra params.
@@ -316,13 +316,14 @@ where
 
         // 4. construct payload to be signed
         let payload_to_be_signed = {
-            let mut encoded = call_data.clone();
-            additional_and_extra_params.encode_extra_to(&mut encoded);
-            additional_and_extra_params.encode_additional_to(&mut encoded);
-            if encoded.len() > 256 {
-                sp_core::blake2_256(&encoded).to_vec()
+            let mut bytes = Vec::new();
+            call_data.encode_to(&mut bytes);
+            additional_and_extra_params.encode_extra_to(&mut bytes);
+            additional_and_extra_params.encode_additional_to(&mut bytes);
+            if bytes.len() > 256 {
+                sp_core::blake2_256(&bytes).to_vec()
             } else {
-                encoded
+                bytes
             }
         };
 
@@ -339,7 +340,7 @@ where
             // attach custom extra params
             additional_and_extra_params.encode_extra_to(&mut encoded_inner);
             // and now, call data
-            encoded_inner.extend(call_data);
+            call_data.encode_to(&mut encoded_inner);
             // now, prefix byte length:
             let len = Compact(encoded_inner.len() as u64);
             let mut encoded = Vec::new();

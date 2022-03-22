@@ -25,7 +25,7 @@
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
+    SubstrateExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -39,7 +39,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_url("wss://rpc.polkadot.io:443")
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
 
     let block_number = 1u32;
 

@@ -28,7 +28,7 @@ use std::time::Duration;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
+    SubstrateExtrinsicParams,
     PairSigner,
 };
 
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
 
     // Subscribe to several balance related events. If we ask for more than one event,
     // we'll be given a correpsonding tuple of `Option`'s, with exactly one
@@ -63,7 +63,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .build()
             .await
             .unwrap()
-            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
 
         // Make small balance transfers from Alice to Bob in a loop:
         loop {

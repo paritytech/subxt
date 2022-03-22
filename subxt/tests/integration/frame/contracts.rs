@@ -28,7 +28,7 @@ use crate::{
         DispatchError,
     },
     test_context,
-    NodeRuntimeDefaultExtra,
+    NodeRuntimeParams,
     TestContext,
 };
 use sp_core::sr25519::Pair;
@@ -62,7 +62,7 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeDefaultExtra> {
+    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
         self.cxt.api.tx().contracts()
     }
 

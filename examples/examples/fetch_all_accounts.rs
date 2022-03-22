@@ -25,7 +25,7 @@
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
+    SubstrateExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -38,7 +38,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
 
     let mut iter = api.storage().system().account_iter(None).await?;
 

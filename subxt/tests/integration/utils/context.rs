@@ -24,14 +24,14 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     Client,
     DefaultConfig,
-    DefaultExtra,
+    SubstrateExtrinsicParams,
     PairSigner,
 };
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub type NodeRuntimeDefaultExtra = DefaultExtra<DefaultConfig>;
+pub type NodeRuntimeParams = SubstrateExtrinsicParams<DefaultConfig>;
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
@@ -58,7 +58,7 @@ pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
 
 pub struct TestContext {
     pub node_proc: TestNodeProcess<DefaultConfig>,
-    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeDefaultExtra>,
+    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeParams>,
 }
 
 impl TestContext {
