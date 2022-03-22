@@ -24,6 +24,10 @@ use frame_metadata::{
     META_RESERVED,
 };
 use structopt::StructOpt;
+use subxt_metadata::{
+    get_metadata_hash,
+    MetadataHasherCache,
+};
 
 /// Utilities for validating metadata compatibility between multiple nodes.
 #[derive(Debug, StructOpt)]
@@ -48,10 +52,24 @@ fn main() -> color_eyre::Result<()> {
 
     match args.command {
         Command::Compatibility { nodes } => {
-            println!("Nodes: {:#?}", nodes);
+            for node in nodes.iter() {
+                let metadata = fetch_metadata(node)?;
+                let hash = metadata_hash(&metadata);
+                println!(
+                    "Node {:?} has metadata hash {:?}",
+                    node.as_str(),
+                    hex::encode(hash)
+                );
+            }
         }
     }
     Ok(())
+}
+
+fn metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
+    // Cached value cannot be shared between different metadata.
+    let mut cache = MetadataHasherCache::new();
+    get_metadata_hash(metadata, &mut cache)
 }
 
 fn fetch_metadata(url: &url::Url) -> color_eyre::Result<RuntimeMetadataLastVersion> {
