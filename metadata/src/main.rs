@@ -52,27 +52,30 @@ fn main() -> color_eyre::Result<()> {
     let args = Opts::from_args();
 
     match args.command {
-        Command::Compatibility { nodes } => {
-            let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
-            for node in nodes.iter() {
-                let metadata = fetch_metadata(node)?;
-                let hash = metadata_hash(&metadata);
-                let hex_hash = hex::encode(hash);
-                println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
-
-                compatibility_map
-                    .entry(hex_hash)
-                    .or_insert_with(Vec::new)
-                    .push(node.as_str().to_string());
-            }
-
-            println!(
-                "\nCompatible nodes\n{}",
-                serde_json::to_string_pretty(&compatibility_map)
-                    .context("Failed to parse compatibility map")?
-            );
-        }
+        Command::Compatibility { nodes } => handle_full_metadata(&*nodes),
     }
+}
+
+fn handle_full_metadata(nodes: &[url::Url]) -> color_eyre::Result<()> {
+    let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
+    for node in nodes.iter() {
+        let metadata = fetch_metadata(node)?;
+        let hash = metadata_hash(&metadata);
+        let hex_hash = hex::encode(hash);
+        println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
+
+        compatibility_map
+            .entry(hex_hash)
+            .or_insert_with(Vec::new)
+            .push(node.as_str().to_string());
+    }
+
+    println!(
+        "\nCompatible nodes\n{}",
+        serde_json::to_string_pretty(&compatibility_map)
+            .context("Failed to parse compatibility map")?
+    );
+
     Ok(())
 }
 
