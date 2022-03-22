@@ -14,6 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use crate::eyre::Context;
+use codec::Decode;
+use color_eyre::eyre;
+use frame_metadata::{
+    RuntimeMetadata,
+    RuntimeMetadataLastVersion,
+    RuntimeMetadataPrefixed,
+    META_RESERVED,
+};
 use structopt::StructOpt;
 
 /// Utilities for validating metadata compatibility between multiple nodes.
@@ -43,4 +52,46 @@ fn main() -> color_eyre::Result<()> {
         }
     }
     Ok(())
+}
+
+fn fetch_metadata(url: &url::Url) -> color_eyre::Result<RuntimeMetadataLastVersion> {
+    let resp = ureq::post(url.as_str())
+        .set("Content-Type", "application/json")
+        .send_json(ureq::json!({
+            "jsonrpc": "2.0",
+            "method": "state_getMetadata",
+            "id": 1
+        }))
+        .context(format!(
+            "Error fetching metadata from node {:?}",
+            url.as_str()
+        ))?;
+    let json: serde_json::Value = resp.into_json()?;
+
+    let hex_data = json["result"]
+        .as_str()
+        .map(ToString::to_string)
+        .ok_or_else(|| eyre::eyre!("metadata result field should be a string"))?;
+    let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
+
+    let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
+    if metadata.0 != META_RESERVED {
+        return Err(eyre::eyre!(
+            "Node {:?} has invalid metadata prefix: {:?} expected prefix: {:?}",
+            url.as_str(),
+            metadata.0,
+            META_RESERVED
+        ))
+    }
+
+    match metadata.1 {
+        RuntimeMetadata::V14(v14) => Ok(v14),
+        _ => {
+            Err(eyre::eyre!(
+                "Node {:?} with unsupported metadata version: {:?}",
+                url.as_str(),
+                metadata.1
+            ))
+        }
+    }
 }
