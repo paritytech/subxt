@@ -13,6 +13,9 @@ description = "Command line utilities for checking metadata compatibility betwee
 
 [dependencies]
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full"] }
+color-eyre = "0.5.11"
 frame-metadata = "15.0.0"
 scale-info = "2.0.0"
 sp-core = { version = "6.0.0"  }
+structopt = "0.3.25"
+url = { version = "2.2.2", features = ["serde"] }
