@@ -62,7 +62,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .balances()
         .transfer(bob_address, 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -118,7 +118,7 @@ async fn multiple_transfers_work_nonce_incremented(
             .tx()
             .balances()
             .transfer(bob_address.clone(), 10_000)
-            .sign_and_submit_then_watch(&alice)
+            .sign_and_submit_then_watch_default(&alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
             .await?
@@ -163,7 +163,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
             100_000_000_000_000,
             runtime_types::pallet_staking::RewardDestination::Stash,
         )
-        .sign_and_submit_then_watch(&bob)
+        .sign_and_submit_then_watch_default(&bob)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -203,7 +203,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -215,7 +215,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
-        .sign_and_submit_then_watch(&hans)
+        .sign_and_submit_then_watch_default(&hans)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -242,7 +242,7 @@ async fn transfer_implicit_subscription() {
         .tx()
         .balances()
         .transfer(bob_addr, 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()

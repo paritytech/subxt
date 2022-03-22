@@ -170,7 +170,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -951,7 +951,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1319,7 +1319,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1561,7 +1561,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1997,7 +1997,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2153,7 +2153,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2436,7 +2436,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2967,7 +2967,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -3342,7 +3342,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5162,7 +5162,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5445,7 +5445,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5722,7 +5722,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -6177,7 +6177,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7354,7 +7354,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7793,7 +7793,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8221,7 +8221,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8679,7 +8679,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8922,7 +8922,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9306,7 +9306,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9704,7 +9704,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9983,7 +9983,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10280,7 +10280,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10975,7 +10975,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11468,7 +11468,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11881,7 +11881,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12382,7 +12382,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12727,7 +12727,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13224,7 +13224,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14140,7 +14140,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14871,7 +14871,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14970,7 +14970,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15154,7 +15154,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15458,7 +15458,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16321,7 +16321,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16400,7 +16400,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16519,7 +16519,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16858,7 +16858,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17575,7 +17575,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17896,7 +17896,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18112,7 +18112,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18540,7 +18540,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -19066,7 +19066,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -27270,7 +27270,7 @@ pub mod api {
     impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::ExtrinsicParams<T>,
     {
         fn from(client: ::subxt::Client<T>) -> Self {
             Self {
@@ -27282,7 +27282,7 @@ pub mod api {
     impl<'a, T, X> RuntimeApi<T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::ExtrinsicParams<T>,
     {
         pub fn constants(&'a self) -> ConstantsApi {
             ConstantsApi
@@ -27593,7 +27593,7 @@ pub mod api {
     impl<'a, T, X> TransactionApi<'a, T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::ExtrinsicParams<T>,
     {
         pub fn system(&self) -> system::calls::TransactionApi<'a, T, X> {
             system::calls::TransactionApi::new(self.client)

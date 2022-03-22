@@ -28,7 +28,7 @@ use crate::{
         DispatchError,
     },
     test_context,
-    NodeRuntimeSignedExtra,
+    NodeRuntimeDefaultExtra,
     TestContext,
 };
 use sp_core::sr25519::Pair;
@@ -44,7 +44,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair>,
+    signer: PairSigner<DefaultConfig, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;
@@ -62,7 +62,7 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra> {
+    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeDefaultExtra> {
         self.cxt.api.tx().contracts()
     }
 
@@ -91,7 +91,7 @@ impl ContractsTestContext {
                 vec![], // data
                 vec![], // salt
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -131,7 +131,7 @@ impl ContractsTestContext {
                 data,
                 salt,
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -162,7 +162,7 @@ impl ContractsTestContext {
                 None,        // storage_deposit_limit
                 input_data,
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?;
 
         log::info!("Call result: {:?}", result);

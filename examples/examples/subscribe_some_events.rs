@@ -70,7 +70,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             api.tx()
                 .balances()
                 .transfer(AccountKeyring::Bob.to_account_id().into(), 1_000_000_000)
-                .sign_and_submit(&signer)
+                .sign_and_submit_default(&signer)
                 .await
                 .unwrap();
             async_std::task::sleep(Duration::from_secs(10)).await;

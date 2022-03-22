@@ -61,7 +61,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -93,7 +93,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized()
         .await?;
@@ -144,7 +144,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?;
 
     while let Some(ev) = balance_transfer_progress.next().await {

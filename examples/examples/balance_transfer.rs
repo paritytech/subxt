@@ -48,7 +48,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit(&signer)
+        .sign_and_submit_default(&signer)
         .await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
