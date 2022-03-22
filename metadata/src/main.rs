@@ -23,10 +23,7 @@ use frame_metadata::{
     RuntimeMetadataPrefixed,
     META_RESERVED,
 };
-use std::collections::{
-    hash_map::Entry,
-    HashMap,
-};
+use std::collections::HashMap;
 use structopt::StructOpt;
 use subxt_metadata::{
     get_metadata_hash,
@@ -63,14 +60,10 @@ fn main() -> color_eyre::Result<()> {
                 let hex_hash = hex::encode(hash);
                 println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
 
-                match compatibility_map.entry(hex_hash) {
-                    Entry::Occupied(mut o) => {
-                        o.get_mut().push(node.as_str().to_string());
-                    }
-                    Entry::Vacant(v) => {
-                        v.insert(vec![node.as_str().to_string()]);
-                    }
-                };
+                compatibility_map
+                    .entry(hex_hash)
+                    .or_insert_with(Vec::new)
+                    .push(node.as_str().to_string());
             }
 
             println!(
