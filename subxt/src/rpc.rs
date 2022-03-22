@@ -403,7 +403,7 @@ impl<T: Config> Rpc<T> {
         &self,
         block_hash: T::Hash,
     ) -> Result<Option<BlockStats>, BasicError> {
-        let params = rpc_params![hash];
+        let params = rpc_params![block_hash];
         let stats = self.client.request("dev_getBlockStats", params).await?;
         Ok(stats)
     }
