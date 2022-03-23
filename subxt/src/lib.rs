@@ -73,7 +73,6 @@ pub use crate::{
         SubmittableExtrinsic,
     },
     config::{
-        AccountData,
         Config,
         DefaultConfig,
     },

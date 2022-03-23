@@ -171,15 +171,14 @@ pub mod api {
                 const PALLET: &'static str = "System";
                 const FUNCTION: &'static str = "remark_with_event";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -194,7 +193,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     FillBlock,
                     DispatchError,
                     root_mod::Event,
@@ -209,7 +207,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Remark,
                     DispatchError,
                     root_mod::Event,
@@ -224,7 +221,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHeapPages,
                     DispatchError,
                     root_mod::Event,
@@ -239,7 +235,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetCode,
                     DispatchError,
                     root_mod::Event,
@@ -254,7 +249,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetCodeWithoutChecks,
                     DispatchError,
                     root_mod::Event,
@@ -272,7 +266,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetStorage,
                     DispatchError,
                     root_mod::Event,
@@ -287,7 +280,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     KillStorage,
                     DispatchError,
                     root_mod::Event,
@@ -303,7 +295,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     KillPrefix,
                     DispatchError,
                     root_mod::Event,
@@ -318,7 +309,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemarkWithEvent,
                     DispatchError,
                     root_mod::Event,
@@ -383,22 +373,7 @@ pub mod api {
         pub mod storage {
             use super::runtime_types;
             pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
-            pub struct AccountOwned(pub ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Account<'_> {
-                const PALLET: &'static str = "System";
-                const STORAGE: &'static str = "Account";
-                type Value = runtime_types::frame_system::AccountInfo<
-                    ::core::primitive::u32,
-                    runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
-                >;
-                fn key(&self) -> ::subxt::StorageEntryKey {
-                    ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
-                        ::subxt::StorageHasher::Blake2_128Concat,
-                    )])
-                }
-            }
-            impl ::subxt::StorageEntry for AccountOwned {
                 const PALLET: &'static str = "System";
                 const STORAGE: &'static str = "Account";
                 type Value = runtime_types::frame_system::AccountInfo<
@@ -986,15 +961,14 @@ pub mod api {
                 const PALLET: &'static str = "Scheduler";
                 const FUNCTION: &'static str = "schedule_named_after";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1018,7 +992,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Schedule,
                     DispatchError,
                     root_mod::Event,
@@ -1039,7 +1012,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Cancel,
                     DispatchError,
                     root_mod::Event,
@@ -1064,7 +1036,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ScheduleNamed,
                     DispatchError,
                     root_mod::Event,
@@ -1085,7 +1056,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelNamed,
                     DispatchError,
                     root_mod::Event,
@@ -1109,7 +1079,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ScheduleAfter,
                     DispatchError,
                     root_mod::Event,
@@ -1139,7 +1108,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ScheduleNamedAfter,
                     DispatchError,
                     root_mod::Event,
@@ -1370,15 +1338,14 @@ pub mod api {
                 const PALLET: &'static str = "Preimage";
                 const FUNCTION: &'static str = "unrequest_preimage";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1393,7 +1360,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NotePreimage,
                     DispatchError,
                     root_mod::Event,
@@ -1408,7 +1374,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     UnnotePreimage,
                     DispatchError,
                     root_mod::Event,
@@ -1423,7 +1388,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RequestPreimage,
                     DispatchError,
                     root_mod::Event,
@@ -1438,7 +1402,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     UnrequestPreimage,
                     DispatchError,
                     root_mod::Event,
@@ -1626,15 +1589,14 @@ pub mod api {
                 const PALLET: &'static str = "Babe";
                 const FUNCTION: &'static str = "plan_config_change";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1650,7 +1612,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReportEquivocation,
                     DispatchError,
                     root_mod::Event,
@@ -1669,7 +1630,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReportEquivocationUnsigned,
                     DispatchError,
                     root_mod::Event,
@@ -1687,7 +1647,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     PlanConfigChange,
                     DispatchError,
                     root_mod::Event,
@@ -2075,15 +2034,14 @@ pub mod api {
                 const PALLET: &'static str = "Timestamp";
                 const FUNCTION: &'static str = "set";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2098,7 +2056,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Set,
                     DispatchError,
                     root_mod::Event,
@@ -2242,15 +2199,14 @@ pub mod api {
                 const PALLET: &'static str = "Indices";
                 const FUNCTION: &'static str = "freeze";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2265,7 +2221,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Claim,
                     DispatchError,
                     root_mod::Event,
@@ -2281,7 +2236,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Transfer,
                     DispatchError,
                     root_mod::Event,
@@ -2296,7 +2250,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Free,
                     DispatchError,
                     root_mod::Event,
@@ -2313,7 +2266,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceTransfer,
                     DispatchError,
                     root_mod::Event,
@@ -2328,7 +2280,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Freeze,
                     DispatchError,
                     root_mod::Event,
@@ -2540,15 +2491,14 @@ pub mod api {
                 const PALLET: &'static str = "Balances";
                 const FUNCTION: &'static str = "force_unreserve";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2567,7 +2517,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Transfer,
                     DispatchError,
                     root_mod::Event,
@@ -2587,7 +2536,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetBalance,
                     DispatchError,
                     root_mod::Event,
@@ -2614,7 +2562,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceTransfer,
                     DispatchError,
                     root_mod::Event,
@@ -2637,7 +2584,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     TransferKeepAlive,
                     DispatchError,
                     root_mod::Event,
@@ -2656,7 +2602,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     TransferAll,
                     DispatchError,
                     root_mod::Event,
@@ -2675,7 +2620,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceUnreserve,
                     DispatchError,
                     root_mod::Event,
@@ -3094,15 +3038,14 @@ pub mod api {
                 const PALLET: &'static str = "Authorship";
                 const FUNCTION: &'static str = "set_uncles";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -3122,7 +3065,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetUncles,
                     DispatchError,
                     root_mod::Event,
@@ -3480,15 +3422,14 @@ pub mod api {
                 const PALLET: &'static str = "Staking";
                 const FUNCTION: &'static str = "chill_other";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -3510,7 +3451,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Bond,
                     DispatchError,
                     root_mod::Event,
@@ -3529,7 +3469,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     BondExtra,
                     DispatchError,
                     root_mod::Event,
@@ -3544,7 +3483,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Unbond,
                     DispatchError,
                     root_mod::Event,
@@ -3559,7 +3497,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     WithdrawUnbonded,
                     DispatchError,
                     root_mod::Event,
@@ -3574,7 +3511,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Validate,
                     DispatchError,
                     root_mod::Event,
@@ -3594,7 +3530,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Nominate,
                     DispatchError,
                     root_mod::Event,
@@ -3608,7 +3543,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Chill,
                     DispatchError,
                     root_mod::Event,
@@ -3625,7 +3559,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetPayee,
                     DispatchError,
                     root_mod::Event,
@@ -3643,7 +3576,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetController,
                     DispatchError,
                     root_mod::Event,
@@ -3658,7 +3590,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetValidatorCount,
                     DispatchError,
                     root_mod::Event,
@@ -3673,7 +3604,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     IncreaseValidatorCount,
                     DispatchError,
                     root_mod::Event,
@@ -3688,7 +3618,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ScaleValidatorCount,
                     DispatchError,
                     root_mod::Event,
@@ -3702,7 +3631,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceNoEras,
                     DispatchError,
                     root_mod::Event,
@@ -3716,7 +3644,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceNewEra,
                     DispatchError,
                     root_mod::Event,
@@ -3731,7 +3658,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetInvulnerables,
                     DispatchError,
                     root_mod::Event,
@@ -3747,7 +3673,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceUnstake,
                     DispatchError,
                     root_mod::Event,
@@ -3764,7 +3689,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceNewEraAlways,
                     DispatchError,
                     root_mod::Event,
@@ -3780,7 +3704,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelDeferredSlash,
                     DispatchError,
                     root_mod::Event,
@@ -3796,7 +3719,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     PayoutStakers,
                     DispatchError,
                     root_mod::Event,
@@ -3814,7 +3736,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Rebond,
                     DispatchError,
                     root_mod::Event,
@@ -3830,7 +3751,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHistoryDepth,
                     DispatchError,
                     root_mod::Event,
@@ -3849,7 +3769,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReapStash,
                     DispatchError,
                     root_mod::Event,
@@ -3872,7 +3791,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Kick,
                     DispatchError,
                     root_mod::Event,
@@ -3894,7 +3812,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetStakingConfigs,
                     DispatchError,
                     root_mod::Event,
@@ -3916,7 +3833,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ChillOther,
                     DispatchError,
                     root_mod::Event,
@@ -5349,15 +5265,14 @@ pub mod api {
                 const PALLET: &'static str = "Session";
                 const FUNCTION: &'static str = "purge_keys";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5373,7 +5288,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetKeys,
                     DispatchError,
                     root_mod::Event,
@@ -5387,7 +5301,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     PurgeKeys,
                     DispatchError,
                     root_mod::Event,
@@ -5644,15 +5557,14 @@ pub mod api {
                 const PALLET: &'static str = "Grandpa";
                 const FUNCTION: &'static str = "note_stalled";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5668,7 +5580,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReportEquivocation,
                     DispatchError,
                     root_mod::Event,
@@ -5687,7 +5598,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReportEquivocationUnsigned,
                     DispatchError,
                     root_mod::Event,
@@ -5706,7 +5616,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NoteStalled,
                     DispatchError,
                     root_mod::Event,
@@ -5934,15 +5843,14 @@ pub mod api {
                 const PALLET: &'static str = "ImOnline";
                 const FUNCTION: &'static str = "heartbeat";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5960,7 +5868,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Heartbeat,
                     DispatchError,
                     root_mod::Event,
@@ -6407,15 +6314,14 @@ pub mod api {
                 const PALLET: &'static str = "Democracy";
                 const FUNCTION: &'static str = "cancel_proposal";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -6431,7 +6337,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Propose,
                     DispatchError,
                     root_mod::Event,
@@ -6450,7 +6355,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Second,
                     DispatchError,
                     root_mod::Event,
@@ -6471,7 +6375,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Vote,
                     DispatchError,
                     root_mod::Event,
@@ -6486,7 +6389,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     EmergencyCancel,
                     DispatchError,
                     root_mod::Event,
@@ -6501,7 +6403,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ExternalPropose,
                     DispatchError,
                     root_mod::Event,
@@ -6516,7 +6417,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ExternalProposeMajority,
                     DispatchError,
                     root_mod::Event,
@@ -6531,7 +6431,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ExternalProposeDefault,
                     DispatchError,
                     root_mod::Event,
@@ -6548,7 +6447,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     FastTrack,
                     DispatchError,
                     root_mod::Event,
@@ -6567,7 +6465,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     VetoExternal,
                     DispatchError,
                     root_mod::Event,
@@ -6582,7 +6479,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelReferendum,
                     DispatchError,
                     root_mod::Event,
@@ -6597,7 +6493,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelQueued,
                     DispatchError,
                     root_mod::Event,
@@ -6614,7 +6509,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Delegate,
                     DispatchError,
                     root_mod::Event,
@@ -6632,7 +6526,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Undelegate,
                     DispatchError,
                     root_mod::Event,
@@ -6646,7 +6539,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClearPublicProposals,
                     DispatchError,
                     root_mod::Event,
@@ -6661,7 +6553,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NotePreimage,
                     DispatchError,
                     root_mod::Event,
@@ -6676,7 +6567,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NotePreimageOperational,
                     DispatchError,
                     root_mod::Event,
@@ -6691,7 +6581,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NoteImminentPreimage,
                     DispatchError,
                     root_mod::Event,
@@ -6706,7 +6595,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NoteImminentPreimageOperational,
                     DispatchError,
                     root_mod::Event,
@@ -6722,7 +6610,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReapPreimage,
                     DispatchError,
                     root_mod::Event,
@@ -6740,7 +6627,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Unlock,
                     DispatchError,
                     root_mod::Event,
@@ -6755,7 +6641,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveVote,
                     DispatchError,
                     root_mod::Event,
@@ -6771,7 +6656,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveOtherVote,
                     DispatchError,
                     root_mod::Event,
@@ -6787,7 +6671,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     EnactProposal,
                     DispatchError,
                     root_mod::Event,
@@ -6806,7 +6689,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Blacklist,
                     DispatchError,
                     root_mod::Event,
@@ -6824,7 +6706,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelProposal,
                     DispatchError,
                     root_mod::Event,
@@ -7619,15 +7500,14 @@ pub mod api {
                 const PALLET: &'static str = "Council";
                 const FUNCTION: &'static str = "disapprove_proposal";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7644,7 +7524,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMembers,
                     DispatchError,
                     root_mod::Event,
@@ -7664,7 +7543,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Execute,
                     DispatchError,
                     root_mod::Event,
@@ -7684,7 +7562,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Propose,
                     DispatchError,
                     root_mod::Event,
@@ -7705,7 +7582,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Vote,
                     DispatchError,
                     root_mod::Event,
@@ -7727,7 +7603,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Close,
                     DispatchError,
                     root_mod::Event,
@@ -7747,7 +7622,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     DisapproveProposal,
                     DispatchError,
                     root_mod::Event,
@@ -8074,15 +7948,14 @@ pub mod api {
                 const PALLET: &'static str = "TechnicalCommittee";
                 const FUNCTION: &'static str = "disapprove_proposal";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8099,7 +7972,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMembers,
                     DispatchError,
                     root_mod::Event,
@@ -8119,7 +7991,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Execute,
                     DispatchError,
                     root_mod::Event,
@@ -8139,7 +8010,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Propose,
                     DispatchError,
                     root_mod::Event,
@@ -8160,7 +8030,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Vote,
                     DispatchError,
                     root_mod::Event,
@@ -8182,7 +8051,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Close,
                     DispatchError,
                     root_mod::Event,
@@ -8202,7 +8070,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     DisapproveProposal,
                     DispatchError,
                     root_mod::Event,
@@ -8518,15 +8385,14 @@ pub mod api {
                 const PALLET: &'static str = "PhragmenElection";
                 const FUNCTION: &'static str = "clean_defunct_voters";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8542,7 +8408,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Vote,
                     DispatchError,
                     root_mod::Event,
@@ -8556,7 +8421,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveVoter,
                     DispatchError,
                     root_mod::Event,
@@ -8571,7 +8435,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SubmitCandidacy,
                     DispatchError,
                     root_mod::Event,
@@ -8586,7 +8449,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RenounceCandidacy,
                     DispatchError,
                     root_mod::Event,
@@ -8605,7 +8467,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveMember,
                     DispatchError,
                     root_mod::Event,
@@ -8624,7 +8485,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CleanDefunctVoters,
                     DispatchError,
                     root_mod::Event,
@@ -8992,15 +8852,14 @@ pub mod api {
                 const PALLET: &'static str = "TechnicalMembership";
                 const FUNCTION: &'static str = "clear_prime";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9015,7 +8874,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddMember,
                     DispatchError,
                     root_mod::Event,
@@ -9030,7 +8888,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveMember,
                     DispatchError,
                     root_mod::Event,
@@ -9046,7 +8903,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SwapMember,
                     DispatchError,
                     root_mod::Event,
@@ -9061,7 +8917,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ResetMembers,
                     DispatchError,
                     root_mod::Event,
@@ -9076,7 +8931,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ChangeKey,
                     DispatchError,
                     root_mod::Event,
@@ -9091,7 +8945,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetPrime,
                     DispatchError,
                     root_mod::Event,
@@ -9105,7 +8958,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClearPrime,
                     DispatchError,
                     root_mod::Event,
@@ -9252,15 +9104,14 @@ pub mod api {
                 const PALLET: &'static str = "Treasury";
                 const FUNCTION: &'static str = "approve_proposal";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9279,7 +9130,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ProposeSpend,
                     DispatchError,
                     root_mod::Event,
@@ -9294,7 +9144,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RejectProposal,
                     DispatchError,
                     root_mod::Event,
@@ -9309,7 +9158,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ApproveProposal,
                     DispatchError,
                     root_mod::Event,
@@ -9649,15 +9497,14 @@ pub mod api {
                 const PALLET: &'static str = "Claims";
                 const FUNCTION: &'static str = "move_claim";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9673,7 +9520,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Claim,
                     DispatchError,
                     root_mod::Event,
@@ -9700,7 +9546,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     MintClaim,
                     DispatchError,
                     root_mod::Event,
@@ -9722,7 +9567,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClaimAttest,
                     DispatchError,
                     root_mod::Event,
@@ -9741,7 +9585,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Attest,
                     DispatchError,
                     root_mod::Event,
@@ -9760,7 +9603,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     MoveClaim,
                     DispatchError,
                     root_mod::Event,
@@ -10062,15 +9904,14 @@ pub mod api {
                 const PALLET: &'static str = "Vesting";
                 const FUNCTION: &'static str = "merge_schedules";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10084,7 +9925,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Vest,
                     DispatchError,
                     root_mod::Event,
@@ -10102,7 +9942,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     VestOther,
                     DispatchError,
                     root_mod::Event,
@@ -10124,7 +9963,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     VestedTransfer,
                     DispatchError,
                     root_mod::Event,
@@ -10150,7 +9988,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceVestedTransfer,
                     DispatchError,
                     root_mod::Event,
@@ -10170,7 +10007,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     MergeSchedules,
                     DispatchError,
                     root_mod::Event,
@@ -10356,15 +10192,14 @@ pub mod api {
                 const PALLET: &'static str = "Utility";
                 const FUNCTION: &'static str = "dispatch_as";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10379,7 +10214,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Batch,
                     DispatchError,
                     root_mod::Event,
@@ -10395,7 +10229,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AsDerivative,
                     DispatchError,
                     root_mod::Event,
@@ -10413,7 +10246,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     BatchAll,
                     DispatchError,
                     root_mod::Event,
@@ -10429,7 +10261,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     DispatchAs,
                     DispatchError,
                     root_mod::Event,
@@ -10667,15 +10498,14 @@ pub mod api {
                 const PALLET: &'static str = "Identity";
                 const FUNCTION: &'static str = "quit_sub";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10690,7 +10520,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddRegistrar,
                     DispatchError,
                     root_mod::Event,
@@ -10705,7 +10534,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetIdentity,
                     DispatchError,
                     root_mod::Event,
@@ -10725,7 +10553,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetSubs,
                     DispatchError,
                     root_mod::Event,
@@ -10739,7 +10566,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClearIdentity,
                     DispatchError,
                     root_mod::Event,
@@ -10755,7 +10581,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RequestJudgement,
                     DispatchError,
                     root_mod::Event,
@@ -10770,7 +10595,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelRequest,
                     DispatchError,
                     root_mod::Event,
@@ -10786,7 +10610,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetFee,
                     DispatchError,
                     root_mod::Event,
@@ -10802,7 +10625,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetAccountId,
                     DispatchError,
                     root_mod::Event,
@@ -10820,7 +10642,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetFields,
                     DispatchError,
                     root_mod::Event,
@@ -10842,7 +10663,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ProvideJudgement,
                     DispatchError,
                     root_mod::Event,
@@ -10864,7 +10684,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     KillIdentity,
                     DispatchError,
                     root_mod::Event,
@@ -10883,7 +10702,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddSub,
                     DispatchError,
                     root_mod::Event,
@@ -10902,7 +10720,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RenameSub,
                     DispatchError,
                     root_mod::Event,
@@ -10920,7 +10737,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveSub,
                     DispatchError,
                     root_mod::Event,
@@ -10934,7 +10750,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     QuitSub,
                     DispatchError,
                     root_mod::Event,
@@ -11387,15 +11202,14 @@ pub mod api {
                 const PALLET: &'static str = "Proxy";
                 const FUNCTION: &'static str = "proxy_announced";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11414,7 +11228,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Proxy,
                     DispatchError,
                     root_mod::Event,
@@ -11435,7 +11248,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddProxy,
                     DispatchError,
                     root_mod::Event,
@@ -11456,7 +11268,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveProxy,
                     DispatchError,
                     root_mod::Event,
@@ -11474,7 +11285,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveProxies,
                     DispatchError,
                     root_mod::Event,
@@ -11491,7 +11301,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Anonymous,
                     DispatchError,
                     root_mod::Event,
@@ -11514,7 +11323,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     KillAnonymous,
                     DispatchError,
                     root_mod::Event,
@@ -11536,7 +11344,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Announce,
                     DispatchError,
                     root_mod::Event,
@@ -11552,7 +11359,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RemoveAnnouncement,
                     DispatchError,
                     root_mod::Event,
@@ -11568,7 +11374,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RejectAnnouncement,
                     DispatchError,
                     root_mod::Event,
@@ -11591,7 +11396,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ProxyAnnounced,
                     DispatchError,
                     root_mod::Event,
@@ -11900,15 +11704,14 @@ pub mod api {
                 const PALLET: &'static str = "Multisig";
                 const FUNCTION: &'static str = "cancel_as_multi";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11926,7 +11729,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AsMultiThreshold1,
                     DispatchError,
                     root_mod::Event,
@@ -11955,7 +11757,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AsMulti,
                     DispatchError,
                     root_mod::Event,
@@ -11985,7 +11786,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ApproveAsMulti,
                     DispatchError,
                     root_mod::Event,
@@ -12013,7 +11813,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelAsMulti,
                     DispatchError,
                     root_mod::Event,
@@ -12327,15 +12126,14 @@ pub mod api {
                 const PALLET: &'static str = "Bounties";
                 const FUNCTION: &'static str = "extend_bounty_expiry";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12351,7 +12149,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ProposeBounty,
                     DispatchError,
                     root_mod::Event,
@@ -12366,7 +12163,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ApproveBounty,
                     DispatchError,
                     root_mod::Event,
@@ -12386,7 +12182,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ProposeCurator,
                     DispatchError,
                     root_mod::Event,
@@ -12405,7 +12200,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     UnassignCurator,
                     DispatchError,
                     root_mod::Event,
@@ -12420,7 +12214,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AcceptCurator,
                     DispatchError,
                     root_mod::Event,
@@ -12439,7 +12232,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AwardBounty,
                     DispatchError,
                     root_mod::Event,
@@ -12457,7 +12249,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClaimBounty,
                     DispatchError,
                     root_mod::Event,
@@ -12472,7 +12263,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CloseBounty,
                     DispatchError,
                     root_mod::Event,
@@ -12488,7 +12278,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ExtendBountyExpiry,
                     DispatchError,
                     root_mod::Event,
@@ -12847,15 +12636,14 @@ pub mod api {
                 const PALLET: &'static str = "Tips";
                 const FUNCTION: &'static str = "slash_tip";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12871,7 +12659,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReportAwesome,
                     DispatchError,
                     root_mod::Event,
@@ -12886,7 +12673,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     RetractTip,
                     DispatchError,
                     root_mod::Event,
@@ -12903,7 +12689,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     TipNew,
                     DispatchError,
                     root_mod::Event,
@@ -12923,7 +12708,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Tip,
                     DispatchError,
                     root_mod::Event,
@@ -12938,7 +12722,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CloseTip,
                     DispatchError,
                     root_mod::Event,
@@ -12953,7 +12736,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SlashTip,
                     DispatchError,
                     root_mod::Event,
@@ -13208,15 +12990,14 @@ pub mod api {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
                 const FUNCTION: &'static str = "submit";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13232,7 +13013,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SubmitUnsigned,
                     DispatchError,
                     root_mod::Event,
@@ -13252,7 +13032,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMinimumUntrustedScore,
                     DispatchError,
                     root_mod::Event,
@@ -13272,7 +13051,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetEmergencyElectionResult,
                     DispatchError,
                     root_mod::Event,
@@ -13288,7 +13066,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Submit,
                     DispatchError,
                     root_mod::Event,
@@ -13719,15 +13496,14 @@ pub mod api {
                 const PALLET: &'static str = "BagsList";
                 const FUNCTION: &'static str = "put_in_front_of";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13742,7 +13518,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Rebag,
                     DispatchError,
                     root_mod::Event,
@@ -13757,7 +13532,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     PutInFrontOf,
                     DispatchError,
                     root_mod::Event,
@@ -14654,15 +14428,14 @@ pub mod api {
                 const PALLET: &'static str = "Configuration";
                 const FUNCTION: &'static str = "set_bypass_consistency_check";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14677,7 +14450,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetValidationUpgradeCooldown,
                     DispatchError,
                     root_mod::Event,
@@ -14692,7 +14464,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetValidationUpgradeDelay,
                     DispatchError,
                     root_mod::Event,
@@ -14707,7 +14478,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetCodeRetentionPeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14722,7 +14492,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxCodeSize,
                     DispatchError,
                     root_mod::Event,
@@ -14737,7 +14506,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxPovSize,
                     DispatchError,
                     root_mod::Event,
@@ -14752,7 +14520,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxHeadDataSize,
                     DispatchError,
                     root_mod::Event,
@@ -14767,7 +14534,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetParathreadCores,
                     DispatchError,
                     root_mod::Event,
@@ -14782,7 +14548,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetParathreadRetries,
                     DispatchError,
                     root_mod::Event,
@@ -14797,7 +14562,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetGroupRotationFrequency,
                     DispatchError,
                     root_mod::Event,
@@ -14812,7 +14576,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetChainAvailabilityPeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14827,7 +14590,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetThreadAvailabilityPeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14842,7 +14604,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetSchedulingLookahead,
                     DispatchError,
                     root_mod::Event,
@@ -14857,7 +14618,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxValidatorsPerCore,
                     DispatchError,
                     root_mod::Event,
@@ -14872,7 +14632,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxValidators,
                     DispatchError,
                     root_mod::Event,
@@ -14887,7 +14646,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetDisputePeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14902,7 +14660,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetDisputePostConclusionAcceptancePeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14917,7 +14674,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetDisputeMaxSpamSlots,
                     DispatchError,
                     root_mod::Event,
@@ -14932,7 +14688,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetDisputeConclusionByTimeOutPeriod,
                     DispatchError,
                     root_mod::Event,
@@ -14947,7 +14702,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetNoShowSlots,
                     DispatchError,
                     root_mod::Event,
@@ -14962,7 +14716,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetNDelayTranches,
                     DispatchError,
                     root_mod::Event,
@@ -14977,7 +14730,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetZerothDelayTrancheWidth,
                     DispatchError,
                     root_mod::Event,
@@ -14992,7 +14744,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetNeededApprovals,
                     DispatchError,
                     root_mod::Event,
@@ -15007,7 +14758,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetRelayVrfModuloSamples,
                     DispatchError,
                     root_mod::Event,
@@ -15022,7 +14772,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxUpwardQueueCount,
                     DispatchError,
                     root_mod::Event,
@@ -15037,7 +14786,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxUpwardQueueSize,
                     DispatchError,
                     root_mod::Event,
@@ -15052,7 +14800,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxDownwardMessageSize,
                     DispatchError,
                     root_mod::Event,
@@ -15067,7 +14814,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetUmpServiceTotalWeight,
                     DispatchError,
                     root_mod::Event,
@@ -15082,7 +14828,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxUpwardMessageSize,
                     DispatchError,
                     root_mod::Event,
@@ -15097,7 +14842,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMaxUpwardMessageNumPerCandidate,
                     DispatchError,
                     root_mod::Event,
@@ -15112,7 +14856,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpOpenRequestTtl,
                     DispatchError,
                     root_mod::Event,
@@ -15127,7 +14870,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpSenderDeposit,
                     DispatchError,
                     root_mod::Event,
@@ -15142,7 +14884,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpRecipientDeposit,
                     DispatchError,
                     root_mod::Event,
@@ -15157,7 +14898,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpChannelMaxCapacity,
                     DispatchError,
                     root_mod::Event,
@@ -15172,7 +14912,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpChannelMaxTotalSize,
                     DispatchError,
                     root_mod::Event,
@@ -15187,7 +14926,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpMaxParachainInboundChannels,
                     DispatchError,
                     root_mod::Event,
@@ -15202,7 +14940,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpMaxParathreadInboundChannels,
                     DispatchError,
                     root_mod::Event,
@@ -15217,7 +14954,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpChannelMaxMessageSize,
                     DispatchError,
                     root_mod::Event,
@@ -15232,7 +14968,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpMaxParachainOutboundChannels,
                     DispatchError,
                     root_mod::Event,
@@ -15247,7 +14982,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpMaxParathreadOutboundChannels,
                     DispatchError,
                     root_mod::Event,
@@ -15262,7 +14996,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetHrmpMaxMessageNumPerCandidate,
                     DispatchError,
                     root_mod::Event,
@@ -15277,7 +15010,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetUmpMaxIndividualWeight,
                     DispatchError,
                     root_mod::Event,
@@ -15292,7 +15024,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetPvfCheckingEnabled,
                     DispatchError,
                     root_mod::Event,
@@ -15307,7 +15038,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetPvfVotingTtl,
                     DispatchError,
                     root_mod::Event,
@@ -15322,7 +15052,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetMinimumValidationUpgradeDelay,
                     DispatchError,
                     root_mod::Event,
@@ -15337,7 +15066,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     SetBypassConsistencyCheck,
                     DispatchError,
                     root_mod::Event,
@@ -15440,15 +15168,14 @@ pub mod api {
                 runtime_types,
             };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15549,15 +15276,14 @@ pub mod api {
                 runtime_types,
             };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15743,15 +15469,14 @@ pub mod api {
                 const PALLET: &'static str = "ParaInherent";
                 const FUNCTION: &'static str = "enter";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15771,7 +15496,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Enter,
                     DispatchError,
                     root_mod::Event,
@@ -16065,15 +15789,14 @@ pub mod api {
                 const PALLET: &'static str = "Paras";
                 const FUNCTION: &'static str = "include_pvf_check_statement";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16089,7 +15812,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceSetCurrentCode,
                     DispatchError,
                     root_mod::Event,
@@ -16105,7 +15827,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceSetCurrentHead,
                     DispatchError,
                     root_mod::Event,
@@ -16122,7 +15843,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceScheduleCodeUpgrade,
                     DispatchError,
                     root_mod::Event,
@@ -16142,7 +15862,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceNoteNewHead,
                     DispatchError,
                     root_mod::Event,
@@ -16157,7 +15876,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceQueueAction,
                     DispatchError,
                     root_mod::Event,
@@ -16172,7 +15890,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddTrustedValidationCode,
                     DispatchError,
                     root_mod::Event,
@@ -16187,7 +15904,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     PokeUnusedValidationCode,
                     DispatchError,
                     root_mod::Event,
@@ -16205,7 +15921,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     IncludePvfCheckStatement,
                     DispatchError,
                     root_mod::Event,
@@ -16946,15 +16661,14 @@ pub mod api {
                 const PALLET: &'static str = "Initializer";
                 const FUNCTION: &'static str = "force_approve";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16969,7 +16683,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceApprove,
                     DispatchError,
                     root_mod::Event,
@@ -17036,15 +16749,14 @@ pub mod api {
                 runtime_types,
             };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17165,15 +16877,14 @@ pub mod api {
                 const PALLET: &'static str = "Ump";
                 const FUNCTION: &'static str = "service_overweight";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17189,7 +16900,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ServiceOverweight,
                     DispatchError,
                     root_mod::Event,
@@ -17515,15 +17225,14 @@ pub mod api {
                 const PALLET: &'static str = "Hrmp";
                 const FUNCTION: &'static str = "hrmp_cancel_open_request";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17540,7 +17249,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     HrmpInitOpenChannel,
                     DispatchError,
                     root_mod::Event,
@@ -17559,7 +17267,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     HrmpAcceptOpenChannel,
                     DispatchError,
                     root_mod::Event,
@@ -17574,7 +17281,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     HrmpCloseChannel,
                     DispatchError,
                     root_mod::Event,
@@ -17589,7 +17295,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceCleanHrmp,
                     DispatchError,
                     root_mod::Event,
@@ -17603,7 +17308,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceProcessHrmpOpen,
                     DispatchError,
                     root_mod::Event,
@@ -17617,7 +17321,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceProcessHrmpClose,
                     DispatchError,
                     root_mod::Event,
@@ -17632,7 +17335,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     HrmpCancelOpenRequest,
                     DispatchError,
                     root_mod::Event,
@@ -18256,15 +17958,14 @@ pub mod api {
                 const PALLET: &'static str = "Registrar";
                 const FUNCTION: &'static str = "reserve";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18281,7 +17982,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Register,
                     DispatchError,
                     root_mod::Event,
@@ -18304,7 +18004,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceRegister,
                     DispatchError,
                     root_mod::Event,
@@ -18325,7 +18024,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Deregister,
                     DispatchError,
                     root_mod::Event,
@@ -18341,7 +18039,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Swap,
                     DispatchError,
                     root_mod::Event,
@@ -18356,7 +18053,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceRemoveLock,
                     DispatchError,
                     root_mod::Event,
@@ -18370,7 +18066,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Reserve,
                     DispatchError,
                     root_mod::Event,
@@ -18593,15 +18288,14 @@ pub mod api {
                 const PALLET: &'static str = "Slots";
                 const FUNCTION: &'static str = "trigger_onboard";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18620,7 +18314,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceLease,
                     DispatchError,
                     root_mod::Event,
@@ -18641,7 +18334,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ClearAllLeases,
                     DispatchError,
                     root_mod::Event,
@@ -18656,7 +18348,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     TriggerOnboard,
                     DispatchError,
                     root_mod::Event,
@@ -18822,15 +18513,14 @@ pub mod api {
                 const PALLET: &'static str = "Auctions";
                 const FUNCTION: &'static str = "cancel_auction";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18846,7 +18536,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     NewAuction,
                     DispatchError,
                     root_mod::Event,
@@ -18868,7 +18557,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Bid,
                     DispatchError,
                     root_mod::Event,
@@ -18888,7 +18576,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     CancelAuction,
                     DispatchError,
                     root_mod::Event,
@@ -19263,15 +18950,14 @@ pub mod api {
                 const PALLET: &'static str = "Crowdloan";
                 const FUNCTION: &'static str = "contribute_all";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -19293,7 +18979,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Create,
                     DispatchError,
                     root_mod::Event,
@@ -19319,7 +19004,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Contribute,
                     DispatchError,
                     root_mod::Event,
@@ -19339,7 +19023,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Withdraw,
                     DispatchError,
                     root_mod::Event,
@@ -19354,7 +19037,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Refund,
                     DispatchError,
                     root_mod::Event,
@@ -19369,7 +19051,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Dissolve,
                     DispatchError,
                     root_mod::Event,
@@ -19391,7 +19072,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Edit,
                     DispatchError,
                     root_mod::Event,
@@ -19414,7 +19094,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     AddMemo,
                     DispatchError,
                     root_mod::Event,
@@ -19429,7 +19108,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Poke,
                     DispatchError,
                     root_mod::Event,
@@ -19447,7 +19125,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ContributeAll,
                     DispatchError,
                     root_mod::Event,
@@ -19808,15 +19485,14 @@ pub mod api {
                 const PALLET: &'static str = "XcmPallet";
                 const FUNCTION: &'static str = "limited_teleport_assets";
             }
-            pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<(X, A)>,
+                marker: ::core::marker::PhantomData<X>,
             }
-            impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+            impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
                 X: ::subxt::SignedExtra<T>,
-                A: ::subxt::AccountData,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -19832,7 +19508,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Send,
                     DispatchError,
                     root_mod::Event,
@@ -19853,7 +19528,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     TeleportAssets,
                     DispatchError,
                     root_mod::Event,
@@ -19876,7 +19550,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ReserveTransferAssets,
                     DispatchError,
                     root_mod::Event,
@@ -19897,7 +19570,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     Execute,
                     DispatchError,
                     root_mod::Event,
@@ -19916,7 +19588,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceXcmVersion,
                     DispatchError,
                     root_mod::Event,
@@ -19934,7 +19605,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceDefaultXcmVersion,
                     DispatchError,
                     root_mod::Event,
@@ -19949,7 +19619,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceSubscribeVersionNotify,
                     DispatchError,
                     root_mod::Event,
@@ -19966,7 +19635,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     ForceUnsubscribeVersionNotify,
                     DispatchError,
                     root_mod::Event,
@@ -19987,7 +19655,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     LimitedReserveTransferAssets,
                     DispatchError,
                     root_mod::Event,
@@ -20012,7 +19679,6 @@ pub mod api {
                     'a,
                     T,
                     X,
-                    A,
                     LimitedTeleportAssets,
                     DispatchError,
                     root_mod::Event,
@@ -28023,38 +27689,21 @@ pub mod api {
             }
         }
     }
-    #[doc = r" The default storage entry from which to fetch an account nonce, required for"]
-    #[doc = r" constructing a transaction."]
-    pub enum DefaultAccountData {}
-    impl ::subxt::AccountData for DefaultAccountData {
-        type StorageEntry = self::system::storage::AccountOwned;
-        type AccountId = ::subxt::sp_core::crypto::AccountId32;
-        type Index = ::core::primitive::u32;
-        fn storage_entry(account_id: Self::AccountId) -> Self::StorageEntry {
-            self::system::storage::AccountOwned(account_id)
-        }
-        fn nonce(
-            result: &<Self::StorageEntry as ::subxt::StorageEntry>::Value,
-        ) -> Self::Index {
-            result.nonce
-        }
-    }
-    pub struct RuntimeApi<T: ::subxt::Config, X, A = DefaultAccountData> {
+    pub struct RuntimeApi<T: ::subxt::Config, X> {
         pub client: ::subxt::Client<T>,
-        marker: ::core::marker::PhantomData<(X, A)>,
+        marker: ::core::marker::PhantomData<X>,
     }
-    impl<T, X, A> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X, A>
+    impl<T, X> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X>
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData,
     {
         type Error = ::subxt::MetadataError;
         fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
             static METADATA_HASH: [u8; 32] = [
-                81u8, 113u8, 22u8, 75u8, 102u8, 155u8, 224u8, 232u8, 179u8, 199u8, 217u8,
-                64u8, 219u8, 183u8, 171u8, 82u8, 125u8, 82u8, 130u8, 73u8, 156u8, 214u8,
-                226u8, 40u8, 125u8, 170u8, 70u8, 70u8, 4u8, 153u8, 192u8, 81u8,
+                107u8, 220u8, 16u8, 12u8, 56u8, 194u8, 172u8, 134u8, 170u8, 197u8, 123u8,
+                45u8, 39u8, 209u8, 192u8, 127u8, 70u8, 0u8, 190u8, 148u8, 99u8, 44u8,
+                169u8, 126u8, 115u8, 217u8, 12u8, 243u8, 156u8, 116u8, 165u8, 45u8,
             ];
             if !client.skip_metadata_validation()
                 && client.metadata().metadata_hash() != METADATA_HASH
@@ -28068,11 +27717,10 @@ pub mod api {
             }
         }
     }
-    impl<'a, T, X, A> RuntimeApi<T, X, A>
+    impl<'a, T, X> RuntimeApi<T, X>
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData,
     {
         pub fn constants(&'a self) -> ConstantsApi {
             ConstantsApi
@@ -28083,7 +27731,7 @@ pub mod api {
                 skip_pallet_validation: false,
             }
         }
-        pub fn tx(&'a self) -> TransactionApi<'a, T, X, A> {
+        pub fn tx(&'a self) -> TransactionApi<'a, T, X> {
             TransactionApi {
                 client: &self.client,
                 skip_pallet_validation: false,
@@ -28853,16 +28501,15 @@ pub mod api {
             }
         }
     }
-    pub struct TransactionApi<'a, T: ::subxt::Config, X, A> {
+    pub struct TransactionApi<'a, T: ::subxt::Config, X> {
         client: &'a ::subxt::Client<T>,
         skip_pallet_validation: bool,
-        marker: ::core::marker::PhantomData<(X, A)>,
+        marker: ::core::marker::PhantomData<X>,
     }
-    impl<'a, T, X, A> TransactionApi<'a, T, X, A>
+    impl<'a, T, X> TransactionApi<'a, T, X>
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
-        A: ::subxt::AccountData,
     {
         pub fn skip_pallet_validation(mut self) -> Self {
             self.skip_pallet_validation = true;
@@ -28870,7 +28517,7 @@ pub mod api {
         }
         pub fn system(
             &self,
-        ) -> Result<system::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<system::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(system))?;
             if !self.skip_pallet_validation && system::PALLET_HASH != hash {
@@ -28883,7 +28530,7 @@ pub mod api {
         }
         pub fn scheduler(
             &self,
-        ) -> Result<scheduler::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<scheduler::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(scheduler))?;
             if !self.skip_pallet_validation && scheduler::PALLET_HASH != hash {
@@ -28896,7 +28543,7 @@ pub mod api {
         }
         pub fn preimage(
             &self,
-        ) -> Result<preimage::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<preimage::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(preimage))?;
             if !self.skip_pallet_validation && preimage::PALLET_HASH != hash {
@@ -28909,7 +28556,7 @@ pub mod api {
         }
         pub fn babe(
             &self,
-        ) -> Result<babe::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<babe::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(babe))?;
             if !self.skip_pallet_validation && babe::PALLET_HASH != hash {
@@ -28922,7 +28569,7 @@ pub mod api {
         }
         pub fn timestamp(
             &self,
-        ) -> Result<timestamp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<timestamp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(timestamp))?;
             if !self.skip_pallet_validation && timestamp::PALLET_HASH != hash {
@@ -28935,7 +28582,7 @@ pub mod api {
         }
         pub fn indices(
             &self,
-        ) -> Result<indices::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<indices::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(indices))?;
             if !self.skip_pallet_validation && indices::PALLET_HASH != hash {
@@ -28948,7 +28595,7 @@ pub mod api {
         }
         pub fn balances(
             &self,
-        ) -> Result<balances::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<balances::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(balances))?;
             if !self.skip_pallet_validation && balances::PALLET_HASH != hash {
@@ -28961,7 +28608,7 @@ pub mod api {
         }
         pub fn authorship(
             &self,
-        ) -> Result<authorship::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<authorship::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(authorship))?;
             if !self.skip_pallet_validation && authorship::PALLET_HASH != hash {
@@ -28974,7 +28621,7 @@ pub mod api {
         }
         pub fn staking(
             &self,
-        ) -> Result<staking::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<staking::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(staking))?;
             if !self.skip_pallet_validation && staking::PALLET_HASH != hash {
@@ -28987,7 +28634,7 @@ pub mod api {
         }
         pub fn session(
             &self,
-        ) -> Result<session::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<session::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(session))?;
             if !self.skip_pallet_validation && session::PALLET_HASH != hash {
@@ -29000,7 +28647,7 @@ pub mod api {
         }
         pub fn grandpa(
             &self,
-        ) -> Result<grandpa::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<grandpa::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(grandpa))?;
             if !self.skip_pallet_validation && grandpa::PALLET_HASH != hash {
@@ -29013,7 +28660,7 @@ pub mod api {
         }
         pub fn im_online(
             &self,
-        ) -> Result<im_online::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<im_online::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(im_online))?;
             if !self.skip_pallet_validation && im_online::PALLET_HASH != hash {
@@ -29026,7 +28673,7 @@ pub mod api {
         }
         pub fn democracy(
             &self,
-        ) -> Result<democracy::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<democracy::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(democracy))?;
             if !self.skip_pallet_validation && democracy::PALLET_HASH != hash {
@@ -29039,7 +28686,7 @@ pub mod api {
         }
         pub fn council(
             &self,
-        ) -> Result<council::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<council::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(council))?;
             if !self.skip_pallet_validation && council::PALLET_HASH != hash {
@@ -29053,7 +28700,7 @@ pub mod api {
         pub fn technical_committee(
             &self,
         ) -> Result<
-            technical_committee::calls::TransactionApi<'a, T, X, A>,
+            technical_committee::calls::TransactionApi<'a, T, X>,
             ::subxt::MetadataError,
         > {
             let hash = self
@@ -29071,7 +28718,7 @@ pub mod api {
         pub fn phragmen_election(
             &self,
         ) -> Result<
-            phragmen_election::calls::TransactionApi<'a, T, X, A>,
+            phragmen_election::calls::TransactionApi<'a, T, X>,
             ::subxt::MetadataError,
         > {
             let hash = self
@@ -29089,7 +28736,7 @@ pub mod api {
         pub fn technical_membership(
             &self,
         ) -> Result<
-            technical_membership::calls::TransactionApi<'a, T, X, A>,
+            technical_membership::calls::TransactionApi<'a, T, X>,
             ::subxt::MetadataError,
         > {
             let hash = self
@@ -29108,7 +28755,7 @@ pub mod api {
         }
         pub fn treasury(
             &self,
-        ) -> Result<treasury::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<treasury::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(treasury))?;
             if !self.skip_pallet_validation && treasury::PALLET_HASH != hash {
@@ -29121,7 +28768,7 @@ pub mod api {
         }
         pub fn claims(
             &self,
-        ) -> Result<claims::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<claims::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(claims))?;
             if !self.skip_pallet_validation && claims::PALLET_HASH != hash {
@@ -29134,7 +28781,7 @@ pub mod api {
         }
         pub fn vesting(
             &self,
-        ) -> Result<vesting::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<vesting::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(vesting))?;
             if !self.skip_pallet_validation && vesting::PALLET_HASH != hash {
@@ -29147,7 +28794,7 @@ pub mod api {
         }
         pub fn utility(
             &self,
-        ) -> Result<utility::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<utility::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(utility))?;
             if !self.skip_pallet_validation && utility::PALLET_HASH != hash {
@@ -29160,7 +28807,7 @@ pub mod api {
         }
         pub fn identity(
             &self,
-        ) -> Result<identity::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<identity::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(identity))?;
             if !self.skip_pallet_validation && identity::PALLET_HASH != hash {
@@ -29173,7 +28820,7 @@ pub mod api {
         }
         pub fn proxy(
             &self,
-        ) -> Result<proxy::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<proxy::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(proxy))?;
             if !self.skip_pallet_validation && proxy::PALLET_HASH != hash {
@@ -29186,7 +28833,7 @@ pub mod api {
         }
         pub fn multisig(
             &self,
-        ) -> Result<multisig::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<multisig::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(multisig))?;
             if !self.skip_pallet_validation && multisig::PALLET_HASH != hash {
@@ -29199,7 +28846,7 @@ pub mod api {
         }
         pub fn bounties(
             &self,
-        ) -> Result<bounties::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<bounties::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(bounties))?;
             if !self.skip_pallet_validation && bounties::PALLET_HASH != hash {
@@ -29212,7 +28859,7 @@ pub mod api {
         }
         pub fn tips(
             &self,
-        ) -> Result<tips::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<tips::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(tips))?;
             if !self.skip_pallet_validation && tips::PALLET_HASH != hash {
@@ -29226,7 +28873,7 @@ pub mod api {
         pub fn election_provider_multi_phase(
             &self,
         ) -> Result<
-            election_provider_multi_phase::calls::TransactionApi<'a, T, X, A>,
+            election_provider_multi_phase::calls::TransactionApi<'a, T, X>,
             ::subxt::MetadataError,
         > {
             let hash = self
@@ -29247,7 +28894,7 @@ pub mod api {
         }
         pub fn bags_list(
             &self,
-        ) -> Result<bags_list::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<bags_list::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(bags_list))?;
             if !self.skip_pallet_validation && bags_list::PALLET_HASH != hash {
@@ -29260,10 +28907,8 @@ pub mod api {
         }
         pub fn configuration(
             &self,
-        ) -> Result<
-            configuration::calls::TransactionApi<'a, T, X, A>,
-            ::subxt::MetadataError,
-        > {
+        ) -> Result<configuration::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
+        {
             let hash = self
                 .client
                 .metadata()
@@ -29278,10 +28923,8 @@ pub mod api {
         }
         pub fn paras_shared(
             &self,
-        ) -> Result<
-            paras_shared::calls::TransactionApi<'a, T, X, A>,
-            ::subxt::MetadataError,
-        > {
+        ) -> Result<paras_shared::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
+        {
             let hash = self
                 .client
                 .metadata()
@@ -29296,10 +28939,8 @@ pub mod api {
         }
         pub fn para_inclusion(
             &self,
-        ) -> Result<
-            para_inclusion::calls::TransactionApi<'a, T, X, A>,
-            ::subxt::MetadataError,
-        > {
+        ) -> Result<para_inclusion::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
+        {
             let hash = self
                 .client
                 .metadata()
@@ -29314,10 +28955,8 @@ pub mod api {
         }
         pub fn para_inherent(
             &self,
-        ) -> Result<
-            para_inherent::calls::TransactionApi<'a, T, X, A>,
-            ::subxt::MetadataError,
-        > {
+        ) -> Result<para_inherent::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
+        {
             let hash = self
                 .client
                 .metadata()
@@ -29332,7 +28971,7 @@ pub mod api {
         }
         pub fn paras(
             &self,
-        ) -> Result<paras::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<paras::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(paras))?;
             if !self.skip_pallet_validation && paras::PALLET_HASH != hash {
@@ -29345,7 +28984,7 @@ pub mod api {
         }
         pub fn initializer(
             &self,
-        ) -> Result<initializer::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<initializer::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self
                 .client
@@ -29361,7 +29000,7 @@ pub mod api {
         }
         pub fn dmp(
             &self,
-        ) -> Result<dmp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<dmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(dmp))?;
             if !self.skip_pallet_validation && dmp::PALLET_HASH != hash {
@@ -29374,7 +29013,7 @@ pub mod api {
         }
         pub fn ump(
             &self,
-        ) -> Result<ump::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<ump::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(ump))?;
             if !self.skip_pallet_validation && ump::PALLET_HASH != hash {
@@ -29387,7 +29026,7 @@ pub mod api {
         }
         pub fn hrmp(
             &self,
-        ) -> Result<hrmp::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<hrmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(hrmp))?;
             if !self.skip_pallet_validation && hrmp::PALLET_HASH != hash {
@@ -29400,7 +29039,7 @@ pub mod api {
         }
         pub fn registrar(
             &self,
-        ) -> Result<registrar::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<registrar::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(registrar))?;
             if !self.skip_pallet_validation && registrar::PALLET_HASH != hash {
@@ -29413,7 +29052,7 @@ pub mod api {
         }
         pub fn slots(
             &self,
-        ) -> Result<slots::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<slots::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(slots))?;
             if !self.skip_pallet_validation && slots::PALLET_HASH != hash {
@@ -29426,7 +29065,7 @@ pub mod api {
         }
         pub fn auctions(
             &self,
-        ) -> Result<auctions::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<auctions::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(auctions))?;
             if !self.skip_pallet_validation && auctions::PALLET_HASH != hash {
@@ -29439,7 +29078,7 @@ pub mod api {
         }
         pub fn crowdloan(
             &self,
-        ) -> Result<crowdloan::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<crowdloan::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(crowdloan))?;
             if !self.skip_pallet_validation && crowdloan::PALLET_HASH != hash {
@@ -29452,7 +29091,7 @@ pub mod api {
         }
         pub fn xcm_pallet(
             &self,
-        ) -> Result<xcm_pallet::calls::TransactionApi<'a, T, X, A>, ::subxt::MetadataError>
+        ) -> Result<xcm_pallet::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
             let hash = self.client.metadata().pallet_hash(stringify!(xcm_pallet))?;
             if !self.skip_pallet_validation && xcm_pallet::PALLET_HASH != hash {
