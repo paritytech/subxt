@@ -24,8 +24,8 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     Client,
     DefaultConfig,
-    SubstrateExtrinsicParams,
     PairSigner,
+    SubstrateExtrinsicParams,
 };
 
 /// substrate node should be installed on the $PATH
@@ -74,8 +74,6 @@ pub async fn test_context() -> TestContext {
     TestContext { node_proc, api }
 }
 
-pub fn pair_signer(
-    pair: Pair,
-) -> PairSigner<DefaultConfig, Pair> {
+pub fn pair_signer(pair: Pair) -> PairSigner<DefaultConfig, Pair> {
     PairSigner::new(pair)
 }

@@ -30,19 +30,21 @@ use sp_runtime::traits::{
 /// as well as actually signing a SCALE encoded payload. Optionally, a
 /// signer can also provide the nonce for the transaction to use.
 pub trait Signer<T: Config> {
-    /// Returns the account id.
-    fn account_id(&self) -> &T::AccountId;
-
     /// Optionally returns a nonce.
     fn nonce(&self) -> Option<T::Index>;
 
-    /// Takes an unsigned extrinsic and returns a signed extrinsic.
+    /// Return the "from" account ID.
+    fn account_id(&self) -> &T::AccountId;
+
+    /// SCALE encodes the address to some output.
+    fn encode_address_to(&self, out: &mut Vec<u8>);
+
+    /// Takes a signer payload for an extrinsic, and returns a signature based on it.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
     fn encode_signature_to(&self, signer_payload: &[u8], out: &mut Vec<u8>);
 }
-
 
 /// A [`Signer`] implementation that can be constructed from an [`Pair`].
 #[derive(Clone, Debug)]
@@ -91,16 +93,21 @@ where
 impl<T, P> Signer<T> for PairSigner<T, P>
 where
     T: Config,
-    T::AccountId: Into<T::Address> + 'static,
+    T::AccountId: Into<T::Address> + Clone + 'static,
     P: Pair + 'static,
     P::Signature: Into<T::Signature> + 'static,
 {
+    fn nonce(&self) -> Option<T::Index> {
+        self.nonce
+    }
+
     fn account_id(&self) -> &T::AccountId {
         &self.account_id
     }
 
-    fn nonce(&self) -> Option<T::Index> {
-        self.nonce
+    fn encode_address_to(&self, out: &mut Vec<u8>) {
+        let address: T::Address = self.account_id.clone().into();
+        address.encode_to(out);
     }
 
     fn encode_signature_to(&self, signer_payload: &[u8], out: &mut Vec<u8>) {

@@ -27,8 +27,8 @@ use subxt::{
     ClientBuilder,
     Config,
     DefaultConfig,
-    SubstrateExtrinsicParams,
     PairSigner,
+    PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -60,7 +60,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, SubstrateExtrinsicParams<MyConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, PolkadotExtrinsicParams<MyConfig>>>();
 
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();

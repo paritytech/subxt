@@ -23,15 +23,15 @@ use crate::{
         BasicError,
         HasModuleError,
     },
+    extrinsic::{
+        ExtrinsicParams,
+        Signer,
+    },
     rpc::{
         Rpc,
         RpcClient,
         RuntimeVersion,
         SystemProperties,
-    },
-    extrinsic::{
-        Signer,
-        ExtrinsicParams,
     },
     storage::StorageClient,
     transaction::TransactionProgress,
@@ -40,7 +40,11 @@ use crate::{
     Encoded,
     Metadata,
 };
-use codec::{Compact, Decode, Encode};
+use codec::{
+    Compact,
+    Decode,
+    Encode,
+};
 use derivative::Derivative;
 use std::sync::Arc;
 
@@ -210,9 +214,11 @@ where
         self,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
-    where X::OtherParams: Default
+    where
+        X::OtherParams: Default,
     {
-        self.sign_and_submit_then_watch(signer, Default::default()).await
+        self.sign_and_submit_then_watch(signer, Default::default())
+            .await
     }
 
     /// Creates and signs an extrinsic and submits it to the chain.
@@ -224,7 +230,8 @@ where
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
     ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
-    where X::OtherParams: Default
+    where
+        X::OtherParams: Default,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, other_params).await?;
@@ -252,7 +259,8 @@ where
         self,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, BasicError>
-    where X::OtherParams: Default
+    where
+        X::OtherParams: Default,
     {
         self.sign_and_submit(signer, Default::default()).await
     }
@@ -270,7 +278,8 @@ where
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
     ) -> Result<T::Hash, BasicError>
-    where X::OtherParams: Default
+    where
+        X::OtherParams: Default,
     {
         let extrinsic = self.create_signed(signer, other_params).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -295,10 +304,7 @@ where
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = {
             let mut bytes = Vec::new();
-            let pallet = self
-                .client
-                .metadata()
-                .pallet(C::PALLET)?;
+            let pallet = self.client.metadata().pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
             self.call.encode_to(&mut bytes);
@@ -334,7 +340,7 @@ where
             // "is signed" + transaction protocol version (4)
             (0b10000000 + 4u8).encode_to(&mut encoded_inner);
             // from address for signature
-            signer.account_id().encode_to(&mut encoded_inner);
+            signer.encode_address_to(&mut encoded_inner);
             // the signature bytes
             signer.encode_signature_to(&payload_to_be_signed, &mut encoded_inner);
             // attach custom extra params

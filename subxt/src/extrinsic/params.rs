@@ -15,12 +15,10 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use codec::{
+    Compact,
     Encode,
 };
-use sp_runtime::{
-    generic::Era,
-};
-use codec::Compact;
+use sp_runtime::generic::Era;
 
 use crate::{
     Config,
@@ -78,39 +76,38 @@ pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Plain
 /// A plain tip payment.
 #[derive(Copy, Clone, Encode)]
 pub struct PlainTip {
-    tip: Compact<u128>
+    tip: Compact<u128>,
 }
 
 impl PlainTip {
     /// Create a new tip of the amount provided.
     pub fn new(amount: u128) -> Self {
         PlainTip {
-            tip: Compact(amount)
+            tip: Compact(amount),
         }
     }
 }
 
 impl Default for PlainTip {
     fn default() -> Self {
-        PlainTip {
-            tip: Compact(0),
-        }
+        PlainTip { tip: Compact(0) }
     }
 }
 
 /// A tip payment made in the form of a specific asset.
 #[derive(Copy, Clone, Encode)]
 pub struct AssetTip {
-    tip: Compact<u128>,
-    asset: Option<u32>
+    #[codec(compact)]
+    tip: u128,
+    asset: Option<u32>,
 }
 
 impl AssetTip {
     /// Create a new tip of the amount provided.
     pub fn new(amount: u128) -> Self {
         AssetTip {
-            tip: Compact(amount),
-            asset: None
+            tip: amount,
+            asset: None,
         }
     }
 
@@ -124,8 +121,8 @@ impl AssetTip {
 impl Default for AssetTip {
     fn default() -> Self {
         Self {
-            tip: Compact(0),
-            asset: None
+            tip: 0,
+            asset: None,
         }
     }
 }
@@ -148,7 +145,7 @@ pub struct BaseExtrinsicParams<T: Config, Tip> {
     transaction_version: u32,
     genesis_hash: T::Hash,
     mortality_checkpoint: T::Hash,
-    marker: std::marker::PhantomData<T>
+    marker: std::marker::PhantomData<T>,
 }
 
 /// The set of parameters which can be provided in order to customise our [`BaseExtrinsicParams`]
@@ -162,7 +159,7 @@ pub struct BaseExtrinsicParamsBuilder<T: Config, Tip> {
     tip: Tip,
 }
 
-impl <T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
+impl<T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
     /// Instantiate the default set of [`BaseExtrinsicParamsBuilder`]
     pub fn new() -> Self {
         Self::default()
@@ -183,17 +180,17 @@ impl <T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl <T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
+impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     fn default() -> Self {
         Self {
             era: Era::Immortal,
             mortality_checkpoint: None,
-            tip: Tip::default()
+            tip: Tip::default(),
         }
     }
 }
 
-impl <T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
+impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(
@@ -207,7 +204,9 @@ impl <T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip>
     ) -> Self {
         BaseExtrinsicParams {
             era: other_params.era,
-            mortality_checkpoint: other_params.mortality_checkpoint.unwrap_or(genesis_hash),
+            mortality_checkpoint: other_params
+                .mortality_checkpoint
+                .unwrap_or(genesis_hash),
             tip: other_params.tip,
             nonce,
             spec_version,
@@ -228,7 +227,8 @@ impl <T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip>
             self.spec_version,
             self.transaction_version,
             self.genesis_hash,
-            self.mortality_checkpoint
-        ).encode_to(v);
+            self.mortality_checkpoint,
+        )
+            .encode_to(v);
     }
 }

@@ -30,9 +30,7 @@ use frame_metadata::{
     META_RESERVED,
 };
 
-use crate::{
-    Call,
-};
+use crate::Call;
 use scale_info::{
     form::PortableForm,
     Type,

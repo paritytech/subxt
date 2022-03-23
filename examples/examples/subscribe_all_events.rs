@@ -28,8 +28,8 @@ use std::time::Duration;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    SubstrateExtrinsicParams,
     PairSigner,
+    PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
     // Subscribe to any events that occur:
     let mut event_sub = api.events().subscribe().await?;
@@ -52,11 +52,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // While this subscription is active, balance transfers are made somewhere:
     async_std::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let api = ClientBuilder::new()
-            .build()
-            .await
-            .unwrap()
-            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>>();
+        let api =
+            ClientBuilder::new()
+                .build()
+                .await
+                .unwrap()
+                .to_runtime_api::<polkadot::RuntimeApi<
+                    DefaultConfig,
+                    PolkadotExtrinsicParams<DefaultConfig>,
+                >>();
 
         let mut transfer_amount = 1_000_000_000;
 
