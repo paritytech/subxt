@@ -255,7 +255,7 @@ fn metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
 fn fetch_runtime_metadata(
     url: &url::Url,
 ) -> color_eyre::Result<RuntimeMetadataLastVersion> {
-    let (_, bytes) = fetch_metadata(&url)?;
+    let (_, bytes) = fetch_metadata(url)?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
     if metadata.0 != META_RESERVED {
