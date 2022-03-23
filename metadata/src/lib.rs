@@ -367,6 +367,7 @@ pub fn get_metadata_hash(
 }
 
 /// Metadata hasher internal cache.
+#[derive(Clone, Debug)]
 pub struct MetadataHasherCache {
     /// Cache of the types obtained from `get_type_hash`.
     pub(crate) types: HashMap<u32, [u8; 32]>,

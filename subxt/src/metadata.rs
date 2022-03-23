@@ -18,6 +18,10 @@ use codec::Error as CodecError;
 use std::{
     collections::HashMap,
     convert::TryFrom,
+    sync::{
+        Arc,
+        Mutex,
+    },
 };
 
 use frame_metadata::{
@@ -91,6 +95,7 @@ pub struct Metadata {
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
+    cache: Arc<Mutex<subxt_metadata::MetadataHasherCache>>,
 }
 
 impl Metadata {
@@ -149,7 +154,7 @@ impl Metadata {
             Some(pallet) => pallet,
             _ => return Err(MetadataError::PalletNotFound(name.to_string())),
         };
-        let mut cache = subxt_metadata::MetadataHasherCache::new();
+        let mut cache = self.cache.lock().unwrap();
         Ok(subxt_metadata::get_pallet_hash(
             &metadata.types,
             pallet,
@@ -159,7 +164,7 @@ impl Metadata {
 
     /// Obtain the full metadata identifier.
     pub fn metadata_hash(&self) -> [u8; 32] {
-        let mut cache = subxt_metadata::MetadataHasherCache::new();
+        let mut cache = self.cache.lock().unwrap();
         subxt_metadata::get_metadata_hash(self.runtime_metadata(), &mut cache)
     }
 }
@@ -395,6 +400,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             pallets,
             events,
             errors,
+            cache: Arc::new(Mutex::new(subxt_metadata::MetadataHasherCache::new())),
         })
     }
 }
