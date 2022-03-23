@@ -101,7 +101,13 @@ fn get_type_def_hash(
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
-            for var in variant.variants() {
+            // The type at path `node_template_runtime::Call` contains variants of the pallets
+            // registered in order. Swapping the order between two pallets would result
+            // in a different hash, but the functionality is still identical.
+            // Sort by variant name to result in deterministic hashing.
+            let mut variants: Vec<_> = variant.variants().iter().collect();
+            variants.sort_by_key(|variant| variant.name());
+            for var in variants {
                 bytes.extend(get_variant_hash(registry, var, visited_ids, cache));
             }
             bytes
