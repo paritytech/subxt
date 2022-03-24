@@ -18,7 +18,6 @@
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
 use crate::Config;
-use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
     IdentifyAccount,
@@ -36,14 +35,14 @@ pub trait Signer<T: Config> {
     /// Return the "from" account ID.
     fn account_id(&self) -> &T::AccountId;
 
-    /// SCALE encodes the address to some output.
-    fn encode_address_to(&self, out: &mut Vec<u8>);
+    /// Return the "from" address.
+    fn address(&self) -> T::Address;
 
     /// Takes a signer payload for an extrinsic, and returns a signature based on it.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
-    fn encode_signature_to(&self, signer_payload: &[u8], out: &mut Vec<u8>);
+    fn sign(&self, signer_payload: &[u8]) -> T::Signature;
 }
 
 /// A [`Signer`] implementation that can be constructed from an [`Pair`].
@@ -105,13 +104,11 @@ where
         &self.account_id
     }
 
-    fn encode_address_to(&self, out: &mut Vec<u8>) {
-        let address: T::Address = self.account_id.clone().into();
-        address.encode_to(out);
+    fn address(&self) -> T::Address {
+        self.account_id.clone().into()
     }
 
-    fn encode_signature_to(&self, signer_payload: &[u8], out: &mut Vec<u8>) {
-        let signature: T::Signature = self.signer.sign(signer_payload).into();
-        signature.encode_to(out);
+    fn sign(&self, signer_payload: &[u8]) -> T::Signature {
+        self.signer.sign(signer_payload).into()
     }
 }

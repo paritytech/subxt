@@ -340,9 +340,11 @@ where
             // "is signed" + transaction protocol version (4)
             (0b10000000 + 4u8).encode_to(&mut encoded_inner);
             // from address for signature
-            signer.encode_address_to(&mut encoded_inner);
+            signer.address().encode_to(&mut encoded_inner);
             // the signature bytes
-            signer.encode_signature_to(&payload_to_be_signed, &mut encoded_inner);
+            signer
+                .sign(&payload_to_be_signed)
+                .encode_to(&mut encoded_inner);
             // attach custom extra params
             additional_and_extra_params.encode_extra_to(&mut encoded_inner);
             // and now, call data
