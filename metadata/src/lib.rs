@@ -331,3 +331,72 @@ impl Default for MetadataHasherCache {
         Self::new()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::{
+        get_pallet_hash,
+        MetadataHasherCache,
+    };
+    use codec::Decode;
+    use frame_metadata::{
+        RuntimeMetadata::V14,
+        RuntimeMetadataLastVersion,
+        RuntimeMetadataPrefixed,
+    };
+    use scale_info::form::PortableForm;
+    use std::fs;
+
+    /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
+    /// tag: polkadot-v0.9.17, branch origin/main.
+    static METADATA_PATH: &'static str = "./test-assets/node_template.scale";
+
+    /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
+    /// tag: polkadot-v0.9.17, branch origin/main, via moving `Balances` pallet order as last
+    /// pallet in `construct_runtime` macro.
+    static _METADATA_SWAP_PATH: &'static str = "./test-assets/node_template_swap.scale";
+
+    /// Load metadata from a given file path.
+    fn load_metadata(path: &str) -> RuntimeMetadataLastVersion {
+        let bytes = fs::read(path).expect("Cannot read metadata");
+        let meta: RuntimeMetadataPrefixed =
+            Decode::decode(&mut &bytes[..]).expect("Cannot decode scale metadata");
+
+        match meta.1 {
+            V14(v14) => v14,
+            _ => panic!("Unsupported metadata version {:?}", meta.1),
+        }
+    }
+
+    /// Obtain a reference to the pallet identified by name in the metadata.
+    fn get_pallet<'a>(
+        metadata: &'a RuntimeMetadataLastVersion,
+        name: &'static str,
+    ) -> &'a frame_metadata::PalletMetadata<PortableForm> {
+        metadata
+            .pallets
+            .iter()
+            .find(|pallet| pallet.name == name)
+            .expect("Pallet not found")
+    }
+
+    #[test]
+    fn check_pallet_cache() {
+        static PALLET_NAME: &'static str = "Balances";
+
+        let metadata = load_metadata(METADATA_PATH);
+        let mut cache = MetadataHasherCache::new();
+        // Cache must be empty.
+        assert_eq!(cache.pallets.len(), 0);
+
+        let pallet = get_pallet(&metadata, "Balances");
+        let hash = get_pallet_hash(&metadata.types, &pallet, &mut cache);
+        let cached_hash = cache
+            .pallets
+            .get(PALLET_NAME)
+            .expect("Pallet cache should be present");
+
+        // Cache entry must exist after calculation.
+        assert_eq!(&hash, cached_hash);
+    }
+}
