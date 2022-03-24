@@ -349,12 +349,12 @@ mod tests {
 
     /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
     /// tag: polkadot-v0.9.17, branch origin/main.
-    static METADATA_PATH: &'static str = "./test-assets/node_template.scale";
+    static METADATA_PATH: &str = "./test-assets/node_template.scale";
 
     /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
     /// tag: polkadot-v0.9.17, branch origin/main, via moving `Balances` pallet order as last
     /// pallet in `construct_runtime` macro.
-    static METADATA_SWAP_PATH: &'static str = "./test-assets/node_template_swap.scale";
+    static METADATA_SWAP_PATH: &str = "./test-assets/node_template_swap.scale";
 
     /// Load metadata from a given file path.
     fn load_metadata(path: &str) -> RuntimeMetadataLastVersion {
@@ -382,7 +382,7 @@ mod tests {
 
     #[test]
     fn check_pallet_cache() {
-        static PALLET_NAME: &'static str = "Balances";
+        static PALLET_NAME: &str = "Balances";
 
         let metadata = load_metadata(METADATA_PATH);
         let mut cache = MetadataHasherCache::new();
@@ -390,7 +390,7 @@ mod tests {
         assert_eq!(cache.pallets.len(), 0);
 
         let pallet = get_pallet(&metadata, "Balances");
-        let hash = get_pallet_hash(&metadata.types, &pallet, &mut cache);
+        let hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
         let cached_hash = cache
             .pallets
             .get(PALLET_NAME)
@@ -410,9 +410,9 @@ mod tests {
         for pallet in metadata.pallets.iter() {
             // Cache intermediate pallet hashes, utilizing a different cache each time.
             let mut inner_cache = MetadataHasherCache::new();
-            let hash = get_pallet_hash(&metadata.types, &pallet, &mut inner_cache);
+            let hash = get_pallet_hash(&metadata.types, pallet, &mut inner_cache);
 
-            let same_cache_hash = get_pallet_hash(&metadata.types, &pallet, &mut cache);
+            let same_cache_hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
 
             assert_eq!(hash, same_cache_hash);
         }
