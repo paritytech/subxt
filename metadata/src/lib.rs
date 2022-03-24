@@ -186,8 +186,7 @@ fn get_type_hash(
     let ty_def = ty.type_def();
     bytes.extend(get_type_def_hash(registry, ty_def, visited_ids));
 
-    let type_hash = hash(&bytes);
-    type_hash
+    hash(&bytes)
 }
 
 /// Obtain the hash representation of a `frame_metadata::ExtrinsicMetadata`.
