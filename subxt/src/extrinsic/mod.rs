@@ -21,7 +21,10 @@ mod signer;
 
 pub use self::{
     params::{
+        AssetTip,
+        Era,
         ExtrinsicParams,
+        PlainTip,
         PolkadotExtrinsicParams,
         PolkadotExtrinsicParamsBuilder,
         SubstrateExtrinsicParams,

@@ -18,12 +18,14 @@ use codec::{
     Compact,
     Encode,
 };
-use sp_runtime::generic::Era;
 
 use crate::{
     Config,
     Encoded,
 };
+
+// We require Era as a param below, so make it available from here.
+pub use sp_runtime::generic::Era;
 
 /// This trait allows you to configure the "signed extra" and
 /// "additional" parameters that are signed and used in transactions.
@@ -124,8 +126,8 @@ impl<T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
 
     /// Set the tip you'd like to give to the block author
     /// for this transaction.
-    pub fn tip(mut self, tip: Tip) -> Self {
-        self.tip = tip;
+    pub fn tip(mut self, tip: impl Into<Tip>) -> Self {
+        self.tip = tip.into();
         self
     }
 }
@@ -186,21 +188,26 @@ impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> 
 /// A tip payment.
 #[derive(Copy, Clone, Encode)]
 pub struct PlainTip {
-    tip: Compact<u128>,
+    #[codec(compact)]
+    tip: u128,
 }
 
 impl PlainTip {
     /// Create a new tip of the amount provided.
     pub fn new(amount: u128) -> Self {
-        PlainTip {
-            tip: Compact(amount),
-        }
+        PlainTip { tip: amount }
     }
 }
 
 impl Default for PlainTip {
     fn default() -> Self {
-        PlainTip { tip: Compact(0) }
+        PlainTip { tip: 0 }
+    }
+}
+
+impl From<u128> for PlainTip {
+    fn from(n: u128) -> Self {
+        PlainTip::new(n)
     }
 }
 
@@ -222,8 +229,15 @@ impl AssetTip {
     }
 
     /// Designate the tip as being of a particular asset class.
+    /// If this is not set, then the native currency is used.
     pub fn of_asset(mut self, asset: u32) -> Self {
         self.asset = Some(asset);
         self
+    }
+}
+
+impl From<u128> for AssetTip {
+    fn from(n: u128) -> Self {
+        AssetTip::new(n)
     }
 }

@@ -87,6 +87,11 @@ where
     pub fn signer(&self) -> &P {
         &self.signer
     }
+
+    /// Return the account ID.
+    pub fn account_id(&self) -> &T::AccountId {
+        &self.account_id
+    }
 }
 
 impl<T, P> Signer<T> for PairSigner<T, P>

@@ -24,7 +24,6 @@ use crate::{
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
-use subxt::Signer;
 
 // Check that we can subscribe to non-finalized block events.
 #[async_std::test]

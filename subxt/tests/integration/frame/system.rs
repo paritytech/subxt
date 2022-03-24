@@ -24,7 +24,6 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::Signer;
 
 #[async_std::test]
 async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {

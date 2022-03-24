@@ -34,10 +34,7 @@ use sp_runtime::{
     AccountId32,
     MultiAddress,
 };
-use subxt::{
-    Error,
-    Signer,
-};
+use subxt::Error;
 
 #[async_std::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {

@@ -32,10 +32,7 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
-    Error,
-    Signer,
-};
+use subxt::Error;
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
