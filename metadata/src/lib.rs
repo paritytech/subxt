@@ -334,6 +334,7 @@ impl Default for MetadataHasherCache {
 #[cfg(test)]
 mod tests {
     use crate::{
+        get_metadata_hash,
         get_pallet_hash,
         MetadataHasherCache,
     };
@@ -430,5 +431,27 @@ mod tests {
             .collect();
 
         assert_eq!(cache_per_pallet, one_cache);
+    }
+
+    #[test]
+    fn check_metadata_cache() {
+        let metadata = load_metadata(METADATA_PATH);
+
+        // Cache must be populated with pallet hashes.
+        let mut cache = MetadataHasherCache::new();
+        let _hash = get_metadata_hash(&metadata, &mut cache);
+
+        // Compare cache with individual pallets
+        for pallet in metadata.pallets.iter() {
+            let mut inner_cache = MetadataHasherCache::new();
+
+            // Compare a fresh iteration over pallet with cache value.
+            let hash = get_pallet_hash(&metadata.types, pallet, &mut inner_cache);
+            assert_eq!(cache.pallets.get(pallet.name.as_str()).unwrap(), &hash);
+
+            // Recalling pallet should result in the same value, even if populated by metadata.
+            let re_hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
+            assert_eq!(cache.pallets.get(pallet.name.as_str()).unwrap(), &re_hash);
+        }
     }
 }
