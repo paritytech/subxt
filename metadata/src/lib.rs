@@ -54,13 +54,12 @@ fn get_field_hash(
     registry: &PortableRegistry,
     field: &Field<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
     field.name().encode_to(&mut bytes);
     field.type_name().encode_to(&mut bytes);
-    bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids, cache));
+    bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids));
 
     hash(&bytes)
 }
@@ -70,13 +69,12 @@ fn get_variant_hash(
     registry: &PortableRegistry,
     var: &Variant<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Variant as u8];
 
     var.name().encode_to(&mut bytes);
     for field in var.fields() {
-        bytes.extend(get_field_hash(registry, field, visited_ids, cache));
+        bytes.extend(get_field_hash(registry, field, visited_ids));
     }
 
     hash(&bytes)
@@ -87,7 +85,6 @@ fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
     visited_ids: &mut HashSet<u32>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
 
@@ -95,7 +92,7 @@ fn get_type_def_hash(
         TypeDef::Composite(composite) => {
             let mut bytes = Vec::new();
             for field in composite.fields() {
-                bytes.extend(get_field_hash(registry, field, visited_ids, cache));
+                bytes.extend(get_field_hash(registry, field, visited_ids));
             }
             bytes
         }
@@ -108,7 +105,7 @@ fn get_type_def_hash(
             let mut variants: Vec<_> = variant.variants().iter().collect();
             variants.sort_by_key(|variant| variant.name());
             for var in variants {
-                bytes.extend(get_variant_hash(registry, var, visited_ids, cache));
+                bytes.extend(get_variant_hash(registry, var, visited_ids));
             }
             bytes
         }
@@ -118,7 +115,6 @@ fn get_type_def_hash(
                 registry,
                 sequence.type_param().id(),
                 visited_ids,
-                cache,
             ));
             bytes
         }
@@ -129,14 +125,13 @@ fn get_type_def_hash(
                 registry,
                 array.type_param().id(),
                 visited_ids,
-                cache,
             ));
             bytes
         }
         TypeDef::Tuple(tuple) => {
             let mut bytes = Vec::new();
             for field in tuple.fields() {
-                bytes.extend(get_type_hash(registry, field.id(), visited_ids, cache));
+                bytes.extend(get_type_hash(registry, field.id(), visited_ids));
             }
             bytes
         }
@@ -151,7 +146,6 @@ fn get_type_def_hash(
                 registry,
                 compact.type_param().id(),
                 visited_ids,
-                cache,
             ));
             bytes
         }
@@ -161,13 +155,11 @@ fn get_type_def_hash(
                 registry,
                 bitseq.bit_order_type().id(),
                 visited_ids,
-                cache,
             ));
             bytes.extend(get_type_hash(
                 registry,
                 bitseq.bit_store_type().id(),
                 visited_ids,
-                cache,
             ));
             bytes
         }
@@ -181,12 +173,7 @@ fn get_type_hash(
     registry: &PortableRegistry,
     id: u32,
     visited_ids: &mut HashSet<u32>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
-    if let Some(cached) = cache.types.get(&id) {
-        return *cached
-    }
-
     let ty = registry.resolve(id).unwrap();
 
     let mut bytes = vec![MetadataHashableIDs::Type as u8];
@@ -197,10 +184,9 @@ fn get_type_hash(
     }
 
     let ty_def = ty.type_def();
-    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids, cache));
+    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids));
 
     let type_hash = hash(&bytes);
-    cache.types.insert(id, type_hash);
     type_hash
 }
 
@@ -208,17 +194,11 @@ fn get_type_hash(
 fn get_extrinsic_hash(
     registry: &PortableRegistry,
     extrinsic: &ExtrinsicMetadata<PortableForm>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut visited_ids = HashSet::<u32>::new();
     let mut bytes = vec![MetadataHashableIDs::Extrinsic as u8];
 
-    bytes.extend(get_type_hash(
-        registry,
-        extrinsic.ty.id(),
-        &mut visited_ids,
-        cache,
-    ));
+    bytes.extend(get_type_hash(registry, extrinsic.ty.id(), &mut visited_ids));
     bytes.push(extrinsic.version);
     for signed_extension in extrinsic.signed_extensions.iter() {
         signed_extension.identifier.encode_to(&mut bytes);
@@ -226,13 +206,11 @@ fn get_extrinsic_hash(
             registry,
             signed_extension.ty.id(),
             &mut visited_ids,
-            cache,
         ));
         bytes.extend(get_type_hash(
             registry,
             signed_extension.additional_signed.id(),
             &mut visited_ids,
-            cache,
         ));
     }
 
@@ -253,38 +231,18 @@ pub fn get_pallet_hash(
     }
 
     if let Some(ref calls) = pallet.calls {
-        bytes.extend(get_type_hash(
-            registry,
-            calls.ty.id(),
-            &mut visited_ids,
-            cache,
-        ));
+        bytes.extend(get_type_hash(registry, calls.ty.id(), &mut visited_ids));
     }
     if let Some(ref event) = pallet.event {
-        bytes.extend(get_type_hash(
-            registry,
-            event.ty.id(),
-            &mut visited_ids,
-            cache,
-        ));
+        bytes.extend(get_type_hash(registry, event.ty.id(), &mut visited_ids));
     }
     for constant in pallet.constants.iter() {
         bytes.extend(constant.name.as_bytes());
         bytes.extend(&constant.value);
-        bytes.extend(get_type_hash(
-            registry,
-            constant.ty.id(),
-            &mut visited_ids,
-            cache,
-        ));
+        bytes.extend(get_type_hash(registry, constant.ty.id(), &mut visited_ids));
     }
     if let Some(ref error) = pallet.error {
-        bytes.extend(get_type_hash(
-            registry,
-            error.ty.id(),
-            &mut visited_ids,
-            cache,
-        ));
+        bytes.extend(get_type_hash(registry, error.ty.id(), &mut visited_ids));
     }
     if let Some(ref storage) = pallet.storage {
         bytes.extend(storage.prefix.as_bytes());
@@ -293,12 +251,7 @@ pub fn get_pallet_hash(
             entry.modifier.encode_to(&mut bytes);
             match &entry.ty {
                 StorageEntryType::Plain(ty) => {
-                    bytes.extend(get_type_hash(
-                        registry,
-                        ty.id(),
-                        &mut visited_ids,
-                        cache,
-                    ));
+                    bytes.extend(get_type_hash(registry, ty.id(), &mut visited_ids));
                 }
                 StorageEntryType::Map {
                     hashers,
@@ -306,18 +259,8 @@ pub fn get_pallet_hash(
                     value,
                 } => {
                     hashers.encode_to(&mut bytes);
-                    bytes.extend(get_type_hash(
-                        registry,
-                        key.id(),
-                        &mut visited_ids,
-                        cache,
-                    ));
-                    bytes.extend(get_type_hash(
-                        registry,
-                        value.id(),
-                        &mut visited_ids,
-                        cache,
-                    ));
+                    bytes.extend(get_type_hash(registry, key.id(), &mut visited_ids));
+                    bytes.extend(get_type_hash(registry, value.id(), &mut visited_ids));
                 }
             }
             bytes.extend(&entry.default);
@@ -355,18 +298,13 @@ pub fn get_metadata_hash(
         bytes.extend(hash)
     }
 
-    bytes.extend(get_extrinsic_hash(
-        &metadata.types,
-        &metadata.extrinsic,
-        cache,
-    ));
+    bytes.extend(get_extrinsic_hash(&metadata.types, &metadata.extrinsic));
 
     let mut visited_ids = HashSet::<u32>::new();
     bytes.extend(get_type_hash(
         &metadata.types,
         metadata.ty.id(),
         &mut visited_ids,
-        cache,
     ));
 
     hash(&bytes)
@@ -375,8 +313,6 @@ pub fn get_metadata_hash(
 /// Metadata hasher internal cache.
 #[derive(Clone, Debug)]
 pub struct MetadataHasherCache {
-    /// Cache of the types obtained from `get_type_hash`.
-    pub(crate) types: HashMap<u32, [u8; 32]>,
     /// Cache of the pallets obtained from `get_pallet_hash`.
     pub(crate) pallets: HashMap<String, [u8; 32]>,
 }
@@ -385,7 +321,6 @@ impl MetadataHasherCache {
     /// Creates an empty `MetadataHasherCache`.
     pub fn new() -> Self {
         Self {
-            types: HashMap::new(),
             pallets: HashMap::new(),
         }
     }
