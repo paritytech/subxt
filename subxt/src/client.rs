@@ -320,16 +320,16 @@ where
             other_params,
         );
 
-        // 4. construct payload to be signed
-        let payload_to_be_signed = {
+        // 4. construct signature
+        let signature = {
             let mut bytes = Vec::new();
             call_data.encode_to(&mut bytes);
             additional_and_extra_params.encode_extra_to(&mut bytes);
             additional_and_extra_params.encode_additional_to(&mut bytes);
             if bytes.len() > 256 {
-                sp_core::blake2_256(&bytes).to_vec()
+                signer.sign(&sp_core::blake2_256(&bytes))
             } else {
-                bytes
+                signer.sign(&bytes)
             }
         };
 
@@ -342,9 +342,7 @@ where
             // from address for signature
             signer.address().encode_to(&mut encoded_inner);
             // the signature bytes
-            signer
-                .sign(&payload_to_be_signed)
-                .encode_to(&mut encoded_inner);
+            signature.encode_to(&mut encoded_inner);
             // attach custom extra params
             additional_and_extra_params.encode_extra_to(&mut encoded_inner);
             // and now, call data

@@ -186,7 +186,7 @@ impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> 
 }
 
 /// A tip payment.
-#[derive(Copy, Clone, Encode)]
+#[derive(Copy, Clone, Default, Encode)]
 pub struct PlainTip {
     #[codec(compact)]
     tip: u128,
@@ -196,12 +196,6 @@ impl PlainTip {
     /// Create a new tip of the amount provided.
     pub fn new(amount: u128) -> Self {
         PlainTip { tip: amount }
-    }
-}
-
-impl Default for PlainTip {
-    fn default() -> Self {
-        PlainTip { tip: 0 }
     }
 }
 
