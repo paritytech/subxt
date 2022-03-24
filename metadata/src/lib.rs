@@ -354,7 +354,7 @@ mod tests {
     /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
     /// tag: polkadot-v0.9.17, branch origin/main, via moving `Balances` pallet order as last
     /// pallet in `construct_runtime` macro.
-    static _METADATA_SWAP_PATH: &'static str = "./test-assets/node_template_swap.scale";
+    static METADATA_SWAP_PATH: &'static str = "./test-assets/node_template_swap.scale";
 
     /// Load metadata from a given file path.
     fn load_metadata(path: &str) -> RuntimeMetadataLastVersion {
@@ -438,5 +438,21 @@ mod tests {
             let re_hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
             assert_eq!(cache.pallets.get(pallet.name.as_str()).unwrap(), &re_hash);
         }
+    }
+
+    #[test]
+    fn check_deterministic_metadata() {
+        let metadata = load_metadata(METADATA_PATH);
+        let metadata_swap = load_metadata(METADATA_SWAP_PATH);
+
+        let mut cache = MetadataHasherCache::new();
+        let hash = get_metadata_hash(&metadata, &mut cache);
+
+        let mut cache_swap = MetadataHasherCache::new();
+        let hash_swap = get_metadata_hash(&metadata_swap, &mut cache_swap);
+
+        // Changing pallet order must still result in a deterministic unique hash.
+        assert_eq!(hash, hash_swap);
+        assert_eq!(cache.pallets, cache_swap.pallets);
     }
 }
