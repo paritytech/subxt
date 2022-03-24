@@ -274,6 +274,7 @@ impl RuntimeGenerator {
                 .filter_map(|(pallet, pallet_mod_name)| {
                     pallet.calls.as_ref().map(|_| pallet_mod_name)
                 });
+        let pallets_with_calls_unchecked = pallets_with_calls.clone();
 
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
@@ -401,9 +402,8 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
-                    pub fn skip_pallet_validation(mut self) -> Self {
-                        self.skip_pallet_validation = true;
-                        self
+                    pub fn skip_pallet_validation(&'a self) -> TransactionApiUnchecked<'a, T, X> {
+                        TransactionApiUnchecked { client: &self.client, marker: ::core::marker::PhantomData }
                     }
 
                     #(
@@ -414,6 +414,23 @@ impl RuntimeGenerator {
                             } else {
                                 Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
                             }
+                        }
+                    )*
+                }
+
+                pub struct TransactionApiUnchecked<'a, T: ::subxt::Config, X> {
+                    client: &'a ::subxt::Client<T>,
+                    marker: ::core::marker::PhantomData<X>,
+                }
+
+                impl<'a, T, X> TransactionApiUnchecked<'a, T, X>
+                where
+                    T: ::subxt::Config,
+                    X: ::subxt::SignedExtra<T>,
+                {
+                    #(
+                        pub fn #pallets_with_calls_unchecked(&self) -> #pallets_with_calls_unchecked::calls::TransactionApi<'a, T, X> {
+                            #pallets_with_calls_unchecked::calls::TransactionApi::new(self.client)
                         }
                     )*
                 }

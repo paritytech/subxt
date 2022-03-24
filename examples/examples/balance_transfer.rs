@@ -48,11 +48,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hash = api
         .tx()
         .skip_pallet_validation()
-        .balances()?
+        .balances()
         .transfer(dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
 
+    println!("Balance transfer extrinsic submitted: {}", hash);
+
+    let hash = api
+        .tx()
+        .balances()?
+        .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
+        .sign_and_submit(&signer)
+        .await?;
     println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
