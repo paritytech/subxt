@@ -229,10 +229,7 @@ where
         self,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
-    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
-    where
-        X::OtherParams: Default,
-    {
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError> {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, other_params).await?;
 
@@ -277,10 +274,7 @@ where
         self,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
-    ) -> Result<T::Hash, BasicError>
-    where
-        X::OtherParams: Default,
-    {
+    ) -> Result<T::Hash, BasicError> {
         let extrinsic = self.create_signed(signer, other_params).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
     }
