@@ -109,14 +109,14 @@ async fn multiple_transfers_work_nonce_incremented(
 
     let bob_pre = api
         .storage()
-        .system()
+        .system()?
         .account(bob.account_id(), None)
         .await?;
 
     for _ in 0..3 {
         api
             .tx()
-            .balances()
+            .balances()?
             .transfer(bob_address.clone(), 10_000)
             .sign_and_submit_then_watch(&alice)
             .await?
@@ -128,7 +128,7 @@ async fn multiple_transfers_work_nonce_incremented(
 
     let bob_post = api
         .storage()
-        .system()
+        .system()?
         .account(bob.account_id(), None)
         .await?;
 
