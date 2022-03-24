@@ -404,33 +404,18 @@ mod tests {
     fn cache_deterministic_hash() {
         let metadata = load_metadata(METADATA_PATH);
 
-        // Cache intermediate pallet hashes, utilizing a different cache each time.
-        let cache_per_pallet: Vec<_> = metadata
-            .pallets
-            .iter()
-            .map(|pallet| {
-                let mut cache = MetadataHasherCache::new();
-                (
-                    pallet.name.clone(),
-                    get_pallet_hash(&metadata.types, &pallet, &mut cache),
-                )
-            })
-            .collect();
-
         // Utilizing the same cache for pallet hashes must not result in different results.
         let mut cache = MetadataHasherCache::new();
-        let one_cache: Vec<_> = metadata
-            .pallets
-            .iter()
-            .map(|pallet| {
-                (
-                    pallet.name.clone(),
-                    get_pallet_hash(&metadata.types, &pallet, &mut cache),
-                )
-            })
-            .collect();
 
-        assert_eq!(cache_per_pallet, one_cache);
+        for pallet in metadata.pallets.iter() {
+            // Cache intermediate pallet hashes, utilizing a different cache each time.
+            let mut inner_cache = MetadataHasherCache::new();
+            let hash = get_pallet_hash(&metadata.types, &pallet, &mut inner_cache);
+
+            let same_cache_hash = get_pallet_hash(&metadata.types, &pallet, &mut cache);
+
+            assert_eq!(hash, same_cache_hash);
+        }
     }
 
     #[test]
