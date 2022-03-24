@@ -62,7 +62,7 @@ pub trait ExtrinsicParams<T: Config> {
 pub type SubstrateExtrinsicParams<T> = BaseExtrinsicParams<T, AssetTip>;
 
 /// A builder which leads to [`SubstrateExtrinsicParams`] being constructed.
-/// This is what you provide to methods like [`crate::Client::sign_and_submit`].
+/// This is what you provide to methods like `sign_and_submit()`.
 pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, AssetTip>;
 
 /// A struct representing the signed extra and additional parameters required
@@ -70,73 +70,18 @@ pub type SubstrateExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Asse
 pub type PolkadotExtrinsicParams<T> = BaseExtrinsicParams<T, PlainTip>;
 
 /// A builder which leads to [`PolkadotExtrinsicParams`] being constructed.
-/// This is what you provide to methods like [`crate::Client::sign_and_submit`].
+/// This is what you provide to methods like `sign_and_submit()`.
 pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, PlainTip>;
-
-/// A plain tip payment.
-#[derive(Copy, Clone, Encode)]
-pub struct PlainTip {
-    tip: Compact<u128>,
-}
-
-impl PlainTip {
-    /// Create a new tip of the amount provided.
-    pub fn new(amount: u128) -> Self {
-        PlainTip {
-            tip: Compact(amount),
-        }
-    }
-}
-
-impl Default for PlainTip {
-    fn default() -> Self {
-        PlainTip { tip: Compact(0) }
-    }
-}
-
-/// A tip payment made in the form of a specific asset.
-#[derive(Copy, Clone, Encode)]
-pub struct AssetTip {
-    #[codec(compact)]
-    tip: u128,
-    asset: Option<u32>,
-}
-
-impl AssetTip {
-    /// Create a new tip of the amount provided.
-    pub fn new(amount: u128) -> Self {
-        AssetTip {
-            tip: amount,
-            asset: None,
-        }
-    }
-
-    /// Designate the tip as being of a particular asset class.
-    pub fn of_asset(mut self, asset: u32) -> Self {
-        self.asset = Some(asset);
-        self
-    }
-}
-
-impl Default for AssetTip {
-    fn default() -> Self {
-        Self {
-            tip: 0,
-            asset: None,
-        }
-    }
-}
 
 /// An implementation of [`ExtrinsicParams`] that is suitable for constructing
 /// extrinsics that can be sent to a node with the same signed extra and additional
-/// parameters as a Polkadot/Substrate node. Prefer to use [`SubstrateExtrinsicParams`]
-/// for a version of this tailored towards Substrate, or [`PolkadotExtrinsicParams`]
-/// for a version tailored to Polkadot.
+/// parameters as a Polkadot/Substrate node. The way that tip payments are specified
+/// differs between Substrate and Polkadot nodes, and so we are generic over that in
+/// order to support both here with relative ease.
 ///
-/// If your node differs in the "signed extra" and
-/// "additional" parameters expected to be sent/signed with a transaction, then you'll
-/// need to define your own struct which implements [`ExtrinsicParams`] and provides
-/// back the custom extra and additional parameters you require.
+/// If your node differs in the "signed extra" and "additional" parameters expected
+/// to be sent/signed with a transaction, then you can define your own type which
+/// implements the [`ExtrinsicParams`] trait.
 pub struct BaseExtrinsicParams<T: Config, Tip> {
     era: Era,
     nonce: T::Index,
@@ -148,11 +93,12 @@ pub struct BaseExtrinsicParams<T: Config, Tip> {
     marker: std::marker::PhantomData<T>,
 }
 
-/// The set of parameters which can be provided in order to customise our [`BaseExtrinsicParams`]
-/// values. These implement [`Default`] so that [`BaseExtrinsicParams`] can be used with
-/// convenience methods like [`crate::Client::sign_and_submit_default`]. Prefer to use
-/// [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards Substrate, or
-/// [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
+/// This builder allows you to provide the parameters that can be configured in order to
+/// construct a [`BaseExtrinsicParams`] value. This implements [`Default`], which allows
+/// [`BaseExtrinsicParams`] to be used with convenience methods like `sign_and_submit_default()`.
+///
+/// Prefer to use [`SubstrateExtrinsicParamsBuilder`] for a version of this tailored towards
+/// Substrate, or [`PolkadotExtrinsicParamsBuilder`] for a version tailored to Polkadot.
 pub struct BaseExtrinsicParamsBuilder<T: Config, Tip> {
     era: Era,
     mortality_checkpoint: Option<T::Hash>,
@@ -165,7 +111,11 @@ impl<T: Config, Tip: Default> BaseExtrinsicParamsBuilder<T, Tip> {
         Self::default()
     }
 
-    /// Set the [`Era`] and era checkpoint.
+    /// Set the [`Era`], which defines how long the transaction will be valid for
+    /// (it can be either immortal, or it can be mortal and expire after a certain amount
+    /// of time). The second argument is the block hash after which the transaction
+    /// becomes valid, and must align with the era phase (see the [`Era::Mortal`] docs
+    /// for more detail on that).
     pub fn era(mut self, era: Era, checkpoint: T::Hash) -> Self {
         self.era = era;
         self.mortality_checkpoint = Some(checkpoint);
@@ -230,5 +180,50 @@ impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> 
             self.mortality_checkpoint,
         )
             .encode_to(v);
+    }
+}
+
+/// A tip payment.
+#[derive(Copy, Clone, Encode)]
+pub struct PlainTip {
+    tip: Compact<u128>,
+}
+
+impl PlainTip {
+    /// Create a new tip of the amount provided.
+    pub fn new(amount: u128) -> Self {
+        PlainTip {
+            tip: Compact(amount),
+        }
+    }
+}
+
+impl Default for PlainTip {
+    fn default() -> Self {
+        PlainTip { tip: Compact(0) }
+    }
+}
+
+/// A tip payment made in the form of a specific asset.
+#[derive(Copy, Clone, Default, Encode)]
+pub struct AssetTip {
+    #[codec(compact)]
+    tip: u128,
+    asset: Option<u32>,
+}
+
+impl AssetTip {
+    /// Create a new tip of the amount provided.
+    pub fn new(amount: u128) -> Self {
+        AssetTip {
+            tip: amount,
+            asset: None,
+        }
+    }
+
+    /// Designate the tip as being of a particular asset class.
+    pub fn of_asset(mut self, asset: u32) -> Self {
+        self.asset = Some(asset);
+        self
     }
 }
