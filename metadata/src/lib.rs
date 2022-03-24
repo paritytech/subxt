@@ -398,4 +398,37 @@ mod tests {
         // Cache entry must exist after calculation.
         assert_eq!(&hash, cached_hash);
     }
+
+    #[test]
+    fn cache_deterministic_hash() {
+        let metadata = load_metadata(METADATA_PATH);
+
+        // Cache intermediate pallet hashes, utilizing a different cache each time.
+        let cache_per_pallet: Vec<_> = metadata
+            .pallets
+            .iter()
+            .map(|pallet| {
+                let mut cache = MetadataHasherCache::new();
+                (
+                    pallet.name.clone(),
+                    get_pallet_hash(&metadata.types, &pallet, &mut cache),
+                )
+            })
+            .collect();
+
+        // Utilizing the same cache for pallet hashes must not result in different results.
+        let mut cache = MetadataHasherCache::new();
+        let one_cache: Vec<_> = metadata
+            .pallets
+            .iter()
+            .map(|pallet| {
+                (
+                    pallet.name.clone(),
+                    get_pallet_hash(&metadata.types, &pallet, &mut cache),
+                )
+            })
+            .collect();
+
+        assert_eq!(cache_per_pallet, one_cache);
+    }
 }
