@@ -268,6 +268,8 @@ impl RuntimeGenerator {
                 .filter_map(|(pallet, pallet_mod_name)| {
                     pallet.storage.as_ref().map(|_| pallet_mod_name)
                 });
+        let pallets_with_storage_unchecked = pallets_with_storage.clone();
+
         let pallets_with_calls =
             pallets_with_mod_names
                 .iter()
@@ -374,9 +376,8 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                 {
-                    pub fn skip_pallet_validation(mut self) -> Self {
-                        self.skip_pallet_validation = true;
-                        self
+                    pub fn skip_pallet_validation(self) -> StorageApiUnchecked<'a, T> {
+                        StorageApiUnchecked { client: self.client }
                     }
 
                     #(
@@ -387,6 +388,21 @@ impl RuntimeGenerator {
                             } else {
                                 Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
                             }
+                        }
+                    )*
+                }
+
+                pub struct StorageApiUnchecked<'a, T: ::subxt::Config> {
+                    client: &'a ::subxt::Client<T>,
+                }
+
+                impl<'a, T> StorageApiUnchecked<'a, T>
+                where
+                    T: ::subxt::Config,
+                {
+                    #(
+                        pub fn #pallets_with_storage_unchecked(&self) -> #pallets_with_storage_unchecked::storage::StorageApi<'a, T> {
+                            #pallets_with_storage_unchecked::storage::StorageApi::new(self.client)
                         }
                     )*
                 }
@@ -402,8 +418,8 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
-                    pub fn skip_pallet_validation(&'a self) -> TransactionApiUnchecked<'a, T, X> {
-                        TransactionApiUnchecked { client: &self.client, marker: ::core::marker::PhantomData }
+                    pub fn skip_pallet_validation(self) -> TransactionApiUnchecked<'a, T, X> {
+                        TransactionApiUnchecked { client: self.client, marker: self.marker }
                     }
 
                     #(

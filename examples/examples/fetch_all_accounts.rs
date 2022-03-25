@@ -43,7 +43,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut iter = api
         .storage()
         .skip_pallet_validation()
-        .system()?
+        .system()
         .account_iter(None)
         .await?;
 
