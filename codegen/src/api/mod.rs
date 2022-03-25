@@ -327,11 +327,11 @@ impl RuntimeGenerator {
                     }
 
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
-                        StorageApi { client: &self.client, skip_pallet_validation: false }
+                        StorageApi { client: &self.client }
                     }
 
                     pub fn tx(&'a self) -> TransactionApi<'a, T, X> {
-                        TransactionApi { client: &self.client, skip_pallet_validation: false, marker: ::core::marker::PhantomData }
+                        TransactionApi { client: &self.client, marker: ::core::marker::PhantomData }
                     }
 
                     pub fn events(&'a self) -> EventsApi<'a, T> {
@@ -369,7 +369,6 @@ impl RuntimeGenerator {
 
                 pub struct StorageApi<'a, T: ::subxt::Config> {
                     client: &'a ::subxt::Client<T>,
-                    skip_pallet_validation: bool,
                 }
 
                 impl<'a, T> StorageApi<'a, T>
@@ -383,7 +382,7 @@ impl RuntimeGenerator {
                     #(
                         pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
                             let hash = self.client.metadata().pallet_hash(stringify!(#pallets_with_storage))?;
-                            if !self.skip_pallet_validation && #pallets_with_storage::PALLET_HASH != hash {
+                            if #pallets_with_storage::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_storage)))
                             } else {
                                 Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
@@ -409,7 +408,6 @@ impl RuntimeGenerator {
 
                 pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                     client: &'a ::subxt::Client<T>,
-                    skip_pallet_validation: bool,
                     marker: ::core::marker::PhantomData<X>,
                 }
 
@@ -425,7 +423,7 @@ impl RuntimeGenerator {
                     #(
                         pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError> {
                             let hash = self.client.metadata().pallet_hash(stringify!(#pallets_with_calls))?;
-                            if !self.skip_pallet_validation && #pallets_with_calls::PALLET_HASH != hash {
+                            if #pallets_with_calls::PALLET_HASH != hash {
                                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_calls)))
                             } else {
                                 Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
