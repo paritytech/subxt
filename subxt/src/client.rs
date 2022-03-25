@@ -51,7 +51,6 @@ pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
     page_size: Option<u32>,
-    skip_metadata_validation: bool,
 }
 
 impl ClientBuilder {
@@ -61,7 +60,6 @@ impl ClientBuilder {
             url: None,
             client: None,
             page_size: None,
-            skip_metadata_validation: false,
         }
     }
 
@@ -80,12 +78,6 @@ impl ClientBuilder {
     /// Set the page size.
     pub fn set_page_size(mut self, size: u32) -> Self {
         self.page_size = Some(size);
-        self
-    }
-
-    /// Skip full metadata validation.
-    pub fn skip_metadata_validation(mut self) -> Self {
-        self.skip_metadata_validation = true;
         self
     }
 
@@ -114,7 +106,6 @@ impl ClientBuilder {
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             iter_page_size: self.page_size.unwrap_or(10),
-            skip_metadata_validation: self.skip_metadata_validation,
         })
     }
 }
@@ -129,7 +120,6 @@ pub struct Client<T: Config> {
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     iter_page_size: u32,
-    skip_metadata_validation: bool,
 }
 
 impl<T: Config> std::fmt::Debug for Client<T> {
@@ -142,7 +132,6 @@ impl<T: Config> std::fmt::Debug for Client<T> {
             .field("properties", &self.properties)
             .field("runtime_version", &self.runtime_version)
             .field("iter_page_size", &self.iter_page_size)
-            .field("skip_metadata_validation", &self.skip_metadata_validation)
             .finish()
     }
 }
@@ -190,9 +179,24 @@ impl<T: Config> Client<T> {
         self.try_into()
     }
 
-    /// True if the metadata validation should not be performed.
-    pub fn skip_metadata_validation(&self) -> bool {
-        self.skip_metadata_validation
+    /// Skip metadata validation during conversion to the Runtime API.
+    pub fn skip_metadata_validation(self) -> ClientUnchecked<T> {
+        ClientUnchecked(self)
+    }
+}
+
+/// Client to interface with a substrate node without performing metadata validation.
+#[derive(Derivative)]
+#[derivative(Clone(bound = ""))]
+pub struct ClientUnchecked<T: Config>(pub Client<T>);
+
+impl<T: Config> ClientUnchecked<T> {
+    /// Convert the client to a runtime api wrapper for custom runtime access.
+    ///
+    /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
+    /// to the target runtime.
+    pub fn to_runtime_api<R: From<Self>>(self) -> R {
+        self.into()
     }
 }
 
