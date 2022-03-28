@@ -42,7 +42,9 @@ pub fn generate_has_module_error_impl(
     // variant. Newer versions have something like a `DispatchError::Module (Details)` variant.
     // We check to see which type of variant we're dealing with based on the metadata, and
     // generate the correct code to handle either older or newer substrate versions.
-    let module_variant_is_struct = if let TypeDef::Variant(details) = dispatch_error_def {
+    let (module_variant_is_struct, module_legacy_err) = if let TypeDef::Variant(details) =
+        dispatch_error_def
+    {
         let module_variant = details
             .variants()
             .iter()
@@ -50,19 +52,39 @@ pub fn generate_has_module_error_impl(
             .unwrap_or_else(|| {
                 abort_call_site!("DispatchError::Module variant expected in metadata")
             });
-        let are_fields_named = module_variant
-            .fields()
-            .get(0)
-            .unwrap_or_else(|| {
-                abort_call_site!(
-                    "DispatchError::Module expected to contain 1 or more fields"
-                )
-            })
-            .name()
-            .is_some();
-        are_fields_named
+
+        let module_field = module_variant.fields().get(0).unwrap_or_else(|| {
+            abort_call_site!("DispatchError::Module expected to contain 1 or more fields")
+        });
+        if module_field.name().is_none() {
+            let module_err = metadata
+                .types
+                .resolve(module_field.ty().id())
+                .unwrap_or_else(|| {
+                    abort_call_site!("sp_runtime::ModuleError type expected in metadata")
+                });
+
+            if let TypeDef::Composite(composite) = module_err.type_def() {
+                let error_field = composite
+                    .fields()
+                    .iter()
+                    .find(|field| field.name() == Some(&"error".to_string()))
+                    .unwrap_or_else(|| {
+                        abort_call_site!(
+                            "sp_runtime::ModuleError expected to contain error field"
+                        )
+                    });
+                // Avoid further metadata inspection by relying on type name information
+                // (the name of the type of the field as it appears in the source code)
+                (false, error_field.type_name() == Some(&"[u8]".to_string()))
+            } else {
+                (false, false)
+            }
+        } else {
+            (true, false)
+        }
     } else {
-        false
+        (false, false)
     };
 
     let trait_fn_body = if module_variant_is_struct {
@@ -74,9 +96,15 @@ pub fn generate_has_module_error_impl(
             }
         }
     } else {
+        let error_conversion = if module_legacy_err {
+            quote! { module_error.error }
+        } else {
+            quote! { module_error.error[0] }
+        };
+
         quote! {
             if let Self::Module (module_error) = self {
-                Some((module_error.index, module_error.error))
+                Some((module_error.index, #error_conversion))
             } else {
                 None
             }
