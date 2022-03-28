@@ -191,7 +191,6 @@ impl RuntimeGenerator {
                 .pallet_hashes
                 .get(&pallet.name)
                 .expect("Pallet must be present after caching metadata");
-            let pallet_name = &pallet.name;
 
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
