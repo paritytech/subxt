@@ -38,10 +38,20 @@ pub fn generate_has_module_error_impl(
         .ty()
         .type_def();
 
-    // Slightly older versions of substrate have a `DispatchError::Module { index, error }`
-    // variant. Newer versions have something like a `DispatchError::Module (Details)` variant.
-    // We check to see which type of variant we're dealing with based on the metadata, and
-    // generate the correct code to handle either older or newer substrate versions.
+    // Different substrate versions will have a `DispatchError::Module` of the following form,
+    // ordered by versions:
+    //
+    // Case 1. DispatchError::Module { index: u8, error: u8 }
+    // Case 2. DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: u8 } )
+    // Case 3. DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: [u8; 4] } )
+    //
+    // To handle all cases and maintain backward compatibility, the type of the variant is inspected
+    // based on the metadata.
+    // If the variant has a named field (i.e, Case 1) the variable `module_variant_is_struct` is
+    // true. If the error is of form `u8`, then `module_legacy_err` is True.
+    //
+    // Note: Legacy errors are present in Case 1 and Case 2. Therefore, newer errors are possibly
+    // encountered in Case 3s, the unnamed field case.
     let (module_variant_is_struct, module_legacy_err) = if let TypeDef::Variant(details) =
         dispatch_error_def
     {
@@ -99,6 +109,7 @@ pub fn generate_has_module_error_impl(
         let error_conversion = if module_legacy_err {
             quote! { module_error.error }
         } else {
+            // Convert [u8; 4] errors to legacy format.
             quote! { module_error.error[0] }
         };
 
