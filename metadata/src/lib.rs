@@ -334,7 +334,6 @@ mod tests {
     use crate::{
         get_metadata_hash,
         get_pallet_hash,
-        MetadataHasherCache,
     };
     use codec::Decode;
     use frame_metadata::{
@@ -342,7 +341,6 @@ mod tests {
         RuntimeMetadataLastVersion,
         RuntimeMetadataPrefixed,
     };
-    use scale_info::form::PortableForm;
     use std::fs;
 
     /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
@@ -366,75 +364,27 @@ mod tests {
         }
     }
 
-    /// Obtain a reference to the pallet identified by name in the metadata.
-    fn get_pallet<'a>(
-        metadata: &'a RuntimeMetadataLastVersion,
-        name: &'static str,
-    ) -> &'a frame_metadata::PalletMetadata<PortableForm> {
-        metadata
-            .pallets
-            .iter()
-            .find(|pallet| pallet.name == name)
-            .expect("Pallet not found")
-    }
-
-    #[test]
-    fn check_pallet_cache() {
-        static PALLET_NAME: &str = "Balances";
-
-        let metadata = load_metadata(METADATA_PATH);
-        let mut cache = MetadataHasherCache::new();
-        // Cache must be empty.
-        assert_eq!(cache.pallets.len(), 0);
-
-        let pallet = get_pallet(&metadata, "Balances");
-        let hash = get_pallet_hash(&metadata.types, pallet);
-        let cached_hash = cache
-            .pallets
-            .get(PALLET_NAME)
-            .expect("Pallet cache should be present");
-
-        // Cache entry must exist after calculation.
-        assert_eq!(&hash, cached_hash);
-    }
-
-    #[test]
-    fn cache_deterministic_hash() {
-        let metadata = load_metadata(METADATA_PATH);
-
-        // Utilizing the same cache for pallet hashes must not result in different results.
-        let mut cache = MetadataHasherCache::new();
-
-        for pallet in metadata.pallets.iter() {
-            // Cache intermediate pallet hashes, utilizing a different cache each time.
-            let mut inner_cache = MetadataHasherCache::new();
-            let hash = get_pallet_hash(&metadata.types, pallet, &mut inner_cache);
-
-            let same_cache_hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
-
-            assert_eq!(hash, same_cache_hash);
-        }
-    }
-
     #[test]
     fn check_metadata_cache() {
         let metadata = load_metadata(METADATA_PATH);
 
         // Cache must be populated with pallet hashes.
-        let mut cache = MetadataHasherCache::new();
-        let _hash = get_metadata_hash(&metadata, &mut cache);
+        let hash_details = get_metadata_hash(&metadata);
 
+        let mut pallets: Vec<_> = metadata.pallets.iter().collect();
         // Compare cache with individual pallets
-        for pallet in metadata.pallets.iter() {
-            let mut inner_cache = MetadataHasherCache::new();
-
+        for pallet in pallets.iter() {
             // Compare a fresh iteration over pallet with cache value.
-            let hash = get_pallet_hash(&metadata.types, pallet, &mut inner_cache);
-            assert_eq!(cache.pallets.get(pallet.name.as_str()).unwrap(), &hash);
+            let hash = get_pallet_hash(&metadata.types, pallet);
+            assert_eq!(hash_details.pallet_hashes.get(&pallet.name).unwrap(), &hash);
+        }
 
-            // Recalling pallet should result in the same value, even if populated by metadata.
-            let re_hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
-            assert_eq!(cache.pallets.get(pallet.name.as_str()).unwrap(), &re_hash);
+        // Verify different order of hashing for pallets
+        pallets.sort_by(|lhs, rhs| rhs.name.cmp(&lhs.name));
+        for pallet in pallets.iter() {
+            // Compare a fresh iteration over pallet with cache value.
+            let hash = get_pallet_hash(&metadata.types, pallet);
+            assert_eq!(hash_details.pallet_hashes.get(&pallet.name).unwrap(), &hash);
         }
     }
 
@@ -443,14 +393,11 @@ mod tests {
         let metadata = load_metadata(METADATA_PATH);
         let metadata_swap = load_metadata(METADATA_SWAP_PATH);
 
-        let mut cache = MetadataHasherCache::new();
-        let hash = get_metadata_hash(&metadata, &mut cache);
-
-        let mut cache_swap = MetadataHasherCache::new();
-        let hash_swap = get_metadata_hash(&metadata_swap, &mut cache_swap);
+        let hash = get_metadata_hash(&metadata);
+        let hash_swap = get_metadata_hash(&metadata_swap);
 
         // Changing pallet order must still result in a deterministic unique hash.
-        assert_eq!(hash, hash_swap);
-        assert_eq!(cache.pallets, cache_swap.pallets);
+        assert_eq!(hash.metadata_hash, hash_swap.metadata_hash);
+        assert_eq!(hash.pallet_hashes, hash_swap.pallet_hashes);
     }
 }
