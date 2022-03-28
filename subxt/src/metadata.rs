@@ -37,7 +37,6 @@ use crate::{
     Call,
     Encoded,
 };
-use heck::ToSnakeCase as _;
 use scale_info::{
     form::PortableForm,
     Type,
@@ -145,12 +144,7 @@ impl Metadata {
     /// Obtain the pallet unique identifier.
     pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
         let metadata = self.runtime_metadata();
-        // Note: fetch name from codegen to avoid `to_snake_case()`.
-        let pallet = match metadata
-            .pallets
-            .iter()
-            .find(|pallet| pallet.name.to_snake_case() == name)
-        {
+        let pallet = match metadata.pallets.iter().find(|pallet| pallet.name == name) {
             Some(pallet) => pallet,
             _ => return Err(MetadataError::PalletNotFound(name.to_string())),
         };
