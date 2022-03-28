@@ -84,6 +84,7 @@ pub mod api {
             216u8, 235u8, 109u8, 154u8, 0u8, 69u8, 166u8, 136u8, 223u8, 187u8, 244u8,
             254u8, 3u8, 126u8, 0u8, 144u8, 77u8, 123u8, 218u8, 221u8, 28u8,
         ];
+        pub static PALLET_NAME: &str = "System";
         pub mod calls {
             use super::{
                 root_mod,
@@ -860,6 +861,7 @@ pub mod api {
             45u8, 130u8, 28u8, 79u8, 134u8, 196u8, 35u8, 14u8, 55u8, 91u8, 98u8, 193u8,
             210u8, 238u8, 11u8, 252u8, 34u8, 163u8, 220u8, 201u8, 148u8,
         ];
+        pub static PALLET_NAME: &str = "Scheduler";
         pub mod calls {
             use super::{
                 root_mod,
@@ -1300,6 +1302,7 @@ pub mod api {
             152u8, 202u8, 104u8, 246u8, 197u8, 180u8, 212u8, 181u8, 91u8, 233u8, 25u8,
             62u8, 148u8, 120u8, 50u8, 88u8, 165u8, 27u8, 45u8, 23u8,
         ];
+        pub static PALLET_NAME: &str = "Preimage";
         pub mod calls {
             use super::{
                 root_mod,
@@ -1540,6 +1543,7 @@ pub mod api {
             203u8, 147u8, 192u8, 16u8, 119u8, 201u8, 41u8, 88u8, 43u8, 23u8, 1u8, 123u8,
             77u8, 242u8, 238u8, 192u8, 168u8, 198u8, 129u8, 94u8, 107u8,
         ];
+        pub static PALLET_NAME: &str = "Babe";
         pub mod calls {
             use super::{
                 root_mod,
@@ -2019,6 +2023,7 @@ pub mod api {
             250u8, 113u8, 160u8, 87u8, 192u8, 194u8, 58u8, 36u8, 193u8, 24u8, 34u8,
             169u8, 134u8, 138u8, 254u8, 48u8, 203u8, 114u8, 83u8, 186u8, 216u8,
         ];
+        pub static PALLET_NAME: &str = "Timestamp";
         pub mod calls {
             use super::{
                 root_mod,
@@ -2135,6 +2140,7 @@ pub mod api {
             72u8, 158u8, 51u8, 14u8, 130u8, 103u8, 157u8, 72u8, 84u8, 122u8, 245u8, 97u8,
             255u8, 81u8, 101u8, 204u8, 62u8, 173u8, 143u8, 168u8, 192u8,
         ];
+        pub static PALLET_NAME: &str = "Indices";
         pub mod calls {
             use super::{
                 root_mod,
@@ -2403,6 +2409,7 @@ pub mod api {
             166u8, 31u8, 22u8, 31u8, 141u8, 43u8, 45u8, 120u8, 108u8, 169u8, 67u8, 167u8,
             70u8, 114u8, 80u8, 81u8, 75u8, 57u8, 216u8, 141u8, 238u8,
         ];
+        pub static PALLET_NAME: &str = "Balances";
         pub mod calls {
             use super::{
                 root_mod,
@@ -2919,6 +2926,7 @@ pub mod api {
             30u8, 173u8, 4u8, 21u8, 5u8, 207u8, 247u8, 144u8, 147u8, 207u8, 79u8, 79u8,
             144u8, 51u8, 188u8, 1u8, 198u8, 43u8, 154u8, 4u8, 136u8,
         ];
+        pub static PALLET_NAME: &str = "TransactionPayment";
         pub mod storage {
             use super::runtime_types;
             pub struct NextFeeMultiplier;
@@ -3019,6 +3027,7 @@ pub mod api {
             52u8, 96u8, 97u8, 60u8, 205u8, 129u8, 228u8, 203u8, 82u8, 95u8, 164u8, 126u8,
             217u8, 93u8, 237u8, 22u8, 88u8, 86u8, 144u8, 105u8, 23u8,
         ];
+        pub static PALLET_NAME: &str = "Authorship";
         pub mod calls {
             use super::{
                 root_mod,
@@ -3177,6 +3186,7 @@ pub mod api {
             136u8, 245u8, 236u8, 228u8, 40u8, 150u8, 189u8, 52u8, 22u8, 152u8, 143u8,
             120u8, 2u8, 182u8, 202u8, 182u8, 238u8, 82u8, 182u8, 242u8, 92u8,
         ];
+        pub static PALLET_NAME: &str = "Staking";
         pub mod calls {
             use super::{
                 root_mod,
@@ -5072,6 +5082,7 @@ pub mod api {
             37u8, 70u8, 246u8, 122u8, 0u8, 105u8, 120u8, 67u8, 196u8, 157u8, 7u8, 106u8,
             34u8, 225u8, 38u8, 72u8, 108u8, 181u8, 31u8, 135u8, 116u8,
         ];
+        pub static PALLET_NAME: &str = "Offences";
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -5233,6 +5244,7 @@ pub mod api {
             173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
             240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
         ];
+        pub static PALLET_NAME: &str = "Historical";
     }
     pub mod session {
         use super::{
@@ -5244,6 +5256,7 @@ pub mod api {
             167u8, 207u8, 179u8, 17u8, 216u8, 47u8, 48u8, 186u8, 88u8, 131u8, 45u8,
             227u8, 216u8, 212u8, 110u8, 47u8, 225u8, 178u8, 118u8, 8u8, 192u8,
         ];
+        pub static PALLET_NAME: &str = "Session";
         pub mod calls {
             use super::{
                 root_mod,
@@ -5514,6 +5527,7 @@ pub mod api {
             147u8, 111u8, 236u8, 28u8, 0u8, 69u8, 189u8, 200u8, 181u8, 150u8, 146u8,
             190u8, 49u8, 179u8, 124u8, 31u8, 134u8, 198u8, 221u8, 195u8, 173u8,
         ];
+        pub static PALLET_NAME: &str = "Grandpa";
         pub mod calls {
             use super::{
                 root_mod,
@@ -5826,6 +5840,7 @@ pub mod api {
             79u8, 213u8, 136u8, 30u8, 194u8, 10u8, 149u8, 221u8, 196u8, 119u8, 121u8,
             209u8, 31u8, 29u8, 137u8, 157u8, 135u8, 144u8, 39u8, 87u8,
         ];
+        pub static PALLET_NAME: &str = "ImOnline";
         pub mod calls {
             use super::{
                 root_mod,
@@ -6066,6 +6081,7 @@ pub mod api {
             173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
             240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
         ];
+        pub static PALLET_NAME: &str = "AuthorityDiscovery";
     }
     pub mod democracy {
         use super::{
@@ -6077,6 +6093,7 @@ pub mod api {
             129u8, 3u8, 35u8, 42u8, 142u8, 45u8, 170u8, 194u8, 59u8, 226u8, 146u8, 18u8,
             2u8, 139u8, 82u8, 193u8, 119u8, 125u8, 22u8, 86u8, 226u8,
         ];
+        pub static PALLET_NAME: &str = "Democracy";
         pub mod calls {
             use super::{
                 root_mod,
@@ -7429,6 +7446,7 @@ pub mod api {
             40u8, 150u8, 68u8, 81u8, 8u8, 179u8, 216u8, 121u8, 115u8, 201u8, 150u8,
             215u8, 182u8, 83u8, 222u8, 162u8, 146u8, 4u8, 185u8, 48u8, 44u8,
         ];
+        pub static PALLET_NAME: &str = "Council";
         pub mod calls {
             use super::{
                 root_mod,
@@ -7877,6 +7895,7 @@ pub mod api {
             246u8, 107u8, 219u8, 6u8, 16u8, 189u8, 212u8, 246u8, 98u8, 106u8, 141u8,
             53u8, 212u8, 95u8, 38u8, 231u8, 230u8, 74u8, 80u8, 26u8,
         ];
+        pub static PALLET_NAME: &str = "TechnicalCommittee";
         pub mod calls {
             use super::{
                 root_mod,
@@ -8325,6 +8344,7 @@ pub mod api {
             78u8, 162u8, 137u8, 40u8, 55u8, 27u8, 191u8, 32u8, 191u8, 188u8, 7u8, 151u8,
             187u8, 172u8, 87u8, 100u8, 38u8, 156u8, 239u8, 40u8,
         ];
+        pub static PALLET_NAME: &str = "PhragmenElection";
         pub mod calls {
             use super::{
                 root_mod,
@@ -8791,6 +8811,7 @@ pub mod api {
             14u8, 1u8, 121u8, 118u8, 29u8, 0u8, 241u8, 148u8, 35u8, 105u8, 39u8, 157u8,
             214u8, 17u8, 240u8, 43u8, 51u8, 87u8, 83u8, 195u8, 26u8,
         ];
+        pub static PALLET_NAME: &str = "TechnicalMembership";
         pub mod calls {
             use super::{
                 root_mod,
@@ -9067,6 +9088,7 @@ pub mod api {
             246u8, 205u8, 73u8, 71u8, 23u8, 65u8, 65u8, 231u8, 201u8, 82u8, 28u8, 18u8,
             180u8, 79u8, 16u8, 55u8, 85u8, 204u8, 51u8, 254u8, 167u8,
         ];
+        pub static PALLET_NAME: &str = "Treasury";
         pub mod calls {
             use super::{
                 root_mod,
@@ -9434,6 +9456,7 @@ pub mod api {
             103u8, 52u8, 136u8, 137u8, 225u8, 202u8, 120u8, 236u8, 31u8, 140u8, 51u8,
             18u8, 26u8, 193u8, 140u8, 253u8, 206u8, 212u8, 218u8, 161u8, 196u8,
         ];
+        pub static PALLET_NAME: &str = "Claims";
         pub mod calls {
             use super::{
                 root_mod,
@@ -9838,6 +9861,7 @@ pub mod api {
             112u8, 198u8, 81u8, 209u8, 192u8, 101u8, 65u8, 66u8, 91u8, 238u8, 7u8, 67u8,
             4u8, 106u8, 14u8, 84u8, 64u8, 124u8, 200u8, 158u8,
         ];
+        pub static PALLET_NAME: &str = "Vesting";
         pub mod calls {
             use super::{
                 root_mod,
@@ -10151,6 +10175,7 @@ pub mod api {
             165u8, 74u8, 233u8, 103u8, 116u8, 0u8, 175u8, 1u8, 53u8, 142u8, 140u8, 16u8,
             211u8, 60u8, 127u8, 17u8, 13u8, 248u8, 169u8, 183u8,
         ];
+        pub static PALLET_NAME: &str = "Utility";
         pub mod calls {
             use super::{
                 root_mod,
@@ -10332,6 +10357,7 @@ pub mod api {
             208u8, 22u8, 92u8, 23u8, 151u8, 90u8, 233u8, 249u8, 116u8, 248u8, 206u8,
             242u8, 75u8, 124u8, 221u8, 152u8, 80u8, 21u8, 8u8, 136u8,
         ];
+        pub static PALLET_NAME: &str = "Identity";
         pub mod calls {
             use super::{
                 root_mod,
@@ -11096,6 +11122,7 @@ pub mod api {
             217u8, 66u8, 65u8, 185u8, 31u8, 171u8, 177u8, 76u8, 193u8, 149u8, 240u8,
             212u8, 175u8, 143u8, 190u8, 203u8, 169u8, 68u8, 144u8, 8u8,
         ];
+        pub static PALLET_NAME: &str = "Proxy";
         pub mod calls {
             use super::{
                 root_mod,
@@ -11643,6 +11670,7 @@ pub mod api {
             113u8, 46u8, 225u8, 90u8, 147u8, 198u8, 86u8, 15u8, 2u8, 131u8, 0u8, 4u8,
             136u8, 249u8, 187u8, 167u8, 175u8, 235u8, 81u8, 35u8,
         ];
+        pub static PALLET_NAME: &str = "Multisig";
         pub mod calls {
             use super::{
                 root_mod,
@@ -12027,6 +12055,7 @@ pub mod api {
             33u8, 111u8, 12u8, 38u8, 95u8, 193u8, 73u8, 44u8, 177u8, 119u8, 99u8, 226u8,
             89u8, 255u8, 78u8, 176u8, 64u8, 65u8, 142u8, 174u8,
         ];
+        pub static PALLET_NAME: &str = "Bounties";
         pub mod calls {
             use super::{
                 root_mod,
@@ -12576,6 +12605,7 @@ pub mod api {
             125u8, 82u8, 105u8, 151u8, 86u8, 76u8, 127u8, 194u8, 56u8, 244u8, 233u8,
             188u8, 205u8, 94u8, 238u8, 254u8, 33u8, 46u8, 137u8, 245u8, 9u8,
         ];
+        pub static PALLET_NAME: &str = "Tips";
         pub mod calls {
             use super::{
                 root_mod,
@@ -12943,6 +12973,7 @@ pub mod api {
             240u8, 158u8, 60u8, 64u8, 181u8, 254u8, 156u8, 121u8, 235u8, 242u8, 210u8,
             117u8, 231u8, 182u8, 148u8, 160u8, 61u8, 160u8, 146u8, 54u8,
         ];
+        pub static PALLET_NAME: &str = "ElectionProviderMultiPhase";
         pub mod calls {
             use super::{
                 root_mod,
@@ -13474,6 +13505,7 @@ pub mod api {
             59u8, 229u8, 75u8, 238u8, 90u8, 194u8, 194u8, 133u8, 172u8, 202u8, 71u8,
             122u8, 196u8, 97u8, 210u8, 226u8, 101u8, 165u8, 63u8, 106u8, 120u8,
         ];
+        pub static PALLET_NAME: &str = "BagsList";
         pub mod calls {
             use super::{
                 root_mod,
@@ -13843,6 +13875,7 @@ pub mod api {
             173u8, 145u8, 203u8, 214u8, 6u8, 138u8, 252u8, 117u8, 255u8, 98u8, 146u8,
             240u8, 98u8, 160u8, 156u8, 163u8, 129u8, 200u8, 158u8, 113u8,
         ];
+        pub static PALLET_NAME: &str = "ParachainsOrigin";
     }
     pub mod configuration {
         use super::{
@@ -13854,6 +13887,7 @@ pub mod api {
             64u8, 39u8, 208u8, 236u8, 12u8, 56u8, 236u8, 210u8, 29u8, 233u8, 183u8,
             127u8, 170u8, 139u8, 190u8, 23u8, 135u8, 82u8, 130u8, 247u8, 131u8,
         ];
+        pub static PALLET_NAME: &str = "Configuration";
         pub mod calls {
             use super::{
                 root_mod,
@@ -15162,6 +15196,7 @@ pub mod api {
             254u8, 134u8, 108u8, 136u8, 85u8, 72u8, 186u8, 203u8, 252u8, 154u8, 107u8,
             247u8, 8u8, 147u8, 18u8, 221u8, 71u8, 196u8, 202u8, 47u8, 131u8,
         ];
+        pub static PALLET_NAME: &str = "ParasShared";
         pub mod calls {
             use super::{
                 root_mod,
@@ -15270,6 +15305,7 @@ pub mod api {
             5u8, 253u8, 94u8, 224u8, 83u8, 186u8, 136u8, 25u8, 124u8, 146u8, 208u8,
             111u8, 212u8, 241u8, 208u8, 13u8, 210u8, 34u8, 187u8, 173u8,
         ];
+        pub static PALLET_NAME: &str = "ParaInclusion";
         pub mod calls {
             use super::{
                 root_mod,
@@ -15450,6 +15486,7 @@ pub mod api {
             204u8, 131u8, 147u8, 10u8, 76u8, 169u8, 154u8, 164u8, 49u8, 213u8, 122u8,
             42u8, 247u8, 63u8, 172u8, 79u8, 41u8, 200u8, 97u8, 11u8,
         ];
+        pub static PALLET_NAME: &str = "ParaInherent";
         pub mod calls {
             use super::{
                 root_mod,
@@ -15569,6 +15606,7 @@ pub mod api {
             115u8, 77u8, 234u8, 56u8, 83u8, 5u8, 248u8, 160u8, 39u8, 141u8, 154u8, 94u8,
             233u8, 107u8, 1u8, 150u8, 23u8, 91u8, 73u8, 66u8,
         ];
+        pub static PALLET_NAME: &str = "ParaScheduler";
         pub mod storage {
             use super::runtime_types;
             pub struct ValidatorGroups;
@@ -15708,6 +15746,7 @@ pub mod api {
             158u8, 134u8, 91u8, 14u8, 183u8, 239u8, 162u8, 141u8, 27u8, 83u8, 99u8, 31u8,
             171u8, 197u8, 200u8, 185u8, 81u8, 49u8, 74u8, 101u8, 107u8,
         ];
+        pub static PALLET_NAME: &str = "Paras";
         pub mod calls {
             use super::{
                 root_mod,
@@ -16642,6 +16681,7 @@ pub mod api {
             21u8, 131u8, 68u8, 153u8, 1u8, 61u8, 167u8, 219u8, 206u8, 6u8, 63u8, 80u8,
             227u8, 251u8, 98u8, 25u8, 55u8, 242u8, 137u8, 168u8, 197u8,
         ];
+        pub static PALLET_NAME: &str = "Initializer";
         pub mod calls {
             use super::{
                 root_mod,
@@ -16743,6 +16783,7 @@ pub mod api {
             168u8, 31u8, 161u8, 218u8, 39u8, 147u8, 45u8, 50u8, 130u8, 240u8, 228u8,
             83u8, 0u8, 232u8, 2u8, 51u8, 228u8, 83u8, 209u8, 228u8, 56u8,
         ];
+        pub static PALLET_NAME: &str = "Dmp";
         pub mod calls {
             use super::{
                 root_mod,
@@ -16862,6 +16903,7 @@ pub mod api {
             16u8, 51u8, 181u8, 66u8, 176u8, 1u8, 78u8, 42u8, 28u8, 228u8, 85u8, 249u8,
             213u8, 34u8, 111u8, 70u8, 67u8, 125u8, 74u8,
         ];
+        pub static PALLET_NAME: &str = "Ump";
         pub mod calls {
             use super::{
                 root_mod,
@@ -17163,6 +17205,7 @@ pub mod api {
             83u8, 70u8, 61u8, 165u8, 151u8, 128u8, 177u8, 122u8, 176u8, 109u8, 191u8,
             39u8, 61u8, 138u8, 68u8, 144u8, 141u8, 59u8, 194u8, 92u8, 152u8,
         ];
+        pub static PALLET_NAME: &str = "Hrmp";
         pub mod calls {
             use super::{
                 root_mod,
@@ -17801,6 +17844,7 @@ pub mod api {
             63u8, 3u8, 145u8, 189u8, 0u8, 194u8, 105u8, 92u8, 247u8, 16u8, 241u8, 25u8,
             245u8, 40u8, 63u8, 240u8, 205u8, 189u8, 222u8, 78u8, 22u8,
         ];
+        pub static PALLET_NAME: &str = "ParaSessionInfo";
         pub mod storage {
             use super::runtime_types;
             pub struct AssignmentKeysUnsafe;
@@ -17897,6 +17941,7 @@ pub mod api {
             69u8, 124u8, 64u8, 211u8, 223u8, 206u8, 160u8, 65u8, 249u8, 250u8, 231u8,
             99u8, 83u8, 54u8, 253u8, 144u8, 174u8, 184u8, 127u8, 58u8,
         ];
+        pub static PALLET_NAME: &str = "Registrar";
         pub mod calls {
             use super::{
                 root_mod,
@@ -18254,6 +18299,7 @@ pub mod api {
             112u8, 3u8, 164u8, 135u8, 61u8, 53u8, 38u8, 94u8, 135u8, 99u8, 51u8, 129u8,
             7u8, 0u8, 41u8, 1u8, 252u8, 100u8, 131u8, 119u8, 159u8,
         ];
+        pub static PALLET_NAME: &str = "Slots";
         pub mod calls {
             use super::{
                 root_mod,
@@ -18473,6 +18519,7 @@ pub mod api {
             239u8, 52u8, 29u8, 12u8, 66u8, 205u8, 184u8, 194u8, 127u8, 133u8, 69u8, 69u8,
             105u8, 166u8, 146u8, 97u8, 75u8, 221u8, 131u8, 238u8, 97u8,
         ];
+        pub static PALLET_NAME: &str = "Auctions";
         pub mod calls {
             use super::{
                 root_mod,
@@ -18837,6 +18884,7 @@ pub mod api {
             171u8, 239u8, 173u8, 68u8, 174u8, 93u8, 109u8, 70u8, 196u8, 202u8, 213u8,
             41u8, 133u8, 200u8, 121u8, 209u8, 50u8, 195u8, 56u8, 121u8, 163u8,
         ];
+        pub static PALLET_NAME: &str = "Crowdloan";
         pub mod calls {
             use super::{
                 root_mod,
@@ -19374,6 +19422,7 @@ pub mod api {
             68u8, 224u8, 202u8, 149u8, 164u8, 128u8, 36u8, 115u8, 170u8, 96u8, 255u8,
             211u8, 138u8, 13u8, 154u8, 141u8, 73u8, 124u8, 87u8, 146u8, 100u8,
         ];
+        pub static PALLET_NAME: &str = "XcmPallet";
         pub mod calls {
             use super::{
                 root_mod,
@@ -27899,10 +27948,10 @@ pub mod api {
         pub fn system(
             &self,
         ) -> Result<system::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(system))?;
+            let hash = self.client.metadata().pallet_hash(system::PALLET_NAME)?;
             if system::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(system),
+                    system::PALLET_NAME,
                 ))
             } else {
                 Ok(system::storage::StorageApi::new(self.client))
@@ -27912,10 +27961,10 @@ pub mod api {
             &self,
         ) -> Result<scheduler::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(scheduler))?;
+            let hash = self.client.metadata().pallet_hash(scheduler::PALLET_NAME)?;
             if scheduler::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(scheduler),
+                    scheduler::PALLET_NAME,
                 ))
             } else {
                 Ok(scheduler::storage::StorageApi::new(self.client))
@@ -27925,10 +27974,10 @@ pub mod api {
             &self,
         ) -> Result<preimage::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(preimage))?;
+            let hash = self.client.metadata().pallet_hash(preimage::PALLET_NAME)?;
             if preimage::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(preimage),
+                    preimage::PALLET_NAME,
                 ))
             } else {
                 Ok(preimage::storage::StorageApi::new(self.client))
@@ -27937,10 +27986,10 @@ pub mod api {
         pub fn babe(
             &self,
         ) -> Result<babe::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(babe))?;
+            let hash = self.client.metadata().pallet_hash(babe::PALLET_NAME)?;
             if babe::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(babe),
+                    babe::PALLET_NAME,
                 ))
             } else {
                 Ok(babe::storage::StorageApi::new(self.client))
@@ -27950,10 +27999,10 @@ pub mod api {
             &self,
         ) -> Result<timestamp::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(timestamp))?;
+            let hash = self.client.metadata().pallet_hash(timestamp::PALLET_NAME)?;
             if timestamp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(timestamp),
+                    timestamp::PALLET_NAME,
                 ))
             } else {
                 Ok(timestamp::storage::StorageApi::new(self.client))
@@ -27962,10 +28011,10 @@ pub mod api {
         pub fn indices(
             &self,
         ) -> Result<indices::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(indices))?;
+            let hash = self.client.metadata().pallet_hash(indices::PALLET_NAME)?;
             if indices::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(indices),
+                    indices::PALLET_NAME,
                 ))
             } else {
                 Ok(indices::storage::StorageApi::new(self.client))
@@ -27975,10 +28024,10 @@ pub mod api {
             &self,
         ) -> Result<balances::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(balances))?;
+            let hash = self.client.metadata().pallet_hash(balances::PALLET_NAME)?;
             if balances::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(balances),
+                    balances::PALLET_NAME,
                 ))
             } else {
                 Ok(balances::storage::StorageApi::new(self.client))
@@ -27991,10 +28040,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(transaction_payment))?;
+                .pallet_hash(transaction_payment::PALLET_NAME)?;
             if transaction_payment::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(transaction_payment),
+                    transaction_payment::PALLET_NAME,
                 ))
             } else {
                 Ok(transaction_payment::storage::StorageApi::new(self.client))
@@ -28004,10 +28053,13 @@ pub mod api {
             &self,
         ) -> Result<authorship::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(authorship))?;
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(authorship::PALLET_NAME)?;
             if authorship::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(authorship),
+                    authorship::PALLET_NAME,
                 ))
             } else {
                 Ok(authorship::storage::StorageApi::new(self.client))
@@ -28016,10 +28068,10 @@ pub mod api {
         pub fn staking(
             &self,
         ) -> Result<staking::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(staking))?;
+            let hash = self.client.metadata().pallet_hash(staking::PALLET_NAME)?;
             if staking::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(staking),
+                    staking::PALLET_NAME,
                 ))
             } else {
                 Ok(staking::storage::StorageApi::new(self.client))
@@ -28029,10 +28081,10 @@ pub mod api {
             &self,
         ) -> Result<offences::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(offences))?;
+            let hash = self.client.metadata().pallet_hash(offences::PALLET_NAME)?;
             if offences::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(offences),
+                    offences::PALLET_NAME,
                 ))
             } else {
                 Ok(offences::storage::StorageApi::new(self.client))
@@ -28041,10 +28093,10 @@ pub mod api {
         pub fn session(
             &self,
         ) -> Result<session::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(session))?;
+            let hash = self.client.metadata().pallet_hash(session::PALLET_NAME)?;
             if session::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(session),
+                    session::PALLET_NAME,
                 ))
             } else {
                 Ok(session::storage::StorageApi::new(self.client))
@@ -28053,10 +28105,10 @@ pub mod api {
         pub fn grandpa(
             &self,
         ) -> Result<grandpa::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(grandpa))?;
+            let hash = self.client.metadata().pallet_hash(grandpa::PALLET_NAME)?;
             if grandpa::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(grandpa),
+                    grandpa::PALLET_NAME,
                 ))
             } else {
                 Ok(grandpa::storage::StorageApi::new(self.client))
@@ -28066,10 +28118,10 @@ pub mod api {
             &self,
         ) -> Result<im_online::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(im_online))?;
+            let hash = self.client.metadata().pallet_hash(im_online::PALLET_NAME)?;
             if im_online::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(im_online),
+                    im_online::PALLET_NAME,
                 ))
             } else {
                 Ok(im_online::storage::StorageApi::new(self.client))
@@ -28079,10 +28131,10 @@ pub mod api {
             &self,
         ) -> Result<democracy::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(democracy))?;
+            let hash = self.client.metadata().pallet_hash(democracy::PALLET_NAME)?;
             if democracy::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(democracy),
+                    democracy::PALLET_NAME,
                 ))
             } else {
                 Ok(democracy::storage::StorageApi::new(self.client))
@@ -28091,10 +28143,10 @@ pub mod api {
         pub fn council(
             &self,
         ) -> Result<council::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(council))?;
+            let hash = self.client.metadata().pallet_hash(council::PALLET_NAME)?;
             if council::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(council),
+                    council::PALLET_NAME,
                 ))
             } else {
                 Ok(council::storage::StorageApi::new(self.client))
@@ -28107,10 +28159,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(technical_committee))?;
+                .pallet_hash(technical_committee::PALLET_NAME)?;
             if technical_committee::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(technical_committee),
+                    technical_committee::PALLET_NAME,
                 ))
             } else {
                 Ok(technical_committee::storage::StorageApi::new(self.client))
@@ -28123,10 +28175,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(phragmen_election))?;
+                .pallet_hash(phragmen_election::PALLET_NAME)?;
             if phragmen_election::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(phragmen_election),
+                    phragmen_election::PALLET_NAME,
                 ))
             } else {
                 Ok(phragmen_election::storage::StorageApi::new(self.client))
@@ -28141,10 +28193,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(technical_membership))?;
+                .pallet_hash(technical_membership::PALLET_NAME)?;
             if technical_membership::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(technical_membership),
+                    technical_membership::PALLET_NAME,
                 ))
             } else {
                 Ok(technical_membership::storage::StorageApi::new(self.client))
@@ -28154,10 +28206,10 @@ pub mod api {
             &self,
         ) -> Result<treasury::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(treasury))?;
+            let hash = self.client.metadata().pallet_hash(treasury::PALLET_NAME)?;
             if treasury::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(treasury),
+                    treasury::PALLET_NAME,
                 ))
             } else {
                 Ok(treasury::storage::StorageApi::new(self.client))
@@ -28166,10 +28218,10 @@ pub mod api {
         pub fn claims(
             &self,
         ) -> Result<claims::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(claims))?;
+            let hash = self.client.metadata().pallet_hash(claims::PALLET_NAME)?;
             if claims::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(claims),
+                    claims::PALLET_NAME,
                 ))
             } else {
                 Ok(claims::storage::StorageApi::new(self.client))
@@ -28178,10 +28230,10 @@ pub mod api {
         pub fn vesting(
             &self,
         ) -> Result<vesting::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(vesting))?;
+            let hash = self.client.metadata().pallet_hash(vesting::PALLET_NAME)?;
             if vesting::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(vesting),
+                    vesting::PALLET_NAME,
                 ))
             } else {
                 Ok(vesting::storage::StorageApi::new(self.client))
@@ -28191,10 +28243,10 @@ pub mod api {
             &self,
         ) -> Result<identity::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(identity))?;
+            let hash = self.client.metadata().pallet_hash(identity::PALLET_NAME)?;
             if identity::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(identity),
+                    identity::PALLET_NAME,
                 ))
             } else {
                 Ok(identity::storage::StorageApi::new(self.client))
@@ -28203,10 +28255,10 @@ pub mod api {
         pub fn proxy(
             &self,
         ) -> Result<proxy::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(proxy))?;
+            let hash = self.client.metadata().pallet_hash(proxy::PALLET_NAME)?;
             if proxy::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(proxy),
+                    proxy::PALLET_NAME,
                 ))
             } else {
                 Ok(proxy::storage::StorageApi::new(self.client))
@@ -28216,10 +28268,10 @@ pub mod api {
             &self,
         ) -> Result<multisig::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(multisig))?;
+            let hash = self.client.metadata().pallet_hash(multisig::PALLET_NAME)?;
             if multisig::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(multisig),
+                    multisig::PALLET_NAME,
                 ))
             } else {
                 Ok(multisig::storage::StorageApi::new(self.client))
@@ -28229,10 +28281,10 @@ pub mod api {
             &self,
         ) -> Result<bounties::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(bounties))?;
+            let hash = self.client.metadata().pallet_hash(bounties::PALLET_NAME)?;
             if bounties::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(bounties),
+                    bounties::PALLET_NAME,
                 ))
             } else {
                 Ok(bounties::storage::StorageApi::new(self.client))
@@ -28241,10 +28293,10 @@ pub mod api {
         pub fn tips(
             &self,
         ) -> Result<tips::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(tips))?;
+            let hash = self.client.metadata().pallet_hash(tips::PALLET_NAME)?;
             if tips::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(tips),
+                    tips::PALLET_NAME,
                 ))
             } else {
                 Ok(tips::storage::StorageApi::new(self.client))
@@ -28259,10 +28311,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(election_provider_multi_phase))?;
+                .pallet_hash(election_provider_multi_phase::PALLET_NAME)?;
             if election_provider_multi_phase::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(election_provider_multi_phase),
+                    election_provider_multi_phase::PALLET_NAME,
                 ))
             } else {
                 Ok(election_provider_multi_phase::storage::StorageApi::new(
@@ -28274,10 +28326,10 @@ pub mod api {
             &self,
         ) -> Result<bags_list::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(bags_list))?;
+            let hash = self.client.metadata().pallet_hash(bags_list::PALLET_NAME)?;
             if bags_list::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(bags_list),
+                    bags_list::PALLET_NAME,
                 ))
             } else {
                 Ok(bags_list::storage::StorageApi::new(self.client))
@@ -28290,10 +28342,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(configuration))?;
+                .pallet_hash(configuration::PALLET_NAME)?;
             if configuration::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(configuration),
+                    configuration::PALLET_NAME,
                 ))
             } else {
                 Ok(configuration::storage::StorageApi::new(self.client))
@@ -28306,10 +28358,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(paras_shared))?;
+                .pallet_hash(paras_shared::PALLET_NAME)?;
             if paras_shared::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(paras_shared),
+                    paras_shared::PALLET_NAME,
                 ))
             } else {
                 Ok(paras_shared::storage::StorageApi::new(self.client))
@@ -28322,10 +28374,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_inclusion))?;
+                .pallet_hash(para_inclusion::PALLET_NAME)?;
             if para_inclusion::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_inclusion),
+                    para_inclusion::PALLET_NAME,
                 ))
             } else {
                 Ok(para_inclusion::storage::StorageApi::new(self.client))
@@ -28338,10 +28390,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_inherent))?;
+                .pallet_hash(para_inherent::PALLET_NAME)?;
             if para_inherent::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_inherent),
+                    para_inherent::PALLET_NAME,
                 ))
             } else {
                 Ok(para_inherent::storage::StorageApi::new(self.client))
@@ -28354,10 +28406,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_scheduler))?;
+                .pallet_hash(para_scheduler::PALLET_NAME)?;
             if para_scheduler::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_scheduler),
+                    para_scheduler::PALLET_NAME,
                 ))
             } else {
                 Ok(para_scheduler::storage::StorageApi::new(self.client))
@@ -28366,10 +28418,10 @@ pub mod api {
         pub fn paras(
             &self,
         ) -> Result<paras::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(paras))?;
+            let hash = self.client.metadata().pallet_hash(paras::PALLET_NAME)?;
             if paras::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(paras),
+                    paras::PALLET_NAME,
                 ))
             } else {
                 Ok(paras::storage::StorageApi::new(self.client))
@@ -28382,10 +28434,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(initializer))?;
+                .pallet_hash(initializer::PALLET_NAME)?;
             if initializer::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(initializer),
+                    initializer::PALLET_NAME,
                 ))
             } else {
                 Ok(initializer::storage::StorageApi::new(self.client))
@@ -28394,10 +28446,10 @@ pub mod api {
         pub fn dmp(
             &self,
         ) -> Result<dmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(dmp))?;
+            let hash = self.client.metadata().pallet_hash(dmp::PALLET_NAME)?;
             if dmp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(dmp),
+                    dmp::PALLET_NAME,
                 ))
             } else {
                 Ok(dmp::storage::StorageApi::new(self.client))
@@ -28406,10 +28458,10 @@ pub mod api {
         pub fn ump(
             &self,
         ) -> Result<ump::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(ump))?;
+            let hash = self.client.metadata().pallet_hash(ump::PALLET_NAME)?;
             if ump::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(ump),
+                    ump::PALLET_NAME,
                 ))
             } else {
                 Ok(ump::storage::StorageApi::new(self.client))
@@ -28418,10 +28470,10 @@ pub mod api {
         pub fn hrmp(
             &self,
         ) -> Result<hrmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(hrmp))?;
+            let hash = self.client.metadata().pallet_hash(hrmp::PALLET_NAME)?;
             if hrmp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(hrmp),
+                    hrmp::PALLET_NAME,
                 ))
             } else {
                 Ok(hrmp::storage::StorageApi::new(self.client))
@@ -28434,10 +28486,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_session_info))?;
+                .pallet_hash(para_session_info::PALLET_NAME)?;
             if para_session_info::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_session_info),
+                    para_session_info::PALLET_NAME,
                 ))
             } else {
                 Ok(para_session_info::storage::StorageApi::new(self.client))
@@ -28447,10 +28499,10 @@ pub mod api {
             &self,
         ) -> Result<registrar::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(registrar))?;
+            let hash = self.client.metadata().pallet_hash(registrar::PALLET_NAME)?;
             if registrar::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(registrar),
+                    registrar::PALLET_NAME,
                 ))
             } else {
                 Ok(registrar::storage::StorageApi::new(self.client))
@@ -28459,10 +28511,10 @@ pub mod api {
         pub fn slots(
             &self,
         ) -> Result<slots::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-            let hash = self.client.metadata().pallet_hash(stringify!(slots))?;
+            let hash = self.client.metadata().pallet_hash(slots::PALLET_NAME)?;
             if slots::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(slots),
+                    slots::PALLET_NAME,
                 ))
             } else {
                 Ok(slots::storage::StorageApi::new(self.client))
@@ -28472,10 +28524,10 @@ pub mod api {
             &self,
         ) -> Result<auctions::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(auctions))?;
+            let hash = self.client.metadata().pallet_hash(auctions::PALLET_NAME)?;
             if auctions::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(auctions),
+                    auctions::PALLET_NAME,
                 ))
             } else {
                 Ok(auctions::storage::StorageApi::new(self.client))
@@ -28485,10 +28537,10 @@ pub mod api {
             &self,
         ) -> Result<crowdloan::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(crowdloan))?;
+            let hash = self.client.metadata().pallet_hash(crowdloan::PALLET_NAME)?;
             if crowdloan::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(crowdloan),
+                    crowdloan::PALLET_NAME,
                 ))
             } else {
                 Ok(crowdloan::storage::StorageApi::new(self.client))
@@ -28498,10 +28550,13 @@ pub mod api {
             &self,
         ) -> Result<xcm_pallet::storage::StorageApi<'a, T>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(xcm_pallet))?;
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(xcm_pallet::PALLET_NAME)?;
             if xcm_pallet::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(xcm_pallet),
+                    xcm_pallet::PALLET_NAME,
                 ))
             } else {
                 Ok(xcm_pallet::storage::StorageApi::new(self.client))
@@ -28678,10 +28733,10 @@ pub mod api {
             &self,
         ) -> Result<system::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(system))?;
+            let hash = self.client.metadata().pallet_hash(system::PALLET_NAME)?;
             if system::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(system),
+                    system::PALLET_NAME,
                 ))
             } else {
                 Ok(system::calls::TransactionApi::new(self.client))
@@ -28691,10 +28746,10 @@ pub mod api {
             &self,
         ) -> Result<scheduler::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(scheduler))?;
+            let hash = self.client.metadata().pallet_hash(scheduler::PALLET_NAME)?;
             if scheduler::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(scheduler),
+                    scheduler::PALLET_NAME,
                 ))
             } else {
                 Ok(scheduler::calls::TransactionApi::new(self.client))
@@ -28704,10 +28759,10 @@ pub mod api {
             &self,
         ) -> Result<preimage::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(preimage))?;
+            let hash = self.client.metadata().pallet_hash(preimage::PALLET_NAME)?;
             if preimage::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(preimage),
+                    preimage::PALLET_NAME,
                 ))
             } else {
                 Ok(preimage::calls::TransactionApi::new(self.client))
@@ -28717,10 +28772,10 @@ pub mod api {
             &self,
         ) -> Result<babe::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(babe))?;
+            let hash = self.client.metadata().pallet_hash(babe::PALLET_NAME)?;
             if babe::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(babe),
+                    babe::PALLET_NAME,
                 ))
             } else {
                 Ok(babe::calls::TransactionApi::new(self.client))
@@ -28730,10 +28785,10 @@ pub mod api {
             &self,
         ) -> Result<timestamp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(timestamp))?;
+            let hash = self.client.metadata().pallet_hash(timestamp::PALLET_NAME)?;
             if timestamp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(timestamp),
+                    timestamp::PALLET_NAME,
                 ))
             } else {
                 Ok(timestamp::calls::TransactionApi::new(self.client))
@@ -28743,10 +28798,10 @@ pub mod api {
             &self,
         ) -> Result<indices::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(indices))?;
+            let hash = self.client.metadata().pallet_hash(indices::PALLET_NAME)?;
             if indices::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(indices),
+                    indices::PALLET_NAME,
                 ))
             } else {
                 Ok(indices::calls::TransactionApi::new(self.client))
@@ -28756,10 +28811,10 @@ pub mod api {
             &self,
         ) -> Result<balances::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(balances))?;
+            let hash = self.client.metadata().pallet_hash(balances::PALLET_NAME)?;
             if balances::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(balances),
+                    balances::PALLET_NAME,
                 ))
             } else {
                 Ok(balances::calls::TransactionApi::new(self.client))
@@ -28769,10 +28824,13 @@ pub mod api {
             &self,
         ) -> Result<authorship::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(authorship))?;
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(authorship::PALLET_NAME)?;
             if authorship::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(authorship),
+                    authorship::PALLET_NAME,
                 ))
             } else {
                 Ok(authorship::calls::TransactionApi::new(self.client))
@@ -28782,10 +28840,10 @@ pub mod api {
             &self,
         ) -> Result<staking::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(staking))?;
+            let hash = self.client.metadata().pallet_hash(staking::PALLET_NAME)?;
             if staking::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(staking),
+                    staking::PALLET_NAME,
                 ))
             } else {
                 Ok(staking::calls::TransactionApi::new(self.client))
@@ -28795,10 +28853,10 @@ pub mod api {
             &self,
         ) -> Result<session::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(session))?;
+            let hash = self.client.metadata().pallet_hash(session::PALLET_NAME)?;
             if session::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(session),
+                    session::PALLET_NAME,
                 ))
             } else {
                 Ok(session::calls::TransactionApi::new(self.client))
@@ -28808,10 +28866,10 @@ pub mod api {
             &self,
         ) -> Result<grandpa::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(grandpa))?;
+            let hash = self.client.metadata().pallet_hash(grandpa::PALLET_NAME)?;
             if grandpa::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(grandpa),
+                    grandpa::PALLET_NAME,
                 ))
             } else {
                 Ok(grandpa::calls::TransactionApi::new(self.client))
@@ -28821,10 +28879,10 @@ pub mod api {
             &self,
         ) -> Result<im_online::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(im_online))?;
+            let hash = self.client.metadata().pallet_hash(im_online::PALLET_NAME)?;
             if im_online::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(im_online),
+                    im_online::PALLET_NAME,
                 ))
             } else {
                 Ok(im_online::calls::TransactionApi::new(self.client))
@@ -28834,10 +28892,10 @@ pub mod api {
             &self,
         ) -> Result<democracy::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(democracy))?;
+            let hash = self.client.metadata().pallet_hash(democracy::PALLET_NAME)?;
             if democracy::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(democracy),
+                    democracy::PALLET_NAME,
                 ))
             } else {
                 Ok(democracy::calls::TransactionApi::new(self.client))
@@ -28847,10 +28905,10 @@ pub mod api {
             &self,
         ) -> Result<council::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(council))?;
+            let hash = self.client.metadata().pallet_hash(council::PALLET_NAME)?;
             if council::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(council),
+                    council::PALLET_NAME,
                 ))
             } else {
                 Ok(council::calls::TransactionApi::new(self.client))
@@ -28865,10 +28923,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(technical_committee))?;
+                .pallet_hash(technical_committee::PALLET_NAME)?;
             if technical_committee::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(technical_committee),
+                    technical_committee::PALLET_NAME,
                 ))
             } else {
                 Ok(technical_committee::calls::TransactionApi::new(self.client))
@@ -28883,10 +28941,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(phragmen_election))?;
+                .pallet_hash(phragmen_election::PALLET_NAME)?;
             if phragmen_election::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(phragmen_election),
+                    phragmen_election::PALLET_NAME,
                 ))
             } else {
                 Ok(phragmen_election::calls::TransactionApi::new(self.client))
@@ -28901,10 +28959,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(technical_membership))?;
+                .pallet_hash(technical_membership::PALLET_NAME)?;
             if technical_membership::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(technical_membership),
+                    technical_membership::PALLET_NAME,
                 ))
             } else {
                 Ok(technical_membership::calls::TransactionApi::new(
@@ -28916,10 +28974,10 @@ pub mod api {
             &self,
         ) -> Result<treasury::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(treasury))?;
+            let hash = self.client.metadata().pallet_hash(treasury::PALLET_NAME)?;
             if treasury::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(treasury),
+                    treasury::PALLET_NAME,
                 ))
             } else {
                 Ok(treasury::calls::TransactionApi::new(self.client))
@@ -28929,10 +28987,10 @@ pub mod api {
             &self,
         ) -> Result<claims::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(claims))?;
+            let hash = self.client.metadata().pallet_hash(claims::PALLET_NAME)?;
             if claims::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(claims),
+                    claims::PALLET_NAME,
                 ))
             } else {
                 Ok(claims::calls::TransactionApi::new(self.client))
@@ -28942,10 +29000,10 @@ pub mod api {
             &self,
         ) -> Result<vesting::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(vesting))?;
+            let hash = self.client.metadata().pallet_hash(vesting::PALLET_NAME)?;
             if vesting::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(vesting),
+                    vesting::PALLET_NAME,
                 ))
             } else {
                 Ok(vesting::calls::TransactionApi::new(self.client))
@@ -28955,10 +29013,10 @@ pub mod api {
             &self,
         ) -> Result<utility::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(utility))?;
+            let hash = self.client.metadata().pallet_hash(utility::PALLET_NAME)?;
             if utility::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(utility),
+                    utility::PALLET_NAME,
                 ))
             } else {
                 Ok(utility::calls::TransactionApi::new(self.client))
@@ -28968,10 +29026,10 @@ pub mod api {
             &self,
         ) -> Result<identity::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(identity))?;
+            let hash = self.client.metadata().pallet_hash(identity::PALLET_NAME)?;
             if identity::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(identity),
+                    identity::PALLET_NAME,
                 ))
             } else {
                 Ok(identity::calls::TransactionApi::new(self.client))
@@ -28981,10 +29039,10 @@ pub mod api {
             &self,
         ) -> Result<proxy::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(proxy))?;
+            let hash = self.client.metadata().pallet_hash(proxy::PALLET_NAME)?;
             if proxy::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(proxy),
+                    proxy::PALLET_NAME,
                 ))
             } else {
                 Ok(proxy::calls::TransactionApi::new(self.client))
@@ -28994,10 +29052,10 @@ pub mod api {
             &self,
         ) -> Result<multisig::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(multisig))?;
+            let hash = self.client.metadata().pallet_hash(multisig::PALLET_NAME)?;
             if multisig::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(multisig),
+                    multisig::PALLET_NAME,
                 ))
             } else {
                 Ok(multisig::calls::TransactionApi::new(self.client))
@@ -29007,10 +29065,10 @@ pub mod api {
             &self,
         ) -> Result<bounties::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(bounties))?;
+            let hash = self.client.metadata().pallet_hash(bounties::PALLET_NAME)?;
             if bounties::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(bounties),
+                    bounties::PALLET_NAME,
                 ))
             } else {
                 Ok(bounties::calls::TransactionApi::new(self.client))
@@ -29020,10 +29078,10 @@ pub mod api {
             &self,
         ) -> Result<tips::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(tips))?;
+            let hash = self.client.metadata().pallet_hash(tips::PALLET_NAME)?;
             if tips::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(tips),
+                    tips::PALLET_NAME,
                 ))
             } else {
                 Ok(tips::calls::TransactionApi::new(self.client))
@@ -29038,10 +29096,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(election_provider_multi_phase))?;
+                .pallet_hash(election_provider_multi_phase::PALLET_NAME)?;
             if election_provider_multi_phase::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(election_provider_multi_phase),
+                    election_provider_multi_phase::PALLET_NAME,
                 ))
             } else {
                 Ok(election_provider_multi_phase::calls::TransactionApi::new(
@@ -29053,10 +29111,10 @@ pub mod api {
             &self,
         ) -> Result<bags_list::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(bags_list))?;
+            let hash = self.client.metadata().pallet_hash(bags_list::PALLET_NAME)?;
             if bags_list::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(bags_list),
+                    bags_list::PALLET_NAME,
                 ))
             } else {
                 Ok(bags_list::calls::TransactionApi::new(self.client))
@@ -29069,10 +29127,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(configuration))?;
+                .pallet_hash(configuration::PALLET_NAME)?;
             if configuration::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(configuration),
+                    configuration::PALLET_NAME,
                 ))
             } else {
                 Ok(configuration::calls::TransactionApi::new(self.client))
@@ -29085,10 +29143,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(paras_shared))?;
+                .pallet_hash(paras_shared::PALLET_NAME)?;
             if paras_shared::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(paras_shared),
+                    paras_shared::PALLET_NAME,
                 ))
             } else {
                 Ok(paras_shared::calls::TransactionApi::new(self.client))
@@ -29101,10 +29159,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_inclusion))?;
+                .pallet_hash(para_inclusion::PALLET_NAME)?;
             if para_inclusion::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_inclusion),
+                    para_inclusion::PALLET_NAME,
                 ))
             } else {
                 Ok(para_inclusion::calls::TransactionApi::new(self.client))
@@ -29117,10 +29175,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(para_inherent))?;
+                .pallet_hash(para_inherent::PALLET_NAME)?;
             if para_inherent::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(para_inherent),
+                    para_inherent::PALLET_NAME,
                 ))
             } else {
                 Ok(para_inherent::calls::TransactionApi::new(self.client))
@@ -29130,10 +29188,10 @@ pub mod api {
             &self,
         ) -> Result<paras::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(paras))?;
+            let hash = self.client.metadata().pallet_hash(paras::PALLET_NAME)?;
             if paras::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(paras),
+                    paras::PALLET_NAME,
                 ))
             } else {
                 Ok(paras::calls::TransactionApi::new(self.client))
@@ -29146,10 +29204,10 @@ pub mod api {
             let hash = self
                 .client
                 .metadata()
-                .pallet_hash(stringify!(initializer))?;
+                .pallet_hash(initializer::PALLET_NAME)?;
             if initializer::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(initializer),
+                    initializer::PALLET_NAME,
                 ))
             } else {
                 Ok(initializer::calls::TransactionApi::new(self.client))
@@ -29159,10 +29217,10 @@ pub mod api {
             &self,
         ) -> Result<dmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(dmp))?;
+            let hash = self.client.metadata().pallet_hash(dmp::PALLET_NAME)?;
             if dmp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(dmp),
+                    dmp::PALLET_NAME,
                 ))
             } else {
                 Ok(dmp::calls::TransactionApi::new(self.client))
@@ -29172,10 +29230,10 @@ pub mod api {
             &self,
         ) -> Result<ump::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(ump))?;
+            let hash = self.client.metadata().pallet_hash(ump::PALLET_NAME)?;
             if ump::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(ump),
+                    ump::PALLET_NAME,
                 ))
             } else {
                 Ok(ump::calls::TransactionApi::new(self.client))
@@ -29185,10 +29243,10 @@ pub mod api {
             &self,
         ) -> Result<hrmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(hrmp))?;
+            let hash = self.client.metadata().pallet_hash(hrmp::PALLET_NAME)?;
             if hrmp::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(hrmp),
+                    hrmp::PALLET_NAME,
                 ))
             } else {
                 Ok(hrmp::calls::TransactionApi::new(self.client))
@@ -29198,10 +29256,10 @@ pub mod api {
             &self,
         ) -> Result<registrar::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(registrar))?;
+            let hash = self.client.metadata().pallet_hash(registrar::PALLET_NAME)?;
             if registrar::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(registrar),
+                    registrar::PALLET_NAME,
                 ))
             } else {
                 Ok(registrar::calls::TransactionApi::new(self.client))
@@ -29211,10 +29269,10 @@ pub mod api {
             &self,
         ) -> Result<slots::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(slots))?;
+            let hash = self.client.metadata().pallet_hash(slots::PALLET_NAME)?;
             if slots::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(slots),
+                    slots::PALLET_NAME,
                 ))
             } else {
                 Ok(slots::calls::TransactionApi::new(self.client))
@@ -29224,10 +29282,10 @@ pub mod api {
             &self,
         ) -> Result<auctions::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(auctions))?;
+            let hash = self.client.metadata().pallet_hash(auctions::PALLET_NAME)?;
             if auctions::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(auctions),
+                    auctions::PALLET_NAME,
                 ))
             } else {
                 Ok(auctions::calls::TransactionApi::new(self.client))
@@ -29237,10 +29295,10 @@ pub mod api {
             &self,
         ) -> Result<crowdloan::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(crowdloan))?;
+            let hash = self.client.metadata().pallet_hash(crowdloan::PALLET_NAME)?;
             if crowdloan::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(crowdloan),
+                    crowdloan::PALLET_NAME,
                 ))
             } else {
                 Ok(crowdloan::calls::TransactionApi::new(self.client))
@@ -29250,10 +29308,13 @@ pub mod api {
             &self,
         ) -> Result<xcm_pallet::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
         {
-            let hash = self.client.metadata().pallet_hash(stringify!(xcm_pallet))?;
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(xcm_pallet::PALLET_NAME)?;
             if xcm_pallet::PALLET_HASH != hash {
                 Err(::subxt::MetadataError::IncompatiblePalletMetadata(
-                    stringify!(xcm_pallet),
+                    xcm_pallet::PALLET_NAME,
                 ))
             } else {
                 Ok(xcm_pallet::calls::TransactionApi::new(self.client))
