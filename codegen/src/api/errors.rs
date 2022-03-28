@@ -86,15 +86,15 @@ pub fn generate_has_module_error_impl(
                     });
                 // Avoid further metadata inspection by relying on type name information
                 // (the name of the type of the field as it appears in the source code)
-                (false, error_field.type_name() == Some(&"[u8]".to_string()))
+                (false, error_field.type_name() == Some(&"u8".to_string()))
             } else {
-                (false, false)
+                (false, true)
             }
         } else {
-            (true, false)
+            (true, true)
         }
     } else {
-        (false, false)
+        (false, true)
     };
 
     let trait_fn_body = if module_variant_is_struct {
