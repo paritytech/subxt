@@ -222,11 +222,15 @@ impl RuntimeGenerator {
                 quote!()
             };
 
+            // The pallet name used for obtaining the pallet hash as existing in the metadata.
+            let pallet_name = &pallet.name;
+
             quote! {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
                     pub static PALLET_HASH: [u8; 32] = [ #(#pallet_hash,)* ];
+                    pub static PALLET_NAME: &str = #pallet_name;
                     #calls
                     #event
                     #storage_mod
@@ -391,9 +395,9 @@ impl RuntimeGenerator {
 
                     #(
                         pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-                            let hash = self.client.metadata().pallet_hash(stringify!(#pallets_with_storage))?;
+                            let hash = self.client.metadata().pallet_hash(#pallets_with_storage::PALLET_NAME)?;
                             if #pallets_with_storage::PALLET_HASH != hash {
-                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_storage)))
+                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_storage::PALLET_NAME))
                             } else {
                                 Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
                             }
@@ -432,9 +436,9 @@ impl RuntimeGenerator {
 
                     #(
                         pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError> {
-                            let hash = self.client.metadata().pallet_hash(stringify!(#pallets_with_calls))?;
+                            let hash = self.client.metadata().pallet_hash(#pallets_with_calls::PALLET_NAME)?;
                             if #pallets_with_calls::PALLET_HASH != hash {
-                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(stringify!(#pallets_with_calls)))
+                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_calls::PALLET_NAME))
                             } else {
                                 Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
                             }
