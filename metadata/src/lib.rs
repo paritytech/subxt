@@ -220,14 +220,9 @@ fn get_extrinsic_hash(
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
     pallet: &frame_metadata::PalletMetadata<PortableForm>,
-    cache: &mut MetadataHasherCache,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Pallet as u8];
     let mut visited_ids = HashSet::<u32>::new();
-
-    if let Some(cached) = cache.pallets.get(&pallet.name) {
-        return *cached
-    }
 
     if let Some(ref calls) = pallet.calls {
         bytes.extend(get_type_hash(registry, calls.ty.id(), &mut visited_ids));
@@ -266,23 +261,18 @@ pub fn get_pallet_hash(
         }
     }
 
-    let pallet_hash = hash(&bytes);
-    cache.pallets.insert(pallet.name.clone(), pallet_hash);
-    pallet_hash
+    hash(&bytes)
 }
 
 /// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`.
-pub fn get_metadata_hash(
-    metadata: &RuntimeMetadataLastVersion,
-    cache: &mut MetadataHasherCache,
-) -> [u8; 32] {
+pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashDetails {
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets: Vec<(String, [u8; 32])> = metadata
         .pallets
         .iter()
         .map(|pallet| {
             let name = pallet.name.clone();
-            let hash = get_pallet_hash(&metadata.types, pallet, cache);
+            let hash = get_pallet_hash(&metadata.types, pallet);
             (name, hash)
         })
         .collect();
@@ -306,26 +296,34 @@ pub fn get_metadata_hash(
         &mut visited_ids,
     ));
 
-    hash(&bytes)
+    let hash = hash(&bytes);
+
+    MetadataHashDetails {
+        metadata_hash: hash,
+        pallet_hashes: pallets.into_iter().collect(),
+    }
 }
 
 /// Metadata hasher internal cache.
 #[derive(Clone, Debug)]
-pub struct MetadataHasherCache {
-    /// Cache of the pallets obtained from `get_pallet_hash`.
-    pub(crate) pallets: HashMap<String, [u8; 32]>,
+pub struct MetadataHashDetails {
+    /// Full metadata hash.
+    pub metadata_hash: [u8; 32],
+    /// Pallet hashes resulted from metadata hashing.
+    pub pallet_hashes: HashMap<String, [u8; 32]>,
 }
 
-impl MetadataHasherCache {
+impl MetadataHashDetails {
     /// Creates an empty `MetadataHasherCache`.
-    pub fn new() -> Self {
+    pub fn new() -> MetadataHashDetails {
         Self {
-            pallets: HashMap::new(),
+            metadata_hash: [0; 32],
+            pallet_hashes: HashMap::new(),
         }
     }
 }
 
-impl Default for MetadataHasherCache {
+impl Default for MetadataHashDetails {
     fn default() -> Self {
         Self::new()
     }
@@ -390,7 +388,7 @@ mod tests {
         assert_eq!(cache.pallets.len(), 0);
 
         let pallet = get_pallet(&metadata, "Balances");
-        let hash = get_pallet_hash(&metadata.types, pallet, &mut cache);
+        let hash = get_pallet_hash(&metadata.types, pallet);
         let cached_hash = cache
             .pallets
             .get(PALLET_NAME)

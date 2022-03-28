@@ -94,7 +94,7 @@ pub struct Metadata {
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
-    cache: Arc<Mutex<subxt_metadata::MetadataHasherCache>>,
+    cache: Arc<Mutex<subxt_metadata::MetadataHashDetails>>,
 }
 
 impl Metadata {
@@ -143,23 +143,28 @@ impl Metadata {
 
     /// Obtain the pallet unique identifier.
     pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
+        if let Some(cache) = self.cache.lock().unwrap().pallet_hashes.get(name) {
+            return Ok(cache.clone())
+        }
+
         let metadata = self.runtime_metadata();
         let pallet = match metadata.pallets.iter().find(|pallet| pallet.name == name) {
             Some(pallet) => pallet,
             _ => return Err(MetadataError::PalletNotFound(name.to_string())),
         };
+
+        let hash = subxt_metadata::get_pallet_hash(&metadata.types, pallet);
         let mut cache = self.cache.lock().unwrap();
-        Ok(subxt_metadata::get_pallet_hash(
-            &metadata.types,
-            pallet,
-            &mut cache,
-        ))
+        cache.pallet_hashes.insert(name.to_string(), hash);
+        Ok(hash)
     }
 
     /// Obtain the full metadata identifier.
     pub fn metadata_hash(&self) -> [u8; 32] {
+        let hash = subxt_metadata::get_metadata_hash(self.runtime_metadata());
         let mut cache = self.cache.lock().unwrap();
-        subxt_metadata::get_metadata_hash(self.runtime_metadata(), &mut cache)
+        *cache = hash;
+        cache.metadata_hash
     }
 }
 
@@ -394,7 +399,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             pallets,
             events,
             errors,
-            cache: Arc::new(Mutex::new(subxt_metadata::MetadataHasherCache::new())),
+            cache: Arc::new(Mutex::new(subxt_metadata::MetadataHashDetails::new())),
         })
     }
 }

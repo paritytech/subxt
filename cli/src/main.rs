@@ -28,10 +28,6 @@ use scale::{
     Decode,
     Input,
 };
-use scale_info::{
-    form::PortableForm,
-    PortableRegistry,
-};
 use serde::{
     Deserialize,
     Serialize,
@@ -51,7 +47,6 @@ use subxt_codegen::GeneratedTypeDerives;
 use subxt_metadata::{
     get_metadata_hash,
     get_pallet_hash,
-    MetadataHasherCache,
 };
 
 /// Utilities for working with substrate metadata for subxt.
@@ -184,7 +179,7 @@ fn handle_pallet_metadata(nodes: &[url::Url], name: &str) -> color_eyre::Result<
 
         match metadata.pallets.iter().find(|pallet| pallet.name == name) {
             Some(pallet_metadata) => {
-                let hash = pallet_hash(&metadata.types, pallet_metadata);
+                let hash = get_pallet_hash(&metadata.types, pallet_metadata);
                 let hex_hash = hex::encode(hash);
                 println!(
                     "Node {:?} has pallet metadata hash {:?}",
@@ -215,20 +210,12 @@ fn handle_pallet_metadata(nodes: &[url::Url], name: &str) -> color_eyre::Result<
     Ok(())
 }
 
-fn pallet_hash(
-    registry: &PortableRegistry,
-    pallet: &frame_metadata::PalletMetadata<PortableForm>,
-) -> [u8; 32] {
-    let mut cache = MetadataHasherCache::new();
-    get_pallet_hash(registry, pallet, &mut cache)
-}
-
 fn handle_full_metadata(nodes: &[url::Url]) -> color_eyre::Result<()> {
     let mut compatibility_map: HashMap<String, Vec<String>> = HashMap::new();
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node)?;
-        let hash = metadata_hash(&metadata);
-        let hex_hash = hex::encode(hash);
+        let hash = get_metadata_hash(&metadata);
+        let hex_hash = hex::encode(hash.metadata_hash);
         println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
 
         compatibility_map
@@ -244,12 +231,6 @@ fn handle_full_metadata(nodes: &[url::Url]) -> color_eyre::Result<()> {
     );
 
     Ok(())
-}
-
-fn metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
-    // Cached value cannot be shared between different metadata.
-    let mut cache = MetadataHasherCache::new();
-    get_metadata_hash(metadata, &mut cache)
 }
 
 fn fetch_runtime_metadata(

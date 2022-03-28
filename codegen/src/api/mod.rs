@@ -37,11 +37,7 @@ mod errors;
 mod events;
 mod storage;
 
-use subxt_metadata::{
-    get_metadata_hash,
-    get_pallet_hash,
-    MetadataHasherCache,
-};
+use subxt_metadata::get_metadata_hash;
 
 use super::GeneratedTypeDerives;
 use crate::{
@@ -187,12 +183,15 @@ impl RuntimeGenerator {
             })
             .collect::<Vec<_>>();
 
-        let mut metadata_cache = MetadataHasherCache::new();
-        let metadata_hash = get_metadata_hash(&self.metadata, &mut metadata_cache);
+        let metadata_hash_details = get_metadata_hash(&self.metadata);
+        let metadata_hash = metadata_hash_details.metadata_hash;
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let pallet_hash =
-                get_pallet_hash(&self.metadata.types, pallet, &mut metadata_cache);
+            let pallet_hash = metadata_hash_details
+                .pallet_hashes
+                .get(&pallet.name)
+                .expect("Pallet must be present after caching metadata");
+            let pallet_name = &pallet.name;
 
             let calls = if let Some(ref calls) = pallet.calls {
                 calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
