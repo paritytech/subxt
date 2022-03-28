@@ -144,7 +144,7 @@ impl Metadata {
     /// Obtain the pallet unique identifier.
     pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
         if let Some(cache) = self.cache.lock().unwrap().pallet_hashes.get(name) {
-            return Ok(cache.clone())
+            return Ok(*cache)
         }
 
         let metadata = self.runtime_metadata();
