@@ -173,10 +173,8 @@ impl<T: Config> Client<T> {
     ///
     /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
     /// to the target runtime.
-    pub fn to_runtime_api<R: TryFrom<Self>>(
-        self,
-    ) -> Result<R, <R as TryFrom<Client<T>>>::Error> {
-        self.try_into()
+    pub fn to_runtime_api<R: From<Self>>(self) -> R {
+        self.into()
     }
 
     /// Skip metadata validation during conversion to the Runtime API.

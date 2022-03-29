@@ -308,19 +308,13 @@ impl RuntimeGenerator {
                     marker: ::core::marker::PhantomData<X>,
                 }
 
-                impl<T, X> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X>
+                impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>
                 {
-                    type Error = ::subxt::MetadataError;
-                    fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
-                        static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if client.metadata().metadata_hash() != METADATA_HASH {
-                            Err(::subxt::MetadataError::IncompatibleMetadata)
-                        } else {
-                            Ok(Self { client, marker: ::core::marker::PhantomData })
-                        }
+                    fn from(client: ::subxt::Client<T>) -> Self {
+                        Self { client: client, marker: ::core::marker::PhantomData }
                     }
                 }
 
