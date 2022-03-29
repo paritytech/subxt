@@ -264,13 +264,16 @@ impl RuntimeGenerator {
                 .filter_map(|(pallet, pallet_mod_name)| {
                     (!pallet.constants.is_empty()).then(|| pallet_mod_name)
                 });
-        let pallets_with_storage =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.storage.as_ref().map(|_| pallet_mod_name)
-                });
-        let pallets_with_storage_unchecked = pallets_with_storage.clone();
+        let pallets_with_storage: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.storage.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
+
+        let pallets_with_storage_unchecked = pallets_with_storage
+            .iter()
+            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
         let pallets_with_calls =
             pallets_with_mod_names
@@ -387,10 +390,6 @@ impl RuntimeGenerator {
                 where
                     T: ::subxt::Config,
                 {
-                    pub fn skip_pallet_validation(self) -> StorageApiUnchecked<'a, T> {
-                        StorageApiUnchecked { client: self.client }
-                    }
-
                     #(
                         pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
                             let hash = self.client.metadata().pallet_hash(#pallets_with_storage::PALLET_NAME)?;
@@ -400,20 +399,9 @@ impl RuntimeGenerator {
                                 Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
                             }
                         }
-                    )*
-                }
 
-                pub struct StorageApiUnchecked<'a, T: ::subxt::Config> {
-                    client: &'a ::subxt::Client<T>,
-                }
-
-                impl<'a, T> StorageApiUnchecked<'a, T>
-                where
-                    T: ::subxt::Config,
-                {
-                    #(
-                        pub fn #pallets_with_storage_unchecked(&self) -> #pallets_with_storage_unchecked::storage::StorageApi<'a, T> {
-                            #pallets_with_storage_unchecked::storage::StorageApi::new(self.client)
+                        pub fn #pallets_with_storage_unchecked(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
+                            #pallets_with_storage::storage::StorageApi::new(self.client)
                         }
                     )*
                 }
