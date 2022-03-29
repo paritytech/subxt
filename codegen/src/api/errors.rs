@@ -20,6 +20,23 @@ use proc_macro_error::abort_call_site;
 use quote::quote;
 use scale_info::TypeDef;
 
+/// Different substrate versions will have a different `DispatchError::Module`.
+/// The following cases are ordered by versions.
+enum ModuleErrorType {
+    /// Case 1: `DispatchError::Module { index: u8, error: u8 }`
+    ///
+    /// This is the first supported `DispatchError::Module` format.
+    NamedField,
+    /// Case 2: `DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: u8 } )`
+    ///
+    /// Substrate introduced `sp_runtime::ModuleError`, while keeping the error `u8`.
+    LegacyError,
+    /// Case 3: `DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: [u8; 4] } )`
+    ///
+    /// The substrate error evolved into `[u8; 4]`.
+    ErrorArray,
+}
+
 /// The aim of this is to implement the `::subxt::HasModuleError` trait for
 /// the generated `DispatchError`, so that we can obtain the module error details,
 /// if applicable, from it.
