@@ -285,7 +285,7 @@ where
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
     ) -> Result<Encoded, BasicError> {
-        // 1. get nonce
+        // 1. Get nonce
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
@@ -305,7 +305,7 @@ where
             Encoded(bytes)
         };
 
-        // 3. construct our custom additional/extra params.
+        // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = X::new(
             self.client.runtime_version.spec_version,
             self.client.runtime_version.transaction_version,
@@ -314,7 +314,10 @@ where
             other_params,
         );
 
-        // 4. construct signature
+        // 4. Construct signature. This is compatible with the Encode impl
+        //    for SignedPayload (which is this payload of bytes that we'd like)
+        //    to sign. See:
+        //    https://github.com/paritytech/substrate/blob/9a6d706d8db00abb6ba183839ec98ecd9924b1f8/primitives/runtime/src/generic/unchecked_extrinsic.rs#L215)
         let signature = {
             let mut bytes = Vec::new();
             call_data.encode_to(&mut bytes);
@@ -327,8 +330,8 @@ where
             }
         };
 
-        // 5. Encode extrinsic, now that we have the parts we need.
-        // (this may not be 100% correct but should be close enough for this example)
+        // 5. Encode extrinsic, now that we have the parts we need. This is compatible
+        //    with the Encode impl for UncheckedExtrinsic (protocol version 4).
         let extrinsic = {
             let mut encoded_inner = Vec::new();
             // "is signed" + transaction protocol version (4)
@@ -342,7 +345,10 @@ where
             // and now, call data
             call_data.encode_to(&mut encoded_inner);
             // now, prefix byte length:
-            let len = Compact(encoded_inner.len() as u64);
+            let len = Compact(
+                u32::try_from(encoded_inner.len())
+                    .expect("extrinsic size expected to be <4GB"),
+            );
             let mut encoded = Vec::new();
             len.encode_to(&mut encoded);
             encoded.extend(encoded_inner);
