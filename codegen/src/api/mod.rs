@@ -203,6 +203,7 @@ impl RuntimeGenerator {
             let constants_mod = if !pallet.constants.is_empty() {
                 constants::generate_constants(
                     &type_gen,
+                    pallet,
                     &pallet.constants,
                     types_mod_ident,
                 )
@@ -300,8 +301,8 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
-                    pub fn constants(&'a self) -> ConstantsApi {
-                        ConstantsApi
+                    pub fn constants(&'a self) -> ConstantsApi<'a, T> {
+                        ConstantsApi { client: &self.client }
                     }
 
                     pub fn storage(&'a self) -> StorageApi<'a, T> {
@@ -335,12 +336,14 @@ impl RuntimeGenerator {
                     }
                 }
 
-                pub struct ConstantsApi;
+                pub struct ConstantsApi<'a, T: ::subxt::Config> {
+                    client: &'a ::subxt::Client<T>,
+                }
 
-                impl ConstantsApi {
+                impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
                     #(
-                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
-                            #pallets_with_constants::constants::ConstantsApi
+                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
+                            #pallets_with_constants::constants::ConstantsApi::new(self.client)
                         }
                     )*
                 }
