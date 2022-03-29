@@ -32,7 +32,7 @@ pub use sp_runtime::generic::Era;
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
 pub trait ExtrinsicParams<T: Config> {
-    /// Thexe parameters can be provided to the constructor along with
+    /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
     type OtherParams;
