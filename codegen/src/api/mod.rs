@@ -318,16 +318,6 @@ impl RuntimeGenerator {
                     }
                 }
 
-                impl<T, X> ::core::convert::From<::subxt::ClientUnchecked<T>> for RuntimeApi<T, X>
-                where
-                    T: ::subxt::Config,
-                    X: ::subxt::SignedExtra<T>
-                {
-                    fn from(client: ::subxt::ClientUnchecked<T>) -> Self {
-                        Self { client: client.0, marker: ::core::marker::PhantomData }
-                    }
-                }
-
                 impl<'a, T, X> RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,

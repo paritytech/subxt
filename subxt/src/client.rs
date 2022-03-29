@@ -176,26 +176,6 @@ impl<T: Config> Client<T> {
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
     }
-
-    /// Skip metadata validation during conversion to the Runtime API.
-    pub fn skip_metadata_validation(self) -> ClientUnchecked<T> {
-        ClientUnchecked(self)
-    }
-}
-
-/// Client to interface with a substrate node without performing metadata validation.
-#[derive(Derivative)]
-#[derivative(Clone(bound = ""))]
-pub struct ClientUnchecked<T: Config>(pub Client<T>);
-
-impl<T: Config> ClientUnchecked<T> {
-    /// Convert the client to a runtime api wrapper for custom runtime access.
-    ///
-    /// The `subxt` proc macro will provide methods to submit extrinsics and read storage specific
-    /// to the target runtime.
-    pub fn to_runtime_api<R: From<Self>>(self) -> R {
-        self.into()
-    }
 }
 
 /// A constructed call ready to be signed and submitted.

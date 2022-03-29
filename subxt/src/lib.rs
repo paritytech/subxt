@@ -70,7 +70,6 @@ pub use crate::{
     client::{
         Client,
         ClientBuilder,
-        ClientUnchecked,
         SubmittableExtrinsic,
     },
     config::{
