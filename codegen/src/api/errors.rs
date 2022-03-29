@@ -18,7 +18,11 @@ use frame_metadata::v14::RuntimeMetadataV14;
 use proc_macro2::TokenStream as TokenStream2;
 use proc_macro_error::abort_call_site;
 use quote::quote;
-use scale_info::TypeDef;
+use scale_info::{
+    form::PortableForm,
+    Field,
+    TypeDef,
+};
 
 /// Different substrate versions will have a different `DispatchError::Module`.
 /// The following cases are ordered by versions.
@@ -37,6 +41,46 @@ enum ModuleErrorType {
     ErrorArray,
 }
 
+/// Determine the `ModuleError` type for the `ModuleErrorType::LegacyError` and
+/// `ModuleErrorType::ErrorArray` cases.
+fn module_error_type(
+    module_field: &Field<PortableForm>,
+    metadata: &RuntimeMetadataV14,
+) -> ModuleErrorType {
+    // Fields are named.
+    if module_field.name().is_some() {
+        return ModuleErrorType::NamedField
+    }
+
+    // Get the `sp_runtime::ModuleError` structure.
+    let module_err = metadata
+        .types
+        .resolve(module_field.ty().id())
+        .unwrap_or_else(|| {
+            abort_call_site!("sp_runtime::ModuleError type expected in metadata")
+        });
+
+    let error_type_def = match module_err.type_def() {
+        TypeDef::Composite(composite) => composite,
+        _ => abort_call_site!("sp_runtime::ModuleError type should be a composite type"),
+    };
+
+    // Get the error field from the `sp_runtime::ModuleError` structure.
+    let error_field = error_type_def
+        .fields()
+        .iter()
+        .find(|field| field.name() == Some(&"error".to_string()))
+        .unwrap_or_else(|| {
+            abort_call_site!("sp_runtime::ModuleError expected to contain error field")
+        });
+
+    if error_field.type_name() == Some(&"u8".to_string()) {
+        ModuleErrorType::LegacyError
+    } else {
+        ModuleErrorType::ErrorArray
+    }
+}
+
 /// The aim of this is to implement the `::subxt::HasModuleError` trait for
 /// the generated `DispatchError`, so that we can obtain the module error details,
 /// if applicable, from it.
@@ -44,7 +88,7 @@ pub fn generate_has_module_error_impl(
     metadata: &RuntimeMetadataV14,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let dispatch_error_def = metadata
+    let dispatch_error = metadata
         .types
         .types()
         .iter()
@@ -55,86 +99,52 @@ pub fn generate_has_module_error_impl(
         .ty()
         .type_def();
 
-    // Different substrate versions will have a `DispatchError::Module` of the following form,
-    // ordered by versions:
-    //
-    // Case 1. DispatchError::Module { index: u8, error: u8 }
-    // Case 2. DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: u8 } )
-    // Case 3. DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: [u8; 4] } )
-    //
-    // To handle all cases and maintain backward compatibility, the type of the variant is inspected
-    // based on the metadata.
-    // If the variant has a named field (i.e, Case 1) the variable `module_variant_is_struct` is
-    // true. If the error is of form `u8`, then `module_legacy_err` is True.
-    //
-    // Note: Legacy errors are present in Case 1 and Case 2. Therefore, newer errors are possibly
-    // encountered in Case 3s, the unnamed field case.
-    let (module_variant_is_struct, module_legacy_err) = if let TypeDef::Variant(details) =
-        dispatch_error_def
-    {
-        let module_variant = details
-            .variants()
-            .iter()
-            .find(|variant| variant.name() == "Module")
-            .unwrap_or_else(|| {
-                abort_call_site!("DispatchError::Module variant expected in metadata")
-            });
-
-        let module_field = module_variant.fields().get(0).unwrap_or_else(|| {
-            abort_call_site!("DispatchError::Module expected to contain 1 or more fields")
-        });
-        if module_field.name().is_none() {
-            let module_err = metadata
-                .types
-                .resolve(module_field.ty().id())
+    // Get the `DispatchError::Module` variant (either struct or named fields).
+    let module_variant = match dispatch_error {
+        TypeDef::Variant(variant) => {
+            variant
+                .variants()
+                .iter()
+                .find(|variant| variant.name() == "Module")
                 .unwrap_or_else(|| {
-                    abort_call_site!("sp_runtime::ModuleError type expected in metadata")
-                });
-
-            if let TypeDef::Composite(composite) = module_err.type_def() {
-                let error_field = composite
-                    .fields()
-                    .iter()
-                    .find(|field| field.name() == Some(&"error".to_string()))
-                    .unwrap_or_else(|| {
-                        abort_call_site!(
-                            "sp_runtime::ModuleError expected to contain error field"
-                        )
-                    });
-                // Avoid further metadata inspection by relying on type name information
-                // (the name of the type of the field as it appears in the source code)
-                (false, error_field.type_name() == Some(&"u8".to_string()))
-            } else {
-                (false, true)
-            }
-        } else {
-            (true, true)
+                    abort_call_site!("DispatchError::Module variant expected in metadata")
+                })
         }
-    } else {
-        (false, true)
+        _ => abort_call_site!("DispatchError expected to contain variant in metadata"),
     };
 
-    let trait_fn_body = if module_variant_is_struct {
-        quote! {
-            if let &Self::Module { index, error } = self {
-                Some((index, error))
-            } else {
-                None
+    let module_field = module_variant.fields().get(0).unwrap_or_else(|| {
+        abort_call_site!("DispatchError::Module expected to contain 1 or more fields")
+    });
+
+    let error_type = module_error_type(module_field, metadata);
+
+    let trait_fn_body = match error_type {
+        ModuleErrorType::NamedField => {
+            quote! {
+                if let &Self::Module { index, error } = self {
+                    Some((index, error))
+                } else {
+                    None
+                }
             }
         }
-    } else {
-        let error_conversion = if module_legacy_err {
-            quote! { module_error.error }
-        } else {
-            // Convert [u8; 4] errors to legacy format.
-            quote! { module_error.error[0] }
-        };
-
-        quote! {
-            if let Self::Module (module_error) = self {
-                Some((module_error.index, #error_conversion))
-            } else {
-                None
+        ModuleErrorType::LegacyError => {
+            quote! {
+                if let Self::Module (module_error) = self {
+                    Some((module_error.index, module_error.error))
+                } else {
+                    None
+                }
+            }
+        }
+        ModuleErrorType::ErrorArray => {
+            quote! {
+                if let Self::Module (module_error) = self {
+                    Some((module_error.index, module_error.error[0]))
+                } else {
+                    None
+                }
             }
         }
     };
