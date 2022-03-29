@@ -41,6 +41,42 @@ enum ModuleErrorType {
     ErrorArray,
 }
 
+impl quote::ToTokens for ModuleErrorType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        let trait_fn_body = match self {
+            ModuleErrorType::NamedField => {
+                quote! {
+                    if let &Self::Module { index, error } = self {
+                        Some((index, error))
+                    } else {
+                        None
+                    }
+                }
+            }
+            ModuleErrorType::LegacyError => {
+                quote! {
+                    if let Self::Module (module_error) = self {
+                        Some((module_error.index, module_error.error))
+                    } else {
+                        None
+                    }
+                }
+            }
+            ModuleErrorType::ErrorArray => {
+                quote! {
+                    if let Self::Module (module_error) = self {
+                        Some((module_error.index, module_error.error[0]))
+                    } else {
+                        None
+                    }
+                }
+            }
+        };
+
+        tokens.extend(trait_fn_body);
+    }
+}
+
 /// Determine the `ModuleError` type for the `ModuleErrorType::LegacyError` and
 /// `ModuleErrorType::ErrorArray` cases.
 fn module_error_type(
@@ -119,40 +155,10 @@ pub fn generate_has_module_error_impl(
 
     let error_type = module_error_type(module_field, metadata);
 
-    let trait_fn_body = match error_type {
-        ModuleErrorType::NamedField => {
-            quote! {
-                if let &Self::Module { index, error } = self {
-                    Some((index, error))
-                } else {
-                    None
-                }
-            }
-        }
-        ModuleErrorType::LegacyError => {
-            quote! {
-                if let Self::Module (module_error) = self {
-                    Some((module_error.index, module_error.error))
-                } else {
-                    None
-                }
-            }
-        }
-        ModuleErrorType::ErrorArray => {
-            quote! {
-                if let Self::Module (module_error) = self {
-                    Some((module_error.index, module_error.error[0]))
-                } else {
-                    None
-                }
-            }
-        }
-    };
-
     quote! {
         impl ::subxt::HasModuleError for #types_mod_ident::sp_runtime::DispatchError {
             fn module_error_indices(&self) -> Option<(u8,u8)> {
-                #trait_fn_body
+                #error_type
             }
         }
     }
