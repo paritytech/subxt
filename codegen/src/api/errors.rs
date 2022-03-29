@@ -38,7 +38,7 @@ enum ModuleErrorType {
     /// Case 3: `DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: [u8; 4] } )`
     ///
     /// The substrate error evolved into `[u8; 4]`.
-    ErrorArray,
+    ArrayError,
 }
 
 impl quote::ToTokens for ModuleErrorType {
@@ -62,7 +62,7 @@ impl quote::ToTokens for ModuleErrorType {
                     }
                 }
             }
-            ModuleErrorType::ErrorArray => {
+            ModuleErrorType::ArrayError => {
                 quote! {
                     if let Self::Module (module_error) = self {
                         Some((module_error.index, module_error.error[0]))
@@ -113,7 +113,7 @@ fn module_error_type(
     if error_field.type_name() == Some(&"u8".to_string()) {
         ModuleErrorType::LegacyError
     } else {
-        ModuleErrorType::ErrorArray
+        ModuleErrorType::ArrayError
     }
 }
 
