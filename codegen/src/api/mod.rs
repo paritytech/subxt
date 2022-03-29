@@ -275,13 +275,15 @@ impl RuntimeGenerator {
             .iter()
             .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
-        let pallets_with_calls =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.calls.as_ref().map(|_| pallet_mod_name)
-                });
-        let pallets_with_calls_unchecked = pallets_with_calls.clone();
+        let pallets_with_calls: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.calls.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
+        let pallets_with_calls_unchecked = pallets_with_calls
+            .iter()
+            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
@@ -416,10 +418,6 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::SignedExtra<T>,
                 {
-                    pub fn skip_pallet_validation(self) -> TransactionApiUnchecked<'a, T, X> {
-                        TransactionApiUnchecked { client: self.client, marker: self.marker }
-                    }
-
                     #(
                         pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError> {
                             let hash = self.client.metadata().pallet_hash(#pallets_with_calls::PALLET_NAME)?;
@@ -429,22 +427,9 @@ impl RuntimeGenerator {
                                 Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
                             }
                         }
-                    )*
-                }
 
-                pub struct TransactionApiUnchecked<'a, T: ::subxt::Config, X> {
-                    client: &'a ::subxt::Client<T>,
-                    marker: ::core::marker::PhantomData<X>,
-                }
-
-                impl<'a, T, X> TransactionApiUnchecked<'a, T, X>
-                where
-                    T: ::subxt::Config,
-                    X: ::subxt::SignedExtra<T>,
-                {
-                    #(
-                        pub fn #pallets_with_calls_unchecked(&self) -> #pallets_with_calls_unchecked::calls::TransactionApi<'a, T, X> {
-                            #pallets_with_calls_unchecked::calls::TransactionApi::new(self.client)
+                        pub fn #pallets_with_calls_unchecked(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X> {
+                            #pallets_with_calls::calls::TransactionApi::new(self.client)
                         }
                     )*
                 }
