@@ -125,9 +125,7 @@ fn module_error_type(
         TypeDef::Array(array) => {
             // Check new error type of len 4 and type u8.
             if array.len() != 4 {
-                abort_call_site!(
-                    "sp_runtime::ModuleError::error array length is not 4"
-                );
+                abort_call_site!("sp_runtime::ModuleError::error array length is not 4");
             }
 
             let array_ty = metadata
