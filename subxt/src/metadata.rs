@@ -30,10 +30,7 @@ use frame_metadata::{
     META_RESERVED,
 };
 
-use crate::{
-    Call,
-    Encoded,
-};
+use crate::Call;
 use scale_info::{
     form::PortableForm,
     Type,
@@ -148,18 +145,22 @@ impl PalletMetadata {
         &self.name
     }
 
-    /// Encode a call based on this pallet metadata.
-    pub fn encode_call<C>(&self, call: &C) -> Result<Encoded, MetadataError>
+    /// Get the index of this pallet.
+    pub fn index(&self) -> u8 {
+        self.index
+    }
+
+    /// Attempt to resolve a call into an index in this pallet, failing
+    /// if the call is not found in this pallet.
+    pub fn call_index<C>(&self) -> Result<u8, MetadataError>
     where
         C: Call,
     {
-        let fn_index = self
+        let fn_index = *self
             .calls
             .get(C::FUNCTION)
             .ok_or(MetadataError::CallNotFound(C::FUNCTION))?;
-        let mut bytes = vec![self.index, *fn_index];
-        bytes.extend(call.encode());
-        Ok(Encoded(bytes))
+        Ok(fn_index)
     }
 
     /// Return [`StorageEntryMetadata`] given some storage key.

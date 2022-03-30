@@ -44,7 +44,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .sudo()
         .sudo(call)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -70,7 +70,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>>
         .tx()
         .sudo()
         .sudo_unchecked_weight(call, 0)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?
