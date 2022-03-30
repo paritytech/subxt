@@ -27742,37 +27742,14 @@ pub mod api {
         pub client: ::subxt::Client<T>,
         marker: ::core::marker::PhantomData<X>,
     }
-    impl<T, X> ::core::convert::TryFrom<::subxt::Client<T>> for RuntimeApi<T, X>
+    impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
     where
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
     {
-        type Error = ::subxt::MetadataError;
-        fn try_from(client: ::subxt::Client<T>) -> Result<Self, Self::Error> {
-            static METADATA_HASH: [u8; 32] = [
-                152u8, 159u8, 209u8, 30u8, 112u8, 179u8, 29u8, 192u8, 231u8, 169u8,
-                118u8, 131u8, 163u8, 197u8, 214u8, 223u8, 29u8, 163u8, 118u8, 188u8,
-                12u8, 226u8, 243u8, 235u8, 13u8, 193u8, 73u8, 223u8, 87u8, 99u8, 165u8,
-                104u8,
-            ];
-            if client.metadata().metadata_hash() != METADATA_HASH {
-                Err(::subxt::MetadataError::IncompatibleMetadata)
-            } else {
-                Ok(Self {
-                    client,
-                    marker: ::core::marker::PhantomData,
-                })
-            }
-        }
-    }
-    impl<T, X> ::core::convert::From<::subxt::ClientUnchecked<T>> for RuntimeApi<T, X>
-    where
-        T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
-    {
-        fn from(client: ::subxt::ClientUnchecked<T>) -> Self {
+        fn from(client: ::subxt::Client<T>) -> Self {
             Self {
-                client: client.0,
+                client,
                 marker: ::core::marker::PhantomData,
             }
         }
@@ -27782,6 +27759,19 @@ pub mod api {
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
     {
+        pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
+            static METADATA_HASH: [u8; 32] = [
+                152u8, 159u8, 209u8, 30u8, 112u8, 179u8, 29u8, 192u8, 231u8, 169u8,
+                118u8, 131u8, 163u8, 197u8, 214u8, 223u8, 29u8, 163u8, 118u8, 188u8,
+                12u8, 226u8, 243u8, 235u8, 13u8, 193u8, 73u8, 223u8, 87u8, 99u8, 165u8,
+                104u8,
+            ];
+            if self.client.metadata().metadata_hash() != METADATA_HASH {
+                Err(::subxt::MetadataError::IncompatibleMetadata)
+            } else {
+                Ok(())
+            }
+        }
         pub fn constants(&'a self) -> ConstantsApi {
             ConstantsApi
         }
@@ -27940,11 +27930,6 @@ pub mod api {
     where
         T: ::subxt::Config,
     {
-        pub fn skip_pallet_validation(self) -> StorageApiUnchecked<'a, T> {
-            StorageApiUnchecked {
-                client: self.client,
-            }
-        }
         pub fn system(
             &self,
         ) -> Result<system::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -27956,6 +27941,9 @@ pub mod api {
             } else {
                 Ok(system::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn system_unchecked(&self) -> system::storage::StorageApi<'a, T> {
+            system::storage::StorageApi::new(self.client)
         }
         pub fn scheduler(
             &self,
@@ -27970,6 +27958,9 @@ pub mod api {
                 Ok(scheduler::storage::StorageApi::new(self.client))
             }
         }
+        pub fn scheduler_unchecked(&self) -> scheduler::storage::StorageApi<'a, T> {
+            scheduler::storage::StorageApi::new(self.client)
+        }
         pub fn preimage(
             &self,
         ) -> Result<preimage::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -27983,6 +27974,9 @@ pub mod api {
                 Ok(preimage::storage::StorageApi::new(self.client))
             }
         }
+        pub fn preimage_unchecked(&self) -> preimage::storage::StorageApi<'a, T> {
+            preimage::storage::StorageApi::new(self.client)
+        }
         pub fn babe(
             &self,
         ) -> Result<babe::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -27994,6 +27988,9 @@ pub mod api {
             } else {
                 Ok(babe::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn babe_unchecked(&self) -> babe::storage::StorageApi<'a, T> {
+            babe::storage::StorageApi::new(self.client)
         }
         pub fn timestamp(
             &self,
@@ -28008,6 +28005,9 @@ pub mod api {
                 Ok(timestamp::storage::StorageApi::new(self.client))
             }
         }
+        pub fn timestamp_unchecked(&self) -> timestamp::storage::StorageApi<'a, T> {
+            timestamp::storage::StorageApi::new(self.client)
+        }
         pub fn indices(
             &self,
         ) -> Result<indices::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28019,6 +28019,9 @@ pub mod api {
             } else {
                 Ok(indices::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn indices_unchecked(&self) -> indices::storage::StorageApi<'a, T> {
+            indices::storage::StorageApi::new(self.client)
         }
         pub fn balances(
             &self,
@@ -28032,6 +28035,9 @@ pub mod api {
             } else {
                 Ok(balances::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn balances_unchecked(&self) -> balances::storage::StorageApi<'a, T> {
+            balances::storage::StorageApi::new(self.client)
         }
         pub fn transaction_payment(
             &self,
@@ -28049,6 +28055,11 @@ pub mod api {
                 Ok(transaction_payment::storage::StorageApi::new(self.client))
             }
         }
+        pub fn transaction_payment_unchecked(
+            &self,
+        ) -> transaction_payment::storage::StorageApi<'a, T> {
+            transaction_payment::storage::StorageApi::new(self.client)
+        }
         pub fn authorship(
             &self,
         ) -> Result<authorship::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28065,6 +28076,9 @@ pub mod api {
                 Ok(authorship::storage::StorageApi::new(self.client))
             }
         }
+        pub fn authorship_unchecked(&self) -> authorship::storage::StorageApi<'a, T> {
+            authorship::storage::StorageApi::new(self.client)
+        }
         pub fn staking(
             &self,
         ) -> Result<staking::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28076,6 +28090,9 @@ pub mod api {
             } else {
                 Ok(staking::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn staking_unchecked(&self) -> staking::storage::StorageApi<'a, T> {
+            staking::storage::StorageApi::new(self.client)
         }
         pub fn offences(
             &self,
@@ -28090,6 +28107,9 @@ pub mod api {
                 Ok(offences::storage::StorageApi::new(self.client))
             }
         }
+        pub fn offences_unchecked(&self) -> offences::storage::StorageApi<'a, T> {
+            offences::storage::StorageApi::new(self.client)
+        }
         pub fn session(
             &self,
         ) -> Result<session::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28102,6 +28122,9 @@ pub mod api {
                 Ok(session::storage::StorageApi::new(self.client))
             }
         }
+        pub fn session_unchecked(&self) -> session::storage::StorageApi<'a, T> {
+            session::storage::StorageApi::new(self.client)
+        }
         pub fn grandpa(
             &self,
         ) -> Result<grandpa::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28113,6 +28136,9 @@ pub mod api {
             } else {
                 Ok(grandpa::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn grandpa_unchecked(&self) -> grandpa::storage::StorageApi<'a, T> {
+            grandpa::storage::StorageApi::new(self.client)
         }
         pub fn im_online(
             &self,
@@ -28127,6 +28153,9 @@ pub mod api {
                 Ok(im_online::storage::StorageApi::new(self.client))
             }
         }
+        pub fn im_online_unchecked(&self) -> im_online::storage::StorageApi<'a, T> {
+            im_online::storage::StorageApi::new(self.client)
+        }
         pub fn democracy(
             &self,
         ) -> Result<democracy::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28140,6 +28169,9 @@ pub mod api {
                 Ok(democracy::storage::StorageApi::new(self.client))
             }
         }
+        pub fn democracy_unchecked(&self) -> democracy::storage::StorageApi<'a, T> {
+            democracy::storage::StorageApi::new(self.client)
+        }
         pub fn council(
             &self,
         ) -> Result<council::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28151,6 +28183,9 @@ pub mod api {
             } else {
                 Ok(council::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn council_unchecked(&self) -> council::storage::StorageApi<'a, T> {
+            council::storage::StorageApi::new(self.client)
         }
         pub fn technical_committee(
             &self,
@@ -28168,6 +28203,11 @@ pub mod api {
                 Ok(technical_committee::storage::StorageApi::new(self.client))
             }
         }
+        pub fn technical_committee_unchecked(
+            &self,
+        ) -> technical_committee::storage::StorageApi<'a, T> {
+            technical_committee::storage::StorageApi::new(self.client)
+        }
         pub fn phragmen_election(
             &self,
         ) -> Result<phragmen_election::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28183,6 +28223,11 @@ pub mod api {
             } else {
                 Ok(phragmen_election::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn phragmen_election_unchecked(
+            &self,
+        ) -> phragmen_election::storage::StorageApi<'a, T> {
+            phragmen_election::storage::StorageApi::new(self.client)
         }
         pub fn technical_membership(
             &self,
@@ -28202,6 +28247,11 @@ pub mod api {
                 Ok(technical_membership::storage::StorageApi::new(self.client))
             }
         }
+        pub fn technical_membership_unchecked(
+            &self,
+        ) -> technical_membership::storage::StorageApi<'a, T> {
+            technical_membership::storage::StorageApi::new(self.client)
+        }
         pub fn treasury(
             &self,
         ) -> Result<treasury::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28215,6 +28265,9 @@ pub mod api {
                 Ok(treasury::storage::StorageApi::new(self.client))
             }
         }
+        pub fn treasury_unchecked(&self) -> treasury::storage::StorageApi<'a, T> {
+            treasury::storage::StorageApi::new(self.client)
+        }
         pub fn claims(
             &self,
         ) -> Result<claims::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28227,6 +28280,9 @@ pub mod api {
                 Ok(claims::storage::StorageApi::new(self.client))
             }
         }
+        pub fn claims_unchecked(&self) -> claims::storage::StorageApi<'a, T> {
+            claims::storage::StorageApi::new(self.client)
+        }
         pub fn vesting(
             &self,
         ) -> Result<vesting::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28238,6 +28294,9 @@ pub mod api {
             } else {
                 Ok(vesting::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn vesting_unchecked(&self) -> vesting::storage::StorageApi<'a, T> {
+            vesting::storage::StorageApi::new(self.client)
         }
         pub fn identity(
             &self,
@@ -28252,6 +28311,9 @@ pub mod api {
                 Ok(identity::storage::StorageApi::new(self.client))
             }
         }
+        pub fn identity_unchecked(&self) -> identity::storage::StorageApi<'a, T> {
+            identity::storage::StorageApi::new(self.client)
+        }
         pub fn proxy(
             &self,
         ) -> Result<proxy::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28263,6 +28325,9 @@ pub mod api {
             } else {
                 Ok(proxy::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn proxy_unchecked(&self) -> proxy::storage::StorageApi<'a, T> {
+            proxy::storage::StorageApi::new(self.client)
         }
         pub fn multisig(
             &self,
@@ -28277,6 +28342,9 @@ pub mod api {
                 Ok(multisig::storage::StorageApi::new(self.client))
             }
         }
+        pub fn multisig_unchecked(&self) -> multisig::storage::StorageApi<'a, T> {
+            multisig::storage::StorageApi::new(self.client)
+        }
         pub fn bounties(
             &self,
         ) -> Result<bounties::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28290,6 +28358,9 @@ pub mod api {
                 Ok(bounties::storage::StorageApi::new(self.client))
             }
         }
+        pub fn bounties_unchecked(&self) -> bounties::storage::StorageApi<'a, T> {
+            bounties::storage::StorageApi::new(self.client)
+        }
         pub fn tips(
             &self,
         ) -> Result<tips::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28301,6 +28372,9 @@ pub mod api {
             } else {
                 Ok(tips::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn tips_unchecked(&self) -> tips::storage::StorageApi<'a, T> {
+            tips::storage::StorageApi::new(self.client)
         }
         pub fn election_provider_multi_phase(
             &self,
@@ -28322,6 +28396,11 @@ pub mod api {
                 ))
             }
         }
+        pub fn election_provider_multi_phase_unchecked(
+            &self,
+        ) -> election_provider_multi_phase::storage::StorageApi<'a, T> {
+            election_provider_multi_phase::storage::StorageApi::new(self.client)
+        }
         pub fn bags_list(
             &self,
         ) -> Result<bags_list::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28334,6 +28413,9 @@ pub mod api {
             } else {
                 Ok(bags_list::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn bags_list_unchecked(&self) -> bags_list::storage::StorageApi<'a, T> {
+            bags_list::storage::StorageApi::new(self.client)
         }
         pub fn configuration(
             &self,
@@ -28351,6 +28433,11 @@ pub mod api {
                 Ok(configuration::storage::StorageApi::new(self.client))
             }
         }
+        pub fn configuration_unchecked(
+            &self,
+        ) -> configuration::storage::StorageApi<'a, T> {
+            configuration::storage::StorageApi::new(self.client)
+        }
         pub fn paras_shared(
             &self,
         ) -> Result<paras_shared::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28366,6 +28453,9 @@ pub mod api {
             } else {
                 Ok(paras_shared::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn paras_shared_unchecked(&self) -> paras_shared::storage::StorageApi<'a, T> {
+            paras_shared::storage::StorageApi::new(self.client)
         }
         pub fn para_inclusion(
             &self,
@@ -28383,6 +28473,11 @@ pub mod api {
                 Ok(para_inclusion::storage::StorageApi::new(self.client))
             }
         }
+        pub fn para_inclusion_unchecked(
+            &self,
+        ) -> para_inclusion::storage::StorageApi<'a, T> {
+            para_inclusion::storage::StorageApi::new(self.client)
+        }
         pub fn para_inherent(
             &self,
         ) -> Result<para_inherent::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28398,6 +28493,11 @@ pub mod api {
             } else {
                 Ok(para_inherent::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn para_inherent_unchecked(
+            &self,
+        ) -> para_inherent::storage::StorageApi<'a, T> {
+            para_inherent::storage::StorageApi::new(self.client)
         }
         pub fn para_scheduler(
             &self,
@@ -28415,6 +28515,11 @@ pub mod api {
                 Ok(para_scheduler::storage::StorageApi::new(self.client))
             }
         }
+        pub fn para_scheduler_unchecked(
+            &self,
+        ) -> para_scheduler::storage::StorageApi<'a, T> {
+            para_scheduler::storage::StorageApi::new(self.client)
+        }
         pub fn paras(
             &self,
         ) -> Result<paras::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28426,6 +28531,9 @@ pub mod api {
             } else {
                 Ok(paras::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn paras_unchecked(&self) -> paras::storage::StorageApi<'a, T> {
+            paras::storage::StorageApi::new(self.client)
         }
         pub fn initializer(
             &self,
@@ -28443,6 +28551,9 @@ pub mod api {
                 Ok(initializer::storage::StorageApi::new(self.client))
             }
         }
+        pub fn initializer_unchecked(&self) -> initializer::storage::StorageApi<'a, T> {
+            initializer::storage::StorageApi::new(self.client)
+        }
         pub fn dmp(
             &self,
         ) -> Result<dmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28454,6 +28565,9 @@ pub mod api {
             } else {
                 Ok(dmp::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn dmp_unchecked(&self) -> dmp::storage::StorageApi<'a, T> {
+            dmp::storage::StorageApi::new(self.client)
         }
         pub fn ump(
             &self,
@@ -28467,6 +28581,9 @@ pub mod api {
                 Ok(ump::storage::StorageApi::new(self.client))
             }
         }
+        pub fn ump_unchecked(&self) -> ump::storage::StorageApi<'a, T> {
+            ump::storage::StorageApi::new(self.client)
+        }
         pub fn hrmp(
             &self,
         ) -> Result<hrmp::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28478,6 +28595,9 @@ pub mod api {
             } else {
                 Ok(hrmp::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn hrmp_unchecked(&self) -> hrmp::storage::StorageApi<'a, T> {
+            hrmp::storage::StorageApi::new(self.client)
         }
         pub fn para_session_info(
             &self,
@@ -28495,6 +28615,11 @@ pub mod api {
                 Ok(para_session_info::storage::StorageApi::new(self.client))
             }
         }
+        pub fn para_session_info_unchecked(
+            &self,
+        ) -> para_session_info::storage::StorageApi<'a, T> {
+            para_session_info::storage::StorageApi::new(self.client)
+        }
         pub fn registrar(
             &self,
         ) -> Result<registrar::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28508,6 +28633,9 @@ pub mod api {
                 Ok(registrar::storage::StorageApi::new(self.client))
             }
         }
+        pub fn registrar_unchecked(&self) -> registrar::storage::StorageApi<'a, T> {
+            registrar::storage::StorageApi::new(self.client)
+        }
         pub fn slots(
             &self,
         ) -> Result<slots::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
@@ -28519,6 +28647,9 @@ pub mod api {
             } else {
                 Ok(slots::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn slots_unchecked(&self) -> slots::storage::StorageApi<'a, T> {
+            slots::storage::StorageApi::new(self.client)
         }
         pub fn auctions(
             &self,
@@ -28533,6 +28664,9 @@ pub mod api {
                 Ok(auctions::storage::StorageApi::new(self.client))
             }
         }
+        pub fn auctions_unchecked(&self) -> auctions::storage::StorageApi<'a, T> {
+            auctions::storage::StorageApi::new(self.client)
+        }
         pub fn crowdloan(
             &self,
         ) -> Result<crowdloan::storage::StorageApi<'a, T>, ::subxt::MetadataError>
@@ -28545,6 +28679,9 @@ pub mod api {
             } else {
                 Ok(crowdloan::storage::StorageApi::new(self.client))
             }
+        }
+        pub fn crowdloan_unchecked(&self) -> crowdloan::storage::StorageApi<'a, T> {
+            crowdloan::storage::StorageApi::new(self.client)
         }
         pub fn xcm_pallet(
             &self,
@@ -28562,155 +28699,7 @@ pub mod api {
                 Ok(xcm_pallet::storage::StorageApi::new(self.client))
             }
         }
-    }
-    pub struct StorageApiUnchecked<'a, T: ::subxt::Config> {
-        client: &'a ::subxt::Client<T>,
-    }
-    impl<'a, T> StorageApiUnchecked<'a, T>
-    where
-        T: ::subxt::Config,
-    {
-        pub fn system(&self) -> system::storage::StorageApi<'a, T> {
-            system::storage::StorageApi::new(self.client)
-        }
-        pub fn scheduler(&self) -> scheduler::storage::StorageApi<'a, T> {
-            scheduler::storage::StorageApi::new(self.client)
-        }
-        pub fn preimage(&self) -> preimage::storage::StorageApi<'a, T> {
-            preimage::storage::StorageApi::new(self.client)
-        }
-        pub fn babe(&self) -> babe::storage::StorageApi<'a, T> {
-            babe::storage::StorageApi::new(self.client)
-        }
-        pub fn timestamp(&self) -> timestamp::storage::StorageApi<'a, T> {
-            timestamp::storage::StorageApi::new(self.client)
-        }
-        pub fn indices(&self) -> indices::storage::StorageApi<'a, T> {
-            indices::storage::StorageApi::new(self.client)
-        }
-        pub fn balances(&self) -> balances::storage::StorageApi<'a, T> {
-            balances::storage::StorageApi::new(self.client)
-        }
-        pub fn transaction_payment(
-            &self,
-        ) -> transaction_payment::storage::StorageApi<'a, T> {
-            transaction_payment::storage::StorageApi::new(self.client)
-        }
-        pub fn authorship(&self) -> authorship::storage::StorageApi<'a, T> {
-            authorship::storage::StorageApi::new(self.client)
-        }
-        pub fn staking(&self) -> staking::storage::StorageApi<'a, T> {
-            staking::storage::StorageApi::new(self.client)
-        }
-        pub fn offences(&self) -> offences::storage::StorageApi<'a, T> {
-            offences::storage::StorageApi::new(self.client)
-        }
-        pub fn session(&self) -> session::storage::StorageApi<'a, T> {
-            session::storage::StorageApi::new(self.client)
-        }
-        pub fn grandpa(&self) -> grandpa::storage::StorageApi<'a, T> {
-            grandpa::storage::StorageApi::new(self.client)
-        }
-        pub fn im_online(&self) -> im_online::storage::StorageApi<'a, T> {
-            im_online::storage::StorageApi::new(self.client)
-        }
-        pub fn democracy(&self) -> democracy::storage::StorageApi<'a, T> {
-            democracy::storage::StorageApi::new(self.client)
-        }
-        pub fn council(&self) -> council::storage::StorageApi<'a, T> {
-            council::storage::StorageApi::new(self.client)
-        }
-        pub fn technical_committee(
-            &self,
-        ) -> technical_committee::storage::StorageApi<'a, T> {
-            technical_committee::storage::StorageApi::new(self.client)
-        }
-        pub fn phragmen_election(&self) -> phragmen_election::storage::StorageApi<'a, T> {
-            phragmen_election::storage::StorageApi::new(self.client)
-        }
-        pub fn technical_membership(
-            &self,
-        ) -> technical_membership::storage::StorageApi<'a, T> {
-            technical_membership::storage::StorageApi::new(self.client)
-        }
-        pub fn treasury(&self) -> treasury::storage::StorageApi<'a, T> {
-            treasury::storage::StorageApi::new(self.client)
-        }
-        pub fn claims(&self) -> claims::storage::StorageApi<'a, T> {
-            claims::storage::StorageApi::new(self.client)
-        }
-        pub fn vesting(&self) -> vesting::storage::StorageApi<'a, T> {
-            vesting::storage::StorageApi::new(self.client)
-        }
-        pub fn identity(&self) -> identity::storage::StorageApi<'a, T> {
-            identity::storage::StorageApi::new(self.client)
-        }
-        pub fn proxy(&self) -> proxy::storage::StorageApi<'a, T> {
-            proxy::storage::StorageApi::new(self.client)
-        }
-        pub fn multisig(&self) -> multisig::storage::StorageApi<'a, T> {
-            multisig::storage::StorageApi::new(self.client)
-        }
-        pub fn bounties(&self) -> bounties::storage::StorageApi<'a, T> {
-            bounties::storage::StorageApi::new(self.client)
-        }
-        pub fn tips(&self) -> tips::storage::StorageApi<'a, T> {
-            tips::storage::StorageApi::new(self.client)
-        }
-        pub fn election_provider_multi_phase(
-            &self,
-        ) -> election_provider_multi_phase::storage::StorageApi<'a, T> {
-            election_provider_multi_phase::storage::StorageApi::new(self.client)
-        }
-        pub fn bags_list(&self) -> bags_list::storage::StorageApi<'a, T> {
-            bags_list::storage::StorageApi::new(self.client)
-        }
-        pub fn configuration(&self) -> configuration::storage::StorageApi<'a, T> {
-            configuration::storage::StorageApi::new(self.client)
-        }
-        pub fn paras_shared(&self) -> paras_shared::storage::StorageApi<'a, T> {
-            paras_shared::storage::StorageApi::new(self.client)
-        }
-        pub fn para_inclusion(&self) -> para_inclusion::storage::StorageApi<'a, T> {
-            para_inclusion::storage::StorageApi::new(self.client)
-        }
-        pub fn para_inherent(&self) -> para_inherent::storage::StorageApi<'a, T> {
-            para_inherent::storage::StorageApi::new(self.client)
-        }
-        pub fn para_scheduler(&self) -> para_scheduler::storage::StorageApi<'a, T> {
-            para_scheduler::storage::StorageApi::new(self.client)
-        }
-        pub fn paras(&self) -> paras::storage::StorageApi<'a, T> {
-            paras::storage::StorageApi::new(self.client)
-        }
-        pub fn initializer(&self) -> initializer::storage::StorageApi<'a, T> {
-            initializer::storage::StorageApi::new(self.client)
-        }
-        pub fn dmp(&self) -> dmp::storage::StorageApi<'a, T> {
-            dmp::storage::StorageApi::new(self.client)
-        }
-        pub fn ump(&self) -> ump::storage::StorageApi<'a, T> {
-            ump::storage::StorageApi::new(self.client)
-        }
-        pub fn hrmp(&self) -> hrmp::storage::StorageApi<'a, T> {
-            hrmp::storage::StorageApi::new(self.client)
-        }
-        pub fn para_session_info(&self) -> para_session_info::storage::StorageApi<'a, T> {
-            para_session_info::storage::StorageApi::new(self.client)
-        }
-        pub fn registrar(&self) -> registrar::storage::StorageApi<'a, T> {
-            registrar::storage::StorageApi::new(self.client)
-        }
-        pub fn slots(&self) -> slots::storage::StorageApi<'a, T> {
-            slots::storage::StorageApi::new(self.client)
-        }
-        pub fn auctions(&self) -> auctions::storage::StorageApi<'a, T> {
-            auctions::storage::StorageApi::new(self.client)
-        }
-        pub fn crowdloan(&self) -> crowdloan::storage::StorageApi<'a, T> {
-            crowdloan::storage::StorageApi::new(self.client)
-        }
-        pub fn xcm_pallet(&self) -> xcm_pallet::storage::StorageApi<'a, T> {
+        pub fn xcm_pallet_unchecked(&self) -> xcm_pallet::storage::StorageApi<'a, T> {
             xcm_pallet::storage::StorageApi::new(self.client)
         }
     }
@@ -28723,12 +28712,6 @@ pub mod api {
         T: ::subxt::Config,
         X: ::subxt::SignedExtra<T>,
     {
-        pub fn skip_pallet_validation(self) -> TransactionApiUnchecked<'a, T, X> {
-            TransactionApiUnchecked {
-                client: self.client,
-                marker: self.marker,
-            }
-        }
         pub fn system(
             &self,
         ) -> Result<system::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28741,6 +28724,9 @@ pub mod api {
             } else {
                 Ok(system::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn system_unchecked(&self) -> system::calls::TransactionApi<'a, T, X> {
+            system::calls::TransactionApi::new(self.client)
         }
         pub fn scheduler(
             &self,
@@ -28755,6 +28741,9 @@ pub mod api {
                 Ok(scheduler::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn scheduler_unchecked(&self) -> scheduler::calls::TransactionApi<'a, T, X> {
+            scheduler::calls::TransactionApi::new(self.client)
+        }
         pub fn preimage(
             &self,
         ) -> Result<preimage::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28767,6 +28756,9 @@ pub mod api {
             } else {
                 Ok(preimage::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn preimage_unchecked(&self) -> preimage::calls::TransactionApi<'a, T, X> {
+            preimage::calls::TransactionApi::new(self.client)
         }
         pub fn babe(
             &self,
@@ -28781,6 +28773,9 @@ pub mod api {
                 Ok(babe::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn babe_unchecked(&self) -> babe::calls::TransactionApi<'a, T, X> {
+            babe::calls::TransactionApi::new(self.client)
+        }
         pub fn timestamp(
             &self,
         ) -> Result<timestamp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28793,6 +28788,9 @@ pub mod api {
             } else {
                 Ok(timestamp::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn timestamp_unchecked(&self) -> timestamp::calls::TransactionApi<'a, T, X> {
+            timestamp::calls::TransactionApi::new(self.client)
         }
         pub fn indices(
             &self,
@@ -28807,6 +28805,9 @@ pub mod api {
                 Ok(indices::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn indices_unchecked(&self) -> indices::calls::TransactionApi<'a, T, X> {
+            indices::calls::TransactionApi::new(self.client)
+        }
         pub fn balances(
             &self,
         ) -> Result<balances::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28819,6 +28820,9 @@ pub mod api {
             } else {
                 Ok(balances::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn balances_unchecked(&self) -> balances::calls::TransactionApi<'a, T, X> {
+            balances::calls::TransactionApi::new(self.client)
         }
         pub fn authorship(
             &self,
@@ -28836,6 +28840,11 @@ pub mod api {
                 Ok(authorship::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn authorship_unchecked(
+            &self,
+        ) -> authorship::calls::TransactionApi<'a, T, X> {
+            authorship::calls::TransactionApi::new(self.client)
+        }
         pub fn staking(
             &self,
         ) -> Result<staking::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28848,6 +28857,9 @@ pub mod api {
             } else {
                 Ok(staking::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn staking_unchecked(&self) -> staking::calls::TransactionApi<'a, T, X> {
+            staking::calls::TransactionApi::new(self.client)
         }
         pub fn session(
             &self,
@@ -28862,6 +28874,9 @@ pub mod api {
                 Ok(session::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn session_unchecked(&self) -> session::calls::TransactionApi<'a, T, X> {
+            session::calls::TransactionApi::new(self.client)
+        }
         pub fn grandpa(
             &self,
         ) -> Result<grandpa::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28874,6 +28889,9 @@ pub mod api {
             } else {
                 Ok(grandpa::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn grandpa_unchecked(&self) -> grandpa::calls::TransactionApi<'a, T, X> {
+            grandpa::calls::TransactionApi::new(self.client)
         }
         pub fn im_online(
             &self,
@@ -28888,6 +28906,9 @@ pub mod api {
                 Ok(im_online::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn im_online_unchecked(&self) -> im_online::calls::TransactionApi<'a, T, X> {
+            im_online::calls::TransactionApi::new(self.client)
+        }
         pub fn democracy(
             &self,
         ) -> Result<democracy::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28901,6 +28922,9 @@ pub mod api {
                 Ok(democracy::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn democracy_unchecked(&self) -> democracy::calls::TransactionApi<'a, T, X> {
+            democracy::calls::TransactionApi::new(self.client)
+        }
         pub fn council(
             &self,
         ) -> Result<council::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28913,6 +28937,9 @@ pub mod api {
             } else {
                 Ok(council::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn council_unchecked(&self) -> council::calls::TransactionApi<'a, T, X> {
+            council::calls::TransactionApi::new(self.client)
         }
         pub fn technical_committee(
             &self,
@@ -28932,6 +28959,11 @@ pub mod api {
                 Ok(technical_committee::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn technical_committee_unchecked(
+            &self,
+        ) -> technical_committee::calls::TransactionApi<'a, T, X> {
+            technical_committee::calls::TransactionApi::new(self.client)
+        }
         pub fn phragmen_election(
             &self,
         ) -> Result<
@@ -28949,6 +28981,11 @@ pub mod api {
             } else {
                 Ok(phragmen_election::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn phragmen_election_unchecked(
+            &self,
+        ) -> phragmen_election::calls::TransactionApi<'a, T, X> {
+            phragmen_election::calls::TransactionApi::new(self.client)
         }
         pub fn technical_membership(
             &self,
@@ -28970,6 +29007,11 @@ pub mod api {
                 ))
             }
         }
+        pub fn technical_membership_unchecked(
+            &self,
+        ) -> technical_membership::calls::TransactionApi<'a, T, X> {
+            technical_membership::calls::TransactionApi::new(self.client)
+        }
         pub fn treasury(
             &self,
         ) -> Result<treasury::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -28982,6 +29024,9 @@ pub mod api {
             } else {
                 Ok(treasury::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn treasury_unchecked(&self) -> treasury::calls::TransactionApi<'a, T, X> {
+            treasury::calls::TransactionApi::new(self.client)
         }
         pub fn claims(
             &self,
@@ -28996,6 +29041,9 @@ pub mod api {
                 Ok(claims::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn claims_unchecked(&self) -> claims::calls::TransactionApi<'a, T, X> {
+            claims::calls::TransactionApi::new(self.client)
+        }
         pub fn vesting(
             &self,
         ) -> Result<vesting::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29008,6 +29056,9 @@ pub mod api {
             } else {
                 Ok(vesting::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn vesting_unchecked(&self) -> vesting::calls::TransactionApi<'a, T, X> {
+            vesting::calls::TransactionApi::new(self.client)
         }
         pub fn utility(
             &self,
@@ -29022,6 +29073,9 @@ pub mod api {
                 Ok(utility::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn utility_unchecked(&self) -> utility::calls::TransactionApi<'a, T, X> {
+            utility::calls::TransactionApi::new(self.client)
+        }
         pub fn identity(
             &self,
         ) -> Result<identity::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29034,6 +29088,9 @@ pub mod api {
             } else {
                 Ok(identity::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn identity_unchecked(&self) -> identity::calls::TransactionApi<'a, T, X> {
+            identity::calls::TransactionApi::new(self.client)
         }
         pub fn proxy(
             &self,
@@ -29048,6 +29105,9 @@ pub mod api {
                 Ok(proxy::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn proxy_unchecked(&self) -> proxy::calls::TransactionApi<'a, T, X> {
+            proxy::calls::TransactionApi::new(self.client)
+        }
         pub fn multisig(
             &self,
         ) -> Result<multisig::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29060,6 +29120,9 @@ pub mod api {
             } else {
                 Ok(multisig::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn multisig_unchecked(&self) -> multisig::calls::TransactionApi<'a, T, X> {
+            multisig::calls::TransactionApi::new(self.client)
         }
         pub fn bounties(
             &self,
@@ -29074,6 +29137,9 @@ pub mod api {
                 Ok(bounties::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn bounties_unchecked(&self) -> bounties::calls::TransactionApi<'a, T, X> {
+            bounties::calls::TransactionApi::new(self.client)
+        }
         pub fn tips(
             &self,
         ) -> Result<tips::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29086,6 +29152,9 @@ pub mod api {
             } else {
                 Ok(tips::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn tips_unchecked(&self) -> tips::calls::TransactionApi<'a, T, X> {
+            tips::calls::TransactionApi::new(self.client)
         }
         pub fn election_provider_multi_phase(
             &self,
@@ -29107,6 +29176,11 @@ pub mod api {
                 ))
             }
         }
+        pub fn election_provider_multi_phase_unchecked(
+            &self,
+        ) -> election_provider_multi_phase::calls::TransactionApi<'a, T, X> {
+            election_provider_multi_phase::calls::TransactionApi::new(self.client)
+        }
         pub fn bags_list(
             &self,
         ) -> Result<bags_list::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29119,6 +29193,9 @@ pub mod api {
             } else {
                 Ok(bags_list::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn bags_list_unchecked(&self) -> bags_list::calls::TransactionApi<'a, T, X> {
+            bags_list::calls::TransactionApi::new(self.client)
         }
         pub fn configuration(
             &self,
@@ -29136,6 +29213,11 @@ pub mod api {
                 Ok(configuration::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn configuration_unchecked(
+            &self,
+        ) -> configuration::calls::TransactionApi<'a, T, X> {
+            configuration::calls::TransactionApi::new(self.client)
+        }
         pub fn paras_shared(
             &self,
         ) -> Result<paras_shared::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29151,6 +29233,11 @@ pub mod api {
             } else {
                 Ok(paras_shared::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn paras_shared_unchecked(
+            &self,
+        ) -> paras_shared::calls::TransactionApi<'a, T, X> {
+            paras_shared::calls::TransactionApi::new(self.client)
         }
         pub fn para_inclusion(
             &self,
@@ -29168,6 +29255,11 @@ pub mod api {
                 Ok(para_inclusion::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn para_inclusion_unchecked(
+            &self,
+        ) -> para_inclusion::calls::TransactionApi<'a, T, X> {
+            para_inclusion::calls::TransactionApi::new(self.client)
+        }
         pub fn para_inherent(
             &self,
         ) -> Result<para_inherent::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29184,6 +29276,11 @@ pub mod api {
                 Ok(para_inherent::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn para_inherent_unchecked(
+            &self,
+        ) -> para_inherent::calls::TransactionApi<'a, T, X> {
+            para_inherent::calls::TransactionApi::new(self.client)
+        }
         pub fn paras(
             &self,
         ) -> Result<paras::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29196,6 +29293,9 @@ pub mod api {
             } else {
                 Ok(paras::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn paras_unchecked(&self) -> paras::calls::TransactionApi<'a, T, X> {
+            paras::calls::TransactionApi::new(self.client)
         }
         pub fn initializer(
             &self,
@@ -29213,6 +29313,11 @@ pub mod api {
                 Ok(initializer::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn initializer_unchecked(
+            &self,
+        ) -> initializer::calls::TransactionApi<'a, T, X> {
+            initializer::calls::TransactionApi::new(self.client)
+        }
         pub fn dmp(
             &self,
         ) -> Result<dmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29225,6 +29330,9 @@ pub mod api {
             } else {
                 Ok(dmp::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn dmp_unchecked(&self) -> dmp::calls::TransactionApi<'a, T, X> {
+            dmp::calls::TransactionApi::new(self.client)
         }
         pub fn ump(
             &self,
@@ -29239,6 +29347,9 @@ pub mod api {
                 Ok(ump::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn ump_unchecked(&self) -> ump::calls::TransactionApi<'a, T, X> {
+            ump::calls::TransactionApi::new(self.client)
+        }
         pub fn hrmp(
             &self,
         ) -> Result<hrmp::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29251,6 +29362,9 @@ pub mod api {
             } else {
                 Ok(hrmp::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn hrmp_unchecked(&self) -> hrmp::calls::TransactionApi<'a, T, X> {
+            hrmp::calls::TransactionApi::new(self.client)
         }
         pub fn registrar(
             &self,
@@ -29265,6 +29379,9 @@ pub mod api {
                 Ok(registrar::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn registrar_unchecked(&self) -> registrar::calls::TransactionApi<'a, T, X> {
+            registrar::calls::TransactionApi::new(self.client)
+        }
         pub fn slots(
             &self,
         ) -> Result<slots::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29277,6 +29394,9 @@ pub mod api {
             } else {
                 Ok(slots::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn slots_unchecked(&self) -> slots::calls::TransactionApi<'a, T, X> {
+            slots::calls::TransactionApi::new(self.client)
         }
         pub fn auctions(
             &self,
@@ -29291,6 +29411,9 @@ pub mod api {
                 Ok(auctions::calls::TransactionApi::new(self.client))
             }
         }
+        pub fn auctions_unchecked(&self) -> auctions::calls::TransactionApi<'a, T, X> {
+            auctions::calls::TransactionApi::new(self.client)
+        }
         pub fn crowdloan(
             &self,
         ) -> Result<crowdloan::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError>
@@ -29303,6 +29426,9 @@ pub mod api {
             } else {
                 Ok(crowdloan::calls::TransactionApi::new(self.client))
             }
+        }
+        pub fn crowdloan_unchecked(&self) -> crowdloan::calls::TransactionApi<'a, T, X> {
+            crowdloan::calls::TransactionApi::new(self.client)
         }
         pub fn xcm_pallet(
             &self,
@@ -29320,148 +29446,9 @@ pub mod api {
                 Ok(xcm_pallet::calls::TransactionApi::new(self.client))
             }
         }
-    }
-    pub struct TransactionApiUnchecked<'a, T: ::subxt::Config, X> {
-        client: &'a ::subxt::Client<T>,
-        marker: ::core::marker::PhantomData<X>,
-    }
-    impl<'a, T, X> TransactionApiUnchecked<'a, T, X>
-    where
-        T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
-    {
-        pub fn system(&self) -> system::calls::TransactionApi<'a, T, X> {
-            system::calls::TransactionApi::new(self.client)
-        }
-        pub fn scheduler(&self) -> scheduler::calls::TransactionApi<'a, T, X> {
-            scheduler::calls::TransactionApi::new(self.client)
-        }
-        pub fn preimage(&self) -> preimage::calls::TransactionApi<'a, T, X> {
-            preimage::calls::TransactionApi::new(self.client)
-        }
-        pub fn babe(&self) -> babe::calls::TransactionApi<'a, T, X> {
-            babe::calls::TransactionApi::new(self.client)
-        }
-        pub fn timestamp(&self) -> timestamp::calls::TransactionApi<'a, T, X> {
-            timestamp::calls::TransactionApi::new(self.client)
-        }
-        pub fn indices(&self) -> indices::calls::TransactionApi<'a, T, X> {
-            indices::calls::TransactionApi::new(self.client)
-        }
-        pub fn balances(&self) -> balances::calls::TransactionApi<'a, T, X> {
-            balances::calls::TransactionApi::new(self.client)
-        }
-        pub fn authorship(&self) -> authorship::calls::TransactionApi<'a, T, X> {
-            authorship::calls::TransactionApi::new(self.client)
-        }
-        pub fn staking(&self) -> staking::calls::TransactionApi<'a, T, X> {
-            staking::calls::TransactionApi::new(self.client)
-        }
-        pub fn session(&self) -> session::calls::TransactionApi<'a, T, X> {
-            session::calls::TransactionApi::new(self.client)
-        }
-        pub fn grandpa(&self) -> grandpa::calls::TransactionApi<'a, T, X> {
-            grandpa::calls::TransactionApi::new(self.client)
-        }
-        pub fn im_online(&self) -> im_online::calls::TransactionApi<'a, T, X> {
-            im_online::calls::TransactionApi::new(self.client)
-        }
-        pub fn democracy(&self) -> democracy::calls::TransactionApi<'a, T, X> {
-            democracy::calls::TransactionApi::new(self.client)
-        }
-        pub fn council(&self) -> council::calls::TransactionApi<'a, T, X> {
-            council::calls::TransactionApi::new(self.client)
-        }
-        pub fn technical_committee(
+        pub fn xcm_pallet_unchecked(
             &self,
-        ) -> technical_committee::calls::TransactionApi<'a, T, X> {
-            technical_committee::calls::TransactionApi::new(self.client)
-        }
-        pub fn phragmen_election(
-            &self,
-        ) -> phragmen_election::calls::TransactionApi<'a, T, X> {
-            phragmen_election::calls::TransactionApi::new(self.client)
-        }
-        pub fn technical_membership(
-            &self,
-        ) -> technical_membership::calls::TransactionApi<'a, T, X> {
-            technical_membership::calls::TransactionApi::new(self.client)
-        }
-        pub fn treasury(&self) -> treasury::calls::TransactionApi<'a, T, X> {
-            treasury::calls::TransactionApi::new(self.client)
-        }
-        pub fn claims(&self) -> claims::calls::TransactionApi<'a, T, X> {
-            claims::calls::TransactionApi::new(self.client)
-        }
-        pub fn vesting(&self) -> vesting::calls::TransactionApi<'a, T, X> {
-            vesting::calls::TransactionApi::new(self.client)
-        }
-        pub fn utility(&self) -> utility::calls::TransactionApi<'a, T, X> {
-            utility::calls::TransactionApi::new(self.client)
-        }
-        pub fn identity(&self) -> identity::calls::TransactionApi<'a, T, X> {
-            identity::calls::TransactionApi::new(self.client)
-        }
-        pub fn proxy(&self) -> proxy::calls::TransactionApi<'a, T, X> {
-            proxy::calls::TransactionApi::new(self.client)
-        }
-        pub fn multisig(&self) -> multisig::calls::TransactionApi<'a, T, X> {
-            multisig::calls::TransactionApi::new(self.client)
-        }
-        pub fn bounties(&self) -> bounties::calls::TransactionApi<'a, T, X> {
-            bounties::calls::TransactionApi::new(self.client)
-        }
-        pub fn tips(&self) -> tips::calls::TransactionApi<'a, T, X> {
-            tips::calls::TransactionApi::new(self.client)
-        }
-        pub fn election_provider_multi_phase(
-            &self,
-        ) -> election_provider_multi_phase::calls::TransactionApi<'a, T, X> {
-            election_provider_multi_phase::calls::TransactionApi::new(self.client)
-        }
-        pub fn bags_list(&self) -> bags_list::calls::TransactionApi<'a, T, X> {
-            bags_list::calls::TransactionApi::new(self.client)
-        }
-        pub fn configuration(&self) -> configuration::calls::TransactionApi<'a, T, X> {
-            configuration::calls::TransactionApi::new(self.client)
-        }
-        pub fn paras_shared(&self) -> paras_shared::calls::TransactionApi<'a, T, X> {
-            paras_shared::calls::TransactionApi::new(self.client)
-        }
-        pub fn para_inclusion(&self) -> para_inclusion::calls::TransactionApi<'a, T, X> {
-            para_inclusion::calls::TransactionApi::new(self.client)
-        }
-        pub fn para_inherent(&self) -> para_inherent::calls::TransactionApi<'a, T, X> {
-            para_inherent::calls::TransactionApi::new(self.client)
-        }
-        pub fn paras(&self) -> paras::calls::TransactionApi<'a, T, X> {
-            paras::calls::TransactionApi::new(self.client)
-        }
-        pub fn initializer(&self) -> initializer::calls::TransactionApi<'a, T, X> {
-            initializer::calls::TransactionApi::new(self.client)
-        }
-        pub fn dmp(&self) -> dmp::calls::TransactionApi<'a, T, X> {
-            dmp::calls::TransactionApi::new(self.client)
-        }
-        pub fn ump(&self) -> ump::calls::TransactionApi<'a, T, X> {
-            ump::calls::TransactionApi::new(self.client)
-        }
-        pub fn hrmp(&self) -> hrmp::calls::TransactionApi<'a, T, X> {
-            hrmp::calls::TransactionApi::new(self.client)
-        }
-        pub fn registrar(&self) -> registrar::calls::TransactionApi<'a, T, X> {
-            registrar::calls::TransactionApi::new(self.client)
-        }
-        pub fn slots(&self) -> slots::calls::TransactionApi<'a, T, X> {
-            slots::calls::TransactionApi::new(self.client)
-        }
-        pub fn auctions(&self) -> auctions::calls::TransactionApi<'a, T, X> {
-            auctions::calls::TransactionApi::new(self.client)
-        }
-        pub fn crowdloan(&self) -> crowdloan::calls::TransactionApi<'a, T, X> {
-            crowdloan::calls::TransactionApi::new(self.client)
-        }
-        pub fn xcm_pallet(&self) -> xcm_pallet::calls::TransactionApi<'a, T, X> {
+        ) -> xcm_pallet::calls::TransactionApi<'a, T, X> {
             xcm_pallet::calls::TransactionApi::new(self.client)
         }
     }
