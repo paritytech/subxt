@@ -72,7 +72,7 @@ impl TestContext {
 pub async fn test_context() -> TestContext {
     env_logger::try_init().ok();
     let node_proc = test_node_process_with(AccountKeyring::Alice).await;
-    let api = node_proc.client().clone().to_runtime_api().unwrap();
+    let api = node_proc.client().clone().to_runtime_api();
     TestContext { node_proc, api }
 }
 
