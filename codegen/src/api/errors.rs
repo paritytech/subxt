@@ -22,6 +22,7 @@ use scale_info::{
     form::PortableForm,
     Field,
     TypeDef,
+    TypeDefPrimitive,
 };
 
 /// Different substrate versions will have a different `DispatchError::Module`.
@@ -110,10 +111,47 @@ fn module_error_type(
             abort_call_site!("sp_runtime::ModuleError expected to contain error field")
         });
 
-    if error_field.type_name() == Some(&"u8".to_string()) {
-        ModuleErrorType::LegacyError
-    } else {
-        ModuleErrorType::ArrayError
+    // Resolve the error type from the metadata.
+    let error_field_ty = metadata
+        .types
+        .resolve(error_field.ty().id())
+        .unwrap_or_else(|| {
+            abort_call_site!("sp_runtime::ModuleError::error type expected in metadata")
+        });
+
+    match error_field_ty.type_def() {
+        // Check for legacy error type.
+        TypeDef::Primitive(TypeDefPrimitive::U8) => ModuleErrorType::LegacyError,
+        TypeDef::Array(array) => {
+            // Check new error type of len 4 and type u8.
+            if array.len() != 4 {
+                abort_call_site!(
+                    "sp_runtime::ModuleError::error array length is not 4"
+                );
+            }
+
+            let array_ty = metadata
+                .types
+                .resolve(array.type_param().id())
+                .unwrap_or_else(|| {
+                    abort_call_site!(
+                        "sp_runtime::ModuleError::error array type expected in metadata"
+                    )
+                });
+
+            if let TypeDef::Primitive(TypeDefPrimitive::U8) = array_ty.type_def() {
+                ModuleErrorType::ArrayError
+            } else {
+                abort_call_site!(
+                    "sp_runtime::ModuleError::error array type expected to be u8"
+                )
+            }
+        }
+        _ => {
+            abort_call_site!(
+                "sp_runtime::ModuleError::error array type or primitive expected"
+            )
+        }
     }
 }
 
