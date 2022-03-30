@@ -44,7 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>()?;
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
     // Subscribe to any events that occur:
     let mut event_sub = api.events().subscribe().await?;
@@ -56,8 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .build()
             .await
             .unwrap()
-            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>()
-            .unwrap();
+            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
 
         let mut transfer_amount = 1_000_000_000;
 

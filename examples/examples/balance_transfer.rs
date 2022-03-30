@@ -40,28 +40,26 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    // Validate full metadata compatibility.
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>()?;
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+
+    // Validate full metadata compatibility.
+    api.validate_metadata()?;
+
     // Skip the pallet metadata compatibility check.
     let hash = api
         .tx()
-        .skip_pallet_validation()
-        .balances()
+        .balances_unchecked()
         .transfer(dest, 10_000)
         .sign_and_submit(&signer)
         .await?;
 
-    println!("Balance transfer extrinsic submitted: {}", hash);
-
-    // Skip the full metadata compatibility.
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .skip_metadata_validation()
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+    println!(
+        "Balance transfer extrinsic submitted (without pallet metadata validation): {}",
+        hash
+    );
 
     // Validate pallet metadata compatibility.
     let hash = api
