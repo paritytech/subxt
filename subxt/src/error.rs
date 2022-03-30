@@ -182,6 +182,20 @@ pub struct ModuleError {
     pub error: String,
     /// A description of the error.
     pub description: Vec<String>,
+    /// A raw byte representation of the error.
+    pub raw: ModuleErrorRaw,
+}
+
+/// The raw error details about a module error that has occurred.
+///
+/// **Note**: Structure used to obtain the underlying bytes of a ModuleError.
+#[derive(Clone, Debug, thiserror::Error)]
+#[error("Pallet index {pallet_index}: raw error: {error:?}")]
+pub struct ModuleErrorRaw {
+    /// Index of the pallet that the error came from.
+    pub pallet_index: u8,
+    /// Raw error bytes.
+    pub error: [u8; 4],
 }
 
 /// This trait is automatically implemented for the generated `DispatchError`,
@@ -190,5 +204,5 @@ pub struct ModuleError {
 pub trait HasModuleError {
     /// If the error has a `Module` variant, return a tuple of the
     /// pallet index and error index. Else, return `None`.
-    fn module_error_indices(&self) -> Option<(u8, u8)>;
+    fn module_error_indices(&self) -> Option<ModuleErrorRaw>;
 }
