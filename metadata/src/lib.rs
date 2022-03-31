@@ -368,6 +368,16 @@ mod tests {
         }
     }
 
+    // Define recursive types.
+    #[derive(scale_info::TypeInfo)]
+    struct A {
+        pub b: Box<B>,
+    }
+    #[derive(scale_info::TypeInfo)]
+    struct B {
+        pub a: Box<A>,
+    }
+
     fn build_default_extrinsic() -> ExtrinsicMetadata {
         ExtrinsicMetadata {
             ty: meta_type::<()>(),
@@ -431,6 +441,47 @@ mod tests {
         // Changing pallet order must still result in a deterministic unique hash.
         assert_eq!(hash.metadata_hash, hash_swap.metadata_hash);
         assert_eq!(hash.pallet_hashes, hash_swap.pallet_hashes);
+
+        assert_eq!(
+            hex::encode(hash.metadata_hash),
+            "59f7633d9bf2daefaf6cd5788a5da8f7f787047e2d2d2ace4b3b142b7208f68f"
+        );
+        // Check cache for pallet correctness.
+        assert_eq!(hash.pallet_hashes.len(), 2);
+        assert_eq!(
+            hex::encode(hash.pallet_hashes.get("First").unwrap()),
+            "eae6e2161f1260646e2342ba4603a7c2a409400fa3de2032fc0627de9050a1b4"
+        );
+        assert_eq!(
+            hex::encode(hash.pallet_hashes.get("Second").unwrap()),
+            "7b569e14819175918ac2c0e578187e1b0639b4712b812493b7ac198936b07c54"
+        );
+    }
+
+    #[test]
+    fn recursive_type() {
+        let mut pallet = build_default_pallet();
+        pallet.calls = Some(PalletCallMetadata {
+            ty: meta_type::<A>(),
+        });
+        let metadata = RuntimeMetadataLastVersion::new(
+            vec![pallet],
+            build_default_extrinsic(),
+            meta_type::<()>(),
+        );
+
+        // Check hashing algorithm finishes on a recursive type.
+        let hash = get_metadata_hash(&metadata);
+
+        assert_eq!(
+            hex::encode(hash.metadata_hash),
+            "4276b003813f57cc13216a84862532e148ab305aca9deecb4d8d8128a0eeec66"
+        );
+        // Check pallet is cached.
+        assert_eq!(
+            hex::encode(hash.pallet_hashes.get("Test").unwrap()),
+            "746759affa93c4d36d4efd41e78fd623bb6eb88a7f641cd9c314c59530b63e8c"
+        );
     }
 
     #[test]
