@@ -24,7 +24,6 @@ use crate::{
 };
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
-use subxt::Signer;
 
 #[async_std::test]
 async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
@@ -52,7 +51,7 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .system()
         .remark_with_event(b"remarkable".to_vec())
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?

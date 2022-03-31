@@ -22,18 +22,16 @@ pub(crate) use crate::{
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    extrinsic::ChargeAssetTxPayment,
     Client,
     DefaultConfig,
-    DefaultExtraWithTxPayment,
     PairSigner,
+    SubstrateExtrinsicParams,
 };
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub type NodeRuntimeSignedExtra =
-    DefaultExtraWithTxPayment<DefaultConfig, ChargeAssetTxPayment<DefaultConfig>>;
+pub type NodeRuntimeParams = SubstrateExtrinsicParams<DefaultConfig>;
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
@@ -60,7 +58,7 @@ pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
 
 pub struct TestContext {
     pub node_proc: TestNodeProcess<DefaultConfig>,
-    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeSignedExtra>,
+    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeParams>,
 }
 
 impl TestContext {
@@ -76,8 +74,6 @@ pub async fn test_context() -> TestContext {
     TestContext { node_proc, api }
 }
 
-pub fn pair_signer(
-    pair: Pair,
-) -> PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair> {
+pub fn pair_signer(pair: Pair) -> PairSigner<DefaultConfig, Pair> {
     PairSigner::new(pair)
 }

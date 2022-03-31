@@ -289,7 +289,7 @@ impl RuntimeGenerator {
                 impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,
-                    X: ::subxt::SignedExtra<T>
+                    X: ::subxt::extrinsic::ExtrinsicParams<T>
                 {
                     fn from(client: ::subxt::Client<T>) -> Self {
                         Self { client, marker: ::core::marker::PhantomData }
@@ -299,7 +299,7 @@ impl RuntimeGenerator {
                 impl<'a, T, X> RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,
-                    X: ::subxt::SignedExtra<T>,
+                    X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     pub fn constants(&'a self) -> ConstantsApi<'a, T> {
                         ConstantsApi { client: &self.client }
@@ -371,7 +371,7 @@ impl RuntimeGenerator {
                 impl<'a, T, X> TransactionApi<'a, T, X>
                 where
                     T: ::subxt::Config,
-                    X: ::subxt::SignedExtra<T>,
+                    X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X> {

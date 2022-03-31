@@ -90,12 +90,11 @@ pub use crate::{
         RawEventDetails,
     },
     extrinsic::{
-        DefaultExtra,
-        DefaultExtraWithTxPayment,
         PairSigner,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
+        PolkadotExtrinsicParams,
+        PolkadotExtrinsicParamsBuilder,
+        SubstrateExtrinsicParams,
+        SubstrateExtrinsicParamsBuilder,
     },
     metadata::{
         ErrorMetadata,

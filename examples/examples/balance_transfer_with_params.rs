@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-d96d3bea85-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
@@ -24,14 +24,15 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    sp_core::{
-        sr25519,
-        Pair,
+    extrinsic::{
+        Era,
+        PlainTip,
     },
-    sp_runtime::AccountId32,
     ClientBuilder,
     DefaultConfig,
+    PairSigner,
     PolkadotExtrinsicParams,
+    PolkadotExtrinsicParamsBuilder as Params,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -41,42 +42,28 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let dest = AccountKeyring::Bob.to_account_id().into();
+
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let era = api.storage().staking().active_era(None).await?.unwrap();
-    println!(
-        "Staking active era: index: {:?}, start: {:?}",
-        era.index, era.start
-    );
+    // Configure the transaction tip and era:
+    let tx_params = Params::new()
+        .tip(PlainTip::new(20_000_000_000))
+        .era(Era::Immortal, *api.client.genesis());
 
-    let alice_id = AccountKeyring::Alice.to_account_id();
-    println!("  Alice account id:        {:?}", alice_id);
-
-    // Get Alice' Stash account ID
-    let alice_stash_id: AccountId32 = sr25519::Pair::from_string("//Alice//stash", None)
-        .expect("Could not obtain stash signer pair")
-        .public()
-        .into();
-    println!("  Alice//stash account id: {:?}", alice_stash_id);
-
-    // Map from all locked "stash" accounts to the controller account.
-    let controller_acc = api
-        .storage()
-        .staking()
-        .bonded(&alice_stash_id, None)
-        .await?
-        .unwrap();
-    println!("    account controlled by: {:?}", controller_acc);
-
-    let era_result = api
-        .storage()
-        .staking()
-        .eras_reward_points(&era.index, None)
+    // Send the transaction:
+    let hash = api
+        .tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345)
+        .sign_and_submit(&signer, tx_params)
         .await?;
-    println!("Era reward points: {:?}", era_result);
+
+    println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
 }

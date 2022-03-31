@@ -1,3 +1,4 @@
+// NOTE [jsdw]: generated from polkadot 0.9.18-f6d6ab005d-aarch64-macos
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
@@ -173,7 +174,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -747,23 +748,28 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn block_weights(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_system::limits::BlockWeights,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("BlockWeights")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 242u8, 5u8, 42u8, 1u8, 0u8, 0u8, 0u8, 0u8, 32u8, 74u8,
+                            169u8, 209u8, 1u8, 0u8, 0u8, 64u8, 89u8, 115u8, 7u8, 0u8,
+                            0u8, 0u8, 0u8, 1u8, 192u8, 118u8, 108u8, 143u8, 88u8, 1u8,
+                            0u8, 0u8, 1u8, 0u8, 152u8, 247u8, 62u8, 93u8, 1u8, 0u8, 0u8,
+                            1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 64u8, 89u8,
+                            115u8, 7u8, 0u8, 0u8, 0u8, 0u8, 1u8, 192u8, 254u8, 190u8,
+                            249u8, 204u8, 1u8, 0u8, 0u8, 1u8, 0u8, 32u8, 74u8, 169u8,
+                            209u8, 1u8, 0u8, 0u8, 1u8, 0u8, 136u8, 82u8, 106u8, 116u8,
+                            0u8, 0u8, 0u8, 64u8, 89u8, 115u8, 7u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn block_length(
                     &self,
@@ -771,19 +777,19 @@ pub mod api {
                     runtime_types::frame_system::limits::BlockLength,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("BlockLength")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 0u8, 60u8, 0u8, 0u8, 0u8, 80u8, 0u8, 0u8, 0u8, 80u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn block_hash_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("BlockHashCount")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[96u8, 9u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn db_weight(
                     &self,
@@ -791,10 +797,12 @@ pub mod api {
                     runtime_types::frame_support::weights::RuntimeDbWeight,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("DbWeight")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            64u8, 120u8, 125u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 225u8,
+                            245u8, 5u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn version(
                     &self,
@@ -802,19 +810,38 @@ pub mod api {
                     runtime_types::sp_version::RuntimeVersion,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("Version")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            32u8, 112u8, 111u8, 108u8, 107u8, 97u8, 100u8, 111u8, 116u8,
+                            60u8, 112u8, 97u8, 114u8, 105u8, 116u8, 121u8, 45u8, 112u8,
+                            111u8, 108u8, 107u8, 97u8, 100u8, 111u8, 116u8, 0u8, 0u8,
+                            0u8, 0u8, 220u8, 35u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 56u8,
+                            223u8, 106u8, 203u8, 104u8, 153u8, 7u8, 96u8, 155u8, 4u8,
+                            0u8, 0u8, 0u8, 55u8, 227u8, 151u8, 252u8, 124u8, 145u8,
+                            245u8, 228u8, 1u8, 0u8, 0u8, 0u8, 64u8, 254u8, 58u8, 212u8,
+                            1u8, 248u8, 149u8, 154u8, 5u8, 0u8, 0u8, 0u8, 210u8, 188u8,
+                            152u8, 151u8, 238u8, 208u8, 143u8, 21u8, 3u8, 0u8, 0u8, 0u8,
+                            247u8, 139u8, 39u8, 139u8, 229u8, 63u8, 69u8, 76u8, 2u8, 0u8,
+                            0u8, 0u8, 175u8, 44u8, 2u8, 151u8, 162u8, 62u8, 109u8, 61u8,
+                            2u8, 0u8, 0u8, 0u8, 73u8, 234u8, 175u8, 27u8, 84u8, 138u8,
+                            12u8, 176u8, 1u8, 0u8, 0u8, 0u8, 145u8, 213u8, 223u8, 24u8,
+                            176u8, 210u8, 207u8, 88u8, 1u8, 0u8, 0u8, 0u8, 237u8, 153u8,
+                            197u8, 172u8, 178u8, 94u8, 237u8, 245u8, 3u8, 0u8, 0u8, 0u8,
+                            203u8, 202u8, 37u8, 227u8, 159u8, 20u8, 35u8, 135u8, 2u8,
+                            0u8, 0u8, 0u8, 104u8, 122u8, 212u8, 74u8, 211u8, 127u8, 3u8,
+                            194u8, 1u8, 0u8, 0u8, 0u8, 171u8, 60u8, 5u8, 114u8, 41u8,
+                            31u8, 235u8, 139u8, 1u8, 0u8, 0u8, 0u8, 188u8, 157u8, 137u8,
+                            144u8, 79u8, 91u8, 146u8, 63u8, 1u8, 0u8, 0u8, 0u8, 55u8,
+                            200u8, 187u8, 19u8, 80u8, 169u8, 162u8, 168u8, 1u8, 0u8, 0u8,
+                            0u8, 12u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn ss58_prefix(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("System")?;
-                    let constant = pallet.constant("SS58Prefix")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[0u8, 0u8][..])?)
                 }
             }
         }
@@ -928,7 +955,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1210,30 +1237,23 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn maximum_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Scheduler")?;
-                    let constant = pallet.constant("MaximumWeight")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 128u8, 110u8, 135u8, 116u8, 1u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_scheduled_per_block(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Scheduler")?;
-                    let constant = pallet.constant("MaxScheduledPerBlock")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[50u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -1284,7 +1304,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1526,7 +1546,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -1910,39 +1930,31 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn epoch_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Babe")?;
-                    let constant = pallet.constant("EpochDuration")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[96u8, 9u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn expected_block_time(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Babe")?;
-                    let constant = pallet.constant("ExpectedBlockTime")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[112u8, 23u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Babe")?;
-                    let constant = pallet.constant("MaxAuthorities")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[160u8, 134u8, 1u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -1970,7 +1982,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2041,21 +2053,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn minimum_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Timestamp")?;
-                    let constant = pallet.constant("MinimumPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[184u8, 11u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -2132,7 +2138,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2303,21 +2309,18 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Indices")?;
-                    let constant = pallet.constant("Deposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 232u8, 118u8, 72u8, 23u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -2418,7 +2421,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -2797,39 +2800,34 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn existential_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Balances")?;
-                    let constant = pallet.constant("ExistentialDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_locks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Balances")?;
-                    let constant = pallet.constant("MaxLocks")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[50u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_reserves(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Balances")?;
-                    let constant = pallet.constant("MaxReserves")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[50u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -2888,30 +2886,24 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn transaction_byte_fee(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("TransactionPayment")?;
-                    let constant = pallet.constant("TransactionByteFee")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            64u8, 66u8, 15u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn operational_fee_multiplier(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u8, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("TransactionPayment")?;
-                    let constant = pallet.constant("OperationalFeeMultiplier")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[5u8][..])?)
                 }
                 pub fn weight_to_fee(
                     &self,
@@ -2923,10 +2915,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("TransactionPayment")?;
-                    let constant = pallet.constant("WeightToFee")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            4u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 180u8, 196u8, 4u8, 0u8, 1u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -2958,7 +2952,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -3067,21 +3061,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn uncle_generations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Authorship")?;
-                    let constant = pallet.constant("UncleGenerations")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -3363,7 +3351,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -4957,66 +4945,55 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn max_nominations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("MaxNominations")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[16u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn sessions_per_era(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("SessionsPerEra")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[6u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn bonding_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("BondingDuration")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[28u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn slash_defer_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("SlashDeferDuration")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[27u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_nominator_rewarded_per_validator(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("MaxNominatorRewardedPerValidator")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 1u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_unlocking_chunks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Staking")?;
-                    let constant = pallet.constant("MaxUnlockingChunks")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[32u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -5208,7 +5185,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5491,7 +5468,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5730,21 +5707,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Grandpa")?;
-                    let constant = pallet.constant("MaxAuthorities")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[160u8, 134u8, 1u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -5774,7 +5745,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -5967,21 +5938,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn unsigned_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("ImOnline")?;
-                    let constant = pallet.constant("UnsignedPriority")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8][..],
+                    )?)
                 }
             }
         }
@@ -6235,7 +6200,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7204,111 +7169,99 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn enactment_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("EnactmentPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 39u8, 6u8, 0u8][..],
+                    )?)
                 }
                 pub fn launch_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("LaunchPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 39u8, 6u8, 0u8][..],
+                    )?)
                 }
                 pub fn voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("VotingPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 39u8, 6u8, 0u8][..],
+                    )?)
                 }
                 pub fn vote_locking_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("VoteLockingPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 39u8, 6u8, 0u8][..],
+                    )?)
                 }
                 pub fn minimum_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("MinimumDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 16u8, 165u8, 212u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn instant_allowed(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("InstantAllowed")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[1u8][..])?)
                 }
                 pub fn fast_track_voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("FastTrackVotingPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[8u8, 7u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn cooloff_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("CooloffPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[192u8, 137u8, 1u8, 0u8][..],
+                    )?)
                 }
                 pub fn preimage_byte_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("PreimageByteDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            128u8, 150u8, 152u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_votes(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("MaxVotes")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_proposals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Democracy")?;
-                    let constant = pallet.constant("MaxProposals")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -7392,7 +7345,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -7831,7 +7784,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8259,7 +8212,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8576,77 +8529,74 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
                     [::core::primitive::u8; 8usize],
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("PalletId")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[112u8, 104u8, 114u8, 101u8, 108u8, 101u8, 99u8, 116u8][..],
+                    )?)
                 }
                 pub fn candidacy_bond(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("CandidacyBond")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 16u8, 165u8, 212u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn voting_bond_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("VotingBondBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 112u8, 19u8, 183u8, 46u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn voting_bond_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("VotingBondFactor")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 208u8, 18u8, 19u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn desired_members(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("DesiredMembers")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[13u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn desired_runners_up(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("DesiredRunnersUp")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[20u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn term_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("PhragmenElection")?;
-                    let constant = pallet.constant("TermDuration")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[192u8, 137u8, 1u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -8720,7 +8670,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -8963,7 +8913,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9201,32 +9151,28 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn proposal_bond(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("ProposalBond")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[80u8, 195u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn proposal_bond_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("ProposalBondMinimum")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 16u8, 165u8, 212u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn proposal_bond_maximum(
                     &self,
@@ -9234,19 +9180,20 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("ProposalBondMaximum")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            1u8, 0u8, 80u8, 57u8, 39u8, 140u8, 4u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn spend_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("SpendPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 70u8, 5u8, 0u8][..],
+                    )?)
                 }
                 pub fn burn(
                     &self,
@@ -9254,10 +9201,9 @@ pub mod api {
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("Burn")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[16u8, 39u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn pallet_id(
                     &self,
@@ -9265,19 +9211,17 @@ pub mod api {
                     runtime_types::frame_support::PalletId,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("PalletId")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[112u8, 121u8, 47u8, 116u8, 114u8, 115u8, 114u8, 121u8][..],
+                    )?)
                 }
                 pub fn max_approvals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Treasury")?;
-                    let constant = pallet.constant("MaxApprovals")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -9353,7 +9297,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9657,23 +9601,22 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn prefix(
                     &self,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<::core::primitive::u8>,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Claims")?;
-                    let constant = pallet.constant("Prefix")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            132u8, 80u8, 97u8, 121u8, 32u8, 68u8, 79u8, 84u8, 115u8,
+                            32u8, 116u8, 111u8, 32u8, 116u8, 104u8, 101u8, 32u8, 80u8,
+                            111u8, 108u8, 107u8, 97u8, 100u8, 111u8, 116u8, 32u8, 97u8,
+                            99u8, 99u8, 111u8, 117u8, 110u8, 116u8, 58u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -9752,7 +9695,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -9958,30 +9901,26 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn min_vested_transfer(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Vesting")?;
-                    let constant = pallet.constant("MinVestedTransfer")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_vesting_schedules(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Vesting")?;
-                    let constant = pallet.constant("MaxVestingSchedules")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[28u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -10035,7 +9974,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10145,21 +10084,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn batched_calls_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Utility")?;
-                    let constant = pallet.constant("batched_calls_limit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[170u8, 42u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -10338,7 +10271,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -10857,66 +10790,64 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn basic_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("BasicDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 125u8, 181u8, 42u8, 47u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn field_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("FieldDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 205u8, 86u8, 39u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn sub_account_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("SubAccountDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            128u8, 248u8, 132u8, 176u8, 46u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_sub_accounts(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("MaxSubAccounts")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_additional_fields(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("MaxAdditionalFields")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_registrars(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Identity")?;
-                    let constant = pallet.constant("MaxRegistrars")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[20u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -11035,7 +10966,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11405,66 +11336,67 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn proxy_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("ProxyDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 132u8, 178u8, 149u8, 46u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn proxy_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("ProxyDepositFactor")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            128u8, 102u8, 171u8, 19u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_proxies(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("MaxProxies")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[32u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_pending(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("MaxPending")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[32u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn announcement_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("AnnouncementDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 132u8, 178u8, 149u8, 46u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn announcement_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Proxy")?;
-                    let constant = pallet.constant("AnnouncementDepositFactor")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 205u8, 86u8, 39u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -11538,7 +11470,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -11811,39 +11743,35 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Multisig")?;
-                    let constant = pallet.constant("DepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 140u8, 97u8, 197u8, 46u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Multisig")?;
-                    let constant = pallet.constant("DepositFactor")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 208u8, 18u8, 19u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_signatories(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Multisig")?;
-                    let constant = pallet.constant("MaxSignatories")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[100u8, 0u8][..])?)
                 }
             }
         }
@@ -11955,7 +11883,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12328,99 +12256,74 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn bounty_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("BountyDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn bounty_deposit_payout_delay(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("BountyDepositPayoutDelay")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 194u8, 1u8, 0u8][..],
+                    )?)
                 }
                 pub fn bounty_update_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("BountyUpdatePeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[128u8, 198u8, 19u8, 0u8][..],
+                    )?)
                 }
-                pub fn curator_deposit_multiplier(
+                pub fn bounty_curator_deposit(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("CuratorDepositMultiplier")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
-                }
-                pub fn curator_deposit_max(
-                    &self,
-                ) -> ::core::result::Result<
-                    ::core::option::Option<::core::primitive::u128>,
-                    ::subxt::BasicError,
-                > {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("CuratorDepositMax")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
-                }
-                pub fn curator_deposit_min(
-                    &self,
-                ) -> ::core::result::Result<
-                    ::core::option::Option<::core::primitive::u128>,
-                    ::subxt::BasicError,
-                > {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("CuratorDepositMin")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[32u8, 161u8, 7u8, 0u8][..],
+                    )?)
                 }
                 pub fn bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("BountyValueMinimum")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 232u8, 118u8, 72u8, 23u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("DataDepositPerByte")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 225u8, 245u8, 5u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("MaximumReasonLength")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 64u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -12527,7 +12430,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -12901,30 +12804,36 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn max_active_child_bounty_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("ChildBounties")?;
-                    let constant = pallet.constant("MaxActiveChildBountyCount")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[100u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn child_bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("ChildBounties")?;
-                    let constant = pallet.constant("ChildBountyValueMinimum")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
+                }
+                pub fn child_bounty_curator_deposit_base(
+                    &self,
+                ) -> ::core::result::Result<
+                    runtime_types::sp_arithmetic::per_things::Permill,
+                    ::subxt::BasicError,
+                > {
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[16u8, 39u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -12997,7 +12906,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13236,39 +13145,34 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Tips")?;
-                    let constant = pallet.constant("MaximumReasonLength")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 64u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Tips")?;
-                    let constant = pallet.constant("DataDepositPerByte")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 225u8, 245u8, 5u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn tip_countdown(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Tips")?;
-                    let constant = pallet.constant("TipCountdown")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[64u8, 56u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn tip_finders_fee(
                     &self,
@@ -13276,19 +13180,18 @@ pub mod api {
                     runtime_types::sp_arithmetic::per_things::Percent,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Tips")?;
-                    let constant = pallet.constant("TipFindersFee")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[20u8][..])?)
                 }
                 pub fn tip_report_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Tips")?;
-                    let constant = pallet.constant("TipReportDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -13357,7 +13260,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -13709,36 +13612,23 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn unsigned_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("UnsignedPhase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[88u8, 2u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn signed_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedPhase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[88u8, 2u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn solution_improvement_threshold(
                     &self,
@@ -13746,157 +13636,115 @@ pub mod api {
                     runtime_types::sp_arithmetic::per_things::Perbill,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SolutionImprovementThreshold")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[32u8, 161u8, 7u8, 0u8][..],
+                    )?)
                 }
                 pub fn offchain_repeat(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("OffchainRepeat")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[18u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn miner_tx_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("MinerTxPriority")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[101u8, 102u8, 102u8, 102u8, 102u8, 102u8, 102u8, 230u8][..],
+                    )?)
                 }
                 pub fn miner_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("MinerMaxWeight")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[192u8, 132u8, 102u8, 101u8, 87u8, 1u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn signed_max_submissions(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedMaxSubmissions")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[16u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn signed_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedMaxWeight")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[192u8, 132u8, 102u8, 101u8, 87u8, 1u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn signed_reward_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedRewardBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn signed_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 160u8, 219u8, 33u8, 93u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn signed_deposit_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedDepositByte")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            120u8, 125u8, 1u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn signed_deposit_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("SignedDepositWeight")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn max_electing_voters(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("MaxElectingVoters")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[228u8, 87u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn max_electable_targets(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("MaxElectableTargets")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(&mut &[255u8, 255u8][..])?)
                 }
                 pub fn miner_max_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self
-                        .client
-                        .metadata()
-                        .pallet("ElectionProviderMultiPhase")?;
-                    let constant = pallet.constant("MinerMaxLength")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 0u8, 54u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -13931,7 +13779,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -14077,23 +13925,186 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn bag_thresholds(
                     &self,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<::core::primitive::u64>,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("BagsList")?;
-                    let constant = pallet.constant("BagThresholds")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            33u8, 3u8, 0u8, 228u8, 11u8, 84u8, 2u8, 0u8, 0u8, 0u8, 243u8,
+                            158u8, 128u8, 151u8, 2u8, 0u8, 0u8, 0u8, 168u8, 177u8, 151u8,
+                            226u8, 2u8, 0u8, 0u8, 0u8, 148u8, 73u8, 46u8, 54u8, 3u8, 0u8,
+                            0u8, 0u8, 39u8, 156u8, 58u8, 147u8, 3u8, 0u8, 0u8, 0u8, 3u8,
+                            188u8, 206u8, 250u8, 3u8, 0u8, 0u8, 0u8, 66u8, 192u8, 27u8,
+                            110u8, 4u8, 0u8, 0u8, 0u8, 27u8, 71u8, 117u8, 238u8, 4u8,
+                            0u8, 0u8, 0u8, 56u8, 94u8, 85u8, 125u8, 5u8, 0u8, 0u8, 0u8,
+                            70u8, 220u8, 96u8, 28u8, 6u8, 0u8, 0u8, 0u8, 137u8, 56u8,
+                            108u8, 205u8, 6u8, 0u8, 0u8, 0u8, 182u8, 238u8, 128u8, 146u8,
+                            7u8, 0u8, 0u8, 0u8, 254u8, 126u8, 227u8, 109u8, 8u8, 0u8,
+                            0u8, 0u8, 232u8, 27u8, 26u8, 98u8, 9u8, 0u8, 0u8, 0u8, 176u8,
+                            25u8, 244u8, 113u8, 10u8, 0u8, 0u8, 0u8, 16u8, 53u8, 146u8,
+                            160u8, 11u8, 0u8, 0u8, 0u8, 207u8, 201u8, 111u8, 241u8, 12u8,
+                            0u8, 0u8, 0u8, 65u8, 20u8, 109u8, 104u8, 14u8, 0u8, 0u8, 0u8,
+                            231u8, 155u8, 218u8, 9u8, 16u8, 0u8, 0u8, 0u8, 206u8, 232u8,
+                            133u8, 218u8, 17u8, 0u8, 0u8, 0u8, 40u8, 169u8, 199u8, 223u8,
+                            19u8, 0u8, 0u8, 0u8, 187u8, 112u8, 147u8, 31u8, 22u8, 0u8,
+                            0u8, 0u8, 142u8, 64u8, 137u8, 160u8, 24u8, 0u8, 0u8, 0u8,
+                            129u8, 10u8, 9u8, 106u8, 27u8, 0u8, 0u8, 0u8, 54u8, 106u8,
+                            72u8, 132u8, 30u8, 0u8, 0u8, 0u8, 91u8, 211u8, 106u8, 248u8,
+                            33u8, 0u8, 0u8, 0u8, 128u8, 124u8, 156u8, 208u8, 37u8, 0u8,
+                            0u8, 0u8, 201u8, 85u8, 48u8, 24u8, 42u8, 0u8, 0u8, 0u8,
+                            189u8, 99u8, 193u8, 219u8, 46u8, 0u8, 0u8, 0u8, 113u8, 224u8,
+                            87u8, 41u8, 52u8, 0u8, 0u8, 0u8, 104u8, 144u8, 146u8, 16u8,
+                            58u8, 0u8, 0u8, 0u8, 237u8, 196u8, 212u8, 162u8, 64u8, 0u8,
+                            0u8, 0u8, 105u8, 147u8, 121u8, 243u8, 71u8, 0u8, 0u8, 0u8,
+                            143u8, 216u8, 12u8, 24u8, 80u8, 0u8, 0u8, 0u8, 75u8, 175u8,
+                            138u8, 40u8, 89u8, 0u8, 0u8, 0u8, 106u8, 22u8, 166u8, 63u8,
+                            99u8, 0u8, 0u8, 0u8, 9u8, 149u8, 23u8, 123u8, 110u8, 0u8,
+                            0u8, 0u8, 120u8, 197u8, 244u8, 251u8, 122u8, 0u8, 0u8, 0u8,
+                            98u8, 200u8, 17u8, 231u8, 136u8, 0u8, 0u8, 0u8, 81u8, 191u8,
+                            109u8, 101u8, 152u8, 0u8, 0u8, 0u8, 4u8, 142u8, 171u8, 164u8,
+                            169u8, 0u8, 0u8, 0u8, 84u8, 70u8, 152u8, 215u8, 188u8, 0u8,
+                            0u8, 0u8, 145u8, 202u8, 192u8, 54u8, 210u8, 0u8, 0u8, 0u8,
+                            23u8, 95u8, 24u8, 1u8, 234u8, 0u8, 0u8, 0u8, 189u8, 21u8,
+                            178u8, 124u8, 4u8, 1u8, 0u8, 0u8, 67u8, 53u8, 143u8, 247u8,
+                            33u8, 1u8, 0u8, 0u8, 184u8, 252u8, 132u8, 200u8, 66u8, 1u8,
+                            0u8, 0u8, 153u8, 103u8, 60u8, 80u8, 103u8, 1u8, 0u8, 0u8,
+                            7u8, 228u8, 78u8, 250u8, 143u8, 1u8, 0u8, 0u8, 179u8, 65u8,
+                            131u8, 62u8, 189u8, 1u8, 0u8, 0u8, 2u8, 127u8, 46u8, 162u8,
+                            239u8, 1u8, 0u8, 0u8, 152u8, 131u8, 188u8, 185u8, 39u8, 2u8,
+                            0u8, 0u8, 22u8, 77u8, 101u8, 42u8, 102u8, 2u8, 0u8, 0u8,
+                            180u8, 149u8, 19u8, 172u8, 171u8, 2u8, 0u8, 0u8, 45u8, 142u8,
+                            130u8, 11u8, 249u8, 2u8, 0u8, 0u8, 161u8, 230u8, 152u8, 44u8,
+                            79u8, 3u8, 0u8, 0u8, 166u8, 22u8, 8u8, 13u8, 175u8, 3u8, 0u8,
+                            0u8, 204u8, 157u8, 55u8, 199u8, 25u8, 4u8, 0u8, 0u8, 160u8,
+                            213u8, 132u8, 149u8, 144u8, 4u8, 0u8, 0u8, 66u8, 231u8,
+                            224u8, 213u8, 20u8, 5u8, 0u8, 0u8, 2u8, 140u8, 215u8, 13u8,
+                            168u8, 5u8, 0u8, 0u8, 15u8, 117u8, 10u8, 239u8, 75u8, 6u8,
+                            0u8, 0u8, 234u8, 141u8, 46u8, 92u8, 2u8, 7u8, 0u8, 0u8,
+                            195u8, 203u8, 153u8, 110u8, 205u8, 7u8, 0u8, 0u8, 177u8,
+                            229u8, 113u8, 124u8, 175u8, 8u8, 0u8, 0u8, 170u8, 43u8,
+                            142u8, 31u8, 171u8, 9u8, 0u8, 0u8, 181u8, 193u8, 32u8, 61u8,
+                            195u8, 10u8, 0u8, 0u8, 38u8, 208u8, 61u8, 14u8, 251u8, 11u8,
+                            0u8, 0u8, 112u8, 199u8, 89u8, 41u8, 86u8, 13u8, 0u8, 0u8,
+                            235u8, 173u8, 218u8, 140u8, 216u8, 14u8, 0u8, 0u8, 247u8,
+                            151u8, 219u8, 170u8, 134u8, 16u8, 0u8, 0u8, 207u8, 240u8,
+                            68u8, 118u8, 101u8, 18u8, 0u8, 0u8, 31u8, 38u8, 96u8, 113u8,
+                            122u8, 20u8, 0u8, 0u8, 9u8, 166u8, 17u8, 190u8, 203u8, 22u8,
+                            0u8, 0u8, 29u8, 251u8, 232u8, 47u8, 96u8, 25u8, 0u8, 0u8,
+                            148u8, 58u8, 60u8, 96u8, 63u8, 28u8, 0u8, 0u8, 138u8, 254u8,
+                            137u8, 196u8, 113u8, 31u8, 0u8, 0u8, 206u8, 217u8, 99u8,
+                            199u8, 0u8, 35u8, 0u8, 0u8, 3u8, 169u8, 42u8, 228u8, 246u8,
+                            38u8, 0u8, 0u8, 254u8, 114u8, 238u8, 197u8, 95u8, 43u8, 0u8,
+                            0u8, 54u8, 201u8, 204u8, 105u8, 72u8, 48u8, 0u8, 0u8, 218u8,
+                            227u8, 50u8, 69u8, 191u8, 53u8, 0u8, 0u8, 6u8, 42u8, 116u8,
+                            112u8, 212u8, 59u8, 0u8, 0u8, 124u8, 151u8, 50u8, 214u8,
+                            153u8, 66u8, 0u8, 0u8, 132u8, 163u8, 36u8, 104u8, 35u8, 74u8,
+                            0u8, 0u8, 87u8, 26u8, 212u8, 89u8, 135u8, 82u8, 0u8, 0u8,
+                            231u8, 241u8, 2u8, 98u8, 222u8, 91u8, 0u8, 0u8, 13u8, 184u8,
+                            118u8, 3u8, 68u8, 102u8, 0u8, 0u8, 174u8, 4u8, 1u8, 222u8,
+                            214u8, 113u8, 0u8, 0u8, 125u8, 158u8, 179u8, 8u8, 185u8,
+                            126u8, 0u8, 0u8, 30u8, 4u8, 74u8, 118u8, 16u8, 141u8, 0u8,
+                            0u8, 58u8, 29u8, 240u8, 100u8, 7u8, 157u8, 0u8, 0u8, 224u8,
+                            79u8, 175u8, 218u8, 204u8, 174u8, 0u8, 0u8, 86u8, 121u8,
+                            240u8, 47u8, 149u8, 194u8, 0u8, 0u8, 149u8, 195u8, 170u8,
+                            169u8, 154u8, 216u8, 0u8, 0u8, 150u8, 124u8, 5u8, 37u8, 30u8,
+                            241u8, 0u8, 0u8, 23u8, 122u8, 102u8, 214u8, 103u8, 12u8, 1u8,
+                            0u8, 40u8, 203u8, 31u8, 30u8, 200u8, 42u8, 1u8, 0u8, 250u8,
+                            40u8, 47u8, 117u8, 152u8, 76u8, 1u8, 0u8, 213u8, 125u8,
+                            200u8, 116u8, 60u8, 114u8, 1u8, 0u8, 125u8, 196u8, 179u8,
+                            251u8, 34u8, 156u8, 1u8, 0u8, 54u8, 92u8, 222u8, 116u8,
+                            199u8, 202u8, 1u8, 0u8, 158u8, 184u8, 225u8, 66u8, 179u8,
+                            254u8, 1u8, 0u8, 12u8, 49u8, 174u8, 84u8, 127u8, 56u8, 2u8,
+                            0u8, 95u8, 225u8, 1u8, 232u8, 213u8, 120u8, 2u8, 0u8, 99u8,
+                            115u8, 218u8, 126u8, 116u8, 192u8, 2u8, 0u8, 81u8, 209u8,
+                            166u8, 13u8, 46u8, 16u8, 3u8, 0u8, 199u8, 233u8, 164u8,
+                            104u8, 237u8, 104u8, 3u8, 0u8, 97u8, 192u8, 145u8, 247u8,
+                            183u8, 203u8, 3u8, 0u8, 191u8, 39u8, 161u8, 183u8, 176u8,
+                            57u8, 4u8, 0u8, 123u8, 20u8, 153u8, 148u8, 27u8, 180u8, 4u8,
+                            0u8, 133u8, 35u8, 237u8, 34u8, 97u8, 60u8, 5u8, 0u8, 105u8,
+                            165u8, 212u8, 197u8, 18u8, 212u8, 5u8, 0u8, 236u8, 140u8,
+                            147u8, 77u8, 239u8, 124u8, 6u8, 0u8, 245u8, 170u8, 144u8,
+                            27u8, 232u8, 56u8, 7u8, 0u8, 140u8, 190u8, 93u8, 219u8, 38u8,
+                            10u8, 8u8, 0u8, 2u8, 151u8, 140u8, 225u8, 19u8, 243u8, 8u8,
+                            0u8, 250u8, 227u8, 20u8, 67u8, 93u8, 246u8, 9u8, 0u8, 221u8,
+                            241u8, 45u8, 186u8, 254u8, 22u8, 11u8, 0u8, 46u8, 186u8,
+                            220u8, 111u8, 74u8, 88u8, 12u8, 0u8, 12u8, 85u8, 24u8, 196u8,
+                            242u8, 189u8, 13u8, 0u8, 240u8, 187u8, 84u8, 49u8, 21u8,
+                            76u8, 15u8, 0u8, 73u8, 142u8, 134u8, 107u8, 70u8, 7u8, 17u8,
+                            0u8, 178u8, 193u8, 83u8, 222u8, 159u8, 244u8, 18u8, 0u8,
+                            39u8, 138u8, 47u8, 178u8, 206u8, 25u8, 21u8, 0u8, 178u8,
+                            57u8, 159u8, 132u8, 36u8, 125u8, 23u8, 0u8, 225u8, 153u8,
+                            231u8, 4u8, 170u8, 37u8, 26u8, 0u8, 186u8, 19u8, 245u8,
+                            171u8, 51u8, 27u8, 29u8, 0u8, 38u8, 71u8, 133u8, 204u8,
+                            120u8, 102u8, 32u8, 0u8, 136u8, 191u8, 128u8, 63u8, 45u8,
+                            17u8, 36u8, 0u8, 28u8, 152u8, 35u8, 248u8, 29u8, 38u8, 40u8,
+                            0u8, 204u8, 196u8, 34u8, 212u8, 80u8, 177u8, 44u8, 0u8,
+                            240u8, 136u8, 130u8, 5u8, 40u8, 192u8, 49u8, 0u8, 54u8,
+                            124u8, 109u8, 126u8, 137u8, 97u8, 55u8, 0u8, 110u8, 147u8,
+                            41u8, 211u8, 10u8, 166u8, 61u8, 0u8, 140u8, 188u8, 108u8,
+                            19u8, 34u8, 160u8, 68u8, 0u8, 0u8, 112u8, 243u8, 42u8, 92u8,
+                            100u8, 76u8, 0u8, 180u8, 59u8, 132u8, 105u8, 153u8, 9u8,
+                            85u8, 0u8, 128u8, 180u8, 171u8, 228u8, 80u8, 169u8, 94u8,
+                            0u8, 160u8, 205u8, 169u8, 121u8, 219u8, 95u8, 105u8, 0u8,
+                            76u8, 194u8, 127u8, 76u8, 199u8, 76u8, 117u8, 0u8, 208u8,
+                            172u8, 14u8, 186u8, 52u8, 147u8, 130u8, 0u8, 72u8, 62u8,
+                            12u8, 207u8, 61u8, 90u8, 145u8, 0u8, 104u8, 198u8, 142u8,
+                            116u8, 105u8, 205u8, 161u8, 0u8, 40u8, 30u8, 111u8, 165u8,
+                            43u8, 29u8, 180u8, 0u8, 152u8, 169u8, 35u8, 38u8, 116u8,
+                            127u8, 200u8, 0u8, 240u8, 154u8, 116u8, 99u8, 77u8, 48u8,
+                            223u8, 0u8, 128u8, 205u8, 252u8, 75u8, 141u8, 114u8, 248u8,
+                            0u8, 144u8, 20u8, 96u8, 45u8, 154u8, 144u8, 20u8, 1u8, 240u8,
+                            180u8, 19u8, 217u8, 69u8, 221u8, 51u8, 1u8, 32u8, 151u8,
+                            53u8, 150u8, 193u8, 180u8, 86u8, 1u8, 80u8, 220u8, 251u8,
+                            174u8, 173u8, 125u8, 125u8, 1u8, 224u8, 17u8, 152u8, 185u8,
+                            71u8, 170u8, 168u8, 1u8, 48u8, 199u8, 238u8, 22u8, 187u8,
+                            185u8, 216u8, 1u8, 32u8, 110u8, 72u8, 134u8, 151u8, 57u8,
+                            14u8, 2u8, 160u8, 250u8, 75u8, 29u8, 114u8, 199u8, 73u8, 2u8,
+                            192u8, 17u8, 113u8, 112u8, 181u8, 18u8, 140u8, 2u8, 128u8,
+                            138u8, 22u8, 67u8, 166u8, 222u8, 213u8, 2u8, 192u8, 248u8,
+                            35u8, 177u8, 162u8, 4u8, 40u8, 3u8, 128u8, 175u8, 89u8,
+                            112u8, 162u8, 118u8, 131u8, 3u8, 192u8, 111u8, 45u8, 135u8,
+                            255u8, 65u8, 233u8, 3u8, 64u8, 147u8, 127u8, 172u8, 143u8,
+                            146u8, 90u8, 4u8, 0u8, 145u8, 9u8, 113u8, 23u8, 182u8, 216u8,
+                            4u8, 64u8, 15u8, 223u8, 91u8, 33u8, 32u8, 101u8, 5u8, 0u8,
+                            73u8, 193u8, 73u8, 68u8, 110u8, 1u8, 6u8, 0u8, 142u8, 188u8,
+                            166u8, 229u8, 108u8, 175u8, 6u8, 0u8, 89u8, 86u8, 134u8,
+                            133u8, 28u8, 113u8, 7u8, 128u8, 104u8, 170u8, 52u8, 164u8,
+                            183u8, 72u8, 8u8, 128u8, 161u8, 226u8, 158u8, 82u8, 185u8,
+                            56u8, 9u8, 0u8, 189u8, 171u8, 232u8, 128u8, 228u8, 67u8,
+                            10u8, 0u8, 42u8, 114u8, 180u8, 32u8, 76u8, 109u8, 11u8,
+                            128u8, 241u8, 192u8, 19u8, 51u8, 92u8, 184u8, 12u8, 0u8,
+                            160u8, 60u8, 203u8, 220u8, 227u8, 40u8, 14u8, 128u8, 184u8,
+                            98u8, 154u8, 158u8, 32u8, 195u8, 15u8, 0u8, 222u8, 86u8,
+                            147u8, 210u8, 202u8, 139u8, 17u8, 0u8, 93u8, 127u8, 76u8,
+                            147u8, 35u8, 136u8, 19u8, 0u8, 26u8, 135u8, 223u8, 53u8, 4u8,
+                            190u8, 21u8, 0u8, 167u8, 206u8, 75u8, 132u8, 239u8, 51u8,
+                            24u8, 0u8, 1u8, 16u8, 251u8, 234u8, 36u8, 241u8, 26u8, 0u8,
+                            128u8, 42u8, 229u8, 209u8, 181u8, 253u8, 29u8, 0u8, 34u8,
+                            161u8, 52u8, 96u8, 157u8, 98u8, 33u8, 0u8, 68u8, 33u8, 107u8,
+                            240u8, 218u8, 41u8, 37u8, 0u8, 2u8, 97u8, 241u8, 130u8,
+                            143u8, 94u8, 41u8, 0u8, 102u8, 32u8, 207u8, 133u8, 30u8,
+                            13u8, 46u8, 0u8, 132u8, 16u8, 25u8, 82u8, 82u8, 67u8, 51u8,
+                            0u8, 160u8, 193u8, 143u8, 202u8, 132u8, 16u8, 57u8, 0u8,
+                            38u8, 173u8, 20u8, 147u8, 204u8, 133u8, 63u8, 0u8, 208u8,
+                            205u8, 36u8, 102u8, 47u8, 182u8, 70u8, 0u8, 156u8, 225u8,
+                            154u8, 28u8, 218u8, 182u8, 78u8, 0u8, 88u8, 204u8, 194u8,
+                            12u8, 95u8, 159u8, 87u8, 0u8, 32u8, 10u8, 117u8, 120u8,
+                            251u8, 137u8, 97u8, 0u8, 48u8, 187u8, 187u8, 214u8, 228u8,
+                            147u8, 108u8, 0u8, 96u8, 203u8, 167u8, 220u8, 158u8, 221u8,
+                            120u8, 0u8, 184u8, 59u8, 192u8, 66u8, 91u8, 139u8, 134u8,
+                            0u8, 184u8, 134u8, 35u8, 97u8, 100u8, 197u8, 149u8, 0u8,
+                            248u8, 241u8, 95u8, 220u8, 147u8, 184u8, 166u8, 0u8, 32u8,
+                            106u8, 145u8, 192u8, 214u8, 150u8, 185u8, 0u8, 216u8, 239u8,
+                            226u8, 143u8, 192u8, 151u8, 206u8, 0u8, 104u8, 41u8, 155u8,
+                            245u8, 46u8, 249u8, 229u8, 255u8, 255u8, 255u8, 255u8, 255u8,
+                            255u8, 255u8, 255u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -14684,7 +14695,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15415,7 +15426,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15514,7 +15525,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -15698,7 +15709,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16002,7 +16013,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16825,21 +16836,15 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn unsigned_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Paras")?;
-                    let constant = pallet.constant("UnsignedPriority")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8, 255u8][..],
+                    )?)
                 }
             }
         }
@@ -16871,7 +16876,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -16950,7 +16955,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17069,7 +17074,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -17425,7 +17430,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18105,7 +18110,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18411,7 +18416,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18663,30 +18668,29 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn para_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Registrar")?;
-                    let constant = pallet.constant("ParaDeposit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 16u8, 165u8, 212u8, 232u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Registrar")?;
-                    let constant = pallet.constant("DataDepositPerByte")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            128u8, 150u8, 152u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
             }
         }
@@ -18733,7 +18737,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -18880,30 +18884,23 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn lease_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Slots")?;
-                    let constant = pallet.constant("LeasePeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 117u8, 18u8, 0u8][..],
+                    )?)
                 }
                 pub fn lease_offset(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Slots")?;
-                    let constant = pallet.constant("LeaseOffset")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[0u8, 16u8, 14u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -18956,7 +18953,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -19226,48 +19223,39 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn ending_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Auctions")?;
-                    let constant = pallet.constant("EndingPeriod")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[64u8, 25u8, 1u8, 0u8][..],
+                    )?)
                 }
                 pub fn sample_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Auctions")?;
-                    let constant = pallet.constant("SampleLength")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[20u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn slot_range_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Auctions")?;
-                    let constant = pallet.constant("SlotRangeCount")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[36u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
                 pub fn lease_periods_per_slot(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Auctions")?;
-                    let constant = pallet.constant("LeasePeriodsPerSlot")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[8u8, 0u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -19393,7 +19381,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -19766,41 +19754,36 @@ pub mod api {
         }
         pub mod constants {
             use super::runtime_types;
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
+            pub struct ConstantsApi;
+            impl ConstantsApi {
                 pub fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_support::PalletId,
                     ::subxt::BasicError,
                 > {
-                    let pallet = self.client.metadata().pallet("Crowdloan")?;
-                    let constant = pallet.constant("PalletId")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[112u8, 121u8, 47u8, 99u8, 102u8, 117u8, 110u8, 100u8][..],
+                    )?)
                 }
                 pub fn min_contribution(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Crowdloan")?;
-                    let constant = pallet.constant("MinContribution")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[
+                            0u8, 116u8, 59u8, 164u8, 11u8, 0u8, 0u8, 0u8, 0u8, 0u8, 0u8,
+                            0u8, 0u8, 0u8, 0u8, 0u8,
+                        ][..],
+                    )?)
                 }
                 pub fn remove_keys_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let pallet = self.client.metadata().pallet("Crowdloan")?;
-                    let constant = pallet.constant("RemoveKeysLimit")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
+                    Ok(::subxt::codec::Decode::decode(
+                        &mut &[232u8, 3u8, 0u8, 0u8][..],
+                    )?)
                 }
             }
         }
@@ -19924,7 +19907,7 @@ pub mod api {
             impl<'a, T, X> TransactionApi<'a, T, X>
             where
                 T: ::subxt::Config,
-                X: ::subxt::SignedExtra<T>,
+                X: ::subxt::extrinsic::ExtrinsicParams<T>,
             {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self {
@@ -23825,8 +23808,6 @@ pub mod api {
                 V7_0_0,
                 #[codec(index = 7)]
                 V8_0_0,
-                #[codec(index = 8)]
-                V9_0_0,
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub enum RewardDestination<_0> {
@@ -27236,7 +27217,7 @@ pub mod api {
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ModuleError {
                 pub index: ::core::primitive::u8,
-                pub error: [::core::primitive::u8; 4usize],
+                pub error: ::core::primitive::u8,
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub enum MultiSignature {
@@ -28385,7 +28366,7 @@ pub mod api {
     impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::extrinsic::ExtrinsicParams<T>,
     {
         fn from(client: ::subxt::Client<T>) -> Self {
             Self {
@@ -28397,12 +28378,10 @@ pub mod api {
     impl<'a, T, X> RuntimeApi<T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::extrinsic::ExtrinsicParams<T>,
     {
-        pub fn constants(&'a self) -> ConstantsApi<'a, T> {
-            ConstantsApi {
-                client: &self.client,
-            }
+        pub fn constants(&'a self) -> ConstantsApi {
+            ConstantsApi
         }
         pub fn storage(&'a self) -> StorageApi<'a, T> {
             StorageApi {
@@ -28458,105 +28437,101 @@ pub mod api {
             ::subxt::events::subscribe_finalized::<T, Event>(self.client).await
         }
     }
-    pub struct ConstantsApi<'a, T: ::subxt::Config> {
-        client: &'a ::subxt::Client<T>,
-    }
-    impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-        pub fn system(&self) -> system::constants::ConstantsApi<'a, T> {
-            system::constants::ConstantsApi::new(self.client)
+    pub struct ConstantsApi;
+    impl ConstantsApi {
+        pub fn system(&self) -> system::constants::ConstantsApi {
+            system::constants::ConstantsApi
         }
-        pub fn scheduler(&self) -> scheduler::constants::ConstantsApi<'a, T> {
-            scheduler::constants::ConstantsApi::new(self.client)
+        pub fn scheduler(&self) -> scheduler::constants::ConstantsApi {
+            scheduler::constants::ConstantsApi
         }
-        pub fn babe(&self) -> babe::constants::ConstantsApi<'a, T> {
-            babe::constants::ConstantsApi::new(self.client)
+        pub fn babe(&self) -> babe::constants::ConstantsApi {
+            babe::constants::ConstantsApi
         }
-        pub fn timestamp(&self) -> timestamp::constants::ConstantsApi<'a, T> {
-            timestamp::constants::ConstantsApi::new(self.client)
+        pub fn timestamp(&self) -> timestamp::constants::ConstantsApi {
+            timestamp::constants::ConstantsApi
         }
-        pub fn indices(&self) -> indices::constants::ConstantsApi<'a, T> {
-            indices::constants::ConstantsApi::new(self.client)
+        pub fn indices(&self) -> indices::constants::ConstantsApi {
+            indices::constants::ConstantsApi
         }
-        pub fn balances(&self) -> balances::constants::ConstantsApi<'a, T> {
-            balances::constants::ConstantsApi::new(self.client)
+        pub fn balances(&self) -> balances::constants::ConstantsApi {
+            balances::constants::ConstantsApi
         }
         pub fn transaction_payment(
             &self,
-        ) -> transaction_payment::constants::ConstantsApi<'a, T> {
-            transaction_payment::constants::ConstantsApi::new(self.client)
+        ) -> transaction_payment::constants::ConstantsApi {
+            transaction_payment::constants::ConstantsApi
         }
-        pub fn authorship(&self) -> authorship::constants::ConstantsApi<'a, T> {
-            authorship::constants::ConstantsApi::new(self.client)
+        pub fn authorship(&self) -> authorship::constants::ConstantsApi {
+            authorship::constants::ConstantsApi
         }
-        pub fn staking(&self) -> staking::constants::ConstantsApi<'a, T> {
-            staking::constants::ConstantsApi::new(self.client)
+        pub fn staking(&self) -> staking::constants::ConstantsApi {
+            staking::constants::ConstantsApi
         }
-        pub fn grandpa(&self) -> grandpa::constants::ConstantsApi<'a, T> {
-            grandpa::constants::ConstantsApi::new(self.client)
+        pub fn grandpa(&self) -> grandpa::constants::ConstantsApi {
+            grandpa::constants::ConstantsApi
         }
-        pub fn im_online(&self) -> im_online::constants::ConstantsApi<'a, T> {
-            im_online::constants::ConstantsApi::new(self.client)
+        pub fn im_online(&self) -> im_online::constants::ConstantsApi {
+            im_online::constants::ConstantsApi
         }
-        pub fn democracy(&self) -> democracy::constants::ConstantsApi<'a, T> {
-            democracy::constants::ConstantsApi::new(self.client)
+        pub fn democracy(&self) -> democracy::constants::ConstantsApi {
+            democracy::constants::ConstantsApi
         }
-        pub fn phragmen_election(
-            &self,
-        ) -> phragmen_election::constants::ConstantsApi<'a, T> {
-            phragmen_election::constants::ConstantsApi::new(self.client)
+        pub fn phragmen_election(&self) -> phragmen_election::constants::ConstantsApi {
+            phragmen_election::constants::ConstantsApi
         }
-        pub fn treasury(&self) -> treasury::constants::ConstantsApi<'a, T> {
-            treasury::constants::ConstantsApi::new(self.client)
+        pub fn treasury(&self) -> treasury::constants::ConstantsApi {
+            treasury::constants::ConstantsApi
         }
-        pub fn claims(&self) -> claims::constants::ConstantsApi<'a, T> {
-            claims::constants::ConstantsApi::new(self.client)
+        pub fn claims(&self) -> claims::constants::ConstantsApi {
+            claims::constants::ConstantsApi
         }
-        pub fn vesting(&self) -> vesting::constants::ConstantsApi<'a, T> {
-            vesting::constants::ConstantsApi::new(self.client)
+        pub fn vesting(&self) -> vesting::constants::ConstantsApi {
+            vesting::constants::ConstantsApi
         }
-        pub fn utility(&self) -> utility::constants::ConstantsApi<'a, T> {
-            utility::constants::ConstantsApi::new(self.client)
+        pub fn utility(&self) -> utility::constants::ConstantsApi {
+            utility::constants::ConstantsApi
         }
-        pub fn identity(&self) -> identity::constants::ConstantsApi<'a, T> {
-            identity::constants::ConstantsApi::new(self.client)
+        pub fn identity(&self) -> identity::constants::ConstantsApi {
+            identity::constants::ConstantsApi
         }
-        pub fn proxy(&self) -> proxy::constants::ConstantsApi<'a, T> {
-            proxy::constants::ConstantsApi::new(self.client)
+        pub fn proxy(&self) -> proxy::constants::ConstantsApi {
+            proxy::constants::ConstantsApi
         }
-        pub fn multisig(&self) -> multisig::constants::ConstantsApi<'a, T> {
-            multisig::constants::ConstantsApi::new(self.client)
+        pub fn multisig(&self) -> multisig::constants::ConstantsApi {
+            multisig::constants::ConstantsApi
         }
-        pub fn bounties(&self) -> bounties::constants::ConstantsApi<'a, T> {
-            bounties::constants::ConstantsApi::new(self.client)
+        pub fn bounties(&self) -> bounties::constants::ConstantsApi {
+            bounties::constants::ConstantsApi
         }
-        pub fn child_bounties(&self) -> child_bounties::constants::ConstantsApi<'a, T> {
-            child_bounties::constants::ConstantsApi::new(self.client)
+        pub fn child_bounties(&self) -> child_bounties::constants::ConstantsApi {
+            child_bounties::constants::ConstantsApi
         }
-        pub fn tips(&self) -> tips::constants::ConstantsApi<'a, T> {
-            tips::constants::ConstantsApi::new(self.client)
+        pub fn tips(&self) -> tips::constants::ConstantsApi {
+            tips::constants::ConstantsApi
         }
         pub fn election_provider_multi_phase(
             &self,
-        ) -> election_provider_multi_phase::constants::ConstantsApi<'a, T> {
-            election_provider_multi_phase::constants::ConstantsApi::new(self.client)
+        ) -> election_provider_multi_phase::constants::ConstantsApi {
+            election_provider_multi_phase::constants::ConstantsApi
         }
-        pub fn bags_list(&self) -> bags_list::constants::ConstantsApi<'a, T> {
-            bags_list::constants::ConstantsApi::new(self.client)
+        pub fn bags_list(&self) -> bags_list::constants::ConstantsApi {
+            bags_list::constants::ConstantsApi
         }
-        pub fn paras(&self) -> paras::constants::ConstantsApi<'a, T> {
-            paras::constants::ConstantsApi::new(self.client)
+        pub fn paras(&self) -> paras::constants::ConstantsApi {
+            paras::constants::ConstantsApi
         }
-        pub fn registrar(&self) -> registrar::constants::ConstantsApi<'a, T> {
-            registrar::constants::ConstantsApi::new(self.client)
+        pub fn registrar(&self) -> registrar::constants::ConstantsApi {
+            registrar::constants::ConstantsApi
         }
-        pub fn slots(&self) -> slots::constants::ConstantsApi<'a, T> {
-            slots::constants::ConstantsApi::new(self.client)
+        pub fn slots(&self) -> slots::constants::ConstantsApi {
+            slots::constants::ConstantsApi
         }
-        pub fn auctions(&self) -> auctions::constants::ConstantsApi<'a, T> {
-            auctions::constants::ConstantsApi::new(self.client)
+        pub fn auctions(&self) -> auctions::constants::ConstantsApi {
+            auctions::constants::ConstantsApi
         }
-        pub fn crowdloan(&self) -> crowdloan::constants::ConstantsApi<'a, T> {
-            crowdloan::constants::ConstantsApi::new(self.client)
+        pub fn crowdloan(&self) -> crowdloan::constants::ConstantsApi {
+            crowdloan::constants::ConstantsApi
         }
     }
     pub struct StorageApi<'a, T: ::subxt::Config> {
@@ -28723,7 +28698,7 @@ pub mod api {
     impl<'a, T, X> TransactionApi<'a, T, X>
     where
         T: ::subxt::Config,
-        X: ::subxt::SignedExtra<T>,
+        X: ::subxt::extrinsic::ExtrinsicParams<T>,
     {
         pub fn system(&self) -> system::calls::TransactionApi<'a, T, X> {
             system::calls::TransactionApi::new(self.client)

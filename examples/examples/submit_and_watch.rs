@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
@@ -27,8 +27,8 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
     PairSigner,
+    PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -55,13 +55,13 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
 
     let balance_transfer = api
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -87,13 +87,13 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
 
     let balance_transfer = api
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized()
         .await?;
@@ -138,13 +138,13 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
 
     let mut balance_transfer_progress = api
         .tx()
         .balances()
         .transfer(dest, 10_000)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?;
 
     while let Some(ev) = balance_transfer_progress.next().await {
