@@ -414,26 +414,26 @@ mod tests {
         vec![pallet_first, pallet_second]
     }
 
+    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataLastVersion {
+        RuntimeMetadataLastVersion::new(
+            pallets,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+        )
+    }
+
     #[test]
     fn different_pallet_index() {
         let pallets = build_default_pallets();
         let mut pallets_swap = pallets.clone();
 
-        let metadata = RuntimeMetadataLastVersion::new(
-            pallets,
-            build_default_extrinsic(),
-            meta_type::<()>(),
-        );
+        let metadata = pallets_to_metadata(pallets);
 
         // Change the order in which pallets are registered.
         pallets_swap.swap(0, 1);
         pallets_swap[0].index = 0;
         pallets_swap[1].index = 1;
-        let metadata_swap = RuntimeMetadataLastVersion::new(
-            pallets_swap,
-            build_default_extrinsic(),
-            meta_type::<()>(),
-        );
+        let metadata_swap = pallets_to_metadata(pallets_swap);
 
         let hash = get_metadata_hash(&metadata);
         let hash_swap = get_metadata_hash(&metadata_swap);
@@ -464,11 +464,7 @@ mod tests {
         pallet.calls = Some(PalletCallMetadata {
             ty: meta_type::<A>(),
         });
-        let metadata = RuntimeMetadataLastVersion::new(
-            vec![pallet],
-            build_default_extrinsic(),
-            meta_type::<()>(),
-        );
+        let metadata = pallets_to_metadata(vec![pallet]);
 
         // Check hashing algorithm finishes on a recursive type.
         let hash = get_metadata_hash(&metadata);
@@ -481,6 +477,52 @@ mod tests {
         assert_eq!(
             hex::encode(hash.pallet_hashes.get("Test").unwrap()),
             "746759affa93c4d36d4efd41e78fd623bb6eb88a7f641cd9c314c59530b63e8c"
+        );
+    }
+
+    #[test]
+    /// Ensure correctness of hashing when parsing the `metadata.types`.
+    ///
+    /// Having a recursive structure `A: { B }` and `B: { A }` registered in different order
+    /// `types: { { id: 0, A }, { id: 1, B } }` and `types: { { id: 0, B }, { id: 1, A } }`
+    /// must produce the same deterministic hashing value.
+    fn recursive_types_different_order() {
+        let mut pallets = build_default_pallets();
+        pallets[0].calls = Some(PalletCallMetadata {
+            ty: meta_type::<A>(),
+        });
+        pallets[1].calls = Some(PalletCallMetadata {
+            ty: meta_type::<B>(),
+        });
+        pallets[1].index = 1;
+        let mut pallets_swap = pallets.clone();
+        let metadata = pallets_to_metadata(pallets);
+
+        pallets_swap.swap(0, 1);
+        pallets_swap[0].index = 0;
+        pallets_swap[1].index = 1;
+        let metadata_swap = pallets_to_metadata(pallets_swap);
+
+        let hash = get_metadata_hash(&metadata);
+        let hash_swap = get_metadata_hash(&metadata_swap);
+
+        // Changing pallet order must still result in a deterministic unique hash.
+        assert_eq!(hash.metadata_hash, hash_swap.metadata_hash);
+        assert_eq!(hash.pallet_hashes, hash_swap.pallet_hashes);
+
+        assert_eq!(
+            hex::encode(hash.metadata_hash),
+            "df0aa051450259ca3fa1f7fd412dadf8ad679b06cb0de2f934a626ba529fed81"
+        );
+        // Check cache for pallet correctness.
+        assert_eq!(hash.pallet_hashes.len(), 2);
+        assert_eq!(
+            hex::encode(hash.pallet_hashes.get("First").unwrap()),
+            "746759affa93c4d36d4efd41e78fd623bb6eb88a7f641cd9c314c59530b63e8c"
+        );
+        assert_eq!(
+            hex::encode(hash.pallet_hashes.get("Second").unwrap()),
+            "27c6e54643d15c31bb34814d63f779801fa1e81b2c3c9778cf12d41cc48bebb4"
         );
     }
 
