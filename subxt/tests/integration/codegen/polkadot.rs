@@ -27436,9 +27436,9 @@ pub mod api {
     #[doc = r" The default error type returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
     impl ::subxt::HasModuleError for runtime_types::sp_runtime::DispatchError {
-        fn module_error_indices(&self) -> Option<::subxt::ModuleErrorRaw> {
+        fn module_error_data(&self) -> Option<::subxt::ModuleErrorData> {
             if let &Self::Module { index, error } = self {
-                Some(::subxt::ModuleErrorRaw {
+                Some(::subxt::ModuleErrorData {
                     pallet_index: index,
                     error: [error, 0, 0, 0],
                 })

@@ -81,7 +81,7 @@ pub use crate::{
         Error,
         GenericError,
         HasModuleError,
-        ModuleErrorRaw,
+        ModuleErrorData,
         RuntimeError,
         TransactionError,
     },

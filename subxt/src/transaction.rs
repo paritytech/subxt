@@ -389,7 +389,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
             let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 let dispatch_error = E::decode(&mut &*ev.data)?;
-                if let Some(raw_error) = dispatch_error.module_error_indices() {
+                if let Some(raw_error) = dispatch_error.module_error_data() {
                     // Error index is utilized as the first byte from the error array.
                     let details = self
                         .client
@@ -399,7 +399,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
                         pallet: details.pallet().to_string(),
                         error: details.error().to_string(),
                         description: details.description().to_vec(),
-                        raw: raw_error,
+                        error_data: raw_error,
                     }))
                 } else {
                     return Err(Error::Runtime(RuntimeError(dispatch_error)))
