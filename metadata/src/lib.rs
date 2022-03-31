@@ -337,10 +337,14 @@ mod tests {
     };
     use codec::Decode;
     use frame_metadata::{
+        ExtrinsicMetadata,
+        PalletCallMetadata,
+        PalletMetadata,
         RuntimeMetadata::V14,
         RuntimeMetadataLastVersion,
         RuntimeMetadataPrefixed,
     };
+    use scale_info::meta_type;
     use std::fs;
 
     /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
@@ -362,6 +366,71 @@ mod tests {
             V14(v14) => v14,
             _ => panic!("Unsupported metadata version {:?}", meta.1),
         }
+    }
+
+    fn build_default_extrinsic() -> ExtrinsicMetadata {
+        ExtrinsicMetadata {
+            ty: meta_type::<()>(),
+            version: 0,
+            signed_extensions: vec![],
+        }
+    }
+
+    fn build_default_pallet() -> PalletMetadata {
+        PalletMetadata {
+            name: "Test",
+            storage: None,
+            calls: None,
+            event: None,
+            constants: vec![],
+            error: None,
+            index: 0,
+        }
+    }
+
+    fn build_default_pallets() -> Vec<PalletMetadata> {
+        let mut pallet_first = build_default_pallet();
+        pallet_first.name = "First";
+        pallet_first.calls = Some(PalletCallMetadata {
+            ty: meta_type::<u8>(),
+        });
+        let mut pallet_second = build_default_pallet();
+        pallet_second.name = "Second";
+        pallet_second.calls = Some(PalletCallMetadata {
+            ty: meta_type::<u16>(),
+        });
+        pallet_second.index = 1;
+
+        vec![pallet_first, pallet_second]
+    }
+
+    #[test]
+    fn different_pallet_index() {
+        let pallets = build_default_pallets();
+        let mut pallets_swap = pallets.clone();
+
+        let metadata = RuntimeMetadataLastVersion::new(
+            pallets,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+        );
+
+        // Change the order in which pallets are registered.
+        pallets_swap.swap(0, 1);
+        pallets_swap[0].index = 0;
+        pallets_swap[1].index = 1;
+        let metadata_swap = RuntimeMetadataLastVersion::new(
+            pallets_swap,
+            build_default_extrinsic(),
+            meta_type::<()>(),
+        );
+
+        let hash = get_metadata_hash(&metadata);
+        let hash_swap = get_metadata_hash(&metadata_swap);
+
+        // Changing pallet order must still result in a deterministic unique hash.
+        assert_eq!(hash.metadata_hash, hash_swap.metadata_hash);
+        assert_eq!(hash.pallet_hashes, hash_swap.pallet_hashes);
     }
 
     #[test]
