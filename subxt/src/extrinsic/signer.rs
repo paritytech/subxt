@@ -17,58 +17,51 @@
 //! A library to **sub**mit e**xt**rinsics to a
 //! [substrate](https://github.com/paritytech/substrate) node via RPC.
 
-use super::{
-    SignedExtra,
-    SignedPayload,
-    UncheckedExtrinsic,
-};
 use crate::Config;
-use codec::Encode;
 use sp_core::Pair;
 use sp_runtime::traits::{
     IdentifyAccount,
-    SignedExtension,
     Verify,
 };
 
-/// Extrinsic signer.
-#[async_trait::async_trait]
-pub trait Signer<T: Config, E: SignedExtra<T>> {
-    /// Returns the account id.
-    fn account_id(&self) -> &T::AccountId;
-
+/// Signing transactions requires a [`Signer`]. This is responsible for
+/// providing the "from" account that the transaction is being signed by,
+/// as well as actually signing a SCALE encoded payload. Optionally, a
+/// signer can also provide the nonce for the transaction to use.
+pub trait Signer<T: Config> {
     /// Optionally returns a nonce.
     fn nonce(&self) -> Option<T::Index>;
 
-    /// Takes an unsigned extrinsic and returns a signed extrinsic.
+    /// Return the "from" account ID.
+    fn account_id(&self) -> &T::AccountId;
+
+    /// Return the "from" address.
+    fn address(&self) -> T::Address;
+
+    /// Takes a signer payload for an extrinsic, and returns a signature based on it.
     ///
     /// Some signers may fail, for instance because the hardware on which the keys are located has
     /// refused the operation.
-    async fn sign(
-        &self,
-        extrinsic: SignedPayload<T, E>,
-    ) -> Result<UncheckedExtrinsic<T, E>, String>;
+    fn sign(&self, signer_payload: &[u8]) -> T::Signature;
 }
 
-/// Extrinsic signer using a private key.
+/// A [`Signer`] implementation that can be constructed from an [`Pair`].
 #[derive(Clone, Debug)]
-pub struct PairSigner<T: Config, E, P: Pair> {
+pub struct PairSigner<T: Config, P: Pair> {
     account_id: T::AccountId,
     nonce: Option<T::Index>,
     signer: P,
-    marker: std::marker::PhantomData<E>,
 }
 
-impl<T, E, P> PairSigner<T, E, P>
+impl<T, P> PairSigner<T, P>
 where
     T: Config,
-    E: SignedExtra<T>,
     T::Signature: From<P::Signature>,
     <T::Signature as Verify>::Signer:
         From<P::Public> + IdentifyAccount<AccountId = T::AccountId>,
     P: Pair,
 {
-    /// Creates a new `Signer` from a `Pair`.
+    /// Creates a new [`Signer`] from a [`Pair`].
     pub fn new(signer: P) -> Self {
         let account_id =
             <T::Signature as Verify>::Signer::from(signer.public()).into_account();
@@ -76,11 +69,11 @@ where
             account_id,
             nonce: None,
             signer,
-            marker: Default::default(),
         }
     }
 
-    /// Sets the nonce to a new value.
+    /// Sets the nonce to a new value. By default, the nonce will
+    /// be retrieved from the node. Setting one here will override that.
     pub fn set_nonce(&mut self, nonce: T::Index) {
         self.nonce = Some(nonce);
     }
@@ -90,43 +83,37 @@ where
         self.nonce = self.nonce.map(|nonce| nonce + 1u32.into());
     }
 
-    /// Returns the signer.
+    /// Returns the [`Pair`] implementation used to construct this.
     pub fn signer(&self) -> &P {
         &self.signer
     }
+
+    /// Return the account ID.
+    pub fn account_id(&self) -> &T::AccountId {
+        &self.account_id
+    }
 }
 
-#[async_trait::async_trait]
-impl<T, E, P> Signer<T, E> for PairSigner<T, E, P>
+impl<T, P> Signer<T> for PairSigner<T, P>
 where
     T: Config,
-    E: SignedExtra<T>,
-    T::AccountId: Into<T::Address> + 'static,
-    <<E as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-        Send + Sync + 'static,
+    T::AccountId: Into<T::Address> + Clone + 'static,
     P: Pair + 'static,
     P::Signature: Into<T::Signature> + 'static,
 {
-    fn account_id(&self) -> &T::AccountId {
-        &self.account_id
-    }
-
     fn nonce(&self) -> Option<T::Index> {
         self.nonce
     }
 
-    async fn sign(
-        &self,
-        extrinsic: SignedPayload<T, E>,
-    ) -> Result<UncheckedExtrinsic<T, E>, String> {
-        let signature = extrinsic.using_encoded(|payload| self.signer.sign(payload));
-        let (call, extra, _) = extrinsic.deconstruct();
-        let extrinsic = UncheckedExtrinsic::<T, E>::new_signed(
-            call,
-            self.account_id.clone().into(),
-            signature.into(),
-            extra,
-        );
-        Ok(extrinsic)
+    fn account_id(&self) -> &T::AccountId {
+        &self.account_id
+    }
+
+    fn address(&self) -> T::Address {
+        self.account_id.clone().into()
+    }
+
+    fn sign(&self, signer_payload: &[u8]) -> T::Signature {
+        self.signer.sign(signer_payload).into()
     }
 }

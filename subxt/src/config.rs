@@ -43,7 +43,8 @@ pub trait Config: 'static {
         + Default
         + AtLeast32Bit
         + Copy
-        + scale_info::TypeInfo;
+        + scale_info::TypeInfo
+        + Into<u64>;
 
     /// The block number type used by the runtime.
     type BlockNumber: Parameter
