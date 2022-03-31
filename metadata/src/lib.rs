@@ -369,10 +369,12 @@ mod tests {
     }
 
     // Define recursive types.
+    #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     struct A {
         pub b: Box<B>,
     }
+    #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     struct B {
         pub a: Box<A>,
