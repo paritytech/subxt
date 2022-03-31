@@ -198,6 +198,14 @@ pub struct ModuleErrorData {
     pub error: [u8; 4],
 }
 
+impl ModuleErrorData {
+    /// Obtain the error index from the underlying byte data.
+    pub fn error_index(&self) -> u8 {
+        // Error index is utilized as the first byte from the error array.
+        self.error[0]
+    }
+}
+
 /// This trait is automatically implemented for the generated `DispatchError`,
 /// so that we can pluck out information about the `Module` error variant, if`
 /// it exists.
