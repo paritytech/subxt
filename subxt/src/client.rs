@@ -24,10 +24,8 @@ use crate::{
         HasModuleError,
     },
     extrinsic::{
-        self,
-        SignedExtra,
+        ExtrinsicParams,
         Signer,
-        UncheckedExtrinsic,
     },
     rpc::{
         Rpc,
@@ -39,9 +37,14 @@ use crate::{
     transaction::TransactionProgress,
     Call,
     Config,
+    Encoded,
     Metadata,
 };
-use codec::Decode;
+use codec::{
+    Compact,
+    Decode,
+    Encode,
+};
 use derivative::Derivative;
 use std::sync::Arc;
 
@@ -188,7 +191,7 @@ pub struct SubmittableExtrinsic<'client, T: Config, X, C, E: Decode, Evs: Decode
 impl<'client, T, X, C, E, Evs> SubmittableExtrinsic<'client, T, X, C, E, Evs>
 where
     T: Config,
-    X: SignedExtra<T>,
+    X: ExtrinsicParams<T>,
     C: Call + Send + Sync,
     E: Decode + HasModuleError,
     Evs: Decode,
@@ -202,20 +205,33 @@ where
         }
     }
 
+    /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
+    /// to construct the "signed extra" and "additional" payloads needed by the extrinsic.
+    ///
+    /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
+    /// and obtain details about it, once it has made it into a block.
+    pub async fn sign_and_submit_then_watch_default(
+        self,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
+    where
+        X::OtherParams: Default,
+    {
+        self.sign_and_submit_then_watch(signer, Default::default())
+            .await
+    }
+
     /// Creates and signs an extrinsic and submits it to the chain.
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
         self,
-        signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
-    where
-        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync + 'static,
-    {
+        signer: &(dyn Signer<T> + Send + Sync),
+        other_params: X::OtherParams,
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError> {
         // Sign the call data to create our extrinsic.
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
+        let extrinsic = self.create_signed(signer, other_params).await?;
 
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
@@ -224,6 +240,26 @@ where
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
         Ok(TransactionProgress::new(sub, self.client, ext_hash))
+    }
+
+    /// Creates and signs an extrinsic and submits to the chain for block inclusion. Passes
+    /// default parameters to construct the "signed extra" and "additional" payloads needed
+    /// by the extrinsic.
+    ///
+    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// and has been included in the transaction pool.
+    pub async fn sign_and_submit_default(
+        self,
+        signer: &(dyn Signer<T> + Send + Sync),
+    ) -> Result<T::Hash, BasicError>
+    where
+        X::OtherParams: Default,
+    {
+        self.sign_and_submit(signer, Default::default()).await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion.
@@ -236,26 +272,20 @@ where
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
         self,
-        signer: &(dyn Signer<T, X> + Send + Sync),
-    ) -> Result<T::Hash, BasicError>
-    where
-        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync + 'static,
-    {
-        let extrinsic = self.create_signed(signer, Default::default()).await?;
+        signer: &(dyn Signer<T> + Send + Sync),
+        other_params: X::OtherParams,
+    ) -> Result<T::Hash, BasicError> {
+        let extrinsic = self.create_signed(signer, other_params).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
     }
 
-    /// Creates a signed extrinsic.
+    /// Creates a returns a raw signed extrinsic, without submitting it.
     pub async fn create_signed(
         &self,
-        signer: &(dyn Signer<T, X> + Send + Sync),
-        additional_params: X::Parameters,
-    ) -> Result<UncheckedExtrinsic<T, X>, BasicError>
-    where
-        <<X as SignedExtra<T>>::Extra as SignedExtension>::AdditionalSigned:
-            Send + Sync + 'static,
-    {
+        signer: &(dyn Signer<T> + Send + Sync),
+        other_params: X::OtherParams,
+    ) -> Result<Encoded, BasicError> {
+        // 1. Get nonce
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
         } else {
@@ -264,21 +294,69 @@ where
                 .system_account_next_index(signer.account_id())
                 .await?
         };
-        let call = self
-            .client
-            .metadata()
-            .pallet(C::PALLET)
-            .and_then(|pallet| pallet.encode_call(&self.call))?;
 
-        let signed = extrinsic::create_signed(
-            &self.client.runtime_version,
-            self.client.genesis_hash,
+        // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
+        let call_data = {
+            let mut bytes = Vec::new();
+            let pallet = self.client.metadata().pallet(C::PALLET)?;
+            bytes.push(pallet.index());
+            bytes.push(pallet.call_index::<C>()?);
+            self.call.encode_to(&mut bytes);
+            Encoded(bytes)
+        };
+
+        // 3. Construct our custom additional/extra params.
+        let additional_and_extra_params = X::new(
+            self.client.runtime_version.spec_version,
+            self.client.runtime_version.transaction_version,
             account_nonce,
-            call,
-            signer,
-            additional_params,
-        )
-        .await?;
-        Ok(signed)
+            self.client.genesis_hash,
+            other_params,
+        );
+
+        // 4. Construct signature. This is compatible with the Encode impl
+        //    for SignedPayload (which is this payload of bytes that we'd like)
+        //    to sign. See:
+        //    https://github.com/paritytech/substrate/blob/9a6d706d8db00abb6ba183839ec98ecd9924b1f8/primitives/runtime/src/generic/unchecked_extrinsic.rs#L215)
+        let signature = {
+            let mut bytes = Vec::new();
+            call_data.encode_to(&mut bytes);
+            additional_and_extra_params.encode_extra_to(&mut bytes);
+            additional_and_extra_params.encode_additional_to(&mut bytes);
+            if bytes.len() > 256 {
+                signer.sign(&sp_core::blake2_256(&bytes))
+            } else {
+                signer.sign(&bytes)
+            }
+        };
+
+        // 5. Encode extrinsic, now that we have the parts we need. This is compatible
+        //    with the Encode impl for UncheckedExtrinsic (protocol version 4).
+        let extrinsic = {
+            let mut encoded_inner = Vec::new();
+            // "is signed" + transaction protocol version (4)
+            (0b10000000 + 4u8).encode_to(&mut encoded_inner);
+            // from address for signature
+            signer.address().encode_to(&mut encoded_inner);
+            // the signature bytes
+            signature.encode_to(&mut encoded_inner);
+            // attach custom extra params
+            additional_and_extra_params.encode_extra_to(&mut encoded_inner);
+            // and now, call data
+            call_data.encode_to(&mut encoded_inner);
+            // now, prefix byte length:
+            let len = Compact(
+                u32::try_from(encoded_inner.len())
+                    .expect("extrinsic size expected to be <4GB"),
+            );
+            let mut encoded = Vec::new();
+            len.encode_to(&mut encoded);
+            encoded.extend(encoded_inner);
+            encoded
+        };
+
+        // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
+        // maybe we can just return the raw bytes..
+        Ok(Encoded(extrinsic))
     }
 }

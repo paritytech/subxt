@@ -24,10 +24,15 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
+    extrinsic::{
+        Era,
+        PlainTip,
+    },
     ClientBuilder,
     DefaultConfig,
     PairSigner,
     PolkadotExtrinsicParams,
+    PolkadotExtrinsicParamsBuilder as Params,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -45,29 +50,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    // Validate full metadata compatibility.
-    api.validate_metadata()?;
+    // Configure the transaction tip and era:
+    let tx_params = Params::new()
+        .tip(PlainTip::new(20_000_000_000))
+        .era(Era::Immortal, *api.client.genesis());
 
-    // Skip the pallet metadata compatibility check.
-    let hash = api
-        .tx()
-        .balances_unchecked()
-        .transfer(dest, 123_456_789_012_345)
-        .sign_and_submit_default(&signer)
-        .await?;
-
-    println!(
-        "Balance transfer extrinsic submitted (without pallet metadata validation): {}",
-        hash
-    );
-
-    // Validate pallet metadata compatibility.
+    // Send the transaction:
     let hash = api
         .tx()
         .balances()?
-        .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
-        .sign_and_submit_default(&signer)
+        .transfer(dest, 123_456_789_012_345)
+        .sign_and_submit(&signer, tx_params)
         .await?;
+
     println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())

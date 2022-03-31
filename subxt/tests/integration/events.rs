@@ -24,7 +24,6 @@ use crate::{
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
-use subxt::Signer;
 
 // Check that we can subscribe to non-finalized block events.
 #[async_std::test]
@@ -118,7 +117,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
         .tx()
         .balances()?
         .transfer(bob.clone().into(), 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?;
 
     // Wait for the next balance transfer event in our subscription stream

@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
@@ -28,8 +28,8 @@ use std::time::Duration;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
     PairSigner,
+    PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -45,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
     // Subscribe to just balance transfer events, making use of `filter_events`
     // to select a single event type (note the 1-tuple) to filter out and return.
@@ -58,11 +58,15 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
     async_std::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let api = ClientBuilder::new()
-            .build()
-            .await
-            .unwrap()
-            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        let api =
+            ClientBuilder::new()
+                .build()
+                .await
+                .unwrap()
+                .to_runtime_api::<polkadot::RuntimeApi<
+                    DefaultConfig,
+                    PolkadotExtrinsicParams<DefaultConfig>,
+                >>();
 
         // Make small balance transfers from Alice to Bob in a loop:
         loop {
@@ -70,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .balances()
                 .unwrap()
                 .transfer(AccountKeyring::Bob.to_account_id().into(), 1_000_000_000)
-                .sign_and_submit(&signer)
+                .sign_and_submit_default(&signer)
                 .await
                 .unwrap();
             async_std::task::sleep(Duration::from_secs(10)).await;
