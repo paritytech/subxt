@@ -1,4 +1,3 @@
-// NOTE [jsdw]: generated from polkadot 0.9.18-f6d6ab005d-aarch64-macos
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
@@ -80,11 +79,15 @@ pub mod api {
         XcmPallet(xcm_pallet::Event),
     }
     pub mod system {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct FillBlock {
@@ -847,11 +850,15 @@ pub mod api {
         }
     }
     pub mod scheduler {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Schedule {
@@ -1259,11 +1266,15 @@ pub mod api {
         }
     }
     pub mod preimage {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct NotePreimage {
@@ -1490,11 +1501,15 @@ pub mod api {
         }
     }
     pub mod babe {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportEquivocation {
@@ -1960,11 +1975,15 @@ pub mod api {
         }
     }
     pub mod timestamp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Set {
@@ -2067,11 +2086,15 @@ pub mod api {
         }
     }
     pub mod indices {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -2326,11 +2349,15 @@ pub mod api {
         }
     }
     pub mod balances {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Transfer {
@@ -2833,8 +2860,10 @@ pub mod api {
         }
     }
     pub mod transaction_payment {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct NextFeeMultiplier;
@@ -2926,11 +2955,15 @@ pub mod api {
         }
     }
     pub mod authorship {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetUncles {
@@ -3075,11 +3108,15 @@ pub mod api {
         }
     }
     pub mod staking {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Bond {
@@ -4999,8 +5036,10 @@ pub mod api {
         }
     }
     pub mod offences {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -5153,15 +5192,21 @@ pub mod api {
         }
     }
     pub mod historical {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod session {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetKeys {
@@ -5418,11 +5463,15 @@ pub mod api {
         }
     }
     pub mod grandpa {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportEquivocation {
@@ -5721,11 +5770,15 @@ pub mod api {
         }
     }
     pub mod im_online {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Heartbeat {
@@ -5952,15 +6005,21 @@ pub mod api {
         }
     }
     pub mod authority_discovery {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod democracy {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Propose {
@@ -7267,11 +7326,15 @@ pub mod api {
         }
     }
     pub mod council {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetMembers {
@@ -7706,11 +7769,15 @@ pub mod api {
         }
     }
     pub mod technical_committee {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetMembers {
@@ -8145,11 +8212,15 @@ pub mod api {
         }
     }
     pub mod phragmen_election {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Vote {
@@ -8602,11 +8673,15 @@ pub mod api {
         }
     }
     pub mod technical_membership {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddMember {
@@ -8869,11 +8944,15 @@ pub mod api {
         }
     }
     pub mod treasury {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ProposeSpend {
@@ -9227,11 +9306,15 @@ pub mod api {
         }
     }
     pub mod claims {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Claim {
@@ -9622,11 +9705,15 @@ pub mod api {
         }
     }
     pub mod vesting {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Vest;
@@ -9926,11 +10013,15 @@ pub mod api {
         }
     }
     pub mod utility {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Batch {
@@ -10098,11 +10189,15 @@ pub mod api {
         }
     }
     pub mod identity {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddRegistrar {
@@ -10853,11 +10948,15 @@ pub mod api {
         }
     }
     pub mod proxy {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Proxy {
@@ -11211,17 +11310,6 @@ pub mod api {
                 const PALLET: &'static str = "Proxy";
                 const EVENT: &'static str = "ProxyAdded";
             }
-            #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
-            pub struct ProxyRemoved {
-                pub delegator: ::subxt::sp_core::crypto::AccountId32,
-                pub delegatee: ::subxt::sp_core::crypto::AccountId32,
-                pub proxy_type: runtime_types::polkadot_runtime::ProxyType,
-                pub delay: ::core::primitive::u32,
-            }
-            impl ::subxt::Event for ProxyRemoved {
-                const PALLET: &'static str = "Proxy";
-                const EVENT: &'static str = "ProxyRemoved";
-            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -11402,11 +11490,15 @@ pub mod api {
         }
     }
     pub mod multisig {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AsMultiThreshold1 {
@@ -11777,11 +11869,15 @@ pub mod api {
         }
     }
     pub mod bounties {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ProposeBounty {
@@ -12329,11 +12425,15 @@ pub mod api {
         }
     }
     pub mod child_bounties {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddChildBounty {
@@ -12839,11 +12939,15 @@ pub mod api {
         }
     }
     pub mod tips {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportAwesome {
@@ -13197,11 +13301,15 @@ pub mod api {
         }
     }
     pub mod election_provider_multi_phase {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SubmitUnsigned { pub raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , pub witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , }
@@ -13750,11 +13858,15 @@ pub mod api {
         }
     }
     pub mod bags_list {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Rebag {
@@ -14110,15 +14222,21 @@ pub mod api {
         }
     }
     pub mod parachains_origin {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod configuration {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -15413,11 +15531,15 @@ pub mod api {
         }
     }
     pub mod paras_shared {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -15512,11 +15634,15 @@ pub mod api {
         }
     }
     pub mod para_inclusion {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -15683,11 +15809,15 @@ pub mod api {
         }
     }
     pub mod para_inherent {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Enter {
@@ -15793,8 +15923,10 @@ pub mod api {
         }
     }
     pub mod para_scheduler {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct ValidatorGroups;
@@ -15925,11 +16057,15 @@ pub mod api {
         }
     }
     pub mod paras {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceSetCurrentCode {
@@ -16850,11 +16986,15 @@ pub mod api {
         }
     }
     pub mod initializer {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -16942,11 +17082,15 @@ pub mod api {
         }
     }
     pub mod dmp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -17052,11 +17196,15 @@ pub mod api {
         }
     }
     pub mod ump {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ServiceOverweight {
@@ -17344,11 +17492,15 @@ pub mod api {
         }
     }
     pub mod hrmp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct HrmpInitOpenChannel {
@@ -18002,8 +18154,10 @@ pub mod api {
         }
     }
     pub mod para_session_info {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct AssignmentKeysUnsafe;
@@ -18091,11 +18245,15 @@ pub mod api {
         }
     }
     pub mod paras_disputes {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceUnfreeze;
@@ -18348,11 +18506,15 @@ pub mod api {
         }
     }
     pub mod registrar {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Register {
@@ -18696,11 +18858,15 @@ pub mod api {
         }
     }
     pub mod slots {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceLease {
@@ -18906,11 +19072,15 @@ pub mod api {
         }
     }
     pub mod auctions {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct NewAuction {
@@ -19261,11 +19431,15 @@ pub mod api {
         }
     }
     pub mod crowdloan {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Create {
@@ -19789,11 +19963,15 @@ pub mod api {
         }
     }
     pub mod xcm_pallet {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Send {
@@ -23229,13 +23407,6 @@ pub mod api {
                     },
                     #[codec(index = 3)]
                     ProxyAdded {
-                        delegator: ::subxt::sp_core::crypto::AccountId32,
-                        delegatee: ::subxt::sp_core::crypto::AccountId32,
-                        proxy_type: runtime_types::polkadot_runtime::ProxyType,
-                        delay: ::core::primitive::u32,
-                    },
-                    #[codec(index = 4)]
-                    ProxyRemoved {
                         delegator: ::subxt::sp_core::crypto::AccountId32,
                         delegatee: ::subxt::sp_core::crypto::AccountId32,
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
@@ -28351,9 +28522,12 @@ pub mod api {
     #[doc = r" The default error type returned when there is a runtime issue."]
     pub type DispatchError = runtime_types::sp_runtime::DispatchError;
     impl ::subxt::HasModuleError for runtime_types::sp_runtime::DispatchError {
-        fn module_error_indices(&self) -> Option<(u8, u8)> {
+        fn module_error_data(&self) -> Option<::subxt::ModuleErrorData> {
             if let Self::Module(module_error) = self {
-                Some((module_error.index, module_error.error))
+                Some(::subxt::ModuleErrorData {
+                    pallet_index: module_error.index,
+                    error: [module_error.error, 0, 0, 0],
+                })
             } else {
                 None
             }
