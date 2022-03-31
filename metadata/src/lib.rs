@@ -331,7 +331,10 @@ impl Default for MetadataHashDetails {
 
 #[cfg(test)]
 mod tests {
-    use crate::get_metadata_hash;
+    use crate::{
+        get_metadata_hash,
+        get_pallet_hash,
+    };
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
@@ -430,6 +433,16 @@ mod tests {
             hex::encode(hash.pallet_hashes.get("Second").unwrap()),
             "7b569e14819175918ac2c0e578187e1b0639b4712b812493b7ac198936b07c54"
         );
+
+        // Verify a fresh compute with cached pallet hash.
+        let pallet_hash_first = get_pallet_hash(&metadata.types, &metadata.pallets[0]);
+        assert_eq!(hash.pallet_hashes.get("First").unwrap(), &pallet_hash_first);
+
+        let pallet_hash_second = get_pallet_hash(&metadata.types, &metadata.pallets[1]);
+        assert_eq!(
+            hash.pallet_hashes.get("Second").unwrap(),
+            &pallet_hash_second
+        );
     }
 
     #[test]
@@ -452,6 +465,10 @@ mod tests {
             hex::encode(hash.pallet_hashes.get("Test").unwrap()),
             "746759affa93c4d36d4efd41e78fd623bb6eb88a7f641cd9c314c59530b63e8c"
         );
+
+        // Verify a fresh compute with cached pallet hash.
+        let pallet_hash = get_pallet_hash(&metadata.types, &metadata.pallets[0]);
+        assert_eq!(hash.pallet_hashes.get("Test").unwrap(), &pallet_hash);
     }
 
     #[test]
@@ -497,6 +514,16 @@ mod tests {
         assert_eq!(
             hex::encode(hash.pallet_hashes.get("Second").unwrap()),
             "27c6e54643d15c31bb34814d63f779801fa1e81b2c3c9778cf12d41cc48bebb4"
+        );
+
+        // Verify a fresh compute with cached pallet hash.
+        let pallet_hash_first = get_pallet_hash(&metadata.types, &metadata.pallets[0]);
+        assert_eq!(hash.pallet_hashes.get("First").unwrap(), &pallet_hash_first);
+
+        let pallet_hash_second = get_pallet_hash(&metadata.types, &metadata.pallets[1]);
+        assert_eq!(
+            hash.pallet_hashes.get("Second").unwrap(),
+            &pallet_hash_second
         );
     }
 }
