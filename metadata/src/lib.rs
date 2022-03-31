@@ -331,42 +331,14 @@ impl Default for MetadataHashDetails {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        get_metadata_hash,
-        get_pallet_hash,
-    };
-    use codec::Decode;
+    use crate::get_metadata_hash;
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
         PalletMetadata,
-        RuntimeMetadata::V14,
         RuntimeMetadataLastVersion,
-        RuntimeMetadataPrefixed,
     };
     use scale_info::meta_type;
-    use std::fs;
-
-    /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
-    /// tag: polkadot-v0.9.17, branch origin/main.
-    static METADATA_PATH: &str = "./test-assets/node_template.scale";
-
-    /// Metadata obtained from https://github.com/substrate-developer-hub/substrate-node-template.git
-    /// tag: polkadot-v0.9.17, branch origin/main, via moving `Balances` pallet order as last
-    /// pallet in `construct_runtime` macro.
-    static METADATA_SWAP_PATH: &str = "./test-assets/node_template_swap.scale";
-
-    /// Load metadata from a given file path.
-    fn load_metadata(path: &str) -> RuntimeMetadataLastVersion {
-        let bytes = fs::read(path).expect("Cannot read metadata");
-        let meta: RuntimeMetadataPrefixed =
-            Decode::decode(&mut &bytes[..]).expect("Cannot decode scale metadata");
-
-        match meta.1 {
-            V14(v14) => v14,
-            _ => panic!("Unsupported metadata version {:?}", meta.1),
-        }
-    }
 
     // Define recursive types.
     #[allow(dead_code)]
@@ -526,42 +498,5 @@ mod tests {
             hex::encode(hash.pallet_hashes.get("Second").unwrap()),
             "27c6e54643d15c31bb34814d63f779801fa1e81b2c3c9778cf12d41cc48bebb4"
         );
-    }
-
-    #[test]
-    fn check_metadata_cache() {
-        let metadata = load_metadata(METADATA_PATH);
-
-        // Cache must be populated with pallet hashes.
-        let hash_details = get_metadata_hash(&metadata);
-
-        let mut pallets: Vec<_> = metadata.pallets.iter().collect();
-        // Compare cache with individual pallets
-        for pallet in pallets.iter() {
-            // Compare a fresh iteration over pallet with cache value.
-            let hash = get_pallet_hash(&metadata.types, pallet);
-            assert_eq!(hash_details.pallet_hashes.get(&pallet.name).unwrap(), &hash);
-        }
-
-        // Verify different order of hashing for pallets
-        pallets.sort_by(|lhs, rhs| rhs.name.cmp(&lhs.name));
-        for pallet in pallets.iter() {
-            // Compare a fresh iteration over pallet with cache value.
-            let hash = get_pallet_hash(&metadata.types, pallet);
-            assert_eq!(hash_details.pallet_hashes.get(&pallet.name).unwrap(), &hash);
-        }
-    }
-
-    #[test]
-    fn check_deterministic_metadata() {
-        let metadata = load_metadata(METADATA_PATH);
-        let metadata_swap = load_metadata(METADATA_SWAP_PATH);
-
-        let hash = get_metadata_hash(&metadata);
-        let hash_swap = get_metadata_hash(&metadata_swap);
-
-        // Changing pallet order must still result in a deterministic unique hash.
-        assert_eq!(hash.metadata_hash, hash_swap.metadata_hash);
-        assert_eq!(hash.pallet_hashes, hash_swap.pallet_hashes);
     }
 }
