@@ -48,7 +48,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::NamedField => {
                 quote! {
                     if let &Self::Module { index, error } = self {
-                        Some(::subxt::ModuleErrorRaw { pallet_index: index, error: [error, 0, 0, 0] })
+                        Some(::subxt::ModuleErrorData { pallet_index: index, error: [error, 0, 0, 0] })
                     } else {
                         None
                     }
@@ -57,7 +57,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::LegacyError => {
                 quote! {
                     if let Self::Module (module_error) = self {
-                        Some(::subxt::ModuleErrorRaw { pallet_index: module_error.index, error: [module_error.error, 0, 0, 0] })
+                        Some(::subxt::ModuleErrorData { pallet_index: module_error.index, error: [module_error.error, 0, 0, 0] })
                     } else {
                         None
                     }
@@ -66,7 +66,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::ArrayError => {
                 quote! {
                     if let Self::Module (module_error) = self {
-                        Some(::subxt::ModuleErrorRaw { pallet_index: module_error.index, error: module_error.error })
+                        Some(::subxt::ModuleErrorData { pallet_index: module_error.index, error: module_error.error })
                     } else {
                         None
                     }
@@ -193,7 +193,7 @@ pub fn generate_has_module_error_impl(
 
     quote! {
         impl ::subxt::HasModuleError for #types_mod_ident::sp_runtime::DispatchError {
-            fn module_error_indices(&self) -> Option<::subxt::ModuleErrorRaw> {
+            fn module_error_data(&self) -> Option<::subxt::ModuleErrorData> {
                 #error_type
             }
         }
