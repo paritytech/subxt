@@ -37,7 +37,7 @@ pub mod polkadot {}
 
 /// Subscribe to all events, and then manually look through them and
 /// pluck out the events that we care about.
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
@@ -56,7 +56,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .filter_events::<(polkadot::balances::events::Transfer,)>();
 
     // While this subscription is active, we imagine some balance transfers are made somewhere else:
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
         let api =
             ClientBuilder::new()
@@ -76,7 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .sign_and_submit_default(&signer)
                 .await
                 .unwrap();
-            async_std::task::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(10)).await;
         }
     });
 
