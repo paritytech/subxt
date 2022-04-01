@@ -29,7 +29,7 @@ thiserror = "1.0.24"
 
 subxt-macro = { version = "0.18.1", path = "../macro" }
 
-sp-core = { package = "sp-core", git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }
+sp-core = { package = "sp-core", git = "https://github.com/tidelabs/substrate", branch = "tidechain", default-features = false }
 sp-runtime = { package = "sp-runtime", git = "https://github.com/tide-labs/substrate", branch = "tidechain", default-features = false }
 
 frame-metadata = "15.0.0"
