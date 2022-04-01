@@ -28,7 +28,7 @@ use sp_keyring::AccountKeyring;
 type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
-#[async_std::test]
+#[tokio::test]
 async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
@@ -54,7 +54,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();

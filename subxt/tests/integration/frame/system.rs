@@ -25,7 +25,7 @@ use crate::{
 use assert_matches::assert_matches;
 use sp_keyring::AccountKeyring;
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
@@ -41,7 +41,7 @@ async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let cxt = test_context().await;

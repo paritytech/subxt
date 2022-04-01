@@ -326,7 +326,7 @@ mod test {
         .map(Ok::<_, BasicError>)
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn filter_one_event_from_stream() {
         let metadata = metadata::<PalletEvents>();
 
@@ -358,7 +358,7 @@ mod test {
         assert_eq!(actual, expected);
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn filter_some_events_from_stream() {
         let metadata = metadata::<PalletEvents>();
 
@@ -406,7 +406,7 @@ mod test {
         assert_eq!(actual, expected);
     }
 
-    #[async_std::test]
+    #[tokio::test]
     async fn filter_no_events_from_stream() {
         let metadata = metadata::<PalletEvents>();
 
