@@ -38,7 +38,7 @@ use subxt::rpc::{
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
 
-#[async_std::main]
+#[tokio::main]
 async fn main() {
     run().await;
 }
