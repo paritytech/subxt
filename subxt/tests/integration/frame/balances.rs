@@ -36,7 +36,7 @@ use sp_runtime::{
 };
 use subxt::Error;
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -95,7 +95,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn multiple_transfers_work_nonce_incremented(
 ) -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -133,7 +133,7 @@ async fn multiple_transfers_work_nonce_incremented(
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_total_issuance() {
     let cxt = test_context().await;
     let total_issuance = cxt
@@ -146,7 +146,7 @@ async fn storage_total_issuance() {
     assert_ne!(total_issuance, 0);
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
@@ -187,7 +187,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn transfer_error() {
     env_logger::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -226,7 +226,7 @@ async fn transfer_error() {
     }
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn transfer_implicit_subscription() {
     env_logger::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -259,7 +259,7 @@ async fn transfer_implicit_subscription() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
     let balances_metadata = cxt.client().metadata().pallet("Balances").unwrap();

@@ -16,7 +16,7 @@
 
 use crate::test_context;
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_get_current_timestamp() {
     let cxt = test_context().await;
 

@@ -26,7 +26,7 @@ use sp_core::storage::{
 };
 use sp_keyring::AccountKeyring;
 
-#[async_std::test]
+#[tokio::test]
 async fn insert_key() {
     let test_node_process = test_node_process_with(AccountKeyring::Bob).await;
     let client = test_node_process.client();
@@ -47,13 +47,13 @@ async fn insert_key() {
         .unwrap());
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn fetch_block_hash() {
     let node_process = test_node_process().await;
     node_process.client().rpc().block_hash(None).await.unwrap();
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn fetch_block() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -61,7 +61,7 @@ async fn fetch_block() {
     client.rpc().block(block_hash).await.unwrap();
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn fetch_read_proof() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -79,7 +79,7 @@ async fn fetch_read_proof() {
         .unwrap();
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn chain_subscribe_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -87,7 +87,7 @@ async fn chain_subscribe_blocks() {
     blocks.next().await.unwrap().unwrap();
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn chain_subscribe_finalized_blocks() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -95,7 +95,7 @@ async fn chain_subscribe_finalized_blocks() {
     blocks.next().await.unwrap().unwrap();
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn fetch_keys() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -107,7 +107,7 @@ async fn fetch_keys() {
     assert_eq!(keys.len(), 4)
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn test_iter() {
     let node_process = test_node_process().await;
     let client = node_process.client();
@@ -123,7 +123,7 @@ async fn test_iter() {
     assert_eq!(i, 13);
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn fetch_system_info() {
     let node_process = test_node_process().await;
     let client = node_process.client();

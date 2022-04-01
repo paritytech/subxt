@@ -170,7 +170,7 @@ impl ContractsTestContext {
     }
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_instantiate_with_code() {
     let ctx = ContractsTestContext::init().await;
     let result = ctx.instantiate_with_code().await;
@@ -182,7 +182,7 @@ async fn tx_instantiate_with_code() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
     let (code_hash, _) = ctx.instantiate_with_code().await.unwrap();
@@ -196,7 +196,7 @@ async fn tx_instantiate() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
