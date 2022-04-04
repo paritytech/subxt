@@ -304,7 +304,10 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashD
     }
 }
 
-/// Metadata hasher internal cache.
+/// Metadata hash details obtained from hashing `frame_metadata::RuntimeMetadataLastVersion`.
+///
+/// **Note:** This structure provides a caching mechanism when the customer
+/// is obtaining the full metadata hash first, then the pallet hash.
 #[derive(Clone, Debug)]
 pub struct MetadataHashDetails {
     /// Full metadata hash.
@@ -314,7 +317,7 @@ pub struct MetadataHashDetails {
 }
 
 impl MetadataHashDetails {
-    /// Creates an empty `MetadataHasherCache`.
+    /// Creates an empty `MetadataHashDetails`.
     pub fn new() -> MetadataHashDetails {
         Self {
             metadata_hash: [0; 32],
