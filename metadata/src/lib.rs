@@ -343,6 +343,7 @@ mod tests {
         ExtrinsicMetadata,
         PalletCallMetadata,
         PalletConstantMetadata,
+        PalletErrorMetadata,
         PalletEventMetadata,
         PalletMetadata,
         PalletStorageMetadata,
@@ -600,6 +601,12 @@ mod tests {
             value: vec![96u8, 0, 0, 0],
             docs: vec![],
         }];
+        compare_pallets_hash(&pallet_lhs, &pallet);
+
+        let pallet_lhs = pallet.clone();
+        pallet.error = Some(PalletErrorMetadata {
+            ty: meta_type::<MetadataTestType>(),
+        });
         compare_pallets_hash(&pallet_lhs, &pallet);
     }
 }
