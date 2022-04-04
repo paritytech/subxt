@@ -84,9 +84,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            147u8, 198u8, 241u8, 157u8, 149u8, 237u8, 189u8, 159u8, 93u8, 172u8, 22u8,
-            118u8, 69u8, 8u8, 3u8, 41u8, 80u8, 39u8, 193u8, 71u8, 200u8, 178u8, 187u8,
-            17u8, 37u8, 155u8, 62u8, 42u8, 123u8, 42u8, 51u8, 172u8,
+            24u8, 180u8, 131u8, 99u8, 119u8, 75u8, 17u8, 113u8, 85u8, 97u8, 64u8, 150u8,
+            163u8, 96u8, 188u8, 19u8, 96u8, 128u8, 51u8, 188u8, 158u8, 168u8, 174u8,
+            53u8, 236u8, 40u8, 18u8, 151u8, 177u8, 115u8, 48u8, 2u8,
         ];
         pub static PALLET_NAME: &str = "System";
         pub mod calls {
@@ -835,9 +835,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            109u8, 83u8, 19u8, 125u8, 112u8, 250u8, 8u8, 176u8, 24u8, 103u8, 24u8, 250u8,
-            50u8, 95u8, 239u8, 186u8, 151u8, 158u8, 114u8, 235u8, 172u8, 173u8, 150u8,
-            58u8, 229u8, 24u8, 228u8, 165u8, 237u8, 168u8, 8u8, 74u8,
+            59u8, 175u8, 196u8, 11u8, 94u8, 224u8, 59u8, 222u8, 33u8, 103u8, 127u8, 86u8,
+            109u8, 136u8, 84u8, 192u8, 52u8, 32u8, 205u8, 95u8, 61u8, 190u8, 105u8,
+            215u8, 4u8, 146u8, 60u8, 214u8, 143u8, 160u8, 135u8, 138u8,
         ];
         pub static PALLET_NAME: &str = "Scheduler";
         pub mod calls {
@@ -2910,9 +2910,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            130u8, 17u8, 94u8, 18u8, 59u8, 239u8, 186u8, 124u8, 216u8, 168u8, 182u8,
-            30u8, 173u8, 4u8, 21u8, 5u8, 207u8, 247u8, 144u8, 147u8, 207u8, 79u8, 79u8,
-            144u8, 51u8, 188u8, 1u8, 198u8, 43u8, 154u8, 4u8, 136u8,
+            163u8, 244u8, 116u8, 136u8, 130u8, 164u8, 198u8, 103u8, 146u8, 110u8, 155u8,
+            135u8, 68u8, 44u8, 120u8, 144u8, 156u8, 32u8, 45u8, 6u8, 208u8, 35u8, 173u8,
+            207u8, 25u8, 90u8, 208u8, 120u8, 68u8, 201u8, 183u8, 148u8,
         ];
         pub static PALLET_NAME: &str = "TransactionPayment";
         pub mod storage {
@@ -3180,9 +3180,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            113u8, 71u8, 58u8, 227u8, 84u8, 102u8, 12u8, 158u8, 62u8, 199u8, 255u8,
-            130u8, 147u8, 19u8, 164u8, 5u8, 173u8, 153u8, 40u8, 16u8, 201u8, 8u8, 71u8,
-            100u8, 166u8, 198u8, 164u8, 228u8, 197u8, 187u8, 151u8, 29u8,
+            159u8, 124u8, 250u8, 134u8, 17u8, 208u8, 64u8, 182u8, 29u8, 141u8, 11u8,
+            46u8, 46u8, 225u8, 137u8, 225u8, 122u8, 147u8, 65u8, 128u8, 171u8, 178u8,
+            178u8, 170u8, 117u8, 30u8, 217u8, 44u8, 75u8, 100u8, 76u8, 84u8,
         ];
         pub static PALLET_NAME: &str = "Staking";
         pub mod calls {
@@ -6148,9 +6148,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            131u8, 92u8, 239u8, 2u8, 208u8, 29u8, 52u8, 170u8, 239u8, 183u8, 76u8, 52u8,
-            246u8, 244u8, 96u8, 34u8, 243u8, 3u8, 141u8, 43u8, 74u8, 58u8, 82u8, 81u8,
-            206u8, 63u8, 140u8, 250u8, 196u8, 186u8, 108u8, 165u8,
+            252u8, 131u8, 250u8, 92u8, 95u8, 245u8, 215u8, 64u8, 209u8, 196u8, 83u8, 2u8,
+            184u8, 128u8, 116u8, 103u8, 115u8, 41u8, 79u8, 42u8, 212u8, 73u8, 4u8, 94u8,
+            232u8, 88u8, 149u8, 19u8, 251u8, 241u8, 175u8, 119u8,
         ];
         pub static PALLET_NAME: &str = "Democracy";
         pub mod calls {
@@ -7481,9 +7481,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            101u8, 151u8, 197u8, 138u8, 85u8, 109u8, 184u8, 130u8, 243u8, 198u8, 70u8,
-            124u8, 5u8, 98u8, 133u8, 52u8, 27u8, 24u8, 157u8, 40u8, 96u8, 116u8, 123u8,
-            180u8, 50u8, 186u8, 14u8, 124u8, 217u8, 66u8, 46u8, 18u8,
+            161u8, 121u8, 157u8, 53u8, 76u8, 35u8, 241u8, 178u8, 229u8, 208u8, 195u8,
+            235u8, 73u8, 236u8, 78u8, 168u8, 238u8, 40u8, 239u8, 249u8, 67u8, 16u8,
+            133u8, 252u8, 227u8, 233u8, 90u8, 194u8, 31u8, 46u8, 168u8, 239u8,
         ];
         pub static PALLET_NAME: &str = "Council";
         pub mod calls {
@@ -7930,9 +7930,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            151u8, 197u8, 196u8, 25u8, 94u8, 211u8, 59u8, 162u8, 133u8, 180u8, 159u8,
-            244u8, 72u8, 64u8, 206u8, 125u8, 193u8, 243u8, 16u8, 133u8, 3u8, 54u8, 125u8,
-            138u8, 17u8, 209u8, 60u8, 154u8, 28u8, 91u8, 163u8, 172u8,
+            141u8, 160u8, 95u8, 218u8, 183u8, 223u8, 13u8, 110u8, 254u8, 99u8, 179u8,
+            205u8, 80u8, 228u8, 2u8, 36u8, 1u8, 30u8, 174u8, 226u8, 240u8, 179u8, 69u8,
+            51u8, 239u8, 251u8, 212u8, 28u8, 113u8, 47u8, 142u8, 19u8,
         ];
         pub static PALLET_NAME: &str = "TechnicalCommittee";
         pub mod calls {
@@ -10224,9 +10224,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            43u8, 147u8, 5u8, 251u8, 205u8, 89u8, 44u8, 225u8, 133u8, 75u8, 242u8, 126u8,
-            35u8, 17u8, 76u8, 158u8, 7u8, 73u8, 76u8, 115u8, 59u8, 254u8, 96u8, 17u8,
-            247u8, 135u8, 22u8, 118u8, 89u8, 123u8, 212u8, 88u8,
+            181u8, 128u8, 191u8, 43u8, 145u8, 41u8, 214u8, 242u8, 220u8, 56u8, 6u8, 50u8,
+            23u8, 38u8, 29u8, 133u8, 146u8, 81u8, 149u8, 84u8, 37u8, 85u8, 100u8, 86u8,
+            90u8, 121u8, 55u8, 250u8, 145u8, 177u8, 41u8, 174u8,
         ];
         pub static PALLET_NAME: &str = "Utility";
         pub mod calls {
@@ -11179,9 +11179,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            79u8, 43u8, 47u8, 117u8, 26u8, 133u8, 205u8, 181u8, 106u8, 3u8, 221u8, 220u8,
-            47u8, 21u8, 63u8, 59u8, 141u8, 108u8, 48u8, 6u8, 229u8, 241u8, 230u8, 144u8,
-            179u8, 1u8, 26u8, 170u8, 235u8, 18u8, 104u8, 204u8,
+            234u8, 239u8, 199u8, 76u8, 210u8, 106u8, 204u8, 100u8, 159u8, 17u8, 197u8,
+            150u8, 101u8, 227u8, 224u8, 74u8, 245u8, 201u8, 235u8, 188u8, 175u8, 79u8,
+            196u8, 218u8, 234u8, 98u8, 111u8, 195u8, 191u8, 132u8, 172u8, 150u8,
         ];
         pub static PALLET_NAME: &str = "Proxy";
         pub mod calls {
@@ -11542,6 +11542,17 @@ pub mod api {
                 const PALLET: &'static str = "Proxy";
                 const EVENT: &'static str = "ProxyAdded";
             }
+            #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
+            pub struct ProxyRemoved {
+                pub delegator: ::subxt::sp_core::crypto::AccountId32,
+                pub delegatee: ::subxt::sp_core::crypto::AccountId32,
+                pub proxy_type: runtime_types::polkadot_runtime::ProxyType,
+                pub delay: ::core::primitive::u32,
+            }
+            impl ::subxt::Event for ProxyRemoved {
+                const PALLET: &'static str = "Proxy";
+                const EVENT: &'static str = "ProxyRemoved";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -11726,9 +11737,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            123u8, 151u8, 171u8, 188u8, 64u8, 67u8, 188u8, 44u8, 161u8, 168u8, 239u8,
-            190u8, 27u8, 141u8, 78u8, 57u8, 121u8, 178u8, 96u8, 87u8, 126u8, 129u8, 44u8,
-            211u8, 125u8, 164u8, 2u8, 193u8, 111u8, 253u8, 195u8, 172u8,
+            151u8, 114u8, 199u8, 199u8, 115u8, 233u8, 137u8, 211u8, 156u8, 252u8, 109u8,
+            28u8, 197u8, 66u8, 170u8, 36u8, 112u8, 125u8, 108u8, 154u8, 11u8, 114u8,
+            236u8, 58u8, 31u8, 134u8, 74u8, 141u8, 84u8, 96u8, 62u8, 42u8,
         ];
         pub static PALLET_NAME: &str = "Multisig";
         pub mod calls {
@@ -12115,9 +12126,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            13u8, 48u8, 174u8, 80u8, 88u8, 195u8, 94u8, 130u8, 213u8, 129u8, 33u8, 223u8,
-            209u8, 238u8, 134u8, 39u8, 29u8, 220u8, 7u8, 40u8, 180u8, 214u8, 253u8,
-            110u8, 154u8, 172u8, 198u8, 173u8, 6u8, 197u8, 140u8, 57u8,
+            249u8, 121u8, 186u8, 68u8, 51u8, 92u8, 208u8, 121u8, 34u8, 194u8, 213u8,
+            75u8, 218u8, 177u8, 75u8, 164u8, 36u8, 73u8, 48u8, 203u8, 223u8, 6u8, 174u8,
+            147u8, 176u8, 244u8, 246u8, 100u8, 25u8, 180u8, 181u8, 254u8,
         ];
         pub static PALLET_NAME: &str = "Bounties";
         pub mod calls {
@@ -12633,14 +12644,36 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
-                pub fn bounty_curator_deposit(
+                pub fn curator_deposit_multiplier(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
                     let pallet = self.client.metadata().pallet("Bounties")?;
-                    let constant = pallet.constant("BountyCuratorDeposit")?;
+                    let constant = pallet.constant("CuratorDepositMultiplier")?;
+                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                    Ok(value)
+                }
+                pub fn curator_deposit_max(
+                    &self,
+                ) -> ::core::result::Result<
+                    ::core::option::Option<::core::primitive::u128>,
+                    ::subxt::BasicError,
+                > {
+                    let pallet = self.client.metadata().pallet("Bounties")?;
+                    let constant = pallet.constant("CuratorDepositMax")?;
+                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                    Ok(value)
+                }
+                pub fn curator_deposit_min(
+                    &self,
+                ) -> ::core::result::Result<
+                    ::core::option::Option<::core::primitive::u128>,
+                    ::subxt::BasicError,
+                > {
+                    let pallet = self.client.metadata().pallet("Bounties")?;
+                    let constant = pallet.constant("CuratorDepositMin")?;
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
@@ -12680,9 +12713,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            99u8, 98u8, 17u8, 62u8, 19u8, 143u8, 244u8, 7u8, 189u8, 22u8, 32u8, 11u8,
-            160u8, 44u8, 38u8, 8u8, 159u8, 57u8, 148u8, 159u8, 188u8, 27u8, 35u8, 204u8,
-            73u8, 216u8, 162u8, 165u8, 72u8, 148u8, 37u8, 202u8,
+            79u8, 171u8, 3u8, 102u8, 7u8, 222u8, 23u8, 110u8, 158u8, 128u8, 182u8, 105u8,
+            6u8, 1u8, 129u8, 102u8, 226u8, 138u8, 88u8, 110u8, 66u8, 166u8, 211u8, 45u8,
+            141u8, 100u8, 28u8, 6u8, 29u8, 55u8, 184u8, 199u8,
         ];
         pub static PALLET_NAME: &str = "ChildBounties";
         pub mod calls {
@@ -13185,17 +13218,6 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
-                pub fn child_bounty_curator_deposit_base(
-                    &self,
-                ) -> ::core::result::Result<
-                    runtime_types::sp_arithmetic::per_things::Permill,
-                    ::subxt::BasicError,
-                > {
-                    let pallet = self.client.metadata().pallet("ChildBounties")?;
-                    let constant = pallet.constant("ChildBountyCuratorDepositBase")?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
-                }
             }
         }
     }
@@ -13579,9 +13601,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            28u8, 108u8, 60u8, 227u8, 121u8, 199u8, 206u8, 188u8, 182u8, 54u8, 138u8,
-            29u8, 149u8, 230u8, 183u8, 173u8, 228u8, 5u8, 25u8, 181u8, 219u8, 8u8, 88u8,
-            152u8, 25u8, 119u8, 255u8, 152u8, 109u8, 155u8, 199u8, 192u8,
+            127u8, 111u8, 135u8, 72u8, 81u8, 43u8, 105u8, 212u8, 214u8, 57u8, 248u8,
+            221u8, 67u8, 155u8, 178u8, 45u8, 188u8, 171u8, 70u8, 10u8, 22u8, 244u8, 26u8,
+            64u8, 252u8, 189u8, 119u8, 76u8, 45u8, 67u8, 143u8, 185u8,
         ];
         pub static PALLET_NAME: &str = "ElectionProviderMultiPhase";
         pub mod calls {
@@ -19732,9 +19754,9 @@ pub mod api {
             runtime_types,
         };
         pub static PALLET_HASH: [u8; 32] = [
-            187u8, 70u8, 64u8, 196u8, 29u8, 248u8, 200u8, 79u8, 138u8, 232u8, 217u8,
-            92u8, 69u8, 95u8, 45u8, 81u8, 83u8, 48u8, 240u8, 47u8, 157u8, 223u8, 18u8,
-            42u8, 101u8, 39u8, 187u8, 161u8, 112u8, 105u8, 39u8, 104u8,
+            18u8, 199u8, 92u8, 211u8, 252u8, 200u8, 208u8, 136u8, 5u8, 108u8, 77u8,
+            120u8, 107u8, 14u8, 179u8, 100u8, 177u8, 251u8, 18u8, 224u8, 143u8, 122u8,
+            142u8, 144u8, 103u8, 136u8, 8u8, 194u8, 68u8, 36u8, 13u8, 183u8,
         ];
         pub static PALLET_NAME: &str = "Crowdloan";
         pub mod calls {
@@ -23725,6 +23747,13 @@ pub mod api {
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
+                    #[codec(index = 4)]
+                    ProxyRemoved {
+                        delegator: ::subxt::sp_core::crypto::AccountId32,
+                        delegatee: ::subxt::sp_core::crypto::AccountId32,
+                        proxy_type: runtime_types::polkadot_runtime::ProxyType,
+                        delay: ::core::primitive::u32,
+                    },
                 }
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
@@ -24292,6 +24321,8 @@ pub mod api {
                 V7_0_0,
                 #[codec(index = 7)]
                 V8_0_0,
+                #[codec(index = 8)]
+                V9_0_0,
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub enum RewardDestination<_0> {
@@ -27697,11 +27728,13 @@ pub mod api {
                 Token(runtime_types::sp_runtime::TokenError),
                 #[codec(index = 8)]
                 Arithmetic(runtime_types::sp_runtime::ArithmeticError),
+                #[codec(index = 9)]
+                Transactional(runtime_types::sp_runtime::TransactionalError),
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ModuleError {
                 pub index: ::core::primitive::u8,
-                pub error: ::core::primitive::u8,
+                pub error: [::core::primitive::u8; 4usize],
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub enum MultiSignature {
@@ -27737,6 +27770,13 @@ pub mod api {
                 Frozen,
                 #[codec(index = 6)]
                 Unsupported,
+            }
+            #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
+            pub enum TransactionalError {
+                #[codec(index = 0)]
+                LimitReached,
+                #[codec(index = 1)]
+                NoLayer,
             }
         }
         pub mod sp_session {
@@ -28839,7 +28879,7 @@ pub mod api {
             if let Self::Module(module_error) = self {
                 Some(::subxt::ModuleErrorData {
                     pallet_index: module_error.index,
-                    error: [module_error.error, 0, 0, 0],
+                    error: module_error.error,
                 })
             } else {
                 None
@@ -28869,9 +28909,9 @@ pub mod api {
     {
         pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
             static METADATA_HASH: [u8; 32] = [
-                35u8, 72u8, 79u8, 150u8, 248u8, 243u8, 190u8, 187u8, 47u8, 131u8, 158u8,
-                75u8, 46u8, 171u8, 215u8, 4u8, 105u8, 206u8, 146u8, 236u8, 4u8, 207u8,
-                126u8, 114u8, 151u8, 210u8, 162u8, 90u8, 241u8, 148u8, 120u8, 60u8,
+                59u8, 164u8, 6u8, 102u8, 115u8, 155u8, 170u8, 80u8, 229u8, 158u8, 215u8,
+                202u8, 98u8, 189u8, 104u8, 103u8, 62u8, 213u8, 75u8, 107u8, 34u8, 127u8,
+                179u8, 22u8, 201u8, 5u8, 66u8, 77u8, 73u8, 244u8, 42u8, 232u8,
             ];
             if self.client.metadata().metadata_hash() != METADATA_HASH {
                 Err(::subxt::MetadataError::IncompatibleMetadata)
@@ -28942,100 +28982,523 @@ pub mod api {
         client: &'a ::subxt::Client<T>,
     }
     impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-        pub fn system(&self) -> system::constants::ConstantsApi<'a, T> {
+        pub fn system(
+            &self,
+        ) -> Result<system::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(system::PALLET_NAME)?;
+            if system::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    system::PALLET_NAME,
+                ))
+            } else {
+                Ok(system::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn system_unchecked(&self) -> system::constants::ConstantsApi<'a, T> {
             system::constants::ConstantsApi::new(self.client)
         }
-        pub fn scheduler(&self) -> scheduler::constants::ConstantsApi<'a, T> {
+        pub fn scheduler(
+            &self,
+        ) -> Result<scheduler::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(scheduler::PALLET_NAME)?;
+            if scheduler::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    scheduler::PALLET_NAME,
+                ))
+            } else {
+                Ok(scheduler::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn scheduler_unchecked(&self) -> scheduler::constants::ConstantsApi<'a, T> {
             scheduler::constants::ConstantsApi::new(self.client)
         }
-        pub fn babe(&self) -> babe::constants::ConstantsApi<'a, T> {
+        pub fn babe(
+            &self,
+        ) -> Result<babe::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(preimage::PALLET_NAME)?;
+            if preimage::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    preimage::PALLET_NAME,
+                ))
+            } else {
+                Ok(babe::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn babe_unchecked(&self) -> babe::constants::ConstantsApi<'a, T> {
             babe::constants::ConstantsApi::new(self.client)
         }
-        pub fn timestamp(&self) -> timestamp::constants::ConstantsApi<'a, T> {
+        pub fn timestamp(
+            &self,
+        ) -> Result<timestamp::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(babe::PALLET_NAME)?;
+            if babe::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    babe::PALLET_NAME,
+                ))
+            } else {
+                Ok(timestamp::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn timestamp_unchecked(&self) -> timestamp::constants::ConstantsApi<'a, T> {
             timestamp::constants::ConstantsApi::new(self.client)
         }
-        pub fn indices(&self) -> indices::constants::ConstantsApi<'a, T> {
+        pub fn indices(
+            &self,
+        ) -> Result<indices::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(timestamp::PALLET_NAME)?;
+            if timestamp::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    timestamp::PALLET_NAME,
+                ))
+            } else {
+                Ok(indices::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn indices_unchecked(&self) -> indices::constants::ConstantsApi<'a, T> {
             indices::constants::ConstantsApi::new(self.client)
         }
-        pub fn balances(&self) -> balances::constants::ConstantsApi<'a, T> {
+        pub fn balances(
+            &self,
+        ) -> Result<balances::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(indices::PALLET_NAME)?;
+            if indices::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    indices::PALLET_NAME,
+                ))
+            } else {
+                Ok(balances::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn balances_unchecked(&self) -> balances::constants::ConstantsApi<'a, T> {
             balances::constants::ConstantsApi::new(self.client)
         }
         pub fn transaction_payment(
             &self,
+        ) -> Result<
+            transaction_payment::constants::ConstantsApi<'a, T>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.metadata().pallet_hash(balances::PALLET_NAME)?;
+            if balances::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    balances::PALLET_NAME,
+                ))
+            } else {
+                Ok(transaction_payment::constants::ConstantsApi::new(
+                    self.client,
+                ))
+            }
+        }
+        pub fn transaction_payment_unchecked(
+            &self,
         ) -> transaction_payment::constants::ConstantsApi<'a, T> {
             transaction_payment::constants::ConstantsApi::new(self.client)
         }
-        pub fn authorship(&self) -> authorship::constants::ConstantsApi<'a, T> {
+        pub fn authorship(
+            &self,
+        ) -> Result<authorship::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(transaction_payment::PALLET_NAME)?;
+            if transaction_payment::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    transaction_payment::PALLET_NAME,
+                ))
+            } else {
+                Ok(authorship::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn authorship_unchecked(&self) -> authorship::constants::ConstantsApi<'a, T> {
             authorship::constants::ConstantsApi::new(self.client)
         }
-        pub fn staking(&self) -> staking::constants::ConstantsApi<'a, T> {
+        pub fn staking(
+            &self,
+        ) -> Result<staking::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(authorship::PALLET_NAME)?;
+            if authorship::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    authorship::PALLET_NAME,
+                ))
+            } else {
+                Ok(staking::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn staking_unchecked(&self) -> staking::constants::ConstantsApi<'a, T> {
             staking::constants::ConstantsApi::new(self.client)
         }
-        pub fn grandpa(&self) -> grandpa::constants::ConstantsApi<'a, T> {
+        pub fn grandpa(
+            &self,
+        ) -> Result<grandpa::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(staking::PALLET_NAME)?;
+            if staking::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    staking::PALLET_NAME,
+                ))
+            } else {
+                Ok(grandpa::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn grandpa_unchecked(&self) -> grandpa::constants::ConstantsApi<'a, T> {
             grandpa::constants::ConstantsApi::new(self.client)
         }
-        pub fn im_online(&self) -> im_online::constants::ConstantsApi<'a, T> {
+        pub fn im_online(
+            &self,
+        ) -> Result<im_online::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(offences::PALLET_NAME)?;
+            if offences::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    offences::PALLET_NAME,
+                ))
+            } else {
+                Ok(im_online::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn im_online_unchecked(&self) -> im_online::constants::ConstantsApi<'a, T> {
             im_online::constants::ConstantsApi::new(self.client)
         }
-        pub fn democracy(&self) -> democracy::constants::ConstantsApi<'a, T> {
+        pub fn democracy(
+            &self,
+        ) -> Result<democracy::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(session::PALLET_NAME)?;
+            if session::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    session::PALLET_NAME,
+                ))
+            } else {
+                Ok(democracy::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn democracy_unchecked(&self) -> democracy::constants::ConstantsApi<'a, T> {
             democracy::constants::ConstantsApi::new(self.client)
         }
         pub fn phragmen_election(
             &self,
+        ) -> Result<
+            phragmen_election::constants::ConstantsApi<'a, T>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.metadata().pallet_hash(grandpa::PALLET_NAME)?;
+            if grandpa::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    grandpa::PALLET_NAME,
+                ))
+            } else {
+                Ok(phragmen_election::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn phragmen_election_unchecked(
+            &self,
         ) -> phragmen_election::constants::ConstantsApi<'a, T> {
             phragmen_election::constants::ConstantsApi::new(self.client)
         }
-        pub fn treasury(&self) -> treasury::constants::ConstantsApi<'a, T> {
+        pub fn treasury(
+            &self,
+        ) -> Result<treasury::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(im_online::PALLET_NAME)?;
+            if im_online::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    im_online::PALLET_NAME,
+                ))
+            } else {
+                Ok(treasury::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn treasury_unchecked(&self) -> treasury::constants::ConstantsApi<'a, T> {
             treasury::constants::ConstantsApi::new(self.client)
         }
-        pub fn claims(&self) -> claims::constants::ConstantsApi<'a, T> {
+        pub fn claims(
+            &self,
+        ) -> Result<claims::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(democracy::PALLET_NAME)?;
+            if democracy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    democracy::PALLET_NAME,
+                ))
+            } else {
+                Ok(claims::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn claims_unchecked(&self) -> claims::constants::ConstantsApi<'a, T> {
             claims::constants::ConstantsApi::new(self.client)
         }
-        pub fn vesting(&self) -> vesting::constants::ConstantsApi<'a, T> {
+        pub fn vesting(
+            &self,
+        ) -> Result<vesting::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(council::PALLET_NAME)?;
+            if council::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    council::PALLET_NAME,
+                ))
+            } else {
+                Ok(vesting::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn vesting_unchecked(&self) -> vesting::constants::ConstantsApi<'a, T> {
             vesting::constants::ConstantsApi::new(self.client)
         }
-        pub fn utility(&self) -> utility::constants::ConstantsApi<'a, T> {
+        pub fn utility(
+            &self,
+        ) -> Result<utility::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(technical_committee::PALLET_NAME)?;
+            if technical_committee::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    technical_committee::PALLET_NAME,
+                ))
+            } else {
+                Ok(utility::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn utility_unchecked(&self) -> utility::constants::ConstantsApi<'a, T> {
             utility::constants::ConstantsApi::new(self.client)
         }
-        pub fn identity(&self) -> identity::constants::ConstantsApi<'a, T> {
+        pub fn identity(
+            &self,
+        ) -> Result<identity::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(phragmen_election::PALLET_NAME)?;
+            if phragmen_election::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    phragmen_election::PALLET_NAME,
+                ))
+            } else {
+                Ok(identity::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn identity_unchecked(&self) -> identity::constants::ConstantsApi<'a, T> {
             identity::constants::ConstantsApi::new(self.client)
         }
-        pub fn proxy(&self) -> proxy::constants::ConstantsApi<'a, T> {
+        pub fn proxy(
+            &self,
+        ) -> Result<proxy::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(technical_membership::PALLET_NAME)?;
+            if technical_membership::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    technical_membership::PALLET_NAME,
+                ))
+            } else {
+                Ok(proxy::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn proxy_unchecked(&self) -> proxy::constants::ConstantsApi<'a, T> {
             proxy::constants::ConstantsApi::new(self.client)
         }
-        pub fn multisig(&self) -> multisig::constants::ConstantsApi<'a, T> {
+        pub fn multisig(
+            &self,
+        ) -> Result<multisig::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(treasury::PALLET_NAME)?;
+            if treasury::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    treasury::PALLET_NAME,
+                ))
+            } else {
+                Ok(multisig::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn multisig_unchecked(&self) -> multisig::constants::ConstantsApi<'a, T> {
             multisig::constants::ConstantsApi::new(self.client)
         }
-        pub fn bounties(&self) -> bounties::constants::ConstantsApi<'a, T> {
+        pub fn bounties(
+            &self,
+        ) -> Result<bounties::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(claims::PALLET_NAME)?;
+            if claims::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    claims::PALLET_NAME,
+                ))
+            } else {
+                Ok(bounties::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn bounties_unchecked(&self) -> bounties::constants::ConstantsApi<'a, T> {
             bounties::constants::ConstantsApi::new(self.client)
         }
-        pub fn child_bounties(&self) -> child_bounties::constants::ConstantsApi<'a, T> {
+        pub fn child_bounties(
+            &self,
+        ) -> Result<child_bounties::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(vesting::PALLET_NAME)?;
+            if vesting::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    vesting::PALLET_NAME,
+                ))
+            } else {
+                Ok(child_bounties::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn child_bounties_unchecked(
+            &self,
+        ) -> child_bounties::constants::ConstantsApi<'a, T> {
             child_bounties::constants::ConstantsApi::new(self.client)
         }
-        pub fn tips(&self) -> tips::constants::ConstantsApi<'a, T> {
+        pub fn tips(
+            &self,
+        ) -> Result<tips::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(identity::PALLET_NAME)?;
+            if identity::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    identity::PALLET_NAME,
+                ))
+            } else {
+                Ok(tips::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn tips_unchecked(&self) -> tips::constants::ConstantsApi<'a, T> {
             tips::constants::ConstantsApi::new(self.client)
         }
         pub fn election_provider_multi_phase(
             &self,
+        ) -> Result<
+            election_provider_multi_phase::constants::ConstantsApi<'a, T>,
+            ::subxt::MetadataError,
+        > {
+            let hash = self.client.metadata().pallet_hash(proxy::PALLET_NAME)?;
+            if proxy::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    proxy::PALLET_NAME,
+                ))
+            } else {
+                Ok(election_provider_multi_phase::constants::ConstantsApi::new(
+                    self.client,
+                ))
+            }
+        }
+        pub fn election_provider_multi_phase_unchecked(
+            &self,
         ) -> election_provider_multi_phase::constants::ConstantsApi<'a, T> {
             election_provider_multi_phase::constants::ConstantsApi::new(self.client)
         }
-        pub fn bags_list(&self) -> bags_list::constants::ConstantsApi<'a, T> {
+        pub fn bags_list(
+            &self,
+        ) -> Result<bags_list::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(multisig::PALLET_NAME)?;
+            if multisig::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    multisig::PALLET_NAME,
+                ))
+            } else {
+                Ok(bags_list::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn bags_list_unchecked(&self) -> bags_list::constants::ConstantsApi<'a, T> {
             bags_list::constants::ConstantsApi::new(self.client)
         }
-        pub fn paras(&self) -> paras::constants::ConstantsApi<'a, T> {
+        pub fn paras(
+            &self,
+        ) -> Result<paras::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(bounties::PALLET_NAME)?;
+            if bounties::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    bounties::PALLET_NAME,
+                ))
+            } else {
+                Ok(paras::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn paras_unchecked(&self) -> paras::constants::ConstantsApi<'a, T> {
             paras::constants::ConstantsApi::new(self.client)
         }
-        pub fn registrar(&self) -> registrar::constants::ConstantsApi<'a, T> {
+        pub fn registrar(
+            &self,
+        ) -> Result<registrar::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(child_bounties::PALLET_NAME)?;
+            if child_bounties::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    child_bounties::PALLET_NAME,
+                ))
+            } else {
+                Ok(registrar::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn registrar_unchecked(&self) -> registrar::constants::ConstantsApi<'a, T> {
             registrar::constants::ConstantsApi::new(self.client)
         }
-        pub fn slots(&self) -> slots::constants::ConstantsApi<'a, T> {
+        pub fn slots(
+            &self,
+        ) -> Result<slots::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(tips::PALLET_NAME)?;
+            if tips::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    tips::PALLET_NAME,
+                ))
+            } else {
+                Ok(slots::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn slots_unchecked(&self) -> slots::constants::ConstantsApi<'a, T> {
             slots::constants::ConstantsApi::new(self.client)
         }
-        pub fn auctions(&self) -> auctions::constants::ConstantsApi<'a, T> {
+        pub fn auctions(
+            &self,
+        ) -> Result<auctions::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self
+                .client
+                .metadata()
+                .pallet_hash(election_provider_multi_phase::PALLET_NAME)?;
+            if election_provider_multi_phase::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    election_provider_multi_phase::PALLET_NAME,
+                ))
+            } else {
+                Ok(auctions::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn auctions_unchecked(&self) -> auctions::constants::ConstantsApi<'a, T> {
             auctions::constants::ConstantsApi::new(self.client)
         }
-        pub fn crowdloan(&self) -> crowdloan::constants::ConstantsApi<'a, T> {
+        pub fn crowdloan(
+            &self,
+        ) -> Result<crowdloan::constants::ConstantsApi<'a, T>, ::subxt::MetadataError>
+        {
+            let hash = self.client.metadata().pallet_hash(bags_list::PALLET_NAME)?;
+            if bags_list::PALLET_HASH != hash {
+                Err(::subxt::MetadataError::IncompatiblePalletMetadata(
+                    bags_list::PALLET_NAME,
+                ))
+            } else {
+                Ok(crowdloan::constants::ConstantsApi::new(self.client))
+            }
+        }
+        pub fn crowdloan_unchecked(&self) -> crowdloan::constants::ConstantsApi<'a, T> {
             crowdloan::constants::ConstantsApi::new(self.client)
         }
     }
