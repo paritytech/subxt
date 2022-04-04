@@ -54,7 +54,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     api.validate_metadata()?;
 
     // The pallet metadata compatibility is verified by default.
-    // When obtaining the "Balance" pallet the API validates if the static metadata is
+    // When obtaining the "Balances" pallet the API validates if the static metadata is
     // compatible with the runtime metadata of the pallet.
     //
     // Note: Pallets can be compatible even if the full metadata validation is not.
@@ -79,6 +79,49 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!(
         "Balance transfer extrinsic submitted (without pallet metadata validation): {}",
         hash
+    );
+
+    // Pallet validation also applies to StorageApi.
+    // Obtain the active era from the "Staking" pallet with pallet validation.
+    let era = api
+        .storage()
+        .staking()? // Pallet metadata is validated.
+        .active_era(None)
+        .await?
+        .unwrap();
+    println!(
+        "Staking active era: index: {:?}, start: {:?}",
+        era.index, era.start
+    );
+
+    let era = api
+        .storage()
+        .staking_unchecked() // Pallet metadata validation is skipped.
+        .active_era(None)
+        .await?
+        .unwrap();
+    println!(
+        "Staking active era (without pallet metadata validation): index: {:?}, start: {:?}",
+        era.index, era.start
+    );
+
+    // Pallet validation also applies to ConstantsApi.
+    // Obtain the existential deposit from the "Balances" pallet with pallet validation.
+    let existential_deposit = api
+        .constants()
+        .balances()? // Pallet metadata is validated.
+        .existential_deposit()
+        .unwrap();
+    println!("Existential deposit constant: {}", existential_deposit);
+
+    let existential_deposit = api
+        .constants()
+        .balances_unchecked() // Pallet metadata validation is skipped.
+        .existential_deposit()
+        .unwrap();
+    println!(
+        "Existential deposit constant (without pallet metadata validation): {}",
+        existential_deposit
     );
 
     Ok(())
