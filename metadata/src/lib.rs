@@ -334,10 +334,7 @@ impl Default for MetadataHashDetails {
 
 #[cfg(test)]
 mod tests {
-    use crate::{
-        get_metadata_hash,
-        get_pallet_hash,
-    };
+    use super::*;
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
@@ -366,7 +363,7 @@ mod tests {
         }
     }
 
-    fn build_default_pallet() -> PalletMetadata {
+    fn default_pallet() -> PalletMetadata {
         PalletMetadata {
             name: "Test",
             storage: None,
@@ -379,19 +376,23 @@ mod tests {
     }
 
     fn build_default_pallets() -> Vec<PalletMetadata> {
-        let mut pallet_first = build_default_pallet();
-        pallet_first.name = "First";
-        pallet_first.calls = Some(PalletCallMetadata {
-            ty: meta_type::<u8>(),
-        });
-        let mut pallet_second = build_default_pallet();
-        pallet_second.name = "Second";
-        pallet_second.calls = Some(PalletCallMetadata {
-            ty: meta_type::<u16>(),
-        });
-        pallet_second.index = 1;
-
-        vec![pallet_first, pallet_second]
+        vec![
+            PalletMetadata {
+                name: "First",
+                calls: Some(PalletCallMetadata {
+                    ty: meta_type::<u8>(),
+                }),
+                ..default_pallet()
+            },
+            PalletMetadata {
+                name: "Second",
+                index: 1,
+                calls: Some(PalletCallMetadata {
+                    ty: meta_type::<u16>(),
+                }),
+                ..default_pallet()
+            },
+        ]
     }
 
     fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataLastVersion {
@@ -450,7 +451,7 @@ mod tests {
 
     #[test]
     fn recursive_type() {
-        let mut pallet = build_default_pallet();
+        let mut pallet = default_pallet();
         pallet.calls = Some(PalletCallMetadata {
             ty: meta_type::<A>(),
         });
