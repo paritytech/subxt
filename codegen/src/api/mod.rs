@@ -259,19 +259,22 @@ impl RuntimeGenerator {
         };
 
         let mod_ident = item_mod_ir.ident;
-        let pallets_with_constants =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    (!pallet.constants.is_empty()).then(|| pallet_mod_name)
-                });
+        let pallets_with_constants: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+            })
+            .collect();
+        let pallets_with_constants_unchecked = pallets_with_constants
+            .iter()
+            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
+
         let pallets_with_storage: Vec<_> = pallets_with_mod_names
             .iter()
             .filter_map(|(pallet, pallet_mod_name)| {
                 pallet.storage.as_ref().map(|_| pallet_mod_name)
             })
             .collect();
-
         let pallets_with_storage_unchecked = pallets_with_storage
             .iter()
             .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
@@ -374,7 +377,16 @@ impl RuntimeGenerator {
 
                 impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
                     #(
-                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
+                        pub fn #pallets_with_constants(&self) ->  Result<#pallets_with_constants::constants::ConstantsApi<'a, T>, ::subxt::MetadataError> {
+                            let hash = self.client.metadata().pallet_hash(#pallets_with_storage::PALLET_NAME)?;
+                            if #pallets_with_storage::PALLET_HASH != hash {
+                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_storage::PALLET_NAME))
+                            } else {
+                                Ok(#pallets_with_constants::constants::ConstantsApi::new(self.client))
+                            }
+                        }
+
+                        pub fn #pallets_with_constants_unchecked(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
                             #pallets_with_constants::constants::ConstantsApi::new(self.client)
                         }
                     )*
