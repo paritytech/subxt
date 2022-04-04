@@ -342,6 +342,7 @@ mod tests {
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
+        PalletEventMetadata,
         PalletMetadata,
         PalletStorageMetadata,
         RuntimeMetadataLastVersion,
@@ -540,12 +541,24 @@ mod tests {
     }
 
     #[test]
-    fn metadata_hash_correctness() {
+    fn pallet_hash_correctness() {
+        let compare_pallets_hash = |lhs: &PalletMetadata, rhs: &PalletMetadata| {
+            let metadata = pallets_to_metadata(vec![lhs.clone()]);
+            let hash = get_metadata_hash(&metadata);
+
+            let metadata = pallets_to_metadata(vec![rhs.clone()]);
+            let new_hash = get_metadata_hash(&metadata);
+
+            assert_ne!(hash.metadata_hash, new_hash.metadata_hash);
+            assert_ne!(
+                hash.pallet_hashes.get("Test").unwrap(),
+                new_hash.pallet_hashes.get("Test").unwrap()
+            );
+        };
+
         // Build metadata progressively from an empty pallet to a fully populated pallet.
         let mut pallet = default_pallet();
-        let metadata = pallets_to_metadata(vec![pallet.clone()]);
-        let hash = get_metadata_hash(&metadata);
-
+        let pallet_lhs = pallet.clone();
         pallet.storage = Some(PalletStorageMetadata {
             prefix: "Storage",
             entries: vec![StorageEntryMetadata {
@@ -556,15 +569,9 @@ mod tests {
                 docs: vec![],
             }],
         });
-        let metadata = pallets_to_metadata(vec![pallet.clone()]);
-        let new_hash = get_metadata_hash(&metadata);
-        // Check storage metadata is taken into account.
-        assert_ne!(hash.metadata_hash, new_hash.metadata_hash);
-        assert_ne!(
-            hash.pallet_hashes.get("Test").unwrap(),
-            new_hash.pallet_hashes.get("Test").unwrap()
-        );
+        compare_pallets_hash(&pallet_lhs, &pallet);
 
+        let pallet_lhs = pallet.clone();
         // Calls are similar to:
         //
         // ```
@@ -576,14 +583,13 @@ mod tests {
         pallet.calls = Some(PalletCallMetadata {
             ty: meta_type::<Call>(),
         });
+        compare_pallets_hash(&pallet_lhs, &pallet);
 
-        let metadata = pallets_to_metadata(vec![pallet.clone()]);
-        let hash = get_metadata_hash(&metadata);
-        // Check storage metadata is taken into account.
-        assert_ne!(hash.metadata_hash, new_hash.metadata_hash);
-        assert_ne!(
-            hash.pallet_hashes.get("Test").unwrap(),
-            new_hash.pallet_hashes.get("Test").unwrap()
-        );
+        let pallet_lhs = pallet.clone();
+        // Events are similar to Calls.
+        pallet.event = Some(PalletEventMetadata {
+            ty: meta_type::<Call>(),
+        });
+        compare_pallets_hash(&pallet_lhs, &pallet);
     }
 }
