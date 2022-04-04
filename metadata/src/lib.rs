@@ -342,6 +342,7 @@ mod tests {
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
+        PalletConstantMetadata,
         PalletEventMetadata,
         PalletMetadata,
         PalletStorageMetadata,
@@ -590,6 +591,15 @@ mod tests {
         pallet.event = Some(PalletEventMetadata {
             ty: meta_type::<Call>(),
         });
+        compare_pallets_hash(&pallet_lhs, &pallet);
+
+        let pallet_lhs = pallet.clone();
+        pallet.constants = vec![PalletConstantMetadata {
+            name: "BlockHashCount",
+            ty: meta_type::<u64>(),
+            value: vec![96u8, 0, 0, 0],
+            docs: vec![],
+        }];
         compare_pallets_hash(&pallet_lhs, &pallet);
     }
 }
