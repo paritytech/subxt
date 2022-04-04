@@ -37,7 +37,7 @@ pub mod polkadot {}
 
 /// Subscribe to all events, and then manually look through them and
 /// pluck out the events that we care about.
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
@@ -50,7 +50,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let mut event_sub = api.events().subscribe().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
         let api =
             ClientBuilder::new()
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .unwrap();
 
-            async_std::task::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(10)).await;
             transfer_amount += 100_000_000;
         }
     });

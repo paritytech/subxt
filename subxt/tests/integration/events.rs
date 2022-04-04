@@ -26,7 +26,7 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 
 // Check that we can subscribe to non-finalized block events.
-#[async_std::test]
+#[tokio::test]
 async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -44,7 +44,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 }
 
 // Check that we can subscribe to finalized block events.
-#[async_std::test]
+#[tokio::test]
 async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -64,7 +64,7 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 
 // Check that our subscription actually keeps producing events for
 // a few blocks.
-#[async_std::test]
+#[tokio::test]
 async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -93,7 +93,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 
 // Check that our subscription receives events, and we can filter them based on
 // it's Stream impl, and ultimately see the event we expect.
-#[async_std::test]
+#[tokio::test]
 async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -135,7 +135,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicError> {
     // This function is not publically available to use, but contains
     // the key logic for filling in missing blocks, so we want to test it.
@@ -194,7 +194,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
 #[allow(unused)]
 async fn check_events_are_sendable() {
     // check that EventSubscription can be used across await points.
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let ctx = test_context().await;
 
         let mut event_sub = ctx.api.events().subscribe().await?;
@@ -209,7 +209,7 @@ async fn check_events_are_sendable() {
     });
 
     // Check that FilterEvents can be used across await points.
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let ctx = test_context().await;
 
         let mut event_sub = ctx

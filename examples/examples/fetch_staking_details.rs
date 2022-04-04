@@ -37,7 +37,7 @@ use subxt::{
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
 pub mod polkadot {}
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 

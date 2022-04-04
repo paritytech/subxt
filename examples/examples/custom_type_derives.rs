@@ -30,7 +30,7 @@ pub mod polkadot {}
 
 use polkadot::runtime_types::frame_support::PalletId;
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pallet_id = PalletId([1u8; 8]);
     let _ = pallet_id.clone();
