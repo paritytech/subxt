@@ -335,6 +335,13 @@ impl Default for MetadataHashDetails {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use bitvec::{
+        order::{
+            Lsb0,
+            Msb0,
+        },
+        vec::BitVec,
+    };
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletCallMetadata,
@@ -353,6 +360,39 @@ mod tests {
     #[derive(scale_info::TypeInfo)]
     struct B {
         pub a: Box<A>,
+    }
+
+    // Define TypeDef supported types.
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    // TypeDef::Composite with TypeDef::Array with Typedef::Primitive.
+    struct AccountId32([u8; 32]);
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    // TypeDef::Variant.
+    enum DigestItem {
+        PreRuntime(
+            // TypeDef::Array with primitive.
+            [::core::primitive::u8; 4usize],
+            // TypeDef::Sequence.
+            ::std::vec::Vec<::core::primitive::u8>,
+        ),
+        Other(::std::vec::Vec<::core::primitive::u8>),
+        // Nested TypeDef::Tuple.
+        RuntimeEnvironmentUpdated(((i8, i16), (u32, u64))),
+        // TypeDef::Compact.
+        Index(#[codec(compact)] ::core::primitive::u8),
+        // TypeDef::BitSequence.
+        BitSeq(BitVec<u8, Lsb0>),
+    }
+
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    // Ensure recursive types and TypeDef variants are captured.
+    struct MetadataTestType {
+        recursive: A,
+        composite: AccountId32,
+        type_def: DigestItem,
     }
 
     fn build_default_extrinsic() -> ExtrinsicMetadata {
