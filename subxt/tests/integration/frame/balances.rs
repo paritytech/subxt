@@ -274,7 +274,7 @@ async fn constant_existential_deposit() {
         existential_deposit,
         cxt.api
             .constants()
-            .balances()
+            .balances_unchecked()
             .existential_deposit()
             .unwrap()
     );
