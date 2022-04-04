@@ -336,10 +336,7 @@ impl Default for MetadataHashDetails {
 mod tests {
     use super::*;
     use bitvec::{
-        order::{
-            Lsb0,
-            Msb0,
-        },
+        order::Lsb0,
         vec::BitVec,
     };
     use frame_metadata::{
@@ -420,7 +417,7 @@ mod tests {
             PalletMetadata {
                 name: "First",
                 calls: Some(PalletCallMetadata {
-                    ty: meta_type::<u8>(),
+                    ty: meta_type::<MetadataTestType>(),
                 }),
                 ..default_pallet()
             },
@@ -428,7 +425,7 @@ mod tests {
                 name: "Second",
                 index: 1,
                 calls: Some(PalletCallMetadata {
-                    ty: meta_type::<u16>(),
+                    ty: meta_type::<(DigestItem, AccountId32, A)>(),
                 }),
                 ..default_pallet()
             },
