@@ -32,6 +32,8 @@ use sp_core::{
 use sp_keyring::AccountKeyring;
 use sp_runtime::{
     AccountId32,
+    ApplyExtrinsicResult,
+    DispatchOutcome,
     MultiAddress,
 };
 use subxt::Error;
@@ -92,6 +94,87 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
+    Ok(())
+}
+
+#[tokio::test]
+async fn dry_run_passes() -> Result<(), subxt::Error<DispatchError>> {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let bob_address = bob.account_id().clone().into();
+    let cxt = test_context().await;
+    let api = &cxt.api;
+
+    let signed_extrinsic = api
+        .tx()
+        .balances()
+        .transfer(bob_address, 10_000)?
+        .create_signed(&alice, Default::default())
+        .await?;
+
+    let dry_run_res: ApplyExtrinsicResult = signed_extrinsic.dry_run().await?;
+    dry_run_res
+        .expect("expected dryrun transaction to be valid")
+        .expect("expected dryrunning to be successful");
+    signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
+        .await?;
+    Ok(())
+}
+
+#[tokio::test]
+async fn dry_run_fails() -> Result<(), subxt::Error<DispatchError>> {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let alice_addr = alice.account_id().clone().into();
+    let hans = pair_signer(Pair::generate().0);
+    let hans_address = hans.account_id().clone().into();
+    let cxt = test_context().await;
+    let api = &cxt.api;
+
+    api.tx()
+        .balances()
+        .transfer(hans_address, 100_000_000_000_000_000)?
+        .sign_and_submit_then_watch_default(&alice)
+        .await
+        .unwrap()
+        .wait_for_finalized_success()
+        .await
+        .unwrap();
+
+    let signed_extrinsic = api
+        .tx()
+        .balances()
+        .transfer(alice_addr, 100_000_000_000_000_000)?
+        .create_signed(&hans, Default::default())
+        .await?;
+
+    let dry_run_res: DispatchOutcome = signed_extrinsic
+        .dry_run()
+        .await
+        .expect("dryrunning failed")
+        .expect("expected dryrun transaction to be valid");
+    if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
+        assert_eq!(module_error.index, 6);
+        assert_eq!(module_error.error, 2);
+    } else {
+        panic!("expected a module module error when dryrunning");
+    }
+
+    let res = signed_extrinsic
+        .submit_and_watch()
+        .await?
+        .wait_for_finalized_success()
+        .await;
+
+    if let Err(Error::Module(err)) = res {
+        assert_eq!(err.pallet, "Balances");
+        assert_eq!(err.error, "InsufficientBalance");
+    } else {
+        panic!("expected a runtime module error");
+    }
+
     Ok(())
 }
 
