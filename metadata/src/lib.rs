@@ -343,7 +343,10 @@ mod tests {
         ExtrinsicMetadata,
         PalletCallMetadata,
         PalletMetadata,
+        PalletStorageMetadata,
         RuntimeMetadataLastVersion,
+        StorageEntryMetadata,
+        StorageEntryModifier,
     };
     use scale_info::meta_type;
 
@@ -382,7 +385,6 @@ mod tests {
         // TypeDef::BitSequence.
         BitSeq(BitVec<u8, Lsb0>),
     }
-
     #[allow(dead_code)]
     #[derive(scale_info::TypeInfo)]
     // Ensure recursive types and TypeDef variants are captured.
@@ -390,6 +392,15 @@ mod tests {
         recursive: A,
         composite: AccountId32,
         type_def: DigestItem,
+    }
+    #[allow(dead_code)]
+    #[derive(scale_info::TypeInfo)]
+    // Simulate a PalletCallMetadata.
+    enum Call {
+        #[codec(index = 0)]
+        FillBlock { ratio: AccountId32 },
+        #[codec(index = 1)]
+        Remark { remark: DigestItem },
     }
 
     fn build_default_extrinsic() -> ExtrinsicMetadata {
@@ -525,6 +536,54 @@ mod tests {
         assert_eq!(
             hash.pallet_hashes.get("Second").unwrap(),
             &pallet_hash_second
+        );
+    }
+
+    #[test]
+    fn metadata_hash_correctness() {
+        // Build metadata progressively from an empty pallet to a fully populated pallet.
+        let mut pallet = default_pallet();
+        let metadata = pallets_to_metadata(vec![pallet.clone()]);
+        let hash = get_metadata_hash(&metadata);
+
+        pallet.storage = Some(PalletStorageMetadata {
+            prefix: "Storage",
+            entries: vec![StorageEntryMetadata {
+                name: "BlockWeight",
+                modifier: StorageEntryModifier::Default,
+                ty: StorageEntryType::Plain(meta_type::<u8>()),
+                default: vec![],
+                docs: vec![],
+            }],
+        });
+        let metadata = pallets_to_metadata(vec![pallet.clone()]);
+        let new_hash = get_metadata_hash(&metadata);
+        // Check storage metadata is taken into account.
+        assert_ne!(hash.metadata_hash, new_hash.metadata_hash);
+        assert_ne!(
+            hash.pallet_hashes.get("Test").unwrap(),
+            new_hash.pallet_hashes.get("Test").unwrap()
+        );
+
+        // Calls are similar to:
+        //
+        // ```
+        // pub enum Call {
+        //     call_name_01 { arg01: type },
+        //     call_name_02 { arg01: type, arg02: type }
+        // }
+        // ```
+        pallet.calls = Some(PalletCallMetadata {
+            ty: meta_type::<Call>(),
+        });
+
+        let metadata = pallets_to_metadata(vec![pallet.clone()]);
+        let hash = get_metadata_hash(&metadata);
+        // Check storage metadata is taken into account.
+        assert_ne!(hash.metadata_hash, new_hash.metadata_hash);
+        assert_ne!(
+            hash.pallet_hashes.get("Test").unwrap(),
+            new_hash.pallet_hashes.get("Test").unwrap()
         );
     }
 }
