@@ -44,30 +44,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-
-    // Validate full metadata compatibility.
-    api.validate_metadata()?;
-
-    // Skip the pallet metadata compatibility check.
     let hash = api
         .tx()
-        .balances_unchecked()
+        .balances()?
         .transfer(dest, 123_456_789_012_345)
         .sign_and_submit_default(&signer)
         .await?;
 
-    println!(
-        "Balance transfer extrinsic submitted (without pallet metadata validation): {}",
-        hash
-    );
-
-    // Validate pallet metadata compatibility.
-    let hash = api
-        .tx()
-        .balances()?
-        .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
-        .sign_and_submit_default(&signer)
-        .await?;
     println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
