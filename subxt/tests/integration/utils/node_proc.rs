@@ -212,7 +212,8 @@ fn next_open_port() -> Option<(u16, u16, u16)> {
             Ordering::SeqCst,
         );
         let next = PORT.fetch_add(1, Ordering::SeqCst);
-        if TcpListener::bind(("0.0.0.0", next)).is_ok() {
+        // Bind to localhost address to find an available port.
+        if TcpListener::bind(("127.0.0.1", next)).is_ok() {
             ports.push(next);
             if ports.len() == 3 {
                 return Some((ports[0], ports[1], ports[2]))
