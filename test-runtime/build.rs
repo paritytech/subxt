@@ -158,7 +158,7 @@ fn next_open_port() -> Option<u16> {
             Ordering::SeqCst,
         );
         let next = next_port.fetch_add(1, Ordering::SeqCst);
-        if TcpListener::bind(("0.0.0.0", next)).is_ok() {
+        if TcpListener::bind(("127.0.0.1", next)).is_ok() {
             return Some(next)
         }
         ports_scanned += 1;
