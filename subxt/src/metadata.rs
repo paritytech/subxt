@@ -138,7 +138,7 @@ impl Metadata {
         &self.metadata
     }
 
-    /// Obtain the pallet unique identifier.
+    /// Obtain the unique hash for a pallet.
     pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
         if let Some(cache) = self.cache.lock().unwrap().pallet_hashes.get(name) {
             return Ok(*cache)
@@ -156,7 +156,7 @@ impl Metadata {
         Ok(hash)
     }
 
-    /// Obtain the full metadata identifier.
+    /// Obtain the unique hash for this metadata.
     pub fn metadata_hash(&self) -> [u8; 32] {
         let hash = subxt_metadata::get_metadata_hash(self.runtime_metadata());
         let mut cache = self.cache.lock().unwrap();

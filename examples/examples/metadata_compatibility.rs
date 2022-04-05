@@ -53,13 +53,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Note: This step can be skipped if full metadata validation is not of interest.
     api.validate_metadata()?;
 
-    // The pallet metadata compatibility is verified by default.
-    // When obtaining the "Balances" pallet the API validates if the static metadata is
-    // compatible with the runtime metadata of the pallet.
+    // The compatibility of a pallet is verified by default when interacting with it.
+    // When obtaining the "Balances" pallet below, the API compares the static
+    // and runtime metadata to make sure that everything lines up.
     //
-    // Note: Pallets can be compatible even if the full metadata validation is not.
-    // Therefore, this is the default behavior for customers who are interested in
-    // working with a subset of the metadata.
+    // We can opt out of this check using the `_unchecked` alternative, seen below.
     let hash = api
         .tx()
         .balances()? // Pallet metadata is validated.
@@ -81,8 +79,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         hash
     );
 
-    // Pallet validation also applies to StorageApi.
-    // Obtain the active era from the "Staking" pallet with pallet validation.
+    // Pallet validation is also carried out when accessing storage items,
+    // and, as above, can be skipped using the `_unchecked` alternatives.
     let era = api
         .storage()
         .staking()? // Pallet metadata is validated.
@@ -105,8 +103,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         era.index, era.start
     );
 
-    // Pallet validation also applies to ConstantsApi.
-    // Obtain the existential deposit from the "Balances" pallet with pallet validation.
+    // Pallet validation is also carried out when accessing constants,
+    // and, as above, can be skipped using the `_unchecked` alternatives.
     let existential_deposit = api
         .constants()
         .balances()? // Pallet metadata is validated.
