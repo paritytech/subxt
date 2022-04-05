@@ -19,11 +19,12 @@ use jsonrpsee::{
     core::client::ClientT,
     rpc_params,
 };
-pub use sp_runtime::traits::SignedExtension;
-use sp_runtime::traits::{
-    Hash,
-    MaybeSerializeDeserialize,
+use serde::{
+    Deserialize,
+    Serialize,
 };
+use sp_runtime::traits::Hash;
+pub use sp_runtime::traits::SignedExtension;
 
 use crate::{
     error::{
@@ -194,15 +195,15 @@ impl<T: Config> Client<T> {
         Ok(A::nonce(&account_data).into())
     }
 
-    /// Fetch the next nonce for the given account id.
+    /// Fetch the current nonce for the given account id.
     pub async fn fetch_next_nonce<A: AccountData>(
         &self,
         account: &T::AccountId,
     ) -> Result<T::Index, BasicError>
     where
+        <T as Config>::AccountId: Serialize,
         <A as AccountData>::Index: Into<<T as Config>::Index>,
-        <T as Config>::AccountId: MaybeSerializeDeserialize,
-        <T as Config>::Index: MaybeSerializeDeserialize,
+        for<'de> <T as Config>::Index: Deserialize<'de>,
     {
         Ok(self
             .rpc()
@@ -258,8 +259,8 @@ where
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
         <A as AccountData>::Index: Into<<T as Config>::Index>,
-        <T as Config>::AccountId: MaybeSerializeDeserialize,
-        <T as Config>::Index: MaybeSerializeDeserialize,
+        <T as Config>::AccountId: Serialize,
+        for<'de> <T as Config>::Index: Deserialize<'de>,
     {
         // Sign the call data to create our extrinsic.
         let extrinsic = self.create_signed(signer, Default::default()).await?;
@@ -290,8 +291,8 @@ where
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
         <A as AccountData>::Index: Into<<T as Config>::Index>,
-        <T as Config>::AccountId: MaybeSerializeDeserialize,
-        <T as Config>::Index: MaybeSerializeDeserialize,
+        <T as Config>::AccountId: Serialize,
+        for<'de> <T as Config>::Index: Deserialize<'de>,
     {
         let extrinsic = self.create_signed(signer, Default::default()).await?;
         self.client.rpc().submit_extrinsic(extrinsic).await
@@ -308,8 +309,8 @@ where
             Send + Sync + 'static,
         <A as AccountData>::AccountId: From<<T as Config>::AccountId>,
         <A as AccountData>::Index: Into<<T as Config>::Index>,
-        <T as Config>::AccountId: MaybeSerializeDeserialize,
-        <T as Config>::Index: MaybeSerializeDeserialize,
+        <T as Config>::AccountId: Serialize,
+        for<'de> <T as Config>::Index: Deserialize<'de>,
     {
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
