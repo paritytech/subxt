@@ -30,12 +30,13 @@ use sp_core::{
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
-    Error,
-    Signer,
+use sp_runtime::{
+    AccountId32,
+    MultiAddress,
 };
+use subxt::Error;
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -58,7 +59,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .balances()
         .transfer(bob_address, 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -94,7 +95,45 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
+async fn multiple_transfers_work_nonce_incremented(
+) -> Result<(), subxt::Error<DispatchError>> {
+    let alice = pair_signer(AccountKeyring::Alice.pair());
+    let bob = pair_signer(AccountKeyring::Bob.pair());
+    let bob_address: MultiAddress<AccountId32, u32> = bob.account_id().clone().into();
+    let cxt = test_context().await;
+    let api = &cxt.api;
+
+    let bob_pre = api
+        .storage()
+        .system()
+        .account(bob.account_id(), None)
+        .await?;
+
+    for _ in 0..3 {
+        api
+            .tx()
+            .balances()
+            .transfer(bob_address.clone(), 10_000)
+            .sign_and_submit_then_watch_default(&alice)
+            .await?
+            .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
+            .await?
+            .wait_for_success()
+            .await?;
+    }
+
+    let bob_post = api
+        .storage()
+        .system()
+        .account(bob.account_id(), None)
+        .await?;
+
+    assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
+    Ok(())
+}
+
+#[tokio::test]
 async fn storage_total_issuance() {
     let cxt = test_context().await;
     let total_issuance = cxt
@@ -107,7 +146,7 @@ async fn storage_total_issuance() {
     assert_ne!(total_issuance, 0);
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     let bob = pair_signer(AccountKeyring::Bob.pair());
     let charlie = AccountKeyring::Charlie.to_account_id();
@@ -121,7 +160,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
             100_000_000_000_000,
             runtime_types::pallet_staking::RewardDestination::Stash,
         )
-        .sign_and_submit_then_watch(&bob)
+        .sign_and_submit_then_watch_default(&bob)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -148,7 +187,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn transfer_error() {
     env_logger::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -161,7 +200,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -173,7 +212,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
-        .sign_and_submit_then_watch(&hans)
+        .sign_and_submit_then_watch_default(&hans)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -187,7 +226,7 @@ async fn transfer_error() {
     }
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn transfer_implicit_subscription() {
     env_logger::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
@@ -200,7 +239,7 @@ async fn transfer_implicit_subscription() {
         .tx()
         .balances()
         .transfer(bob_addr, 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -220,7 +259,7 @@ async fn transfer_implicit_subscription() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
     let balances_metadata = cxt.client().metadata().pallet("Balances").unwrap();

@@ -73,7 +73,6 @@ pub use crate::{
         SubmittableExtrinsic,
     },
     config::{
-        AccountData,
         Config,
         DefaultConfig,
     },
@@ -82,6 +81,7 @@ pub use crate::{
         Error,
         GenericError,
         HasModuleError,
+        ModuleErrorData,
         RuntimeError,
         TransactionError,
     },
@@ -91,12 +91,11 @@ pub use crate::{
         RawEventDetails,
     },
     extrinsic::{
-        DefaultExtra,
-        DefaultExtraWithTxPayment,
         PairSigner,
-        SignedExtra,
-        Signer,
-        UncheckedExtrinsic,
+        PolkadotExtrinsicParams,
+        PolkadotExtrinsicParamsBuilder,
+        SubstrateExtrinsicParams,
+        SubstrateExtrinsicParamsBuilder,
     },
     metadata::{
         ErrorMetadata,

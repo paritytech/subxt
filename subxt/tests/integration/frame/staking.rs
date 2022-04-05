@@ -32,10 +32,7 @@ use sp_core::{
     Pair,
 };
 use sp_keyring::AccountKeyring;
-use subxt::{
-    Error,
-    Signer,
-};
+use subxt::Error;
 
 /// Helper function to generate a crypto pair from seed
 fn get_from_seed(seed: &str) -> sr25519::Pair {
@@ -50,7 +47,7 @@ fn default_validator_prefs() -> ValidatorPrefs {
     }
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn validate_with_controller_account() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let ctx = test_context().await;
@@ -58,7 +55,7 @@ async fn validate_with_controller_account() {
         .tx()
         .staking()
         .validate(default_validator_prefs())
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -66,7 +63,7 @@ async fn validate_with_controller_account() {
         .expect("should be successful");
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let ctx = test_context().await;
@@ -75,7 +72,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .tx()
         .staking()
         .validate(default_validator_prefs())
-        .sign_and_submit_then_watch(&alice_stash)
+        .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -86,7 +83,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn nominate_with_controller_account() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -96,7 +93,7 @@ async fn nominate_with_controller_account() {
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
         .wait_for_finalized_success()
@@ -104,7 +101,7 @@ async fn nominate_with_controller_account() {
         .expect("should be successful");
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let bob = pair_signer(AccountKeyring::Bob.pair());
@@ -115,7 +112,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
-        .sign_and_submit_then_watch(&alice_stash)
+        .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -127,7 +124,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     let alice_stash = pair_signer(get_from_seed("Alice//stash"));
     let bob_stash = pair_signer(get_from_seed("Bob//stash"));
@@ -139,7 +136,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .tx()
         .staking()
         .nominate(vec![bob_stash.account_id().clone().into()])
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -158,7 +155,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .tx()
         .staking()
         .chill()
-        .sign_and_submit_then_watch(&alice_stash)
+        .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -173,7 +170,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .tx()
         .staking()
         .chill()
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -183,7 +180,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_bond() -> Result<(), Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let ctx = test_context().await;
@@ -197,7 +194,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
             100_000_000_000_000,
             RewardDestination::Stash,
         )
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -213,7 +210,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
             100_000_000_000_000,
             RewardDestination::Stash,
         )
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await;
@@ -225,7 +222,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
     let ctx = test_context().await;
     let history_depth = ctx.api.storage().staking().history_depth(None).await?;
@@ -233,7 +230,7 @@ async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_current_era() -> Result<(), Error<DispatchError>> {
     let ctx = test_context().await;
     let _current_era = ctx
@@ -246,7 +243,7 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
     let cxt = test_context().await;
     let current_era_result = cxt

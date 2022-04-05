@@ -74,8 +74,6 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata<PortableForm>,
 ) -> (TokenStream2, TokenStream2) {
     let entry_struct_ident = format_ident!("{}", storage_entry.name);
-    let is_account_wrapper = pallet.name == "System" && storage_entry.name == "Account";
-    let wrapper_struct_ident = format_ident!("{}Owned", storage_entry.name);
     let (fields, entry_struct, constructor, key_impl, should_ref) = match storage_entry.ty
     {
         StorageEntryType::Plain(_) => {
@@ -183,18 +181,6 @@ fn generate_storage_entry_fns(
 
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
-                    // `::system::storage::Account` was utilized as associated type `StorageEntry`
-                    // for `::subxt::AccountData` implementation by the generated `DefaultAccountData`.
-                    // Due to changes in the storage API, `::system::storage::Account` cannot be
-                    // used without specifying a lifetime. To satisfy `::subxt::AccountData`
-                    // implementation, a non-reference wrapper `AccountOwned` is generated.
-                    let wrapper_struct = if is_account_wrapper {
-                        quote!(
-                            pub struct #wrapper_struct_ident ( pub #ty_path );
-                        )
-                    } else {
-                        quote!()
-                    };
 
                     // `ty_path` can be `std::vec::Vec<T>`. In such cases, the entry struct
                     // should contain a slice reference.
@@ -204,7 +190,6 @@ fn generate_storage_entry_fns(
                     };
                     let entry_struct = quote! {
                         pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_slice );
-                        #wrapper_struct
                     };
                     let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
@@ -256,27 +241,11 @@ fn generate_storage_entry_fns(
         }
     );
 
-    // The wrapper account must implement the same trait as the counter-part Account,
-    // with the same pallet and storage. This continues the implementation of the wrapper
-    // generated with the Account.
-    let wrapper_entry_impl = if is_account_wrapper {
-        quote!(
-            impl ::subxt::StorageEntry for #wrapper_struct_ident {
-                #storage_entry_impl
-            }
-        )
-    } else {
-        quote!()
-    };
-
     let storage_entry_type = quote! {
         #entry_struct
-
         impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
             #storage_entry_impl
         }
-
-        #wrapper_entry_impl
     };
 
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {

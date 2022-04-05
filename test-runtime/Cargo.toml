@@ -1,6 +1,6 @@
 [package]
 name = "test-runtime"
-version = "0.18.1"
+version = "0.19.0"
 edition = "2021"
 
 [dependencies]
@@ -13,5 +13,5 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 subxt = { path = "../subxt" }
 sp-core = { package = "sp-core", git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
 
-async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
+tokio = { version = "1.8", features = ["rt", "macros"] }
 which = "4.2.2"

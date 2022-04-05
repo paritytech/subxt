@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.18.1"
+version = "0.19.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -20,14 +20,13 @@ chameleon = "0.1.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.8.0", features = ["async-client", "client-ws-transport"] }
+jsonrpsee = { version = "0.9.0", features = ["async-client", "client-ws-transport"] }
 log = "0.4.14"
-num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
 
-subxt-macro = { version = "0.18.1", path = "../macro" }
+subxt-macro = { version = "0.19.0", path = "../macro" }
 
 sp-core = { package = "sp-core", git = "https://github.com/tidelabs/substrate", branch = "tidechain", default-features = false }
 sp-runtime = { package = "sp-runtime", git = "https://github.com/tidelabs/substrate", branch = "tidechain", default-features = false }
@@ -38,7 +37,7 @@ derivative = "2.2.0"
 [dev-dependencies]
 sp-arithmetic = { version = "5.0.0", default-features = false }
 assert_matches = "1.5.0"
-async-std = { version = "1.9.0", features = ["attributes", "tokio1"] }
+tokio = { version = "1.8", features = ["macros", "time"] }
 env_logger = "0.9.0"
 tempdir = "0.3.7"
 wabt = "0.10.0"

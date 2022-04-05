@@ -28,7 +28,7 @@ use sp_keyring::AccountKeyring;
 type Call = runtime_types::node_runtime::Call;
 type BalancesCall = runtime_types::pallet_balances::pallet::Call;
 
-#[async_std::test]
+#[tokio::test]
 async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
@@ -44,7 +44,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .sudo()
         .sudo(call)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?
@@ -54,7 +54,7 @@ async fn test_sudo() -> Result<(), subxt::Error<DispatchError>> {
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>> {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id().into();
@@ -70,7 +70,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>>
         .tx()
         .sudo()
         .sudo_unchecked_weight(call, 0)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
         .await?

@@ -31,8 +31,12 @@ We also assume that ongoing work done is being merged directly to the `master` b
 5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
-    Any [closed PRs](https://github.com/paritytech/subxt/pulls?q=is%3Apr+sort%3Aupdated-desc+is%3Aclosed) between the last release and
-    this release branch should be noted.
+    Utilize the following script to generate the merged PRs between releases.
+    ```
+    ./scripts/generate_changelog.sh
+    ```
+    Ensure that the script picked the latest published release tag (e.g. if releasing `v0.17.0`, the script should
+    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Added" and "Changed" sections.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
 

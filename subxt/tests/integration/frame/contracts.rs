@@ -25,11 +25,10 @@ use crate::{
             storage,
         },
         system,
-        DefaultAccountData,
         DispatchError,
     },
     test_context,
-    NodeRuntimeSignedExtra,
+    NodeRuntimeParams,
     TestContext,
 };
 use sp_core::sr25519::Pair;
@@ -45,7 +44,7 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, NodeRuntimeSignedExtra, Pair>,
+    signer: PairSigner<DefaultConfig, Pair>,
 }
 
 type Hash = <DefaultConfig as Config>::Hash;
@@ -63,9 +62,7 @@ impl ContractsTestContext {
         self.cxt.client()
     }
 
-    fn contracts_tx(
-        &self,
-    ) -> TransactionApi<DefaultConfig, NodeRuntimeSignedExtra, DefaultAccountData> {
+    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
         self.cxt.api.tx().contracts()
     }
 
@@ -94,7 +91,7 @@ impl ContractsTestContext {
                 vec![], // data
                 vec![], // salt
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -134,7 +131,7 @@ impl ContractsTestContext {
                 data,
                 salt,
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -165,7 +162,7 @@ impl ContractsTestContext {
                 None,        // storage_deposit_limit
                 input_data,
             )
-            .sign_and_submit_then_watch(&self.signer)
+            .sign_and_submit_then_watch_default(&self.signer)
             .await?;
 
         log::info!("Call result: {:?}", result);
@@ -173,7 +170,7 @@ impl ContractsTestContext {
     }
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_instantiate_with_code() {
     let ctx = ContractsTestContext::init().await;
     let result = ctx.instantiate_with_code().await;
@@ -185,7 +182,7 @@ async fn tx_instantiate_with_code() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_instantiate() {
     let ctx = ContractsTestContext::init().await;
     let (code_hash, _) = ctx.instantiate_with_code().await.unwrap();
@@ -199,7 +196,7 @@ async fn tx_instantiate() {
     );
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();

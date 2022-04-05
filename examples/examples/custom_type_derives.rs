@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//! Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
 
 #![allow(clippy::redundant_clone)]
 
@@ -30,7 +30,7 @@ pub mod polkadot {}
 
 use polkadot::runtime_types::frame_support::PalletId;
 
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let pallet_id = PalletId([1u8; 8]);
     let _ = pallet_id.clone();

@@ -24,20 +24,20 @@ use crate::{
 };
 use sp_keyring::AccountKeyring;
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
 
     // Look up a plain value. Wait long enough that we don't get the genesis block data,
     // because it may have no storage associated with it.
-    async_std::task::sleep(std::time::Duration::from_secs(6)).await;
+    tokio::time::sleep(std::time::Duration::from_secs(6)).await;
     let entry = ctx.api.storage().timestamp().now(None).await?;
     assert!(entry > 0);
 
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
 
@@ -49,7 +49,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
         .tx()
         .system()
         .remark(vec![1, 2, 3, 4, 5])
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -65,7 +65,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
 // Here we create a key that looks a bit like a StorageNMap key, but should in fact be
 // treated as a StorageKey (ie we should hash both values together with one hasher, rather
 // than hash both values separately, or ignore the second value).
-#[async_std::test]
+#[tokio::test]
 async fn storage_n_mapish_key_is_properly_created(
 ) -> Result<(), subxt::Error<DispatchError>> {
     use codec::Encode;
@@ -100,7 +100,7 @@ async fn storage_n_mapish_key_is_properly_created(
     Ok(())
 }
 
-#[async_std::test]
+#[tokio::test]
 async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
 
@@ -114,7 +114,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
         .tx()
         .assets()
         .create(99, alice.clone().into(), 1)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -122,7 +122,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
         .tx()
         .assets()
         .approve_transfer(99, bob.clone().into(), 123)
-        .sign_and_submit_then_watch(&signer)
+        .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
         .await?;

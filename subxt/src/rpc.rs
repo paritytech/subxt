@@ -96,16 +96,6 @@ pub enum NumberOrHex {
     Hex(U256),
 }
 
-/// RPC list or value wrapper.
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-#[serde(untagged)]
-pub enum ListOrValue<T> {
-    /// A list of values of given type.
-    List(Vec<T>),
-    /// A single value of given type.
-    Value(T),
-}
-
 /// Alias for the type of a block returned by `chain_getBlock`
 pub type ChainBlock<T> =
     SignedBlock<Block<<T as Config>::Header, <T as Config>::Extrinsic>>;
@@ -120,11 +110,19 @@ impl From<NumberOrHex> for BlockNumber {
     }
 }
 
-impl From<u32> for BlockNumber {
-    fn from(x: u32) -> Self {
-        NumberOrHex::Number(x.into()).into()
+// All unsigned ints can be converted into a BlockNumber:
+macro_rules! into_block_number {
+    ($($t: ty)+) => {
+        $(
+            impl From<$t> for BlockNumber {
+                fn from(x: $t) -> Self {
+                    NumberOrHex::Number(x.into()).into()
+                }
+            }
+        )+
     }
 }
+into_block_number!(u8 u16 u32 u64);
 
 /// Arbitrary properties defined in the chain spec as a JSON object.
 pub type SystemProperties = serde_json::Map<String, serde_json::Value>;
@@ -202,6 +200,26 @@ pub struct ReadProof<Hash> {
     pub at: Hash,
     /// A proof used to prove that storage entries are included in the storage trie
     pub proof: Vec<Bytes>,
+}
+
+/// Statistics of a block returned by the `dev_getBlockStats` RPC.
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct BlockStats {
+    /// The length in bytes of the storage proof produced by executing the block.
+    pub witness_len: u64,
+    /// The length in bytes of the storage proof after compaction.
+    pub witness_compact_len: u64,
+    /// Length of the block in bytes.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub block_len: u64,
+    /// Number of extrinsics in the block.
+    ///
+    /// This information can also be acquired by downloading the whole block. This merely
+    /// saves some complexity on the client side.
+    pub num_extrinsics: u64,
 }
 
 /// Client for substrate rpc interfaces
@@ -285,16 +303,11 @@ impl<T: Config> Rpc<T> {
 
     /// Fetch the genesis hash
     pub async fn genesis_hash(&self) -> Result<T::Hash, BasicError> {
-        let block_zero = Some(ListOrValue::Value(NumberOrHex::Number(0)));
+        let block_zero = 0u32;
         let params = rpc_params![block_zero];
-        let list_or_value: ListOrValue<Option<T::Hash>> =
+        let genesis_hash: Option<T::Hash> =
             self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(genesis_hash) => {
-                genesis_hash.ok_or_else(|| "Genesis hash not found".into())
-            }
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
+        genesis_hash.ok_or_else(|| "Genesis hash not found".into())
     }
 
     /// Fetch the metadata
@@ -331,6 +344,17 @@ impl<T: Config> Rpc<T> {
         Ok(self.client.request("system_version", rpc_params![]).await?)
     }
 
+    /// Fetch the current nonce for the given account ID.
+    pub async fn system_account_next_index(
+        &self,
+        account: &T::AccountId,
+    ) -> Result<T::Index, BasicError> {
+        Ok(self
+            .client
+            .request("system_accountNextIndex", rpc_params![account])
+            .await?)
+    }
+
     /// Get a header
     pub async fn header(
         &self,
@@ -346,13 +370,9 @@ impl<T: Config> Rpc<T> {
         &self,
         block_number: Option<BlockNumber>,
     ) -> Result<Option<T::Hash>, BasicError> {
-        let block_number = block_number.map(ListOrValue::Value);
         let params = rpc_params![block_number];
-        let list_or_value = self.client.request("chain_getBlockHash", params).await?;
-        match list_or_value {
-            ListOrValue::Value(hash) => Ok(hash),
-            ListOrValue::List(_) => Err("Expected a Value, got a List".into()),
-        }
+        let block_hash = self.client.request("chain_getBlockHash", params).await?;
+        Ok(block_hash)
     }
 
     /// Get a block hash of the latest finalized block
@@ -372,6 +392,20 @@ impl<T: Config> Rpc<T> {
         let params = rpc_params![hash];
         let block = self.client.request("chain_getBlock", params).await?;
         Ok(block)
+    }
+
+    /// Reexecute the specified `block_hash` and gather statistics while doing so.
+    ///
+    /// This function requires the specified block and its parent to be available
+    /// at the queried node. If either the specified block or the parent is pruned,
+    /// this function will return `None`.
+    pub async fn block_stats(
+        &self,
+        block_hash: T::Hash,
+    ) -> Result<Option<BlockStats>, BasicError> {
+        let params = rpc_params![block_hash];
+        let stats = self.client.request("dev_getBlockStats", params).await?;
+        Ok(stats)
     }
 
     /// Get proof of storage entries at a specific block's state.

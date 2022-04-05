@@ -22,10 +22,17 @@
 //! polkadot --dev --tmp
 //! ```
 
+use sp_keyring::AccountKeyring;
 use subxt::{
+    extrinsic::{
+        Era,
+        PlainTip,
+    },
     ClientBuilder,
     DefaultConfig,
+    PairSigner,
     PolkadotExtrinsicParams,
+    PolkadotExtrinsicParamsBuilder as Params,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -35,15 +42,28 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
+    let signer = PairSigner::new(AccountKeyring::Alice.pair());
+    let dest = AccountKeyring::Bob.to_account_id().into();
+
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let mut iter = api.storage().system().account_iter(None).await?;
+    // Configure the transaction tip and era:
+    let tx_params = Params::new()
+        .tip(PlainTip::new(20_000_000_000))
+        .era(Era::Immortal, *api.client.genesis());
 
-    while let Some((key, account)) = iter.next().await? {
-        println!("{}: {}", hex::encode(key), account.data.free);
-    }
+    // Send the transaction:
+    let hash = api
+        .tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345)
+        .sign_and_submit(&signer, tx_params)
+        .await?;
+
+    println!("Balance transfer extrinsic submitted: {}", hash);
+
     Ok(())
 }

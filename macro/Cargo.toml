@@ -1,6 +1,6 @@
 [package]
 name = "subxt-macro"
-version = "0.18.1"
+version = "0.19.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 autotests = false
@@ -27,7 +27,7 @@ quote = "1.0.8"
 syn = "1.0.58"
 scale-info = "2.0.0"
 
-subxt-codegen = { path = "../codegen", version = "0.18.1" }
+subxt-codegen = { path = "../codegen", version = "0.19.0" }
 
 [dev-dependencies]
 pretty_assertions = "1.0.0"

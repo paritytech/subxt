@@ -15,19 +15,14 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::{
-        balances,
-        system,
-    },
-    pair_signer,
-    test_context,
+    node_runtime::{balances, system},
+    pair_signer, test_context,
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
-use subxt::Signer;
 
 // Check that we can subscribe to non-finalized block events.
-#[async_std::test]
+#[tokio::test]
 async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -45,7 +40,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 }
 
 // Check that we can subscribe to finalized block events.
-#[async_std::test]
+#[tokio::test]
 async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -65,7 +60,7 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 
 // Check that our subscription actually keeps producing events for
 // a few blocks.
-#[async_std::test]
+#[tokio::test]
 async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -94,7 +89,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 
 // Check that our subscription receives events, and we can filter them based on
 // it's Stream impl, and ultimately see the event we expect.
-#[async_std::test]
+#[tokio::test]
 async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     env_logger::try_init().ok();
     let ctx = test_context().await;
@@ -118,7 +113,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
         .tx()
         .balances()
         .transfer(bob.clone().into(), 10_000)
-        .sign_and_submit_then_watch(&alice)
+        .sign_and_submit_then_watch_default(&alice)
         .await?;
 
     // Wait for the next balance transfer event in our subscription stream
@@ -136,6 +131,58 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     Ok(())
 }
 
+#[tokio::test]
+async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicError> {
+    // This function is not publically available to use, but contains
+    // the key logic for filling in missing blocks, so we want to test it.
+    // This is used in `subscribe_finalized` to ensure no block headers are
+    // missed.
+    use subxt::events::subscribe_to_block_headers_filling_in_gaps;
+
+    let ctx = test_context().await;
+
+    // Manually subscribe to the next 6 finalized block headers, but deliberately
+    // filter out some in the middle so we get back b _ _ b _ b. This guarantees
+    // that there will be some gaps, even if there aren't any from the subscription.
+    let some_finalized_blocks = ctx
+        .api
+        .client
+        .rpc()
+        .subscribe_finalized_blocks()
+        .await?
+        .enumerate()
+        .take(6)
+        .filter(|(n, _)| {
+            let n = *n;
+            async move { n == 0 || n == 3 || n == 5 }
+        })
+        .map(|(_, h)| h);
+
+    // This should spot any gaps in the middle and fill them back in.
+    let all_finalized_blocks = subscribe_to_block_headers_filling_in_gaps(
+        &ctx.api.client,
+        None,
+        some_finalized_blocks,
+    );
+    futures::pin_mut!(all_finalized_blocks);
+
+    // Iterate the block headers, making sure we get them all in order.
+    let mut last_block_number = None;
+    while let Some(header) = all_finalized_blocks.next().await {
+        let header = header?;
+
+        use sp_runtime::traits::Header;
+        let block_number: u128 = (*header.number()).into();
+
+        if let Some(last) = last_block_number {
+            assert_eq!(last + 1, block_number);
+        }
+        last_block_number = Some(block_number);
+    }
+
+    Ok(())
+}
+
 // This is just a compile-time check that we can subscribe to events in
 // a context that requires the event subscription/filtering to be Send-able.
 // We test a typical use of EventSubscription and FilterEvents. We don't need
@@ -143,7 +190,7 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 #[allow(unused)]
 async fn check_events_are_sendable() {
     // check that EventSubscription can be used across await points.
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let ctx = test_context().await;
 
         let mut event_sub = ctx.api.events().subscribe().await?;
@@ -158,7 +205,7 @@ async fn check_events_are_sendable() {
     });
 
     // Check that FilterEvents can be used across await points.
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let ctx = test_context().await;
 
         let mut event_sub = ctx

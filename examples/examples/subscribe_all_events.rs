@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.13-82616422d0-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
@@ -28,8 +28,8 @@ use std::time::Duration;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    DefaultExtra,
     PairSigner,
+    PolkadotExtrinsicParams,
 };
 
 #[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
@@ -37,26 +37,30 @@ pub mod polkadot {}
 
 /// Subscribe to all events, and then manually look through them and
 /// pluck out the events that we care about.
-#[async_std::main]
+#[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
     // Subscribe to any events that occur:
     let mut event_sub = api.events().subscribe().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
-    async_std::task::spawn(async {
+    tokio::task::spawn(async {
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let api = ClientBuilder::new()
-            .build()
-            .await
-            .unwrap()
-            .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, DefaultExtra<DefaultConfig>>>();
+        let api =
+            ClientBuilder::new()
+                .build()
+                .await
+                .unwrap()
+                .to_runtime_api::<polkadot::RuntimeApi<
+                    DefaultConfig,
+                    PolkadotExtrinsicParams<DefaultConfig>,
+                >>();
 
         let mut transfer_amount = 1_000_000_000;
 
@@ -65,11 +69,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             api.tx()
                 .balances()
                 .transfer(AccountKeyring::Bob.to_account_id().into(), transfer_amount)
-                .sign_and_submit(&signer)
+                .sign_and_submit_default(&signer)
                 .await
                 .unwrap();
 
-            async_std::task::sleep(Duration::from_secs(10)).await;
+            tokio::time::sleep(Duration::from_secs(10)).await;
             transfer_amount += 100_000_000;
         }
     });
