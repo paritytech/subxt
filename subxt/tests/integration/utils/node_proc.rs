@@ -22,10 +22,6 @@ use std::{
     },
     net::TcpListener,
     process,
-    sync::atomic::{
-        AtomicU16,
-        Ordering,
-    },
     thread,
     time,
 };
@@ -189,39 +185,25 @@ impl TestNodeProcessBuilder {
     }
 }
 
-/// The start of the port range to scan.
-const START_PORT: u16 = 9900;
-/// The end of the port range to scan.
-const END_PORT: u16 = 10000;
-/// The maximum number of ports to scan before giving up.
-const MAX_PORTS: u16 = 1000;
-/// Next available unclaimed port for test node endpoints.
-static PORT: AtomicU16 = AtomicU16::new(START_PORT);
-
 /// Returns the next set of 3 open ports.
 ///
 /// Returns None if there are not 3 open ports available.
 fn next_open_port() -> Option<(u16, u16, u16)> {
-    let mut ports = Vec::new();
-    let mut ports_scanned = 0u16;
-    loop {
-        let _ = PORT.compare_exchange(
-            END_PORT,
-            START_PORT,
-            Ordering::SeqCst,
-            Ordering::SeqCst,
-        );
-        let next = PORT.fetch_add(1, Ordering::SeqCst);
-        // Bind to localhost address to find an available port.
-        if TcpListener::bind(("127.0.0.1", next)).is_ok() {
-            ports.push(next);
-            if ports.len() == 3 {
-                return Some((ports[0], ports[1], ports[2]))
+    // Ask the kernel to allocate a port.
+    let next_port = || {
+        match TcpListener::bind(("127.0.0.1", 0)) {
+            Ok(listener) => {
+                if let Ok(address) = listener.local_addr() {
+                    Some(address.port())
+                } else {
+                    None
+                }
             }
+            Err(_) => None,
         }
-        ports_scanned += 1;
-        if ports_scanned == MAX_PORTS {
-            return None
-        }
-    }
+    };
+
+    // The ports allocated should be different, unless in
+    // the unlikely case that the system has less than 3 available ports.
+    Some((next_port()?, next_port()?, next_port()?))
 }
