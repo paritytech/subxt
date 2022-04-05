@@ -24,10 +24,6 @@ use std::{
     },
     path::Path,
     process::Command,
-    sync::atomic::{
-        AtomicU16,
-        Ordering,
-    },
     thread,
     time,
 };
@@ -49,8 +45,7 @@ async fn run() {
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
 
     // Run binary.
-    let port = next_open_port()
-        .expect("Cannot spawn substrate: no available ports in the given port range");
+    let port = next_open_port().expect("Cannot spawn substrate: no available ports");
     let cmd = Command::new(&substrate_bin)
         .arg("--dev")
         .arg("--tmp")
@@ -138,33 +133,17 @@ async fn run() {
     println!("cargo:rerun-if-changed=build.rs");
 }
 
-/// Returns the next open port, or None if no port found in range.
+/// Returns the next open port, or None if no port found.
 fn next_open_port() -> Option<u16> {
-    /// The start of the port range to scan.
-    const START_PORT: u16 = 9900;
-    /// The end of the port range to scan.
-    const END_PORT: u16 = 10000;
-    /// The maximum number of ports to scan before giving up.
-    const MAX_PORTS: u16 = 1000;
-
-    let next_port: AtomicU16 = AtomicU16::new(START_PORT);
-    let mut ports_scanned = 0u16;
-    loop {
-        // Loop back from the beginning if needed
-        let _ = next_port.compare_exchange(
-            END_PORT,
-            START_PORT,
-            Ordering::SeqCst,
-            Ordering::SeqCst,
-        );
-        let next = next_port.fetch_add(1, Ordering::SeqCst);
-        if TcpListener::bind(("0.0.0.0", next)).is_ok() {
-            return Some(next)
+    match TcpListener::bind(("127.0.0.1", 0)) {
+        Ok(listener) => {
+            if let Ok(address) = listener.local_addr() {
+                Some(address.port())
+            } else {
+                None
+            }
         }
-        ports_scanned += 1;
-        if ports_scanned == MAX_PORTS {
-            return None
-        }
+        Err(_) => None,
     }
 }
 
