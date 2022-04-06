@@ -11,5 +11,5 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 [build-dependencies]
 subxt = { path = "../subxt" }
 sp-core = "6.0.0"
-tokio = { version = "1.8", features = ["rt", "macros", "rt-multi-thread"] }
+tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
