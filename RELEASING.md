@@ -31,12 +31,18 @@ We also assume that ongoing work done is being merged directly to the `master` b
 5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
 
-    Utilize the following script to generate the merged PRs between releases.
+    First, if there have been any significant changes, add a description of those changes to the top of the
+    changelog entry for this release.
+
+    Next, you can use the following script to generate the merged PRs between releases:
+
     ```
     ./scripts/generate_changelog.sh
     ```
+
     Ensure that the script picked the latest published release tag (e.g. if releasing `v0.17.0`, the script should
-    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Added" and "Changed" sections.
+    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Added" and "Changed" sections, and make any
+    other adjustments that you feel are necessary for clarity.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
 
@@ -50,18 +56,14 @@ We also assume that ongoing work done is being merged directly to the `master` b
         git checkout master && git pull
         ```
 
-    2.  Perform a dry-run publish to ensure the crates can be correctly published.
-
-        The crates in this repository need publishing in a specific order, since they depend on each other.
+    2.  Perform a final sanity check that everything looks ok.
 
         ```
-        (cd codegen && cargo publish --dry-run) && \
-            (cd macro && cargo publish --dry-run) && \
-            (cd subxt && cargo publish --dry-run) && \
-            (cd cli && cargo publish --dry-run);
+        cargo check --all-targets
+        cargo test --all-targets
         ```
 
-    3.  If the dry-run was successful, run the following command to publish each crate in the required order (allowing
+    3.  Run the following command to publish each crate in the required order (allowing
         a little time in between each to let crates.io catch up with what we've published).
 
         ```
