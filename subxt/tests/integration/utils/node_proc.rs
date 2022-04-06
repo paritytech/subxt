@@ -20,6 +20,11 @@ use std::{
         OsStr,
         OsString,
     },
+    io::{
+        BufRead,
+        BufReader,
+        Read,
+    },
     process,
 };
 use subxt::{
@@ -27,7 +32,6 @@ use subxt::{
     ClientBuilder,
     Config,
 };
-use std::io::{ Read, BufRead, BufReader };
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
@@ -135,10 +139,7 @@ impl TestNodeProcessBuilder {
         match client {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
-                let err = format!(
-                    "Failed to connect to node rpc at {}: {}",
-                    ws_url, err
-                );
+                let err = format!("Failed to connect to node rpc at {}: {}", ws_url, err);
                 log::error!("{}", err);
                 proc.kill().map_err(|e| {
                     format!("Error killing substrate process '{}': {}", proc.id(), e)
