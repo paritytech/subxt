@@ -14,7 +14,7 @@ If you're targeting a node with compatible additional and extra transaction data
 change you'll have to make is to import and use `subxt::PolkadotExtrinsicParams` or `subxt::SubstrateExtrinsicParams`
 instead of `subxt::DefaultExtra` (depending on what node you're compatible with), and then use `sign_and_submit_default`
 instead of `sign_and_submit` when making a call. Now, `sign_and_submit` accepts a second argument which allows these
-parameters (such as mortality and tip payment) to be cusotmised. See `examples/balance_transfer_with_params.rs` for a
+parameters (such as mortality and tip payment) to be customized. See `examples/balance_transfer_with_params.rs` for a
 small usage example.
 
 If you're targeting a node which involves custom additional and extra transaction data, you'll need to implement the
