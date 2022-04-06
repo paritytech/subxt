@@ -34,7 +34,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     First, if there have been any significant changes, add a description of those changes to the top of the
     changelog entry for this release.
 
-    Next, you utilize the following script to generate the merged PRs between releases:
+    Next, you can use the following script to generate the merged PRs between releases:
 
     ```
     ./scripts/generate_changelog.sh
