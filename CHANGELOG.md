@@ -4,6 +4,41 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.20.0] - 2022-04-06
+
+The most significant change in this release is in how we create and sign extrinsics, and how we manage the
+"additional" and "extra" data that is attached to them. See https://github.com/paritytech/subxt/issues/477, and the
+associated PR https://github.com/paritytech/subxt/pull/490 for a more detailed look at the code changes.
+
+If you're targeting a node with compatible additional and extra transaction data to Substrate or Polkadot, the main
+change you'll have to make is to import and use `subxt::PolkadotExtrinsicParams` or `subxt::SubstrateExtrinsicParams`
+instead of `subxt::DefaultExtra` (depending on what node you're compatible with), and then use `sign_and_submit_default`
+instead of `sign_and_submit` when making a call. Now, `sign_and_submit` accepts a second argument which allows these
+parameters (such as mortality and tip payment) to be cusotmised. See `examples/balance_transfer_with_params.rs` for a
+small usage example.
+
+If you're targeting a node which involves custom additional and extra transaction data, you'll need to implement the
+trait `subxt::extrinsic::ExtrinsicParams`, which determines the parameters that can be provided to `sign_and_submit`, as
+well as how to encode these into the "additional" and "extra" data needed for a transaction. have a look at
+`subxt/src/extrinsic/params.rs` for the trait definition and Substrate/Polkadot implementations. The aim with this change
+is to make it easier to customise this for your own chains, and provide a simple way to provide values at runtime.
+
+### Fixed
+
+- Test utils: parse port from substrate binary output to avoid races ([#501](https://github.com/paritytech/subxt/pull/501))
+- Rely on the kernel for port allocation ([#498](https://github.com/paritytech/subxt/pull/498))
+
+### Changed
+
+- Export ModuleError for downstream matching ([#499](https://github.com/paritytech/subxt/pull/499))
+- Bump jsonrpsee to v0.9.0 ([#496](https://github.com/paritytech/subxt/pull/496))
+- Use tokio instead of async-std in tests/examples ([#495](https://github.com/paritytech/subxt/pull/495))
+- Read constants from metadata at runtime ([#494](https://github.com/paritytech/subxt/pull/494))
+- Handle `sp_runtime::ModuleError` substrate updates ([#492](https://github.com/paritytech/subxt/pull/492))
+- Simplify creating and signing extrinsics ([#490](https://github.com/paritytech/subxt/pull/490))
+- Add `dev_getBlockStats` RPC ([#489](https://github.com/paritytech/subxt/pull/489))
+- scripts: Hardcode github subxt pull link for changelog consistency ([#482](https://github.com/paritytech/subxt/pull/482))
+
 ## [0.19.0] - 2022-03-21
 
 ### Changed
