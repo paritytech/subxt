@@ -171,7 +171,7 @@ fn find_substrate_port_from_output(r: impl Read + Send + 'static) -> u16 {
             // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
             let port_num = port_str
                 .parse()
-                .expect(&format!("valid port expected on 'Listening for new connecitons' line, got '{port_str}'"));
+                .unwrap_or_else(|_| panic!("valid port expected on 'Listening for new connections' line, got '{port_str}'"));
 
             Some(port_num)
         })
