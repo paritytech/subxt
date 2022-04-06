@@ -20,14 +20,12 @@ use std::{
         OsStr,
         OsString,
     },
-    net::TcpListener,
-    process,
-    sync::atomic::{
-        AtomicU16,
-        Ordering,
+    io::{
+        BufRead,
+        BufReader,
+        Read,
     },
-    thread,
-    time,
+    process,
 };
 use subxt::{
     Client,
@@ -83,7 +81,6 @@ where
 pub struct TestNodeProcessBuilder {
     node_path: OsString,
     authority: Option<AccountKeyring>,
-    scan_port_range: bool,
 }
 
 impl TestNodeProcessBuilder {
@@ -94,7 +91,6 @@ impl TestNodeProcessBuilder {
         Self {
             node_path: node_path.as_ref().into(),
             authority: None,
-            scan_port_range: false,
         }
     }
 
@@ -104,42 +100,26 @@ impl TestNodeProcessBuilder {
         self
     }
 
-    /// Enable port scanning to scan for open ports.
-    ///
-    /// Allows spawning multiple node instances for tests to run in parallel.
-    pub fn scan_for_open_ports(&mut self) -> &mut Self {
-        self.scan_port_range = true;
-        self
-    }
-
     /// Spawn the substrate node at the given path, and wait for rpc to be initialized.
     pub async fn spawn<R>(&self) -> Result<TestNodeProcess<R>, String>
     where
         R: Config,
     {
         let mut cmd = process::Command::new(&self.node_path);
-        cmd.env("RUST_LOG", "error").arg("--dev").arg("--tmp");
+        cmd.env("RUST_LOG", "info")
+            .arg("--dev")
+            .arg("--tmp")
+            .stdout(process::Stdio::piped())
+            .stderr(process::Stdio::piped())
+            .arg("--port=0")
+            .arg("--rpc-port=0")
+            .arg("--ws-port=0");
 
         if let Some(authority) = self.authority {
             let authority = format!("{:?}", authority);
             let arg = format!("--{}", authority.as_str().to_lowercase());
             cmd.arg(arg);
         }
-
-        let ws_port = if self.scan_port_range {
-            let (p2p_port, http_port, ws_port) = next_open_port()
-                .ok_or_else(|| "No available ports in the given port range".to_owned())?;
-
-            cmd.arg(format!("--port={}", p2p_port));
-            cmd.arg(format!("--rpc-port={}", http_port));
-            cmd.arg(format!("--ws-port={}", ws_port));
-            ws_port
-        } else {
-            // the default Websockets port
-            9944
-        };
-
-        let ws_url = format!("ws://127.0.0.1:{}", ws_port);
 
         let mut proc = cmd.spawn().map_err(|e| {
             format!(
@@ -148,37 +128,18 @@ impl TestNodeProcessBuilder {
                 e
             )
         })?;
-        // wait for rpc to be initialized
-        const MAX_ATTEMPTS: u32 = 6;
-        let mut attempts = 1;
-        let mut wait_secs = 1;
-        let client = loop {
-            thread::sleep(time::Duration::from_secs(wait_secs));
-            log::info!(
-                "Connecting to contracts enabled node, attempt {}/{}",
-                attempts,
-                MAX_ATTEMPTS
-            );
-            let result = ClientBuilder::new().set_url(ws_url.clone()).build().await;
-            match result {
-                Ok(client) => break Ok(client),
-                Err(err) => {
-                    if attempts < MAX_ATTEMPTS {
-                        attempts += 1;
-                        wait_secs *= 2; // backoff
-                        continue
-                    }
-                    break Err(err)
-                }
-            }
-        };
+
+        // Wait for RPC port to be logged (it's logged to stderr):
+        let stderr = proc.stderr.take().unwrap();
+        let ws_port = find_substrate_port_from_output(stderr);
+        let ws_url = format!("ws://127.0.0.1:{}", ws_port);
+
+        // Connect to the node with a subxt client:
+        let client = ClientBuilder::new().set_url(ws_url.clone()).build().await;
         match client {
             Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
-                let err = format!(
-                    "Failed to connect to node rpc at {} after {} attempts: {}",
-                    ws_url, attempts, err
-                );
+                let err = format!("Failed to connect to node rpc at {}: {}", ws_url, err);
                 log::error!("{}", err);
                 proc.kill().map_err(|e| {
                     format!("Error killing substrate process '{}': {}", proc.id(), e)
@@ -189,38 +150,30 @@ impl TestNodeProcessBuilder {
     }
 }
 
-/// The start of the port range to scan.
-const START_PORT: u16 = 9900;
-/// The end of the port range to scan.
-const END_PORT: u16 = 10000;
-/// The maximum number of ports to scan before giving up.
-const MAX_PORTS: u16 = 1000;
-/// Next available unclaimed port for test node endpoints.
-static PORT: AtomicU16 = AtomicU16::new(START_PORT);
+// Consume a stderr reader from a spawned substrate command and
+// locate the port number that is logged out to it.
+fn find_substrate_port_from_output(r: impl Read + Send + 'static) -> u16 {
+    BufReader::new(r)
+        .lines()
+        .find_map(|line| {
+            let line = line
+                .expect("failed to obtain next line from stdout for port discovery");
 
-/// Returns the next set of 3 open ports.
-///
-/// Returns None if there are not 3 open ports available.
-fn next_open_port() -> Option<(u16, u16, u16)> {
-    let mut ports = Vec::new();
-    let mut ports_scanned = 0u16;
-    loop {
-        let _ = PORT.compare_exchange(
-            END_PORT,
-            START_PORT,
-            Ordering::SeqCst,
-            Ordering::SeqCst,
-        );
-        let next = PORT.fetch_add(1, Ordering::SeqCst);
-        if TcpListener::bind(("0.0.0.0", next)).is_ok() {
-            ports.push(next);
-            if ports.len() == 3 {
-                return Some((ports[0], ports[1], ports[2]))
-            }
-        }
-        ports_scanned += 1;
-        if ports_scanned == MAX_PORTS {
-            return None
-        }
-    }
+            // does the line contain our port (we expect this specific output from substrate).
+            let line_end = match line.rsplit_once("Listening for new connections on 127.0.0.1:") {
+                None => return None,
+                Some((_, after)) => after
+            };
+
+            // trim non-numeric chars from the end of the port part of the line.
+            let port_str = line_end.trim_end_matches(|b| !('0'..='9').contains(&b));
+
+            // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
+            let port_num = port_str
+                .parse()
+                .unwrap_or_else(|_| panic!("valid port expected on 'Listening for new connections' line, got '{port_str}'"));
+
+            Some(port_num)
+        })
+        .expect("We should find a port before the reader ends")
 }
