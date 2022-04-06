@@ -6,7 +6,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.20.0] - 2022-04-06
 
-The most significant change in this release is in how we create and sign extrinsics, and how we manage the
+The most significant change in this release is how we create and sign extrinsics, and how we manage the
 "additional" and "extra" data that is attached to them. See https://github.com/paritytech/subxt/issues/477, and the
 associated PR https://github.com/paritytech/subxt/pull/490 for a more detailed look at the code changes.
 
