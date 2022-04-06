@@ -56,18 +56,14 @@ We also assume that ongoing work done is being merged directly to the `master` b
         git checkout master && git pull
         ```
 
-    2.  Perform a dry-run publish to ensure the crates can be correctly published.
-
-        The crates in this repository need publishing in a specific order, since they depend on each other.
+    2.  Perform a final sanity check that everything looks ok.
 
         ```
-        (cd codegen && cargo publish --dry-run) && \
-            (cd macro && cargo publish --dry-run) && \
-            (cd subxt && cargo publish --dry-run) && \
-            (cd cli && cargo publish --dry-run);
+        cargo check --all-targets
+        cargo test --all-targets
         ```
 
-    3.  If the dry-run was successful, run the following command to publish each crate in the required order (allowing
+    3.  Run the following command to publish each crate in the required order (allowing
         a little time in between each to let crates.io catch up with what we've published).
 
         ```
