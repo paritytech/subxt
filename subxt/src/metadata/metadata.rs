@@ -156,15 +156,21 @@ impl Metadata {
     pub fn storage_hash<S: crate::StorageEntry>(
         &self,
     ) -> Result<[u8; 32], MetadataError> {
-        self.inner.cached_storage_hashes.get_or_insert(S::PALLET, S::STORAGE, || {
-            subxt_metadata::get_storage_hash(&self.inner.metadata, S::PALLET, S::STORAGE)
+        self.inner
+            .cached_storage_hashes
+            .get_or_insert(S::PALLET, S::STORAGE, || {
+                subxt_metadata::get_storage_hash(
+                    &self.inner.metadata,
+                    S::PALLET,
+                    S::STORAGE,
+                )
                 .map_err(|e| {
                     match e {
                         subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
                     }
                 })
-        })
+            })
     }
 
     /// Obtain the unique hash for a constant.
@@ -173,28 +179,40 @@ impl Metadata {
         pallet: &str,
         constant: &str,
     ) -> Result<[u8; 32], MetadataError> {
-        self.inner.cached_constant_hashes.get_or_insert(pallet, constant, || {
-            subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
-                    }
-                })
-        })
+        self.inner
+            .cached_constant_hashes
+            .get_or_insert(pallet, constant, || {
+                subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => {
+                                MetadataError::ConstantNotFound
+                            }
+                        }
+                    })
+            })
     }
 
     /// Obtain the unique hash for a call.
     pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
-        self.inner.cached_call_hashes.get_or_insert(C::PALLET, C::FUNCTION, || {
-            subxt_metadata::get_call_hash(&self.inner.metadata, C::PALLET, C::FUNCTION)
+        self.inner
+            .cached_call_hashes
+            .get_or_insert(C::PALLET, C::FUNCTION, || {
+                subxt_metadata::get_call_hash(
+                    &self.inner.metadata,
+                    C::PALLET,
+                    C::FUNCTION,
+                )
                 .map_err(|e| {
                     match e {
                         subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
                         subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
                     }
                 })
-        })
+            })
     }
 
     /// Obtain the unique hash for this metadata.

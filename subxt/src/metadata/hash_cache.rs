@@ -29,10 +29,17 @@ pub struct HashCache {
 impl HashCache {
     /// get a hash out of the cache by its pallet and item key. If the item doesn't exist,
     /// run the function provided to obtain a hash to insert (or bail with some error on failure).
-    pub fn get_or_insert<F, E>(&self, pallet: &str, item: &str, f: F) -> Result<[u8; 32], E>
-    where F: FnOnce() -> Result<[u8; 32], E>
+    pub fn get_or_insert<F, E>(
+        &self,
+        pallet: &str,
+        item: &str,
+        f: F,
+    ) -> Result<[u8; 32], E>
+    where
+        F: FnOnce() -> Result<[u8; 32], E>,
     {
-        let maybe_hash = self.inner
+        let maybe_hash = self
+            .inner
             .read()
             .unwrap()
             .get(&PalletItemKey::new(pallet, item))
@@ -43,10 +50,10 @@ impl HashCache {
         }
 
         let hash = f()?;
-        self.inner
-            .write()
-            .unwrap()
-            .insert(PalletItemKey::new(pallet.to_string(), item.to_string()), hash);
+        self.inner.write().unwrap().insert(
+            PalletItemKey::new(pallet.to_string(), item.to_string()),
+            hash,
+        );
 
         Ok(hash)
     }
