@@ -323,8 +323,7 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
             // Make sure to filter just the pallets we are interested in.
             let in_pallet = pallets
                 .iter()
-                .find(|pallet_ref| pallet_ref.as_ref() == pallet.name)
-                .is_some();
+                .any(|pallet_ref| pallet_ref.as_ref() == pallet.name);
             if in_pallet {
                 let name = pallet.name.clone();
                 let hash = get_pallet_hash(&metadata.types, pallet);
