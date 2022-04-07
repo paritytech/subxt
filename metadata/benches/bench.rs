@@ -21,7 +21,6 @@ use frame_metadata::{
     RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
 };
-use std::fs;
 use subxt_metadata::{
     get_metadata_hash,
     get_pallet_hash,

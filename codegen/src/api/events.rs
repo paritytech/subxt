@@ -35,10 +35,10 @@ pub fn generate_events(
         |name| name.into(),
         "Event",
     );
-    let event_structs = struct_defs.iter().map(|struct_def| {
+    let event_structs = struct_defs.iter().map(|(variant_name, struct_def)| {
         let pallet_name = &pallet.name;
         let event_struct = &struct_def.name;
-        let event_name = struct_def.name.to_string();
+        let event_name = variant_name;
 
         quote! {
             #struct_def

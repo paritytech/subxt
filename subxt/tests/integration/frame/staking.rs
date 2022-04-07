@@ -54,8 +54,8 @@ async fn validate_with_controller_account() {
     ctx.api
         .tx()
         .staking()
-        .unwrap()
         .validate(default_validator_prefs())
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -71,8 +71,8 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
     let announce_validator = ctx
         .api
         .tx()
-        .staking()?
-        .validate(default_validator_prefs())
+        .staking()
+        .validate(default_validator_prefs())?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -93,8 +93,8 @@ async fn nominate_with_controller_account() {
     ctx.api
         .tx()
         .staking()
-        .unwrap()
         .nominate(vec![bob.account_id().clone().into()])
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -112,8 +112,8 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
     let nomination = ctx
         .api
         .tx()
-        .staking()?
-        .nominate(vec![bob.account_id().clone().into()])
+        .staking()
+        .nominate(vec![bob.account_id().clone().into()])?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -136,8 +136,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     // this will fail the second time, which is why this is one test, not two
     ctx.api
         .tx()
-        .staking()?
-        .nominate(vec![bob_stash.account_id().clone().into()])
+        .staking()
+        .nominate(vec![bob_stash.account_id().clone().into()])?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -146,7 +146,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     let ledger = ctx
         .api
         .storage()
-        .staking()?
+        .staking()
         .ledger(alice.account_id(), None)
         .await?
         .unwrap();
@@ -155,8 +155,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     let chill = ctx
         .api
         .tx()
-        .staking()?
-        .chill()
+        .staking()
+        .chill()?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -170,8 +170,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     let is_chilled = ctx
         .api
         .tx()
-        .staking()?
-        .chill()
+        .staking()
+        .chill()?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -191,12 +191,12 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .api
         .tx()
         .staking()
-        .unwrap()
         .bond(
             AccountKeyring::Bob.to_account_id().into(),
             100_000_000_000_000,
             RewardDestination::Stash,
         )
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -208,12 +208,12 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
         .api
         .tx()
         .staking()
-        .unwrap()
         .bond(
             AccountKeyring::Bob.to_account_id().into(),
             100_000_000_000_000,
             RewardDestination::Stash,
         )
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -229,7 +229,7 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
 #[tokio::test]
 async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
     let ctx = test_context().await;
-    let history_depth = ctx.api.storage().staking()?.history_depth(None).await?;
+    let history_depth = ctx.api.storage().staking().history_depth(None).await?;
     assert_eq!(history_depth, 84);
     Ok(())
 }
@@ -240,7 +240,7 @@ async fn storage_current_era() -> Result<(), Error<DispatchError>> {
     let _current_era = ctx
         .api
         .storage()
-        .staking()?
+        .staking()
         .current_era(None)
         .await?
         .expect("current era always exists");
@@ -253,7 +253,7 @@ async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
     let current_era_result = cxt
         .api
         .storage()
-        .staking()?
+        .staking()
         .eras_reward_points(&0, None)
         .await;
     assert!(current_era_result.is_ok());

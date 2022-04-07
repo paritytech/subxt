@@ -22,11 +22,9 @@
 //! polkadot --dev --tmp
 //! ```
 
-use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
     DefaultConfig,
-    PairSigner,
     PolkadotExtrinsicParams,
 };
 
@@ -37,90 +35,18 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     env_logger::init();
 
-    let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
-
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    // Full metadata validation is not enabled by default.
-    // Ensure that the static metadata used to generate the API
-    // (i.e., runtime_metadata_path = "examples/polkadot_metadata.scale") is compatible with
-    // the runtime metadata obtained from the polkadot node.
+    // Full metadata validation is not enabled by default; instead, the individual calls,
+    // storage requests and constant accesses are runtime type checked against the node
+    // metadata to ensure that they are compatible with the generated code.
     //
-    // Note: This step can be skipped if full metadata validation is not of interest.
+    // To make sure that all of our statically generated pallets are compatible with the
+    // runtime node, we can run this check:
     api.validate_metadata()?;
-
-    // The compatibility of a pallet is verified by default when interacting with it.
-    // When obtaining the "Balances" pallet below, the API compares the static
-    // and runtime metadata to make sure that everything lines up.
-    //
-    // We can opt out of this check using the `_unchecked` alternative, seen below.
-    let hash = api
-        .tx()
-        .balances()? // Pallet metadata is validated.
-        .transfer(AccountKeyring::Bob.to_account_id().into(), 10_000)
-        .sign_and_submit_default(&signer)
-        .await?;
-    println!("Balance transfer extrinsic submitted: {}", hash);
-
-    // The pallet metadata can be skipped when calling the `_unchecked` family of methods.
-    let hash = api
-        .tx()
-        .balances_unchecked() // Pallet metadata validation is skipped.
-        .transfer(dest, 123_456_789_012_345)
-        .sign_and_submit_default(&signer)
-        .await?;
-
-    println!(
-        "Balance transfer extrinsic submitted (without pallet metadata validation): {}",
-        hash
-    );
-
-    // Pallet validation is also carried out when accessing storage items,
-    // and, as above, can be skipped using the `_unchecked` alternatives.
-    let era = api
-        .storage()
-        .staking()? // Pallet metadata is validated.
-        .active_era(None)
-        .await?
-        .unwrap();
-    println!(
-        "Staking active era: index: {:?}, start: {:?}",
-        era.index, era.start
-    );
-
-    let era = api
-        .storage()
-        .staking_unchecked() // Pallet metadata validation is skipped.
-        .active_era(None)
-        .await?
-        .unwrap();
-    println!(
-        "Staking active era (without pallet metadata validation): index: {:?}, start: {:?}",
-        era.index, era.start
-    );
-
-    // Pallet validation is also carried out when accessing constants,
-    // and, as above, can be skipped using the `_unchecked` alternatives.
-    let existential_deposit = api
-        .constants()
-        .balances()? // Pallet metadata is validated.
-        .existential_deposit()
-        .unwrap();
-    println!("Existential deposit constant: {}", existential_deposit);
-
-    let existential_deposit = api
-        .constants()
-        .balances_unchecked() // Pallet metadata validation is skipped.
-        .existential_deposit()
-        .unwrap();
-    println!(
-        "Existential deposit constant (without pallet metadata validation): {}",
-        existential_deposit
-    );
 
     Ok(())
 }

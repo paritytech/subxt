@@ -63,7 +63,7 @@ impl ContractsTestContext {
     }
 
     fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
-        self.cxt.api.tx().contracts_unchecked()
+        self.cxt.api.tx().contracts()
     }
 
     async fn instantiate_with_code(
@@ -82,7 +82,7 @@ impl ContractsTestContext {
             .cxt
             .api
             .tx()
-            .contracts()?
+            .contracts()
             .instantiate_with_code(
                 100_000_000_000_000_000, // endowment
                 500_000_000_000,         // gas_limit
@@ -90,7 +90,7 @@ impl ContractsTestContext {
                 code,
                 vec![], // data
                 vec![], // salt
-            )
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
@@ -130,7 +130,7 @@ impl ContractsTestContext {
                 code_hash,
                 data,
                 salt,
-            )
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
@@ -161,7 +161,7 @@ impl ContractsTestContext {
                 500_000_000, // gas_limit
                 None,        // storage_deposit_limit
                 input_data,
-            )
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?;
 
@@ -206,7 +206,6 @@ async fn tx_call() {
         .api
         .storage()
         .contracts()
-        .unwrap()
         .contract_info_of(&contract, None)
         .await;
     assert!(contract_info.is_ok());

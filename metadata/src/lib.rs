@@ -18,7 +18,7 @@ use codec::Encode;
 use frame_metadata::{
     ExtrinsicMetadata,
     RuntimeMetadataLastVersion,
-    StorageEntryType,
+    StorageEntryType, StorageEntryMetadata,
 };
 use scale_info::{
     form::PortableForm,
@@ -98,13 +98,7 @@ fn get_type_def_hash(
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
-            // The type at path `node_template_runtime::Call` contains variants of the pallets
-            // registered in order. Swapping the order between two pallets would result
-            // in a different hash, but the functionality is still identical.
-            // Sort by variant name to result in deterministic hashing.
-            let mut variants: Vec<_> = variant.variants().iter().collect();
-            variants.sort_by_key(|variant| variant.name());
-            for var in variants {
+            for var in variant.variants().iter() {
                 bytes.extend(get_variant_hash(registry, var, visited_ids));
             }
             bytes
@@ -216,6 +210,120 @@ fn get_extrinsic_hash(
     hash(&bytes)
 }
 
+/// Get the hash corresponding to a single storage entry.
+fn get_storage_entry_hash(
+    registry: &PortableRegistry,
+    entry: &StorageEntryMetadata<PortableForm>,
+    visited_ids: &mut HashSet<u32>
+) -> [u8; 32] {
+    let mut bytes = Vec::new();
+    bytes.extend(entry.name.as_bytes());
+    entry.modifier.encode_to(&mut bytes);
+    match &entry.ty {
+        StorageEntryType::Plain(ty) => {
+            bytes.extend(get_type_hash(registry, ty.id(), visited_ids));
+        }
+        StorageEntryType::Map {
+            hashers,
+            key,
+            value,
+        } => {
+            hashers.encode_to(&mut bytes);
+            bytes.extend(get_type_hash(registry, key.id(), visited_ids));
+            bytes.extend(get_type_hash(registry, value.id(), visited_ids));
+        }
+    }
+    bytes.extend(&entry.default);
+    hash(&bytes)
+}
+
+/// Obtain the hash for a specific storage item, or an error if it's not found.
+pub fn get_storage_hash(
+    metadata: &RuntimeMetadataLastVersion,
+    pallet_name: &str,
+    storage_name: &str
+) -> Result<[u8; 32], NotFound> {
+    let pallet = metadata
+        .pallets
+        .iter()
+        .find(|p| p.name == pallet_name)
+        .ok_or(NotFound::Pallet)?;
+
+    let storage = pallet
+        .storage
+        .as_ref()
+        .ok_or(NotFound::Item)?;
+
+    let entry = storage
+        .entries
+        .iter()
+        .find(|s| s.name == storage_name)
+        .ok_or(NotFound::Item)?;
+
+    let hash = get_storage_entry_hash(&metadata.types, entry, &mut HashSet::new());
+    Ok(hash)
+}
+
+/// Obtain the hash for a specific constant, or an error if it's not found.
+pub fn get_constant_hash(
+    metadata: &RuntimeMetadataLastVersion,
+    pallet_name: &str,
+    constant_name: &str
+) -> Result<[u8; 32], NotFound> {
+    let pallet = metadata
+        .pallets
+        .iter()
+        .find(|p| p.name == pallet_name)
+        .ok_or(NotFound::Pallet)?;
+
+    let constant = pallet
+        .constants
+        .iter()
+        .find(|c| c.name == constant_name)
+        .ok_or(NotFound::Item)?;
+
+    let hash = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
+    Ok(hash)
+}
+
+/// Obtain the hash for a specific call, or an error if it's not found.
+pub fn get_call_hash(
+    metadata: &RuntimeMetadataLastVersion,
+    pallet_name: &str,
+    call_name: &str
+) -> Result<[u8; 32], NotFound> {
+    let pallet = metadata
+        .pallets
+        .iter()
+        .find(|p| p.name == pallet_name)
+        .ok_or(NotFound::Pallet)?;
+
+    let call_id = pallet
+        .calls
+        .as_ref()
+        .ok_or(NotFound::Item)?
+        .ty
+        .id();
+
+    let call_ty = metadata.types
+        .resolve(call_id)
+        .ok_or(NotFound::Item)?;
+
+    let call_variants = match call_ty.type_def() {
+        TypeDef::Variant(variant) => variant.variants(),
+        _ => return Err(NotFound::Item)
+    };
+
+    let variant = call_variants
+        .iter()
+        .find(|v| v.name() == call_name)
+        .ok_or(NotFound::Item)?;
+
+    // hash the specific variant representing the call we are interested in.
+    let hash = get_variant_hash(&metadata.types, variant, &mut HashSet::new());
+    Ok(hash)
+}
+
 /// Obtain the hash representation of a `frame_metadata::PalletMetadata`.
 pub fn get_pallet_hash(
     registry: &PortableRegistry,
@@ -241,23 +349,7 @@ pub fn get_pallet_hash(
     if let Some(ref storage) = pallet.storage {
         bytes.extend(storage.prefix.as_bytes());
         for entry in storage.entries.iter() {
-            bytes.extend(entry.name.as_bytes());
-            entry.modifier.encode_to(&mut bytes);
-            match &entry.ty {
-                StorageEntryType::Plain(ty) => {
-                    bytes.extend(get_type_hash(registry, ty.id(), &mut visited_ids));
-                }
-                StorageEntryType::Map {
-                    hashers,
-                    key,
-                    value,
-                } => {
-                    hashers.encode_to(&mut bytes);
-                    bytes.extend(get_type_hash(registry, key.id(), &mut visited_ids));
-                    bytes.extend(get_type_hash(registry, value.id(), &mut visited_ids));
-                }
-            }
-            bytes.extend(&entry.default);
+            bytes.extend(get_storage_entry_hash(registry, entry, &mut visited_ids));
         }
     }
 
@@ -302,6 +394,14 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashD
         metadata_hash: hash,
         pallet_hashes: pallets.into_iter().collect(),
     }
+}
+
+/// An error returned if we attempt to get the hash for a specific call, constant
+/// or storage item that doesn't exist.
+#[derive(Clone, Debug)]
+pub enum NotFound {
+    Pallet,
+    Item
 }
 
 /// Metadata hash details obtained from hashing `frame_metadata::RuntimeMetadataLastVersion`.
