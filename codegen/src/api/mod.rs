@@ -292,11 +292,24 @@ impl RuntimeGenerator {
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
 
+        // Pallet names and their length are used to create PALLETS array.
+        // The array is used to identify the pallets composing the metadata for
+        // validation of just those pallets.
+        let pallet_names: Vec<_> = self
+            .metadata
+            .pallets
+            .iter()
+            .map(|pallet| &pallet.name)
+            .collect();
+        let pallet_names_len = pallet_names.len();
+
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
+                // Identify the pallets composing the static metadata by name.
+                pub static PALLETS: [&str; #pallet_names_len] =  [ #(#pallet_names,)* ];
 
                 #outer_event
                 #( #modules )*
