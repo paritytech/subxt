@@ -28962,11 +28962,11 @@ pub mod api {
     {
         pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
             static METADATA_HASH: [u8; 32] = [
-                59u8, 164u8, 6u8, 102u8, 115u8, 155u8, 170u8, 80u8, 229u8, 158u8, 215u8,
-                202u8, 98u8, 189u8, 104u8, 103u8, 62u8, 213u8, 75u8, 107u8, 34u8, 127u8,
-                179u8, 22u8, 201u8, 5u8, 66u8, 77u8, 73u8, 244u8, 42u8, 232u8,
+                88u8, 248u8, 208u8, 153u8, 137u8, 198u8, 114u8, 16u8, 225u8, 33u8, 193u8,
+                139u8, 34u8, 230u8, 56u8, 37u8, 246u8, 112u8, 14u8, 16u8, 109u8, 97u8,
+                95u8, 234u8, 154u8, 70u8, 44u8, 93u8, 27u8, 148u8, 214u8, 80u8,
             ];
-            if self.client.metadata().metadata_hash() != METADATA_HASH {
+            if self.client.metadata().metadata_hash(&PALLETS) != METADATA_HASH {
                 Err(::subxt::MetadataError::IncompatibleMetadata)
             } else {
                 Ok(())
