@@ -194,18 +194,17 @@ impl RuntimeGenerator {
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash_details =
-            get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
-        let metadata_hash = metadata_hash_details.metadata_hash;
+        let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let pallet_hash = metadata_hash_details
-                .pallet_hashes
-                .get(&pallet.name)
-                .expect("Pallet must be present after caching metadata");
-
             let calls = if let Some(ref calls) = pallet.calls {
-                calls::generate_calls(&self.metadata, &type_gen, pallet, calls, types_mod_ident)
+                calls::generate_calls(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    calls,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
@@ -217,7 +216,13 @@ impl RuntimeGenerator {
             };
 
             let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(&self.metadata, &type_gen, pallet, storage, types_mod_ident)
+                storage::generate_storage(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    storage,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
@@ -241,7 +246,6 @@ impl RuntimeGenerator {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
-                    pub static PALLET_HASH: [u8; 32] = [ #(#pallet_hash,)* ];
                     pub static PALLET_NAME: &str = #pallet_name;
                     #calls
                     #event

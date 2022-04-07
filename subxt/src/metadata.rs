@@ -16,11 +16,12 @@
 
 use codec::Error as CodecError;
 use std::{
+    borrow::Cow,
     collections::HashMap,
     convert::TryFrom,
     sync::{
         Arc,
-        Mutex,
+        RwLock,
     },
 };
 
@@ -87,17 +88,45 @@ pub enum MetadataError {
 /// Runtime metadata.
 #[derive(Clone, Debug)]
 pub struct Metadata {
+    inner: Arc<MetadataInner>,
+}
+
+// We hide the innards behind an Arc so that it's easy to clone and share.
+#[derive(Debug)]
+struct MetadataInner {
     metadata: RuntimeMetadataLastVersion,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
-    cache: Arc<Mutex<subxt_metadata::MetadataHashDetails>>,
+    // The hashes uniquely identify parts of the metadata; different
+    // hashes mean some type difference exists between static and runtime
+    // versions. We cache them here to avoid recalculating:
+    cached_metadata_hash: RwLock<Option<[u8; 32]>>,
+    cached_call_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
+    cached_constant_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
+    cached_storage_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
+}
+
+#[derive(Debug, PartialEq, Eq, Hash)]
+struct PalletItemKey<'a> {
+    pallet: Cow<'a, str>,
+    item: Cow<'a, str>,
+}
+
+impl<'a> PalletItemKey<'a> {
+    fn new(pallet: impl Into<Cow<'a, str>>, item: impl Into<Cow<'a, str>>) -> Self {
+        PalletItemKey {
+            pallet: pallet.into(),
+            item: item.into(),
+        }
+    }
 }
 
 impl Metadata {
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
-        self.pallets
+        self.inner
+            .pallets
             .get(name)
             .ok_or(MetadataError::PalletNotFound)
     }
@@ -109,6 +138,7 @@ impl Metadata {
         event_index: u8,
     ) -> Result<&EventMetadata, MetadataError> {
         let event = self
+            .inner
             .events
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
@@ -122,6 +152,7 @@ impl Metadata {
         error_index: u8,
     ) -> Result<&ErrorMetadata, MetadataError> {
         let error = self
+            .inner
             .errors
             .get(&(pallet_index, error_index))
             .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
@@ -130,74 +161,123 @@ impl Metadata {
 
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
-        self.metadata.types.resolve(id)
+        self.inner.metadata.types.resolve(id)
     }
 
     /// Return the runtime metadata.
     pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
-        &self.metadata
+        &self.inner.metadata
     }
 
     /// Obtain the unique hash for a specific storage entry.
-    pub fn storage_hash<S: crate::StorageEntry>(&self) -> Result<[u8; 32], MetadataError> {
-        subxt_metadata::get_storage_hash(&self.metadata, S::PALLET, S::STORAGE)
-            .map_err(|e| {
-                match e {
-                    subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                    subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
-                }
-            })
+    pub fn storage_hash<S: crate::StorageEntry>(
+        &self,
+    ) -> Result<[u8; 32], MetadataError> {
+        if let Some(hash) = self
+            .inner
+            .cached_storage_hashes
+            .read()
+            .unwrap()
+            .get(&PalletItemKey::new(S::PALLET, S::STORAGE))
+        {
+            return Ok(*hash)
+        }
+
+        let hash =
+            subxt_metadata::get_storage_hash(&self.inner.metadata, S::PALLET, S::STORAGE)
+                .map_err(|e| {
+                    match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
+                    }
+                })?;
+
+        self.inner.cached_storage_hashes.write().unwrap().insert(
+            PalletItemKey::new(S::PALLET.to_string(), S::STORAGE.to_string()),
+            hash,
+        );
+
+        Ok(hash)
     }
 
     /// Obtain the unique hash for a constant.
-    pub fn constant_hash(&self, pallet_name: &str, constant_name: &str) -> Result<[u8; 32], MetadataError> {
-        subxt_metadata::get_constant_hash(&self.metadata, pallet_name,  constant_name)
-            .map_err(|e| {
-                match e {
-                    subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                    subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
-                }
-            })
+    pub fn constant_hash(
+        &self,
+        pallet_name: &str,
+        constant_name: &str,
+    ) -> Result<[u8; 32], MetadataError> {
+        if let Some(hash) = self
+            .inner
+            .cached_constant_hashes
+            .read()
+            .unwrap()
+            .get(&PalletItemKey::new(pallet_name, constant_name))
+        {
+            return Ok(*hash)
+        }
+
+        let hash = subxt_metadata::get_constant_hash(
+            &self.inner.metadata,
+            pallet_name,
+            constant_name,
+        )
+        .map_err(|e| {
+            match e {
+                subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
+            }
+        })?;
+
+        self.inner.cached_constant_hashes.write().unwrap().insert(
+            PalletItemKey::new(pallet_name.to_string(), constant_name.to_string()),
+            hash,
+        );
+
+        Ok(hash)
     }
 
     /// Obtain the unique hash for a call.
     pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
-        subxt_metadata::get_call_hash(&self.metadata, C::PALLET, C::FUNCTION)
-            .map_err(|e| {
+        if let Some(hash) = self
+            .inner
+            .cached_call_hashes
+            .read()
+            .unwrap()
+            .get(&PalletItemKey::new(C::PALLET, C::FUNCTION))
+        {
+            return Ok(*hash)
+        }
+
+        let hash =
+            subxt_metadata::get_call_hash(&self.inner.metadata, C::PALLET, C::FUNCTION)
+                .map_err(|e| {
                 match e {
                     subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
                     subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
                 }
-            })
-    }
+            })?;
 
-    /// Obtain the unique hash for a pallet.
-    pub fn pallet_hash(&self, name: &str) -> Result<[u8; 32], MetadataError> {
-        if let Some(cache) = self.cache.lock().unwrap().pallet_hashes.get(name) {
-            return Ok(*cache)
-        }
+        self.inner.cached_call_hashes.write().unwrap().insert(
+            PalletItemKey::new(C::PALLET.to_string(), C::FUNCTION.to_string()),
+            hash,
+        );
 
-        let metadata = self.runtime_metadata();
-        let pallet = match metadata.pallets.iter().find(|pallet| pallet.name == name) {
-            Some(pallet) => pallet,
-            _ => return Err(MetadataError::PalletNotFound),
-        };
-
-        let hash = subxt_metadata::get_pallet_hash(&metadata.types, pallet);
-        let mut cache = self.cache.lock().unwrap();
-        cache.pallet_hashes.insert(name.to_string(), hash);
         Ok(hash)
     }
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
+        if let Some(hash) = *self.inner.cached_metadata_hash.read().unwrap() {
+            return hash
+        }
+
         let hash = subxt_metadata::get_metadata_per_pallet_hash(
             self.runtime_metadata(),
             pallets,
         );
-        let mut cache = self.cache.lock().unwrap();
-        *cache = hash;
-        cache.metadata_hash
+        *self.inner.cached_metadata_hash.write().unwrap() = Some(hash);
+
+        hash
     }
 }
 
@@ -240,9 +320,7 @@ impl PalletMetadata {
         &self,
         key: &str,
     ) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
-        self.storage
-            .get(key)
-            .ok_or(MetadataError::StorageNotFound)
+        self.storage.get(key).ok_or(MetadataError::StorageNotFound)
     }
 
     /// Get a constant's metadata by name.
@@ -431,12 +509,17 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             })
             .collect();
 
-        Ok(Self {
-            metadata,
-            pallets,
-            events,
-            errors,
-            cache: Arc::new(Mutex::new(subxt_metadata::MetadataHashDetails::new())),
+        Ok(Metadata {
+            inner: Arc::new(MetadataInner {
+                metadata,
+                pallets,
+                events,
+                errors,
+                cached_metadata_hash: Default::default(),
+                cached_call_hashes: Default::default(),
+                cached_constant_hashes: Default::default(),
+                cached_storage_hashes: Default::default(),
+            }),
         })
     }
 }

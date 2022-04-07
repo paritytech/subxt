@@ -215,7 +215,7 @@ fn handle_full_metadata(nodes: &[url::Url]) -> color_eyre::Result<()> {
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node)?;
         let hash = get_metadata_hash(&metadata);
-        let hex_hash = hex::encode(hash.metadata_hash);
+        let hex_hash = hex::encode(hash);
         println!("Node {:?} has metadata hash {:?}", node.as_str(), hex_hash,);
 
         compatibility_map

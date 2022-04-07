@@ -211,9 +211,15 @@ fn generate_storage_entry_fns(
 
     let pallet_name = &pallet.name;
     let storage_name = &storage_entry.name;
-    let storage_hash = subxt_metadata::get_storage_hash(metadata, pallet_name, &storage_name)
-        .unwrap_or_else(|_| abort_call_site!("Metadata information for the storage entry {}_{} could not be found", pallet_name, storage_name));
-
+    let storage_hash =
+        subxt_metadata::get_storage_hash(metadata, pallet_name, &storage_name)
+            .unwrap_or_else(|_| {
+                abort_call_site!(
+                    "Metadata information for the storage entry {}_{} could not be found",
+                    pallet_name,
+                    storage_name
+                )
+            });
 
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
     let fn_name_iter = format_ident!("{}_iter", fn_name);
