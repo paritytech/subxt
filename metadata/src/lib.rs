@@ -396,12 +396,51 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashD
     }
 }
 
-/// An error returned if we attempt to get the hash for a specific call, constant
-/// or storage item that doesn't exist.
-#[derive(Clone, Debug)]
-pub enum NotFound {
-    Pallet,
-    Item
+/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`
+/// hashing only the provided pallets.
+///
+/// **Note:** This is similar to `get_metadata_hash`, but performs hashing only of the provided
+/// pallets if they exist. There are cases where the runtime metadata contains a subset of
+/// the pallets from the static metadata. In those cases, the static API can communicate
+/// properly with the subset of pallets from the runtime node.
+pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
+    metadata: &RuntimeMetadataLastVersion,
+    pallets: &[T],
+) -> MetadataHashDetails {
+    // Collect all pairs of (pallet name, pallet hash).
+    let mut pallets_hashed: Vec<(String, [u8; 32])> = metadata
+        .pallets
+        .iter()
+        .filter_map(|pallet| {
+            // Make sure to filter just the pallets we are interested in.
+            let in_pallet = pallets
+                .iter()
+                .any(|pallet_ref| pallet_ref.as_ref() == pallet.name);
+            if in_pallet {
+                let name = pallet.name.clone();
+                let hash = get_pallet_hash(&metadata.types, pallet);
+                Some((name, hash))
+            } else {
+                None
+            }
+        })
+        .collect();
+    // Sort by pallet name to create a deterministic representation of the underlying metadata.
+    pallets_hashed.sort_by_key(|key| key.1);
+    // Note: pallet name is excluded from hashing.
+    // Each pallet has a hash of 32 bytes, and the vector is extended with
+    // extrinsic hash and metadata ty hash (2 * 32).
+    let mut bytes = Vec::with_capacity(pallets_hashed.len() * 32);
+    for (_, hash) in pallets_hashed.iter() {
+        bytes.extend(hash)
+    }
+
+    let hash = hash(&bytes);
+
+    MetadataHashDetails {
+        metadata_hash: hash,
+        pallet_hashes: pallets_hashed.into_iter().collect(),
+    }
 }
 
 /// Metadata hash details obtained from hashing `frame_metadata::RuntimeMetadataLastVersion`.
@@ -430,6 +469,14 @@ impl Default for MetadataHashDetails {
     fn default() -> Self {
         Self::new()
     }
+}
+
+/// An error returned if we attempt to get the hash for a specific call, constant
+/// or storage item that doesn't exist.
+#[derive(Clone, Debug)]
+pub enum NotFound {
+    Pallet,
+    Item,
 }
 
 #[cfg(test)]
@@ -708,5 +755,51 @@ mod tests {
             ty: meta_type::<MetadataTestType>(),
         });
         compare_pallets_hash(&pallet_lhs, &pallet);
+    }
+
+    #[test]
+    fn metadata_per_pallet_hash_correctness() {
+        let pallets = build_default_pallets();
+
+        // Build metadata with just the first pallet.
+        let metadata = pallets_to_metadata(vec![pallets[0].clone()]);
+        // Build metadata with both pallets.
+        let metadata_second = pallets_to_metadata(pallets);
+
+        // Check hashing with non-existent "Second" pallet.
+        let hash = get_metadata_per_pallet_hash(&metadata, &["First", "Second"]);
+        assert!(hash.pallet_hashes.get("First").is_some());
+        assert!(hash.pallet_hashes.get("Second").is_none());
+
+        // Check hashing with existing "First" pallet, ensure hashing is consistent.
+        let hash_rhs = get_metadata_per_pallet_hash(&metadata, &["First"]);
+        assert!(hash_rhs.pallet_hashes.get("First").is_some());
+        assert!(hash_rhs.pallet_hashes.get("Second").is_none());
+        assert_eq!(hash.metadata_hash, hash_rhs.metadata_hash);
+        assert_eq!(
+            hash.pallet_hashes.get("First").unwrap(),
+            hash_rhs.pallet_hashes.get("First").unwrap()
+        );
+
+        // Check hashing with one pallet out of two.
+        let hash_second = get_metadata_per_pallet_hash(&metadata_second, &["First"]);
+        assert!(hash_second.pallet_hashes.get("First").is_some());
+        assert!(hash_second.pallet_hashes.get("Second").is_none());
+        assert_eq!(hash_second.metadata_hash, hash.metadata_hash);
+        assert_eq!(
+            hash_second.pallet_hashes.get("First").unwrap(),
+            hash.pallet_hashes.get("First").unwrap()
+        );
+
+        // Check hashing with all pallets.
+        let hash_second =
+            get_metadata_per_pallet_hash(&metadata_second, &["First", "Second"]);
+        assert!(hash_second.pallet_hashes.get("First").is_some());
+        assert!(hash_second.pallet_hashes.get("Second").is_some());
+        assert_ne!(hash_second.metadata_hash, hash.metadata_hash);
+        assert_eq!(
+            hash_second.pallet_hashes.get("First").unwrap(),
+            hash.pallet_hashes.get("First").unwrap()
+        );
     }
 }

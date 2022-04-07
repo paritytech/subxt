@@ -37,7 +37,7 @@ mod errors;
 mod events;
 mod storage;
 
-use subxt_metadata::get_metadata_hash;
+use subxt_metadata::get_metadata_per_pallet_hash;
 
 use super::GeneratedTypeDerives;
 use crate::{
@@ -183,7 +183,19 @@ impl RuntimeGenerator {
             })
             .collect::<Vec<_>>();
 
-        let metadata_hash_details = get_metadata_hash(&self.metadata);
+        // Pallet names and their length are used to create PALLETS array.
+        // The array is used to identify the pallets composing the metadata for
+        // validation of just those pallets.
+        let pallet_names: Vec<_> = self
+            .metadata
+            .pallets
+            .iter()
+            .map(|pallet| &pallet.name)
+            .collect();
+        let pallet_names_len = pallet_names.len();
+
+        let metadata_hash_details =
+            get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
         let metadata_hash = metadata_hash_details.metadata_hash;
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
@@ -289,6 +301,8 @@ impl RuntimeGenerator {
             pub mod #mod_ident {
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
+                // Identify the pallets composing the static metadata by name.
+                pub static PALLETS: [&str; #pallet_names_len] =  [ #(#pallet_names,)* ];
 
                 #outer_event
                 #( #modules )*
@@ -321,7 +335,7 @@ impl RuntimeGenerator {
                 {
                     pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
                         static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if self.client.metadata().metadata_hash() != METADATA_HASH {
+                        if self.client.metadata().metadata_hash(&PALLETS) != METADATA_HASH {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(())

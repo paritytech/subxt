@@ -1,6 +1,59 @@
 #[allow(dead_code, unused_imports, non_camel_case_types)]
 pub mod api {
     use super::api as root_mod;
+    pub static PALLETS: [&str; 51usize] = [
+        "System",
+        "Scheduler",
+        "Preimage",
+        "Babe",
+        "Timestamp",
+        "Indices",
+        "Balances",
+        "TransactionPayment",
+        "Authorship",
+        "Staking",
+        "Offences",
+        "Historical",
+        "Session",
+        "Grandpa",
+        "ImOnline",
+        "AuthorityDiscovery",
+        "Democracy",
+        "Council",
+        "TechnicalCommittee",
+        "PhragmenElection",
+        "TechnicalMembership",
+        "Treasury",
+        "Claims",
+        "Vesting",
+        "Utility",
+        "Identity",
+        "Proxy",
+        "Multisig",
+        "Bounties",
+        "ChildBounties",
+        "Tips",
+        "ElectionProviderMultiPhase",
+        "BagsList",
+        "ParachainsOrigin",
+        "Configuration",
+        "ParasShared",
+        "ParaInclusion",
+        "ParaInherent",
+        "ParaScheduler",
+        "Paras",
+        "Initializer",
+        "Dmp",
+        "Ump",
+        "Hrmp",
+        "ParaSessionInfo",
+        "ParasDisputes",
+        "Registrar",
+        "Slots",
+        "Auctions",
+        "Crowdloan",
+        "XcmPallet",
+    ];
     #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
     pub enum Event {
         #[codec(index = 0)]
@@ -39707,7 +39760,7 @@ pub mod api {
                 207u8, 2u8, 2u8, 87u8, 108u8, 100u8, 101u8, 42u8, 191u8, 145u8, 249u8,
                 202u8, 73u8, 44u8, 217u8, 11u8, 117u8, 15u8, 90u8, 57u8, 63u8,
             ];
-            if self.client.metadata().metadata_hash() != METADATA_HASH {
+            if self.client.metadata().metadata_hash(&PALLETS) != METADATA_HASH {
                 Err(::subxt::MetadataError::IncompatibleMetadata)
             } else {
                 Ok(())
