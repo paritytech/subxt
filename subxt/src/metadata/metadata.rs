@@ -14,17 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::hash_cache::HashCache;
+use crate::Call;
 use codec::Error as CodecError;
-use std::{
-    borrow::Cow,
-    collections::HashMap,
-    convert::TryFrom,
-    sync::{
-        Arc,
-        RwLock,
-    },
-};
-
 use frame_metadata::{
     PalletConstantMetadata,
     RuntimeMetadata,
@@ -33,12 +25,18 @@ use frame_metadata::{
     StorageEntryMetadata,
     META_RESERVED,
 };
-
-use crate::Call;
 use scale_info::{
     form::PortableForm,
     Type,
     Variant,
+};
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    sync::{
+        Arc,
+        RwLock,
+    },
 };
 
 /// Metadata error.
@@ -102,24 +100,9 @@ struct MetadataInner {
     // hashes mean some type difference exists between static and runtime
     // versions. We cache them here to avoid recalculating:
     cached_metadata_hash: RwLock<Option<[u8; 32]>>,
-    cached_call_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
-    cached_constant_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
-    cached_storage_hashes: RwLock<HashMap<PalletItemKey<'static>, [u8; 32]>>,
-}
-
-#[derive(Debug, PartialEq, Eq, Hash)]
-struct PalletItemKey<'a> {
-    pallet: Cow<'a, str>,
-    item: Cow<'a, str>,
-}
-
-impl<'a> PalletItemKey<'a> {
-    fn new(pallet: impl Into<Cow<'a, str>>, item: impl Into<Cow<'a, str>>) -> Self {
-        PalletItemKey {
-            pallet: pallet.into(),
-            item: item.into(),
-        }
-    }
+    cached_call_hashes: HashCache,
+    cached_constant_hashes: HashCache,
+    cached_storage_hashes: HashCache,
 }
 
 impl Metadata {
@@ -173,14 +156,8 @@ impl Metadata {
     pub fn storage_hash<S: crate::StorageEntry>(
         &self,
     ) -> Result<[u8; 32], MetadataError> {
-        if let Some(hash) = self
-            .inner
-            .cached_storage_hashes
-            .read()
-            .unwrap()
-            .get(&PalletItemKey::new(S::PALLET, S::STORAGE))
-        {
-            return Ok(*hash)
+        if let Some(hash) = self.inner.cached_storage_hashes.get(S::PALLET, S::STORAGE) {
+            return Ok(hash)
         }
 
         let hash =
@@ -192,60 +169,41 @@ impl Metadata {
                     }
                 })?;
 
-        self.inner.cached_storage_hashes.write().unwrap().insert(
-            PalletItemKey::new(S::PALLET.to_string(), S::STORAGE.to_string()),
-            hash,
-        );
-
+        self.inner
+            .cached_storage_hashes
+            .insert(S::PALLET, S::STORAGE, hash);
         Ok(hash)
     }
 
     /// Obtain the unique hash for a constant.
     pub fn constant_hash(
         &self,
-        pallet_name: &str,
-        constant_name: &str,
+        pallet: &str,
+        constant: &str,
     ) -> Result<[u8; 32], MetadataError> {
-        if let Some(hash) = self
-            .inner
-            .cached_constant_hashes
-            .read()
-            .unwrap()
-            .get(&PalletItemKey::new(pallet_name, constant_name))
-        {
-            return Ok(*hash)
+        if let Some(hash) = self.inner.cached_constant_hashes.get(pallet, constant) {
+            return Ok(hash)
         }
 
-        let hash = subxt_metadata::get_constant_hash(
-            &self.inner.metadata,
-            pallet_name,
-            constant_name,
-        )
-        .map_err(|e| {
-            match e {
-                subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
-            }
-        })?;
+        let hash =
+            subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
+                .map_err(|e| {
+                    match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::ConstantNotFound,
+                    }
+                })?;
 
-        self.inner.cached_constant_hashes.write().unwrap().insert(
-            PalletItemKey::new(pallet_name.to_string(), constant_name.to_string()),
-            hash,
-        );
-
+        self.inner
+            .cached_constant_hashes
+            .insert(pallet, constant, hash);
         Ok(hash)
     }
 
     /// Obtain the unique hash for a call.
     pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
-        if let Some(hash) = self
-            .inner
-            .cached_call_hashes
-            .read()
-            .unwrap()
-            .get(&PalletItemKey::new(C::PALLET, C::FUNCTION))
-        {
-            return Ok(*hash)
+        if let Some(hash) = self.inner.cached_call_hashes.get(C::PALLET, C::FUNCTION) {
+            return Ok(hash)
         }
 
         let hash =
@@ -257,11 +215,9 @@ impl Metadata {
                 }
             })?;
 
-        self.inner.cached_call_hashes.write().unwrap().insert(
-            PalletItemKey::new(C::PALLET.to_string(), C::FUNCTION.to_string()),
-            hash,
-        );
-
+        self.inner
+            .cached_call_hashes
+            .insert(C::PALLET, C::FUNCTION, hash);
         Ok(hash)
     }
 
