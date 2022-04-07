@@ -304,6 +304,50 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashD
     }
 }
 
+/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`
+/// hashing only the provided pallets.
+///
+/// **Note:** This is similar to `get_metadata_hash`, but performs hashing only of the provided
+/// pallets if they exist. There are cases where the runtime metadata contains a subset of
+/// the pallets from the static metadata. In those cases, the static API can communicate
+/// properly with the subset of pallets from the runtime node.
+pub fn get_metadata_per_pallet_hash(
+    metadata: &RuntimeMetadataLastVersion,
+    pallets: &[String],
+) -> MetadataHashDetails {
+    // Collect all pairs of (pallet name, pallet hash).
+    let mut pallets_hashed: Vec<(String, [u8; 32])> = metadata
+        .pallets
+        .iter()
+        .filter_map(|pallet| {
+            // Make sure to filter just the pallets we are interested in.
+            if pallets.contains(&pallet.name) {
+                let name = pallet.name.clone();
+                let hash = get_pallet_hash(&metadata.types, pallet);
+                Some((name, hash))
+            } else {
+                None
+            }
+        })
+        .collect();
+    // Sort by pallet name to create a deterministic representation of the underlying metadata.
+    pallets_hashed.sort_by_key(|key| key.1);
+    // Note: pallet name is excluded from hashing.
+    // Each pallet has a hash of 32 bytes, and the vector is extended with
+    // extrinsic hash and metadata ty hash (2 * 32).
+    let mut bytes = Vec::with_capacity(pallets_hashed.len() * 32);
+    for (_, hash) in pallets_hashed.iter() {
+        bytes.extend(hash)
+    }
+
+    let hash = hash(&bytes);
+
+    MetadataHashDetails {
+        metadata_hash: hash,
+        pallet_hashes: pallets_hashed.into_iter().collect(),
+    }
+}
+
 /// Metadata hash details obtained from hashing `frame_metadata::RuntimeMetadataLastVersion`.
 ///
 /// **Note:** This structure provides a caching mechanism when the customer
