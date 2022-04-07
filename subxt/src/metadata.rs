@@ -149,7 +149,7 @@ impl Metadata {
             })
     }
 
-    /// Obtain the unique hash for a call.
+    /// Obtain the unique hash for a constant.
     pub fn constant_hash(&self, pallet_name: &str, constant_name: &str) -> Result<[u8; 32], MetadataError> {
         subxt_metadata::get_constant_hash(&self.metadata, pallet_name,  constant_name)
             .map_err(|e| {
