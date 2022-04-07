@@ -29,7 +29,7 @@ use subxt_metadata::{
 fn load_metadata() -> RuntimeMetadataLastVersion {
     let bytes = test_runtime::METADATA;
     let meta: RuntimeMetadataPrefixed =
-        Decode::decode(&mut &bytes[..]).expect("Cannot decode scale metadata");
+        Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
     match meta.1 {
         V14(v14) => v14,
