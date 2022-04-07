@@ -311,9 +311,9 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> MetadataHashD
 /// pallets if they exist. There are cases where the runtime metadata contains a subset of
 /// the pallets from the static metadata. In those cases, the static API can communicate
 /// properly with the subset of pallets from the runtime node.
-pub fn get_metadata_per_pallet_hash(
+pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
     metadata: &RuntimeMetadataLastVersion,
-    pallets: &[String],
+    pallets: &[T],
 ) -> MetadataHashDetails {
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets_hashed: Vec<(String, [u8; 32])> = metadata
@@ -321,7 +321,11 @@ pub fn get_metadata_per_pallet_hash(
         .iter()
         .filter_map(|pallet| {
             // Make sure to filter just the pallets we are interested in.
-            if pallets.contains(&pallet.name) {
+            let in_pallet = pallets
+                .iter()
+                .find(|pallet_ref| pallet_ref.as_ref() == pallet.name)
+                .is_some();
+            if in_pallet {
                 let name = pallet.name.clone();
                 let hash = get_pallet_hash(&metadata.types, pallet);
                 Some((name, hash))
