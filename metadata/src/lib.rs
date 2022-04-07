@@ -657,4 +657,50 @@ mod tests {
         });
         compare_pallets_hash(&pallet_lhs, &pallet);
     }
+
+    #[test]
+    fn metadata_per_pallet_hash_correctness() {
+        let pallets = build_default_pallets();
+
+        // Build metadata with just the first pallet.
+        let metadata = pallets_to_metadata(vec![pallets[0].clone()]);
+        // Build metadata with both pallets.
+        let metadata_second = pallets_to_metadata(pallets);
+
+        // Check hashing with non-existent "Second" pallet.
+        let hash = get_metadata_per_pallet_hash(&metadata, &["First", "Second"]);
+        assert!(hash.pallet_hashes.get("First").is_some());
+        assert!(hash.pallet_hashes.get("Second").is_none());
+
+        // Check hashing with existing "First" pallet, ensure hashing is consistent.
+        let hash_rhs = get_metadata_per_pallet_hash(&metadata, &["First"]);
+        assert!(hash_rhs.pallet_hashes.get("First").is_some());
+        assert!(hash_rhs.pallet_hashes.get("Second").is_none());
+        assert_eq!(hash.metadata_hash, hash_rhs.metadata_hash);
+        assert_eq!(
+            hash.pallet_hashes.get("First").unwrap(),
+            hash_rhs.pallet_hashes.get("First").unwrap()
+        );
+
+        // Check hashing with one pallet out of two.
+        let hash_second = get_metadata_per_pallet_hash(&metadata_second, &["First"]);
+        assert!(hash_second.pallet_hashes.get("First").is_some());
+        assert!(hash_second.pallet_hashes.get("Second").is_none());
+        assert_eq!(hash_second.metadata_hash, hash.metadata_hash);
+        assert_eq!(
+            hash_second.pallet_hashes.get("First").unwrap(),
+            hash.pallet_hashes.get("First").unwrap()
+        );
+
+        // Check hashing with all pallets.
+        let hash_second =
+            get_metadata_per_pallet_hash(&metadata_second, &["First", "Second"]);
+        assert!(hash_second.pallet_hashes.get("First").is_some());
+        assert!(hash_second.pallet_hashes.get("Second").is_some());
+        assert_ne!(hash_second.metadata_hash, hash.metadata_hash);
+        assert_eq!(
+            hash_second.pallet_hashes.get("First").unwrap(),
+            hash.pallet_hashes.get("First").unwrap()
+        );
+    }
 }
