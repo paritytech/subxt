@@ -21,7 +21,6 @@ use frame_metadata::{
     RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
 };
-use std::fs;
 use subxt_metadata::{
     get_metadata_hash,
     get_pallet_hash,
@@ -30,7 +29,7 @@ use subxt_metadata::{
 fn load_metadata() -> RuntimeMetadataLastVersion {
     let bytes = test_runtime::METADATA;
     let meta: RuntimeMetadataPrefixed =
-        Decode::decode(&mut &bytes[..]).expect("Cannot decode scale metadata");
+        Decode::decode(&*bytes).expect("Cannot decode scale metadata");
 
     match meta.1 {
         V14(v14) => v14,
@@ -48,7 +47,7 @@ fn bench(c: &mut Criterion) {
     for pallet in metadata.pallets.iter() {
         let bench_name = format!("pallet_validation/{}", pallet.name);
         c.bench_function(&bench_name, |b| {
-            b.iter(|| get_pallet_hash(&metadata.types, &pallet))
+            b.iter(|| get_pallet_hash(&metadata.types, pallet))
         });
     }
 }
