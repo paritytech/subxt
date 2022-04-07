@@ -343,7 +343,7 @@ impl RuntimeGenerator {
                 {
                     pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
                         static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if self.client.metadata().metadata_hash() != METADATA_HASH {
+                        if self.client.metadata().metadata_hash(&PALLETS) != METADATA_HASH {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(())

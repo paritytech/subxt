@@ -157,8 +157,11 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for this metadata.
-    pub fn metadata_hash(&self) -> [u8; 32] {
-        let hash = subxt_metadata::get_metadata_hash(self.runtime_metadata());
+    pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
+        let hash = subxt_metadata::get_metadata_per_pallet_hash(
+            self.runtime_metadata(),
+            pallets,
+        );
         let mut cache = self.cache.lock().unwrap();
         *cache = hash;
         cache.metadata_hash
