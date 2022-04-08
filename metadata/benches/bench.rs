@@ -62,11 +62,11 @@ fn bench_get_metadata_hash(c: &mut Criterion) {
 
 fn bench_get_pallet_hash(c: &mut Criterion) {
     let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_pallet_hash");
 
     for pallet in metadata.pallets.iter() {
         let pallet_name = &pallet.name;
-        let bench_name = format!("get_pallet_hash/{pallet_name}");
-        c.bench_function(&bench_name, |b| {
+        group.bench_function(pallet_name, |b| {
             b.iter(|| get_pallet_hash(&metadata.types, pallet))
         });
     }
@@ -74,17 +74,21 @@ fn bench_get_pallet_hash(c: &mut Criterion) {
 
 fn bench_get_call_hash(c: &mut Criterion) {
     let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_call_hash");
 
     for pallet in metadata.pallets.iter() {
         let pallet_name = &pallet.name;
-        let call_type_id = pallet.calls.as_ref().unwrap().ty.id();
+        let call_type_id = match &pallet.calls {
+            Some(calls) => calls.ty.id(),
+            None => continue,
+        };
         let call_type = metadata.types.resolve(call_type_id).unwrap();
         let variants = expect_variant(call_type.type_def());
 
         for variant in variants.variants() {
             let call_name = variant.name();
-            let bench_name = format!("get_call_hash/{pallet_name}/{call_name}");
-            c.bench_function(&bench_name, |b| {
+            let bench_name = format!("{pallet_name}/{call_name}");
+            group.bench_function(&bench_name, |b| {
                 b.iter(|| get_call_hash(&metadata, &pallet.name, call_name))
             });
         }
@@ -93,13 +97,14 @@ fn bench_get_call_hash(c: &mut Criterion) {
 
 fn bench_get_constant_hash(c: &mut Criterion) {
     let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_constant_hash");
 
     for pallet in metadata.pallets.iter() {
         let pallet_name = &pallet.name;
         for constant in &pallet.constants {
             let constant_name = &constant.name;
-            let bench_name = format!("get_constant_hash/{pallet_name}/{constant_name}");
-            c.bench_function(&bench_name, |b| {
+            let bench_name = format!("{pallet_name}/{constant_name}");
+            group.bench_function(&bench_name, |b| {
                 b.iter(|| get_constant_hash(&metadata, &pallet.name, constant_name))
             });
         }
@@ -108,13 +113,19 @@ fn bench_get_constant_hash(c: &mut Criterion) {
 
 fn bench_get_storage_hash(c: &mut Criterion) {
     let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_storage_hash");
 
     for pallet in metadata.pallets.iter() {
         let pallet_name = &pallet.name;
-        for storage in &pallet.storage.as_ref().unwrap().entries {
+        let storage_entries = match &pallet.storage {
+            Some(storage) => &storage.entries,
+            None => continue,
+        };
+
+        for storage in storage_entries {
             let storage_name = &storage.name;
-            let bench_name = format!("get_storage_hash/{pallet_name}/{storage_name}");
-            c.bench_function(&bench_name, |b| {
+            let bench_name = format!("{pallet_name}/{storage_name}");
+            group.bench_function(&bench_name, |b| {
                 b.iter(|| get_storage_hash(&metadata, &pallet.name, storage_name))
             });
         }
