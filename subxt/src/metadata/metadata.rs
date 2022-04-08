@@ -14,16 +14,9 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::hash_cache::HashCache;
+use crate::Call;
 use codec::Error as CodecError;
-use std::{
-    collections::HashMap,
-    convert::TryFrom,
-    sync::{
-        Arc,
-        Mutex,
-    },
-};
-
 use frame_metadata::{
     PalletConstantMetadata,
     RuntimeMetadata,
@@ -32,26 +25,32 @@ use frame_metadata::{
     StorageEntryMetadata,
     META_RESERVED,
 };
-
-use crate::Call;
 use scale_info::{
     form::PortableForm,
     Type,
     Variant,
+};
+use std::{
+    collections::HashMap,
+    convert::TryFrom,
+    sync::{
+        Arc,
+        RwLock,
+    },
 };
 
 /// Metadata error.
 #[derive(Debug, thiserror::Error)]
 pub enum MetadataError {
     /// Module is not in metadata.
-    #[error("Pallet {0} not found")]
-    PalletNotFound(String),
+    #[error("Pallet not found")]
+    PalletNotFound,
     /// Pallet is not in metadata.
     #[error("Pallet index {0} not found")]
     PalletIndexNotFound(u8),
     /// Call is not in metadata.
-    #[error("Call {0} not found")]
-    CallNotFound(&'static str),
+    #[error("Call not found")]
+    CallNotFound,
     /// Event is not in metadata.
     #[error("Pallet {0}, Event {0} not found")]
     EventNotFound(u8, u8),
@@ -59,8 +58,8 @@ pub enum MetadataError {
     #[error("Pallet {0}, Error {0} not found")]
     ErrorNotFound(u8, u8),
     /// Storage is not in metadata.
-    #[error("Storage {0} not found")]
-    StorageNotFound(&'static str),
+    #[error("Storage not found")]
+    StorageNotFound,
     /// Storage type does not match requested type.
     #[error("Storage type error")]
     StorageTypeError,
@@ -71,8 +70,8 @@ pub enum MetadataError {
     #[error("Failed to decode constant value: {0}")]
     ConstantValueError(CodecError),
     /// Constant is not in metadata.
-    #[error("Constant {0} not found")]
-    ConstantNotFound(&'static str),
+    #[error("Constant not found")]
+    ConstantNotFound,
     /// Type is not in metadata.
     #[error("Type {0} missing from type registry")]
     TypeNotFound(u32),
@@ -87,19 +86,32 @@ pub enum MetadataError {
 /// Runtime metadata.
 #[derive(Clone, Debug)]
 pub struct Metadata {
+    inner: Arc<MetadataInner>,
+}
+
+// We hide the innards behind an Arc so that it's easy to clone and share.
+#[derive(Debug)]
+struct MetadataInner {
     metadata: RuntimeMetadataLastVersion,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
-    cache: Arc<Mutex<subxt_metadata::MetadataHashDetails>>,
+    // The hashes uniquely identify parts of the metadata; different
+    // hashes mean some type difference exists between static and runtime
+    // versions. We cache them here to avoid recalculating:
+    cached_metadata_hash: RwLock<Option<[u8; 32]>>,
+    cached_call_hashes: HashCache,
+    cached_constant_hashes: HashCache,
+    cached_storage_hashes: HashCache,
 }
 
 impl Metadata {
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
-        self.pallets
+        self.inner
+            .pallets
             .get(name)
-            .ok_or_else(|| MetadataError::PalletNotFound(name.to_string()))
+            .ok_or(MetadataError::PalletNotFound)
     }
 
     /// Returns the metadata for the event at the given pallet and event indices.
@@ -109,6 +121,7 @@ impl Metadata {
         event_index: u8,
     ) -> Result<&EventMetadata, MetadataError> {
         let event = self
+            .inner
             .events
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
@@ -122,6 +135,7 @@ impl Metadata {
         error_index: u8,
     ) -> Result<&ErrorMetadata, MetadataError> {
         let error = self
+            .inner
             .errors
             .get(&(pallet_index, error_index))
             .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
@@ -130,41 +144,90 @@ impl Metadata {
 
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
-        self.metadata.types.resolve(id)
+        self.inner.metadata.types.resolve(id)
     }
 
     /// Return the runtime metadata.
     pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
-        &self.metadata
+        &self.inner.metadata
     }
 
-    /// Obtain the unique hash for a pallet.
-    pub fn pallet_hash(&self, name: &'static str) -> Result<[u8; 32], MetadataError> {
-        if let Some(cache) = self.cache.lock().unwrap().pallet_hashes.get(name) {
-            return Ok(*cache)
-        }
+    /// Obtain the unique hash for a specific storage entry.
+    pub fn storage_hash<S: crate::StorageEntry>(
+        &self,
+    ) -> Result<[u8; 32], MetadataError> {
+        self.inner
+            .cached_storage_hashes
+            .get_or_insert(S::PALLET, S::STORAGE, || {
+                subxt_metadata::get_storage_hash(
+                    &self.inner.metadata,
+                    S::PALLET,
+                    S::STORAGE,
+                )
+                .map_err(|e| {
+                    match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
+                    }
+                })
+            })
+    }
 
-        let metadata = self.runtime_metadata();
-        let pallet = match metadata.pallets.iter().find(|pallet| pallet.name == name) {
-            Some(pallet) => pallet,
-            _ => return Err(MetadataError::PalletNotFound(name.to_string())),
-        };
+    /// Obtain the unique hash for a constant.
+    pub fn constant_hash(
+        &self,
+        pallet: &str,
+        constant: &str,
+    ) -> Result<[u8; 32], MetadataError> {
+        self.inner
+            .cached_constant_hashes
+            .get_or_insert(pallet, constant, || {
+                subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => {
+                                MetadataError::ConstantNotFound
+                            }
+                        }
+                    })
+            })
+    }
 
-        let hash = subxt_metadata::get_pallet_hash(&metadata.types, pallet);
-        let mut cache = self.cache.lock().unwrap();
-        cache.pallet_hashes.insert(name.to_string(), hash);
-        Ok(hash)
+    /// Obtain the unique hash for a call.
+    pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
+        self.inner
+            .cached_call_hashes
+            .get_or_insert(C::PALLET, C::FUNCTION, || {
+                subxt_metadata::get_call_hash(
+                    &self.inner.metadata,
+                    C::PALLET,
+                    C::FUNCTION,
+                )
+                .map_err(|e| {
+                    match e {
+                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
+                        subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
+                    }
+                })
+            })
     }
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
+        if let Some(hash) = *self.inner.cached_metadata_hash.read().unwrap() {
+            return hash
+        }
+
         let hash = subxt_metadata::get_metadata_per_pallet_hash(
             self.runtime_metadata(),
             pallets,
         );
-        let mut cache = self.cache.lock().unwrap();
-        *cache = hash;
-        cache.metadata_hash
+        *self.inner.cached_metadata_hash.write().unwrap() = Some(hash);
+
+        hash
     }
 }
 
@@ -198,28 +261,26 @@ impl PalletMetadata {
         let fn_index = *self
             .calls
             .get(C::FUNCTION)
-            .ok_or(MetadataError::CallNotFound(C::FUNCTION))?;
+            .ok_or(MetadataError::CallNotFound)?;
         Ok(fn_index)
     }
 
     /// Return [`StorageEntryMetadata`] given some storage key.
     pub fn storage(
         &self,
-        key: &'static str,
+        key: &str,
     ) -> Result<&StorageEntryMetadata<PortableForm>, MetadataError> {
-        self.storage
-            .get(key)
-            .ok_or(MetadataError::StorageNotFound(key))
+        self.storage.get(key).ok_or(MetadataError::StorageNotFound)
     }
 
     /// Get a constant's metadata by name.
     pub fn constant(
         &self,
-        key: &'static str,
+        key: &str,
     ) -> Result<&PalletConstantMetadata<PortableForm>, MetadataError> {
         self.constants
             .get(key)
-            .ok_or(MetadataError::ConstantNotFound(key))
+            .ok_or(MetadataError::ConstantNotFound)
     }
 }
 
@@ -398,12 +459,17 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             })
             .collect();
 
-        Ok(Self {
-            metadata,
-            pallets,
-            events,
-            errors,
-            cache: Arc::new(Mutex::new(subxt_metadata::MetadataHashDetails::new())),
+        Ok(Metadata {
+            inner: Arc::new(MetadataInner {
+                metadata,
+                pallets,
+                events,
+                errors,
+                cached_metadata_hash: Default::default(),
+                cached_call_hashes: Default::default(),
+                cached_constant_hashes: Default::default(),
+                cached_storage_hashes: Default::default(),
+            }),
         })
     }
 }

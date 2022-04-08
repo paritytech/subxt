@@ -194,18 +194,17 @@ impl RuntimeGenerator {
             .collect();
         let pallet_names_len = pallet_names.len();
 
-        let metadata_hash_details =
-            get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
-        let metadata_hash = metadata_hash_details.metadata_hash;
+        let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let pallet_hash = metadata_hash_details
-                .pallet_hashes
-                .get(&pallet.name)
-                .expect("Pallet must be present after caching metadata");
-
             let calls = if let Some(ref calls) = pallet.calls {
-                calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
+                calls::generate_calls(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    calls,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
@@ -217,13 +216,20 @@ impl RuntimeGenerator {
             };
 
             let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(&type_gen, pallet, storage, types_mod_ident)
+                storage::generate_storage(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    storage,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
 
             let constants_mod = if !pallet.constants.is_empty() {
                 constants::generate_constants(
+                    &self.metadata,
                     &type_gen,
                     pallet,
                     &pallet.constants,
@@ -240,7 +246,6 @@ impl RuntimeGenerator {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
-                    pub static PALLET_HASH: [u8; 32] = [ #(#pallet_hash,)* ];
                     pub static PALLET_NAME: &str = #pallet_name;
                     #calls
                     #event
@@ -277,9 +282,6 @@ impl RuntimeGenerator {
                 (!pallet.constants.is_empty()).then(|| pallet_mod_name)
             })
             .collect();
-        let pallets_with_constants_unchecked = pallets_with_constants
-            .iter()
-            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
         let pallets_with_storage: Vec<_> = pallets_with_mod_names
             .iter()
@@ -287,9 +289,6 @@ impl RuntimeGenerator {
                 pallet.storage.as_ref().map(|_| pallet_mod_name)
             })
             .collect();
-        let pallets_with_storage_unchecked = pallets_with_storage
-            .iter()
-            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
         let pallets_with_calls: Vec<_> = pallets_with_mod_names
             .iter()
@@ -297,9 +296,6 @@ impl RuntimeGenerator {
                 pallet.calls.as_ref().map(|_| pallet_mod_name)
             })
             .collect();
-        let pallets_with_calls_unchecked = pallets_with_calls
-            .iter()
-            .map(|pallet_mod_name| format_ident!("{}_unchecked", pallet_mod_name));
 
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
@@ -391,16 +387,7 @@ impl RuntimeGenerator {
 
                 impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
                     #(
-                        pub fn #pallets_with_constants(&self) ->  Result<#pallets_with_constants::constants::ConstantsApi<'a, T>, ::subxt::MetadataError> {
-                            let hash = self.client.metadata().pallet_hash(#pallets_with_storage::PALLET_NAME)?;
-                            if #pallets_with_storage::PALLET_HASH != hash {
-                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_storage::PALLET_NAME))
-                            } else {
-                                Ok(#pallets_with_constants::constants::ConstantsApi::new(self.client))
-                            }
-                        }
-
-                        pub fn #pallets_with_constants_unchecked(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
+                        pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi<'a, T> {
                             #pallets_with_constants::constants::ConstantsApi::new(self.client)
                         }
                     )*
@@ -415,16 +402,7 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                 {
                     #(
-                        pub fn #pallets_with_storage(&self) -> Result<#pallets_with_storage::storage::StorageApi<'a, T>, ::subxt::MetadataError> {
-                            let hash = self.client.metadata().pallet_hash(#pallets_with_storage::PALLET_NAME)?;
-                            if #pallets_with_storage::PALLET_HASH != hash {
-                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_storage::PALLET_NAME))
-                            } else {
-                                Ok(#pallets_with_storage::storage::StorageApi::new(self.client))
-                            }
-                        }
-
-                        pub fn #pallets_with_storage_unchecked(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
+                        pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi<'a, T> {
                             #pallets_with_storage::storage::StorageApi::new(self.client)
                         }
                     )*
@@ -441,16 +419,7 @@ impl RuntimeGenerator {
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     #(
-                        pub fn #pallets_with_calls(&self) -> Result<#pallets_with_calls::calls::TransactionApi<'a, T, X>, ::subxt::MetadataError> {
-                            let hash = self.client.metadata().pallet_hash(#pallets_with_calls::PALLET_NAME)?;
-                            if #pallets_with_calls::PALLET_HASH != hash {
-                                Err(::subxt::MetadataError::IncompatiblePalletMetadata(#pallets_with_calls::PALLET_NAME))
-                            } else {
-                                Ok(#pallets_with_calls::calls::TransactionApi::new(self.client))
-                            }
-                        }
-
-                        pub fn #pallets_with_calls_unchecked(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X> {
+                        pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi<'a, T, X> {
                             #pallets_with_calls::calls::TransactionApi::new(self.client)
                         }
                     )*
@@ -460,12 +429,13 @@ impl RuntimeGenerator {
     }
 }
 
+/// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<'a, F>(
     type_gen: &'a TypeGenerator,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-) -> Vec<CompositeDef>
+) -> Vec<(String, CompositeDef)>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
@@ -482,13 +452,14 @@ where
                     &[],
                     type_gen,
                 );
-                CompositeDef::struct_def(
+                let struct_def = CompositeDef::struct_def(
                     struct_name.as_ref(),
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
-                )
+                );
+                (var.name().to_string(), struct_def)
             })
             .collect()
     } else {

@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let era = api.storage().staking()?.active_era(None).await?.unwrap();
+    let era = api.storage().staking().active_era(None).await?.unwrap();
     println!(
         "Staking active era: index: {:?}, start: {:?}",
         era.index, era.start
@@ -65,7 +65,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Map from all locked "stash" accounts to the controller account.
     let controller_acc = api
         .storage()
-        .staking()?
+        .staking()
         .bonded(&alice_stash_id, None)
         .await?
         .unwrap();
@@ -73,7 +73,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let era_result = api
         .storage()
-        .staking()?
+        .staking()
         .eras_reward_points(&era.index, None)
         .await?;
     println!("Era reward points: {:?}", era_result);

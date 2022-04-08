@@ -16,11 +16,13 @@
 
 use crate::types::TypeGenerator;
 use frame_metadata::{
+    v14::RuntimeMetadataV14,
     PalletConstantMetadata,
     PalletMetadata,
 };
 use heck::ToSnakeCase as _;
 use proc_macro2::TokenStream as TokenStream2;
+use proc_macro_error::abort_call_site;
 use quote::{
     format_ident,
     quote,
@@ -28,6 +30,7 @@ use quote::{
 use scale_info::form::PortableForm;
 
 pub fn generate_constants(
+    metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     constants: &[PalletConstantMetadata<PortableForm>],
@@ -37,14 +40,21 @@ pub fn generate_constants(
         let fn_name = format_ident!("{}", constant.name.to_snake_case());
         let pallet_name = &pallet.name;
         let constant_name = &constant.name;
+        let constant_hash = subxt_metadata::get_constant_hash(metadata, pallet_name, &constant_name)
+            .unwrap_or_else(|_| abort_call_site!("Metadata information for the constant {}_{} could not be found", pallet_name, constant_name));
+
         let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
 
         quote! {
             pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-                let pallet = self.client.metadata().pallet(#pallet_name)?;
-                let constant = pallet.constant(#constant_name)?;
-                let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                Ok(value)
+                if self.client.metadata().constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
+                    let pallet = self.client.metadata().pallet(#pallet_name)?;
+                    let constant = pallet.constant(#constant_name)?;
+                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                    Ok(value)
+                } else {
+                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                }
             }
         }
     });

@@ -46,19 +46,19 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 
     let alice_pre = api
         .storage()
-        .system()?
+        .system()
         .account(alice.account_id(), None)
         .await?;
     let bob_pre = api
         .storage()
-        .system()?
+        .system()
         .account(bob.account_id(), None)
         .await?;
 
     let events = api
         .tx()
-        .balances()?
-        .transfer(bob_address, 10_000)
+        .balances()
+        .transfer(bob_address, 10_000)?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -81,12 +81,12 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
 
     let alice_post = api
         .storage()
-        .system()?
+        .system()
         .account(alice.account_id(), None)
         .await?;
     let bob_post = api
         .storage()
-        .system()?
+        .system()
         .account(bob.account_id(), None)
         .await?;
 
@@ -106,15 +106,15 @@ async fn multiple_transfers_work_nonce_incremented(
 
     let bob_pre = api
         .storage()
-        .system()?
+        .system()
         .account(bob.account_id(), None)
         .await?;
 
     for _ in 0..3 {
         api
             .tx()
-            .balances()?
-            .transfer(bob_address.clone(), 10_000)
+            .balances()
+            .transfer(bob_address.clone(), 10_000)?
             .sign_and_submit_then_watch_default(&alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
@@ -125,7 +125,7 @@ async fn multiple_transfers_work_nonce_incremented(
 
     let bob_post = api
         .storage()
-        .system()?
+        .system()
         .account(bob.account_id(), None)
         .await?;
 
@@ -140,7 +140,6 @@ async fn storage_total_issuance() {
         .api
         .storage()
         .balances()
-        .unwrap()
         .total_issuance(None)
         .await
         .unwrap();
@@ -155,12 +154,12 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
 
     cxt.api
         .tx()
-        .staking()?
+        .staking()
         .bond(
             charlie.into(),
             100_000_000_000_000,
             runtime_types::pallet_staking::RewardDestination::Stash,
-        )
+        )?
         .sign_and_submit_then_watch_default(&bob)
         .await?
         .wait_for_finalized_success()
@@ -172,7 +171,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     let locks = cxt
         .api
         .storage()
-        .balances()?
+        .balances()
         .locks(&locked_account, None)
         .await?;
 
@@ -200,8 +199,8 @@ async fn transfer_error() {
     ctx.api
         .tx()
         .balances()
-        .unwrap()
         .transfer(hans_address, 100_000_000_000_000_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -213,8 +212,8 @@ async fn transfer_error() {
         .api
         .tx()
         .balances()
-        .unwrap()
         .transfer(alice_addr, 100_000_000_000_000_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&hans)
         .await
         .unwrap()
@@ -241,8 +240,8 @@ async fn transfer_implicit_subscription() {
         .api
         .tx()
         .balances()
-        .unwrap()
         .transfer(bob_addr, 10_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -274,7 +273,7 @@ async fn constant_existential_deposit() {
         existential_deposit,
         cxt.api
             .constants()
-            .balances_unchecked()
+            .balances()
             .existential_deposit()
             .unwrap()
     );

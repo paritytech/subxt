@@ -14,13 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::test_context;
+mod hash_cache;
+mod metadata;
 
-#[tokio::test]
-async fn storage_get_current_timestamp() {
-    let cxt = test_context().await;
-
-    let timestamp = cxt.api.storage().timestamp().now(None).await;
-
-    assert!(timestamp.is_ok())
-}
+pub use metadata::{
+    ErrorMetadata,
+    EventMetadata,
+    InvalidMetadataError,
+    Metadata,
+    MetadataError,
+    PalletMetadata,
+};

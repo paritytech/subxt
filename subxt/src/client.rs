@@ -46,7 +46,6 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
-use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -105,7 +104,7 @@ impl ClientBuilder {
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: Arc::new(metadata),
+            metadata,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: runtime_version?,
             iter_page_size: self.page_size.unwrap_or(10),
@@ -119,7 +118,7 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Arc<Metadata>,
+    metadata: Metadata,
     properties: SystemProperties,
     runtime_version: RuntimeVersion,
     iter_page_size: u32,
