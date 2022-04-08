@@ -78,7 +78,7 @@ pub fn generate_calls(
             let pallet_name = &pallet.name;
             let call_name = variant_name;
             let struct_name = &struct_def.name;
-            let call_hash = subxt_metadata::get_call_hash(metadata, pallet_name, &call_name)
+            let call_hash = subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
                 .unwrap_or_else(|_| abort_call_site!("Metadata information for the call {}_{} could not be found", pallet_name, call_name));
 
             let fn_name = format_ident!("{}", variant_name.to_snake_case());

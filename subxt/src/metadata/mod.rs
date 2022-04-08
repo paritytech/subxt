@@ -15,9 +15,9 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod hash_cache;
-mod metadata;
+mod metadata_type;
 
-pub use metadata::{
+pub use metadata_type::{
     ErrorMetadata,
     EventMetadata,
     InvalidMetadataError,

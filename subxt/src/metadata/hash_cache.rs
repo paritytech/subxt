@@ -43,7 +43,7 @@ impl HashCache {
             .read()
             .unwrap()
             .get(&PalletItemKey::new(pallet, item))
-            .map(|i| *i);
+            .copied();
 
         if let Some(hash) = maybe_hash {
             return Ok(hash)

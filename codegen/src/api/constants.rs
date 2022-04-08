@@ -40,7 +40,7 @@ pub fn generate_constants(
         let fn_name = format_ident!("{}", constant.name.to_snake_case());
         let pallet_name = &pallet.name;
         let constant_name = &constant.name;
-        let constant_hash = subxt_metadata::get_constant_hash(metadata, pallet_name, &constant_name)
+        let constant_hash = subxt_metadata::get_constant_hash(metadata, pallet_name, constant_name)
             .unwrap_or_else(|_| abort_call_site!("Metadata information for the constant {}_{} could not be found", pallet_name, constant_name));
 
         let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
