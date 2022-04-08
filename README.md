@@ -108,6 +108,7 @@ Please add your project to this list via a PR.
 - [phala-pherry](https://github.com/Phala-Network/phala-blockchain/tree/master/standalone/pherry) The relayer between Phala blockchain and the off-chain Secure workers.
 - [crunch](https://github.com/turboflakes/crunch) CLI to claim staking rewards in batch every Era or X hours for substrate-based chains.
 - [interbtc-clients](https://github.com/interlay/interbtc-clients) Client implementations for the interBTC parachain; notably the Vault / Relayer and Oracle.
+- [tidext](https://github.com/tidelabs/tidext) Tidechain client with [Stronghold](https://github.com/iotaledger/stronghold.rs) signer.
 
 **Alternatives**
 
