@@ -178,15 +178,13 @@ fn get_type_hash(
     id: u32,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
-    let ty = registry.resolve(id).unwrap();
-
     let mut bytes = vec![MetadataHashableIDs::Type as u8];
     // Guard against recursive types
     if !visited_ids.insert(id) {
         return hash(&bytes)
     }
 
-    let ty_def = ty.type_def();
+    let ty = registry.resolve(id).unwrap();
 
     // Check if the type is at path `node_template_runtime::Call`.
     // Metadata contains `node_template_runtime`: Call, Runtime, Event.
@@ -199,7 +197,7 @@ fn get_type_hash(
 
     bytes.extend(get_type_def_hash(
         registry,
-        ty_def,
+        ty.type_def(),
         is_template_runtime,
         visited_ids,
     ));
