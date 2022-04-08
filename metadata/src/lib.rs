@@ -196,7 +196,6 @@ fn get_type_hash(
     // To properly test this scenario without relying on test assets, check if
     // the path ends with the said cases.
     let path_name = ty.path().segments().join("::");
-    println!("Pallet hash call: {}", path_name);
     let is_template_runtime = path_name.ends_with("node_template_runtime::Call")
         || path_name.ends_with("node_template_runtime::Runtime")
         || path_name.ends_with("node_template_runtime::Event");
