@@ -75,3 +75,41 @@ impl<'a> PalletItemKey<'a> {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn hash_cache_validation() {
+        let cache = HashCache::default();
+
+        let pallet = "System";
+        let item = "Account";
+        let mut call_number = 0;
+        let value = cache.get_or_insert(pallet, item, || -> Result<[u8; 32], ()> {
+            call_number += 1;
+            Ok([0; 32])
+        });
+
+        assert_eq!(
+            cache
+                .inner
+                .read()
+                .unwrap()
+                .get(&PalletItemKey::new(pallet, item))
+                .unwrap(),
+            &value.unwrap()
+        );
+        assert_eq!(value.unwrap(), [0; 32]);
+        assert_eq!(call_number, 1);
+
+        // Further calls must be hashed.
+        let value = cache.get_or_insert(pallet, item, || -> Result<[u8; 32], ()> {
+            call_number += 1;
+            Ok([0; 32])
+        });
+        assert_eq!(call_number, 1);
+        assert_eq!(value.unwrap(), [0; 32]);
+    }
+}
