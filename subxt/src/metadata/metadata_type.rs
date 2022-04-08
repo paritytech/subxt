@@ -473,3 +473,120 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
         })
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::StorageEntryKey;
+
+    fn load_metadata() -> Metadata {
+        let bytes = test_runtime::METADATA;
+        let meta: RuntimeMetadataPrefixed =
+            codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+
+        Metadata::try_from(meta)
+            .expect("Cannot translate runtime metadata to internal Metadata")
+    }
+
+    #[test]
+    fn metadata_inner_cache() {
+        // Note: Dependency on test_runtime can be removed if complex metadata
+        // is manually constructed.
+        let metadata = load_metadata();
+
+        let hash = metadata.metadata_hash(&["System"]);
+        // Check inner caching.
+        assert_eq!(
+            metadata.inner.cached_metadata_hash.read().unwrap().unwrap(),
+            hash
+        );
+
+        // Currently the caching does not take into account different pallets
+        // as the intended behavior is to use this method only once.
+        // Enforce this behavior into testing.
+        let hash_old = metadata.metadata_hash(&["Balances"]);
+        assert_eq!(hash_old, hash);
+    }
+
+    #[test]
+    fn metadata_call_inner_cache() {
+        let metadata = load_metadata();
+
+        #[derive(codec::Encode)]
+        struct ValidCall;
+        impl crate::Call for ValidCall {
+            const PALLET: &'static str = "System";
+            const FUNCTION: &'static str = "fill_block";
+        }
+
+        let hash = metadata.call_hash::<ValidCall>();
+
+        let mut call_number = 0;
+        let hash_cached = metadata.inner.cached_call_hashes.get_or_insert(
+            "System",
+            "fill_block",
+            || -> Result<[u8; 32], MetadataError> {
+                call_number += 1;
+                Ok([0; 32])
+            },
+        );
+
+        // Check function is never called (e.i, value fetched from cache).
+        assert_eq!(call_number, 0);
+        assert_eq!(hash.unwrap(), hash_cached.unwrap());
+    }
+
+    #[test]
+    fn metadata_constant_inner_cache() {
+        let metadata = load_metadata();
+
+        let hash = metadata.constant_hash("System", "BlockWeights");
+
+        let mut call_number = 0;
+        let hash_cached = metadata.inner.cached_constant_hashes.get_or_insert(
+            "System",
+            "BlockWeights",
+            || -> Result<[u8; 32], MetadataError> {
+                call_number += 1;
+                Ok([0; 32])
+            },
+        );
+
+        // Check function is never called (e.i, value fetched from cache).
+        assert_eq!(call_number, 0);
+        assert_eq!(hash.unwrap(), hash_cached.unwrap());
+    }
+
+    #[test]
+    fn metadata_storage_inner_cache() {
+        let metadata = load_metadata();
+
+        #[derive(codec::Encode)]
+        struct ValidStorage;
+        impl crate::StorageEntry for ValidStorage {
+            const PALLET: &'static str = "System";
+            const STORAGE: &'static str = "Account";
+            type Value = ();
+
+            fn key(&self) -> StorageEntryKey {
+                unreachable!("Should not be called");
+            }
+        }
+
+        let hash = metadata.storage_hash::<ValidStorage>();
+
+        let mut call_number = 0;
+        let hash_cached = metadata.inner.cached_storage_hashes.get_or_insert(
+            "System",
+            "Account",
+            || -> Result<[u8; 32], MetadataError> {
+                call_number += 1;
+                Ok([0; 32])
+            },
+        );
+
+        // Check function is never called (e.i, value fetched from cache).
+        assert_eq!(call_number, 0);
+        assert_eq!(hash.unwrap(), hash_cached.unwrap());
+    }
+}
