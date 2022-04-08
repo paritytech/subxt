@@ -82,6 +82,7 @@ fn get_variant_hash(
 fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
+    is_template_runtime: bool,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
@@ -96,9 +97,22 @@ fn get_type_def_hash(
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
-            for var in variant.variants().iter() {
-                bytes.extend(get_variant_hash(registry, var, visited_ids));
-            }
+            if is_template_runtime {
+                // The type at path `node_template_runtime::Call` contains variants of the pallets
+                // registered in order. Swapping the order between two pallets would result
+                // in a different hash, but the functionality is still identical.
+                // Sort by variant name to result in deterministic hashing.
+                let mut variants: Vec<_> = variant.variants().iter().collect();
+                variants.sort_by_key(|variant| variant.name());
+                for var in variants {
+                    bytes.extend(get_variant_hash(registry, var, visited_ids));
+                }
+            } else {
+                for var in variant.variants().iter() {
+                    bytes.extend(get_variant_hash(registry, var, visited_ids));
+                }
+            };
+
             bytes
         }
         TypeDef::Sequence(sequence) => {
@@ -176,7 +190,23 @@ fn get_type_hash(
     }
 
     let ty_def = ty.type_def();
-    bytes.extend(get_type_def_hash(registry, ty_def, visited_ids));
+
+    // Check if the type is at path `node_template_runtime::Call`.
+    // Metadata contains `node_template_runtime`: Call, Runtime, Event.
+    // To properly test this scenario without relying on test assets, check if
+    // the path ends with the said cases.
+    let path_name = ty.path().segments().join("::");
+    println!("Pallet hash call: {}", path_name);
+    let is_template_runtime = path_name.ends_with("node_template_runtime::Call")
+        || path_name.ends_with("node_template_runtime::Runtime")
+        || path_name.ends_with("node_template_runtime::Event");
+
+    bytes.extend(get_type_def_hash(
+        registry,
+        ty_def,
+        is_template_runtime,
+        visited_ids,
+    ));
 
     hash(&bytes)
 }
@@ -713,21 +743,32 @@ mod tests {
     /// the same order as the pallet.
     /// Ensure that pallet order does not affect the outcome of hashing.
     fn node_template_runtime_variant() {
-        // Special case for `node_template_runtime::Call` variant.
-        mod node_template_runtime {
-            #[derive(scale_info::TypeInfo)]
-            pub enum Call {
-                #[codec(index = 0)]
-                System { dispatch: u8 },
-                #[codec(index = 1)]
-                Sudo { dispatch: u16 },
-                #[codec(index = 2)]
-                Timestamp { dispatch: u32 },
+        let pallet = {
+            // Special case for `node_template_runtime::Call` variant.
+            mod node_template_runtime {
+                #[allow(dead_code)]
+                #[derive(scale_info::TypeInfo)]
+                pub enum Call {
+                    #[codec(index = 0)]
+                    System { dispatch: u8 },
+                    #[codec(index = 1)]
+                    Sudo { dispatch: u16 },
+                    #[codec(index = 2)]
+                    Timestamp { dispatch: u32 },
+                }
             }
-        }
-        // Swap Sudo and Timestamp pallets.
-        mod reversed {
-            pub mod node_template_runtime {
+            PalletMetadata {
+                calls: Some(PalletCallMetadata {
+                    ty: meta_type::<node_template_runtime::Call>(),
+                }),
+                ..default_pallet()
+            }
+        };
+
+        let pallet_rev = {
+            // Swap Sudo and Timestamp pallets.
+            mod node_template_runtime {
+                #[allow(dead_code)]
                 #[derive(scale_info::TypeInfo)]
                 pub enum Call {
                     #[codec(index = 0)]
@@ -738,19 +779,12 @@ mod tests {
                     Sudo { dispatch: u16 },
                 }
             }
-        }
-
-        let pallet = PalletMetadata {
-            calls: Some(PalletCallMetadata {
-                ty: meta_type::<node_template_runtime::Call>(),
-            }),
-            ..default_pallet()
-        };
-        let pallet_rev = PalletMetadata {
-            calls: Some(PalletCallMetadata {
-                ty: meta_type::<reversed::node_template_runtime::Call>(),
-            }),
-            ..default_pallet()
+            PalletMetadata {
+                calls: Some(PalletCallMetadata {
+                    ty: meta_type::<node_template_runtime::Call>(),
+                }),
+                ..default_pallet()
+            }
         };
 
         let metadata = pallets_to_metadata(vec![pallet]);
