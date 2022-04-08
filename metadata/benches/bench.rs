@@ -21,9 +21,17 @@ use frame_metadata::{
     RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
 };
+use scale_info::{
+    form::PortableForm,
+    TypeDef,
+    TypeDefVariant,
+};
 use subxt_metadata::{
+    get_call_hash,
+    get_constant_hash,
     get_metadata_hash,
     get_pallet_hash,
+    get_storage_hash,
 };
 
 fn load_metadata() -> RuntimeMetadataLastVersion {
@@ -37,20 +45,101 @@ fn load_metadata() -> RuntimeMetadataLastVersion {
     }
 }
 
-fn bench(c: &mut Criterion) {
+fn expect_variant(def: &TypeDef<PortableForm>) -> &TypeDefVariant<PortableForm> {
+    match def {
+        TypeDef::Variant(variant) => variant,
+        _ => panic!("Expected a variant type, got {def:?}"),
+    }
+}
+
+fn bench_get_metadata_hash(c: &mut Criterion) {
     let metadata = load_metadata();
 
-    c.bench_function("full_metadata_validation", |b| {
+    c.bench_function("get_metadata_hash", |b| {
         b.iter(|| get_metadata_hash(&metadata))
     });
+}
+
+fn bench_get_pallet_hash(c: &mut Criterion) {
+    let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_pallet_hash");
 
     for pallet in metadata.pallets.iter() {
-        let bench_name = format!("pallet_validation/{}", pallet.name);
-        c.bench_function(&bench_name, |b| {
+        let pallet_name = &pallet.name;
+        group.bench_function(pallet_name, |b| {
             b.iter(|| get_pallet_hash(&metadata.types, pallet))
         });
     }
 }
 
-criterion_group!(benches, bench);
+fn bench_get_call_hash(c: &mut Criterion) {
+    let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_call_hash");
+
+    for pallet in metadata.pallets.iter() {
+        let pallet_name = &pallet.name;
+        let call_type_id = match &pallet.calls {
+            Some(calls) => calls.ty.id(),
+            None => continue,
+        };
+        let call_type = metadata.types.resolve(call_type_id).unwrap();
+        let variants = expect_variant(call_type.type_def());
+
+        for variant in variants.variants() {
+            let call_name = variant.name();
+            let bench_name = format!("{pallet_name}/{call_name}");
+            group.bench_function(&bench_name, |b| {
+                b.iter(|| get_call_hash(&metadata, &pallet.name, call_name))
+            });
+        }
+    }
+}
+
+fn bench_get_constant_hash(c: &mut Criterion) {
+    let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_constant_hash");
+
+    for pallet in metadata.pallets.iter() {
+        let pallet_name = &pallet.name;
+        for constant in &pallet.constants {
+            let constant_name = &constant.name;
+            let bench_name = format!("{pallet_name}/{constant_name}");
+            group.bench_function(&bench_name, |b| {
+                b.iter(|| get_constant_hash(&metadata, &pallet.name, constant_name))
+            });
+        }
+    }
+}
+
+fn bench_get_storage_hash(c: &mut Criterion) {
+    let metadata = load_metadata();
+    let mut group = c.benchmark_group("get_storage_hash");
+
+    for pallet in metadata.pallets.iter() {
+        let pallet_name = &pallet.name;
+        let storage_entries = match &pallet.storage {
+            Some(storage) => &storage.entries,
+            None => continue,
+        };
+
+        for storage in storage_entries {
+            let storage_name = &storage.name;
+            let bench_name = format!("{pallet_name}/{storage_name}");
+            group.bench_function(&bench_name, |b| {
+                b.iter(|| get_storage_hash(&metadata, &pallet.name, storage_name))
+            });
+        }
+    }
+}
+
+criterion_group!(
+    name = benches;
+    config = Criterion::default();
+    targets =
+        bench_get_metadata_hash,
+        bench_get_pallet_hash,
+        bench_get_call_hash,
+        bench_get_constant_hash,
+        bench_get_storage_hash,
+);
 criterion_main!(benches);
