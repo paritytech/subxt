@@ -55,8 +55,6 @@ fn get_field_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
-    field.name().encode_to(&mut bytes);
-    field.type_name().encode_to(&mut bytes);
     bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids));
 
     hash(&bytes)
@@ -183,7 +181,6 @@ fn get_type_hash(
     let ty = registry.resolve(id).unwrap();
 
     let mut bytes = vec![MetadataHashableIDs::Type as u8];
-    ty.path().segments().encode_to(&mut bytes);
     // Guard against recursive types
     if !visited_ids.insert(id) {
         return hash(&bytes)
