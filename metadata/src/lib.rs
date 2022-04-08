@@ -706,4 +706,59 @@ mod tests {
             get_metadata_per_pallet_hash(&metadata_both, &["First", "Second"]);
         assert_ne!(hash_second, hash, "hashing both pallets should produce a different result from hashing just one pallet");
     }
+
+    #[test]
+    /// Sudo pallets will have a `node_template_runtime::Call` variant
+    /// which contains dispatch calls to those pallets. The calls of the pallets are registered in
+    /// the same order as the pallet.
+    /// Ensure that pallet order does not affect the outcome of hashing.
+    fn node_template_runtime_variant() {
+        // Special case for `node_template_runtime::Call` variant.
+        mod node_template_runtime {
+            #[derive(scale_info::TypeInfo)]
+            pub enum Call {
+                #[codec(index = 0)]
+                System { dispatch: u8 },
+                #[codec(index = 1)]
+                Sudo { dispatch: u16 },
+                #[codec(index = 2)]
+                Timestamp { dispatch: u32 },
+            }
+        }
+        // Swap Sudo and Timestamp pallets.
+        mod reversed {
+            pub mod node_template_runtime {
+                #[derive(scale_info::TypeInfo)]
+                pub enum Call {
+                    #[codec(index = 0)]
+                    System { dispatch: u8 },
+                    #[codec(index = 1)]
+                    Timestamp { dispatch: u32 },
+                    #[codec(index = 2)]
+                    Sudo { dispatch: u16 },
+                }
+            }
+        }
+
+        let pallet = PalletMetadata {
+            calls: Some(PalletCallMetadata {
+                ty: meta_type::<node_template_runtime::Call>(),
+            }),
+            ..default_pallet()
+        };
+        let pallet_rev = PalletMetadata {
+            calls: Some(PalletCallMetadata {
+                ty: meta_type::<reversed::node_template_runtime::Call>(),
+            }),
+            ..default_pallet()
+        };
+
+        let metadata = pallets_to_metadata(vec![pallet]);
+        let metadata_rev = pallets_to_metadata(vec![pallet_rev]);
+
+        let hash = get_metadata_per_pallet_hash(&metadata, &["Test"]);
+        let hash_rev = get_metadata_per_pallet_hash(&metadata_rev, &["Test"]);
+
+        assert_eq!(hash, hash_rev);
+    }
 }
