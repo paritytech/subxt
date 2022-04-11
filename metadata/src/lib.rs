@@ -807,6 +807,38 @@ mod tests {
 
         #[allow(dead_code)]
         #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNotNamedA {
+            First(u8),
+        }
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNotNamedB {
+            First(u8),
+        }
+        // Semantic changes apply only to field names.
+        // This is considered to be a good tradeoff in hashing performance, as refactoring
+        // a structure / enum 's name is less likely to cause a breaking change.
+        // Even if the enums have different names, 'EnumFieldNotNamedA' and 'EnumFieldNotNamedB',
+        // they are equal in meaning (i.e, both contain `First(u8)`).
+        assert_eq!(
+            to_hash(meta_type::<EnumFieldNotNamedA>()),
+            to_hash(meta_type::<EnumFieldNotNamedB>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNotNamedA([u8; 32]);
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNotNamedSecondB([u8; 32]);
+        // Similarly to enums, semantic changes apply only inside the structure fields.
+        assert_eq!(
+            to_hash(meta_type::<StructFieldNotNamedA>()),
+            to_hash(meta_type::<StructFieldNotNamedSecondB>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
         enum EnumFieldNotNamed {
             First(u8),
         }
@@ -815,7 +847,8 @@ mod tests {
         enum EnumFieldNotNamedSecond {
             Second(u8),
         }
-        // Although the enums are binary compatible, they contain a different semantic meaning.
+        // The enums are binary compatible, they contain a different semantic meaning:
+        // `First(u8)` and `Second(u8)`.
         assert_ne!(
             to_hash(meta_type::<EnumFieldNotNamed>()),
             to_hash(meta_type::<EnumFieldNotNamedSecond>())
@@ -831,22 +864,10 @@ mod tests {
         enum EnumFieldNamedSecond {
             First { b: u8 },
         }
+        // Named fields contain a different semantic meaning ('a' and 'b').
         assert_ne!(
             to_hash(meta_type::<EnumFieldNamed>()),
             to_hash(meta_type::<EnumFieldNamedSecond>())
-        );
-
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct StructFieldNotNamed([u8; 32]);
-        #[allow(dead_code)]
-        #[derive(scale_info::TypeInfo)]
-        struct StructFieldNotNamedSecond([u8; 32]);
-        // Similarly to enums, semantic changes apply only inside the structure fields.
-        // Meaning that structs cannot differ in form, but can have different naming.
-        assert_eq!(
-            to_hash(meta_type::<StructFieldNotNamed>()),
-            to_hash(meta_type::<StructFieldNotNamedSecond>())
         );
 
         #[allow(dead_code)]
@@ -859,6 +880,7 @@ mod tests {
         struct StructFieldNamedSecond {
             b: u32,
         }
+        // Similar to enums, struct fields contain a different semantic meaning ('a' and 'b').
         assert_ne!(
             to_hash(meta_type::<StructFieldNamed>()),
             to_hash(meta_type::<StructFieldNamedSecond>())
@@ -881,6 +903,7 @@ mod tests {
             First,
             Third { named: u8 },
         }
+        // Swapping the registration order should also be taken into account.
         assert_ne!(
             to_hash(meta_type::<EnumField>()),
             to_hash(meta_type::<EnumFieldSwap>())
