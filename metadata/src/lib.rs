@@ -55,6 +55,8 @@ fn get_field_hash(
 ) -> [u8; 32] {
     let mut bytes = vec![MetadataHashableIDs::Field as u8];
 
+    field.name().encode_to(&mut bytes);
+    field.type_name().encode_to(&mut bytes);
     bytes.extend(get_type_hash(registry, field.ty().id(), visited_ids));
 
     hash(&bytes)
@@ -788,5 +790,118 @@ mod tests {
         let hash_rev = get_metadata_per_pallet_hash(&metadata_rev, &["Test"]);
 
         assert_eq!(hash, hash_rev);
+    }
+
+    #[test]
+    fn field_semantic_changes() {
+        // Get a hash representation of the provided meta type,
+        // inserted in the context of pallet metadata call.
+        let to_hash = |meta_ty| {
+            let pallet = PalletMetadata {
+                calls: Some(PalletCallMetadata { ty: meta_ty }),
+                ..default_pallet()
+            };
+            let metadata = pallets_to_metadata(vec![pallet]);
+            get_metadata_hash(&metadata)
+        };
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNotNamed {
+            First(u8),
+        }
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNotNamedSecond {
+            Second(u8),
+        }
+        // Although the enums are binary compatible, they contain a different semantic meaning.
+        assert_ne!(
+            to_hash(meta_type::<EnumFieldNotNamed>()),
+            to_hash(meta_type::<EnumFieldNotNamedSecond>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNamed {
+            First { a: u8 },
+        }
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldNamedSecond {
+            First { b: u8 },
+        }
+        assert_ne!(
+            to_hash(meta_type::<EnumFieldNamed>()),
+            to_hash(meta_type::<EnumFieldNamedSecond>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNotNamed([u8; 32]);
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNotNamedSecond([u8; 32]);
+        // Similarly to enums, semantic changes apply only inside the structure fields.
+        // Meaning that structs cannot differ in form, but can have different naming.
+        assert_eq!(
+            to_hash(meta_type::<StructFieldNotNamed>()),
+            to_hash(meta_type::<StructFieldNotNamedSecond>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNamed {
+            a: u32,
+        }
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldNamedSecond {
+            b: u32,
+        }
+        assert_ne!(
+            to_hash(meta_type::<StructFieldNamed>()),
+            to_hash(meta_type::<StructFieldNamedSecond>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumField {
+            First,
+            // Field is unnamed, but has type name `u8`.
+            Second(u8),
+            // File is named and has type name `u8`.
+            Third { named: u8 },
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        enum EnumFieldSwap {
+            Second(u8),
+            First,
+            Third { named: u8 },
+        }
+        assert_ne!(
+            to_hash(meta_type::<EnumField>()),
+            to_hash(meta_type::<EnumFieldSwap>())
+        );
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructField {
+            a: u32,
+            b: u32,
+        }
+
+        #[allow(dead_code)]
+        #[derive(scale_info::TypeInfo)]
+        struct StructFieldSwap {
+            b: u32,
+            a: u32,
+        }
+        assert_ne!(
+            to_hash(meta_type::<StructField>()),
+            to_hash(meta_type::<StructFieldSwap>())
+        );
     }
 }
