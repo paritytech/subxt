@@ -174,31 +174,6 @@ fn get_type_def_hash(
     hash(&bytes)
 }
 
-/// Check if the provided path segments construct a `node_template_runtime` type.
-///
-/// The `node_template_runtime::Call` contains dispatch calls to the pallets, registered
-/// in the same order as registered pallets.
-/// The presence of such structure needs to be taken into account when hashing:
-/// if the calls are simply hashed, then registering a different order of pallets
-/// would result in a different hashing **even if the pallets are firstly sorted
-/// in `get_metadata_per_pallet_hash` or `get_metadata_hash` functions **.
-fn check_template_runtime(segments: &[String]) -> bool {
-    let path_name = segments.join("::");
-
-    // The release version must match exactly the path segments.
-    if cfg!(not(test)) {
-        path_name == "node_template_runtime::Call"
-            || path_name == "node_template_runtime::Runtime"
-            || path_name == "node_template_runtime::Event"
-    } else {
-        // Testing cannot provide an absolute path of `node_template_runtime::Call`, but
-        // only a path ending in such segments.
-        path_name.ends_with("node_template_runtime::Call")
-            || path_name.ends_with("node_template_runtime::Runtime")
-            || path_name.ends_with("node_template_runtime::Event")
-    }
-}
-
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
 fn get_type_hash(
     registry: &PortableRegistry,
@@ -214,7 +189,17 @@ fn get_type_hash(
     let ty = registry.resolve(id).unwrap();
 
     // Check if this type is a `node_template_runtime` to sort inner variants.
-    let is_template_runtime = check_template_runtime(ty.path().segments());
+    // The `node_template_runtime::Call` contains dispatch calls to the pallets, registered
+    // in the same order as registered pallets.
+    // The presence of such structure needs to be taken into account when hashing:
+    // if the calls are simply hashed, then registering a different order of pallets
+    // would result in a different hashing **even if the pallets are firstly sorted
+    // in `get_metadata_per_pallet_hash` or `get_metadata_hash` functions **.
+    let path_name = ty.path().segments().join("::");
+    let is_template_runtime = path_name == "node_template_runtime::Call"
+        || path_name == "node_template_runtime::Runtime"
+        || path_name == "node_template_runtime::Event";
+
     bytes.extend(get_type_def_hash(
         registry,
         ty.type_def(),
@@ -495,7 +480,16 @@ mod tests {
         StorageEntryMetadata,
         StorageEntryModifier,
     };
-    use scale_info::meta_type;
+    use scale_info::{
+        build::{
+            Fields,
+            Variants,
+        },
+        meta_type,
+        Path,
+        Type,
+        TypeInfo,
+    };
 
     // Define recursive types.
     #[allow(dead_code)]
@@ -757,48 +751,89 @@ mod tests {
     /// the same order as the pallets.
     /// Ensure that pallet order does not affect the outcome of hashing.
     fn node_template_runtime_variant() {
-        let pallet = {
-            // Special case for `node_template_runtime::Call` variant.
-            mod node_template_runtime {
-                #[allow(dead_code)]
-                #[derive(scale_info::TypeInfo)]
-                pub enum Call {
-                    #[codec(index = 0)]
-                    System { dispatch: u8 },
-                    #[codec(index = 1)]
-                    Sudo { dispatch: u16 },
-                    #[codec(index = 2)]
-                    Timestamp { dispatch: u32 },
-                }
+        // Build a special case of "node_template_runtime::Call".
+        //
+        // The following lines translate to:
+        // ```
+        // mod node_template_runtime {
+        //     #[allow(dead_code)]
+        //     #[derive(scale_info::TypeInfo)]
+        //     pub enum Call {
+        //         #[codec(index = 0)]
+        //         System { dispatch: u8 },
+        //         #[codec(index = 1)]
+        //         Sudo { dispatch: u16 },
+        //     }
+        // }
+        // ```
+        struct Call;
+        impl TypeInfo for Call {
+            type Identity = Self;
+            fn type_info() -> Type {
+                Type::builder()
+                    .path(Path::new("Call", "node_template_runtime"))
+                    .variant(
+                        Variants::new()
+                            .variant("System", |v| {
+                                v.index(0).fields(Fields::named().field(|f| {
+                                    f.ty::<u8>().name("dispatch").type_name("u8")
+                                }))
+                            })
+                            .variant("Sudo", |v| {
+                                v.index(1).fields(Fields::named().field(|f| {
+                                    f.ty::<u16>().name("dispatch").type_name("u16")
+                                }))
+                            }),
+                    )
             }
-            PalletMetadata {
-                calls: Some(PalletCallMetadata {
-                    ty: meta_type::<node_template_runtime::Call>(),
-                }),
-                ..default_pallet()
-            }
+        }
+        let pallet = PalletMetadata {
+            calls: Some(PalletCallMetadata {
+                ty: meta_type::<Call>(),
+            }),
+            ..default_pallet()
         };
 
-        let pallet_rev = {
-            // Swap Sudo and Timestamp pallets.
-            mod node_template_runtime {
-                #[allow(dead_code)]
-                #[derive(scale_info::TypeInfo)]
-                pub enum Call {
-                    #[codec(index = 0)]
-                    System { dispatch: u8 },
-                    #[codec(index = 1)]
-                    Timestamp { dispatch: u32 },
-                    #[codec(index = 2)]
-                    Sudo { dispatch: u16 },
-                }
+        // Similar to `Call` implementation, but the pallet order is reversed.
+        // The following lines translate to:
+        // ```
+        // mod node_template_runtime {
+        //     #[allow(dead_code)]
+        //     #[derive(scale_info::TypeInfo)]
+        //     pub enum Call {
+        //         #[codec(index = 0)]
+        //         Sudo { dispatch: u16 },
+        //         #[codec(index = 1)]
+        //         System { dispatch: u8 },
+        //     }
+        // }
+        // ```
+        struct CallSecond;
+        impl TypeInfo for CallSecond {
+            type Identity = Self;
+            fn type_info() -> Type {
+                Type::builder()
+                    .path(Path::new("Call", "node_template_runtime"))
+                    .variant(
+                        Variants::new()
+                            .variant("Sudo", |v| {
+                                v.index(0).fields(Fields::named().field(|f| {
+                                    f.ty::<u16>().name("dispatch").type_name("u16")
+                                }))
+                            })
+                            .variant("System", |v| {
+                                v.index(1).fields(Fields::named().field(|f| {
+                                    f.ty::<u8>().name("dispatch").type_name("u8")
+                                }))
+                            }),
+                    )
             }
-            PalletMetadata {
-                calls: Some(PalletCallMetadata {
-                    ty: meta_type::<node_template_runtime::Call>(),
-                }),
-                ..default_pallet()
-            }
+        }
+        let pallet_rev = PalletMetadata {
+            calls: Some(PalletCallMetadata {
+                ty: meta_type::<CallSecond>(),
+            }),
+            ..default_pallet()
         };
 
         let metadata = pallets_to_metadata(vec![pallet]);
