@@ -306,7 +306,7 @@ impl RuntimeGenerator {
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
                 // Identify the pallets composing the static metadata by name.
-                pub static PALLETS: [&str; #pallet_names_len] =  [ #(#pallet_names,)* ];
+                pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
                 #outer_event
                 #( #modules )*

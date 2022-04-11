@@ -738,7 +738,7 @@ mod tests {
         let hash_rhs = get_metadata_per_pallet_hash(&metadata_one, &["First"]);
         assert_eq!(hash, hash_rhs, "hashing should ignore non-existant pallets");
 
-        // Hashing one pallet from metadata with 2 pallets in will ignore the second pallet.
+        // Hashing one pallet from metadata with 2 pallets inserted will ignore the second pallet.
         let hash_second = get_metadata_per_pallet_hash(&metadata_both, &["First"]);
         assert_eq!(
             hash_second, hash,
@@ -753,8 +753,8 @@ mod tests {
 
     #[test]
     /// Sudo pallets will have a `node_template_runtime::Call` variant
-    /// which contains dispatch calls to those pallets. The calls of the pallets are registered in
-    /// the same order as the pallet.
+    /// which contains dispatch calls to other pallets. The calls of the pallets are registered in
+    /// the same order as the pallets.
     /// Ensure that pallet order does not affect the outcome of hashing.
     fn node_template_runtime_variant() {
         let pallet = {

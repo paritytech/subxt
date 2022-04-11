@@ -162,18 +162,14 @@ fn main() -> color_eyre::Result<()> {
 }
 
 fn handle_pallet_metadata(nodes: &[url::Url], name: &str) -> color_eyre::Result<()> {
-    #[derive(Serialize, Deserialize)]
+    #[derive(Serialize, Deserialize, Default)]
     #[serde(rename_all = "camelCase")]
     struct CompatibilityPallet {
         pallet_present: HashMap<String, Vec<String>>,
         pallet_not_found: Vec<String>,
     }
 
-    let mut compatibility = CompatibilityPallet {
-        pallet_present: Default::default(),
-        pallet_not_found: vec![],
-    };
-
+    let mut compatibility: CompatibilityPallet = Default::default();
     for node in nodes.iter() {
         let metadata = fetch_runtime_metadata(node)?;
 
