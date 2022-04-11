@@ -174,6 +174,31 @@ fn get_type_def_hash(
     hash(&bytes)
 }
 
+/// Check if the provided path segments construct a `node_template_runtime` type.
+///
+/// The `node_template_runtime::Call` contains dispatch calls to the pallets, registered
+/// in the same order as registered pallets.
+/// The presence of such structure needs to be taken into account when hashing:
+/// if the calls are simply hashed, then registering a different order of pallets
+/// would result in a different hashing **even if the pallets are firstly sorted
+/// in `get_metadata_per_pallet_hash` or `get_metadata_hash` functions **.
+fn check_template_runtime(segments: &[String]) -> bool {
+    let path_name = segments.join("::");
+
+    // The release version must match exactly the path segments.
+    if cfg!(not(test)) {
+        path_name == "node_template_runtime::Call"
+            || path_name == "node_template_runtime::Runtime"
+            || path_name == "node_template_runtime::Event"
+    } else {
+        // Testing cannot provide an absolute path of `node_template_runtime::Call`, but
+        // only a path ending in such segments.
+        path_name.ends_with("node_template_runtime::Call")
+            || path_name.ends_with("node_template_runtime::Runtime")
+            || path_name.ends_with("node_template_runtime::Event")
+    }
+}
+
 /// Obtain the hash representation of a `scale_info::Type` identified by id.
 fn get_type_hash(
     registry: &PortableRegistry,
@@ -188,15 +213,8 @@ fn get_type_hash(
 
     let ty = registry.resolve(id).unwrap();
 
-    // Check if the type is at path `node_template_runtime::Call`.
-    // Metadata contains `node_template_runtime`: Call, Runtime, Event.
-    // To properly test this scenario without relying on test assets, check if
-    // the path ends with the said cases.
-    let path_name = ty.path().segments().join("::");
-    let is_template_runtime = path_name.ends_with("node_template_runtime::Call")
-        || path_name.ends_with("node_template_runtime::Runtime")
-        || path_name.ends_with("node_template_runtime::Event");
-
+    // Check if this type is a `node_template_runtime` to sort inner variants.
+    let is_template_runtime = check_template_runtime(ty.path().segments());
     bytes.extend(get_type_def_hash(
         registry,
         ty.type_def(),
