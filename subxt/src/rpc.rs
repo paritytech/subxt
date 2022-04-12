@@ -21,33 +21,63 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::{collections::HashMap, sync::Arc};
+use std::{
+    collections::HashMap,
+    sync::Arc,
+};
 
 use crate::{
-    error::BasicError, storage::StorageKeyPrefix, Config, Metadata, PhantomDataSendSync,
+    error::BasicError,
+    storage::StorageKeyPrefix,
+    Config,
+    Metadata,
+    PhantomDataSendSync,
 };
-use codec::{Decode, Encode};
+use codec::{
+    Decode,
+    Encode,
+};
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
-        InvalidUri, Receiver as WsReceiver, Sender as WsSender, Uri,
+        InvalidUri,
+        Receiver as WsReceiver,
+        Sender as WsSender,
+        Uri,
         WsTransportClientBuilder,
     },
     core::{
         client::{
-            Client as RpcClient, ClientBuilder as RpcClientBuilder, ClientT,
-            Subscription, SubscriptionClientT,
+            Client as RpcClient,
+            ClientBuilder as RpcClientBuilder,
+            ClientT,
+            Subscription,
+            SubscriptionClientT,
         },
-        to_json_value, DeserializeOwned, Error as RpcError, JsonValue,
+        to_json_value,
+        DeserializeOwned,
+        Error as RpcError,
+        JsonValue,
     },
     rpc_params,
 };
-use serde::{Deserialize, Serialize};
-use sp_core::{
-    storage::{StorageChangeSet, StorageData, StorageKey},
-    Bytes, U256,
+use serde::{
+    Deserialize,
+    Serialize,
 };
-use sp_runtime::generic::{Block, SignedBlock};
+use sp_core::{
+    storage::{
+        StorageChangeSet,
+        StorageData,
+        StorageKey,
+    },
+    Bytes,
+    U256,
+};
+use sp_runtime::generic::{
+    Block,
+    SignedBlock,
+};
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
