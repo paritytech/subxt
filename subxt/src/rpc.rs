@@ -21,63 +21,33 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::{
-    collections::HashMap,
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    error::BasicError,
-    storage::StorageKeyPrefix,
-    Config,
-    Metadata,
-    PhantomDataSendSync,
+    error::BasicError, storage::StorageKeyPrefix, Config, Metadata, PhantomDataSendSync,
 };
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
-        InvalidUri,
-        Receiver as WsReceiver,
-        Sender as WsSender,
-        Uri,
+        InvalidUri, Receiver as WsReceiver, Sender as WsSender, Uri,
         WsTransportClientBuilder,
     },
     core::{
         client::{
-            Client as RpcClient,
-            ClientBuilder as RpcClientBuilder,
-            ClientT,
-            Subscription,
-            SubscriptionClientT,
+            Client as RpcClient, ClientBuilder as RpcClientBuilder, ClientT,
+            Subscription, SubscriptionClientT,
         },
-        to_json_value,
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
+        to_json_value, DeserializeOwned, Error as RpcError, JsonValue,
     },
     rpc_params,
 };
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageData,
-        StorageKey,
-    },
-    Bytes,
-    U256,
+    storage::{StorageChangeSet, StorageData, StorageKey},
+    Bytes, U256,
 };
-use sp_runtime::generic::{
-    Block,
-    SignedBlock,
-};
+use sp_runtime::generic::{Block, SignedBlock};
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
 /// string.
@@ -222,6 +192,20 @@ pub struct BlockStats {
     pub num_extrinsics: u64,
 }
 
+/// Health struct returned by the RPC
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Health {
+    /// Number of connected peers
+    pub peers: usize,
+    /// Is the node syncing
+    pub is_syncing: bool,
+    /// Should this node have any peers
+    ///
+    /// Might be false for local chains or when running without discovery.
+    pub should_have_peers: bool,
+}
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
@@ -327,6 +311,11 @@ impl<T: Config> Rpc<T> {
             .client
             .request("system_properties", rpc_params![])
             .await?)
+    }
+
+    /// Fetch system health
+    pub async fn system_health(&self) -> Result<Health, BasicError> {
+        Ok(self.client.request("system_health", rpc_params![]).await?)
     }
 
     /// Fetch system chain
