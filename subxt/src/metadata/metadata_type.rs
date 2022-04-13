@@ -20,8 +20,8 @@ use codec::Error as CodecError;
 use frame_metadata::{
     PalletConstantMetadata,
     RuntimeMetadata,
-    RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
+    RuntimeMetadataV14,
     StorageEntryMetadata,
     META_RESERVED,
 };
@@ -92,7 +92,7 @@ pub struct Metadata {
 // We hide the innards behind an Arc so that it's easy to clone and share.
 #[derive(Debug)]
 struct MetadataInner {
-    metadata: RuntimeMetadataLastVersion,
+    metadata: RuntimeMetadataV14,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
     errors: HashMap<(u8, u8), ErrorMetadata>,
@@ -148,7 +148,7 @@ impl Metadata {
     }
 
     /// Return the runtime metadata.
-    pub fn runtime_metadata(&self) -> &RuntimeMetadataLastVersion {
+    pub fn runtime_metadata(&self) -> &RuntimeMetadataV14 {
         &self.inner.metadata
     }
 

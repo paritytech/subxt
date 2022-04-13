@@ -17,7 +17,7 @@
 use codec::Encode;
 use frame_metadata::{
     ExtrinsicMetadata,
-    RuntimeMetadataLastVersion,
+    RuntimeMetadataV14,
     StorageEntryMetadata,
     StorageEntryType,
 };
@@ -235,7 +235,7 @@ fn get_storage_entry_hash(
 
 /// Obtain the hash for a specific storage item, or an error if it's not found.
 pub fn get_storage_hash(
-    metadata: &RuntimeMetadataLastVersion,
+    metadata: &RuntimeMetadataV14,
     pallet_name: &str,
     storage_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -259,7 +259,7 @@ pub fn get_storage_hash(
 
 /// Obtain the hash for a specific constant, or an error if it's not found.
 pub fn get_constant_hash(
-    metadata: &RuntimeMetadataLastVersion,
+    metadata: &RuntimeMetadataV14,
     pallet_name: &str,
     constant_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -281,7 +281,7 @@ pub fn get_constant_hash(
 
 /// Obtain the hash for a specific call, or an error if it's not found.
 pub fn get_call_hash(
-    metadata: &RuntimeMetadataLastVersion,
+    metadata: &RuntimeMetadataV14,
     pallet_name: &str,
     call_name: &str,
 ) -> Result<[u8; 32], NotFound> {
@@ -342,8 +342,8 @@ pub fn get_pallet_hash(
     hash(&bytes)
 }
 
-/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`.
-pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
+/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataV14`.
+pub fn get_metadata_hash(metadata: &RuntimeMetadataV14) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
     let mut pallets: Vec<(&str, [u8; 32])> = metadata
         .pallets
@@ -377,7 +377,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
     hash(&bytes)
 }
 
-/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`
+/// Obtain the hash representation of a `frame_metadata::RuntimeMetadataV14`
 /// hashing only the provided pallets.
 ///
 /// **Note:** This is similar to `get_metadata_hash`, but performs hashing only of the provided
@@ -385,7 +385,7 @@ pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
 /// the pallets from the static metadata. In those cases, the static API can communicate
 /// properly with the subset of pallets from the runtime node.
 pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
-    metadata: &RuntimeMetadataLastVersion,
+    metadata: &RuntimeMetadataV14,
     pallets: &[T],
 ) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
@@ -443,7 +443,7 @@ mod tests {
         PalletEventMetadata,
         PalletMetadata,
         PalletStorageMetadata,
-        RuntimeMetadataLastVersion,
+        RuntimeMetadataV14,
         StorageEntryMetadata,
         StorageEntryModifier,
     };
@@ -542,12 +542,8 @@ mod tests {
         ]
     }
 
-    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataLastVersion {
-        RuntimeMetadataLastVersion::new(
-            pallets,
-            build_default_extrinsic(),
-            meta_type::<()>(),
-        )
+    fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
+        RuntimeMetadataV14::new(pallets, build_default_extrinsic(), meta_type::<()>())
     }
 
     #[test]

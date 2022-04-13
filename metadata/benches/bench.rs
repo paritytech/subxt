@@ -18,8 +18,8 @@ use codec::Decode;
 use criterion::*;
 use frame_metadata::{
     RuntimeMetadata::V14,
-    RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
+    RuntimeMetadataV14,
 };
 use scale_info::{
     form::PortableForm,
@@ -34,7 +34,7 @@ use subxt_metadata::{
     get_storage_hash,
 };
 
-fn load_metadata() -> RuntimeMetadataLastVersion {
+fn load_metadata() -> RuntimeMetadataV14 {
     let bytes = test_runtime::METADATA;
     let meta: RuntimeMetadataPrefixed =
         Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");

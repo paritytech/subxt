@@ -403,7 +403,7 @@ pub(crate) mod test_utils {
             ExtrinsicMetadata,
             PalletEventMetadata,
             PalletMetadata,
-            RuntimeMetadataLastVersion,
+            RuntimeMetadataV14,
         },
         RuntimeMetadataPrefixed,
     };
@@ -459,7 +459,7 @@ pub(crate) mod test_utils {
             signed_extensions: vec![],
         };
 
-        let v14 = RuntimeMetadataLastVersion::new(pallets, extrinsic, meta_type::<()>());
+        let v14 = RuntimeMetadataV14::new(pallets, extrinsic, meta_type::<()>());
         let runtime_metadata: RuntimeMetadataPrefixed = v14.into();
 
         Metadata::try_from(runtime_metadata).unwrap()

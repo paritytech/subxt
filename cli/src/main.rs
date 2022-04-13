@@ -20,8 +20,8 @@ use color_eyre::eyre::{
 };
 use frame_metadata::{
     RuntimeMetadata,
-    RuntimeMetadataLastVersion,
     RuntimeMetadataPrefixed,
+    RuntimeMetadataV14,
     META_RESERVED,
 };
 use scale::{
@@ -229,9 +229,7 @@ fn handle_full_metadata(nodes: &[url::Url]) -> color_eyre::Result<()> {
     Ok(())
 }
 
-fn fetch_runtime_metadata(
-    url: &url::Url,
-) -> color_eyre::Result<RuntimeMetadataLastVersion> {
+fn fetch_runtime_metadata(url: &url::Url) -> color_eyre::Result<RuntimeMetadataV14> {
     let (_, bytes) = fetch_metadata(url)?;
 
     let metadata = <RuntimeMetadataPrefixed as Decode>::decode(&mut &bytes[..])?;
