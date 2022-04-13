@@ -239,14 +239,10 @@ impl RuntimeGenerator {
                 quote!()
             };
 
-            // The pallet name used for obtaining the pallet hash as existing in the metadata.
-            let pallet_name = &pallet.name;
-
             quote! {
                 pub mod #mod_name {
                     use super::root_mod;
                     use super::#types_mod_ident;
-                    pub static PALLET_NAME: &str = #pallet_name;
                     #calls
                     #event
                     #storage_mod
@@ -338,8 +334,7 @@ impl RuntimeGenerator {
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
-                        static METADATA_HASH: [u8; 32] = [ #(#metadata_hash,)* ];
-                        if self.client.metadata().metadata_hash(&PALLETS) != METADATA_HASH {
+                        if self.client.metadata().metadata_hash(&PALLETS) != [ #(#metadata_hash,)* ] {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(())

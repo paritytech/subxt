@@ -82,11 +82,8 @@ fn get_variant_hash(
 fn get_type_def_hash(
     registry: &PortableRegistry,
     ty_def: &TypeDef<PortableForm>,
-    is_template_runtime: bool,
     visited_ids: &mut HashSet<u32>,
 ) -> [u8; 32] {
-    let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
-
     let data = match ty_def {
         TypeDef::Composite(composite) => {
             let mut bytes = Vec::new();
@@ -97,22 +94,9 @@ fn get_type_def_hash(
         }
         TypeDef::Variant(variant) => {
             let mut bytes = Vec::new();
-            if is_template_runtime {
-                // The type at path `node_template_runtime::Call` contains variants of the pallets
-                // registered in order. Swapping the order between two pallets would result
-                // in a different hash, but the functionality is still identical.
-                // Sort by variant name to result in deterministic hashing.
-                let mut variants: Vec<_> = variant.variants().iter().collect();
-                variants.sort_by_key(|variant| variant.name());
-                for var in variants {
-                    bytes.extend(get_variant_hash(registry, var, visited_ids));
-                }
-            } else {
-                for var in variant.variants().iter() {
-                    bytes.extend(get_variant_hash(registry, var, visited_ids));
-                }
-            };
-
+            for var in variant.variants().iter() {
+                bytes.extend(get_variant_hash(registry, var, visited_ids));
+            }
             bytes
         }
         TypeDef::Sequence(sequence) => {
@@ -170,6 +154,8 @@ fn get_type_def_hash(
             bytes
         }
     };
+
+    let mut bytes = vec![MetadataHashableIDs::TypeDef as u8];
     bytes.extend(data);
     hash(&bytes)
 }
@@ -188,22 +174,9 @@ fn get_type_hash(
 
     let ty = registry.resolve(id).unwrap();
 
-    // Check if this type is a `node_template_runtime` to sort inner variants.
-    // The `node_template_runtime::Call` contains dispatch calls to the pallets, registered
-    // in the same order as registered pallets.
-    // The presence of such structure needs to be taken into account when hashing:
-    // if the calls are simply hashed, then registering a different order of pallets
-    // would result in a different hashing **even if the pallets are firstly sorted
-    // in `get_metadata_per_pallet_hash` or `get_metadata_hash` functions **.
-    let path_name = ty.path().segments().join("::");
-    let is_template_runtime = path_name == "node_template_runtime::Call"
-        || path_name == "node_template_runtime::Runtime"
-        || path_name == "node_template_runtime::Event";
-
     bytes.extend(get_type_def_hash(
         registry,
         ty.type_def(),
-        is_template_runtime,
         visited_ids,
     ));
 
@@ -376,18 +349,17 @@ pub fn get_pallet_hash(
 /// Obtain the hash representation of a `frame_metadata::RuntimeMetadataLastVersion`.
 pub fn get_metadata_hash(metadata: &RuntimeMetadataLastVersion) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
-    let mut pallets: Vec<(String, [u8; 32])> = metadata
+    let mut pallets: Vec<(&str, [u8; 32])> = metadata
         .pallets
         .iter()
         .map(|pallet| {
-            let name = pallet.name.clone();
             let hash = get_pallet_hash(&metadata.types, pallet);
-            (name, hash)
+            (&*pallet.name, hash)
         })
         .collect();
 
     // Sort by pallet name to create a deterministic representation of the underlying metadata.
-    pallets.sort_by_key(|key| key.1);
+    pallets.sort_by_key(|&(name, _hash)| name);
 
     // Note: pallet name is excluded from hashing.
     // Each pallet has a hash of 32 bytes, and the vector is extended with
@@ -421,7 +393,7 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
     pallets: &[T],
 ) -> [u8; 32] {
     // Collect all pairs of (pallet name, pallet hash).
-    let mut pallets_hashed: Vec<(String, [u8; 32])> = metadata
+    let mut pallets_hashed: Vec<(&str, [u8; 32])> = metadata
         .pallets
         .iter()
         .filter_map(|pallet| {
@@ -430,9 +402,8 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
                 .iter()
                 .any(|pallet_ref| pallet_ref.as_ref() == pallet.name);
             if in_pallet {
-                let name = pallet.name.clone();
                 let hash = get_pallet_hash(&metadata.types, pallet);
-                Some((name, hash))
+                Some((&*pallet.name, hash))
             } else {
                 None
             }
@@ -440,7 +411,7 @@ pub fn get_metadata_per_pallet_hash<T: AsRef<str>>(
         .collect();
 
     // Sort by pallet name to create a deterministic representation of the underlying metadata.
-    pallets_hashed.sort_by_key(|key| key.1);
+    pallets_hashed.sort_by_key(|&(name, _hash)| name);
 
     // Note: pallet name is excluded from hashing.
     // Each pallet has a hash of 32 bytes, and the vector is extended with
@@ -743,106 +714,6 @@ mod tests {
         let hash_second =
             get_metadata_per_pallet_hash(&metadata_both, &["First", "Second"]);
         assert_ne!(hash_second, hash, "hashing both pallets should produce a different result from hashing just one pallet");
-    }
-
-    #[test]
-    /// Sudo pallets will have a `node_template_runtime::Call` variant
-    /// which contains dispatch calls to other pallets. The calls of the pallets are registered in
-    /// the same order as the pallets.
-    /// Ensure that pallet order does not affect the outcome of hashing.
-    fn node_template_runtime_variant() {
-        // Build a special case of "node_template_runtime::Call".
-        //
-        // The following lines translate to:
-        // ```
-        // mod node_template_runtime {
-        //     #[allow(dead_code)]
-        //     #[derive(scale_info::TypeInfo)]
-        //     pub enum Call {
-        //         #[codec(index = 0)]
-        //         System { dispatch: u8 },
-        //         #[codec(index = 1)]
-        //         Sudo { dispatch: u16 },
-        //     }
-        // }
-        // ```
-        struct Call;
-        impl TypeInfo for Call {
-            type Identity = Self;
-            fn type_info() -> Type {
-                Type::builder()
-                    .path(Path::new("Call", "node_template_runtime"))
-                    .variant(
-                        Variants::new()
-                            .variant("System", |v| {
-                                v.index(0).fields(Fields::named().field(|f| {
-                                    f.ty::<u8>().name("dispatch").type_name("u8")
-                                }))
-                            })
-                            .variant("Sudo", |v| {
-                                v.index(1).fields(Fields::named().field(|f| {
-                                    f.ty::<u16>().name("dispatch").type_name("u16")
-                                }))
-                            }),
-                    )
-            }
-        }
-        let pallet = PalletMetadata {
-            calls: Some(PalletCallMetadata {
-                ty: meta_type::<Call>(),
-            }),
-            ..default_pallet()
-        };
-
-        // Similar to `Call` implementation, but the pallet order is reversed.
-        // The following lines translate to:
-        // ```
-        // mod node_template_runtime {
-        //     #[allow(dead_code)]
-        //     #[derive(scale_info::TypeInfo)]
-        //     pub enum Call {
-        //         #[codec(index = 0)]
-        //         Sudo { dispatch: u16 },
-        //         #[codec(index = 1)]
-        //         System { dispatch: u8 },
-        //     }
-        // }
-        // ```
-        struct CallSecond;
-        impl TypeInfo for CallSecond {
-            type Identity = Self;
-            fn type_info() -> Type {
-                Type::builder()
-                    .path(Path::new("Call", "node_template_runtime"))
-                    .variant(
-                        Variants::new()
-                            .variant("Sudo", |v| {
-                                v.index(0).fields(Fields::named().field(|f| {
-                                    f.ty::<u16>().name("dispatch").type_name("u16")
-                                }))
-                            })
-                            .variant("System", |v| {
-                                v.index(1).fields(Fields::named().field(|f| {
-                                    f.ty::<u8>().name("dispatch").type_name("u8")
-                                }))
-                            }),
-                    )
-            }
-        }
-        let pallet_rev = PalletMetadata {
-            calls: Some(PalletCallMetadata {
-                ty: meta_type::<CallSecond>(),
-            }),
-            ..default_pallet()
-        };
-
-        let metadata = pallets_to_metadata(vec![pallet]);
-        let metadata_rev = pallets_to_metadata(vec![pallet_rev]);
-
-        let hash = get_metadata_per_pallet_hash(&metadata, &["Test"]);
-        let hash_rev = get_metadata_per_pallet_hash(&metadata_rev, &["Test"]);
-
-        assert_eq!(hash, hash_rev);
     }
 
     #[test]
