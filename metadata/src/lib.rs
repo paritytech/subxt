@@ -174,11 +174,7 @@ fn get_type_hash(
 
     let ty = registry.resolve(id).unwrap();
 
-    bytes.extend(get_type_def_hash(
-        registry,
-        ty.type_def(),
-        visited_ids,
-    ));
+    bytes.extend(get_type_def_hash(registry, ty.type_def(), visited_ids));
 
     hash(&bytes)
 }
@@ -451,16 +447,7 @@ mod tests {
         StorageEntryMetadata,
         StorageEntryModifier,
     };
-    use scale_info::{
-        build::{
-            Fields,
-            Variants,
-        },
-        meta_type,
-        Path,
-        Type,
-        TypeInfo,
-    };
+    use scale_info::meta_type;
 
     // Define recursive types.
     #[allow(dead_code)]
