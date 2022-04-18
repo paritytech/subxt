@@ -412,6 +412,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The full account information for a particular account ID."]
             pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Account<'_> {
                 const PALLET: &'static str = "System";
@@ -427,6 +428,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Total extrinsics count for the current block."]
             pub struct ExtrinsicCount;
             impl ::subxt::StorageEntry for ExtrinsicCount {
                 const PALLET: &'static str = "System";
@@ -436,6 +438,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current weight for the block."]
             pub struct BlockWeight;
             impl ::subxt::StorageEntry for BlockWeight {
                 const PALLET: &'static str = "System";
@@ -447,6 +450,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Total length (in bytes) for all extrinsics put together, for the current block."]
             pub struct AllExtrinsicsLen;
             impl ::subxt::StorageEntry for AllExtrinsicsLen {
                 const PALLET: &'static str = "System";
@@ -456,6 +460,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Map of block numbers to block hashes."]
             pub struct BlockHash<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for BlockHash<'_> {
                 const PALLET: &'static str = "System";
@@ -468,6 +473,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Extrinsics data for the current block (maps an extrinsic's index to its data)."]
             pub struct ExtrinsicData<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ExtrinsicData<'_> {
                 const PALLET: &'static str = "System";
@@ -480,6 +486,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The current block number being processed. Set by `execute_block`."]
             pub struct Number;
             impl ::subxt::StorageEntry for Number {
                 const PALLET: &'static str = "System";
@@ -489,6 +496,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Hash of the previous block."]
             pub struct ParentHash;
             impl ::subxt::StorageEntry for ParentHash {
                 const PALLET: &'static str = "System";
@@ -498,6 +506,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Digest of the current block, also part of the block header."]
             pub struct Digest;
             impl ::subxt::StorageEntry for Digest {
                 const PALLET: &'static str = "System";
@@ -507,6 +516,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Events deposited for the current block."]
+            #[doc = ""]
+            #[doc = " NOTE: This storage item is explicitly unbounded since it is never intended to be read"]
+            #[doc = " from within the runtime."]
             pub struct Events;
             impl ::subxt::StorageEntry for Events {
                 const PALLET: &'static str = "System";
@@ -521,6 +534,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The number of events in the `Events<T>` list."]
             pub struct EventCount;
             impl ::subxt::StorageEntry for EventCount {
                 const PALLET: &'static str = "System";
@@ -530,6 +544,16 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Mapping between a topic (represented by T::Hash) and a vector of indexes"]
+            #[doc = " of events in the `<Events<T>>` list."]
+            #[doc = ""]
+            #[doc = " All topic vectors have deterministic storage locations depending on the topic. This"]
+            #[doc = " allows light-clients to leverage the changes trie storage tracking mechanism and"]
+            #[doc = " in case of changes fetch the list of events of interest."]
+            #[doc = ""]
+            #[doc = " The value has the type `(T::BlockNumber, EventIndex)` because if we used only just"]
+            #[doc = " the `EventIndex` then in case if the topic has the same contents on the next block"]
+            #[doc = " no notification will be triggered thus the event might be lost."]
             pub struct EventTopics<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for EventTopics<'_> {
                 const PALLET: &'static str = "System";
@@ -543,6 +567,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Stores the `spec_version` and `spec_name` of when the last runtime upgrade happened."]
             pub struct LastRuntimeUpgrade;
             impl ::subxt::StorageEntry for LastRuntimeUpgrade {
                 const PALLET: &'static str = "System";
@@ -552,6 +577,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " True if we have upgraded so that `type RefCount` is `u32`. False (default) if not."]
             pub struct UpgradedToU32RefCount;
             impl ::subxt::StorageEntry for UpgradedToU32RefCount {
                 const PALLET: &'static str = "System";
@@ -561,6 +587,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " True if we have upgraded so that AccountInfo contains three types of `RefCount`. False"]
+            #[doc = " (default) if not."]
             pub struct UpgradedToTripleRefCount;
             impl ::subxt::StorageEntry for UpgradedToTripleRefCount {
                 const PALLET: &'static str = "System";
@@ -570,6 +598,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The execution phase of the block."]
             pub struct ExecutionPhase;
             impl ::subxt::StorageEntry for ExecutionPhase {
                 const PALLET: &'static str = "System";
@@ -1205,6 +1234,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Items to be executed, indexed by the block number that they should be executed on."]
             pub struct Agenda<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Agenda<'_> {
                 const PALLET: &'static str = "Scheduler";
@@ -1229,6 +1259,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Lookup from identity to the block number and index of the task."]
             pub struct Lookup<'a>(pub &'a [::core::primitive::u8]);
             impl ::subxt::StorageEntry for Lookup<'_> {
                 const PALLET: &'static str = "Scheduler";
@@ -1480,6 +1511,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The request status of a given hash."]
             pub struct StatusFor<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for StatusFor<'_> {
                 const PALLET: &'static str = "Preimage";
@@ -1495,6 +1527,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The preimages stored by this pallet."]
             pub struct PreimageFor<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for PreimageFor<'_> {
                 const PALLET: &'static str = "Preimage";
@@ -1708,6 +1741,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Current epoch index."]
             pub struct EpochIndex;
             impl ::subxt::StorageEntry for EpochIndex {
                 const PALLET: &'static str = "Babe";
@@ -1717,6 +1751,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Current epoch authorities."]
             pub struct Authorities;
             impl ::subxt::StorageEntry for Authorities {
                 const PALLET: &'static str = "Babe";
@@ -1726,6 +1761,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The slot at which the first epoch actually started. This is 0"]
+            #[doc = " until the first block of the chain."]
             pub struct GenesisSlot;
             impl ::subxt::StorageEntry for GenesisSlot {
                 const PALLET: &'static str = "Babe";
@@ -1735,6 +1772,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Current slot number."]
             pub struct CurrentSlot;
             impl ::subxt::StorageEntry for CurrentSlot {
                 const PALLET: &'static str = "Babe";
@@ -1744,6 +1782,16 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The epoch randomness for the *current* epoch."]
+            #[doc = ""]
+            #[doc = " # Security"]
+            #[doc = ""]
+            #[doc = " This MUST NOT be used for gambling, as it can be influenced by a"]
+            #[doc = " malicious validator in the short term. It MAY be used in many"]
+            #[doc = " cryptographic protocols, however, so long as one remembers that this"]
+            #[doc = " (like everything else on-chain) it is public. For example, it can be"]
+            #[doc = " used where a number is needed that cannot have been chosen by an"]
+            #[doc = " adversary, for purposes such as public-coin zero-knowledge proofs."]
             pub struct Randomness;
             impl ::subxt::StorageEntry for Randomness {
                 const PALLET: &'static str = "Babe";
@@ -1753,6 +1801,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Pending epoch configuration change that will be applied when the next epoch is enacted."]
             pub struct PendingEpochConfigChange;
             impl ::subxt::StorageEntry for PendingEpochConfigChange {
                 const PALLET: &'static str = "Babe";
@@ -1763,6 +1812,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Next epoch randomness."]
             pub struct NextRandomness;
             impl ::subxt::StorageEntry for NextRandomness {
                 const PALLET: &'static str = "Babe";
@@ -1772,6 +1822,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Next epoch authorities."]
             pub struct NextAuthorities;
             impl ::subxt::StorageEntry for NextAuthorities {
                 const PALLET: &'static str = "Babe";
@@ -1781,6 +1832,15 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Randomness under construction."]
+            #[doc = ""]
+            #[doc = " We make a trade-off between storage accesses and list length."]
+            #[doc = " We store the under-construction randomness in segments of up to"]
+            #[doc = " `UNDER_CONSTRUCTION_SEGMENT_LENGTH`."]
+            #[doc = ""]
+            #[doc = " Once a segment reaches this length, we begin the next one."]
+            #[doc = " We reset all segments and return to `0` at the beginning of every"]
+            #[doc = " epoch."]
             pub struct SegmentIndex;
             impl ::subxt::StorageEntry for SegmentIndex {
                 const PALLET: &'static str = "Babe";
@@ -1790,6 +1850,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay."]
             pub struct UnderConstruction<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for UnderConstruction<'_> {
                 const PALLET: &'static str = "Babe";
@@ -1805,6 +1866,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Temporary value (cleared at block finalization) which is `Some`"]
+            #[doc = " if per-block initialization has already been called for current block."]
             pub struct Initialized;
             impl ::subxt::StorageEntry for Initialized {
                 const PALLET: &'static str = "Babe";
@@ -1814,6 +1877,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " This field should always be populated during block processing unless"]
+            #[doc = " secondary plain slots are enabled (which don't contain a VRF output)."]
+            #[doc = ""]
+            #[doc = " It is set in `on_initialize`, before it will contain the value from the last block."]
             pub struct AuthorVrfRandomness;
             impl ::subxt::StorageEntry for AuthorVrfRandomness {
                 const PALLET: &'static str = "Babe";
@@ -1823,6 +1890,11 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The block numbers when the last and current epoch have started, respectively `N-1` and"]
+            #[doc = " `N`."]
+            #[doc = " NOTE: We track this is in order to annotate the block number when a given pool of"]
+            #[doc = " entropy was fixed (i.e. it was known to chain observers). Since epochs are defined in"]
+            #[doc = " slots, which may be skipped, the block numbers may not line up with the slot numbers."]
             pub struct EpochStart;
             impl ::subxt::StorageEntry for EpochStart {
                 const PALLET: &'static str = "Babe";
@@ -1832,6 +1904,11 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " How late the current block is compared to its parent."]
+            #[doc = ""]
+            #[doc = " This entry is populated as part of block execution and is cleaned up"]
+            #[doc = " on block finalization. Querying this storage entry outside of block"]
+            #[doc = " execution context should always yield zero."]
             pub struct Lateness;
             impl ::subxt::StorageEntry for Lateness {
                 const PALLET: &'static str = "Babe";
@@ -1841,6 +1918,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The configuration for the current epoch. Should never be `None` as it is initialized in"]
+            #[doc = " genesis."]
             pub struct EpochConfig;
             impl ::subxt::StorageEntry for EpochConfig {
                 const PALLET: &'static str = "Babe";
@@ -1850,6 +1929,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The configuration for the next epoch, `None` if the config will not change"]
+            #[doc = " (you can fallback to `EpochConfig` instead in that case)."]
             pub struct NextEpochConfig;
             impl ::subxt::StorageEntry for NextEpochConfig {
                 const PALLET: &'static str = "Babe";
@@ -2145,6 +2226,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Current time for the current block."]
             pub struct Now;
             impl ::subxt::StorageEntry for Now {
                 const PALLET: &'static str = "Timestamp";
@@ -2154,6 +2236,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Did the timestamp get updated in this block?"]
             pub struct DidUpdate;
             impl ::subxt::StorageEntry for DidUpdate {
                 const PALLET: &'static str = "Timestamp";
@@ -2507,6 +2590,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The lookup from index to account."]
             pub struct Accounts<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Accounts<'_> {
                 const PALLET: &'static str = "Indices";
@@ -2987,6 +3071,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The total units issued in the system."]
             pub struct TotalIssuance;
             impl ::subxt::StorageEntry for TotalIssuance {
                 const PALLET: &'static str = "Balances";
@@ -2996,6 +3081,30 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The Balances pallet example of storing the balance of an account."]
+            #[doc = ""]
+            #[doc = " # Example"]
+            #[doc = ""]
+            #[doc = " ```nocompile"]
+            #[doc = "  impl pallet_balances::Config for Runtime {"]
+            #[doc = "    type AccountStore = StorageMapShim<Self::Account<Runtime>, frame_system::Provider<Runtime>, AccountId, Self::AccountData<Balance>>"]
+            #[doc = "  }"]
+            #[doc = " ```"]
+            #[doc = ""]
+            #[doc = " You can also store the balance of an account in the `System` pallet."]
+            #[doc = ""]
+            #[doc = " # Example"]
+            #[doc = ""]
+            #[doc = " ```nocompile"]
+            #[doc = "  impl pallet_balances::Config for Runtime {"]
+            #[doc = "   type AccountStore = System"]
+            #[doc = "  }"]
+            #[doc = " ```"]
+            #[doc = ""]
+            #[doc = " But this comes with tradeoffs, storing account balances in the system pallet stores"]
+            #[doc = " `frame_system` data alongside the account data contrary to storing account balances in the"]
+            #[doc = " `Balances` pallet, which uses a `StorageMap` to store balances data only."]
+            #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
             pub struct Account<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Account<'_> {
                 const PALLET: &'static str = "Balances";
@@ -3009,6 +3118,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Any liquidity locks on some account balances."]
+            #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
             pub struct Locks<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Locks<'_> {
                 const PALLET: &'static str = "Balances";
@@ -3021,6 +3132,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Named reserves on some account balances."]
             pub struct Reserves<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Reserves<'_> {
                 const PALLET: &'static str = "Balances";
@@ -3039,6 +3151,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Storage version of the pallet."]
+            #[doc = ""]
+            #[doc = " This is set to v2.0.0 for new networks."]
             pub struct StorageVersion;
             impl ::subxt::StorageEntry for StorageVersion {
                 const PALLET: &'static str = "Balances";
@@ -3360,6 +3475,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Uncles"]
             pub struct Uncles;
             impl ::subxt::StorageEntry for Uncles {
                 const PALLET: &'static str = "Authorship";
@@ -3375,6 +3491,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Author of current block."]
             pub struct Author;
             impl ::subxt::StorageEntry for Author {
                 const PALLET: &'static str = "Authorship";
@@ -3384,6 +3501,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Whether uncles were already set in this block."]
             pub struct DidSetUncles;
             impl ::subxt::StorageEntry for DidSetUncles {
                 const PALLET: &'static str = "Authorship";
@@ -4614,6 +4732,13 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Number of eras to keep in history."]
+            #[doc = ""]
+            #[doc = " Information is kept for eras in `[current_era - history_depth; current_era]`."]
+            #[doc = ""]
+            #[doc = " Must be more than the number of eras delayed by session otherwise. I.e. active era must"]
+            #[doc = " always be in history. I.e. `active_era > current_era - history_depth` must be"]
+            #[doc = " guaranteed."]
             pub struct HistoryDepth;
             impl ::subxt::StorageEntry for HistoryDepth {
                 const PALLET: &'static str = "Staking";
@@ -4623,6 +4748,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The ideal number of staking participants."]
             pub struct ValidatorCount;
             impl ::subxt::StorageEntry for ValidatorCount {
                 const PALLET: &'static str = "Staking";
@@ -4632,6 +4758,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Minimum number of staking participants before emergency conditions are imposed."]
             pub struct MinimumValidatorCount;
             impl ::subxt::StorageEntry for MinimumValidatorCount {
                 const PALLET: &'static str = "Staking";
@@ -4641,6 +4768,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Any validators that may never be slashed or forcibly kicked. It's a Vec since they're"]
+            #[doc = " easy to initialize and the performance hit is minimal (we expect no more than four"]
+            #[doc = " invulnerables) and restricted to testnets."]
             pub struct Invulnerables;
             impl ::subxt::StorageEntry for Invulnerables {
                 const PALLET: &'static str = "Staking";
@@ -4650,6 +4780,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Map from all locked \"stash\" accounts to the controller account."]
             pub struct Bonded<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Bonded<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4662,6 +4793,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The minimum active bond to become and maintain the role of a nominator."]
             pub struct MinNominatorBond;
             impl ::subxt::StorageEntry for MinNominatorBond {
                 const PALLET: &'static str = "Staking";
@@ -4671,6 +4803,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The minimum active bond to become and maintain the role of a validator."]
             pub struct MinValidatorBond;
             impl ::subxt::StorageEntry for MinValidatorBond {
                 const PALLET: &'static str = "Staking";
@@ -4680,6 +4813,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The minimum amount of commission that validators can set."]
+            #[doc = ""]
+            #[doc = " If set to `0`, no limit exists."]
             pub struct MinCommission;
             impl ::subxt::StorageEntry for MinCommission {
                 const PALLET: &'static str = "Staking";
@@ -4689,6 +4825,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Map from all (unlocked) \"controller\" accounts to the info regarding the staking."]
             pub struct Ledger<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Ledger<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4704,6 +4841,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Where the reward payment should be made. Keyed by stash."]
             pub struct Payee<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Payee<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4718,6 +4856,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The map from (wannabe) validator stash key to the preferences of that validator."]
             pub struct Validators<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Validators<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4730,6 +4869,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = "Counter for the related counted storage map"]
             pub struct CounterForValidators;
             impl ::subxt::StorageEntry for CounterForValidators {
                 const PALLET: &'static str = "Staking";
@@ -4739,6 +4879,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The maximum validator count before we stop allowing new validators to join."]
+            #[doc = ""]
+            #[doc = " When this value is not set, no limits are enforced."]
             pub struct MaxValidatorsCount;
             impl ::subxt::StorageEntry for MaxValidatorsCount {
                 const PALLET: &'static str = "Staking";
@@ -4748,6 +4891,22 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The map from nominator stash key to their nomination preferences, namely the validators that"]
+            #[doc = " they wish to support."]
+            #[doc = ""]
+            #[doc = " Note that the keys of this storage map might become non-decodable in case the"]
+            #[doc = " [`Config::MaxNominations`] configuration is decreased. In this rare case, these nominators"]
+            #[doc = " are still existent in storage, their key is correct and retrievable (i.e. `contains_key`"]
+            #[doc = " indicates that they exist), but their value cannot be decoded. Therefore, the non-decodable"]
+            #[doc = " nominators will effectively not-exist, until they re-submit their preferences such that it"]
+            #[doc = " is within the bounds of the newly set `Config::MaxNominations`."]
+            #[doc = ""]
+            #[doc = " This implies that `::iter_keys().count()` and `::iter().count()` might return different"]
+            #[doc = " values for this map. Moreover, the main `::count()` is aligned with the former, namely the"]
+            #[doc = " number of keys that exist."]
+            #[doc = ""]
+            #[doc = " Lastly, if any of the nominators become non-decodable, they can be chilled immediately via"]
+            #[doc = " [`Call::chill_other`] dispatchable by anyone."]
             pub struct Nominators<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Nominators<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4760,6 +4919,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = "Counter for the related counted storage map"]
             pub struct CounterForNominators;
             impl ::subxt::StorageEntry for CounterForNominators {
                 const PALLET: &'static str = "Staking";
@@ -4769,6 +4929,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The maximum nominator count before we stop allowing new validators to join."]
+            #[doc = ""]
+            #[doc = " When this value is not set, no limits are enforced."]
             pub struct MaxNominatorsCount;
             impl ::subxt::StorageEntry for MaxNominatorsCount {
                 const PALLET: &'static str = "Staking";
@@ -4778,6 +4941,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current era index."]
+            #[doc = ""]
+            #[doc = " This is the latest planned era, depending on how the Session pallet queues the validator"]
+            #[doc = " set, it might be active or not."]
             pub struct CurrentEra;
             impl ::subxt::StorageEntry for CurrentEra {
                 const PALLET: &'static str = "Staking";
@@ -4787,6 +4954,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The active era information, it holds index and start."]
+            #[doc = ""]
+            #[doc = " The active era is the era being currently rewarded. Validator set of this era must be"]
+            #[doc = " equal to [`SessionInterface::validators`]."]
             pub struct ActiveEra;
             impl ::subxt::StorageEntry for ActiveEra {
                 const PALLET: &'static str = "Staking";
@@ -4796,6 +4967,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The session index at which the era start for the last `HISTORY_DEPTH` eras."]
+            #[doc = ""]
+            #[doc = " Note: This tracks the starting session (i.e. session index when era start being active)"]
+            #[doc = " for the eras in `[CurrentEra - HISTORY_DEPTH, CurrentEra]`."]
             pub struct ErasStartSessionIndex<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ErasStartSessionIndex<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4808,6 +4983,12 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Exposure of validator at era."]
+            #[doc = ""]
+            #[doc = " This is keyed first by the era index to allow bulk deletion and then the stash account."]
+            #[doc = ""]
+            #[doc = " Is it removed after `HISTORY_DEPTH` eras."]
+            #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
             pub struct ErasStakers<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -4832,6 +5013,17 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Clipped Exposure of validator at era."]
+            #[doc = ""]
+            #[doc = " This is similar to [`ErasStakers`] but number of nominators exposed is reduced to the"]
+            #[doc = " `T::MaxNominatorRewardedPerValidator` biggest stakers."]
+            #[doc = " (Note: the field `total` and `own` of the exposure remains unchanged)."]
+            #[doc = " This is used to limit the i/o cost for the nominator payout."]
+            #[doc = ""]
+            #[doc = " This is keyed fist by the era index to allow bulk deletion and then the stash account."]
+            #[doc = ""]
+            #[doc = " Is it removed after `HISTORY_DEPTH` eras."]
+            #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
             pub struct ErasStakersClipped<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -4856,6 +5048,11 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Similar to `ErasStakers`, this holds the preferences of validators."]
+            #[doc = ""]
+            #[doc = " This is keyed first by the era index to allow bulk deletion and then the stash account."]
+            #[doc = ""]
+            #[doc = " Is it removed after `HISTORY_DEPTH` eras."]
             pub struct ErasValidatorPrefs<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -4877,6 +5074,9 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " The total validator era payout for the last `HISTORY_DEPTH` eras."]
+            #[doc = ""]
+            #[doc = " Eras that haven't finished yet or has been removed doesn't have reward."]
             pub struct ErasValidatorReward<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ErasValidatorReward<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4889,6 +5089,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Rewards for the last `HISTORY_DEPTH` eras."]
+            #[doc = " If reward hasn't been set or has been removed then 0 reward is returned."]
             pub struct ErasRewardPoints<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ErasRewardPoints<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4903,6 +5105,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The total amount staked for the last `HISTORY_DEPTH` eras."]
+            #[doc = " If total hasn't been set or has been removed then 0 stake is returned."]
             pub struct ErasTotalStake<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ErasTotalStake<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4915,6 +5119,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Mode of era forcing."]
             pub struct ForceEra;
             impl ::subxt::StorageEntry for ForceEra {
                 const PALLET: &'static str = "Staking";
@@ -4924,6 +5129,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The percentage of the slash that is distributed to reporters."]
+            #[doc = ""]
+            #[doc = " The rest of the slashed value is handled by the `Slash`."]
             pub struct SlashRewardFraction;
             impl ::subxt::StorageEntry for SlashRewardFraction {
                 const PALLET: &'static str = "Staking";
@@ -4933,6 +5141,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The amount of currency given to reporters of a slash event which was"]
+            #[doc = " canceled by extraordinary circumstances (e.g. governance)."]
             pub struct CanceledSlashPayout;
             impl ::subxt::StorageEntry for CanceledSlashPayout {
                 const PALLET: &'static str = "Staking";
@@ -4942,6 +5152,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " All unapplied slashes that are queued for later."]
             pub struct UnappliedSlashes<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for UnappliedSlashes<'_> {
                 const PALLET: &'static str = "Staking";
@@ -4959,6 +5170,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " A mapping from still-bonded eras to the first session index of that era."]
+            #[doc = ""]
+            #[doc = " Must contains information for eras for the range:"]
+            #[doc = " `[active_era - bounding_duration; active_era]`"]
             pub struct BondedEras;
             impl ::subxt::StorageEntry for BondedEras {
                 const PALLET: &'static str = "Staking";
@@ -4969,6 +5184,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " All slashing events on validators, mapped by era to the highest slash proportion"]
+            #[doc = " and slash value of the era."]
             pub struct ValidatorSlashInEra<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -4993,6 +5210,7 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " All slashing events on nominators, mapped by era to the highest slash value of the era."]
             pub struct NominatorSlashInEra<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -5014,6 +5232,7 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Slashing spans for stash accounts."]
             pub struct SlashingSpans<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for SlashingSpans<'_> {
                 const PALLET: &'static str = "Staking";
@@ -5026,6 +5245,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Records information about the maximum slash of a stash within a slashing span,"]
+            #[doc = " as well as how much reward has been paid out."]
             pub struct SpanSlash<'a>(
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
                 pub &'a ::core::primitive::u32,
@@ -5043,6 +5264,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The earliest era for which we have a pending, unapplied slash."]
             pub struct EarliestUnappliedSlash;
             impl ::subxt::StorageEntry for EarliestUnappliedSlash {
                 const PALLET: &'static str = "Staking";
@@ -5052,6 +5274,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The last planned session scheduled by the session pallet."]
+            #[doc = ""]
+            #[doc = " This is basically in sync with the call to [`pallet_session::SessionManager::new_session`]."]
             pub struct CurrentPlannedSession;
             impl ::subxt::StorageEntry for CurrentPlannedSession {
                 const PALLET: &'static str = "Staking";
@@ -5061,6 +5286,15 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Indices of validators that have offended in the active era and whether they are currently"]
+            #[doc = " disabled."]
+            #[doc = ""]
+            #[doc = " This value should be a superset of disabled validators since not all offences lead to the"]
+            #[doc = " validator being disabled (if there was no slash). This is needed to track the percentage of"]
+            #[doc = " validators that have offended in the current era, ensuring a new era is forced if"]
+            #[doc = " `OffendingValidatorsThreshold` is reached. The vec is always kept sorted so that we can find"]
+            #[doc = " whether a given validator has previously offended using binary search. It gets cleared when"]
+            #[doc = " the era ends."]
             pub struct OffendingValidators;
             impl ::subxt::StorageEntry for OffendingValidators {
                 const PALLET: &'static str = "Staking";
@@ -5071,6 +5305,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " True if network has been upgraded to this version."]
+            #[doc = " Storage version of the pallet."]
+            #[doc = ""]
+            #[doc = " This is set to v7.0.0 for new networks."]
             pub struct StorageVersion;
             impl ::subxt::StorageEntry for StorageVersion {
                 const PALLET: &'static str = "Staking";
@@ -5080,6 +5318,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The threshold for when users can start calling `chill_other` for other validators /"]
+            #[doc = " nominators. The threshold is compared to the actual number of validators / nominators"]
+            #[doc = " (`CountFor*`) in the system compared to the configured max (`Max*Count`)."]
             pub struct ChillThreshold;
             impl ::subxt::StorageEntry for ChillThreshold {
                 const PALLET: &'static str = "Staking";
@@ -5775,6 +6016,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The primary structure that holds all offence records keyed by report identifiers."]
             pub struct Reports<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Reports<'_> {
                 const PALLET: &'static str = "Offences";
@@ -5796,6 +6038,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " A vector of reports of the same kind that happened at the same time slot."]
             pub struct ConcurrentReportsIndex<'a>(
                 pub &'a [::core::primitive::u8; 16usize],
                 pub &'a [::core::primitive::u8],
@@ -5817,6 +6060,12 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Enumerates all reports of a kind along with the time they happened."]
+            #[doc = ""]
+            #[doc = " All reports are sorted by the time of offence."]
+            #[doc = ""]
+            #[doc = " Note that the actual type of this mapping is `Vec<u8>`, this is because values of"]
+            #[doc = " different types are not supported at the moment so we are doing the manual serialization."]
             pub struct ReportsByKindIndex<'a>(pub &'a [::core::primitive::u8; 16usize]);
             impl ::subxt::StorageEntry for ReportsByKindIndex<'_> {
                 const PALLET: &'static str = "Offences";
@@ -6039,6 +6288,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The current set of validators."]
             pub struct Validators;
             impl ::subxt::StorageEntry for Validators {
                 const PALLET: &'static str = "Session";
@@ -6048,6 +6298,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Current index of the session."]
             pub struct CurrentIndex;
             impl ::subxt::StorageEntry for CurrentIndex {
                 const PALLET: &'static str = "Session";
@@ -6057,6 +6308,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " True if the underlying economic identities or weighting behind the validators"]
+            #[doc = " has changed in the queued validator set."]
             pub struct QueuedChanged;
             impl ::subxt::StorageEntry for QueuedChanged {
                 const PALLET: &'static str = "Session";
@@ -6066,6 +6319,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The queued keys for the next session. When the next session begins, these keys"]
+            #[doc = " will be used to determine the validator's session keys."]
             pub struct QueuedKeys;
             impl ::subxt::StorageEntry for QueuedKeys {
                 const PALLET: &'static str = "Session";
@@ -6078,6 +6333,11 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Indices of disabled validators."]
+            #[doc = ""]
+            #[doc = " The vec is always kept sorted so that we can find whether a given validator is"]
+            #[doc = " disabled using binary search. It gets cleared when `on_session_ending` returns"]
+            #[doc = " a new set of identities."]
             pub struct DisabledValidators;
             impl ::subxt::StorageEntry for DisabledValidators {
                 const PALLET: &'static str = "Session";
@@ -6087,6 +6347,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The next session keys for a validator."]
             pub struct NextKeys<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for NextKeys<'_> {
                 const PALLET: &'static str = "Session";
@@ -6099,6 +6360,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
             pub struct KeyOwner<'a>(
                 pub &'a runtime_types::sp_core::crypto::KeyTypeId,
                 pub &'a [::core::primitive::u8],
@@ -6385,6 +6647,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " State of the current authority set."]
             pub struct State;
             impl ::subxt::StorageEntry for State {
                 const PALLET: &'static str = "Grandpa";
@@ -6395,6 +6658,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Pending change: (signaled at, scheduled change)."]
             pub struct PendingChange;
             impl ::subxt::StorageEntry for PendingChange {
                 const PALLET: &'static str = "Grandpa";
@@ -6406,6 +6670,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " next block number where we can force a change."]
             pub struct NextForced;
             impl ::subxt::StorageEntry for NextForced {
                 const PALLET: &'static str = "Grandpa";
@@ -6415,6 +6680,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " `true` if we are currently stalled."]
             pub struct Stalled;
             impl ::subxt::StorageEntry for Stalled {
                 const PALLET: &'static str = "Grandpa";
@@ -6424,6 +6690,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The number of changes (both in terms of keys and underlying economic responsibilities)"]
+            #[doc = " in the \"set\" of Grandpa validators from genesis."]
             pub struct CurrentSetId;
             impl ::subxt::StorageEntry for CurrentSetId {
                 const PALLET: &'static str = "Grandpa";
@@ -6433,6 +6701,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " A mapping from grandpa set ID to the index of the *most recent* session for which its"]
+            #[doc = " members were responsible."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: `SetId` is not under user control."]
             pub struct SetIdSession<'a>(pub &'a ::core::primitive::u64);
             impl ::subxt::StorageEntry for SetIdSession<'_> {
                 const PALLET: &'static str = "Grandpa";
@@ -6657,6 +6929,17 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The block number after which it's ok to send heartbeats in the current"]
+            #[doc = " session."]
+            #[doc = ""]
+            #[doc = " At the beginning of each session we set this to a value that should fall"]
+            #[doc = " roughly in the middle of the session duration. The idea is to first wait for"]
+            #[doc = " the validators to produce a block in the current session, so that the"]
+            #[doc = " heartbeat later on will not be necessary."]
+            #[doc = ""]
+            #[doc = " This value will only be used as a fallback if we fail to get a proper session"]
+            #[doc = " progress estimate from `NextSessionRotation`, as those estimates should be"]
+            #[doc = " more accurate then the value we calculate for `HeartbeatAfter`."]
             pub struct HeartbeatAfter;
             impl ::subxt::StorageEntry for HeartbeatAfter {
                 const PALLET: &'static str = "ImOnline";
@@ -6666,6 +6949,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current set of keys that may issue a heartbeat."]
             pub struct Keys;
             impl ::subxt::StorageEntry for Keys {
                 const PALLET: &'static str = "ImOnline";
@@ -6675,6 +6959,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " For each session index, we keep a mapping of `SessionIndex` and `AuthIndex` to"]
+            #[doc = " `WrapperOpaque<BoundedOpaqueNetworkState>`."]
             pub struct ReceivedHeartbeats<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::core::primitive::u32,
@@ -6698,6 +6984,8 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " For each session index, we keep a mapping of `ValidatorId<T>` to the"]
+            #[doc = " number of blocks authored by the given authority."]
             pub struct AuthoredBlocks<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
@@ -7926,6 +8214,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The number of (public) proposals that have been made so far."]
             pub struct PublicPropCount;
             impl ::subxt::StorageEntry for PublicPropCount {
                 const PALLET: &'static str = "Democracy";
@@ -7935,6 +8224,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The public proposals. Unsorted. The second item is the proposal's hash."]
             pub struct PublicProps;
             impl ::subxt::StorageEntry for PublicProps {
                 const PALLET: &'static str = "Democracy";
@@ -7948,6 +8238,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Those who have locked a deposit."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: Safe, as increasing integer keys are safe."]
             pub struct DepositOf<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for DepositOf<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -7963,6 +8256,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Map of hashes to the proposal preimage, along with who registered it and their deposit."]
+            #[doc = " The block number is the block at which it was deposited."]
             pub struct Preimages<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Preimages<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -7979,6 +8274,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The next free referendum index, aka the number of referenda started so far."]
             pub struct ReferendumCount;
             impl ::subxt::StorageEntry for ReferendumCount {
                 const PALLET: &'static str = "Democracy";
@@ -7988,6 +8284,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The lowest referendum index representing an unbaked referendum. Equal to"]
+            #[doc = " `ReferendumCount` if there isn't a unbaked referendum."]
             pub struct LowestUnbaked;
             impl ::subxt::StorageEntry for LowestUnbaked {
                 const PALLET: &'static str = "Democracy";
@@ -7997,6 +8295,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Information concerning any given referendum."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: SAFE as indexes are not under an attacker’s control."]
             pub struct ReferendumInfoOf<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ReferendumInfoOf<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -8013,6 +8314,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " All votes for a particular voter. We store the balance for the number of votes that we"]
+            #[doc = " have recorded. The second item is the total amount of delegations, that will be added."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: SAFE as `AccountId`s are crypto hashes anyway."]
             pub struct VotingOf<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for VotingOf<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -8029,6 +8334,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " True if the last referendum tabled was submitted externally. False if it was a public"]
+            #[doc = " proposal."]
             pub struct LastTabledWasExternal;
             impl ::subxt::StorageEntry for LastTabledWasExternal {
                 const PALLET: &'static str = "Democracy";
@@ -8038,6 +8345,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The referendum to be tabled whenever it would be valid to table an external proposal."]
+            #[doc = " This happens when a referendum needs to be tabled and one of two conditions are met:"]
+            #[doc = " - `LastTabledWasExternal` is `false`; or"]
+            #[doc = " - `PublicProps` is empty."]
             pub struct NextExternal;
             impl ::subxt::StorageEntry for NextExternal {
                 const PALLET: &'static str = "Democracy";
@@ -8050,6 +8361,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " A record of who vetoed what. Maps proposal hash to a possible existent block number"]
+            #[doc = " (until when it may not be resubmitted) and who vetoed it."]
             pub struct Blacklist<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Blacklist<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -8065,6 +8378,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Record of all proposals that have been subject to emergency cancellation."]
             pub struct Cancellations<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Cancellations<'_> {
                 const PALLET: &'static str = "Democracy";
@@ -8077,6 +8391,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Storage version of the pallet."]
+            #[doc = ""]
+            #[doc = " New networks start with last version."]
             pub struct StorageVersion;
             impl ::subxt::StorageEntry for StorageVersion {
                 const PALLET: &'static str = "Democracy";
@@ -8860,6 +9177,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The hashes of the active proposals."]
             pub struct Proposals;
             impl ::subxt::StorageEntry for Proposals {
                 const PALLET: &'static str = "Council";
@@ -8872,6 +9190,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Actual proposal for a given hash, if it's current."]
             pub struct ProposalOf<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for ProposalOf<'_> {
                 const PALLET: &'static str = "Council";
@@ -8884,6 +9203,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Votes on a given proposal, if it is ongoing."]
             pub struct Voting<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Voting<'_> {
                 const PALLET: &'static str = "Council";
@@ -8899,6 +9219,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Proposals so far."]
             pub struct ProposalCount;
             impl ::subxt::StorageEntry for ProposalCount {
                 const PALLET: &'static str = "Council";
@@ -8908,6 +9229,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current members of the collective. This is stored sorted (just by value)."]
             pub struct Members;
             impl ::subxt::StorageEntry for Members {
                 const PALLET: &'static str = "Council";
@@ -8917,6 +9239,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The prime member that helps determine the default vote behavior in case of absentations."]
             pub struct Prime;
             impl ::subxt::StorageEntry for Prime {
                 const PALLET: &'static str = "Council";
@@ -9443,6 +9766,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The hashes of the active proposals."]
             pub struct Proposals;
             impl ::subxt::StorageEntry for Proposals {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9455,6 +9779,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Actual proposal for a given hash, if it's current."]
             pub struct ProposalOf<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for ProposalOf<'_> {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9467,6 +9792,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Votes on a given proposal, if it is ongoing."]
             pub struct Voting<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Voting<'_> {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9482,6 +9808,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Proposals so far."]
             pub struct ProposalCount;
             impl ::subxt::StorageEntry for ProposalCount {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9491,6 +9818,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current members of the collective. This is stored sorted (just by value)."]
             pub struct Members;
             impl ::subxt::StorageEntry for Members {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9500,6 +9828,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The prime member that helps determine the default vote behavior in case of absentations."]
             pub struct Prime;
             impl ::subxt::StorageEntry for Prime {
                 const PALLET: &'static str = "TechnicalCommittee";
@@ -9945,6 +10274,9 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The current elected members."]
+            #[doc = ""]
+            #[doc = " Invariant: Always sorted based on account id."]
             pub struct Members;
             impl ::subxt::StorageEntry for Members {
                 const PALLET: &'static str = "PhragmenElection";
@@ -9959,6 +10291,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current reserved runners-up."]
+            #[doc = ""]
+            #[doc = " Invariant: Always sorted based on rank (worse to best). Upon removal of a member, the"]
+            #[doc = " last (i.e. _best_) runner-up will be replaced."]
             pub struct RunnersUp;
             impl ::subxt::StorageEntry for RunnersUp {
                 const PALLET: &'static str = "PhragmenElection";
@@ -9973,6 +10309,12 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The present candidate list. A current member or runner-up can never enter this vector"]
+            #[doc = " and is always implicitly assumed to be a candidate."]
+            #[doc = ""]
+            #[doc = " Second element is the deposit."]
+            #[doc = ""]
+            #[doc = " Invariant: Always sorted based on account id."]
             pub struct Candidates;
             impl ::subxt::StorageEntry for Candidates {
                 const PALLET: &'static str = "PhragmenElection";
@@ -9985,6 +10327,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The total number of vote rounds that have happened, excluding the upcoming one."]
             pub struct ElectionRounds;
             impl ::subxt::StorageEntry for ElectionRounds {
                 const PALLET: &'static str = "PhragmenElection";
@@ -9994,6 +10337,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Votes and locked stake of a particular voter."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: SAFE as `AccountId` is a crypto hash."]
             pub struct Voting<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Voting<'_> {
                 const PALLET: &'static str = "PhragmenElection";
@@ -10436,6 +10782,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The current membership, stored as an ordered Vec."]
             pub struct Members;
             impl ::subxt::StorageEntry for Members {
                 const PALLET: &'static str = "TechnicalMembership";
@@ -10445,6 +10792,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current prime member, if one exists."]
             pub struct Prime;
             impl ::subxt::StorageEntry for Prime {
                 const PALLET: &'static str = "TechnicalMembership";
@@ -10714,6 +11062,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Number of proposals that have been made."]
             pub struct ProposalCount;
             impl ::subxt::StorageEntry for ProposalCount {
                 const PALLET: &'static str = "Treasury";
@@ -10723,6 +11072,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Proposals that have been made."]
             pub struct Proposals<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Proposals<'_> {
                 const PALLET: &'static str = "Treasury";
@@ -10738,6 +11088,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Proposal indices that have been approved but not yet awarded."]
             pub struct Approvals;
             impl ::subxt::StorageEntry for Approvals {
                 const PALLET: &'static str = "Treasury";
@@ -11206,6 +11557,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Vesting schedule for a claim."]
+            #[doc = " First balance is the total amount that should be held for vesting."]
+            #[doc = " Second balance is how much should be unlocked per block."]
+            #[doc = " The block number is when the vesting should start."]
             pub struct Vesting<'a>(
                 pub &'a runtime_types::polkadot_runtime_common::claims::EthereumAddress,
             );
@@ -11224,6 +11579,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The statement kind that must be signed, if any."]
             pub struct Signing<'a>(
                 pub &'a runtime_types::polkadot_runtime_common::claims::EthereumAddress,
             );
@@ -11239,6 +11595,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Pre-claimed Ethereum accounts, by the Account ID that they are claimed to."]
             pub struct Preclaims<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Preclaims<'_> {
                 const PALLET: &'static str = "Claims";
@@ -11676,6 +12033,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Information regarding the vesting of a given account."]
             pub struct Vesting<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Vesting<'_> {
                 const PALLET: &'static str = "Vesting";
@@ -11694,6 +12052,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Storage version of the pallet."]
+            #[doc = ""]
+            #[doc = " New networks start with latest version, as determined by the genesis build."]
             pub struct StorageVersion;
             impl ::subxt::StorageEntry for StorageVersion {
                 const PALLET: &'static str = "Vesting";
@@ -12785,6 +13146,9 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Information that is pertinent to identify the entity behind an account."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
             pub struct IdentityOf<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for IdentityOf<'_> {
                 const PALLET: &'static str = "Identity";
@@ -12799,6 +13163,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The super-identity of an alternative \"sub\" identity together with its name, within that"]
+            #[doc = " context. If the account is not some other account's sub-identity, then just `None`."]
             pub struct SuperOf<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for SuperOf<'_> {
                 const PALLET: &'static str = "Identity";
@@ -12814,6 +13180,11 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Alternative \"sub\" identities of this account."]
+            #[doc = ""]
+            #[doc = " The first item is the deposit, the second is a vector of the accounts."]
+            #[doc = ""]
+            #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
             pub struct SubsOf<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for SubsOf<'_> {
                 const PALLET: &'static str = "Identity";
@@ -12831,6 +13202,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The set of registrars. Not expected to get very big as can only be added through a"]
+            #[doc = " special origin (likely a council motion)."]
+            #[doc = ""]
+            #[doc = " The index into this can be cast to `RegistrarIndex` to get a valid value."]
             pub struct Registrars;
             impl ::subxt::StorageEntry for Registrars {
                 const PALLET: &'static str = "Identity";
@@ -13567,6 +13942,8 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The set of account proxies. Maps the account which has delegated to the accounts"]
+            #[doc = " which are being delegated to, together with the amount held on deposit."]
             pub struct Proxies<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Proxies<'_> {
                 const PALLET: &'static str = "Proxy";
@@ -13588,6 +13965,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The announcements made by the proxy (key)."]
             pub struct Announcements<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for Announcements<'_> {
                 const PALLET: &'static str = "Proxy";
@@ -14130,6 +14508,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The set of open multisig operations."]
             pub struct Multisigs<'a>(
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
                 pub &'a [::core::primitive::u8; 32usize],
@@ -14731,6 +15110,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Number of bounty proposals that have been made."]
             pub struct BountyCount;
             impl ::subxt::StorageEntry for BountyCount {
                 const PALLET: &'static str = "Bounties";
@@ -14740,6 +15120,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Bounties that have been made."]
             pub struct Bounties<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Bounties<'_> {
                 const PALLET: &'static str = "Bounties";
@@ -14756,6 +15137,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The description of each bounty."]
             pub struct BountyDescriptions<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for BountyDescriptions<'_> {
                 const PALLET: &'static str = "Bounties";
@@ -14771,6 +15153,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Bounty indices that have been approved but not yet funded."]
             pub struct BountyApprovals;
             impl ::subxt::StorageEntry for BountyApprovals {
                 const PALLET: &'static str = "Bounties";
@@ -15422,6 +15805,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Number of total child bounties."]
             pub struct ChildBountyCount;
             impl ::subxt::StorageEntry for ChildBountyCount {
                 const PALLET: &'static str = "ChildBounties";
@@ -15431,6 +15815,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Number of child-bounties per parent bounty."]
+            #[doc = " Map of parent bounty index to number of child bounties."]
             pub struct ParentChildBounties<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ParentChildBounties<'_> {
                 const PALLET: &'static str = "ChildBounties";
@@ -15443,6 +15829,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Child-bounties that have been added."]
             pub struct ChildBounties<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a ::core::primitive::u32,
@@ -15468,6 +15855,7 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " The description of each child-bounty."]
             pub struct ChildBountyDescriptions<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ChildBountyDescriptions<'_> {
                 const PALLET: &'static str = "ChildBounties";
@@ -15483,6 +15871,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The cumulative child-bounty curator fee for each parent bounty."]
             pub struct ChildrenCuratorFees<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ChildrenCuratorFees<'_> {
                 const PALLET: &'static str = "ChildBounties";
@@ -15972,6 +16361,9 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " TipsMap that are not yet completed. Keyed by the hash of `(reason, who)` from the value."]
+            #[doc = " This has the insecure enumerable hash function since the key itself is already"]
+            #[doc = " guaranteed to be a secure hash."]
             pub struct Tips<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Tips<'_> {
                 const PALLET: &'static str = "Tips";
@@ -15989,6 +16381,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Simple preimage lookup from the reason's hash to the original data. Again, has an"]
+            #[doc = " insecure enumerable hash since the key is guaranteed to be the result of a secure hash."]
             pub struct Reasons<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for Reasons<'_> {
                 const PALLET: &'static str = "Tips";
@@ -16411,6 +16805,12 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Internal counter for the number of rounds."]
+            #[doc = ""]
+            #[doc = " This is useful for de-duplication of transactions submitted to the pool, and general"]
+            #[doc = " diagnostics of the pallet."]
+            #[doc = ""]
+            #[doc = " This is merely incremented once per every time that an upstream `elect` is called."]
             pub struct Round;
             impl ::subxt::StorageEntry for Round {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16420,6 +16820,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Current phase."]
             pub struct CurrentPhase;
             impl ::subxt::StorageEntry for CurrentPhase {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16431,6 +16832,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Current best solution, signed or unsigned, queued to be returned upon `elect`."]
             pub struct QueuedSolution;
             impl ::subxt::StorageEntry for QueuedSolution {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16443,6 +16845,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Snapshot data of the round."]
+            #[doc = ""]
+            #[doc = " This is created at the beginning of the signed phase and cleared upon calling `elect`."]
             pub struct Snapshot;
             impl ::subxt::StorageEntry for Snapshot {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16453,6 +16858,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Desired number of targets to elect for this round."]
+            #[doc = ""]
+            #[doc = " Only exists when [`Snapshot`] is present."]
             pub struct DesiredTargets;
             impl ::subxt::StorageEntry for DesiredTargets {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16462,6 +16870,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The metadata of the [`RoundSnapshot`]"]
+            #[doc = ""]
+            #[doc = " Only exists when [`Snapshot`] is present."]
             pub struct SnapshotMetadata;
             impl ::subxt::StorageEntry for SnapshotMetadata {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16471,6 +16882,15 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The next index to be assigned to an incoming signed submission."]
+            #[doc = ""]
+            #[doc = " Every accepted submission is assigned a unique index; that index is bound to that particular"]
+            #[doc = " submission for the duration of the election. On election finalization, the next index is"]
+            #[doc = " reset to 0."]
+            #[doc = ""]
+            #[doc = " We can't just use `SignedSubmissionIndices.len()`, because that's a bounded set; past its"]
+            #[doc = " capacity, it will simply saturate. We can't just iterate over `SignedSubmissionsMap`,"]
+            #[doc = " because iteration is slow. Instead, we store the value here."]
             pub struct SignedSubmissionNextIndex;
             impl ::subxt::StorageEntry for SignedSubmissionNextIndex {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16480,6 +16900,12 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " A sorted, bounded set of `(score, index)`, where each `index` points to a value in"]
+            #[doc = " `SignedSubmissions`."]
+            #[doc = ""]
+            #[doc = " We never need to process more than a single signed submission at a time. Signed submissions"]
+            #[doc = " can be quite large, so we're willing to pay the cost of multiple database accesses to access"]
+            #[doc = " them one at a time instead of reading and decoding all of them at once."]
             pub struct SignedSubmissionIndices;
             impl ::subxt::StorageEntry for SignedSubmissionIndices {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16489,6 +16915,13 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Unchecked, signed solutions."]
+            #[doc = ""]
+            #[doc = " Together with `SubmissionIndices`, this stores a bounded set of `SignedSubmissions` while"]
+            #[doc = " allowing us to keep only a single one in memory at a time."]
+            #[doc = ""]
+            #[doc = " Twox note: the key of the map is an auto-incrementing index which users cannot inspect or"]
+            #[doc = " affect; we shouldn't need a cryptographically secure hasher."]
             pub struct SignedSubmissionsMap<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for SignedSubmissionsMap<'_> {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16501,6 +16934,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The minimum score that each 'untrusted' solution must attain in order to be considered"]
+            #[doc = " feasible."]
+            #[doc = ""]
+            #[doc = " Can be set via `set_minimum_untrusted_score`."]
             pub struct MinimumUntrustedScore;
             impl ::subxt::StorageEntry for MinimumUntrustedScore {
                 const PALLET: &'static str = "ElectionProviderMultiPhase";
@@ -16927,6 +17364,9 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " A single node, within some bag."]
+            #[doc = ""]
+            #[doc = " Nodes store links forward and back within their respective bags."]
             pub struct ListNodes<'a>(pub &'a ::subxt::sp_core::crypto::AccountId32);
             impl ::subxt::StorageEntry for ListNodes<'_> {
                 const PALLET: &'static str = "BagsList";
@@ -16939,6 +17379,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = "Counter for the related counted storage map"]
             pub struct CounterForListNodes;
             impl ::subxt::StorageEntry for CounterForListNodes {
                 const PALLET: &'static str = "BagsList";
@@ -16948,6 +17389,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " A bag stored in storage."]
+            #[doc = ""]
+            #[doc = " Stores a `Bag` struct, which stores head and tail pointers to itself."]
             pub struct ListBags<'a>(pub &'a ::core::primitive::u64);
             impl ::subxt::StorageEntry for ListBags<'_> {
                 const PALLET: &'static str = "BagsList";
@@ -18368,6 +18812,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The active configuration for the current session."]
             pub struct ActiveConfig;
             impl ::subxt::StorageEntry for ActiveConfig {
                 const PALLET: &'static str = "Configuration";
@@ -18377,6 +18822,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Pending configuration (if any) for the next session."]
+            #[doc = ""]
+            #[doc = " DEPRECATED: This is no longer used, and will be removed in the future."]
             pub struct PendingConfig<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for PendingConfig<'_> {
                 const PALLET: &'static str = "Configuration";
@@ -18389,6 +18837,13 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Pending configuration changes."]
+            #[doc = ""]
+            #[doc = " This is a list of configuration changes, each with a session index at which it should"]
+            #[doc = " be applied."]
+            #[doc = ""]
+            #[doc = " The list is sorted ascending by session index. Also, this list can only contain at most"]
+            #[doc = " 2 items: for the next session and for the `scheduled_session`."]
             pub struct PendingConfigs;
             impl ::subxt::StorageEntry for PendingConfigs {
                 const PALLET: &'static str = "Configuration";
@@ -18398,6 +18853,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " If this is set, then the configuration setters will bypass the consistency checks. This"]
+            #[doc = " is meant to be used only as the last resort."]
             pub struct BypassConsistencyCheck;
             impl ::subxt::StorageEntry for BypassConsistencyCheck {
                 const PALLET: &'static str = "Configuration";
@@ -18473,6 +18930,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The current session index."]
             pub struct CurrentSessionIndex;
             impl ::subxt::StorageEntry for CurrentSessionIndex {
                 const PALLET: &'static str = "ParasShared";
@@ -18482,6 +18940,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " All the validators actively participating in parachain consensus."]
+            #[doc = " Indices are into the broader validator set."]
             pub struct ActiveValidatorIndices;
             impl ::subxt::StorageEntry for ActiveValidatorIndices {
                 const PALLET: &'static str = "ParasShared";
@@ -18493,6 +18953,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The parachain attestation keys of the validators actively participating in parachain consensus."]
+            #[doc = " This should be the same length as `ActiveValidatorIndices`."]
             pub struct ActiveValidatorKeys;
             impl ::subxt::StorageEntry for ActiveValidatorKeys {
                 const PALLET: &'static str = "ParasShared";
@@ -18622,6 +19084,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]
             pub struct AvailabilityBitfields<'a>(
                 pub &'a runtime_types::polkadot_primitives::v2::ValidatorIndex,
             );
@@ -18636,6 +19099,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Candidates pending availability by `ParaId`."]
             pub struct PendingAvailability<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -18650,6 +19114,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The commitments of candidates pending availability, by `ParaId`."]
             pub struct PendingAvailabilityCommitments<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -18787,6 +19252,12 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Whether the paras inherent was included within this block."]
+            #[doc = ""]
+            #[doc = " The `Option<()>` is effectively a `bool`, but it never hits storage in the `None` variant"]
+            #[doc = " due to the guarantees of FRAME's storage APIs."]
+            #[doc = ""]
+            #[doc = " If this is `None` at the end of the block, we panic and render the block invalid."]
             pub struct Included;
             impl ::subxt::StorageEntry for Included {
                 const PALLET: &'static str = "ParaInherent";
@@ -18796,6 +19267,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Scraped on chain data for extracting resolved disputes as well as backing votes."]
             pub struct OnChainVotes;
             impl ::subxt::StorageEntry for OnChainVotes {
                 const PALLET: &'static str = "ParaInherent";
@@ -18846,6 +19318,12 @@ pub mod api {
         };
         pub mod storage {
             use super::runtime_types;
+            #[doc = " All the validator groups. One for each core. Indices are into `ActiveValidators` - not the"]
+            #[doc = " broader set of Polkadot validators, but instead just the subset used for parachains during"]
+            #[doc = " this session."]
+            #[doc = ""]
+            #[doc = " Bound: The number of cores is the sum of the numbers of parachains and parathread multiplexers."]
+            #[doc = " Reasonably, 100-1000. The dominant factor is the number of validators: safe upper bound at 10k."]
             pub struct ValidatorGroups;
             impl ::subxt::StorageEntry for ValidatorGroups {
                 const PALLET: &'static str = "ParaScheduler";
@@ -18859,6 +19337,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " A queue of upcoming claims and which core they should be mapped onto."]
+            #[doc = ""]
+            #[doc = " The number of queued claims is bounded at the `scheduling_lookahead`"]
+            #[doc = " multiplied by the number of parathread multiplexer cores. Reasonably, 10 * 50 = 500."]
             pub struct ParathreadQueue;
             impl ::subxt::StorageEntry for ParathreadQueue {
                 const PALLET: &'static str = "ParaScheduler";
@@ -18868,6 +19350,14 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " One entry for each availability core. Entries are `None` if the core is not currently occupied. Can be"]
+            #[doc = " temporarily `Some` if scheduled but not occupied."]
+            #[doc = " The i'th parachain belongs to the i'th core, with the remaining cores all being"]
+            #[doc = " parathread-multiplexers."]
+            #[doc = ""]
+            #[doc = " Bounded by the maximum of either of these two values:"]
+            #[doc = "   * The number of parachains and parathread multiplexers"]
+            #[doc = "   * The number of validators divided by `configuration.max_validators_per_core`."]
             pub struct AvailabilityCores;
             impl ::subxt::StorageEntry for AvailabilityCores {
                 const PALLET: &'static str = "ParaScheduler";
@@ -18881,6 +19371,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " An index used to ensure that only one claim on a parathread exists in the queue or is"]
+            #[doc = " currently being handled by an occupied core."]
+            #[doc = ""]
+            #[doc = " Bounded by the number of parathread cores and scheduling lookahead. Reasonably, 10 * 50 = 500."]
             pub struct ParathreadClaimIndex;
             impl ::subxt::StorageEntry for ParathreadClaimIndex {
                 const PALLET: &'static str = "ParaScheduler";
@@ -18891,6 +19385,12 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The block number where the session start occurred. Used to track how many group rotations have occurred."]
+            #[doc = ""]
+            #[doc = " Note that in the context of parachains modules the session change is signaled during"]
+            #[doc = " the block and enacted at the end of the block (at the finalization stage, to be exact)."]
+            #[doc = " Thus for all intents and purposes the effect of the session change is observed at the"]
+            #[doc = " block following the session change, block number of which we save in this storage value."]
             pub struct SessionStartBlock;
             impl ::subxt::StorageEntry for SessionStartBlock {
                 const PALLET: &'static str = "ParaScheduler";
@@ -18900,6 +19400,12 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Currently scheduled cores - free but up to be occupied."]
+            #[doc = ""]
+            #[doc = " Bounded by the number of cores: one for each parachain and parathread multiplexer."]
+            #[doc = ""]
+            #[doc = " The value contained here will not be valid after the end of a block. Runtime APIs should be used to determine scheduled cores/"]
+            #[doc = " for the upcoming block."]
             pub struct Scheduled;
             impl ::subxt::StorageEntry for Scheduled {
                 const PALLET: &'static str = "ParaScheduler";
@@ -19312,6 +19818,10 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " All currently active PVF pre-checking votes."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]
             pub struct PvfActiveVoteMap<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
             );
@@ -19326,6 +19836,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The list of all currently active PVF votes. Auxiliary to `PvfActiveVoteMap`."]
             pub struct PvfActiveVoteList;
             impl ::subxt::StorageEntry for PvfActiveVoteList {
                 const PALLET: &'static str = "Paras";
@@ -19337,6 +19848,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " All parachains. Ordered ascending by `ParaId`. Parathreads are not included."]
+            #[doc = ""]
+            #[doc = " Consider using the [`ParachainsCache`] type of modifying."]
             pub struct Parachains;
             impl ::subxt::StorageEntry for Parachains {
                 const PALLET: &'static str = "Paras";
@@ -19347,6 +19861,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current lifecycle of a all known Para IDs."]
             pub struct ParaLifecycles<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19362,6 +19877,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The head-data of every registered para."]
             pub struct Heads<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19376,6 +19892,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The validation code hash of every live para."]
+            #[doc = ""]
+            #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
             pub struct CurrentCodeHash<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19391,6 +19910,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Actual past code hash, indicated by the para id as well as the block number at which it"]
+            #[doc = " became outdated."]
+            #[doc = ""]
+            #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
             pub struct PastCodeHash<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
                 pub &'a ::core::primitive::u32,
@@ -19407,6 +19930,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Past code of parachains. The parachains themselves may not be registered anymore,"]
+            #[doc = " but we also keep their code on-chain for the same amount of time as outdated code"]
+            #[doc = " to keep it available for secondary checkers."]
             pub struct PastCodeMeta<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19424,6 +19950,12 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Which paras have past code that needs pruning and the relay-chain block at which the code was replaced."]
+            #[doc = " Note that this is the actual height of the included block, not the expected height at which the"]
+            #[doc = " code upgrade would be applied, although they may be equal."]
+            #[doc = " This is to ensure the entire acceptance period is covered, not an offset acceptance period starting"]
+            #[doc = " from the time at which the parachain perceives a code upgrade as having occurred."]
+            #[doc = " Multiple entries for a single para are permitted. Ordered ascending by block number."]
             pub struct PastCodePruning;
             impl ::subxt::StorageEntry for PastCodePruning {
                 const PALLET: &'static str = "Paras";
@@ -19436,6 +19968,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The block number at which the planned code change is expected for a para."]
+            #[doc = " The change will be applied after the first parablock for this ID included which executes"]
+            #[doc = " in the context of a relay chain block with a number >= `expected_at`."]
             pub struct FutureCodeUpgrades<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19450,6 +19985,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The actual future code hash of a para."]
+            #[doc = ""]
+            #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
             pub struct FutureCodeHash<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19465,6 +20003,15 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " This is used by the relay-chain to communicate to a parachain a go-ahead with in the upgrade procedure."]
+            #[doc = ""]
+            #[doc = " This value is absent when there are no upgrades scheduled or during the time the relay chain"]
+            #[doc = " performs the checks. It is set at the first relay-chain block when the corresponding parachain"]
+            #[doc = " can switch its upgrade function. As soon as the parachain's block is included, the value"]
+            #[doc = " gets reset to `None`."]
+            #[doc = ""]
+            #[doc = " NOTE that this field is used by parachains via merkle storage proofs, therefore changing"]
+            #[doc = " the format will require migration of parachains."]
             pub struct UpgradeGoAheadSignal<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19479,6 +20026,15 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " This is used by the relay-chain to communicate that there are restrictions for performing"]
+            #[doc = " an upgrade for this parachain."]
+            #[doc = ""]
+            #[doc = " This may be a because the parachain waits for the upgrade cooldown to expire. Another"]
+            #[doc = " potential use case is when we want to perform some maintenance (such as storage migration)"]
+            #[doc = " we could restrict upgrades to make the process simpler."]
+            #[doc = ""]
+            #[doc = " NOTE that this field is used by parachains via merkle storage proofs, therefore changing"]
+            #[doc = " the format will require migration of parachains."]
             pub struct UpgradeRestrictionSignal<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19493,6 +20049,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The list of parachains that are awaiting for their upgrade restriction to cooldown."]
+            #[doc = ""]
+            #[doc = " Ordered ascending by block number."]
             pub struct UpgradeCooldowns;
             impl ::subxt::StorageEntry for UpgradeCooldowns {
                 const PALLET: &'static str = "Paras";
@@ -19505,6 +20064,10 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The list of upcoming code upgrades. Each item is a pair of which para performs a code"]
+            #[doc = " upgrade and at which relay-chain block it is expected at."]
+            #[doc = ""]
+            #[doc = " Ordered ascending by block number."]
             pub struct UpcomingUpgrades;
             impl ::subxt::StorageEntry for UpcomingUpgrades {
                 const PALLET: &'static str = "Paras";
@@ -19517,6 +20080,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The actions to perform during the start of a specific session index."]
             pub struct ActionsQueue<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for ActionsQueue<'_> {
                 const PALLET: &'static str = "Paras";
@@ -19530,6 +20094,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Upcoming paras instantiation arguments."]
+            #[doc = ""]
+            #[doc = " NOTE that after PVF pre-checking is enabled the para genesis arg will have it's code set"]
+            #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
             pub struct UpcomingParasGenesis<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -19545,6 +20113,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The number of reference on the validation code in [`CodeByHash`] storage."]
             pub struct CodeByHashRefs<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
             );
@@ -19559,6 +20128,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Validation code stored by its hash."]
+            #[doc = ""]
+            #[doc = " This storage is consistent with [`FutureCodeHash`], [`CurrentCodeHash`] and"]
+            #[doc = " [`PastCodeHash`]."]
             pub struct CodeByHash<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
             );
@@ -20006,6 +20579,14 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Whether the parachains modules have been initialized within this block."]
+            #[doc = ""]
+            #[doc = " Semantically a `bool`, but this guarantees it should never hit the trie,"]
+            #[doc = " as this is cleared in `on_finalize` and Frame optimizes `None` values to be empty values."]
+            #[doc = ""]
+            #[doc = " As a `bool`, `set(false)` and `remove()` both lead to the next `get()` being false, but one of"]
+            #[doc = " them writes to the trie and one does not. This confusion makes `Option<()>` more suitable for"]
+            #[doc = " the semantics of this variable."]
             pub struct HasInitialized;
             impl ::subxt::StorageEntry for HasInitialized {
                 const PALLET: &'static str = "Initializer";
@@ -20015,6 +20596,13 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Buffered session changes along with the block number at which they should be applied."]
+            #[doc = ""]
+            #[doc = " Typically this will be empty or one element long. Apart from that this item never hits"]
+            #[doc = " the storage."]
+            #[doc = ""]
+            #[doc = " However this is a `Vec` regardless to handle various edge cases that may occur at runtime"]
+            #[doc = " upgrade boundaries or if governance intervenes."]
             pub struct BufferedSessionChanges;
             impl ::subxt::StorageEntry for BufferedSessionChanges {
                 const PALLET: &'static str = "Initializer";
@@ -20075,6 +20663,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The downward messages addressed for a certain para."]
             pub struct DownwardMessageQueues<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20093,6 +20682,13 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " A mapping that stores the downward message queue MQC head for each para."]
+            #[doc = ""]
+            #[doc = " Each link in this chain has a form:"]
+            #[doc = " `(prev_head, B, H(M))`, where"]
+            #[doc = " - `prev_head`: is the previous head hash or zero if none."]
+            #[doc = " - `B`: is the relay-chain block number in which a message was appended."]
+            #[doc = " - `H(M)`: is the hash of the message being appended."]
             pub struct DownwardMessageQueueHeads<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20313,6 +20909,12 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The messages waiting to be handled by the relay-chain originating from a certain parachain."]
+            #[doc = ""]
+            #[doc = " Note that some upward messages might have been already processed by the inclusion logic. E.g."]
+            #[doc = " channel management messages."]
+            #[doc = ""]
+            #[doc = " The messages are processed in FIFO order."]
             pub struct RelayDispatchQueues<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20327,6 +20929,17 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Size of the dispatch queues. Caches sizes of the queues in `RelayDispatchQueue`."]
+            #[doc = ""]
+            #[doc = " First item in the tuple is the count of messages and second"]
+            #[doc = " is the total length (in bytes) of the message payloads."]
+            #[doc = ""]
+            #[doc = " Note that this is an auxiliary mapping: it's possible to tell the byte size and the number of"]
+            #[doc = " messages only looking at `RelayDispatchQueues`. This mapping is separate to avoid the cost of"]
+            #[doc = " loading the whole message queue if only the total size and count are required."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - The set of keys should exactly match the set of keys of `RelayDispatchQueues`."]
             pub struct RelayDispatchQueueSize<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20341,6 +20954,11 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The ordered list of `ParaId`s that have a `RelayDispatchQueue` entry."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - The set of items from this vector should be exactly the set of the keys in"]
+            #[doc = "   `RelayDispatchQueues` and `RelayDispatchQueueSize`."]
             pub struct NeedsDispatch;
             impl ::subxt::StorageEntry for NeedsDispatch {
                 const PALLET: &'static str = "Ump";
@@ -20351,6 +20969,11 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " This is the para that gets will get dispatched first during the next upward dispatchable queue"]
+            #[doc = " execution round."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - If `Some(para)`, then `para` must be present in `NeedsDispatch`."]
             pub struct NextDispatchRoundStartWith;
             impl ::subxt::StorageEntry for NextDispatchRoundStartWith {
                 const PALLET: &'static str = "Ump";
@@ -20360,6 +20983,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The messages that exceeded max individual message weight budget."]
+            #[doc = ""]
+            #[doc = " These messages stay there until manually dispatched."]
             pub struct Overweight<'a>(pub &'a ::core::primitive::u64);
             impl ::subxt::StorageEntry for Overweight<'_> {
                 const PALLET: &'static str = "Ump";
@@ -20375,6 +21001,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The number of overweight messages ever recorded in `Overweight` (and thus the lowest free"]
+            #[doc = " index)."]
             pub struct OverweightCount;
             impl ::subxt::StorageEntry for OverweightCount {
                 const PALLET: &'static str = "Ump";
@@ -20796,6 +21424,12 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The set of pending HRMP open channel requests."]
+            #[doc = ""]
+            #[doc = " The set is accompanied by a list for iteration."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
             pub struct HrmpOpenChannelRequests<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::HrmpChannelId,
             );
@@ -20821,6 +21455,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " This mapping tracks how many open channel requests are initiated by a given sender para."]
+            #[doc = " Invariant: `HrmpOpenChannelRequests` should contain the same number of items that has"]
+            #[doc = " `(X, _)` as the number of `HrmpOpenChannelRequestCount` for `X`."]
             pub struct HrmpOpenChannelRequestCount<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20835,6 +21472,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " This mapping tracks how many open channel requests were accepted by a given recipient para."]
+            #[doc = " Invariant: `HrmpOpenChannelRequests` should contain the same number of items `(_, X)` with"]
+            #[doc = " `confirmed` set to true, as the number of `HrmpAcceptedChannelRequestCount` for `X`."]
             pub struct HrmpAcceptedChannelRequestCount<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20849,6 +21489,13 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " A set of pending HRMP close channel requests that are going to be closed during the session"]
+            #[doc = " change. Used for checking if a given channel is registered for closure."]
+            #[doc = ""]
+            #[doc = " The set is accompanied by a list for iteration."]
+            #[doc = ""]
+            #[doc = " Invariant:"]
+            #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
             pub struct HrmpCloseChannelRequests<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::HrmpChannelId,
             );
@@ -20874,6 +21521,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The HRMP watermark associated with each para."]
+            #[doc = " Invariant:"]
+            #[doc = " - each para `P` used here as a key should satisfy `Paras::is_valid_para(P)` within a session."]
             pub struct HrmpWatermarks<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20888,6 +21538,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " HRMP channel data associated with each para."]
+            #[doc = " Invariant:"]
+            #[doc = " - each participant in the channel should satisfy `Paras::is_valid_para(P)` within a session."]
             pub struct HrmpChannels<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::HrmpChannelId,
             );
@@ -20903,6 +21556,19 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Ingress/egress indexes allow to find all the senders and receivers given the opposite side."]
+            #[doc = " I.e."]
+            #[doc = ""]
+            #[doc = " (a) ingress index allows to find all the senders for a given recipient."]
+            #[doc = " (b) egress index allows to find all the recipients for a given sender."]
+            #[doc = ""]
+            #[doc = " Invariants:"]
+            #[doc = " - for each ingress index entry for `P` each item `I` in the index should present in"]
+            #[doc = "   `HrmpChannels` as `(I, P)`."]
+            #[doc = " - for each egress index entry for `P` each item `E` in the index should present in"]
+            #[doc = "   `HrmpChannels` as `(P, E)`."]
+            #[doc = " - there should be no other dangling channels in `HrmpChannels`."]
+            #[doc = " - the vectors are sorted."]
             pub struct HrmpIngressChannelsIndex<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -20933,6 +21599,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Storage for the messages for each channel."]
+            #[doc = " Invariant: cannot be non-empty if the corresponding channel in `HrmpChannels` is `None`."]
             pub struct HrmpChannelContents<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::HrmpChannelId,
             );
@@ -20951,6 +21619,12 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Maintains a mapping that can be used to answer the question: What paras sent a message at"]
+            #[doc = " the given block number for a given receiver. Invariants:"]
+            #[doc = " - The inner `Vec<ParaId>` is never empty."]
+            #[doc = " - The inner `Vec<ParaId>` cannot store two same `ParaId`."]
+            #[doc = " - The outer vector is sorted ascending by block number and cannot store two items with the"]
+            #[doc = "   same block number."]
             pub struct HrmpChannelDigests<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -21206,6 +21880,9 @@ pub mod api {
         };
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Assignment keys for the current session."]
+            #[doc = " Note that this API is private due to it being prone to 'off-by-one' at session boundaries."]
+            #[doc = " When in doubt, use `Sessions` API instead."]
             pub struct AssignmentKeysUnsafe;
             impl ::subxt::StorageEntry for AssignmentKeysUnsafe {
                 const PALLET: &'static str = "ParaSessionInfo";
@@ -21217,6 +21894,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The earliest session for which previous session info is stored."]
             pub struct EarliestStoredSession;
             impl ::subxt::StorageEntry for EarliestStoredSession {
                 const PALLET: &'static str = "ParaSessionInfo";
@@ -21226,6 +21904,9 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Session information in a rolling window."]
+            #[doc = " Should have an entry in range `EarliestStoredSession..=CurrentSessionIndex`."]
+            #[doc = " Does not have any entries before the session index in the first session change notification."]
             pub struct Sessions<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Sessions<'_> {
                 const PALLET: &'static str = "ParaSessionInfo";
@@ -21390,6 +22071,8 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The last pruned session, if any. All data stored by this module"]
+            #[doc = " references sessions."]
             pub struct LastPrunedSession;
             impl ::subxt::StorageEntry for LastPrunedSession {
                 const PALLET: &'static str = "ParasDisputes";
@@ -21399,6 +22082,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " All ongoing or concluded disputes for the last several sessions."]
             pub struct Disputes<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a runtime_types::polkadot_core_primitives::CandidateHash,
@@ -21422,6 +22106,8 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " All included blocks on the chain, as well as the block number in this chain that"]
+            #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
             pub struct Included<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a runtime_types::polkadot_core_primitives::CandidateHash,
@@ -21443,6 +22129,11 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Maps session indices to a vector indicating the number of potentially-spam disputes"]
+            #[doc = " each validator is participating in. Potentially-spam disputes are remote disputes which have"]
+            #[doc = " fewer than `byzantine_threshold + 1` validators."]
+            #[doc = ""]
+            #[doc = " The i'th entry of the vector corresponds to the i'th validator in the session."]
             pub struct SpamSlots<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for SpamSlots<'_> {
                 const PALLET: &'static str = "ParasDisputes";
@@ -21455,6 +22146,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Whether the chain is frozen. Starts as `None`. When this is `Some`,"]
+            #[doc = " the chain will not accept any new parachain blocks for backing or inclusion,"]
+            #[doc = " and its value indicates the last valid block number in the chain."]
+            #[doc = " It can only be set back to `None` by governance intervention."]
             pub struct Frozen;
             impl ::subxt::StorageEntry for Frozen {
                 const PALLET: &'static str = "ParasDisputes";
@@ -21828,6 +22523,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Pending swap operations."]
             pub struct PendingSwap<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -21842,6 +22538,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Amount held on deposit for each para and the original depositor."]
+            #[doc = ""]
+            #[doc = " The given account ID is responsible for registering the code and initial head data, but may only do"]
+            #[doc = " so if it isn't yet registered. (After that, it's up to governance to do so.)"]
             pub struct Paras<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -21860,6 +22560,7 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The next free `ParaId`."]
             pub struct NextFreeParaId;
             impl ::subxt::StorageEntry for NextFreeParaId {
                 const PALLET: &'static str = "Registrar";
@@ -22125,6 +22826,22 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Amounts held on deposit for each (possibly future) leased parachain."]
+            #[doc = ""]
+            #[doc = " The actual amount locked on its behalf by any account at any time is the maximum of the second values"]
+            #[doc = " of the items in this list whose first value is the account."]
+            #[doc = ""]
+            #[doc = " The first item in the list is the amount locked for the current Lease Period. Following"]
+            #[doc = " items are for the subsequent lease periods."]
+            #[doc = ""]
+            #[doc = " The default value (an empty list) implies that the parachain no longer exists (or never"]
+            #[doc = " existed) as far as this pallet is concerned."]
+            #[doc = ""]
+            #[doc = " If a parachain doesn't exist *yet* but is scheduled to exist in the future, then it"]
+            #[doc = " will be left-padded with one or more `None`s to denote the fact that nothing is held on"]
+            #[doc = " deposit for the non-existent chain currently, but is held at some point in the future."]
+            #[doc = ""]
+            #[doc = " It is illegal for a `None` value to trail in the list."]
             pub struct Leases<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -22442,6 +23159,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Number of auctions started so far."]
             pub struct AuctionCounter;
             impl ::subxt::StorageEntry for AuctionCounter {
                 const PALLET: &'static str = "Auctions";
@@ -22451,6 +23169,11 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Information relating to the current auction, if there is one."]
+            #[doc = ""]
+            #[doc = " The first item in the tuple is the lease period index that the first of the four"]
+            #[doc = " contiguous lease periods on auction is for. The second is the block number when the"]
+            #[doc = " auction will \"begin to end\", i.e. the first block of the Ending Period of the auction."]
             pub struct AuctionInfo;
             impl ::subxt::StorageEntry for AuctionInfo {
                 const PALLET: &'static str = "Auctions";
@@ -22460,6 +23183,8 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Amounts currently reserved in the accounts of the bidders currently winning"]
+            #[doc = " (sub-)ranges."]
             pub struct ReservedAmounts<'a>(
                 pub &'a ::subxt::sp_core::crypto::AccountId32,
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
@@ -22475,6 +23200,9 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The winning bids for each of the 10 ranges at each sample in the final Ending Period of"]
+            #[doc = " the current auction. The map's key is the 0-based index into the Sample Size. The"]
+            #[doc = " first sample of the ending period is 0; the last is `Sample Size - 1`."]
             pub struct Winning<'a>(pub &'a ::core::primitive::u32);
             impl ::subxt::StorageEntry for Winning<'_> {
                 const PALLET: &'static str = "Auctions";
@@ -23058,6 +23786,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " Info on all of the funds."]
             pub struct Funds<'a>(
                 pub &'a runtime_types::polkadot_parachain::primitives::Id,
             );
@@ -23077,6 +23806,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The funds that have had additional contributions during the last block. This is used"]
+            #[doc = " in order to determine which funds should submit new or updated bids."]
             pub struct NewRaise;
             impl ::subxt::StorageEntry for NewRaise {
                 const PALLET: &'static str = "Crowdloan";
@@ -23087,6 +23818,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The number of auctions that have entered into their ending period so far."]
             pub struct EndingsCount;
             impl ::subxt::StorageEntry for EndingsCount {
                 const PALLET: &'static str = "Crowdloan";
@@ -23096,6 +23828,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " Tracker for the next available fund index"]
             pub struct NextFundIndex;
             impl ::subxt::StorageEntry for NextFundIndex {
                 const PALLET: &'static str = "Crowdloan";
@@ -23864,6 +24597,7 @@ pub mod api {
         }
         pub mod storage {
             use super::runtime_types;
+            #[doc = " The latest available query index."]
             pub struct QueryCounter;
             impl ::subxt::StorageEntry for QueryCounter {
                 const PALLET: &'static str = "XcmPallet";
@@ -23873,6 +24607,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The ongoing queries."]
             pub struct Queries<'a>(pub &'a ::core::primitive::u64);
             impl ::subxt::StorageEntry for Queries<'_> {
                 const PALLET: &'static str = "XcmPallet";
@@ -23887,6 +24622,10 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " The existing asset traps."]
+            #[doc = ""]
+            #[doc = " Key is the blake2 256 hash of (origin, versioned `MultiAssets`) pair. Value is the number of"]
+            #[doc = " times this pair has been trapped (usually just 1 if it exists at all)."]
             pub struct AssetTraps<'a>(pub &'a ::subxt::sp_core::H256);
             impl ::subxt::StorageEntry for AssetTraps<'_> {
                 const PALLET: &'static str = "XcmPallet";
@@ -23899,6 +24638,8 @@ pub mod api {
                     )])
                 }
             }
+            #[doc = " Default version to encode XCM when latest version of destination is unknown. If `None`,"]
+            #[doc = " then the destinations whose XCM version is unknown are considered unreachable."]
             pub struct SafeXcmVersion;
             impl ::subxt::StorageEntry for SafeXcmVersion {
                 const PALLET: &'static str = "XcmPallet";
@@ -23908,6 +24649,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The Latest versions that we know various locations support."]
             pub struct SupportedVersion<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a runtime_types::xcm::VersionedMultiLocation,
@@ -23929,6 +24671,7 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " All locations that we have requested version notifications from."]
             pub struct VersionNotifiers<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a runtime_types::xcm::VersionedMultiLocation,
@@ -23950,6 +24693,8 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " The target locations that are subscribed to our version changes, as well as the most recent"]
+            #[doc = " of our versions we informed them of."]
             pub struct VersionNotifyTargets<'a>(
                 pub &'a ::core::primitive::u32,
                 pub &'a runtime_types::xcm::VersionedMultiLocation,
@@ -23975,6 +24720,9 @@ pub mod api {
                     ])
                 }
             }
+            #[doc = " Destinations whose latest XCM version we would like to know. Duplicates not allowed, and"]
+            #[doc = " the `u32` counter is the number of times that a send to the destination has been attempted,"]
+            #[doc = " which is used as a prioritization."]
             pub struct VersionDiscoveryQueue;
             impl ::subxt::StorageEntry for VersionDiscoveryQueue {
                 const PALLET: &'static str = "XcmPallet";
@@ -23988,6 +24736,7 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
+            #[doc = " The current migration's stage, if any."]
             pub struct CurrentMigration;
             impl ::subxt::StorageEntry for CurrentMigration {
                 const PALLET: &'static str = "XcmPallet";
