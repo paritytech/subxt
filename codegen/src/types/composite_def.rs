@@ -46,7 +46,7 @@ pub struct CompositeDef {
     /// The fields of the type, which are either all named or all unnamed.
     pub fields: CompositeDefFields,
     /// Documentation of the composite type as presented in metadata.
-    pub docs: TokenStream,
+    pub docs: Option<TokenStream>,
 }
 
 impl CompositeDef {
@@ -88,7 +88,7 @@ impl CompositeDef {
         }
 
         let name = format_ident!("{}", ident);
-        let docs_token = quote! { #( #[doc = #docs ] )* };
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
 
         Self {
             name,
@@ -109,7 +109,7 @@ impl CompositeDef {
         docs: &[String],
     ) -> Self {
         let name = format_ident!("{}", ident);
-        let docs_token = quote! { #( #[doc = #docs ] )* };
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
