@@ -90,6 +90,7 @@ impl<'a> TypeDefGen<'a> {
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
+                    ty.docs(),
                 );
                 TypeDefGenKind::Struct(composite_def)
             }
