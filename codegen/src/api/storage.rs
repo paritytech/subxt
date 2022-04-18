@@ -241,7 +241,10 @@ fn generate_storage_entry_fns(
         }
     );
 
+    let docs = &storage_entry.docs;
+    let docs_token = quote! { #( #[doc = #docs ] )* };
     let storage_entry_type = quote! {
+        #docs_token
         #entry_struct
         impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
             #storage_entry_impl
