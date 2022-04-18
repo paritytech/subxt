@@ -24441,24 +24441,53 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "A dispatch that will fill the block weight up to the given ratio."]
                     fill_block {
                         ratio: runtime_types::sp_arithmetic::per_things::Perbill,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Make some on-chain remark."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`"]
+                    #[doc = "# </weight>"]
                     remark {
                         remark: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Set the number of pages in the WebAssembly environment's heap."]
                     set_heap_pages { pages: ::core::primitive::u64 },
                     #[codec(index = 3)]
+                    #[doc = "Set the new runtime code."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(C + S)` where `C` length of `code` and `S` complexity of `can_set_code`"]
+                    #[doc = "- 1 call to `can_set_code`: `O(S)` (calls `sp_io::misc::runtime_version` which is"]
+                    #[doc = "  expensive)."]
+                    #[doc = "- 1 storage write (codec `O(C)`)."]
+                    #[doc = "- 1 digest item."]
+                    #[doc = "- 1 event."]
+                    #[doc = "The weight of this function is dependent on the runtime, but generally this is very"]
+                    #[doc = "expensive. We will treat this as a full block."]
+                    #[doc = "# </weight>"]
                     set_code {
                         code: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Set the new runtime code without doing any checks of the given `code`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(C)` where `C` length of `code`"]
+                    #[doc = "- 1 storage write (codec `O(C)`)."]
+                    #[doc = "- 1 digest item."]
+                    #[doc = "- 1 event."]
+                    #[doc = "The weight of this function is dependent on the runtime. We will treat this as a full"]
+                    #[doc = "block. # </weight>"]
                     set_code_without_checks {
                         code: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Set some items of storage."]
                     set_storage {
                         items: ::std::vec::Vec<(
                             ::std::vec::Vec<::core::primitive::u8>,
@@ -24466,15 +24495,21 @@ pub mod api {
                         )>,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Kill some items from storage."]
                     kill_storage {
                         keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Kill all storage items with a key that starts with the given prefix."]
+                    #[doc = ""]
+                    #[doc = "**NOTE:** We rely on the Root origin to provide us the number of subkeys under"]
+                    #[doc = "the prefix we are removing to accurately calculate the weight of this function."]
                     kill_prefix {
                         prefix: ::std::vec::Vec<::core::primitive::u8>,
                         subkeys: ::core::primitive::u32,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Make some on-chain remark and emit event."]
                     remark_with_event {
                         remark: ::std::vec::Vec<::core::primitive::u8>,
                     },
@@ -24484,16 +24519,26 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The name of specification does not match between the current runtime"]
+                    #[doc = "and the new runtime."]
                     InvalidSpecName,
                     #[codec(index = 1)]
+                    #[doc = "The specification version is not allowed to decrease between the current runtime"]
+                    #[doc = "and the new runtime."]
                     SpecVersionNeedsToIncrease,
                     #[codec(index = 2)]
+                    #[doc = "Failed to extract the runtime version from the new runtime."]
+                    #[doc = ""]
+                    #[doc = "Either calling `Core_version` or decoding `RuntimeVersion` failed."]
                     FailedToExtractRuntimeVersion,
                     #[codec(index = 3)]
+                    #[doc = "Suicide called when the account has non-default composite data."]
                     NonDefaultComposite,
                     #[codec(index = 4)]
+                    #[doc = "There is a non-zero reference count preventing the account from being purged."]
                     NonZeroRefCount,
                     #[codec(index = 5)]
+                    #[doc = "The origin filter prevent the call to be dispatched."]
                     CallFiltered,
                 }
                 #[derive(
@@ -24501,27 +24546,33 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "An extrinsic completed successfully."]
                     ExtrinsicSuccess {
                         dispatch_info:
                             runtime_types::frame_support::weights::DispatchInfo,
                     },
                     #[codec(index = 1)]
+                    #[doc = "An extrinsic failed."]
                     ExtrinsicFailed {
                         dispatch_error: runtime_types::sp_runtime::DispatchError,
                         dispatch_info:
                             runtime_types::frame_support::weights::DispatchInfo,
                     },
                     #[codec(index = 2)]
+                    #[doc = "`:code` was updated."]
                     CodeUpdated,
                     #[codec(index = 3)]
+                    #[doc = "A new account was created."]
                     NewAccount {
                         account: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "An account was reaped."]
                     KilledAccount {
                         account: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "On on-chain remark happened."]
                     Remarked {
                         sender: ::subxt::sp_core::crypto::AccountId32,
                         hash: ::subxt::sp_core::H256,
@@ -24567,6 +24618,7 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Provide a set of uncles."]
                     set_uncles {
                         new_uncles: ::std::vec::Vec<
                             runtime_types::sp_runtime::generic::header::Header<
@@ -24581,18 +24633,25 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The uncle parent not in the chain."]
                     InvalidUncleParent,
                     #[codec(index = 1)]
+                    #[doc = "Uncles already set in the block."]
                     UnclesAlreadySet,
                     #[codec(index = 2)]
+                    #[doc = "Too many uncles."]
                     TooManyUncles,
                     #[codec(index = 3)]
+                    #[doc = "The uncle is genesis."]
                     GenesisUncle,
                     #[codec(index = 4)]
+                    #[doc = "The uncle is too high in chain."]
                     TooHighUncle,
                     #[codec(index = 5)]
+                    #[doc = "The uncle is already included."]
                     UncleAlreadyIncluded,
                     #[codec(index = 6)]
+                    #[doc = "The uncle isn't recent enough to be included."]
                     OldUncle,
                 }
             }
@@ -24612,16 +24671,19 @@ pub mod api {
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Call {
-                    # [codec (index = 0)] report_equivocation { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 1)] report_equivocation_unsigned { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 2)] plan_config_change { config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor , } , }
+                    # [codec (index = 0)] # [doc = "Report authority equivocation/misbehavior. This method will verify"] # [doc = "the equivocation proof and validate the given key ownership proof"] # [doc = "against the extracted offender. If both are valid, the offence will"] # [doc = "be reported."] report_equivocation { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 1)] # [doc = "Report authority equivocation/misbehavior. This method will verify"] # [doc = "the equivocation proof and validate the given key ownership proof"] # [doc = "against the extracted offender. If both are valid, the offence will"] # [doc = "be reported."] # [doc = "This extrinsic must be called unsigned and it is expected that only"] # [doc = "block authors will call it (validated in `ValidateUnsigned`), as such"] # [doc = "if the block author is defined it will be defined as the equivocation"] # [doc = "reporter."] report_equivocation_unsigned { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 2)] # [doc = "Plan an epoch config change. The epoch config change is recorded and will be enacted on"] # [doc = "the next call to `enact_epoch_change`. The config will be activated one epoch after."] # [doc = "Multiple calls to this method will replace any existing planned config change that had"] # [doc = "not been enacted yet."] plan_config_change { config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor , } , }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "An equivocation proof provided as part of an equivocation report is invalid."]
                     InvalidEquivocationProof,
                     #[codec(index = 1)]
+                    #[doc = "A key ownership proof provided as part of an equivocation report is invalid."]
                     InvalidKeyOwnershipProof,
                     #[codec(index = 2)]
+                    #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
                 }
             }
@@ -24658,10 +24720,26 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Declare that some `dislocated` account has, through rewards or penalties, sufficiently"]
+                    #[doc = "changed its score that it should properly fall into a different bag than its current"]
+                    #[doc = "one."]
+                    #[doc = ""]
+                    #[doc = "Anyone can call this function about any potentially dislocated account."]
+                    #[doc = ""]
+                    #[doc = "Will never return an error; if `dislocated` does not exist or doesn't need a rebag, then"]
+                    #[doc = "it is a noop and fees are still collected from `origin`."]
                     rebag {
                         dislocated: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Move the caller's Id directly in front of `lighter`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and can only be called by the Id of"]
+                    #[doc = "the account going in front of `lighter`."]
+                    #[doc = ""]
+                    #[doc = "Only works if"]
+                    #[doc = "- both nodes are within the same bag,"]
+                    #[doc = "- and `origin` has a greater `Score` than `lighter`."]
                     put_in_front_of {
                         lighter: ::subxt::sp_core::crypto::AccountId32,
                     },
@@ -24671,10 +24749,13 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Attempted to place node in front of a node in another bag."]
                     NotInSameBag,
                     #[codec(index = 1)]
+                    #[doc = "Id not found in list."]
                     IdNotFound,
                     #[codec(index = 2)]
+                    #[doc = "An Id does not have a greater score than another Id."]
                     NotHeavier,
                 }
                 #[derive(
@@ -24682,6 +24763,7 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "Moved an account from one bag to another."]
                     Rebagged {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         from: ::core::primitive::u64,
@@ -24699,6 +24781,31 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Transfer some liquid free balance to another account."]
+                    #[doc = ""]
+                    #[doc = "`transfer` will set the `FreeBalance` of the sender and receiver."]
+                    #[doc = "If the sender's account is below the existential deposit as a result"]
+                    #[doc = "of the transfer, the account will be reaped."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be `Signed` by the transactor."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Dependent on arguments but not critical, given proper implementations for input config"]
+                    #[doc = "  types. See related functions below."]
+                    #[doc = "- It contains a limited number of reads and writes internally and no complex"]
+                    #[doc = "  computation."]
+                    #[doc = ""]
+                    #[doc = "Related functions:"]
+                    #[doc = ""]
+                    #[doc = "  - `ensure_can_withdraw` is always called internally but has a bounded complexity."]
+                    #[doc = "  - Transferring balances to accounts that did not exist before will cause"]
+                    #[doc = "    `T::OnNewAccount::on_new_account` to be called."]
+                    #[doc = "  - Removing enough funds from an account will trigger `T::DustRemoval::on_unbalanced`."]
+                    #[doc = "  - `transfer_keep_alive` works the same way as `transfer`, but has an additional check"]
+                    #[doc = "    that the transfer will not kill the origin account."]
+                    #[doc = "---------------------------------"]
+                    #[doc = "- Origin account is already in memory, so no DB operations for them."]
+                    #[doc = "# </weight>"]
                     transfer {
                         dest: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24708,6 +24815,14 @@ pub mod api {
                         value: ::core::primitive::u128,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Set the balances of a given account."]
+                    #[doc = ""]
+                    #[doc = "This will alter `FreeBalance` and `ReservedBalance` in storage. it will"]
+                    #[doc = "also alter the total issuance of the system (`TotalIssuance`) appropriately."]
+                    #[doc = "If the new free or reserved balance is below the existential deposit,"]
+                    #[doc = "it will reset the account nonce (`frame_system::AccountNonce`)."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call is `root`."]
                     set_balance {
                         who: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24719,6 +24834,12 @@ pub mod api {
                         new_reserved: ::core::primitive::u128,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Exactly as `transfer`, except the origin must be root and the source account may be"]
+                    #[doc = "specified."]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Same as transfer, but additional read and write because the source account is not"]
+                    #[doc = "  assumed to be in the overlay."]
+                    #[doc = "# </weight>"]
                     force_transfer {
                         source: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24732,6 +24853,12 @@ pub mod api {
                         value: ::core::primitive::u128,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Same as the [`transfer`] call, but with a check that the transfer will not kill the"]
+                    #[doc = "origin account."]
+                    #[doc = ""]
+                    #[doc = "99% of the time you want [`transfer`] instead."]
+                    #[doc = ""]
+                    #[doc = "[`transfer`]: struct.Pallet.html#method.transfer"]
                     transfer_keep_alive {
                         dest: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24741,6 +24868,23 @@ pub mod api {
                         value: ::core::primitive::u128,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Transfer the entire transferable balance from the caller account."]
+                    #[doc = ""]
+                    #[doc = "NOTE: This function only attempts to transfer _transferable_ balances. This means that"]
+                    #[doc = "any locked, reserved, or existential deposits (when `keep_alive` is `true`), will not be"]
+                    #[doc = "transferred by this function. To ensure that this function results in a killed account,"]
+                    #[doc = "you might need to prepare the account by removing any reference counters, storage"]
+                    #[doc = "deposits, etc..."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be Signed."]
+                    #[doc = ""]
+                    #[doc = "- `dest`: The recipient of the transfer."]
+                    #[doc = "- `keep_alive`: A boolean to determine if the `transfer_all` operation should send all"]
+                    #[doc = "  of the funds the account has, causing the sender account to be killed (false), or"]
+                    #[doc = "  transfer everything except at least the existential deposit, which will guarantee to"]
+                    #[doc = "  keep the sender account alive (true). # <weight>"]
+                    #[doc = "- O(1). Just like transfer, but reading the user's transferable balance first."]
+                    #[doc = "  #</weight>"]
                     transfer_all {
                         dest: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24749,6 +24893,9 @@ pub mod api {
                         keep_alive: ::core::primitive::bool,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Unreserve some balance from a user by force."]
+                    #[doc = ""]
+                    #[doc = "Can only be called by ROOT."]
                     force_unreserve {
                         who: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -24762,27 +24909,35 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Vesting balance too high to send value"]
                     VestingBalance,
                     #[codec(index = 1)]
+                    #[doc = "Account liquidity restrictions prevent withdrawal"]
                     LiquidityRestrictions,
                     #[codec(index = 2)]
+                    #[doc = "Balance too low to send value"]
                     InsufficientBalance,
                     #[codec(index = 3)]
+                    #[doc = "Value too low to create account due to existential deposit"]
                     ExistentialDeposit,
                     #[codec(index = 4)]
+                    #[doc = "Transfer/payment would kill account"]
                     KeepAlive,
                     #[codec(index = 5)]
+                    #[doc = "A vesting schedule already exists for this account"]
                     ExistingVestingSchedule,
                     #[codec(index = 6)]
+                    #[doc = "Beneficiary account must pre-exist"]
                     DeadAccount,
                     #[codec(index = 7)]
+                    #[doc = "Number of named reserves exceed MaxReserves"]
                     TooManyReserves,
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Event {
-                    # [codec (index = 0)] Endowed { account : :: subxt :: sp_core :: crypto :: AccountId32 , free_balance : :: core :: primitive :: u128 , } , # [codec (index = 1)] DustLost { account : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 2)] Transfer { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 3)] BalanceSet { who : :: subxt :: sp_core :: crypto :: AccountId32 , free : :: core :: primitive :: u128 , reserved : :: core :: primitive :: u128 , } , # [codec (index = 4)] Reserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 5)] Unreserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] ReserveRepatriated { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , destination_status : runtime_types :: frame_support :: traits :: tokens :: misc :: BalanceStatus , } , # [codec (index = 7)] Deposit { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 8)] Withdraw { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 9)] Slashed { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , }
+                    # [codec (index = 0)] # [doc = "An account was created with some free balance."] Endowed { account : :: subxt :: sp_core :: crypto :: AccountId32 , free_balance : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "An account was removed whose balance was non-zero but below ExistentialDeposit,"] # [doc = "resulting in an outright loss."] DustLost { account : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 2)] # [doc = "Transfer succeeded."] Transfer { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A balance was set by root."] BalanceSet { who : :: subxt :: sp_core :: crypto :: AccountId32 , free : :: core :: primitive :: u128 , reserved : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Some balance was reserved (moved from free to reserved)."] Reserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Some balance was unreserved (moved from reserved to free)."] Unreserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Some balance was moved from the reserve of the first account to the second account."] # [doc = "Final argument indicates the destination balance type."] ReserveRepatriated { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , destination_status : runtime_types :: frame_support :: traits :: tokens :: misc :: BalanceStatus , } , # [codec (index = 7)] # [doc = "Some amount was deposited (e.g. for transaction fees)."] Deposit { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 8)] # [doc = "Some amount was withdrawn from the account (e.g. for transaction fees)."] Withdraw { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 9)] # [doc = "Some amount was removed from the account (e.g. for misbehavior)."] Slashed { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , }
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AccountData<_0> {
@@ -24828,17 +24983,44 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Propose a new bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Payment: `TipReportDepositBase` will be reserved from the origin account, as well as"]
+                    #[doc = "`DataDepositPerByte` for each byte in `reason`. It will be unreserved upon approval,"]
+                    #[doc = "or slashed when rejected."]
+                    #[doc = ""]
+                    #[doc = "- `curator`: The curator account whom will manage this bounty."]
+                    #[doc = "- `fee`: The curator fee."]
+                    #[doc = "- `value`: The total payment amount of this bounty, curator fee included."]
+                    #[doc = "- `description`: The description of this bounty."]
                     propose_bounty {
                         #[codec(compact)]
                         value: ::core::primitive::u128,
                         description: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Approve a bounty proposal. At a later time, the bounty will be funded and become active"]
+                    #[doc = "and the original deposit will be returned."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::ApproveOrigin`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     approve_bounty {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Assign a curator to a funded bounty."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::ApproveOrigin`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     propose_curator {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
@@ -24850,16 +25032,53 @@ pub mod api {
                         fee: ::core::primitive::u128,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Unassign curator from a bounty."]
+                    #[doc = ""]
+                    #[doc = "This function can only be called by the `RejectOrigin` a signed origin."]
+                    #[doc = ""]
+                    #[doc = "If this function is called by the `RejectOrigin`, we assume that the curator is"]
+                    #[doc = "malicious or inactive. As a result, we will slash the curator when possible."]
+                    #[doc = ""]
+                    #[doc = "If the origin is the curator, we take this as a sign they are unable to do their job and"]
+                    #[doc = "they willingly give up. We could slash them, but for now we allow them to recover their"]
+                    #[doc = "deposit and exit without issue. (We may want to change this if it is abused.)"]
+                    #[doc = ""]
+                    #[doc = "Finally, the origin can be anyone if and only if the curator is \"inactive\". This allows"]
+                    #[doc = "anyone in the community to call out that a curator is not doing their due diligence, and"]
+                    #[doc = "we should pick a new curator. In this case the curator should also be slashed."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     unassign_curator {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Accept the curator role for a bounty."]
+                    #[doc = "A deposit will be reserved from curator and refund upon successful payout."]
+                    #[doc = ""]
+                    #[doc = "May only be called from the curator."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     accept_curator {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Award bounty to a beneficiary account. The beneficiary will be able to claim the funds"]
+                    #[doc = "after a delay."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the curator of this bounty."]
+                    #[doc = ""]
+                    #[doc = "- `bounty_id`: Bounty ID to award."]
+                    #[doc = "- `beneficiary`: The beneficiary account whom will receive the payout."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     award_bounty {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
@@ -24869,16 +25088,45 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Claim the payout from an awarded bounty after payout delay."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the beneficiary of this bounty."]
+                    #[doc = ""]
+                    #[doc = "- `bounty_id`: Bounty ID to claim."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     claim_bounty {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Cancel a proposed or active bounty. All the funds will be sent to treasury and"]
+                    #[doc = "the curator deposit will be unreserved if possible."]
+                    #[doc = ""]
+                    #[doc = "Only `T::RejectOrigin` is able to cancel a bounty."]
+                    #[doc = ""]
+                    #[doc = "- `bounty_id`: Bounty ID to cancel."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     close_bounty {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Extend the expiry time of an active bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the curator of this bounty."]
+                    #[doc = ""]
+                    #[doc = "- `bounty_id`: Bounty ID to extend."]
+                    #[doc = "- `remark`: additional information."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "# </weight>"]
                     extend_bounty_expiry {
                         #[codec(compact)]
                         bounty_id: ::core::primitive::u32,
@@ -24890,26 +25138,38 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Proposer's balance is too low."]
                     InsufficientProposersBalance,
                     #[codec(index = 1)]
+                    #[doc = "No proposal or bounty at that index."]
                     InvalidIndex,
                     #[codec(index = 2)]
+                    #[doc = "The reason given is just too big."]
                     ReasonTooBig,
                     #[codec(index = 3)]
+                    #[doc = "The bounty status is unexpected."]
                     UnexpectedStatus,
                     #[codec(index = 4)]
+                    #[doc = "Require bounty curator."]
                     RequireCurator,
                     #[codec(index = 5)]
+                    #[doc = "Invalid bounty value."]
                     InvalidValue,
                     #[codec(index = 6)]
+                    #[doc = "Invalid bounty fee."]
                     InvalidFee,
                     #[codec(index = 7)]
+                    #[doc = "A bounty payout is pending."]
+                    #[doc = "To cancel the bounty, you must unassign and slash the curator."]
                     PendingPayout,
                     #[codec(index = 8)]
+                    #[doc = "The bounties cannot be claimed/closed because it's still in the countdown period."]
                     Premature,
                     #[codec(index = 9)]
+                    #[doc = "The bounty cannot be closed because it has active child-bounties."]
                     HasActiveChildBounty,
                     #[codec(index = 10)]
+                    #[doc = "Too many approvals are already queued."]
                     TooManyQueued,
                 }
                 #[derive(
@@ -24917,28 +25177,35 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "New bounty proposal."]
                     BountyProposed { index: ::core::primitive::u32 },
                     #[codec(index = 1)]
+                    #[doc = "A bounty proposal was rejected; funds were slashed."]
                     BountyRejected {
                         index: ::core::primitive::u32,
                         bond: ::core::primitive::u128,
                     },
                     #[codec(index = 2)]
+                    #[doc = "A bounty proposal is funded and became active."]
                     BountyBecameActive { index: ::core::primitive::u32 },
                     #[codec(index = 3)]
+                    #[doc = "A bounty is awarded to a beneficiary."]
                     BountyAwarded {
                         index: ::core::primitive::u32,
                         beneficiary: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "A bounty is claimed by beneficiary."]
                     BountyClaimed {
                         index: ::core::primitive::u32,
                         payout: ::core::primitive::u128,
                         beneficiary: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "A bounty is cancelled."]
                     BountyCanceled { index: ::core::primitive::u32 },
                     #[codec(index = 6)]
+                    #[doc = "A bounty expiry is extended."]
                     BountyExtended { index: ::core::primitive::u32 },
                 }
             }
@@ -24980,6 +25247,25 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Add a new child-bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the curator of parent"]
+                    #[doc = "bounty and the parent bounty must be in \"active\" state."]
+                    #[doc = ""]
+                    #[doc = "Child-bounty gets added successfully & fund gets transferred from"]
+                    #[doc = "parent bounty to child-bounty account, if parent bounty has enough"]
+                    #[doc = "funds, else the call fails."]
+                    #[doc = ""]
+                    #[doc = "Upper bound to maximum number of active  child-bounties that can be"]
+                    #[doc = "added are managed via runtime trait config"]
+                    #[doc = "[`Config::MaxActiveChildBountyCount`]."]
+                    #[doc = ""]
+                    #[doc = "If the call is success, the status of child-bounty is updated to"]
+                    #[doc = "\"Added\"."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty for which child-bounty is being added."]
+                    #[doc = "- `value`: Value for executing the proposal."]
+                    #[doc = "- `description`: Text description for the child-bounty."]
                     add_child_bounty {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -24988,6 +25274,21 @@ pub mod api {
                         description: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Propose curator for funded child-bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be curator of parent bounty."]
+                    #[doc = ""]
+                    #[doc = "Parent bounty must be in active state, for this child-bounty call to"]
+                    #[doc = "work."]
+                    #[doc = ""]
+                    #[doc = "Child-bounty must be in \"Added\" state, for processing the call. And"]
+                    #[doc = "state of child-bounty is moved to \"CuratorProposed\" on successful"]
+                    #[doc = "call completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
+                    #[doc = "- `curator`: Address of child-bounty curator."]
+                    #[doc = "- `fee`: payment fee to child-bounty curator for execution."]
                     propose_curator {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25001,6 +25302,25 @@ pub mod api {
                         fee: ::core::primitive::u128,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Accept the curator role for the child-bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the curator of this"]
+                    #[doc = "child-bounty."]
+                    #[doc = ""]
+                    #[doc = "A deposit will be reserved from the curator and refund upon"]
+                    #[doc = "successful payout or cancellation."]
+                    #[doc = ""]
+                    #[doc = "Fee for curator is deducted from curator fee of parent bounty."]
+                    #[doc = ""]
+                    #[doc = "Parent bounty must be in active state, for this child-bounty call to"]
+                    #[doc = "work."]
+                    #[doc = ""]
+                    #[doc = "Child-bounty must be in \"CuratorProposed\" state, for processing the"]
+                    #[doc = "call. And state of child-bounty is moved to \"Active\" on successful"]
+                    #[doc = "call completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
                     accept_curator {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25008,6 +25328,40 @@ pub mod api {
                         child_bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Unassign curator from a child-bounty."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call can be either `RejectOrigin`, or"]
+                    #[doc = "the curator of the parent bounty, or any signed origin."]
+                    #[doc = ""]
+                    #[doc = "For the origin other than T::RejectOrigin and the child-bounty"]
+                    #[doc = "curator, parent-bounty must be in active state, for this call to"]
+                    #[doc = "work. We allow child-bounty curator and T::RejectOrigin to execute"]
+                    #[doc = "this call irrespective of the parent-bounty state."]
+                    #[doc = ""]
+                    #[doc = "If this function is called by the `RejectOrigin` or the"]
+                    #[doc = "parent-bounty curator, we assume that the child-bounty curator is"]
+                    #[doc = "malicious or inactive. As a result, child-bounty curator deposit is"]
+                    #[doc = "slashed."]
+                    #[doc = ""]
+                    #[doc = "If the origin is the child-bounty curator, we take this as a sign"]
+                    #[doc = "that they are unable to do their job, and are willingly giving up."]
+                    #[doc = "We could slash the deposit, but for now we allow them to unreserve"]
+                    #[doc = "their deposit and exit without issue. (We may want to change this if"]
+                    #[doc = "it is abused.)"]
+                    #[doc = ""]
+                    #[doc = "Finally, the origin can be anyone iff the child-bounty curator is"]
+                    #[doc = "\"inactive\". Expiry update due of parent bounty is used to estimate"]
+                    #[doc = "inactive state of child-bounty curator."]
+                    #[doc = ""]
+                    #[doc = "This allows anyone in the community to call out that a child-bounty"]
+                    #[doc = "curator is not doing their due diligence, and we should pick a new"]
+                    #[doc = "one. In this case the child-bounty curator deposit is slashed."]
+                    #[doc = ""]
+                    #[doc = "State of child-bounty is moved to Added state on successful call"]
+                    #[doc = "completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
                     unassign_curator {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25015,6 +25369,23 @@ pub mod api {
                         child_bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Award child-bounty to a beneficiary."]
+                    #[doc = ""]
+                    #[doc = "The beneficiary will be able to claim the funds after a delay."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be the master curator or"]
+                    #[doc = "curator of this child-bounty."]
+                    #[doc = ""]
+                    #[doc = "Parent bounty must be in active state, for this child-bounty call to"]
+                    #[doc = "work."]
+                    #[doc = ""]
+                    #[doc = "Child-bounty must be in active state, for processing the call. And"]
+                    #[doc = "state of child-bounty is moved to \"PendingPayout\" on successful call"]
+                    #[doc = "completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
+                    #[doc = "- `beneficiary`: Beneficiary account."]
                     award_child_bounty {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25026,6 +25397,22 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Claim the payout from an awarded child-bounty after payout delay."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call may be any signed origin."]
+                    #[doc = ""]
+                    #[doc = "Call works independent of parent bounty state, No need for parent"]
+                    #[doc = "bounty to be in active state."]
+                    #[doc = ""]
+                    #[doc = "The Beneficiary is paid out with agreed bounty value. Curator fee is"]
+                    #[doc = "paid & curator deposit is unreserved."]
+                    #[doc = ""]
+                    #[doc = "Child-bounty must be in \"PendingPayout\" state, for processing the"]
+                    #[doc = "call. And instance of child-bounty is removed from the state on"]
+                    #[doc = "successful call completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
                     claim_child_bounty {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25033,6 +25420,28 @@ pub mod api {
                         child_bounty_id: ::core::primitive::u32,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Cancel a proposed or active child-bounty. Child-bounty account funds"]
+                    #[doc = "are transferred to parent bounty account. The child-bounty curator"]
+                    #[doc = "deposit may be unreserved if possible."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be either parent curator or"]
+                    #[doc = "`T::RejectOrigin`."]
+                    #[doc = ""]
+                    #[doc = "If the state of child-bounty is `Active`, curator deposit is"]
+                    #[doc = "unreserved."]
+                    #[doc = ""]
+                    #[doc = "If the state of child-bounty is `PendingPayout`, call fails &"]
+                    #[doc = "returns `PendingPayout` error."]
+                    #[doc = ""]
+                    #[doc = "For the origin other than T::RejectOrigin, parent bounty must be in"]
+                    #[doc = "active state, for this child-bounty call to work. For origin"]
+                    #[doc = "T::RejectOrigin execution is forced."]
+                    #[doc = ""]
+                    #[doc = "Instance of child-bounty is removed from the state on successful"]
+                    #[doc = "call completion."]
+                    #[doc = ""]
+                    #[doc = "- `parent_bounty_id`: Index of parent bounty."]
+                    #[doc = "- `child_bounty_id`: Index of child bounty."]
                     close_child_bounty {
                         #[codec(compact)]
                         parent_bounty_id: ::core::primitive::u32,
@@ -25045,10 +25454,13 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The parent bounty is not in active state."]
                     ParentBountyNotActive,
                     #[codec(index = 1)]
+                    #[doc = "The bounty balance is not enough to add new child-bounty."]
                     InsufficientBountyBalance,
                     #[codec(index = 2)]
+                    #[doc = "Number of child-bounties exceeds limit `MaxActiveChildBountyCount`."]
                     TooManyChildBounties,
                 }
                 #[derive(
@@ -25056,17 +25468,20 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A child-bounty is added."]
                     Added {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "A child-bounty is awarded to a beneficiary."]
                     Awarded {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
                         beneficiary: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "A child-bounty is claimed by beneficiary."]
                     Claimed {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
@@ -25074,6 +25489,7 @@ pub mod api {
                         beneficiary: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A child-bounty is cancelled."]
                     Canceled {
                         index: ::core::primitive::u32,
                         child_index: ::core::primitive::u32,
@@ -25114,6 +25530,38 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Set the collective's membership."]
+                    #[doc = ""]
+                    #[doc = "- `new_members`: The new member list. Be nice to the chain and provide it sorted."]
+                    #[doc = "- `prime`: The prime member whose vote sets the default."]
+                    #[doc = "- `old_count`: The upper bound for the previous number of members in storage. Used for"]
+                    #[doc = "  weight estimation."]
+                    #[doc = ""]
+                    #[doc = "Requires root origin."]
+                    #[doc = ""]
+                    #[doc = "NOTE: Does not enforce the expected `MaxMembers` limit on the amount of members, but"]
+                    #[doc = "      the weight estimations rely on it to estimate dispatchable weight."]
+                    #[doc = ""]
+                    #[doc = "# WARNING:"]
+                    #[doc = ""]
+                    #[doc = "The `pallet-collective` can also be managed by logic outside of the pallet through the"]
+                    #[doc = "implementation of the trait [`ChangeMembers`]."]
+                    #[doc = "Any call to `set_members` must be careful that the member set doesn't get out of sync"]
+                    #[doc = "with other logic managing the member set."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "## Weight"]
+                    #[doc = "- `O(MP + N)` where:"]
+                    #[doc = "  - `M` old-members-count (code- and governance-bounded)"]
+                    #[doc = "  - `N` new-members-count (code- and governance-bounded)"]
+                    #[doc = "  - `P` proposals-count (code-bounded)"]
+                    #[doc = "- DB:"]
+                    #[doc = "  - 1 storage mutation (codec `O(M)` read, `O(N)` write) for reading and writing the"]
+                    #[doc = "    members"]
+                    #[doc = "  - 1 storage read (codec `O(P)`) for reading the proposals"]
+                    #[doc = "  - `P` storage mutations (codec `O(M)`) for updating the votes for each proposal"]
+                    #[doc = "  - 1 storage write (codec `O(1)`) for deleting the old `prime` and setting the new one"]
+                    #[doc = "# </weight>"]
                     set_members {
                         new_members:
                             ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
@@ -25122,6 +25570,17 @@ pub mod api {
                         old_count: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Dispatch a proposal from a member using the `Member` origin."]
+                    #[doc = ""]
+                    #[doc = "Origin must be a member of the collective."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "## Weight"]
+                    #[doc = "- `O(M + P)` where `M` members-count (code-bounded) and `P` complexity of dispatching"]
+                    #[doc = "  `proposal`"]
+                    #[doc = "- DB: 1 read (codec `O(M)`) + DB access of `proposal`"]
+                    #[doc = "- 1 event"]
+                    #[doc = "# </weight>"]
                     execute {
                         proposal:
                             ::std::boxed::Box<runtime_types::polkadot_runtime::Call>,
@@ -25129,6 +25588,33 @@ pub mod api {
                         length_bound: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Add a new proposal to either be voted on or executed directly."]
+                    #[doc = ""]
+                    #[doc = "Requires the sender to be member."]
+                    #[doc = ""]
+                    #[doc = "`threshold` determines whether `proposal` is executed directly (`threshold < 2`)"]
+                    #[doc = "or put up for voting."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "## Weight"]
+                    #[doc = "- `O(B + M + P1)` or `O(B + M + P2)` where:"]
+                    #[doc = "  - `B` is `proposal` size in bytes (length-fee-bounded)"]
+                    #[doc = "  - `M` is members-count (code- and governance-bounded)"]
+                    #[doc = "  - branching is influenced by `threshold` where:"]
+                    #[doc = "    - `P1` is proposal execution complexity (`threshold < 2`)"]
+                    #[doc = "    - `P2` is proposals-count (code-bounded) (`threshold >= 2`)"]
+                    #[doc = "- DB:"]
+                    #[doc = "  - 1 storage read `is_member` (codec `O(M)`)"]
+                    #[doc = "  - 1 storage read `ProposalOf::contains_key` (codec `O(1)`)"]
+                    #[doc = "  - DB accesses influenced by `threshold`:"]
+                    #[doc = "    - EITHER storage accesses done by `proposal` (`threshold < 2`)"]
+                    #[doc = "    - OR proposal insertion (`threshold <= 2`)"]
+                    #[doc = "      - 1 storage mutation `Proposals` (codec `O(P2)`)"]
+                    #[doc = "      - 1 storage mutation `ProposalCount` (codec `O(1)`)"]
+                    #[doc = "      - 1 storage write `ProposalOf` (codec `O(B)`)"]
+                    #[doc = "      - 1 storage write `Voting` (codec `O(M)`)"]
+                    #[doc = "  - 1 event"]
+                    #[doc = "# </weight>"]
                     propose {
                         #[codec(compact)]
                         threshold: ::core::primitive::u32,
@@ -25138,6 +25624,21 @@ pub mod api {
                         length_bound: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Add an aye or nay vote for the sender to the given proposal."]
+                    #[doc = ""]
+                    #[doc = "Requires the sender to be a member."]
+                    #[doc = ""]
+                    #[doc = "Transaction fees will be waived if the member is voting on any particular proposal"]
+                    #[doc = "for the first time and the call is successful. Subsequent vote changes will charge a"]
+                    #[doc = "fee."]
+                    #[doc = "# <weight>"]
+                    #[doc = "## Weight"]
+                    #[doc = "- `O(M)` where `M` is members-count (code- and governance-bounded)"]
+                    #[doc = "- DB:"]
+                    #[doc = "  - 1 storage read `Members` (codec `O(M)`)"]
+                    #[doc = "  - 1 storage mutation `Voting` (codec `O(M)`)"]
+                    #[doc = "- 1 event"]
+                    #[doc = "# </weight>"]
                     vote {
                         proposal: ::subxt::sp_core::H256,
                         #[codec(compact)]
@@ -25145,6 +25646,38 @@ pub mod api {
                         approve: ::core::primitive::bool,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Close a vote that is either approved, disapproved or whose voting period has ended."]
+                    #[doc = ""]
+                    #[doc = "May be called by any signed account in order to finish voting and close the proposal."]
+                    #[doc = ""]
+                    #[doc = "If called before the end of the voting period it will only close the vote if it is"]
+                    #[doc = "has enough votes to be approved or disapproved."]
+                    #[doc = ""]
+                    #[doc = "If called after the end of the voting period abstentions are counted as rejections"]
+                    #[doc = "unless there is a prime member set and the prime member cast an approval."]
+                    #[doc = ""]
+                    #[doc = "If the close operation completes successfully with disapproval, the transaction fee will"]
+                    #[doc = "be waived. Otherwise execution of the approved operation will be charged to the caller."]
+                    #[doc = ""]
+                    #[doc = "+ `proposal_weight_bound`: The maximum amount of weight consumed by executing the closed"]
+                    #[doc = "proposal."]
+                    #[doc = "+ `length_bound`: The upper bound for the length of the proposal in storage. Checked via"]
+                    #[doc = "`storage::read` so it is `size_of::<u32>() == 4` larger than the pure length."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "## Weight"]
+                    #[doc = "- `O(B + M + P1 + P2)` where:"]
+                    #[doc = "  - `B` is `proposal` size in bytes (length-fee-bounded)"]
+                    #[doc = "  - `M` is members-count (code- and governance-bounded)"]
+                    #[doc = "  - `P1` is the complexity of `proposal` preimage."]
+                    #[doc = "  - `P2` is proposal-count (code-bounded)"]
+                    #[doc = "- DB:"]
+                    #[doc = " - 2 storage reads (`Members`: codec `O(M)`, `Prime`: codec `O(1)`)"]
+                    #[doc = " - 3 mutations (`Voting`: codec `O(M)`, `ProposalOf`: codec `O(B)`, `Proposals`: codec"]
+                    #[doc = "   `O(P2)`)"]
+                    #[doc = " - any mutations done while executing `proposal` (`P1`)"]
+                    #[doc = "- up to 3 events"]
+                    #[doc = "# </weight>"]
                     close {
                         proposal_hash: ::subxt::sp_core::H256,
                         #[codec(compact)]
@@ -25155,6 +25688,20 @@ pub mod api {
                         length_bound: ::core::primitive::u32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Disapprove a proposal, close, and remove it from the system, regardless of its current"]
+                    #[doc = "state."]
+                    #[doc = ""]
+                    #[doc = "Must be called by the Root origin."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "* `proposal_hash`: The hash of the proposal that should be disapproved."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Complexity: O(P) where P is the number of max proposals"]
+                    #[doc = "DB Weight:"]
+                    #[doc = "* Reads: Proposals"]
+                    #[doc = "* Writes: Voting, Proposals, ProposalOf"]
+                    #[doc = "# </weight>"]
                     disapprove_proposal {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
@@ -25164,24 +25711,34 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Account is not a member"]
                     NotMember,
                     #[codec(index = 1)]
+                    #[doc = "Duplicate proposals not allowed"]
                     DuplicateProposal,
                     #[codec(index = 2)]
+                    #[doc = "Proposal must exist"]
                     ProposalMissing,
                     #[codec(index = 3)]
+                    #[doc = "Mismatched index"]
                     WrongIndex,
                     #[codec(index = 4)]
+                    #[doc = "Duplicate vote ignored"]
                     DuplicateVote,
                     #[codec(index = 5)]
+                    #[doc = "Members are already initialized!"]
                     AlreadyInitialized,
                     #[codec(index = 6)]
+                    #[doc = "The close call was made too early, before the end of the voting."]
                     TooEarly,
                     #[codec(index = 7)]
+                    #[doc = "There can only be a maximum of `MaxProposals` active proposals."]
                     TooManyProposals,
                     #[codec(index = 8)]
+                    #[doc = "The given weight bound for the proposal was too low."]
                     WrongProposalWeight,
                     #[codec(index = 9)]
+                    #[doc = "The given length bound for the proposal was too low."]
                     WrongProposalLength,
                 }
                 #[derive(
@@ -25189,6 +25746,8 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A motion (given hash) has been proposed (by given account) with a threshold (given"]
+                    #[doc = "`MemberCount`)."]
                     Proposed {
                         account: ::subxt::sp_core::crypto::AccountId32,
                         proposal_index: ::core::primitive::u32,
@@ -25196,6 +25755,8 @@ pub mod api {
                         threshold: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "A motion (given hash) has been voted on by given account, leaving"]
+                    #[doc = "a tally (yes votes and no votes given respectively as `MemberCount`)."]
                     Voted {
                         account: ::subxt::sp_core::crypto::AccountId32,
                         proposal_hash: ::subxt::sp_core::H256,
@@ -25204,14 +25765,17 @@ pub mod api {
                         no: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "A motion was approved by the required threshold."]
                     Approved {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A motion was not approved by the required threshold."]
                     Disapproved {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 4)]
+                    #[doc = "A motion was executed; result will be `Ok` if it returned without error."]
                     Executed {
                         proposal_hash: ::subxt::sp_core::H256,
                         result: ::core::result::Result<
@@ -25220,6 +25784,7 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 5)]
+                    #[doc = "A single member did some action; result will be `Ok` if it returned without error."]
                     MemberExecuted {
                         proposal_hash: ::subxt::sp_core::H256,
                         result: ::core::result::Result<
@@ -25228,6 +25793,7 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 6)]
+                    #[doc = "A proposal was closed because its threshold was reached or after its duration was up."]
                     Closed {
                         proposal_hash: ::subxt::sp_core::H256,
                         yes: ::core::primitive::u32,
@@ -25284,12 +25850,33 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Propose a sensitive action to be taken."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_ and the sender must"]
+                    #[doc = "have funds to cover the deposit."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The hash of the proposal preimage."]
+                    #[doc = "- `value`: The amount of deposit (must be at least `MinimumDeposit`)."]
+                    #[doc = ""]
+                    #[doc = "Emits `Proposed`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(p)`"]
                     propose {
                         proposal_hash: ::subxt::sp_core::H256,
                         #[codec(compact)]
                         value: ::core::primitive::u128,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Signals agreement with a particular proposal."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_ and the sender"]
+                    #[doc = "must have funds to cover the deposit, equal to the original deposit."]
+                    #[doc = ""]
+                    #[doc = "- `proposal`: The index of the proposal to second."]
+                    #[doc = "- `seconds_upper_bound`: an upper bound on the current number of seconds on this"]
+                    #[doc = "  proposal. Extrinsic is weighted according to this value with no refund."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(S)` where S is the number of seconds a proposal already has."]
                     second {
                         #[codec(compact)]
                         proposal: ::core::primitive::u32,
@@ -25297,6 +25884,15 @@ pub mod api {
                         seconds_upper_bound: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Vote in a referendum. If `vote.is_aye()`, the vote is to enact the proposal;"]
+                    #[doc = "otherwise it is a vote to keep the status quo."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `ref_index`: The index of the referendum to vote for."]
+                    #[doc = "- `vote`: The vote configuration."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R)` where R is the number of referendums the voter has voted on."]
                     vote {
                         #[codec(compact)]
                         ref_index: ::core::primitive::u32,
@@ -25305,37 +25901,134 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Schedule an emergency cancellation of a referendum. Cannot happen twice to the same"]
+                    #[doc = "referendum."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be `CancellationOrigin`."]
+                    #[doc = ""]
+                    #[doc = "-`ref_index`: The index of the referendum to cancel."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(1)`."]
                     emergency_cancel { ref_index: ::core::primitive::u32 },
                     #[codec(index = 4)]
+                    #[doc = "Schedule a referendum to be tabled once it is legal to schedule an external"]
+                    #[doc = "referendum."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be `ExternalOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The preimage hash of the proposal."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(V)` with V number of vetoers in the blacklist of proposal."]
+                    #[doc = "  Decoding vec of length V. Charged as maximum"]
                     external_propose {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Schedule a majority-carries referendum to be tabled next once it is legal to schedule"]
+                    #[doc = "an external referendum."]
+                    #[doc = ""]
+                    #[doc = "The dispatch of this call must be `ExternalMajorityOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The preimage hash of the proposal."]
+                    #[doc = ""]
+                    #[doc = "Unlike `external_propose`, blacklisting has no effect on this and it may replace a"]
+                    #[doc = "pre-scheduled `external_propose` call."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(1)`"]
                     external_propose_majority {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Schedule a negative-turnout-bias referendum to be tabled next once it is legal to"]
+                    #[doc = "schedule an external referendum."]
+                    #[doc = ""]
+                    #[doc = "The dispatch of this call must be `ExternalDefaultOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The preimage hash of the proposal."]
+                    #[doc = ""]
+                    #[doc = "Unlike `external_propose`, blacklisting has no effect on this and it may replace a"]
+                    #[doc = "pre-scheduled `external_propose` call."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(1)`"]
                     external_propose_default {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Schedule the currently externally-proposed majority-carries referendum to be tabled"]
+                    #[doc = "immediately. If there is no externally-proposed referendum currently, or if there is one"]
+                    #[doc = "but it is not a majority-carries referendum then it fails."]
+                    #[doc = ""]
+                    #[doc = "The dispatch of this call must be `FastTrackOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The hash of the current external proposal."]
+                    #[doc = "- `voting_period`: The period that is allowed for voting on this proposal. Increased to"]
+                    #[doc = "  `FastTrackVotingPeriod` if too low."]
+                    #[doc = "- `delay`: The number of block after voting has ended in approval and this should be"]
+                    #[doc = "  enacted. This doesn't have a minimum amount."]
+                    #[doc = ""]
+                    #[doc = "Emits `Started`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(1)`"]
                     fast_track {
                         proposal_hash: ::subxt::sp_core::H256,
                         voting_period: ::core::primitive::u32,
                         delay: ::core::primitive::u32,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Veto and blacklist the external proposal hash."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be `VetoOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The preimage hash of the proposal to veto and blacklist."]
+                    #[doc = ""]
+                    #[doc = "Emits `Vetoed`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(V + log(V))` where V is number of `existing vetoers`"]
                     veto_external {
                         proposal_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 9)]
+                    #[doc = "Remove a referendum."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "- `ref_index`: The index of the referendum to cancel."]
+                    #[doc = ""]
+                    #[doc = "# Weight: `O(1)`."]
                     cancel_referendum {
                         #[codec(compact)]
                         ref_index: ::core::primitive::u32,
                     },
                     #[codec(index = 10)]
+                    #[doc = "Cancel a proposal queued for enactment."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "- `which`: The index of the referendum to cancel."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(D)` where `D` is the items in the dispatch queue. Weighted as `D = 10`."]
                     cancel_queued { which: ::core::primitive::u32 },
                     #[codec(index = 11)]
+                    #[doc = "Delegate the voting power (with some given conviction) of the sending account."]
+                    #[doc = ""]
+                    #[doc = "The balance delegated is locked for as long as it's delegated, and thereafter for the"]
+                    #[doc = "time appropriate for the conviction's lock period."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_, and the signing account must either:"]
+                    #[doc = "  - be delegating already; or"]
+                    #[doc = "  - have no voting activity (if there is, then it will need to be removed/consolidated"]
+                    #[doc = "    through `reap_vote` or `unvote`)."]
+                    #[doc = ""]
+                    #[doc = "- `to`: The account whose voting the `target` account's voting power will follow."]
+                    #[doc = "- `conviction`: The conviction that will be attached to the delegated votes. When the"]
+                    #[doc = "  account is undelegated, the funds will be locked for the corresponding period."]
+                    #[doc = "- `balance`: The amount of the account's balance to be used in delegating. This must not"]
+                    #[doc = "  be more than the account's current balance."]
+                    #[doc = ""]
+                    #[doc = "Emits `Delegated`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
+                    #[doc = "  voted on. Weight is charged as if maximum votes."]
                     delegate {
                         to: ::subxt::sp_core::crypto::AccountId32,
                         conviction:
@@ -25343,53 +26036,181 @@ pub mod api {
                         balance: ::core::primitive::u128,
                     },
                     #[codec(index = 12)]
+                    #[doc = "Undelegate the voting power of the sending account."]
+                    #[doc = ""]
+                    #[doc = "Tokens may be unlocked following once an amount of time consistent with the lock period"]
+                    #[doc = "of the conviction with which the delegation was issued."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_ and the signing account must be"]
+                    #[doc = "currently delegating."]
+                    #[doc = ""]
+                    #[doc = "Emits `Undelegated`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
+                    #[doc = "  voted on. Weight is charged as if maximum votes."]
                     undelegate,
                     #[codec(index = 13)]
+                    #[doc = "Clears all public proposals."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(1)`."]
                     clear_public_proposals,
                     #[codec(index = 14)]
+                    #[doc = "Register the preimage for an upcoming proposal. This doesn't require the proposal to be"]
+                    #[doc = "in the dispatch queue but does require a deposit, returned once enacted."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `encoded_proposal`: The preimage of a proposal."]
+                    #[doc = ""]
+                    #[doc = "Emits `PreimageNoted`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(E)` with E size of `encoded_proposal` (protected by a required deposit)."]
                     note_preimage {
                         encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 15)]
+                    #[doc = "Same as `note_preimage` but origin is `OperationalPreimageOrigin`."]
                     note_preimage_operational {
                         encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 16)]
+                    #[doc = "Register the preimage for an upcoming proposal. This requires the proposal to be"]
+                    #[doc = "in the dispatch queue. No deposit is needed. When this call is successful, i.e."]
+                    #[doc = "the preimage has not been uploaded before and matches some imminent proposal,"]
+                    #[doc = "no fee is paid."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `encoded_proposal`: The preimage of a proposal."]
+                    #[doc = ""]
+                    #[doc = "Emits `PreimageNoted`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(E)` with E size of `encoded_proposal` (protected by a required deposit)."]
                     note_imminent_preimage {
                         encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 17)]
+                    #[doc = "Same as `note_imminent_preimage` but origin is `OperationalPreimageOrigin`."]
                     note_imminent_preimage_operational {
                         encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 18)]
+                    #[doc = "Remove an expired proposal preimage and collect the deposit."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The preimage hash of a proposal."]
+                    #[doc = "- `proposal_length_upper_bound`: an upper bound on length of the proposal. Extrinsic is"]
+                    #[doc = "  weighted according to this value with no refund."]
+                    #[doc = ""]
+                    #[doc = "This will only work after `VotingPeriod` blocks from the time that the preimage was"]
+                    #[doc = "noted, if it's the same account doing it. If it's a different account, then it'll only"]
+                    #[doc = "work an additional `EnactmentPeriod` later."]
+                    #[doc = ""]
+                    #[doc = "Emits `PreimageReaped`."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(D)` where D is length of proposal."]
                     reap_preimage {
                         proposal_hash: ::subxt::sp_core::H256,
                         #[codec(compact)]
                         proposal_len_upper_bound: ::core::primitive::u32,
                     },
                     #[codec(index = 19)]
+                    #[doc = "Unlock tokens that have an expired lock."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `target`: The account to remove the lock on."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R)` with R number of vote of target."]
                     unlock {
                         target: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 20)]
+                    #[doc = "Remove a vote for a referendum."]
+                    #[doc = ""]
+                    #[doc = "If:"]
+                    #[doc = "- the referendum was cancelled, or"]
+                    #[doc = "- the referendum is ongoing, or"]
+                    #[doc = "- the referendum has ended such that"]
+                    #[doc = "  - the vote of the account was in opposition to the result; or"]
+                    #[doc = "  - there was no conviction to the account's vote; or"]
+                    #[doc = "  - the account made a split vote"]
+                    #[doc = "...then the vote is removed cleanly and a following call to `unlock` may result in more"]
+                    #[doc = "funds being available."]
+                    #[doc = ""]
+                    #[doc = "If, however, the referendum has ended and:"]
+                    #[doc = "- it finished corresponding to the vote of the account, and"]
+                    #[doc = "- the account made a standard vote with conviction, and"]
+                    #[doc = "- the lock period of the conviction is not over"]
+                    #[doc = "...then the lock will be aggregated into the overall account's lock, which may involve"]
+                    #[doc = "*overlocking* (where the two locks are combined into a single lock that is the maximum"]
+                    #[doc = "of both the amount locked and the time is it locked for)."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_, and the signer must have a vote"]
+                    #[doc = "registered for referendum `index`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: The index of referendum of the vote to be removed."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R + log R)` where R is the number of referenda that `target` has voted on."]
+                    #[doc = "  Weight is calculated for the maximum number of vote."]
                     remove_vote { index: ::core::primitive::u32 },
                     #[codec(index = 21)]
+                    #[doc = "Remove a vote for a referendum."]
+                    #[doc = ""]
+                    #[doc = "If the `target` is equal to the signer, then this function is exactly equivalent to"]
+                    #[doc = "`remove_vote`. If not equal to the signer, then the vote must have expired,"]
+                    #[doc = "either because the referendum was cancelled, because the voter lost the referendum or"]
+                    #[doc = "because the conviction period is over."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `target`: The account of the vote to be removed; this account must have voted for"]
+                    #[doc = "  referendum `index`."]
+                    #[doc = "- `index`: The index of referendum of the vote to be removed."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(R + log R)` where R is the number of referenda that `target` has voted on."]
+                    #[doc = "  Weight is calculated for the maximum number of vote."]
                     remove_other_vote {
                         target: ::subxt::sp_core::crypto::AccountId32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 22)]
+                    #[doc = "Enact a proposal from a referendum. For now we just make the weight be the maximum."]
                     enact_proposal {
                         proposal_hash: ::subxt::sp_core::H256,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 23)]
+                    #[doc = "Permanently place a proposal into the blacklist. This prevents it from ever being"]
+                    #[doc = "proposed again."]
+                    #[doc = ""]
+                    #[doc = "If called on a queued public or external proposal, then this will result in it being"]
+                    #[doc = "removed. If the `ref_index` supplied is an active referendum with the proposal hash,"]
+                    #[doc = "then it will be cancelled."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be `BlacklistOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `proposal_hash`: The proposal hash to blacklist permanently."]
+                    #[doc = "- `ref_index`: An ongoing referendum whose hash is `proposal_hash`, which will be"]
+                    #[doc = "cancelled."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(p)` (though as this is an high-privilege dispatch, we assume it has a"]
+                    #[doc = "  reasonable value)."]
                     blacklist {
                         proposal_hash: ::subxt::sp_core::H256,
                         maybe_ref_index: ::core::option::Option<::core::primitive::u32>,
                     },
                     #[codec(index = 24)]
+                    #[doc = "Remove a proposal."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be `CancelProposalOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `prop_index`: The index of the proposal to cancel."]
+                    #[doc = ""]
+                    #[doc = "Weight: `O(p)` where `p = PublicProps::<T>::decode_len()`"]
                     cancel_proposal {
                         #[codec(compact)]
                         prop_index: ::core::primitive::u32,
@@ -25400,67 +26221,96 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Value too low"]
                     ValueLow,
                     #[codec(index = 1)]
+                    #[doc = "Proposal does not exist"]
                     ProposalMissing,
                     #[codec(index = 2)]
+                    #[doc = "Cannot cancel the same proposal twice"]
                     AlreadyCanceled,
                     #[codec(index = 3)]
+                    #[doc = "Proposal already made"]
                     DuplicateProposal,
                     #[codec(index = 4)]
+                    #[doc = "Proposal still blacklisted"]
                     ProposalBlacklisted,
                     #[codec(index = 5)]
+                    #[doc = "Next external proposal not simple majority"]
                     NotSimpleMajority,
                     #[codec(index = 6)]
+                    #[doc = "Invalid hash"]
                     InvalidHash,
                     #[codec(index = 7)]
+                    #[doc = "No external proposal"]
                     NoProposal,
                     #[codec(index = 8)]
+                    #[doc = "Identity may not veto a proposal twice"]
                     AlreadyVetoed,
                     #[codec(index = 9)]
+                    #[doc = "Preimage already noted"]
                     DuplicatePreimage,
                     #[codec(index = 10)]
+                    #[doc = "Not imminent"]
                     NotImminent,
                     #[codec(index = 11)]
+                    #[doc = "Too early"]
                     TooEarly,
                     #[codec(index = 12)]
+                    #[doc = "Imminent"]
                     Imminent,
                     #[codec(index = 13)]
+                    #[doc = "Preimage not found"]
                     PreimageMissing,
                     #[codec(index = 14)]
+                    #[doc = "Vote given for invalid referendum"]
                     ReferendumInvalid,
                     #[codec(index = 15)]
+                    #[doc = "Invalid preimage"]
                     PreimageInvalid,
                     #[codec(index = 16)]
+                    #[doc = "No proposals waiting"]
                     NoneWaiting,
                     #[codec(index = 17)]
+                    #[doc = "The given account did not vote on the referendum."]
                     NotVoter,
                     #[codec(index = 18)]
+                    #[doc = "The actor has no permission to conduct the action."]
                     NoPermission,
                     #[codec(index = 19)]
+                    #[doc = "The account is already delegating."]
                     AlreadyDelegating,
                     #[codec(index = 20)]
+                    #[doc = "Too high a balance was provided that the account cannot afford."]
                     InsufficientFunds,
                     #[codec(index = 21)]
+                    #[doc = "The account is not currently delegating."]
                     NotDelegating,
                     #[codec(index = 22)]
+                    #[doc = "The account currently has votes attached to it and the operation cannot succeed until"]
+                    #[doc = "these are removed, either through `unvote` or `reap_vote`."]
                     VotesExist,
                     #[codec(index = 23)]
+                    #[doc = "The instant referendum origin is currently disallowed."]
                     InstantNotAllowed,
                     #[codec(index = 24)]
+                    #[doc = "Delegation to oneself makes no sense."]
                     Nonsense,
                     #[codec(index = 25)]
+                    #[doc = "Invalid upper bound."]
                     WrongUpperBound,
                     #[codec(index = 26)]
+                    #[doc = "Maximum number of votes reached."]
                     MaxVotesReached,
                     #[codec(index = 27)]
+                    #[doc = "Maximum number of proposals reached."]
                     TooManyProposals,
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Event {
-                    # [codec (index = 0)] Proposed { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 1)] Tabled { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , depositors : :: std :: vec :: Vec < :: subxt :: sp_core :: crypto :: AccountId32 > , } , # [codec (index = 2)] ExternalTabled , # [codec (index = 3)] Started { ref_index : :: core :: primitive :: u32 , threshold : runtime_types :: pallet_democracy :: vote_threshold :: VoteThreshold , } , # [codec (index = 4)] Passed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 5)] NotPassed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 6)] Cancelled { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 7)] Executed { ref_index : :: core :: primitive :: u32 , result : :: core :: result :: Result < () , runtime_types :: sp_runtime :: DispatchError > , } , # [codec (index = 8)] Delegated { who : :: subxt :: sp_core :: crypto :: AccountId32 , target : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 9)] Undelegated { account : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 10)] Vetoed { who : :: subxt :: sp_core :: crypto :: AccountId32 , proposal_hash : :: subxt :: sp_core :: H256 , until : :: core :: primitive :: u32 , } , # [codec (index = 11)] PreimageNoted { proposal_hash : :: subxt :: sp_core :: H256 , who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 12)] PreimageUsed { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 13)] PreimageInvalid { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 14)] PreimageMissing { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 15)] PreimageReaped { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , reaper : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 16)] Blacklisted { proposal_hash : :: subxt :: sp_core :: H256 , } , # [codec (index = 17)] Voted { voter : :: subxt :: sp_core :: crypto :: AccountId32 , ref_index : :: core :: primitive :: u32 , vote : runtime_types :: pallet_democracy :: vote :: AccountVote < :: core :: primitive :: u128 > , } , # [codec (index = 18)] Seconded { seconder : :: subxt :: sp_core :: crypto :: AccountId32 , prop_index : :: core :: primitive :: u32 , } , }
+                    # [codec (index = 0)] # [doc = "A motion has been proposed by a public account."] Proposed { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "A public proposal has been tabled for referendum vote."] Tabled { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , depositors : :: std :: vec :: Vec < :: subxt :: sp_core :: crypto :: AccountId32 > , } , # [codec (index = 2)] # [doc = "An external proposal has been tabled."] ExternalTabled , # [codec (index = 3)] # [doc = "A referendum has begun."] Started { ref_index : :: core :: primitive :: u32 , threshold : runtime_types :: pallet_democracy :: vote_threshold :: VoteThreshold , } , # [codec (index = 4)] # [doc = "A proposal has been approved by referendum."] Passed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "A proposal has been rejected by referendum."] NotPassed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "A referendum has been cancelled."] Cancelled { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "A proposal has been enacted."] Executed { ref_index : :: core :: primitive :: u32 , result : :: core :: result :: Result < () , runtime_types :: sp_runtime :: DispatchError > , } , # [codec (index = 8)] # [doc = "An account has delegated their vote to another account."] Delegated { who : :: subxt :: sp_core :: crypto :: AccountId32 , target : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 9)] # [doc = "An account has cancelled a previous delegation operation."] Undelegated { account : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 10)] # [doc = "An external proposal has been vetoed."] Vetoed { who : :: subxt :: sp_core :: crypto :: AccountId32 , proposal_hash : :: subxt :: sp_core :: H256 , until : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "A proposal's preimage was noted, and the deposit taken."] PreimageNoted { proposal_hash : :: subxt :: sp_core :: H256 , who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "A proposal preimage was removed and used (the deposit was returned)."] PreimageUsed { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 13)] # [doc = "A proposal could not be executed because its preimage was invalid."] PreimageInvalid { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "A proposal could not be executed because its preimage was missing."] PreimageMissing { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "A registered preimage was removed and the deposit collected by the reaper."] PreimageReaped { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , reaper : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 16)] # [doc = "A proposal_hash has been blacklisted permanently."] Blacklisted { proposal_hash : :: subxt :: sp_core :: H256 , } , # [codec (index = 17)] # [doc = "An account has voted in a referendum"] Voted { voter : :: subxt :: sp_core :: crypto :: AccountId32 , ref_index : :: core :: primitive :: u32 , vote : runtime_types :: pallet_democracy :: vote :: AccountVote < :: core :: primitive :: u128 > , } , # [codec (index = 18)] # [doc = "An account has secconded a proposal"] Seconded { seconder : :: subxt :: sp_core :: crypto :: AccountId32 , prop_index : :: core :: primitive :: u32 , } , }
             }
             pub mod types {
                 use super::runtime_types;
@@ -25601,41 +26451,53 @@ pub mod api {
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Call {
-                    # [codec (index = 0)] submit_unsigned { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , } , # [codec (index = 1)] set_minimum_untrusted_score { maybe_next_score : :: core :: option :: Option < runtime_types :: sp_npos_elections :: ElectionScore > , } , # [codec (index = 2)] set_emergency_election_result { supports : :: std :: vec :: Vec < (:: subxt :: sp_core :: crypto :: AccountId32 , runtime_types :: sp_npos_elections :: Support < :: subxt :: sp_core :: crypto :: AccountId32 > ,) > , } , # [codec (index = 3)] submit { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , } , # [codec (index = 4)] governance_fallback { maybe_max_voters : :: core :: option :: Option < :: core :: primitive :: u32 > , maybe_max_targets : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
+                    # [codec (index = 0)] # [doc = "Submit a solution for the unsigned phase."] # [doc = ""] # [doc = "The dispatch origin fo this call must be __none__."] # [doc = ""] # [doc = "This submission is checked on the fly. Moreover, this unsigned solution is only"] # [doc = "validated when submitted to the pool from the **local** node. Effectively, this means"] # [doc = "that only active validators can submit this transaction when authoring a block (similar"] # [doc = "to an inherent)."] # [doc = ""] # [doc = "To prevent any incorrect solution (and thus wasted time/weight), this transaction will"] # [doc = "panic if the solution submitted by the validator is invalid in any way, effectively"] # [doc = "putting their authoring reward at risk."] # [doc = ""] # [doc = "No deposit or reward is associated with this submission."] submit_unsigned { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , } , # [codec (index = 1)] # [doc = "Set a new value for `MinimumUntrustedScore`."] # [doc = ""] # [doc = "Dispatch origin must be aligned with `T::ForceOrigin`."] # [doc = ""] # [doc = "This check can be turned off by setting the value to `None`."] set_minimum_untrusted_score { maybe_next_score : :: core :: option :: Option < runtime_types :: sp_npos_elections :: ElectionScore > , } , # [codec (index = 2)] # [doc = "Set a solution in the queue, to be handed out to the client of this pallet in the next"] # [doc = "call to `ElectionProvider::elect`."] # [doc = ""] # [doc = "This can only be set by `T::ForceOrigin`, and only when the phase is `Emergency`."] # [doc = ""] # [doc = "The solution is not checked for any feasibility and is assumed to be trustworthy, as any"] # [doc = "feasibility check itself can in principle cause the election process to fail (due to"] # [doc = "memory/weight constrains)."] set_emergency_election_result { supports : :: std :: vec :: Vec < (:: subxt :: sp_core :: crypto :: AccountId32 , runtime_types :: sp_npos_elections :: Support < :: subxt :: sp_core :: crypto :: AccountId32 > ,) > , } , # [codec (index = 3)] # [doc = "Submit a solution for the signed phase."] # [doc = ""] # [doc = "The dispatch origin fo this call must be __signed__."] # [doc = ""] # [doc = "The solution is potentially queued, based on the claimed score and processed at the end"] # [doc = "of the signed phase."] # [doc = ""] # [doc = "A deposit is reserved and recorded for the solution. Based on the outcome, the solution"] # [doc = "might be rewarded, slashed, or get all or a part of the deposit back."] submit { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , } , # [codec (index = 4)] # [doc = "Trigger the governance fallback."] # [doc = ""] # [doc = "This can only be called when [`Phase::Emergency`] is enabled, as an alternative to"] # [doc = "calling [`Call::set_emergency_election_result`]."] governance_fallback { maybe_max_voters : :: core :: option :: Option < :: core :: primitive :: u32 > , maybe_max_targets : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Submission was too early."]
                     PreDispatchEarlySubmission,
                     #[codec(index = 1)]
+                    #[doc = "Wrong number of winners presented."]
                     PreDispatchWrongWinnerCount,
                     #[codec(index = 2)]
+                    #[doc = "Submission was too weak, score-wise."]
                     PreDispatchWeakSubmission,
                     #[codec(index = 3)]
+                    #[doc = "The queue was full, and the solution was not better than any of the existing ones."]
                     SignedQueueFull,
                     #[codec(index = 4)]
+                    #[doc = "The origin failed to pay the deposit."]
                     SignedCannotPayDeposit,
                     #[codec(index = 5)]
+                    #[doc = "Witness data to dispatchable is invalid."]
                     SignedInvalidWitness,
                     #[codec(index = 6)]
+                    #[doc = "The signed submission consumes too much weight"]
                     SignedTooMuchWeight,
                     #[codec(index = 7)]
+                    #[doc = "OCW submitted solution for wrong round"]
                     OcwCallWrongEra,
                     #[codec(index = 8)]
+                    #[doc = "Snapshot metadata should exist but didn't."]
                     MissingSnapshotMetadata,
                     #[codec(index = 9)]
+                    #[doc = "`Self::insert_submission` returned an invalid index."]
                     InvalidSubmissionIndex,
                     #[codec(index = 10)]
+                    #[doc = "The call is not allowed at this point."]
                     CallNotAllowed,
                     #[codec(index = 11)]
+                    #[doc = "The fallback failed"]
                     FallbackFailed,
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Event {
-                    # [codec (index = 0)] SolutionStored { election_compute : runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute , prev_ejected : :: core :: primitive :: bool , } , # [codec (index = 1)] ElectionFinalized { election_compute : :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute > , } , # [codec (index = 2)] Rewarded { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 3)] Slashed { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 4)] SignedPhaseStarted { round : :: core :: primitive :: u32 , } , # [codec (index = 5)] UnsignedPhaseStarted { round : :: core :: primitive :: u32 , } , }
+                    # [codec (index = 0)] # [doc = "A solution was stored with the given compute."] # [doc = ""] # [doc = "If the solution is signed, this means that it hasn't yet been processed. If the"] # [doc = "solution is unsigned, this means that it has also been processed."] # [doc = ""] # [doc = "The `bool` is `true` when a previous solution was ejected to make room for this one."] SolutionStored { election_compute : runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute , prev_ejected : :: core :: primitive :: bool , } , # [codec (index = 1)] # [doc = "The election has been finalized, with `Some` of the given computation, or else if the"] # [doc = "election failed, `None`."] ElectionFinalized { election_compute : :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute > , } , # [codec (index = 2)] # [doc = "An account has been rewarded for their signed submission being finalized."] Rewarded { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "An account has been slashed for submitting an invalid signed submission."] Slashed { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "The signed phase of the given round has started."] SignedPhaseStarted { round : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "The unsigned phase of the given round has started."] UnsignedPhaseStarted { round : :: core :: primitive :: u32 , } , }
             }
             pub mod signed {
                 use super::runtime_types;
@@ -25718,23 +26580,98 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Vote for a set of candidates for the upcoming round of election. This can be called to"]
+                    #[doc = "set the initial votes, or update already existing votes."]
+                    #[doc = ""]
+                    #[doc = "Upon initial voting, `value` units of `who`'s balance is locked and a deposit amount is"]
+                    #[doc = "reserved. The deposit is based on the number of votes and can be updated over time."]
+                    #[doc = ""]
+                    #[doc = "The `votes` should:"]
+                    #[doc = "  - not be empty."]
+                    #[doc = "  - be less than the number of possible candidates. Note that all current members and"]
+                    #[doc = "    runners-up are also automatically candidates for the next round."]
+                    #[doc = ""]
+                    #[doc = "If `value` is more than `who`'s free balance, then the maximum of the two is used."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be signed."]
+                    #[doc = ""]
+                    #[doc = "### Warning"]
+                    #[doc = ""]
+                    #[doc = "It is the responsibility of the caller to **NOT** place all of their balance into the"]
+                    #[doc = "lock and keep some for further operations."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "We assume the maximum weight among all 3 cases: vote_equal, vote_more and vote_less."]
+                    #[doc = "# </weight>"]
                     vote {
                         votes: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                         #[codec(compact)]
                         value: ::core::primitive::u128,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Remove `origin` as a voter."]
+                    #[doc = ""]
+                    #[doc = "This removes the lock and returns the deposit."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be signed and be a voter."]
                     remove_voter,
                     #[codec(index = 2)]
+                    #[doc = "Submit oneself for candidacy. A fixed amount of deposit is recorded."]
+                    #[doc = ""]
+                    #[doc = "All candidates are wiped at the end of the term. They either become a member/runner-up,"]
+                    #[doc = "or leave the system while their deposit is slashed."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be signed."]
+                    #[doc = ""]
+                    #[doc = "### Warning"]
+                    #[doc = ""]
+                    #[doc = "Even if a candidate ends up being a member, they must call [`Call::renounce_candidacy`]"]
+                    #[doc = "to get their deposit back. Losing the spot in an election will always lead to a slash."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "The number of current candidates must be provided as witness data."]
+                    #[doc = "# </weight>"]
                     submit_candidacy {
                         #[codec(compact)]
                         candidate_count: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Renounce one's intention to be a candidate for the next election round. 3 potential"]
+                    #[doc = "outcomes exist:"]
+                    #[doc = ""]
+                    #[doc = "- `origin` is a candidate and not elected in any set. In this case, the deposit is"]
+                    #[doc = "  unreserved, returned and origin is removed as a candidate."]
+                    #[doc = "- `origin` is a current runner-up. In this case, the deposit is unreserved, returned and"]
+                    #[doc = "  origin is removed as a runner-up."]
+                    #[doc = "- `origin` is a current member. In this case, the deposit is unreserved and origin is"]
+                    #[doc = "  removed as a member, consequently not being a candidate for the next round anymore."]
+                    #[doc = "  Similar to [`remove_member`](Self::remove_member), if replacement runners exists, they"]
+                    #[doc = "  are immediately used. If the prime is renouncing, then no prime will exist until the"]
+                    #[doc = "  next round."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be signed, and have one of the above roles."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "The type of renouncing must be provided as witness data."]
+                    #[doc = "# </weight>"]
                     renounce_candidacy {
                         renouncing: runtime_types::pallet_elections_phragmen::Renouncing,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Remove a particular member from the set. This is effective immediately and the bond of"]
+                    #[doc = "the outgoing member is slashed."]
+                    #[doc = ""]
+                    #[doc = "If a runner-up is available, then the best runner-up will be removed and replaces the"]
+                    #[doc = "outgoing member. Otherwise, a new phragmen election is started."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be root."]
+                    #[doc = ""]
+                    #[doc = "Note that this does not affect the designated block number of the next election."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "If we have a replacement, we use a small weight. Else, since this is a root call and"]
+                    #[doc = "will go into phragmen, we assume full block for now."]
+                    #[doc = "# </weight>"]
                     remove_member {
                         who: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -25743,6 +26680,16 @@ pub mod api {
                         has_replacement: ::core::primitive::bool,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Clean all voters who are defunct (i.e. they do not serve any purpose at all). The"]
+                    #[doc = "deposit of the removed voters are returned."]
+                    #[doc = ""]
+                    #[doc = "This is an root function to be used only for cleaning the state."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this call must be root."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "The total number of voters and those that are defunct must be provided as witness data."]
+                    #[doc = "# </weight>"]
                     clean_defunct_voters {
                         num_voters: ::core::primitive::u32,
                         num_defunct: ::core::primitive::u32,
@@ -25753,38 +26700,55 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Cannot vote when no candidates or members exist."]
                     UnableToVote,
                     #[codec(index = 1)]
+                    #[doc = "Must vote for at least one candidate."]
                     NoVotes,
                     #[codec(index = 2)]
+                    #[doc = "Cannot vote more than candidates."]
                     TooManyVotes,
                     #[codec(index = 3)]
+                    #[doc = "Cannot vote more than maximum allowed."]
                     MaximumVotesExceeded,
                     #[codec(index = 4)]
+                    #[doc = "Cannot vote with stake less than minimum balance."]
                     LowBalance,
                     #[codec(index = 5)]
+                    #[doc = "Voter can not pay voting bond."]
                     UnableToPayBond,
                     #[codec(index = 6)]
+                    #[doc = "Must be a voter."]
                     MustBeVoter,
                     #[codec(index = 7)]
+                    #[doc = "Cannot report self."]
                     ReportSelf,
                     #[codec(index = 8)]
+                    #[doc = "Duplicated candidate submission."]
                     DuplicatedCandidate,
                     #[codec(index = 9)]
+                    #[doc = "Member cannot re-submit candidacy."]
                     MemberSubmit,
                     #[codec(index = 10)]
+                    #[doc = "Runner cannot re-submit candidacy."]
                     RunnerUpSubmit,
                     #[codec(index = 11)]
+                    #[doc = "Candidate does not have enough funds."]
                     InsufficientCandidateFunds,
                     #[codec(index = 12)]
+                    #[doc = "Not a member."]
                     NotMember,
                     #[codec(index = 13)]
+                    #[doc = "The provided count of number of candidates is incorrect."]
                     InvalidWitnessData,
                     #[codec(index = 14)]
+                    #[doc = "The provided count of number of votes is incorrect."]
                     InvalidVoteCount,
                     #[codec(index = 15)]
+                    #[doc = "The renouncing origin presented a wrong `Renouncing` parameter."]
                     InvalidRenouncing,
                     #[codec(index = 16)]
+                    #[doc = "Prediction regarding replacement after member removal is wrong."]
                     InvalidReplacement,
                 }
                 #[derive(
@@ -25792,6 +26756,11 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A new term with new_members. This indicates that enough candidates existed to run"]
+                    #[doc = "the election, not that enough have has been elected. The inner value must be examined"]
+                    #[doc = "for this purpose. A `NewTerm(\\[\\])` indicates that some candidates got their bond"]
+                    #[doc = "slashed and none were elected, whilst `EmptyTerm` means that no candidates existed to"]
+                    #[doc = "begin with."]
                     NewTerm {
                         new_members: ::std::vec::Vec<(
                             ::subxt::sp_core::crypto::AccountId32,
@@ -25799,23 +26768,34 @@ pub mod api {
                         )>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "No (or not enough) candidates existed for this round. This is different from"]
+                    #[doc = "`NewTerm(\\[\\])`. See the description of `NewTerm`."]
                     EmptyTerm,
                     #[codec(index = 2)]
+                    #[doc = "Internal error happened while trying to perform election."]
                     ElectionError,
                     #[codec(index = 3)]
+                    #[doc = "A member has been removed. This should always be followed by either `NewTerm` or"]
+                    #[doc = "`EmptyTerm`."]
                     MemberKicked {
                         member: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Someone has renounced their candidacy."]
                     Renounced {
                         candidate: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "A candidate was slashed by amount due to failing to obtain a seat as member or"]
+                    #[doc = "runner-up."]
+                    #[doc = ""]
+                    #[doc = "Note that old members and runners-up are also candidates."]
                     CandidateSlashed {
                         candidate: ::subxt::sp_core::crypto::AccountId32,
                         amount: ::core::primitive::u128,
                     },
                     #[codec(index = 6)]
+                    #[doc = "A seat holder was slashed by amount by being forcefully removed from the set."]
                     SeatHolderSlashed {
                         seat_holder: ::subxt::sp_core::crypto::AccountId32,
                         amount: ::core::primitive::u128,
@@ -25853,6 +26833,10 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
+                    #[doc = "equivocation proof and validate the given key ownership proof"]
+                    #[doc = "against the extracted offender. If both are valid, the offence"]
+                    #[doc = "will be reported."]
                     report_equivocation {
                         equivocation_proof: ::std::boxed::Box<
                             runtime_types::sp_finality_grandpa::EquivocationProof<
@@ -25863,6 +26847,15 @@ pub mod api {
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
+                    #[doc = "equivocation proof and validate the given key ownership proof"]
+                    #[doc = "against the extracted offender. If both are valid, the offence"]
+                    #[doc = "will be reported."]
+                    #[doc = ""]
+                    #[doc = "This extrinsic must be called unsigned and it is expected that only"]
+                    #[doc = "block authors will call it (validated in `ValidateUnsigned`), as such"]
+                    #[doc = "if the block author is defined it will be defined as the equivocation"]
+                    #[doc = "reporter."]
                     report_equivocation_unsigned {
                         equivocation_proof: ::std::boxed::Box<
                             runtime_types::sp_finality_grandpa::EquivocationProof<
@@ -25873,6 +26866,13 @@ pub mod api {
                         key_owner_proof: runtime_types::sp_session::MembershipProof,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Note that the current authority set of the GRANDPA finality gadget has"]
+                    #[doc = "stalled. This will trigger a forced authority set change at the beginning"]
+                    #[doc = "of the next session, to be enacted `delay` blocks after that. The delay"]
+                    #[doc = "should be high enough to safely assume that the block signalling the"]
+                    #[doc = "forced change will not be re-orged (e.g. 1000 blocks). The GRANDPA voters"]
+                    #[doc = "will start the new authority set using the given finalized block as base."]
+                    #[doc = "Only callable by root."]
                     note_stalled {
                         delay: ::core::primitive::u32,
                         best_finalized_block_number: ::core::primitive::u32,
@@ -25883,18 +26883,27 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Attempt to signal GRANDPA pause when the authority set isn't live"]
+                    #[doc = "(either paused or already pending pause)."]
                     PauseFailed,
                     #[codec(index = 1)]
+                    #[doc = "Attempt to signal GRANDPA resume when the authority set isn't paused"]
+                    #[doc = "(either live or already pending resume)."]
                     ResumeFailed,
                     #[codec(index = 2)]
+                    #[doc = "Attempt to signal GRANDPA change with one already pending."]
                     ChangePending,
                     #[codec(index = 3)]
+                    #[doc = "Cannot signal forced change so soon after last."]
                     TooSoon,
                     #[codec(index = 4)]
+                    #[doc = "A key ownership proof provided as part of an equivocation report is invalid."]
                     InvalidKeyOwnershipProof,
                     #[codec(index = 5)]
+                    #[doc = "An equivocation proof provided as part of an equivocation report is invalid."]
                     InvalidEquivocationProof,
                     #[codec(index = 6)]
+                    #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
                 }
                 #[derive(
@@ -25902,6 +26911,7 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "New authority set has been applied."]
                     NewAuthorities {
                         authority_set: ::std::vec::Vec<(
                             runtime_types::sp_finality_grandpa::app::Public,
@@ -25909,8 +26919,10 @@ pub mod api {
                         )>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Current authority set has been paused."]
                     Paused,
                     #[codec(index = 2)]
+                    #[doc = "Current authority set has been resumed."]
                     Resumed,
                 }
             }
@@ -25937,16 +26949,69 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Add a registrar to the system."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be `T::RegistrarOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `account`: the account of the registrar."]
+                    #[doc = ""]
+                    #[doc = "Emits `RegistrarAdded` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R)` where `R` registrar-count (governance-bounded and code-bounded)."]
+                    #[doc = "- One storage mutation (codec `O(R)`)."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     add_registrar {
                         account: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Set an account's identity information and reserve the appropriate deposit."]
+                    #[doc = ""]
+                    #[doc = "If the account already has identity information, the deposit is taken as part payment"]
+                    #[doc = "for the new deposit."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `info`: The identity information."]
+                    #[doc = ""]
+                    #[doc = "Emits `IdentitySet` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(X + X' + R)`"]
+                    #[doc = "  - where `X` additional-field-count (deposit-bounded and code-bounded)"]
+                    #[doc = "  - where `R` judgements-count (registrar-count-bounded)"]
+                    #[doc = "- One balance reserve operation."]
+                    #[doc = "- One storage mutation (codec-read `O(X' + R)`, codec-write `O(X + R)`)."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     set_identity {
                         info: ::std::boxed::Box<
                             runtime_types::pallet_identity::types::IdentityInfo,
                         >,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Set the sub-accounts of the sender."]
+                    #[doc = ""]
+                    #[doc = "Payment: Any aggregate balance reserved by previous `set_subs` calls will be returned"]
+                    #[doc = "and an amount `SubAccountDeposit` will be reserved for each item in `subs`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "identity."]
+                    #[doc = ""]
+                    #[doc = "- `subs`: The identity's (new) sub-accounts."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(P + S)`"]
+                    #[doc = "  - where `P` old-subs-count (hard- and deposit-bounded)."]
+                    #[doc = "  - where `S` subs-count (hard- and deposit-bounded)."]
+                    #[doc = "- At most one balance operations."]
+                    #[doc = "- DB:"]
+                    #[doc = "  - `P + S` storage mutations (codec complexity `O(1)`)"]
+                    #[doc = "  - One storage read (codec complexity `O(P)`)."]
+                    #[doc = "  - One storage write (codec complexity `O(S)`)."]
+                    #[doc = "  - One storage-exists (`IdentityOf::contains_key`)."]
+                    #[doc = "# </weight>"]
                     set_subs {
                         subs: ::std::vec::Vec<(
                             ::subxt::sp_core::crypto::AccountId32,
@@ -25954,8 +27019,49 @@ pub mod api {
                         )>,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Clear an account's identity info and all sub-accounts and return all deposits."]
+                    #[doc = ""]
+                    #[doc = "Payment: All reserved balances on the account are returned."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "identity."]
+                    #[doc = ""]
+                    #[doc = "Emits `IdentityCleared` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R + S + X)`"]
+                    #[doc = "  - where `R` registrar-count (governance-bounded)."]
+                    #[doc = "  - where `S` subs-count (hard- and deposit-bounded)."]
+                    #[doc = "  - where `X` additional-field-count (deposit-bounded and code-bounded)."]
+                    #[doc = "- One balance-unreserve operation."]
+                    #[doc = "- `2` storage reads and `S + 2` storage deletions."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     clear_identity,
                     #[codec(index = 4)]
+                    #[doc = "Request a judgement from a registrar."]
+                    #[doc = ""]
+                    #[doc = "Payment: At most `max_fee` will be reserved for payment to the registrar if judgement"]
+                    #[doc = "given."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a"]
+                    #[doc = "registered identity."]
+                    #[doc = ""]
+                    #[doc = "- `reg_index`: The index of the registrar whose judgement is requested."]
+                    #[doc = "- `max_fee`: The maximum fee that may be paid. This should just be auto-populated as:"]
+                    #[doc = ""]
+                    #[doc = "```nocompile"]
+                    #[doc = "Self::registrars().get(reg_index).unwrap().fee"]
+                    #[doc = "```"]
+                    #[doc = ""]
+                    #[doc = "Emits `JudgementRequested` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R + X)`."]
+                    #[doc = "- One balance-reserve operation."]
+                    #[doc = "- Storage: 1 read `O(R)`, 1 mutate `O(X + R)`."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     request_judgement {
                         #[codec(compact)]
                         reg_index: ::core::primitive::u32,
@@ -25963,8 +27069,38 @@ pub mod api {
                         max_fee: ::core::primitive::u128,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Cancel a previous request."]
+                    #[doc = ""]
+                    #[doc = "Payment: A previously reserved deposit is returned on success."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a"]
+                    #[doc = "registered identity."]
+                    #[doc = ""]
+                    #[doc = "- `reg_index`: The index of the registrar whose judgement is no longer requested."]
+                    #[doc = ""]
+                    #[doc = "Emits `JudgementUnrequested` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R + X)`."]
+                    #[doc = "- One balance-reserve operation."]
+                    #[doc = "- One storage mutation `O(R + X)`."]
+                    #[doc = "- One event"]
+                    #[doc = "# </weight>"]
                     cancel_request { reg_index: ::core::primitive::u32 },
                     #[codec(index = 6)]
+                    #[doc = "Set the fee required for a judgement to be requested from a registrar."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
+                    #[doc = "of the registrar whose index is `index`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index of the registrar whose fee is to be set."]
+                    #[doc = "- `fee`: the new fee."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R)`."]
+                    #[doc = "- One storage mutation `O(R)`."]
+                    #[doc = "- Benchmark: 7.315 + R * 0.329 µs (min squares analysis)"]
+                    #[doc = "# </weight>"]
                     set_fee {
                         #[codec(compact)]
                         index: ::core::primitive::u32,
@@ -25972,12 +27108,38 @@ pub mod api {
                         fee: ::core::primitive::u128,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Change the account associated with a registrar."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
+                    #[doc = "of the registrar whose index is `index`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index of the registrar whose fee is to be set."]
+                    #[doc = "- `new`: the new account ID."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R)`."]
+                    #[doc = "- One storage mutation `O(R)`."]
+                    #[doc = "- Benchmark: 8.823 + R * 0.32 µs (min squares analysis)"]
+                    #[doc = "# </weight>"]
                     set_account_id {
                         #[codec(compact)]
                         index: ::core::primitive::u32,
                         new: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Set the field information for a registrar."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
+                    #[doc = "of the registrar whose index is `index`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index of the registrar whose fee is to be set."]
+                    #[doc = "- `fields`: the fields that the registrar concerns themselves with."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R)`."]
+                    #[doc = "- One storage mutation `O(R)`."]
+                    #[doc = "- Benchmark: 7.464 + R * 0.325 µs (min squares analysis)"]
+                    #[doc = "# </weight>"]
                     set_fields {
                         #[codec(compact)]
                         index: ::core::primitive::u32,
@@ -25986,6 +27148,25 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 9)]
+                    #[doc = "Provide a judgement for an account's identity."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must be the account"]
+                    #[doc = "of the registrar whose index is `reg_index`."]
+                    #[doc = ""]
+                    #[doc = "- `reg_index`: the index of the registrar whose judgement is being made."]
+                    #[doc = "- `target`: the account whose identity the judgement is upon. This must be an account"]
+                    #[doc = "  with a registered identity."]
+                    #[doc = "- `judgement`: the judgement of the registrar of index `reg_index` about `target`."]
+                    #[doc = ""]
+                    #[doc = "Emits `JudgementGiven` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R + X)`."]
+                    #[doc = "- One balance-transfer operation."]
+                    #[doc = "- Up to one account-lookup operation."]
+                    #[doc = "- Storage: 1 read `O(R)`, 1 mutate `O(R + X)`."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     provide_judgement {
                         #[codec(compact)]
                         reg_index: ::core::primitive::u32,
@@ -25998,6 +27179,25 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 10)]
+                    #[doc = "Remove an account's identity and sub-account information and slash the deposits."]
+                    #[doc = ""]
+                    #[doc = "Payment: Reserved balances from `set_subs` and `set_identity` are slashed and handled by"]
+                    #[doc = "`Slash`. Verification request deposits are not returned; they should be cancelled"]
+                    #[doc = "manually using `cancel_request`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
+                    #[doc = ""]
+                    #[doc = "- `target`: the account whose identity the judgement is upon. This must be an account"]
+                    #[doc = "  with a registered identity."]
+                    #[doc = ""]
+                    #[doc = "Emits `IdentityKilled` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(R + S + X)`."]
+                    #[doc = "- One balance-reserve operation."]
+                    #[doc = "- `S + 2` storage mutations."]
+                    #[doc = "- One event."]
+                    #[doc = "# </weight>"]
                     kill_identity {
                         target: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -26005,6 +27205,13 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 11)]
+                    #[doc = "Add the given account to the sender's subs."]
+                    #[doc = ""]
+                    #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
+                    #[doc = "to the sender."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "sub identity of `sub`."]
                     add_sub {
                         sub: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -26013,6 +27220,10 @@ pub mod api {
                         data: runtime_types::pallet_identity::types::Data,
                     },
                     #[codec(index = 12)]
+                    #[doc = "Alter the associated name of the given sub-account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "sub identity of `sub`."]
                     rename_sub {
                         sub: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -26021,6 +27232,13 @@ pub mod api {
                         data: runtime_types::pallet_identity::types::Data,
                     },
                     #[codec(index = 13)]
+                    #[doc = "Remove the given account from the sender's subs."]
+                    #[doc = ""]
+                    #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
+                    #[doc = "to the sender."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "sub identity of `sub`."]
                     remove_sub {
                         sub: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -26028,6 +27246,16 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 14)]
+                    #[doc = "Remove the sender as a sub-account."]
+                    #[doc = ""]
+                    #[doc = "Payment: Balance reserved by a previous `set_subs` call for one sub will be repatriated"]
+                    #[doc = "to the sender (*not* the original depositor)."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
+                    #[doc = "super-identity."]
+                    #[doc = ""]
+                    #[doc = "NOTE: This should not normally be used, but is provided in the case that the non-"]
+                    #[doc = "controller of an account is maliciously registered as a sub-account."]
                     quit_sub,
                 }
                 #[derive(
@@ -26035,36 +27263,52 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Too many subs-accounts."]
                     TooManySubAccounts,
                     #[codec(index = 1)]
+                    #[doc = "Account isn't found."]
                     NotFound,
                     #[codec(index = 2)]
+                    #[doc = "Account isn't named."]
                     NotNamed,
                     #[codec(index = 3)]
+                    #[doc = "Empty index."]
                     EmptyIndex,
                     #[codec(index = 4)]
+                    #[doc = "Fee is changed."]
                     FeeChanged,
                     #[codec(index = 5)]
+                    #[doc = "No identity found."]
                     NoIdentity,
                     #[codec(index = 6)]
+                    #[doc = "Sticky judgement."]
                     StickyJudgement,
                     #[codec(index = 7)]
+                    #[doc = "Judgement given."]
                     JudgementGiven,
                     #[codec(index = 8)]
+                    #[doc = "Invalid judgement."]
                     InvalidJudgement,
                     #[codec(index = 9)]
+                    #[doc = "The index is invalid."]
                     InvalidIndex,
                     #[codec(index = 10)]
+                    #[doc = "The target is invalid."]
                     InvalidTarget,
                     #[codec(index = 11)]
+                    #[doc = "Too many additional fields."]
                     TooManyFields,
                     #[codec(index = 12)]
+                    #[doc = "Maximum amount of registrars reached. Cannot add any more."]
                     TooManyRegistrars,
                     #[codec(index = 13)]
+                    #[doc = "Account ID is already named."]
                     AlreadyClaimed,
                     #[codec(index = 14)]
+                    #[doc = "Sender is not a sub-account."]
                     NotSub,
                     #[codec(index = 15)]
+                    #[doc = "Sub-account isn't owned by sender."]
                     NotOwned,
                 }
                 #[derive(
@@ -26072,51 +27316,62 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A name was set or reset (which will remove all judgements)."]
                     IdentitySet {
                         who: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "A name was cleared, and the given balance returned."]
                     IdentityCleared {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
                     #[codec(index = 2)]
+                    #[doc = "A name was removed and the given balance slashed."]
                     IdentityKilled {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A judgement was asked from a registrar."]
                     JudgementRequested {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "A judgement request was retracted."]
                     JudgementUnrequested {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "A judgement was given by a registrar."]
                     JudgementGiven {
                         target: ::subxt::sp_core::crypto::AccountId32,
                         registrar_index: ::core::primitive::u32,
                     },
                     #[codec(index = 6)]
+                    #[doc = "A registrar was added."]
                     RegistrarAdded {
                         registrar_index: ::core::primitive::u32,
                     },
                     #[codec(index = 7)]
+                    #[doc = "A sub-identity was added to an identity and the deposit paid."]
                     SubIdentityAdded {
                         sub: ::subxt::sp_core::crypto::AccountId32,
                         main: ::subxt::sp_core::crypto::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
                     #[codec(index = 8)]
+                    #[doc = "A sub-identity was removed from an identity and the deposit freed."]
                     SubIdentityRemoved {
                         sub: ::subxt::sp_core::crypto::AccountId32,
                         main: ::subxt::sp_core::crypto::AccountId32,
                         deposit: ::core::primitive::u128,
                     },
                     #[codec(index = 9)]
+                    #[doc = "A sub-identity was cleared, and the given deposit repatriated from the"]
+                    #[doc = "main identity account to the sub-identity account."]
                     SubIdentityRevoked {
                         sub: ::subxt::sp_core::crypto::AccountId32,
                         main: ::subxt::sp_core::crypto::AccountId32,
@@ -26308,14 +27563,16 @@ pub mod api {
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Call {
-                    # [codec (index = 0)] heartbeat { heartbeat : runtime_types :: pallet_im_online :: Heartbeat < :: core :: primitive :: u32 > , signature : runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Signature , } , }
+                    # [codec (index = 0)] # [doc = "# <weight>"] # [doc = "- Complexity: `O(K + E)` where K is length of `Keys` (heartbeat.validators_len) and E is"] # [doc = "  length of `heartbeat.network_state.external_address`"] # [doc = "  - `O(K)`: decoding of length `K`"] # [doc = "  - `O(E)`: decoding/encoding of length `E`"] # [doc = "- DbReads: pallet_session `Validators`, pallet_session `CurrentIndex`, `Keys`,"] # [doc = "  `ReceivedHeartbeats`"] # [doc = "- DbWrites: `ReceivedHeartbeats`"] # [doc = "# </weight>"] heartbeat { heartbeat : runtime_types :: pallet_im_online :: Heartbeat < :: core :: primitive :: u32 > , signature : runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Signature , } , }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Non existent public key."]
                     InvalidKey,
                     #[codec(index = 1)]
+                    #[doc = "Duplicated heartbeat."]
                     DuplicatedHeartbeat,
                 }
                 #[derive(
@@ -26323,13 +27580,16 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A new heartbeat was received from `AuthorityId`."]
                     HeartbeatReceived {
                         authority_id:
                             runtime_types::pallet_im_online::sr25519::app_sr25519::Public,
                     },
                     #[codec(index = 1)]
+                    #[doc = "At the end of the session, no offence was committed."]
                     AllGood,
                     #[codec(index = 2)]
+                    #[doc = "At the end of the session, at least one validator was found to be offline."]
                     SomeOffline {
                         offline: ::std::vec::Vec<(
                             ::subxt::sp_core::crypto::AccountId32,
@@ -26375,21 +27635,116 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Assign an previously unassigned index."]
+                    #[doc = ""]
+                    #[doc = "Payment: `Deposit` is reserved from the sender account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index to be claimed. This must not be in use."]
+                    #[doc = ""]
+                    #[doc = "Emits `IndexAssigned` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- One storage mutation (codec `O(1)`)."]
+                    #[doc = "- One reserve operation."]
+                    #[doc = "- One event."]
+                    #[doc = "-------------------"]
+                    #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
+                    #[doc = "# </weight>"]
                     claim { index: ::core::primitive::u32 },
                     #[codec(index = 1)]
+                    #[doc = "Assign an index already owned by the sender to another account. The balance reservation"]
+                    #[doc = "is effectively transferred to the new account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index to be re-assigned. This must be owned by the sender."]
+                    #[doc = "- `new`: the new owner of the index. This function is a no-op if it is equal to sender."]
+                    #[doc = ""]
+                    #[doc = "Emits `IndexAssigned` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- One storage mutation (codec `O(1)`)."]
+                    #[doc = "- One transfer operation."]
+                    #[doc = "- One event."]
+                    #[doc = "-------------------"]
+                    #[doc = "- DB Weight:"]
+                    #[doc = "   - Reads: Indices Accounts, System Account (recipient)"]
+                    #[doc = "   - Writes: Indices Accounts, System Account (recipient)"]
+                    #[doc = "# </weight>"]
                     transfer {
                         new: ::subxt::sp_core::crypto::AccountId32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Free up an index owned by the sender."]
+                    #[doc = ""]
+                    #[doc = "Payment: Any previous deposit placed for the index is unreserved in the sender account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must own the index."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index to be freed. This must be owned by the sender."]
+                    #[doc = ""]
+                    #[doc = "Emits `IndexFreed` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- One storage mutation (codec `O(1)`)."]
+                    #[doc = "- One reserve operation."]
+                    #[doc = "- One event."]
+                    #[doc = "-------------------"]
+                    #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
+                    #[doc = "# </weight>"]
                     free { index: ::core::primitive::u32 },
                     #[codec(index = 3)]
+                    #[doc = "Force an index to an account. This doesn't require a deposit. If the index is already"]
+                    #[doc = "held, then any deposit is reimbursed to its current owner."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index to be (re-)assigned."]
+                    #[doc = "- `new`: the new owner of the index. This function is a no-op if it is equal to sender."]
+                    #[doc = "- `freeze`: if set to `true`, will freeze the index so it cannot be transferred."]
+                    #[doc = ""]
+                    #[doc = "Emits `IndexAssigned` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- One storage mutation (codec `O(1)`)."]
+                    #[doc = "- Up to one reserve operation."]
+                    #[doc = "- One event."]
+                    #[doc = "-------------------"]
+                    #[doc = "- DB Weight:"]
+                    #[doc = "   - Reads: Indices Accounts, System Account (original owner)"]
+                    #[doc = "   - Writes: Indices Accounts, System Account (original owner)"]
+                    #[doc = "# </weight>"]
                     force_transfer {
                         new: ::subxt::sp_core::crypto::AccountId32,
                         index: ::core::primitive::u32,
                         freeze: ::core::primitive::bool,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Freeze an index so it will always point to the sender account. This consumes the"]
+                    #[doc = "deposit."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must have a"]
+                    #[doc = "non-frozen account `index`."]
+                    #[doc = ""]
+                    #[doc = "- `index`: the index to be frozen in place."]
+                    #[doc = ""]
+                    #[doc = "Emits `IndexFrozen` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- One storage mutation (codec `O(1)`)."]
+                    #[doc = "- Up to one slash operation."]
+                    #[doc = "- One event."]
+                    #[doc = "-------------------"]
+                    #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
+                    #[doc = "# </weight>"]
                     freeze { index: ::core::primitive::u32 },
                 }
                 #[derive(
@@ -26397,14 +27752,19 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The index was not already assigned."]
                     NotAssigned,
                     #[codec(index = 1)]
+                    #[doc = "The index is assigned to another account."]
                     NotOwner,
                     #[codec(index = 2)]
+                    #[doc = "The index was not available."]
                     InUse,
                     #[codec(index = 3)]
+                    #[doc = "The source and destination accounts are identical."]
                     NotTransfer,
                     #[codec(index = 4)]
+                    #[doc = "The index is permanent and may not be freed/changed."]
                     Permanent,
                 }
                 #[derive(
@@ -26412,13 +27772,16 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A account index was assigned."]
                     IndexAssigned {
                         who: ::subxt::sp_core::crypto::AccountId32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "A account index has been freed up (unassigned)."]
                     IndexFreed { index: ::core::primitive::u32 },
                     #[codec(index = 2)]
+                    #[doc = "A account index has been frozen to its current account ID."]
                     IndexFrozen {
                         index: ::core::primitive::u32,
                         who: ::subxt::sp_core::crypto::AccountId32,
@@ -26435,31 +27798,57 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Add a member `who` to the set."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::AddOrigin`."]
                     add_member {
                         who: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Remove a member `who` from the set."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::RemoveOrigin`."]
                     remove_member {
                         who: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Swap out one member `remove` for another `add`."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::SwapOrigin`."]
+                    #[doc = ""]
+                    #[doc = "Prime membership is *not* passed from `remove` to `add`, if extant."]
                     swap_member {
                         remove: ::subxt::sp_core::crypto::AccountId32,
                         add: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Change the membership to a new set, disregarding the existing membership. Be nice and"]
+                    #[doc = "pass `members` pre-sorted."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::ResetOrigin`."]
                     reset_members {
                         members: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Swap out the sending member for some other key `new`."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `Signed` origin of a current member."]
+                    #[doc = ""]
+                    #[doc = "Prime membership is passed from the origin account to `new`, if extant."]
                     change_key {
                         new: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Set the prime member. Must be a current member."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::PrimeOrigin`."]
                     set_prime {
                         who: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Remove the prime member if it exists."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::PrimeOrigin`."]
                     clear_prime,
                 }
                 #[derive(
@@ -26467,8 +27856,10 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Already a member."]
                     AlreadyMember,
                     #[codec(index = 1)]
+                    #[doc = "Not a member."]
                     NotMember,
                 }
                 #[derive(
@@ -26476,16 +27867,22 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "The given member was added; see the transaction for who."]
                     MemberAdded,
                     #[codec(index = 1)]
+                    #[doc = "The given member was removed; see the transaction for who."]
                     MemberRemoved,
                     #[codec(index = 2)]
+                    #[doc = "Two members were swapped; see the transaction for who."]
                     MembersSwapped,
                     #[codec(index = 3)]
+                    #[doc = "The membership was reset; see the transaction for who the new set is."]
                     MembersReset,
                     #[codec(index = 4)]
+                    #[doc = "One of the members' keys changed."]
                     KeyChanged,
                     #[codec(index = 5)]
+                    #[doc = "Phantom member, never used."]
                     Dummy,
                 }
             }
@@ -26499,12 +27896,73 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Immediately dispatch a multi-signature call using a single approval from the caller."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `other_signatories`: The accounts (other than the sender) who are part of the"]
+                    #[doc = "multi-signature, but do not participate in the approval process."]
+                    #[doc = "- `call`: The call to be executed."]
+                    #[doc = ""]
+                    #[doc = "Result is equivalent to the dispatched result."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "O(Z + C) where Z is the length of the call and C its execution weight."]
+                    #[doc = "-------------------------------"]
+                    #[doc = "- DB Weight: None"]
+                    #[doc = "- Plus Call Weight"]
+                    #[doc = "# </weight>"]
                     as_multi_threshold_1 {
                         other_signatories:
                             ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                         call: ::std::boxed::Box<runtime_types::polkadot_runtime::Call>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
+                    #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
+                    #[doc = ""]
+                    #[doc = "If there are enough, then dispatch the call."]
+                    #[doc = ""]
+                    #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
+                    #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
+                    #[doc = "is cancelled."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `threshold`: The total number of approvals for this dispatch before it is executed."]
+                    #[doc = "- `other_signatories`: The accounts (other than the sender) who can approve this"]
+                    #[doc = "dispatch. May not be empty."]
+                    #[doc = "- `maybe_timepoint`: If this is the first approval, then this must be `None`. If it is"]
+                    #[doc = "not the first approval, then it must be `Some`, with the timepoint (block number and"]
+                    #[doc = "transaction index) of the first approval transaction."]
+                    #[doc = "- `call`: The call to be executed."]
+                    #[doc = ""]
+                    #[doc = "NOTE: Unless this is the final approval, you will generally want to use"]
+                    #[doc = "`approve_as_multi` instead, since it only requires a hash of the call."]
+                    #[doc = ""]
+                    #[doc = "Result is equivalent to the dispatched result if `threshold` is exactly `1`. Otherwise"]
+                    #[doc = "on success, result is `Ok` and the result from the interior call, if it was executed,"]
+                    #[doc = "may be found in the deposited `MultisigExecuted` event."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(S + Z + Call)`."]
+                    #[doc = "- Up to one balance-reserve or unreserve operation."]
+                    #[doc = "- One passthrough operation, one insert, both `O(S)` where `S` is the number of"]
+                    #[doc = "  signatories. `S` is capped by `MaxSignatories`, with weight being proportional."]
+                    #[doc = "- One call encode & hash, both of complexity `O(Z)` where `Z` is tx-len."]
+                    #[doc = "- One encode & hash, both of complexity `O(S)`."]
+                    #[doc = "- Up to one binary search and insert (`O(logS + S)`)."]
+                    #[doc = "- I/O: 1 read `O(S)`, up to 1 mutate `O(S)`. Up to one remove."]
+                    #[doc = "- One event."]
+                    #[doc = "- The weight of the `call`."]
+                    #[doc = "- Storage: inserts one item, value size bounded by `MaxSignatories`, with a deposit"]
+                    #[doc = "  taken for its lifetime of `DepositBase + threshold * DepositFactor`."]
+                    #[doc = "-------------------------------"]
+                    #[doc = "- DB Weight:"]
+                    #[doc = "    - Reads: Multisig Storage, [Caller Account], Calls (if `store_call`)"]
+                    #[doc = "    - Writes: Multisig Storage, [Caller Account], Calls (if `store_call`)"]
+                    #[doc = "- Plus Call Weight"]
+                    #[doc = "# </weight>"]
                     as_multi {
                         threshold: ::core::primitive::u16,
                         other_signatories:
@@ -26521,6 +27979,41 @@ pub mod api {
                         max_weight: ::core::primitive::u64,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Register approval for a dispatch to be made from a deterministic composite account if"]
+                    #[doc = "approved by a total of `threshold - 1` of `other_signatories`."]
+                    #[doc = ""]
+                    #[doc = "Payment: `DepositBase` will be reserved if this is the first approval, plus"]
+                    #[doc = "`threshold` times `DepositFactor`. It is returned once this dispatch happens or"]
+                    #[doc = "is cancelled."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `threshold`: The total number of approvals for this dispatch before it is executed."]
+                    #[doc = "- `other_signatories`: The accounts (other than the sender) who can approve this"]
+                    #[doc = "dispatch. May not be empty."]
+                    #[doc = "- `maybe_timepoint`: If this is the first approval, then this must be `None`. If it is"]
+                    #[doc = "not the first approval, then it must be `Some`, with the timepoint (block number and"]
+                    #[doc = "transaction index) of the first approval transaction."]
+                    #[doc = "- `call_hash`: The hash of the call to be executed."]
+                    #[doc = ""]
+                    #[doc = "NOTE: If this is the final approval, you will want to use `as_multi` instead."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(S)`."]
+                    #[doc = "- Up to one balance-reserve or unreserve operation."]
+                    #[doc = "- One passthrough operation, one insert, both `O(S)` where `S` is the number of"]
+                    #[doc = "  signatories. `S` is capped by `MaxSignatories`, with weight being proportional."]
+                    #[doc = "- One encode & hash, both of complexity `O(S)`."]
+                    #[doc = "- Up to one binary search and insert (`O(logS + S)`)."]
+                    #[doc = "- I/O: 1 read `O(S)`, up to 1 mutate `O(S)`. Up to one remove."]
+                    #[doc = "- One event."]
+                    #[doc = "- Storage: inserts one item, value size bounded by `MaxSignatories`, with a deposit"]
+                    #[doc = "  taken for its lifetime of `DepositBase + threshold * DepositFactor`."]
+                    #[doc = "----------------------------------"]
+                    #[doc = "- DB Weight:"]
+                    #[doc = "    - Read: Multisig Storage, [Caller Account]"]
+                    #[doc = "    - Write: Multisig Storage, [Caller Account]"]
+                    #[doc = "# </weight>"]
                     approve_as_multi {
                         threshold: ::core::primitive::u16,
                         other_signatories:
@@ -26534,6 +28027,32 @@ pub mod api {
                         max_weight: ::core::primitive::u64,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Cancel a pre-existing, on-going multisig transaction. Any deposit reserved previously"]
+                    #[doc = "for this operation will be unreserved on success."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `threshold`: The total number of approvals for this dispatch before it is executed."]
+                    #[doc = "- `other_signatories`: The accounts (other than the sender) who can approve this"]
+                    #[doc = "dispatch. May not be empty."]
+                    #[doc = "- `timepoint`: The timepoint (block number and transaction index) of the first approval"]
+                    #[doc = "transaction for this dispatch."]
+                    #[doc = "- `call_hash`: The hash of the call to be executed."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(S)`."]
+                    #[doc = "- Up to one balance-reserve or unreserve operation."]
+                    #[doc = "- One passthrough operation, one insert, both `O(S)` where `S` is the number of"]
+                    #[doc = "  signatories. `S` is capped by `MaxSignatories`, with weight being proportional."]
+                    #[doc = "- One encode & hash, both of complexity `O(S)`."]
+                    #[doc = "- One event."]
+                    #[doc = "- I/O: 1 read `O(S)`, one remove."]
+                    #[doc = "- Storage: removes one item."]
+                    #[doc = "----------------------------------"]
+                    #[doc = "- DB Weight:"]
+                    #[doc = "    - Read: Multisig Storage, [Caller Account], Refund Account, Calls"]
+                    #[doc = "    - Write: Multisig Storage, [Caller Account], Refund Account, Calls"]
+                    #[doc = "# </weight>"]
                     cancel_as_multi {
                         threshold: ::core::primitive::u16,
                         other_signatories:
@@ -26549,32 +28068,46 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Threshold must be 2 or greater."]
                     MinimumThreshold,
                     #[codec(index = 1)]
+                    #[doc = "Call is already approved by this signatory."]
                     AlreadyApproved,
                     #[codec(index = 2)]
+                    #[doc = "Call doesn't need any (more) approvals."]
                     NoApprovalsNeeded,
                     #[codec(index = 3)]
+                    #[doc = "There are too few signatories in the list."]
                     TooFewSignatories,
                     #[codec(index = 4)]
+                    #[doc = "There are too many signatories in the list."]
                     TooManySignatories,
                     #[codec(index = 5)]
+                    #[doc = "The signatories were provided out of order; they should be ordered."]
                     SignatoriesOutOfOrder,
                     #[codec(index = 6)]
+                    #[doc = "The sender was contained in the other signatories; it shouldn't be."]
                     SenderInSignatories,
                     #[codec(index = 7)]
+                    #[doc = "Multisig operation not found when attempting to cancel."]
                     NotFound,
                     #[codec(index = 8)]
+                    #[doc = "Only the account that originally created the multisig is able to cancel it."]
                     NotOwner,
                     #[codec(index = 9)]
+                    #[doc = "No timepoint was given, yet the multisig operation is already underway."]
                     NoTimepoint,
                     #[codec(index = 10)]
+                    #[doc = "A different timepoint was given to the multisig operation that is underway."]
                     WrongTimepoint,
                     #[codec(index = 11)]
+                    #[doc = "A timepoint was given, yet no multisig operation is underway."]
                     UnexpectedTimepoint,
                     #[codec(index = 12)]
+                    #[doc = "The maximum weight information provided was too low."]
                     MaxWeightTooLow,
                     #[codec(index = 13)]
+                    #[doc = "The data to be stored is already stored."]
                     AlreadyStored,
                 }
                 #[derive(
@@ -26582,12 +28115,14 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A new multisig operation has begun."]
                     NewMultisig {
                         approving: ::subxt::sp_core::crypto::AccountId32,
                         multisig: ::subxt::sp_core::crypto::AccountId32,
                         call_hash: [::core::primitive::u8; 32usize],
                     },
                     #[codec(index = 1)]
+                    #[doc = "A multisig operation has been approved by someone."]
                     MultisigApproval {
                         approving: ::subxt::sp_core::crypto::AccountId32,
                         timepoint: runtime_types::pallet_multisig::Timepoint<
@@ -26597,6 +28132,7 @@ pub mod api {
                         call_hash: [::core::primitive::u8; 32usize],
                     },
                     #[codec(index = 2)]
+                    #[doc = "A multisig operation has been executed."]
                     MultisigExecuted {
                         approving: ::subxt::sp_core::crypto::AccountId32,
                         timepoint: runtime_types::pallet_multisig::Timepoint<
@@ -26610,6 +28146,7 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A multisig operation has been cancelled."]
                     MultisigCancelled {
                         cancelling: ::subxt::sp_core::crypto::AccountId32,
                         timepoint: runtime_types::pallet_multisig::Timepoint<
@@ -26642,6 +28179,9 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
+                    #[doc = "(kind-specific) time slot. This event is not deposited for duplicate slashes."]
+                    #[doc = "\\[kind, timeslot\\]."]
                     Offence {
                         kind: [::core::primitive::u8; 16usize],
                         timeslot: ::std::vec::Vec<::core::primitive::u8>,
@@ -26658,14 +28198,26 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Register a preimage on-chain."]
+                    #[doc = ""]
+                    #[doc = "If the preimage was previously requested, no fees or deposits are taken for providing"]
+                    #[doc = "the preimage. Otherwise, a deposit is taken proportional to the size of the preimage."]
                     note_preimage {
                         bytes: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Clear an unrequested preimage from the runtime storage."]
                     unnote_preimage { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 2)]
+                    #[doc = "Request a preimage be uploaded to the chain without paying any fees or deposits."]
+                    #[doc = ""]
+                    #[doc = "If the preimage requests has already been provided on-chain, we unreserve any deposit"]
+                    #[doc = "a user may have paid, and take the control of the preimage out of their hands."]
                     request_preimage { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 3)]
+                    #[doc = "Clear a previously made request for a preimage."]
+                    #[doc = ""]
+                    #[doc = "NOTE: THIS MUST NOT BE CALLED ON `hash` MORE TIMES THAN `request_preimage`."]
                     unrequest_preimage { hash: ::subxt::sp_core::H256 },
                 }
                 #[derive(
@@ -26673,16 +28225,22 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Preimage is too large to store on-chain."]
                     TooLarge,
                     #[codec(index = 1)]
+                    #[doc = "Preimage has already been noted on-chain."]
                     AlreadyNoted,
                     #[codec(index = 2)]
+                    #[doc = "The user is not authorized to perform this action."]
                     NotAuthorized,
                     #[codec(index = 3)]
+                    #[doc = "The preimage cannot be removed since it has not yet been noted."]
                     NotNoted,
                     #[codec(index = 4)]
+                    #[doc = "A preimage may not be removed when there are outstanding requests."]
                     Requested,
                     #[codec(index = 5)]
+                    #[doc = "The preimage request cannot be removed since no outstanding requests exist."]
                     NotRequested,
                 }
                 #[derive(
@@ -26690,10 +28248,13 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A preimage has been noted."]
                     Noted { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 1)]
+                    #[doc = "A preimage has been requested."]
                     Requested { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 2)]
+                    #[doc = "A preimage has ben cleared."]
                     Cleared { hash: ::subxt::sp_core::H256 },
                 }
             }
@@ -26714,6 +28275,21 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Dispatch the given `call` from an account that the sender is authorised for through"]
+                    #[doc = "`add_proxy`."]
+                    #[doc = ""]
+                    #[doc = "Removes any corresponding announcement(s)."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `real`: The account that the proxy will make a call on behalf of."]
+                    #[doc = "- `force_proxy_type`: Specify the exact proxy type to be used and checked for this call."]
+                    #[doc = "- `call`: The call to be made by the `real` account."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
                     proxy {
                         real: ::subxt::sp_core::crypto::AccountId32,
                         force_proxy_type: ::core::option::Option<
@@ -26722,26 +28298,103 @@ pub mod api {
                         call: ::std::boxed::Box<runtime_types::polkadot_runtime::Call>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Register a proxy account for the sender that is able to make calls on its behalf."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `proxy`: The account that the `caller` would like to make a proxy."]
+                    #[doc = "- `proxy_type`: The permissions allowed for this proxy account."]
+                    #[doc = "- `delay`: The announcement period required of the initial proxy. Will generally be"]
+                    #[doc = "zero."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
                     add_proxy {
                         delegate: ::subxt::sp_core::crypto::AccountId32,
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Unregister a proxy account for the sender."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `proxy`: The account that the `caller` would like to remove as a proxy."]
+                    #[doc = "- `proxy_type`: The permissions currently enabled for the removed proxy account."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
                     remove_proxy {
                         delegate: ::subxt::sp_core::crypto::AccountId32,
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Unregister all proxy accounts for the sender."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "WARNING: This may be called on accounts created by `anonymous`, however if done, then"]
+                    #[doc = "the unreserved fees will be inaccessible. **All access to this account will be lost.**"]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
                     remove_proxies,
                     #[codec(index = 4)]
+                    #[doc = "Spawn a fresh new account that is guaranteed to be otherwise inaccessible, and"]
+                    #[doc = "initialize it with a proxy of `proxy_type` for `origin` sender."]
+                    #[doc = ""]
+                    #[doc = "Requires a `Signed` origin."]
+                    #[doc = ""]
+                    #[doc = "- `proxy_type`: The type of the proxy that the sender will be registered as over the"]
+                    #[doc = "new account. This will almost always be the most permissive `ProxyType` possible to"]
+                    #[doc = "allow for maximum flexibility."]
+                    #[doc = "- `index`: A disambiguation index, in case this is called multiple times in the same"]
+                    #[doc = "transaction (e.g. with `utility::batch`). Unless you're using `batch` you probably just"]
+                    #[doc = "want to use `0`."]
+                    #[doc = "- `delay`: The announcement period required of the initial proxy. Will generally be"]
+                    #[doc = "zero."]
+                    #[doc = ""]
+                    #[doc = "Fails with `Duplicate` if this has already been called in this transaction, from the"]
+                    #[doc = "same sender, with the same parameters."]
+                    #[doc = ""]
+                    #[doc = "Fails if there are insufficient funds to pay for deposit."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
+                    #[doc = "TODO: Might be over counting 1 read"]
                     anonymous {
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
                         delay: ::core::primitive::u32,
                         index: ::core::primitive::u16,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Removes a previously spawned anonymous proxy."]
+                    #[doc = ""]
+                    #[doc = "WARNING: **All access to this account will be lost.** Any funds held in it will be"]
+                    #[doc = "inaccessible."]
+                    #[doc = ""]
+                    #[doc = "Requires a `Signed` origin, and the sender account must have been created by a call to"]
+                    #[doc = "`anonymous` with corresponding parameters."]
+                    #[doc = ""]
+                    #[doc = "- `spawner`: The account that originally called `anonymous` to create this account."]
+                    #[doc = "- `index`: The disambiguation index originally passed to `anonymous`. Probably `0`."]
+                    #[doc = "- `proxy_type`: The proxy type originally passed to `anonymous`."]
+                    #[doc = "- `height`: The height of the chain when the call to `anonymous` was processed."]
+                    #[doc = "- `ext_index`: The extrinsic index in which the call to `anonymous` was processed."]
+                    #[doc = ""]
+                    #[doc = "Fails with `NoPermission` in case the caller is not a previously created anonymous"]
+                    #[doc = "account whose `anonymous` call has corresponding parameters."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of the number of proxies the user has (P)."]
+                    #[doc = "# </weight>"]
                     kill_anonymous {
                         spawner: ::subxt::sp_core::crypto::AccountId32,
                         proxy_type: runtime_types::polkadot_runtime::ProxyType,
@@ -26752,21 +28405,91 @@ pub mod api {
                         ext_index: ::core::primitive::u32,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Publish the hash of a proxy-call that will be made in the future."]
+                    #[doc = ""]
+                    #[doc = "This must be called some number of blocks before the corresponding `proxy` is attempted"]
+                    #[doc = "if the delay associated with the proxy relationship is greater than zero."]
+                    #[doc = ""]
+                    #[doc = "No more than `MaxPending` announcements may be made at any one time."]
+                    #[doc = ""]
+                    #[doc = "This will take a deposit of `AnnouncementDepositFactor` as well as"]
+                    #[doc = "`AnnouncementDepositBase` if there are no other pending announcements."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and a proxy of `real`."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `real`: The account that the proxy will make a call on behalf of."]
+                    #[doc = "- `call_hash`: The hash of the call to be made by the `real` account."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of:"]
+                    #[doc = "- A: the number of announcements made."]
+                    #[doc = "- P: the number of proxies the user has."]
+                    #[doc = "# </weight>"]
                     announce {
                         real: ::subxt::sp_core::crypto::AccountId32,
                         call_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Remove a given announcement."]
+                    #[doc = ""]
+                    #[doc = "May be called by a proxy account to remove a call they previously announced and return"]
+                    #[doc = "the deposit."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `real`: The account that the proxy will make a call on behalf of."]
+                    #[doc = "- `call_hash`: The hash of the call to be made by the `real` account."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of:"]
+                    #[doc = "- A: the number of announcements made."]
+                    #[doc = "- P: the number of proxies the user has."]
+                    #[doc = "# </weight>"]
                     remove_announcement {
                         real: ::subxt::sp_core::crypto::AccountId32,
                         call_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Remove the given announcement of a delegate."]
+                    #[doc = ""]
+                    #[doc = "May be called by a target (proxied) account to remove a call that one of their delegates"]
+                    #[doc = "(`delegate`) has announced they want to execute. The deposit is returned."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `delegate`: The account that previously announced the call."]
+                    #[doc = "- `call_hash`: The hash of the call to be made."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of:"]
+                    #[doc = "- A: the number of announcements made."]
+                    #[doc = "- P: the number of proxies the user has."]
+                    #[doc = "# </weight>"]
                     reject_announcement {
                         delegate: ::subxt::sp_core::crypto::AccountId32,
                         call_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 9)]
+                    #[doc = "Dispatch the given `call` from an account that the sender is authorized for through"]
+                    #[doc = "`add_proxy`."]
+                    #[doc = ""]
+                    #[doc = "Removes any corresponding announcement(s)."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Parameters:"]
+                    #[doc = "- `real`: The account that the proxy will make a call on behalf of."]
+                    #[doc = "- `force_proxy_type`: Specify the exact proxy type to be used and checked for this call."]
+                    #[doc = "- `call`: The call to be made by the `real` account."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Weight is a function of:"]
+                    #[doc = "- A: the number of announcements made."]
+                    #[doc = "- P: the number of proxies the user has."]
+                    #[doc = "# </weight>"]
                     proxy_announced {
                         delegate: ::subxt::sp_core::crypto::AccountId32,
                         real: ::subxt::sp_core::crypto::AccountId32,
@@ -26781,20 +28504,28 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "There are too many proxies registered or too many announcements pending."]
                     TooMany,
                     #[codec(index = 1)]
+                    #[doc = "Proxy registration not found."]
                     NotFound,
                     #[codec(index = 2)]
+                    #[doc = "Sender is not a proxy of the account to be proxied."]
                     NotProxy,
                     #[codec(index = 3)]
+                    #[doc = "A call which is incompatible with the proxy type's filter was attempted."]
                     Unproxyable,
                     #[codec(index = 4)]
+                    #[doc = "Account is already a proxy."]
                     Duplicate,
                     #[codec(index = 5)]
+                    #[doc = "Call may not be made by proxy because it may escalate its privileges."]
                     NoPermission,
                     #[codec(index = 6)]
+                    #[doc = "Announcement, if made at all, was made too recently."]
                     Unannounced,
                     #[codec(index = 7)]
+                    #[doc = "Cannot add self as proxy."]
                     NoSelfProxy,
                 }
                 #[derive(
@@ -26802,6 +28533,7 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A proxy was executed correctly, with the given."]
                     ProxyExecuted {
                         result: ::core::result::Result<
                             (),
@@ -26809,6 +28541,8 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Anonymous account has been created by new proxy with given"]
+                    #[doc = "disambiguation index and proxy type."]
                     AnonymousCreated {
                         anonymous: ::subxt::sp_core::crypto::AccountId32,
                         who: ::subxt::sp_core::crypto::AccountId32,
@@ -26816,12 +28550,14 @@ pub mod api {
                         disambiguation_index: ::core::primitive::u16,
                     },
                     #[codec(index = 2)]
+                    #[doc = "An announcement was placed to make a call in the future."]
                     Announced {
                         real: ::subxt::sp_core::crypto::AccountId32,
                         proxy: ::subxt::sp_core::crypto::AccountId32,
                         call_hash: ::subxt::sp_core::H256,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A proxy was added."]
                     ProxyAdded {
                         delegator: ::subxt::sp_core::crypto::AccountId32,
                         delegatee: ::subxt::sp_core::crypto::AccountId32,
@@ -26829,6 +28565,7 @@ pub mod api {
                         delay: ::core::primitive::u32,
                     },
                     #[codec(index = 4)]
+                    #[doc = "A proxy was removed."]
                     ProxyRemoved {
                         delegator: ::subxt::sp_core::crypto::AccountId32,
                         delegatee: ::subxt::sp_core::crypto::AccountId32,
@@ -26859,6 +28596,7 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Anonymously schedule a task."]
                     schedule {
                         when: ::core::primitive::u32,
                         maybe_periodic: ::core::option::Option<(
@@ -26874,11 +28612,13 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Cancel an anonymously scheduled task."]
                     cancel {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Schedule a named task."]
                     schedule_named {
                         id: ::std::vec::Vec<::core::primitive::u8>,
                         when: ::core::primitive::u32,
@@ -26895,10 +28635,16 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Cancel a named scheduled task."]
                     cancel_named {
                         id: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Anonymously schedule a task after a delay."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Same as [`schedule`]."]
+                    #[doc = "# </weight>"]
                     schedule_after {
                         after: ::core::primitive::u32,
                         maybe_periodic: ::core::option::Option<(
@@ -26914,6 +28660,11 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Schedule a named task after a delay."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "Same as [`schedule_named`](Self::schedule_named)."]
+                    #[doc = "# </weight>"]
                     schedule_named_after {
                         id: ::std::vec::Vec<::core::primitive::u8>,
                         after: ::core::primitive::u32,
@@ -26935,12 +28686,16 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Failed to schedule a call"]
                     FailedToSchedule,
                     #[codec(index = 1)]
+                    #[doc = "Cannot find the scheduled call."]
                     NotFound,
                     #[codec(index = 2)]
+                    #[doc = "Given target block number is in the past."]
                     TargetBlockNumberInPast,
                     #[codec(index = 3)]
+                    #[doc = "Reschedule failed because it does not change scheduled time."]
                     RescheduleNoChange,
                 }
                 #[derive(
@@ -26948,16 +28703,19 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "Scheduled some task."]
                     Scheduled {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Canceled some task."]
                     Canceled {
                         when: ::core::primitive::u32,
                         index: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Dispatched some task."]
                     Dispatched {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<
@@ -26969,6 +28727,7 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 3)]
+                    #[doc = "The call for the provided hash was not found so the task has been aborted."]
                     CallLookupFailed {
                         task: (::core::primitive::u32, ::core::primitive::u32),
                         id: ::core::option::Option<
@@ -27000,11 +28759,41 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Sets the session key(s) of the function caller to `keys`."]
+                    #[doc = "Allows an account to set its session key prior to becoming a validator."]
+                    #[doc = "This doesn't take effect until the next session."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this function must be signed."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(1)`. Actual cost depends on the number of length of"]
+                    #[doc = "  `T::Keys::key_ids()` which is fixed."]
+                    #[doc = "- DbReads: `origin account`, `T::ValidatorIdOf`, `NextKeys`"]
+                    #[doc = "- DbWrites: `origin account`, `NextKeys`"]
+                    #[doc = "- DbReads per key id: `KeyOwner`"]
+                    #[doc = "- DbWrites per key id: `KeyOwner`"]
+                    #[doc = "# </weight>"]
                     set_keys {
                         keys: runtime_types::polkadot_runtime::SessionKeys,
                         proof: ::std::vec::Vec<::core::primitive::u8>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Removes any session key(s) of the function caller."]
+                    #[doc = ""]
+                    #[doc = "This doesn't take effect until the next session."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin of this function must be Signed and the account must be either be"]
+                    #[doc = "convertible to a validator ID using the chain's typical addressing system (this usually"]
+                    #[doc = "means being a controller account) or directly convertible into a validator ID (which"]
+                    #[doc = "usually means being a stash account)."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(1)` in number of key types. Actual cost depends on the number of length"]
+                    #[doc = "  of `T::Keys::key_ids()` which is fixed."]
+                    #[doc = "- DbReads: `T::ValidatorIdOf`, `NextKeys`, `origin account`"]
+                    #[doc = "- DbWrites: `NextKeys`, `origin account`"]
+                    #[doc = "- DbWrites per key id: `KeyOwner`"]
+                    #[doc = "# </weight>"]
                     purge_keys,
                 }
                 #[derive(
@@ -27012,14 +28801,19 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Invalid ownership proof."]
                     InvalidProof,
                     #[codec(index = 1)]
+                    #[doc = "No associated validator ID for account."]
                     NoAssociatedValidatorId,
                     #[codec(index = 2)]
+                    #[doc = "Registered duplicate key."]
                     DuplicatedKey,
                     #[codec(index = 3)]
+                    #[doc = "No keys are associated with this account."]
                     NoKeys,
                     #[codec(index = 4)]
+                    #[doc = "Key setting account is not live, so it's impossible to associate keys."]
                     NoAccount,
                 }
                 #[derive(
@@ -27027,6 +28821,8 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "New session has happened. Note that the argument is the session index, not the"]
+                    #[doc = "block number as the type might suggest."]
                     NewSession {
                         session_index: ::core::primitive::u32,
                     },
@@ -27044,6 +28840,23 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Take the origin account as a stash and lock up `value` of its balance. `controller` will"]
+                        #[doc = "be the account that controls it."]
+                        #[doc = ""]
+                        #[doc = "`value` must be more than the `minimum_balance` specified by `T::Currency`."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the stash account."]
+                        #[doc = ""]
+                        #[doc = "Emits `Bonded`."]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Independent of the arguments. Moderate complexity."]
+                        #[doc = "- O(1)."]
+                        #[doc = "- Three extra DB entries."]
+                        #[doc = ""]
+                        #[doc = "NOTE: Two of the storage writes (`Self::bonded`, `Self::payee`) are _never_ cleaned"]
+                        #[doc = "unless the `origin` falls below _existential deposit_ and gets removed as dust."]
+                        #[doc = "------------------"]
+                        #[doc = "# </weight>"]
                         bond {
                             controller: ::subxt::sp_runtime::MultiAddress<
                                 ::subxt::sp_core::crypto::AccountId32,
@@ -27056,24 +28869,89 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 1)]
+                        #[doc = "Add some extra amount that have appeared in the stash `free_balance` into the balance up"]
+                        #[doc = "for staking."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the stash, not the controller."]
+                        #[doc = ""]
+                        #[doc = "Use this if there are additional funds in your stash account that you wish to bond."]
+                        #[doc = "Unlike [`bond`](Self::bond) or [`unbond`](Self::unbond) this function does not impose"]
+                        #[doc = "any limitation on the amount that can be added."]
+                        #[doc = ""]
+                        #[doc = "Emits `Bonded`."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Independent of the arguments. Insignificant complexity."]
+                        #[doc = "- O(1)."]
+                        #[doc = "# </weight>"]
                         bond_extra {
                             #[codec(compact)]
                             max_additional: ::core::primitive::u128,
                         },
                         #[codec(index = 2)]
+                        #[doc = "Schedule a portion of the stash to be unlocked ready for transfer out after the bond"]
+                        #[doc = "period ends. If this leaves an amount actively bonded less than"]
+                        #[doc = "T::Currency::minimum_balance(), then it is increased to the full amount."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
+                        #[doc = ""]
+                        #[doc = "Once the unlock period is done, you can call `withdraw_unbonded` to actually move"]
+                        #[doc = "the funds out of management ready for transfer."]
+                        #[doc = ""]
+                        #[doc = "No more than a limited number of unlocking chunks (see `MaxUnlockingChunks`)"]
+                        #[doc = "can co-exists at the same time. In that case, [`Call::withdraw_unbonded`] need"]
+                        #[doc = "to be called first to remove some of the chunks (if possible)."]
+                        #[doc = ""]
+                        #[doc = "If a user encounters the `InsufficientBond` error when calling this extrinsic,"]
+                        #[doc = "they should call `chill` first in order to free up their bonded funds."]
+                        #[doc = ""]
+                        #[doc = "Emits `Unbonded`."]
+                        #[doc = ""]
+                        #[doc = "See also [`Call::withdraw_unbonded`]."]
                         unbond {
                             #[codec(compact)]
                             value: ::core::primitive::u128,
                         },
                         #[codec(index = 3)]
+                        #[doc = "Remove any unlocked chunks from the `unlocking` queue from our management."]
+                        #[doc = ""]
+                        #[doc = "This essentially frees up that balance to be used by the stash account to do"]
+                        #[doc = "whatever it wants."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller."]
+                        #[doc = ""]
+                        #[doc = "Emits `Withdrawn`."]
+                        #[doc = ""]
+                        #[doc = "See also [`Call::unbond`]."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "Complexity O(S) where S is the number of slashing spans to remove"]
+                        #[doc = "NOTE: Weight annotation is the kill scenario, we refund otherwise."]
+                        #[doc = "# </weight>"]
                         withdraw_unbonded {
                             num_slashing_spans: ::core::primitive::u32,
                         },
                         #[codec(index = 4)]
+                        #[doc = "Declare the desire to validate for the origin controller."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
                         validate {
                             prefs: runtime_types::pallet_staking::ValidatorPrefs,
                         },
                         #[codec(index = 5)]
+                        #[doc = "Declare the desire to nominate `targets` for the origin controller."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- The transaction's complexity is proportional to the size of `targets` (N)"]
+                        #[doc = "which is capped at CompactAssignments::LIMIT (T::MaxNominations)."]
+                        #[doc = "- Both the reads and writes follow a similar pattern."]
+                        #[doc = "# </weight>"]
                         nominate {
                             targets: ::std::vec::Vec<
                                 ::subxt::sp_runtime::MultiAddress<
@@ -27083,14 +28961,57 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 6)]
+                        #[doc = "Declare no desire to either validate or nominate."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Independent of the arguments. Insignificant complexity."]
+                        #[doc = "- Contains one read."]
+                        #[doc = "- Writes are limited to the `origin` account key."]
+                        #[doc = "# </weight>"]
                         chill,
                         #[codec(index = 7)]
+                        #[doc = "(Re-)set the payment target for a controller."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Independent of the arguments. Insignificant complexity."]
+                        #[doc = "- Contains a limited number of reads."]
+                        #[doc = "- Writes are limited to the `origin` account key."]
+                        #[doc = "---------"]
+                        #[doc = "- Weight: O(1)"]
+                        #[doc = "- DB Weight:"]
+                        #[doc = "    - Read: Ledger"]
+                        #[doc = "    - Write: Payee"]
+                        #[doc = "# </weight>"]
                         set_payee {
                             payee: runtime_types::pallet_staking::RewardDestination<
                                 ::subxt::sp_core::crypto::AccountId32,
                             >,
                         },
                         #[codec(index = 8)]
+                        #[doc = "(Re-)set the controller of a stash."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the stash, not the controller."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Independent of the arguments. Insignificant complexity."]
+                        #[doc = "- Contains a limited number of reads."]
+                        #[doc = "- Writes are limited to the `origin` account key."]
+                        #[doc = "----------"]
+                        #[doc = "Weight: O(1)"]
+                        #[doc = "DB Weight:"]
+                        #[doc = "- Read: Bonded, Ledger New Controller, Ledger Old Controller"]
+                        #[doc = "- Write: Bonded, Ledger New Controller, Ledger Old Controller"]
+                        #[doc = "# </weight>"]
                         set_controller {
                             controller: ::subxt::sp_runtime::MultiAddress<
                                 ::subxt::sp_core::crypto::AccountId32,
@@ -27098,51 +29019,176 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 9)]
+                        #[doc = "Sets the ideal number of validators."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "Weight: O(1)"]
+                        #[doc = "Write: Validator Count"]
+                        #[doc = "# </weight>"]
                         set_validator_count {
                             #[codec(compact)]
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 10)]
+                        #[doc = "Increments the ideal number of validators."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "Same as [`Self::set_validator_count`]."]
+                        #[doc = "# </weight>"]
                         increase_validator_count {
                             #[codec(compact)]
                             additional: ::core::primitive::u32,
                         },
                         #[codec(index = 11)]
+                        #[doc = "Scale up the ideal number of validators by a factor."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "Same as [`Self::set_validator_count`]."]
+                        #[doc = "# </weight>"]
                         scale_validator_count {
                             factor: runtime_types::sp_arithmetic::per_things::Percent,
                         },
                         #[codec(index = 12)]
+                        #[doc = "Force there to be no new eras indefinitely."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# Warning"]
+                        #[doc = ""]
+                        #[doc = "The election process starts multiple blocks before the end of the era."]
+                        #[doc = "Thus the election process may be ongoing when this is called. In this case the"]
+                        #[doc = "election will continue until the next era is triggered."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- No arguments."]
+                        #[doc = "- Weight: O(1)"]
+                        #[doc = "- Write: ForceEra"]
+                        #[doc = "# </weight>"]
                         force_no_eras,
                         #[codec(index = 13)]
+                        #[doc = "Force there to be a new era at the end of the next session. After this, it will be"]
+                        #[doc = "reset to normal (non-forced) behaviour."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# Warning"]
+                        #[doc = ""]
+                        #[doc = "The election process starts multiple blocks before the end of the era."]
+                        #[doc = "If this is called just before a new era is triggered, the election process may not"]
+                        #[doc = "have enough blocks to get a result."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- No arguments."]
+                        #[doc = "- Weight: O(1)"]
+                        #[doc = "- Write ForceEra"]
+                        #[doc = "# </weight>"]
                         force_new_era,
                         #[codec(index = 14)]
+                        #[doc = "Set the validators who cannot be slashed (if any)."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
                         set_invulnerables {
                             invulnerables:
                                 ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                         },
                         #[codec(index = 15)]
+                        #[doc = "Force a current staker to become completely unstaked, immediately."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
                         force_unstake {
                             stash: ::subxt::sp_core::crypto::AccountId32,
                             num_slashing_spans: ::core::primitive::u32,
                         },
                         #[codec(index = 16)]
+                        #[doc = "Force there to be a new era at the end of sessions indefinitely."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be Root."]
+                        #[doc = ""]
+                        #[doc = "# Warning"]
+                        #[doc = ""]
+                        #[doc = "The election process starts multiple blocks before the end of the era."]
+                        #[doc = "If this is called just before a new era is triggered, the election process may not"]
+                        #[doc = "have enough blocks to get a result."]
                         force_new_era_always,
                         #[codec(index = 17)]
+                        #[doc = "Cancel enactment of a deferred slash."]
+                        #[doc = ""]
+                        #[doc = "Can be called by the `T::SlashCancelOrigin`."]
+                        #[doc = ""]
+                        #[doc = "Parameters: era and indices of the slashes for that era to kill."]
                         cancel_deferred_slash {
                             era: ::core::primitive::u32,
                             slash_indices: ::std::vec::Vec<::core::primitive::u32>,
                         },
                         #[codec(index = 18)]
+                        #[doc = "Pay out all the stakers behind a single validator for a single era."]
+                        #[doc = ""]
+                        #[doc = "- `validator_stash` is the stash account of the validator. Their nominators, up to"]
+                        #[doc = "  `T::MaxNominatorRewardedPerValidator`, will also receive their rewards."]
+                        #[doc = "- `era` may be any era between `[current_era - history_depth; current_era]`."]
+                        #[doc = ""]
+                        #[doc = "The origin of this call must be _Signed_. Any account can call this function, even if"]
+                        #[doc = "it is not one of the stakers."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Time complexity: at most O(MaxNominatorRewardedPerValidator)."]
+                        #[doc = "- Contains a limited number of reads and writes."]
+                        #[doc = "-----------"]
+                        #[doc = "N is the Number of payouts for the validator (including the validator)"]
+                        #[doc = "Weight:"]
+                        #[doc = "- Reward Destination Staked: O(N)"]
+                        #[doc = "- Reward Destination Controller (Creating): O(N)"]
+                        #[doc = ""]
+                        #[doc = "  NOTE: weights are assuming that payouts are made to alive stash account (Staked)."]
+                        #[doc = "  Paying even a dead controller is cheaper weight-wise. We don't do any refunds here."]
+                        #[doc = "# </weight>"]
                         payout_stakers {
                             validator_stash: ::subxt::sp_core::crypto::AccountId32,
                             era: ::core::primitive::u32,
                         },
                         #[codec(index = 19)]
+                        #[doc = "Rebond a portion of the stash scheduled to be unlocked."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin must be signed by the controller."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- Time complexity: O(L), where L is unlocking chunks"]
+                        #[doc = "- Bounded by `MaxUnlockingChunks`."]
+                        #[doc = "- Storage changes: Can't increase storage, only decrease it."]
+                        #[doc = "# </weight>"]
                         rebond {
                             #[codec(compact)]
                             value: ::core::primitive::u128,
                         },
                         #[codec(index = 20)]
+                        #[doc = "Set `HistoryDepth` value. This function will delete any history information"]
+                        #[doc = "when `HistoryDepth` is reduced."]
+                        #[doc = ""]
+                        #[doc = "Parameters:"]
+                        #[doc = "- `new_history_depth`: The new history depth you would like to set."]
+                        #[doc = "- `era_items_deleted`: The number of items that will be deleted by this dispatch. This"]
+                        #[doc = "  should report all the storage items that will be deleted by clearing old era history."]
+                        #[doc = "  Needed to report an accurate weight for the dispatch. Trusted by `Root` to report an"]
+                        #[doc = "  accurate number."]
+                        #[doc = ""]
+                        #[doc = "Origin must be root."]
+                        #[doc = ""]
+                        #[doc = "# <weight>"]
+                        #[doc = "- E: Number of history depths removed, i.e. 10 -> 7 = 3"]
+                        #[doc = "- Weight: O(E)"]
+                        #[doc = "- DB Weight:"]
+                        #[doc = "    - Reads: Current Era, History Depth"]
+                        #[doc = "    - Writes: History Depth"]
+                        #[doc = "    - Clear Prefix Each: Era Stakers, EraStakersClipped, ErasValidatorPrefs"]
+                        #[doc = "    - Writes Each: ErasValidatorReward, ErasRewardPoints, ErasTotalStake,"]
+                        #[doc = "      ErasStartSessionIndex"]
+                        #[doc = "# </weight>"]
                         set_history_depth {
                             #[codec(compact)]
                             new_history_depth: ::core::primitive::u32,
@@ -27150,11 +29196,34 @@ pub mod api {
                             era_items_deleted: ::core::primitive::u32,
                         },
                         #[codec(index = 21)]
+                        #[doc = "Remove all data structures concerning a staker/stash once it is at a state where it can"]
+                        #[doc = "be considered `dust` in the staking system. The requirements are:"]
+                        #[doc = ""]
+                        #[doc = "1. the `total_balance` of the stash is below existential deposit."]
+                        #[doc = "2. or, the `ledger.total` of the stash is below existential deposit."]
+                        #[doc = ""]
+                        #[doc = "The former can happen in cases like a slash; the latter when a fully unbonded account"]
+                        #[doc = "is still receiving staking rewards in `RewardDestination::Staked`."]
+                        #[doc = ""]
+                        #[doc = "It can be called by anyone, as long as `stash` meets the above requirements."]
+                        #[doc = ""]
+                        #[doc = "Refunds the transaction fees upon successful execution."]
                         reap_stash {
                             stash: ::subxt::sp_core::crypto::AccountId32,
                             num_slashing_spans: ::core::primitive::u32,
                         },
                         #[codec(index = 22)]
+                        #[doc = "Remove the given nominations from the calling validator."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
+                        #[doc = ""]
+                        #[doc = "- `who`: A list of nominator stash accounts who are nominating this validator which"]
+                        #[doc = "  should no longer be nominating this validator."]
+                        #[doc = ""]
+                        #[doc = "Note: Making this call only makes sense if you first set the validator preferences to"]
+                        #[doc = "block any further nominations."]
                         kick {
                             who: ::std::vec::Vec<
                                 ::subxt::sp_runtime::MultiAddress<
@@ -27164,6 +29233,23 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 23)]
+                        #[doc = "Update the various staking configurations ."]
+                        #[doc = ""]
+                        #[doc = "* `min_nominator_bond`: The minimum active bond needed to be a nominator."]
+                        #[doc = "* `min_validator_bond`: The minimum active bond needed to be a validator."]
+                        #[doc = "* `max_nominator_count`: The max number of users who can be a nominator at once. When"]
+                        #[doc = "  set to `None`, no limit is enforced."]
+                        #[doc = "* `max_validator_count`: The max number of users who can be a validator at once. When"]
+                        #[doc = "  set to `None`, no limit is enforced."]
+                        #[doc = "* `chill_threshold`: The ratio of `max_nominator_count` or `max_validator_count` which"]
+                        #[doc = "  should be filled in order for the `chill_other` transaction to work."]
+                        #[doc = "* `min_commission`: The minimum amount of commission that each validators must maintain."]
+                        #[doc = "  This is checked only upon calling `validate`. Existing validators are not affected."]
+                        #[doc = ""]
+                        #[doc = "Origin must be Root to call this function."]
+                        #[doc = ""]
+                        #[doc = "NOTE: Existing nominators and validators will not be affected by this update."]
+                        #[doc = "to kick people under the new limits, `chill_other` should be called."]
                         set_staking_configs {
                             min_nominator_bond:
                                 runtime_types::pallet_staking::pallet::pallet::ConfigOp<
@@ -27191,10 +29277,39 @@ pub mod api {
                                 >,
                         },
                         #[codec(index = 24)]
+                        #[doc = "Declare a `controller` to stop participating as either a validator or nominator."]
+                        #[doc = ""]
+                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must be _Signed_, but can be called by anyone."]
+                        #[doc = ""]
+                        #[doc = "If the caller is the same as the controller being targeted, then no further checks are"]
+                        #[doc = "enforced, and this function behaves just like `chill`."]
+                        #[doc = ""]
+                        #[doc = "If the caller is different than the controller being targeted, the following conditions"]
+                        #[doc = "must be met:"]
+                        #[doc = ""]
+                        #[doc = "* `controller` must belong to a nominator who has become non-decodable,"]
+                        #[doc = ""]
+                        #[doc = "Or:"]
+                        #[doc = ""]
+                        #[doc = "* A `ChillThreshold` must be set and checked which defines how close to the max"]
+                        #[doc = "  nominators or validators we must reach before users can start chilling one-another."]
+                        #[doc = "* A `MaxNominatorCount` and `MaxValidatorCount` must be set which is used to determine"]
+                        #[doc = "  how close we are to the threshold."]
+                        #[doc = "* A `MinNominatorBond` and `MinValidatorBond` must be set and checked, which determines"]
+                        #[doc = "  if this is a person that should be chilled because they have not met the threshold"]
+                        #[doc = "  bond required."]
+                        #[doc = ""]
+                        #[doc = "This can be helpful if bond requirements are updated, and we need to remove old users"]
+                        #[doc = "who do not satisfy these requirements."]
                         chill_other {
                             controller: ::subxt::sp_core::crypto::AccountId32,
                         },
                         #[codec(index = 25)]
+                        #[doc = "Force a validator to have at least the minimum commission. This will not affect a"]
+                        #[doc = "validator who already has a commission greater than or equal to the minimum. Any account"]
+                        #[doc = "can call this."]
                         force_apply_min_commission {
                             validator_stash: ::subxt::sp_core::crypto::AccountId32,
                         },
@@ -27215,52 +29330,80 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Not a controller account."]
                         NotController,
                         #[codec(index = 1)]
+                        #[doc = "Not a stash account."]
                         NotStash,
                         #[codec(index = 2)]
+                        #[doc = "Stash is already bonded."]
                         AlreadyBonded,
                         #[codec(index = 3)]
+                        #[doc = "Controller is already paired."]
                         AlreadyPaired,
                         #[codec(index = 4)]
+                        #[doc = "Targets cannot be empty."]
                         EmptyTargets,
                         #[codec(index = 5)]
+                        #[doc = "Duplicate index."]
                         DuplicateIndex,
                         #[codec(index = 6)]
+                        #[doc = "Slash record index out of bounds."]
                         InvalidSlashIndex,
                         #[codec(index = 7)]
+                        #[doc = "Cannot have a validator or nominator role, with value less than the minimum defined by"]
+                        #[doc = "governance (see `MinValidatorBond` and `MinNominatorBond`). If unbonding is the"]
+                        #[doc = "intention, `chill` first to remove one's role as validator/nominator."]
                         InsufficientBond,
                         #[codec(index = 8)]
+                        #[doc = "Can not schedule more unlock chunks."]
                         NoMoreChunks,
                         #[codec(index = 9)]
+                        #[doc = "Can not rebond without unlocking chunks."]
                         NoUnlockChunk,
                         #[codec(index = 10)]
+                        #[doc = "Attempting to target a stash that still has funds."]
                         FundedTarget,
                         #[codec(index = 11)]
+                        #[doc = "Invalid era to reward."]
                         InvalidEraToReward,
                         #[codec(index = 12)]
+                        #[doc = "Invalid number of nominations."]
                         InvalidNumberOfNominations,
                         #[codec(index = 13)]
+                        #[doc = "Items are not sorted and unique."]
                         NotSortedAndUnique,
                         #[codec(index = 14)]
+                        #[doc = "Rewards for this era have already been claimed for this validator."]
                         AlreadyClaimed,
                         #[codec(index = 15)]
+                        #[doc = "Incorrect previous history depth input provided."]
                         IncorrectHistoryDepth,
                         #[codec(index = 16)]
+                        #[doc = "Incorrect number of slashing spans provided."]
                         IncorrectSlashingSpans,
                         #[codec(index = 17)]
+                        #[doc = "Internal state has become somehow corrupted and the operation cannot continue."]
                         BadState,
                         #[codec(index = 18)]
+                        #[doc = "Too many nomination targets supplied."]
                         TooManyTargets,
                         #[codec(index = 19)]
+                        #[doc = "A nomination target was supplied that was blocked or otherwise not a validator."]
                         BadTarget,
                         #[codec(index = 20)]
+                        #[doc = "The user has enough bond and thus cannot be chilled forcefully by an external person."]
                         CannotChillOther,
                         #[codec(index = 21)]
+                        #[doc = "There are too many nominators in the system. Governance needs to adjust the staking"]
+                        #[doc = "settings to keep things safe for the runtime."]
                         TooManyNominators,
                         #[codec(index = 22)]
+                        #[doc = "There are too many validators in the system. Governance needs to adjust the staking"]
+                        #[doc = "settings to keep things safe for the runtime."]
                         TooManyValidators,
                         #[codec(index = 23)]
+                        #[doc = "Commission is too low. Must be at least `MinCommission`."]
                         CommissionTooLow,
                     }
                     #[derive(
@@ -27268,50 +29411,71 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "The era payout has been set; the first balance is the validator-payout; the second is"]
+                        #[doc = "the remainder from the maximum amount of reward."]
+                        #[doc = "\\[era_index, validator_payout, remainder\\]"]
                         EraPaid(
                             ::core::primitive::u32,
                             ::core::primitive::u128,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 1)]
+                        #[doc = "The nominator has been rewarded by this amount. \\[stash, amount\\]"]
                         Rewarded(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 2)]
+                        #[doc = "One validator (and its nominators) has been slashed by the given amount."]
+                        #[doc = "\\[validator, amount\\]"]
                         Slashed(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 3)]
+                        #[doc = "An old slashing report from a prior era was discarded because it could"]
+                        #[doc = "not be processed. \\[session_index\\]"]
                         OldSlashingReportDiscarded(::core::primitive::u32),
                         #[codec(index = 4)]
+                        #[doc = "A new set of stakers was elected."]
                         StakersElected,
                         #[codec(index = 5)]
+                        #[doc = "An account has bonded this amount. \\[stash, amount\\]"]
+                        #[doc = ""]
+                        #[doc = "NOTE: This event is only emitted when funds are bonded via a dispatchable. Notably,"]
+                        #[doc = "it will not be emitted for staking rewards when they are added to stake."]
                         Bonded(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 6)]
+                        #[doc = "An account has unbonded this amount. \\[stash, amount\\]"]
                         Unbonded(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 7)]
+                        #[doc = "An account has called `withdraw_unbonded` and removed unbonding chunks worth `Balance`"]
+                        #[doc = "from the unlocking queue. \\[stash, amount\\]"]
                         Withdrawn(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 8)]
+                        #[doc = "A nominator has been kicked from a validator. \\[nominator, stash\\]"]
                         Kicked(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::subxt::sp_core::crypto::AccountId32,
                         ),
                         #[codec(index = 9)]
+                        #[doc = "The election failed. No new era is planned."]
                         StakingElectionFailed,
                         #[codec(index = 10)]
+                        #[doc = "An account has stopped participating as either a validator or nominator."]
+                        #[doc = "\\[stash\\]"]
                         Chilled(::subxt::sp_core::crypto::AccountId32),
                         #[codec(index = 11)]
+                        #[doc = "The stakers' rewards are getting paid. \\[era_index, validator_stash\\]"]
                         PayoutStarted(
                             ::core::primitive::u32,
                             ::subxt::sp_core::crypto::AccountId32,
@@ -27462,6 +29626,22 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Set the current time."]
+                    #[doc = ""]
+                    #[doc = "This call should be invoked exactly once per block. It will panic at the finalization"]
+                    #[doc = "phase, if this call hasn't been invoked by that time."]
+                    #[doc = ""]
+                    #[doc = "The timestamp should be greater than the previous one by the amount specified by"]
+                    #[doc = "`MinimumPeriod`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be `Inherent`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)` (Note that implementations of `OnTimestampSet` must also be `O(1)`)"]
+                    #[doc = "- 1 storage read and 1 storage mutation (codec `O(1)`). (because of `DidUpdate::take` in"]
+                    #[doc = "  `on_finalize`)"]
+                    #[doc = "- 1 event handler `on_timestamp_set`. Must be `O(1)`."]
+                    #[doc = "# </weight>"]
                     set {
                         #[codec(compact)]
                         now: ::core::primitive::u64,
@@ -27478,13 +29658,73 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Report something `reason` that deserves a tip and claim any eventual the finder's fee."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "Payment: `TipReportDepositBase` will be reserved from the origin account, as well as"]
+                    #[doc = "`DataDepositPerByte` for each byte in `reason`."]
+                    #[doc = ""]
+                    #[doc = "- `reason`: The reason for, or the thing that deserves, the tip; generally this will be"]
+                    #[doc = "  a UTF-8-encoded URL."]
+                    #[doc = "- `who`: The account which should be credited for the tip."]
+                    #[doc = ""]
+                    #[doc = "Emits `NewTip` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(R)` where `R` length of `reason`."]
+                    #[doc = "  - encoding and hashing of 'reason'"]
+                    #[doc = "- DbReads: `Reasons`, `Tips`"]
+                    #[doc = "- DbWrites: `Reasons`, `Tips`"]
+                    #[doc = "# </weight>"]
                     report_awesome {
                         reason: ::std::vec::Vec<::core::primitive::u8>,
                         who: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Retract a prior tip-report from `report_awesome`, and cancel the process of tipping."]
+                    #[doc = ""]
+                    #[doc = "If successful, the original deposit will be unreserved."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the tip identified by `hash`"]
+                    #[doc = "must have been reported by the signing account through `report_awesome` (and not"]
+                    #[doc = "through `tip_new`)."]
+                    #[doc = ""]
+                    #[doc = "- `hash`: The identity of the open tip for which a tip value is declared. This is formed"]
+                    #[doc = "  as the hash of the tuple of the original tip `reason` and the beneficiary account ID."]
+                    #[doc = ""]
+                    #[doc = "Emits `TipRetracted` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(1)`"]
+                    #[doc = "  - Depends on the length of `T::Hash` which is fixed."]
+                    #[doc = "- DbReads: `Tips`, `origin account`"]
+                    #[doc = "- DbWrites: `Reasons`, `Tips`, `origin account`"]
+                    #[doc = "# </weight>"]
                     retract_tip { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 2)]
+                    #[doc = "Give a tip for something new; no finder's fee will be taken."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must be a"]
+                    #[doc = "member of the `Tippers` set."]
+                    #[doc = ""]
+                    #[doc = "- `reason`: The reason for, or the thing that deserves, the tip; generally this will be"]
+                    #[doc = "  a UTF-8-encoded URL."]
+                    #[doc = "- `who`: The account which should be credited for the tip."]
+                    #[doc = "- `tip_value`: The amount of tip that the sender would like to give. The median tip"]
+                    #[doc = "  value of active tippers will be given to the `who`."]
+                    #[doc = ""]
+                    #[doc = "Emits `NewTip` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(R + T)` where `R` length of `reason`, `T` is the number of tippers."]
+                    #[doc = "  - `O(T)`: decoding `Tipper` vec of length `T`. `T` is charged as upper bound given by"]
+                    #[doc = "    `ContainsLengthBound`. The actual cost depends on the implementation of"]
+                    #[doc = "    `T::Tippers`."]
+                    #[doc = "  - `O(R)`: hashing and encoding of reason of length `R`"]
+                    #[doc = "- DbReads: `Tippers`, `Reasons`"]
+                    #[doc = "- DbWrites: `Reasons`, `Tips`"]
+                    #[doc = "# </weight>"]
                     tip_new {
                         reason: ::std::vec::Vec<::core::primitive::u8>,
                         who: ::subxt::sp_core::crypto::AccountId32,
@@ -27492,14 +29732,66 @@ pub mod api {
                         tip_value: ::core::primitive::u128,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Declare a tip value for an already-open tip."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the signing account must be a"]
+                    #[doc = "member of the `Tippers` set."]
+                    #[doc = ""]
+                    #[doc = "- `hash`: The identity of the open tip for which a tip value is declared. This is formed"]
+                    #[doc = "  as the hash of the tuple of the hash of the original tip `reason` and the beneficiary"]
+                    #[doc = "  account ID."]
+                    #[doc = "- `tip_value`: The amount of tip that the sender would like to give. The median tip"]
+                    #[doc = "  value of active tippers will be given to the `who`."]
+                    #[doc = ""]
+                    #[doc = "Emits `TipClosing` if the threshold of tippers has been reached and the countdown period"]
+                    #[doc = "has started."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(T)` where `T` is the number of tippers. decoding `Tipper` vec of length"]
+                    #[doc = "  `T`, insert tip and check closing, `T` is charged as upper bound given by"]
+                    #[doc = "  `ContainsLengthBound`. The actual cost depends on the implementation of `T::Tippers`."]
+                    #[doc = ""]
+                    #[doc = "  Actually weight could be lower as it depends on how many tips are in `OpenTip` but it"]
+                    #[doc = "  is weighted as if almost full i.e of length `T-1`."]
+                    #[doc = "- DbReads: `Tippers`, `Tips`"]
+                    #[doc = "- DbWrites: `Tips`"]
+                    #[doc = "# </weight>"]
                     tip {
                         hash: ::subxt::sp_core::H256,
                         #[codec(compact)]
                         tip_value: ::core::primitive::u128,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Close and payout a tip."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "The tip identified by `hash` must have finished its countdown period."]
+                    #[doc = ""]
+                    #[doc = "- `hash`: The identity of the open tip for which a tip value is declared. This is formed"]
+                    #[doc = "  as the hash of the tuple of the original tip `reason` and the beneficiary account ID."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: `O(T)` where `T` is the number of tippers. decoding `Tipper` vec of length"]
+                    #[doc = "  `T`. `T` is charged as upper bound given by `ContainsLengthBound`. The actual cost"]
+                    #[doc = "  depends on the implementation of `T::Tippers`."]
+                    #[doc = "- DbReads: `Tips`, `Tippers`, `tip finder`"]
+                    #[doc = "- DbWrites: `Reasons`, `Tips`, `Tippers`, `tip finder`"]
+                    #[doc = "# </weight>"]
                     close_tip { hash: ::subxt::sp_core::H256 },
                     #[codec(index = 5)]
+                    #[doc = "Remove and slash an already-open tip."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::RejectOrigin`."]
+                    #[doc = ""]
+                    #[doc = "As a result, the finder is slashed and the deposits are lost."]
+                    #[doc = ""]
+                    #[doc = "Emits `TipSlashed` if successful."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "  `T` is charged as upper bound given by `ContainsLengthBound`."]
+                    #[doc = "  The actual cost depends on the implementation of `T::Tippers`."]
+                    #[doc = "# </weight>"]
                     slash_tip { hash: ::subxt::sp_core::H256 },
                 }
                 #[derive(
@@ -27507,16 +29799,22 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The reason given is just too big."]
                     ReasonTooBig,
                     #[codec(index = 1)]
+                    #[doc = "The tip was already found/started."]
                     AlreadyKnown,
                     #[codec(index = 2)]
+                    #[doc = "The tip hash is unknown."]
                     UnknownTip,
                     #[codec(index = 3)]
+                    #[doc = "The account attempting to retract the tip is not the finder of the tip."]
                     NotFinder,
                     #[codec(index = 4)]
+                    #[doc = "The tip cannot be claimed/closed because there are not enough tippers yet."]
                     StillOpen,
                     #[codec(index = 5)]
+                    #[doc = "The tip cannot be claimed/closed because it's still in the countdown period."]
                     Premature,
                 }
                 #[derive(
@@ -27524,18 +29822,23 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "A new tip suggestion has been opened."]
                     NewTip { tip_hash: ::subxt::sp_core::H256 },
                     #[codec(index = 1)]
+                    #[doc = "A tip suggestion has reached threshold and is closing."]
                     TipClosing { tip_hash: ::subxt::sp_core::H256 },
                     #[codec(index = 2)]
+                    #[doc = "A tip suggestion has been closed."]
                     TipClosed {
                         tip_hash: ::subxt::sp_core::H256,
                         who: ::subxt::sp_core::crypto::AccountId32,
                         payout: ::core::primitive::u128,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A tip suggestion has been retracted."]
                     TipRetracted { tip_hash: ::subxt::sp_core::H256 },
                     #[codec(index = 4)]
+                    #[doc = "A tip suggestion has been slashed."]
                     TipSlashed {
                         tip_hash: ::subxt::sp_core::H256,
                         finder: ::subxt::sp_core::crypto::AccountId32,
@@ -27577,6 +29880,15 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Put forward a suggestion for spending. A deposit proportional to the value"]
+                    #[doc = "is reserved and slashed if the proposal is rejected. It is returned once the"]
+                    #[doc = "proposal is awarded."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(1)"]
+                    #[doc = "- DbReads: `ProposalCount`, `origin account`"]
+                    #[doc = "- DbWrites: `ProposalCount`, `Proposals`, `origin account`"]
+                    #[doc = "# </weight>"]
                     propose_spend {
                         #[codec(compact)]
                         value: ::core::primitive::u128,
@@ -27586,11 +29898,30 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Reject a proposed spend. The original deposit will be slashed."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::RejectOrigin`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(1)"]
+                    #[doc = "- DbReads: `Proposals`, `rejected proposer account`"]
+                    #[doc = "- DbWrites: `Proposals`, `rejected proposer account`"]
+                    #[doc = "# </weight>"]
                     reject_proposal {
                         #[codec(compact)]
                         proposal_id: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Approve a proposal. At a later time, the proposal will be allocated to the beneficiary"]
+                    #[doc = "and the original deposit will be returned."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::ApproveOrigin`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(1)."]
+                    #[doc = "- DbReads: `Proposals`, `Approvals`"]
+                    #[doc = "- DbWrite: `Approvals`"]
+                    #[doc = "# </weight>"]
                     approve_proposal {
                         #[codec(compact)]
                         proposal_id: ::core::primitive::u32,
@@ -27601,10 +29932,13 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Proposer's balance is too low."]
                     InsufficientProposersBalance,
                     #[codec(index = 1)]
+                    #[doc = "No proposal or bounty at that index."]
                     InvalidIndex,
                     #[codec(index = 2)]
+                    #[doc = "Too many approvals in the queue."]
                     TooManyApprovals,
                 }
                 #[derive(
@@ -27612,33 +29946,40 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "New proposal."]
                     Proposed {
                         proposal_index: ::core::primitive::u32,
                     },
                     #[codec(index = 1)]
+                    #[doc = "We have ended a spend period and will now allocate funds."]
                     Spending {
                         budget_remaining: ::core::primitive::u128,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Some funds have been allocated."]
                     Awarded {
                         proposal_index: ::core::primitive::u32,
                         award: ::core::primitive::u128,
                         account: ::subxt::sp_core::crypto::AccountId32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "A proposal was rejected; funds were slashed."]
                     Rejected {
                         proposal_index: ::core::primitive::u32,
                         slashed: ::core::primitive::u128,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Some of our funds have been burnt."]
                     Burnt {
                         burnt_funds: ::core::primitive::u128,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Spending has finished; this is the amount that rolls over until next spend."]
                     Rollover {
                         rollover_balance: ::core::primitive::u128,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Some funds have been deposited."]
                     Deposit { value: ::core::primitive::u128 },
                 }
             }
@@ -27659,19 +30000,75 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Send a batch of dispatch calls."]
+                    #[doc = ""]
+                    #[doc = "May be called from any origin."]
+                    #[doc = ""]
+                    #[doc = "- `calls`: The calls to be dispatched from the same origin. The number of call must not"]
+                    #[doc = "  exceed the constant: `batched_calls_limit` (available in constant metadata)."]
+                    #[doc = ""]
+                    #[doc = "If origin is root then call are dispatch without checking origin filter. (This includes"]
+                    #[doc = "bypassing `frame_system::Config::BaseCallFilter`)."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(C) where C is the number of calls to be batched."]
+                    #[doc = "# </weight>"]
+                    #[doc = ""]
+                    #[doc = "This will return `Ok` in all circumstances. To determine the success of the batch, an"]
+                    #[doc = "event is deposited. If a call failed and the batch was interrupted, then the"]
+                    #[doc = "`BatchInterrupted` event is deposited, along with the number of successful calls made"]
+                    #[doc = "and the error of the failed call. If all were successful, then the `BatchCompleted`"]
+                    #[doc = "event is deposited."]
                     batch {
                         calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Send a call through an indexed pseudonym of the sender."]
+                    #[doc = ""]
+                    #[doc = "Filter from origin are passed along. The call will be dispatched with an origin which"]
+                    #[doc = "use the same filter as the origin of this call."]
+                    #[doc = ""]
+                    #[doc = "NOTE: If you need to ensure that any account-based filtering is not honored (i.e."]
+                    #[doc = "because you expect `proxy` to have been used prior in the call stack and you do not want"]
+                    #[doc = "the call restrictions to apply to any sub-accounts), then use `as_multi_threshold_1`"]
+                    #[doc = "in the Multisig pallet instead."]
+                    #[doc = ""]
+                    #[doc = "NOTE: Prior to version *12, this was called `as_limited_sub`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
                     as_derivative {
                         index: ::core::primitive::u16,
                         call: ::std::boxed::Box<runtime_types::polkadot_runtime::Call>,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Send a batch of dispatch calls and atomically execute them."]
+                    #[doc = "The whole transaction will rollback and fail if any of the calls failed."]
+                    #[doc = ""]
+                    #[doc = "May be called from any origin."]
+                    #[doc = ""]
+                    #[doc = "- `calls`: The calls to be dispatched from the same origin. The number of call must not"]
+                    #[doc = "  exceed the constant: `batched_calls_limit` (available in constant metadata)."]
+                    #[doc = ""]
+                    #[doc = "If origin is root then call are dispatch without checking origin filter. (This includes"]
+                    #[doc = "bypassing `frame_system::Config::BaseCallFilter`)."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(C) where C is the number of calls to be batched."]
+                    #[doc = "# </weight>"]
                     batch_all {
                         calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Dispatches a function call with a provided origin."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- O(1)."]
+                    #[doc = "- Limited storage reads."]
+                    #[doc = "- One DB write (event)."]
+                    #[doc = "- Weight of derivative `call` execution + T::WeightInfo::dispatch_as()."]
+                    #[doc = "# </weight>"]
                     dispatch_as {
                         as_origin: ::std::boxed::Box<
                             runtime_types::polkadot_runtime::OriginCaller,
@@ -27684,6 +30081,7 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "Too many calls batched."]
                     TooManyCalls,
                 }
                 #[derive(
@@ -27691,15 +30089,20 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "Batch of dispatches did not complete fully. Index of first failing dispatch given, as"]
+                    #[doc = "well as the error."]
                     BatchInterrupted {
                         index: ::core::primitive::u32,
                         error: runtime_types::sp_runtime::DispatchError,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Batch of dispatches completed fully with no error."]
                     BatchCompleted,
                     #[codec(index = 2)]
+                    #[doc = "A single item within a Batch of dispatches has completed with no error."]
                     ItemCompleted,
                     #[codec(index = 3)]
+                    #[doc = "A call was dispatched."]
                     DispatchedAs {
                         result: ::core::result::Result<
                             (),
@@ -27718,8 +30121,36 @@ pub mod api {
                 )]
                 pub enum Call {
                     #[codec(index = 0)]
+                    #[doc = "Unlock any vested funds of the sender account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have funds still"]
+                    #[doc = "locked under this pallet."]
+                    #[doc = ""]
+                    #[doc = "Emits either `VestingCompleted` or `VestingUpdated`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- DbWeight: 2 Reads, 2 Writes"]
+                    #[doc = "    - Reads: Vesting Storage, Balances Locks, [Sender Account]"]
+                    #[doc = "    - Writes: Vesting Storage, Balances Locks, [Sender Account]"]
+                    #[doc = "# </weight>"]
                     vest,
                     #[codec(index = 1)]
+                    #[doc = "Unlock any vested funds of a `target` account."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `target`: The account whose vested funds should be unlocked. Must have funds still"]
+                    #[doc = "locked under this pallet."]
+                    #[doc = ""]
+                    #[doc = "Emits either `VestingCompleted` or `VestingUpdated`."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- DbWeight: 3 Reads, 3 Writes"]
+                    #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account"]
+                    #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account"]
+                    #[doc = "# </weight>"]
                     vest_other {
                         target: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -27727,6 +30158,23 @@ pub mod api {
                         >,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Create a vested transfer."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `target`: The account receiving the vested funds."]
+                    #[doc = "- `schedule`: The vesting schedule attached to the transfer."]
+                    #[doc = ""]
+                    #[doc = "Emits `VestingCreated`."]
+                    #[doc = ""]
+                    #[doc = "NOTE: This will unlock all schedules through the current block."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- DbWeight: 3 Reads, 3 Writes"]
+                    #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account, [Sender Account]"]
+                    #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account, [Sender Account]"]
+                    #[doc = "# </weight>"]
                     vested_transfer {
                         target: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -27739,6 +30187,24 @@ pub mod api {
                             >,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Force a vested transfer."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Root_."]
+                    #[doc = ""]
+                    #[doc = "- `source`: The account whose funds should be transferred."]
+                    #[doc = "- `target`: The account that should be transferred the vested funds."]
+                    #[doc = "- `schedule`: The vesting schedule attached to the transfer."]
+                    #[doc = ""]
+                    #[doc = "Emits `VestingCreated`."]
+                    #[doc = ""]
+                    #[doc = "NOTE: This will unlock all schedules through the current block."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- `O(1)`."]
+                    #[doc = "- DbWeight: 4 Reads, 4 Writes"]
+                    #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account, Source Account"]
+                    #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account, Source Account"]
+                    #[doc = "# </weight>"]
                     force_vested_transfer {
                         source: ::subxt::sp_runtime::MultiAddress<
                             ::subxt::sp_core::crypto::AccountId32,
@@ -27755,6 +30221,27 @@ pub mod api {
                             >,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Merge two vesting schedules together, creating a new vesting schedule that unlocks over"]
+                    #[doc = "the highest possible start and end blocks. If both schedules have already started the"]
+                    #[doc = "current block will be used as the schedule start; with the caveat that if one schedule"]
+                    #[doc = "is finished by the current block, the other will be treated as the new merged schedule,"]
+                    #[doc = "unmodified."]
+                    #[doc = ""]
+                    #[doc = "NOTE: If `schedule1_index == schedule2_index` this is a no-op."]
+                    #[doc = "NOTE: This will unlock all schedules through the current block prior to merging."]
+                    #[doc = "NOTE: If both schedules have ended by the current block, no new schedule will be created"]
+                    #[doc = "and both will be removed."]
+                    #[doc = ""]
+                    #[doc = "Merged schedule attributes:"]
+                    #[doc = "- `starting_block`: `MAX(schedule1.starting_block, scheduled2.starting_block,"]
+                    #[doc = "  current_block)`."]
+                    #[doc = "- `ending_block`: `MAX(schedule1.ending_block, schedule2.ending_block)`."]
+                    #[doc = "- `locked`: `schedule1.locked_at(current_block) + schedule2.locked_at(current_block)`."]
+                    #[doc = ""]
+                    #[doc = "The dispatch origin for this call must be _Signed_."]
+                    #[doc = ""]
+                    #[doc = "- `schedule1_index`: index of the first schedule to merge."]
+                    #[doc = "- `schedule2_index`: index of the second schedule to merge."]
                     merge_schedules {
                         schedule1_index: ::core::primitive::u32,
                         schedule2_index: ::core::primitive::u32,
@@ -27765,14 +30252,20 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The account given is not vesting."]
                     NotVesting,
                     #[codec(index = 1)]
+                    #[doc = "The account already has `MaxVestingSchedules` count of schedules and thus"]
+                    #[doc = "cannot add another one. Consider merging existing schedules in order to add another."]
                     AtMaxVestingSchedules,
                     #[codec(index = 2)]
+                    #[doc = "Amount being transferred is too low to create a vesting schedule."]
                     AmountLow,
                     #[codec(index = 3)]
+                    #[doc = "An index was out of bounds of the vesting schedules."]
                     ScheduleIndexOutOfBounds,
                     #[codec(index = 4)]
+                    #[doc = "Failed to create a new schedule because some parameter was invalid."]
                     InvalidScheduleParams,
                 }
                 #[derive(
@@ -27780,11 +30273,14 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "The amount vested has been updated. This could indicate a change in funds available."]
+                    #[doc = "The balance given is the amount which is left unvested (and thus locked)."]
                     VestingUpdated {
                         account: ::subxt::sp_core::crypto::AccountId32,
                         unvested: ::core::primitive::u128,
                     },
                     #[codec(index = 1)]
+                    #[doc = "An \\[account\\] has become fully vested."]
                     VestingCompleted {
                         account: ::subxt::sp_core::crypto::AccountId32,
                     },
@@ -27824,6 +30320,21 @@ pub mod api {
                         message: ::std::boxed::Box<runtime_types::xcm::VersionedXcm>,
                     },
                     #[codec(index = 1)]
+                    #[doc = "Teleport some assets from the local chain to some destination chain."]
+                    #[doc = ""]
+                    #[doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"]
+                    #[doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"]
+                    #[doc = "with all fees taken as needed from the asset."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."]
+                    #[doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send"]
+                    #[doc = "  from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain."]
+                    #[doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will generally be"]
+                    #[doc = "  an `AccountId32` value."]
+                    #[doc = "- `assets`: The assets to be withdrawn. The first item should be the currency used to to pay the fee on the"]
+                    #[doc = "  `dest` side. May not be empty."]
+                    #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
+                    #[doc = "  fees."]
                     teleport_assets {
                         dest:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
@@ -27834,6 +30345,22 @@ pub mod api {
                         fee_asset_item: ::core::primitive::u32,
                     },
                     #[codec(index = 2)]
+                    #[doc = "Transfer some assets from the local chain to the sovereign account of a destination"]
+                    #[doc = "chain and forward a notification XCM."]
+                    #[doc = ""]
+                    #[doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"]
+                    #[doc = "index `fee_asset_item`. The weight limit for fees is not provided and thus is unlimited,"]
+                    #[doc = "with all fees taken as needed from the asset."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."]
+                    #[doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send"]
+                    #[doc = "  from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain."]
+                    #[doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will generally be"]
+                    #[doc = "  an `AccountId32` value."]
+                    #[doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the fee on the"]
+                    #[doc = "  `dest` side."]
+                    #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
+                    #[doc = "  fees."]
                     reserve_transfer_assets {
                         dest:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
@@ -27844,11 +30371,28 @@ pub mod api {
                         fee_asset_item: ::core::primitive::u32,
                     },
                     #[codec(index = 3)]
+                    #[doc = "Execute an XCM message from a local, signed, origin."]
+                    #[doc = ""]
+                    #[doc = "An event is deposited indicating whether `msg` could be executed completely or only"]
+                    #[doc = "partially."]
+                    #[doc = ""]
+                    #[doc = "No more than `max_weight` will be used in its attempted execution. If this is less than the"]
+                    #[doc = "maximum amount of weight that the message could take to be executed, then no execution"]
+                    #[doc = "attempt will be made."]
+                    #[doc = ""]
+                    #[doc = "NOTE: A successful return to this does *not* imply that the `msg` was executed successfully"]
+                    #[doc = "to completion; only that *some* of it was executed."]
                     execute {
                         message: ::std::boxed::Box<runtime_types::xcm::VersionedXcm>,
                         max_weight: ::core::primitive::u64,
                     },
                     #[codec(index = 4)]
+                    #[doc = "Extoll that a particular destination can be communicated with through a particular"]
+                    #[doc = "version of XCM."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be Root."]
+                    #[doc = "- `location`: The destination that is being described."]
+                    #[doc = "- `xcm_version`: The latest version of XCM that `location` supports."]
                     force_xcm_version {
                         location: ::std::boxed::Box<
                             runtime_types::xcm::v1::multilocation::MultiLocation,
@@ -27856,20 +30400,53 @@ pub mod api {
                         xcm_version: ::core::primitive::u32,
                     },
                     #[codec(index = 5)]
+                    #[doc = "Set a safe XCM version (the version that XCM should be encoded with if the most recent"]
+                    #[doc = "version a destination can accept is unknown)."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be Root."]
+                    #[doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."]
                     force_default_xcm_version {
                         maybe_xcm_version: ::core::option::Option<::core::primitive::u32>,
                     },
                     #[codec(index = 6)]
+                    #[doc = "Ask a location to notify us regarding their XCM version and any changes to it."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be Root."]
+                    #[doc = "- `location`: The location to which we should subscribe for XCM version notifications."]
                     force_subscribe_version_notify {
                         location:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
                     },
                     #[codec(index = 7)]
+                    #[doc = "Require that a particular destination should no longer notify us regarding any XCM"]
+                    #[doc = "version changes."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be Root."]
+                    #[doc = "- `location`: The location to which we are currently subscribed for XCM version"]
+                    #[doc = "  notifications which we no longer desire."]
                     force_unsubscribe_version_notify {
                         location:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
                     },
                     #[codec(index = 8)]
+                    #[doc = "Transfer some assets from the local chain to the sovereign account of a destination"]
+                    #[doc = "chain and forward a notification XCM."]
+                    #[doc = ""]
+                    #[doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"]
+                    #[doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"]
+                    #[doc = "is needed than `weight_limit`, then the operation will fail and the assets send may be"]
+                    #[doc = "at risk."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."]
+                    #[doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send"]
+                    #[doc = "  from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain."]
+                    #[doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will generally be"]
+                    #[doc = "  an `AccountId32` value."]
+                    #[doc = "- `assets`: The assets to be withdrawn. This should include the assets used to pay the fee on the"]
+                    #[doc = "  `dest` side."]
+                    #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
+                    #[doc = "  fees."]
+                    #[doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."]
                     limited_reserve_transfer_assets {
                         dest:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
@@ -27881,6 +30458,23 @@ pub mod api {
                         weight_limit: runtime_types::xcm::v2::WeightLimit,
                     },
                     #[codec(index = 9)]
+                    #[doc = "Teleport some assets from the local chain to some destination chain."]
+                    #[doc = ""]
+                    #[doc = "Fee payment on the destination side is made from the asset in the `assets` vector of"]
+                    #[doc = "index `fee_asset_item`, up to enough to pay for `weight_limit` of weight. If more weight"]
+                    #[doc = "is needed than `weight_limit`, then the operation will fail and the assets send may be"]
+                    #[doc = "at risk."]
+                    #[doc = ""]
+                    #[doc = "- `origin`: Must be capable of withdrawing the `assets` and executing XCM."]
+                    #[doc = "- `dest`: Destination context for the assets. Will typically be `X2(Parent, Parachain(..))` to send"]
+                    #[doc = "  from parachain to parachain, or `X1(Parachain(..))` to send from relay to parachain."]
+                    #[doc = "- `beneficiary`: A beneficiary location for the assets in the context of `dest`. Will generally be"]
+                    #[doc = "  an `AccountId32` value."]
+                    #[doc = "- `assets`: The assets to be withdrawn. The first item should be the currency used to to pay the fee on the"]
+                    #[doc = "  `dest` side. May not be empty."]
+                    #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
+                    #[doc = "  fees."]
+                    #[doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."]
                     limited_teleport_assets {
                         dest:
                             ::std::boxed::Box<runtime_types::xcm::VersionedMultiLocation>,
@@ -27897,30 +30491,46 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
+                    #[doc = "The desired destination was unreachable, generally because there is a no way of routing"]
+                    #[doc = "to it."]
                     Unreachable,
                     #[codec(index = 1)]
+                    #[doc = "There was some other issue (i.e. not to do with routing) in sending the message. Perhaps"]
+                    #[doc = "a lack of space for buffering the message."]
                     SendFailure,
                     #[codec(index = 2)]
+                    #[doc = "The message execution fails the filter."]
                     Filtered,
                     #[codec(index = 3)]
+                    #[doc = "The message's weight could not be determined."]
                     UnweighableMessage,
                     #[codec(index = 4)]
+                    #[doc = "The destination `MultiLocation` provided cannot be inverted."]
                     DestinationNotInvertible,
                     #[codec(index = 5)]
+                    #[doc = "The assets to be sent are empty."]
                     Empty,
                     #[codec(index = 6)]
+                    #[doc = "Could not re-anchor the assets to declare the fees for the destination chain."]
                     CannotReanchor,
                     #[codec(index = 7)]
+                    #[doc = "Too many assets have been attempted for transfer."]
                     TooManyAssets,
                     #[codec(index = 8)]
+                    #[doc = "Origin is invalid for sending."]
                     InvalidOrigin,
                     #[codec(index = 9)]
+                    #[doc = "The version of the `Versioned` value used is not able to be interpreted."]
                     BadVersion,
                     #[codec(index = 10)]
+                    #[doc = "The given location could not be used (e.g. because it cannot be expressed in the"]
+                    #[doc = "desired version of XCM)."]
                     BadLocation,
                     #[codec(index = 11)]
+                    #[doc = "The referenced subscription could not be found."]
                     NoSubscription,
                     #[codec(index = 12)]
+                    #[doc = "The location is invalid since it already has a subscription from us."]
                     AlreadySubscribed,
                 }
                 #[derive(
@@ -27928,30 +30538,54 @@ pub mod api {
                 )]
                 pub enum Event {
                     #[codec(index = 0)]
+                    #[doc = "Execution of an XCM message was attempted."]
+                    #[doc = ""]
+                    #[doc = "\\[ outcome \\]"]
                     Attempted(runtime_types::xcm::v2::traits::Outcome),
                     #[codec(index = 1)]
+                    #[doc = "A XCM message was sent."]
+                    #[doc = ""]
+                    #[doc = "\\[ origin, destination, message \\]"]
                     Sent(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         runtime_types::xcm::v2::Xcm,
                     ),
                     #[codec(index = 2)]
+                    #[doc = "Query response received which does not match a registered query. This may be because a"]
+                    #[doc = "matching query was never registered, it may be because it is a duplicate response, or"]
+                    #[doc = "because the query timed out."]
+                    #[doc = ""]
+                    #[doc = "\\[ origin location, id \\]"]
                     UnexpectedResponse(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u64,
                     ),
                     #[codec(index = 3)]
+                    #[doc = "Query response has been received and is ready for taking with `take_response`. There is"]
+                    #[doc = "no registered notification call."]
+                    #[doc = ""]
+                    #[doc = "\\[ id, response \\]"]
                     ResponseReady(
                         ::core::primitive::u64,
                         runtime_types::xcm::v2::Response,
                     ),
                     #[codec(index = 4)]
+                    #[doc = "Query response has been received and query is removed. The registered notification has"]
+                    #[doc = "been dispatched and executed successfully."]
+                    #[doc = ""]
+                    #[doc = "\\[ id, pallet index, call index \\]"]
                     Notified(
                         ::core::primitive::u64,
                         ::core::primitive::u8,
                         ::core::primitive::u8,
                     ),
                     #[codec(index = 5)]
+                    #[doc = "Query response has been received and query is removed. The registered notification could"]
+                    #[doc = "not be dispatched because the dispatch weight is greater than the maximum weight"]
+                    #[doc = "originally budgeted by this runtime for the query result."]
+                    #[doc = ""]
+                    #[doc = "\\[ id, pallet index, call index, actual weight, max budgeted weight \\]"]
                     NotifyOverweight(
                         ::core::primitive::u64,
                         ::core::primitive::u8,
@@ -27960,18 +30594,32 @@ pub mod api {
                         ::core::primitive::u64,
                     ),
                     #[codec(index = 6)]
+                    #[doc = "Query response has been received and query is removed. There was a general error with"]
+                    #[doc = "dispatching the notification call."]
+                    #[doc = ""]
+                    #[doc = "\\[ id, pallet index, call index \\]"]
                     NotifyDispatchError(
                         ::core::primitive::u64,
                         ::core::primitive::u8,
                         ::core::primitive::u8,
                     ),
                     #[codec(index = 7)]
+                    #[doc = "Query response has been received and query is removed. The dispatch was unable to be"]
+                    #[doc = "decoded into a `Call`; this might be due to dispatch function having a signature which"]
+                    #[doc = "is not `(origin, QueryId, Response)`."]
+                    #[doc = ""]
+                    #[doc = "\\[ id, pallet index, call index \\]"]
                     NotifyDecodeFailed(
                         ::core::primitive::u64,
                         ::core::primitive::u8,
                         ::core::primitive::u8,
                     ),
                     #[codec(index = 8)]
+                    #[doc = "Expected query response has been received but the origin location of the response does"]
+                    #[doc = "not match that expected. The query remains registered for a later, valid, response to"]
+                    #[doc = "be received and acted upon."]
+                    #[doc = ""]
+                    #[doc = "\\[ origin location, id, expected location \\]"]
                     InvalidResponder(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u64,
@@ -27980,35 +30628,65 @@ pub mod api {
                         >,
                     ),
                     #[codec(index = 9)]
+                    #[doc = "Expected query response has been received but the expected origin location placed in"]
+                    #[doc = "storage by this runtime previously cannot be decoded. The query remains registered."]
+                    #[doc = ""]
+                    #[doc = "This is unexpected (since a location placed in storage in a previously executing"]
+                    #[doc = "runtime should be readable prior to query timeout) and dangerous since the possibly"]
+                    #[doc = "valid response will be dropped. Manual governance intervention is probably going to be"]
+                    #[doc = "needed."]
+                    #[doc = ""]
+                    #[doc = "\\[ origin location, id \\]"]
                     InvalidResponderVersion(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u64,
                     ),
                     #[codec(index = 10)]
+                    #[doc = "Received query response has been read and removed."]
+                    #[doc = ""]
+                    #[doc = "\\[ id \\]"]
                     ResponseTaken(::core::primitive::u64),
                     #[codec(index = 11)]
+                    #[doc = "Some assets have been placed in an asset trap."]
+                    #[doc = ""]
+                    #[doc = "\\[ hash, origin, assets \\]"]
                     AssetsTrapped(
                         ::subxt::sp_core::H256,
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         runtime_types::xcm::VersionedMultiAssets,
                     ),
                     #[codec(index = 12)]
+                    #[doc = "An XCM version change notification message has been attempted to be sent."]
+                    #[doc = ""]
+                    #[doc = "\\[ destination, result \\]"]
                     VersionChangeNotified(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u32,
                     ),
                     #[codec(index = 13)]
+                    #[doc = "The supported version of a location has been changed. This might be through an"]
+                    #[doc = "automatic notification or a manual intervention."]
+                    #[doc = ""]
+                    #[doc = "\\[ location, XCM version \\]"]
                     SupportedVersionChanged(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u32,
                     ),
                     #[codec(index = 14)]
+                    #[doc = "A given location which had a version change subscription was dropped owing to an error"]
+                    #[doc = "sending the notification to it."]
+                    #[doc = ""]
+                    #[doc = "\\[ location, query ID, error \\]"]
                     NotifyTargetSendFail(
                         runtime_types::xcm::v1::multilocation::MultiLocation,
                         ::core::primitive::u64,
                         runtime_types::xcm::v2::traits::Error,
                     ),
                     #[codec(index = 15)]
+                    #[doc = "A given location which had a version change subscription was dropped owing to an error"]
+                    #[doc = "migrating the location to our new XCM format."]
+                    #[doc = ""]
+                    #[doc = "\\[ location, query ID \\]"]
                     NotifyTargetMigrationFail(
                         runtime_types::xcm::VersionedMultiLocation,
                         ::core::primitive::u64,
@@ -28647,6 +31325,11 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Create a new auction."]
+                        #[doc = ""]
+                        #[doc = "This can only happen when there isn't already an auction in progress and may only be"]
+                        #[doc = "called by the root origin. Accepts the `duration` of this auction and the"]
+                        #[doc = "`lease_period_index` of the initial lease period of the four that are to be auctioned."]
                         new_auction {
                             #[codec(compact)]
                             duration: ::core::primitive::u32,
@@ -28654,6 +31337,22 @@ pub mod api {
                             lease_period_index: ::core::primitive::u32,
                         },
                         #[codec(index = 1)]
+                        #[doc = "Make a new bid from an account (including a parachain account) for deploying a new"]
+                        #[doc = "parachain."]
+                        #[doc = ""]
+                        #[doc = "Multiple simultaneous bids from the same bidder are allowed only as long as all active"]
+                        #[doc = "bids overlap each other (i.e. are mutually exclusive). Bids cannot be redacted."]
+                        #[doc = ""]
+                        #[doc = "- `sub` is the sub-bidder ID, allowing for multiple competing bids to be made by (and"]
+                        #[doc = "funded by) the same account."]
+                        #[doc = "- `auction_index` is the index of the auction to bid on. Should just be the present"]
+                        #[doc = "value of `AuctionCounter`."]
+                        #[doc = "- `first_slot` is the first lease period index of the range to bid on. This is the"]
+                        #[doc = "absolute lease period index value, not an auction-specific offset."]
+                        #[doc = "- `last_slot` is the last lease period index of the range to bid on. This is the"]
+                        #[doc = "absolute lease period index value, not an auction-specific offset."]
+                        #[doc = "- `amount` is the amount to bid to be held as deposit for the parachain should the"]
+                        #[doc = "bid win. This amount is held throughout the range."]
                         bid {
                             #[codec(compact)]
                             para: runtime_types::polkadot_parachain::primitives::Id,
@@ -28667,6 +31366,9 @@ pub mod api {
                             amount: ::core::primitive::u128,
                         },
                         #[codec(index = 2)]
+                        #[doc = "Cancel an in-progress auction."]
+                        #[doc = ""]
+                        #[doc = "Can only be called by Root origin."]
                         cancel_auction,
                     }
                     #[derive(
@@ -28674,18 +31376,25 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "This auction is already in progress."]
                         AuctionInProgress,
                         #[codec(index = 1)]
+                        #[doc = "The lease period is in the past."]
                         LeasePeriodInPast,
                         #[codec(index = 2)]
+                        #[doc = "Para is not registered"]
                         ParaNotRegistered,
                         #[codec(index = 3)]
+                        #[doc = "Not a current auction."]
                         NotCurrentAuction,
                         #[codec(index = 4)]
+                        #[doc = "Not an auction."]
                         NotAuction,
                         #[codec(index = 5)]
+                        #[doc = "Auction has already ended."]
                         AuctionEnded,
                         #[codec(index = 6)]
+                        #[doc = "The para is already leased out for part of this range."]
                         AlreadyLeasedOut,
                     }
                     #[derive(
@@ -28693,31 +31402,43 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "An auction started. Provides its index and the block number where it will begin to"]
+                        #[doc = "close and the first lease period of the quadruplet that is auctioned."]
+                        #[doc = "`[auction_index, lease_period, ending]`"]
                         AuctionStarted(
                             ::core::primitive::u32,
                             ::core::primitive::u32,
                             ::core::primitive::u32,
                         ),
                         #[codec(index = 1)]
+                        #[doc = "An auction ended. All funds become unreserved. `[auction_index]`"]
                         AuctionClosed(::core::primitive::u32),
                         #[codec(index = 2)]
+                        #[doc = "Funds were reserved for a winning bid. First balance is the extra amount reserved."]
+                        #[doc = "Second is the total. `[bidder, extra_reserved, total_amount]`"]
                         Reserved(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 3)]
+                        #[doc = "Funds were unreserved since bidder is no longer active. `[bidder, amount]`"]
                         Unreserved(
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 4)]
+                        #[doc = "Someone attempted to lease the same slot twice for a parachain. The amount is held in reserve"]
+                        #[doc = "but no parachain slot has been leased."]
+                        #[doc = "`[parachain_id, leaser, amount]`"]
                         ReserveConfiscated(
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::subxt::sp_core::crypto::AccountId32,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 5)]
+                        #[doc = "A new bid has been accepted as the current winner."]
+                        #[doc = "`[who, para_id, amount, first_slot, last_slot]`"]
                         BidAccepted(
                             ::subxt::sp_core::crypto::AccountId32,
                             runtime_types::polkadot_parachain::primitives::Id,
@@ -28726,6 +31447,8 @@ pub mod api {
                             ::core::primitive::u32,
                         ),
                         #[codec(index = 6)]
+                        #[doc = "The winning offset was chosen for an auction. This will map into the `Winning` storage map."]
+                        #[doc = "`[auction_index, block_number]`"]
                         WinningOffset(::core::primitive::u32, ::core::primitive::u32),
                     }
                 }
@@ -28738,29 +31461,36 @@ pub mod api {
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Call {
-                        # [codec (index = 0)] claim { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , } , # [codec (index = 1)] mint_claim { who : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , value : :: core :: primitive :: u128 , vesting_schedule : :: core :: option :: Option < (:: core :: primitive :: u128 , :: core :: primitive :: u128 , :: core :: primitive :: u32 ,) > , statement : :: core :: option :: Option < runtime_types :: polkadot_runtime_common :: claims :: StatementKind > , } , # [codec (index = 2)] claim_attest { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 3)] attest { statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 4)] move_claim { old : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , new : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , maybe_preclaim : :: core :: option :: Option < :: subxt :: sp_core :: crypto :: AccountId32 > , } , }
+                        # [codec (index = 0)] # [doc = "Make a claim to collect your DOTs."] # [doc = ""] # [doc = "The dispatch origin for this call must be _None_."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to claim is deemed valid if the signature provided matches"] # [doc = "the expected signed message of:"] # [doc = ""] # [doc = "> Ethereum Signed Message:"] # [doc = "> (configured prefix string)(address)"] # [doc = ""] # [doc = "and `address` matches the `dest` account."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `dest`: The destination account to payout the claim."] # [doc = "- `ethereum_signature`: The signature of an ethereum signed message"] # [doc = "   matching the format described above."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to validate unsigned `claim` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] claim { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , } , # [codec (index = 1)] # [doc = "Mint a new claim to collect DOTs."] # [doc = ""] # [doc = "The dispatch origin for this call must be _Root_."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `who`: The Ethereum address allowed to collect this claim."] # [doc = "- `value`: The number of DOTs that will be claimed."] # [doc = "- `vesting_schedule`: An optional vesting schedule for these DOTs."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "We assume worst case that both vesting and statement is being inserted."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] mint_claim { who : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , value : :: core :: primitive :: u128 , vesting_schedule : :: core :: option :: Option < (:: core :: primitive :: u128 , :: core :: primitive :: u128 , :: core :: primitive :: u32 ,) > , statement : :: core :: option :: Option < runtime_types :: polkadot_runtime_common :: claims :: StatementKind > , } , # [codec (index = 2)] # [doc = "Make a claim to collect your DOTs by signing a statement."] # [doc = ""] # [doc = "The dispatch origin for this call must be _None_."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to `claim_attest` is deemed valid if the signature provided matches"] # [doc = "the expected signed message of:"] # [doc = ""] # [doc = "> Ethereum Signed Message:"] # [doc = "> (configured prefix string)(address)(statement)"] # [doc = ""] # [doc = "and `address` matches the `dest` account; the `statement` must match that which is"] # [doc = "expected according to your purchase arrangement."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `dest`: The destination account to payout the claim."] # [doc = "- `ethereum_signature`: The signature of an ethereum signed message"] # [doc = "   matching the format described above."] # [doc = "- `statement`: The identity of the statement which is being attested to in the signature."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to validate unsigned `claim_attest` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] claim_attest { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 3)] # [doc = "Attest to a statement, needed to finalize the claims process."] # [doc = ""] # [doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a `SignedExtension`."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"] # [doc = "and provides a `statement` which is expected for the account."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `statement`: The identity of the statement which is being attested to in the signature."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to do pre-validation on `attest` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] attest { statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 4)] move_claim { old : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , new : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , maybe_preclaim : :: core :: option :: Option < :: subxt :: sp_core :: crypto :: AccountId32 > , } , }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Invalid Ethereum signature."]
                         InvalidEthereumSignature,
                         #[codec(index = 1)]
+                        #[doc = "Ethereum address has no claim."]
                         SignerHasNoClaim,
                         #[codec(index = 2)]
+                        #[doc = "Account ID sending transaction has no claim."]
                         SenderHasNoClaim,
                         #[codec(index = 3)]
+                        #[doc = "There's not enough in the pot to pay out some unvested amount. Generally implies a logic"]
+                        #[doc = "error."]
                         PotUnderflow,
                         #[codec(index = 4)]
+                        #[doc = "A needed statement was not included."]
                         InvalidStatement,
                         #[codec(index = 5)]
+                        #[doc = "The account already has a vested balance."]
                         VestedBalanceExists,
                     }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Event {
-                        # [codec (index = 0)] Claimed (:: subxt :: sp_core :: crypto :: AccountId32 , runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , :: core :: primitive :: u128 ,) , }
+                        # [codec (index = 0)] # [doc = "Someone claimed some DOTs. `[who, ethereum_address, amount]`"] Claimed (:: subxt :: sp_core :: crypto :: AccountId32 , runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , :: core :: primitive :: u128 ,) , }
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
@@ -28793,6 +31523,10 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Create a new crowdloaning campaign for a parachain slot with the given lease period range."]
+                        #[doc = ""]
+                        #[doc = "This applies a lock to your parachain configuration, ensuring that it cannot be changed"]
+                        #[doc = "by the parachain manager."]
                         create {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
@@ -28809,6 +31543,8 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 1)]
+                        #[doc = "Contribute to a crowd sale. This will transfer some balance over to fund a parachain"]
+                        #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
                         contribute {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
@@ -28819,22 +31555,48 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 2)]
+                        #[doc = "Withdraw full balance of a specific contributor."]
+                        #[doc = ""]
+                        #[doc = "Origin must be signed, but can come from anyone."]
+                        #[doc = ""]
+                        #[doc = "The fund must be either in, or ready for, retirement. For a fund to be *in* retirement, then the retirement"]
+                        #[doc = "flag must be set. For a fund to be ready for retirement, then:"]
+                        #[doc = "- it must not already be in retirement;"]
+                        #[doc = "- the amount of raised funds must be bigger than the _free_ balance of the account;"]
+                        #[doc = "- and either:"]
+                        #[doc = "  - the block number must be at least `end`; or"]
+                        #[doc = "  - the current lease period must be greater than the fund's `last_period`."]
+                        #[doc = ""]
+                        #[doc = "In this case, the fund's retirement flag is set and its `end` is reset to the current block"]
+                        #[doc = "number."]
+                        #[doc = ""]
+                        #[doc = "- `who`: The account whose contribution should be withdrawn."]
+                        #[doc = "- `index`: The parachain to whose crowdloan the contribution was made."]
                         withdraw {
                             who: ::subxt::sp_core::crypto::AccountId32,
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
                         },
                         #[codec(index = 3)]
+                        #[doc = "Automatically refund contributors of an ended crowdloan."]
+                        #[doc = "Due to weight restrictions, this function may need to be called multiple"]
+                        #[doc = "times to fully refund all users. We will refund `RemoveKeysLimit` users at a time."]
+                        #[doc = ""]
+                        #[doc = "Origin must be signed, but can come from anyone."]
                         refund {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
                         },
                         #[codec(index = 4)]
+                        #[doc = "Remove a fund after the retirement period has ended and all funds have been returned."]
                         dissolve {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
                         },
                         #[codec(index = 5)]
+                        #[doc = "Edit the configuration for an in-progress crowdloan."]
+                        #[doc = ""]
+                        #[doc = "Can only be called by Root origin."]
                         edit {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
@@ -28851,15 +31613,23 @@ pub mod api {
                             >,
                         },
                         #[codec(index = 6)]
+                        #[doc = "Add an optional memo to an existing crowdloan contribution."]
+                        #[doc = ""]
+                        #[doc = "Origin must be Signed, and the user must have contributed to the crowdloan."]
                         add_memo {
                             index: runtime_types::polkadot_parachain::primitives::Id,
                             memo: ::std::vec::Vec<::core::primitive::u8>,
                         },
                         #[codec(index = 7)]
+                        #[doc = "Poke the fund into `NewRaise`"]
+                        #[doc = ""]
+                        #[doc = "Origin must be Signed, and the fund has non-zero raise."]
                         poke {
                             index: runtime_types::polkadot_parachain::primitives::Id,
                         },
                         #[codec(index = 8)]
+                        #[doc = "Contribute your entire balance to a crowd sale. This will transfer the entire balance of a user over to fund a parachain"]
+                        #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
                         contribute_all {
                             #[codec(compact)]
                             index: runtime_types::polkadot_parachain::primitives::Id,
@@ -28873,50 +31643,73 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The current lease period is more than the first lease period."]
                         FirstPeriodInPast,
                         #[codec(index = 1)]
+                        #[doc = "The first lease period needs to at least be less than 3 `max_value`."]
                         FirstPeriodTooFarInFuture,
                         #[codec(index = 2)]
+                        #[doc = "Last lease period must be greater than first lease period."]
                         LastPeriodBeforeFirstPeriod,
                         #[codec(index = 3)]
+                        #[doc = "The last lease period cannot be more than 3 periods after the first period."]
                         LastPeriodTooFarInFuture,
                         #[codec(index = 4)]
+                        #[doc = "The campaign ends before the current block number. The end must be in the future."]
                         CannotEndInPast,
                         #[codec(index = 5)]
+                        #[doc = "The end date for this crowdloan is not sensible."]
                         EndTooFarInFuture,
                         #[codec(index = 6)]
+                        #[doc = "There was an overflow."]
                         Overflow,
                         #[codec(index = 7)]
+                        #[doc = "The contribution was below the minimum, `MinContribution`."]
                         ContributionTooSmall,
                         #[codec(index = 8)]
+                        #[doc = "Invalid fund index."]
                         InvalidParaId,
                         #[codec(index = 9)]
+                        #[doc = "Contributions exceed maximum amount."]
                         CapExceeded,
                         #[codec(index = 10)]
+                        #[doc = "The contribution period has already ended."]
                         ContributionPeriodOver,
                         #[codec(index = 11)]
+                        #[doc = "The origin of this call is invalid."]
                         InvalidOrigin,
                         #[codec(index = 12)]
+                        #[doc = "This crowdloan does not correspond to a parachain."]
                         NotParachain,
                         #[codec(index = 13)]
+                        #[doc = "This parachain lease is still active and retirement cannot yet begin."]
                         LeaseActive,
                         #[codec(index = 14)]
+                        #[doc = "This parachain's bid or lease is still active and withdraw cannot yet begin."]
                         BidOrLeaseActive,
                         #[codec(index = 15)]
+                        #[doc = "The crowdloan has not yet ended."]
                         FundNotEnded,
                         #[codec(index = 16)]
+                        #[doc = "There are no contributions stored in this crowdloan."]
                         NoContributions,
                         #[codec(index = 17)]
+                        #[doc = "The crowdloan is not ready to dissolve. Potentially still has a slot or in retirement period."]
                         NotReadyToDissolve,
                         #[codec(index = 18)]
+                        #[doc = "Invalid signature."]
                         InvalidSignature,
                         #[codec(index = 19)]
+                        #[doc = "The provided memo is too large."]
                         MemoTooLarge,
                         #[codec(index = 20)]
+                        #[doc = "The fund is already in `NewRaise`"]
                         AlreadyInNewRaise,
                         #[codec(index = 21)]
+                        #[doc = "No contributions allowed during the VRF delay"]
                         VrfDelayInProgress,
                         #[codec(index = 22)]
+                        #[doc = "A lease period has not started yet, due to an offset in the starting block."]
                         NoLeasePeriod,
                     }
                     #[derive(
@@ -28924,28 +31717,36 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "Create a new crowdloaning campaign. `[fund_index]`"]
                         Created(runtime_types::polkadot_parachain::primitives::Id),
                         #[codec(index = 1)]
+                        #[doc = "Contributed to a crowd sale. `[who, fund_index, amount]`"]
                         Contributed(
                             ::subxt::sp_core::crypto::AccountId32,
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 2)]
+                        #[doc = "Withdrew full balance of a contributor. `[who, fund_index, amount]`"]
                         Withdrew(
                             ::subxt::sp_core::crypto::AccountId32,
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::core::primitive::u128,
                         ),
                         #[codec(index = 3)]
+                        #[doc = "The loans in a fund have been partially dissolved, i.e. there are some left"]
+                        #[doc = "over child keys that still need to be killed. `[fund_index]`"]
                         PartiallyRefunded(
                             runtime_types::polkadot_parachain::primitives::Id,
                         ),
                         #[codec(index = 4)]
+                        #[doc = "All loans in a fund have been refunded. `[fund_index]`"]
                         AllRefunded(runtime_types::polkadot_parachain::primitives::Id),
                         #[codec(index = 5)]
+                        #[doc = "Fund is dissolved. `[fund_index]`"]
                         Dissolved(runtime_types::polkadot_parachain::primitives::Id),
                         #[codec(index = 6)]
+                        #[doc = "The result of trying to submit a new bid to the Slots pallet."]
                         HandleBidResult(
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::core::result::Result<
@@ -28954,14 +31755,17 @@ pub mod api {
                             >,
                         ),
                         #[codec(index = 7)]
+                        #[doc = "The configuration to a crowdloan has been edited. `[fund_index]`"]
                         Edited(runtime_types::polkadot_parachain::primitives::Id),
                         #[codec(index = 8)]
+                        #[doc = "A memo has been updated. `[who, fund_index, memo]`"]
                         MemoUpdated(
                             ::subxt::sp_core::crypto::AccountId32,
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::std::vec::Vec<::core::primitive::u8>,
                         ),
                         #[codec(index = 9)]
+                        #[doc = "A parachain has been moved to `NewRaise`"]
                         AddedToNewRaise(
                             runtime_types::polkadot_parachain::primitives::Id,
                         ),
@@ -28991,38 +31795,53 @@ pub mod api {
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Call {
-                        # [codec (index = 0)] register { id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] force_register { who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 2)] deregister { id : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 3)] swap { id : runtime_types :: polkadot_parachain :: primitives :: Id , other : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 4)] force_remove_lock { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] reserve , }
+                        # [codec (index = 0)] # [doc = "Register head data and validation code for a reserved Para Id."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin."] # [doc = "- `id`: The para ID. Must be owned/managed by the `origin` signing account."] # [doc = "- `genesis_head`: The genesis head data of the parachain/thread."] # [doc = "- `validation_code`: The initial validation code of the parachain/thread."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin signed account must reserve a corresponding deposit for the registration. Anything already"] # [doc = "reserved previously for this para ID is accounted for."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Registered` event is emitted in case of success."] register { id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Force the registration of a Para Id on the relay chain."] # [doc = ""] # [doc = "This function must be called by a Root origin."] # [doc = ""] # [doc = "The deposit taken can be specified for this registration. Any `ParaId`"] # [doc = "can be registered, including sub-1000 IDs which are System Parachains."] force_register { who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 2)] # [doc = "Deregister a Para Id, freeing all data and returning any deposit."] # [doc = ""] # [doc = "The caller must be Root, the `para` owner, or the `para` itself. The para must be a parathread."] deregister { id : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 3)] # [doc = "Swap a parachain with another parachain or parathread."] # [doc = ""] # [doc = "The origin must be Root, the `para` owner, or the `para` itself."] # [doc = ""] # [doc = "The swap will happen only if there is already an opposite swap pending. If there is not,"] # [doc = "the swap will be stored in the pending swaps map, ready for a later confirmatory swap."] # [doc = ""] # [doc = "The `ParaId`s remain mapped to the same head data and code so external code can rely on"] # [doc = "`ParaId` to be a long-term identifier of a notional \"parachain\". However, their"] # [doc = "scheduling info (i.e. whether they're a parathread or parachain), auction information"] # [doc = "and the auction deposit are switched."] swap { id : runtime_types :: polkadot_parachain :: primitives :: Id , other : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 4)] # [doc = "Remove a manager lock from a para. This will allow the manager of a"] # [doc = "previously locked para to deregister or swap a para without using governance."] # [doc = ""] # [doc = "Can only be called by the Root origin."] force_remove_lock { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Reserve a Para Id on the relay chain."] # [doc = ""] # [doc = "This function will reserve a new Para Id to be owned/managed by the origin account."] # [doc = "The origin account is able to register head data and validation code using `register` to create"] # [doc = "a parathread. Using the Slots pallet, a parathread can then be upgraded to get a parachain slot."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin. Becomes the manager/owner of the new para ID."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin must reserve a deposit of `ParaDeposit` for the registration."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for use."] reserve , }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The ID is not registered."]
                         NotRegistered,
                         #[codec(index = 1)]
+                        #[doc = "The ID is already registered."]
                         AlreadyRegistered,
                         #[codec(index = 2)]
+                        #[doc = "The caller is not the owner of this Id."]
                         NotOwner,
                         #[codec(index = 3)]
+                        #[doc = "Invalid para code size."]
                         CodeTooLarge,
                         #[codec(index = 4)]
+                        #[doc = "Invalid para head data size."]
                         HeadDataTooLarge,
                         #[codec(index = 5)]
+                        #[doc = "Para is not a Parachain."]
                         NotParachain,
                         #[codec(index = 6)]
+                        #[doc = "Para is not a Parathread."]
                         NotParathread,
                         #[codec(index = 7)]
+                        #[doc = "Cannot deregister para"]
                         CannotDeregister,
                         #[codec(index = 8)]
+                        #[doc = "Cannot schedule downgrade of parachain to parathread"]
                         CannotDowngrade,
                         #[codec(index = 9)]
+                        #[doc = "Cannot schedule upgrade of parathread to parachain"]
                         CannotUpgrade,
                         #[codec(index = 10)]
+                        #[doc = "Para is locked from manipulation by the manager. Must use parachain or relay chain governance."]
                         ParaLocked,
                         #[codec(index = 11)]
+                        #[doc = "The ID given for registration has not been reserved."]
                         NotReserved,
                         #[codec(index = 12)]
+                        #[doc = "Registering parachain with empty code is not allowed."]
                         EmptyCode,
                         #[codec(index = 13)]
+                        #[doc = "Cannot perform a parachain slot / lifecycle swap. Check that the state of both paras are"]
+                        #[doc = "correct for the swap to work."]
                         CannotSwap,
                     }
                     #[derive(
@@ -29061,6 +31880,10 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Just a connect into the `lease_out` call, in case Root wants to force some lease to happen"]
+                        #[doc = "independently of any other on-chain mechanism to use it."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
                         force_lease {
                             para: runtime_types::polkadot_parachain::primitives::Id,
                             leaser: ::subxt::sp_core::crypto::AccountId32,
@@ -29069,10 +31892,20 @@ pub mod api {
                             period_count: ::core::primitive::u32,
                         },
                         #[codec(index = 1)]
+                        #[doc = "Clear all leases for a Para Id, refunding any deposits back to the original owners."]
+                        #[doc = ""]
+                        #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
                         clear_all_leases {
                             para: runtime_types::polkadot_parachain::primitives::Id,
                         },
                         #[codec(index = 2)]
+                        #[doc = "Try to onboard a parachain that has a lease for the current lease period."]
+                        #[doc = ""]
+                        #[doc = "This function can be useful if there was some state issue with a para that should"]
+                        #[doc = "have onboarded, but was unable to. As long as they have a lease period, we can"]
+                        #[doc = "let them onboard from here."]
+                        #[doc = ""]
+                        #[doc = "Origin must be signed, but can be called by anyone."]
                         trigger_onboard {
                             para: runtime_types::polkadot_parachain::primitives::Id,
                         },
@@ -29082,8 +31915,10 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The parachain ID is not onboarding."]
                         ParaNotOnboarding,
                         #[codec(index = 1)]
+                        #[doc = "There was an error with the lease."]
                         LeaseError,
                     }
                     #[derive(
@@ -29091,8 +31926,13 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "A new `[lease_period]` is beginning."]
                         NewLeasePeriod(::core::primitive::u32),
                         #[codec(index = 1)]
+                        #[doc = "A para has won the right to a continuous set of lease periods as a parachain."]
+                        #[doc = "First balance is any extra amount reserved on top of the para's existing deposit."]
+                        #[doc = "Second balance is the total amount reserved."]
+                        #[doc = "`[parachain_id, leaser, period_begin, period_count, extra_reserved, total_amount]`"]
                         Leased(
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::subxt::sp_core::crypto::AccountId32,
@@ -29169,116 +32009,167 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Set the validation upgrade cooldown."]
                         set_validation_upgrade_cooldown { new: ::core::primitive::u32 },
                         #[codec(index = 1)]
+                        #[doc = "Set the validation upgrade delay."]
                         set_validation_upgrade_delay { new: ::core::primitive::u32 },
                         #[codec(index = 2)]
+                        #[doc = "Set the acceptance period for an included candidate."]
                         set_code_retention_period { new: ::core::primitive::u32 },
                         #[codec(index = 3)]
+                        #[doc = "Set the max validation code size for incoming upgrades."]
                         set_max_code_size { new: ::core::primitive::u32 },
                         #[codec(index = 4)]
+                        #[doc = "Set the max POV block size for incoming upgrades."]
                         set_max_pov_size { new: ::core::primitive::u32 },
                         #[codec(index = 5)]
+                        #[doc = "Set the max head data size for paras."]
                         set_max_head_data_size { new: ::core::primitive::u32 },
                         #[codec(index = 6)]
+                        #[doc = "Set the number of parathread execution cores."]
                         set_parathread_cores { new: ::core::primitive::u32 },
                         #[codec(index = 7)]
+                        #[doc = "Set the number of retries for a particular parathread."]
                         set_parathread_retries { new: ::core::primitive::u32 },
                         #[codec(index = 8)]
+                        #[doc = "Set the parachain validator-group rotation frequency"]
                         set_group_rotation_frequency { new: ::core::primitive::u32 },
                         #[codec(index = 9)]
+                        #[doc = "Set the availability period for parachains."]
                         set_chain_availability_period { new: ::core::primitive::u32 },
                         #[codec(index = 10)]
+                        #[doc = "Set the availability period for parathreads."]
                         set_thread_availability_period { new: ::core::primitive::u32 },
                         #[codec(index = 11)]
+                        #[doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."]
                         set_scheduling_lookahead { new: ::core::primitive::u32 },
                         #[codec(index = 12)]
+                        #[doc = "Set the maximum number of validators to assign to any core."]
                         set_max_validators_per_core {
                             new: ::core::option::Option<::core::primitive::u32>,
                         },
                         #[codec(index = 13)]
+                        #[doc = "Set the maximum number of validators to use in parachain consensus."]
                         set_max_validators {
                             new: ::core::option::Option<::core::primitive::u32>,
                         },
                         #[codec(index = 14)]
+                        #[doc = "Set the dispute period, in number of sessions to keep for disputes."]
                         set_dispute_period { new: ::core::primitive::u32 },
                         #[codec(index = 15)]
+                        #[doc = "Set the dispute post conclusion acceptance period."]
                         set_dispute_post_conclusion_acceptance_period {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 16)]
+                        #[doc = "Set the maximum number of dispute spam slots."]
                         set_dispute_max_spam_slots { new: ::core::primitive::u32 },
                         #[codec(index = 17)]
+                        #[doc = "Set the dispute conclusion by time out period."]
                         set_dispute_conclusion_by_time_out_period {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 18)]
+                        #[doc = "Set the no show slots, in number of number of consensus slots."]
+                        #[doc = "Must be at least 1."]
                         set_no_show_slots { new: ::core::primitive::u32 },
                         #[codec(index = 19)]
+                        #[doc = "Set the total number of delay tranches."]
                         set_n_delay_tranches { new: ::core::primitive::u32 },
                         #[codec(index = 20)]
+                        #[doc = "Set the zeroth delay tranche width."]
                         set_zeroth_delay_tranche_width { new: ::core::primitive::u32 },
                         #[codec(index = 21)]
+                        #[doc = "Set the number of validators needed to approve a block."]
                         set_needed_approvals { new: ::core::primitive::u32 },
                         #[codec(index = 22)]
+                        #[doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."]
                         set_relay_vrf_modulo_samples { new: ::core::primitive::u32 },
                         #[codec(index = 23)]
+                        #[doc = "Sets the maximum items that can present in a upward dispatch queue at once."]
                         set_max_upward_queue_count { new: ::core::primitive::u32 },
                         #[codec(index = 24)]
+                        #[doc = "Sets the maximum total size of items that can present in a upward dispatch queue at once."]
                         set_max_upward_queue_size { new: ::core::primitive::u32 },
                         #[codec(index = 25)]
+                        #[doc = "Set the critical downward message size."]
                         set_max_downward_message_size { new: ::core::primitive::u32 },
                         #[codec(index = 26)]
+                        #[doc = "Sets the soft limit for the phase of dispatching dispatchable upward messages."]
                         set_ump_service_total_weight { new: ::core::primitive::u64 },
                         #[codec(index = 27)]
+                        #[doc = "Sets the maximum size of an upward message that can be sent by a candidate."]
                         set_max_upward_message_size { new: ::core::primitive::u32 },
                         #[codec(index = 28)]
+                        #[doc = "Sets the maximum number of messages that a candidate can contain."]
                         set_max_upward_message_num_per_candidate {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 29)]
+                        #[doc = "Sets the number of sessions after which an HRMP open channel request expires."]
                         set_hrmp_open_request_ttl { new: ::core::primitive::u32 },
                         #[codec(index = 30)]
+                        #[doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."]
                         set_hrmp_sender_deposit { new: ::core::primitive::u128 },
                         #[codec(index = 31)]
+                        #[doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"]
+                        #[doc = "channel."]
                         set_hrmp_recipient_deposit { new: ::core::primitive::u128 },
                         #[codec(index = 32)]
+                        #[doc = "Sets the maximum number of messages allowed in an HRMP channel at once."]
                         set_hrmp_channel_max_capacity { new: ::core::primitive::u32 },
                         #[codec(index = 33)]
+                        #[doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."]
                         set_hrmp_channel_max_total_size { new: ::core::primitive::u32 },
                         #[codec(index = 34)]
+                        #[doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."]
                         set_hrmp_max_parachain_inbound_channels {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 35)]
+                        #[doc = "Sets the maximum number of inbound HRMP channels a parathread is allowed to accept."]
                         set_hrmp_max_parathread_inbound_channels {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 36)]
+                        #[doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."]
                         set_hrmp_channel_max_message_size { new: ::core::primitive::u32 },
                         #[codec(index = 37)]
+                        #[doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."]
                         set_hrmp_max_parachain_outbound_channels {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 38)]
+                        #[doc = "Sets the maximum number of outbound HRMP channels a parathread is allowed to open."]
                         set_hrmp_max_parathread_outbound_channels {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 39)]
+                        #[doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."]
                         set_hrmp_max_message_num_per_candidate {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 40)]
+                        #[doc = "Sets the maximum amount of weight any individual upward message may consume."]
                         set_ump_max_individual_weight { new: ::core::primitive::u64 },
                         #[codec(index = 41)]
+                        #[doc = "Enable or disable PVF pre-checking. Consult the field documentation prior executing."]
                         set_pvf_checking_enabled { new: ::core::primitive::bool },
                         #[codec(index = 42)]
+                        #[doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."]
                         set_pvf_voting_ttl { new: ::core::primitive::u32 },
                         #[codec(index = 43)]
+                        #[doc = "Sets the minimum delay between announcing the upgrade block for a parachain until the"]
+                        #[doc = "upgrade taking place."]
+                        #[doc = ""]
+                        #[doc = "See the field documentation for information and constraints for the new value."]
                         set_minimum_validation_upgrade_delay {
                             new: ::core::primitive::u32,
                         },
                         #[codec(index = 44)]
+                        #[doc = "Setting this to true will disable consistency checks for the configuration setters."]
+                        #[doc = "Use with caution."]
                         set_bypass_consistency_check { new: ::core::primitive::bool },
                     }
                     #[derive(
@@ -29286,6 +32177,7 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The new value for a configuration parameter is invalid."]
                         InvalidNewValue,
                     }
                 }
@@ -29354,25 +32246,32 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Duplicate dispute statement sets provided."]
                         DuplicateDisputeStatementSets,
                         #[codec(index = 1)]
+                        #[doc = "Ancient dispute statement provided."]
                         AncientDisputeStatement,
                         #[codec(index = 2)]
+                        #[doc = "Validator index on statement is out of bounds for session."]
                         ValidatorIndexOutOfBounds,
                         #[codec(index = 3)]
+                        #[doc = "Invalid signature on statement."]
                         InvalidSignature,
                         #[codec(index = 4)]
+                        #[doc = "Validator vote submitted more than once to dispute."]
                         DuplicateStatement,
                         #[codec(index = 5)]
+                        #[doc = "Too many spam slots used by some specific validator."]
                         PotentialSpam,
                         #[codec(index = 6)]
+                        #[doc = "A dispute where there are only votes on one side."]
                         SingleSidedDispute,
                     }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Event {
-                        # [codec (index = 0)] DisputeInitiated (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeLocation ,) , # [codec (index = 1)] DisputeConcluded (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeResult ,) , # [codec (index = 2)] DisputeTimedOut (runtime_types :: polkadot_core_primitives :: CandidateHash ,) , # [codec (index = 3)] Revert (:: core :: primitive :: u32 ,) , }
+                        # [codec (index = 0)] # [doc = "A dispute has been initiated. \\[candidate hash, dispute location\\]"] DisputeInitiated (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeLocation ,) , # [codec (index = 1)] # [doc = "A dispute has concluded for or against a candidate."] # [doc = "`\\[para id, candidate hash, dispute result\\]`"] DisputeConcluded (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeResult ,) , # [codec (index = 2)] # [doc = "A dispute has timed out due to insufficient participation."] # [doc = "`\\[para id, candidate hash\\]`"] DisputeTimedOut (runtime_types :: polkadot_core_primitives :: CandidateHash ,) , # [codec (index = 3)] # [doc = "A dispute has concluded with supermajority against a candidate."] # [doc = "Block authors should no longer build on top of this head and should"] # [doc = "instead revert the block at the given height. This should be the"] # [doc = "number of the child of the last known valid block in the chain."] Revert (:: core :: primitive :: u32 ,) , }
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
@@ -29411,48 +32310,67 @@ pub mod api {
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Call {
-                        # [codec (index = 0)] hrmp_init_open_channel { recipient : runtime_types :: polkadot_parachain :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 1)] hrmp_accept_open_channel { sender : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 2)] hrmp_close_channel { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , } , # [codec (index = 3)] force_clean_hrmp { para : runtime_types :: polkadot_parachain :: primitives :: Id , inbound : :: core :: primitive :: u32 , outbound : :: core :: primitive :: u32 , } , # [codec (index = 4)] force_process_hrmp_open { channels : :: core :: primitive :: u32 , } , # [codec (index = 5)] force_process_hrmp_close { channels : :: core :: primitive :: u32 , } , # [codec (index = 6)] hrmp_cancel_open_request { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , open_requests : :: core :: primitive :: u32 , } , }
+                        # [codec (index = 0)] # [doc = "Initiate opening a channel from a parachain to a given recipient with given channel"] # [doc = "parameters."] # [doc = ""] # [doc = "- `proposed_max_capacity` - specifies how many messages can be in the channel at once."] # [doc = "- `proposed_max_message_size` - specifies the maximum size of the messages."] # [doc = ""] # [doc = "These numbers are a subject to the relay-chain configuration limits."] # [doc = ""] # [doc = "The channel can be opened only after the recipient confirms it and only on a session"] # [doc = "change."] hrmp_init_open_channel { recipient : runtime_types :: polkadot_parachain :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Accept a pending open channel request from the given sender."] # [doc = ""] # [doc = "The channel will be opened only on the next session boundary."] hrmp_accept_open_channel { sender : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 2)] # [doc = "Initiate unilateral closing of a channel. The origin must be either the sender or the"] # [doc = "recipient in the channel being closed."] # [doc = ""] # [doc = "The closure can only happen on a session change."] hrmp_close_channel { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , } , # [codec (index = 3)] # [doc = "This extrinsic triggers the cleanup of all the HRMP storage items that"] # [doc = "a para may have. Normally this happens once per session, but this allows"] # [doc = "you to trigger the cleanup immediately for a specific parachain."] # [doc = ""] # [doc = "Origin must be Root."] # [doc = ""] # [doc = "Number of inbound and outbound channels for `para` must be provided as witness data of weighing."] force_clean_hrmp { para : runtime_types :: polkadot_parachain :: primitives :: Id , inbound : :: core :: primitive :: u32 , outbound : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Force process HRMP open channel requests."] # [doc = ""] # [doc = "If there are pending HRMP open channel requests, you can use this"] # [doc = "function process all of those requests immediately."] # [doc = ""] # [doc = "Total number of opening channels must be provided as witness data of weighing."] force_process_hrmp_open { channels : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Force process HRMP close channel requests."] # [doc = ""] # [doc = "If there are pending HRMP close channel requests, you can use this"] # [doc = "function process all of those requests immediately."] # [doc = ""] # [doc = "Total number of closing channels must be provided as witness data of weighing."] force_process_hrmp_close { channels : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "This cancels a pending open channel request. It can be canceled by either of the sender"] # [doc = "or the recipient for that request. The origin must be either of those."] # [doc = ""] # [doc = "The cancellation happens immediately. It is not possible to cancel the request if it is"] # [doc = "already accepted."] # [doc = ""] # [doc = "Total number of open requests (i.e. `HrmpOpenChannelRequestsList`) must be provided as"] # [doc = "witness data."] hrmp_cancel_open_request { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , open_requests : :: core :: primitive :: u32 , } , }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The sender tried to open a channel to themselves."]
                         OpenHrmpChannelToSelf,
                         #[codec(index = 1)]
+                        #[doc = "The recipient is not a valid para."]
                         OpenHrmpChannelInvalidRecipient,
                         #[codec(index = 2)]
+                        #[doc = "The requested capacity is zero."]
                         OpenHrmpChannelZeroCapacity,
                         #[codec(index = 3)]
+                        #[doc = "The requested capacity exceeds the global limit."]
                         OpenHrmpChannelCapacityExceedsLimit,
                         #[codec(index = 4)]
+                        #[doc = "The requested maximum message size is 0."]
                         OpenHrmpChannelZeroMessageSize,
                         #[codec(index = 5)]
+                        #[doc = "The open request requested the message size that exceeds the global limit."]
                         OpenHrmpChannelMessageSizeExceedsLimit,
                         #[codec(index = 6)]
+                        #[doc = "The channel already exists"]
                         OpenHrmpChannelAlreadyExists,
                         #[codec(index = 7)]
+                        #[doc = "There is already a request to open the same channel."]
                         OpenHrmpChannelAlreadyRequested,
                         #[codec(index = 8)]
+                        #[doc = "The sender already has the maximum number of allowed outbound channels."]
                         OpenHrmpChannelLimitExceeded,
                         #[codec(index = 9)]
+                        #[doc = "The channel from the sender to the origin doesn't exist."]
                         AcceptHrmpChannelDoesntExist,
                         #[codec(index = 10)]
+                        #[doc = "The channel is already confirmed."]
                         AcceptHrmpChannelAlreadyConfirmed,
                         #[codec(index = 11)]
+                        #[doc = "The recipient already has the maximum number of allowed inbound channels."]
                         AcceptHrmpChannelLimitExceeded,
                         #[codec(index = 12)]
+                        #[doc = "The origin tries to close a channel where it is neither the sender nor the recipient."]
                         CloseHrmpChannelUnauthorized,
                         #[codec(index = 13)]
+                        #[doc = "The channel to be closed doesn't exist."]
                         CloseHrmpChannelDoesntExist,
                         #[codec(index = 14)]
+                        #[doc = "The channel close request is already requested."]
                         CloseHrmpChannelAlreadyUnderway,
                         #[codec(index = 15)]
+                        #[doc = "Canceling is requested by neither the sender nor recipient of the open channel request."]
                         CancelHrmpOpenChannelUnauthorized,
                         #[codec(index = 16)]
+                        #[doc = "The open request doesn't exist."]
                         OpenHrmpChannelDoesntExist,
                         #[codec(index = 17)]
+                        #[doc = "Cannot cancel an HRMP open channel request because it is already confirmed."]
                         OpenHrmpChannelAlreadyConfirmed,
                         #[codec(index = 18)]
+                        #[doc = "The provided witness data is wrong."]
                         WrongWitness,
                     }
                     #[derive(
@@ -29460,6 +32378,8 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "Open HRMP channel requested."]
+                        #[doc = "`[sender, recipient, proposed_max_capacity, proposed_max_message_size]`"]
                         OpenChannelRequested(
                             runtime_types::polkadot_parachain::primitives::Id,
                             runtime_types::polkadot_parachain::primitives::Id,
@@ -29467,16 +32387,20 @@ pub mod api {
                             ::core::primitive::u32,
                         ),
                         #[codec(index = 1)]
+                        #[doc = "An HRMP channel request sent by the receiver was canceled by either party."]
+                        #[doc = "`[by_parachain, channel_id]`"]
                         OpenChannelCanceled(
                             runtime_types::polkadot_parachain::primitives::Id,
                             runtime_types::polkadot_parachain::primitives::HrmpChannelId,
                         ),
                         #[codec(index = 2)]
+                        #[doc = "Open HRMP channel accepted. `[sender, recipient]`"]
                         OpenChannelAccepted(
                             runtime_types::polkadot_parachain::primitives::Id,
                             runtime_types::polkadot_parachain::primitives::Id,
                         ),
                         #[codec(index = 3)]
+                        #[doc = "HRMP channel closed. `[by_parachain, channel_id]`"]
                         ChannelClosed(
                             runtime_types::polkadot_parachain::primitives::Id,
                             runtime_types::polkadot_parachain::primitives::HrmpChannelId,
@@ -29521,62 +32445,94 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Validator indices are out of order or contains duplicates."]
                         UnsortedOrDuplicateValidatorIndices,
                         #[codec(index = 1)]
+                        #[doc = "Dispute statement sets are out of order or contain duplicates."]
                         UnsortedOrDuplicateDisputeStatementSet,
                         #[codec(index = 2)]
+                        #[doc = "Backed candidates are out of order (core index) or contain duplicates."]
                         UnsortedOrDuplicateBackedCandidates,
                         #[codec(index = 3)]
+                        #[doc = "A different relay parent was provided compared to the on-chain stored one."]
                         UnexpectedRelayParent,
                         #[codec(index = 4)]
+                        #[doc = "Availability bitfield has unexpected size."]
                         WrongBitfieldSize,
                         #[codec(index = 5)]
+                        #[doc = "Bitfield consists of zeros only."]
                         BitfieldAllZeros,
                         #[codec(index = 6)]
+                        #[doc = "Multiple bitfields submitted by same validator or validators out of order by index."]
                         BitfieldDuplicateOrUnordered,
                         #[codec(index = 7)]
+                        #[doc = "Validator index out of bounds."]
                         ValidatorIndexOutOfBounds,
                         #[codec(index = 8)]
+                        #[doc = "Invalid signature"]
                         InvalidBitfieldSignature,
                         #[codec(index = 9)]
+                        #[doc = "Candidate submitted but para not scheduled."]
                         UnscheduledCandidate,
                         #[codec(index = 10)]
+                        #[doc = "Candidate scheduled despite pending candidate already existing for the para."]
                         CandidateScheduledBeforeParaFree,
                         #[codec(index = 11)]
+                        #[doc = "Candidate included with the wrong collator."]
                         WrongCollator,
                         #[codec(index = 12)]
+                        #[doc = "Scheduled cores out of order."]
                         ScheduledOutOfOrder,
                         #[codec(index = 13)]
+                        #[doc = "Head data exceeds the configured maximum."]
                         HeadDataTooLarge,
                         #[codec(index = 14)]
+                        #[doc = "Code upgrade prematurely."]
                         PrematureCodeUpgrade,
                         #[codec(index = 15)]
+                        #[doc = "Output code is too large"]
                         NewCodeTooLarge,
                         #[codec(index = 16)]
+                        #[doc = "Candidate not in parent context."]
                         CandidateNotInParentContext,
                         #[codec(index = 17)]
+                        #[doc = "Invalid group index in core assignment."]
                         InvalidGroupIndex,
                         #[codec(index = 18)]
+                        #[doc = "Insufficient (non-majority) backing."]
                         InsufficientBacking,
                         #[codec(index = 19)]
+                        #[doc = "Invalid (bad signature, unknown validator, etc.) backing."]
                         InvalidBacking,
                         #[codec(index = 20)]
+                        #[doc = "Collator did not sign PoV."]
                         NotCollatorSigned,
                         #[codec(index = 21)]
+                        #[doc = "The validation data hash does not match expected."]
                         ValidationDataHashMismatch,
                         #[codec(index = 22)]
+                        #[doc = "The downward message queue is not processed correctly."]
                         IncorrectDownwardMessageHandling,
                         #[codec(index = 23)]
+                        #[doc = "At least one upward message sent does not pass the acceptance criteria."]
                         InvalidUpwardMessages,
                         #[codec(index = 24)]
+                        #[doc = "The candidate didn't follow the rules of HRMP watermark advancement."]
                         HrmpWatermarkMishandling,
                         #[codec(index = 25)]
+                        #[doc = "The HRMP messages sent by the candidate is not valid."]
                         InvalidOutboundHrmp,
                         #[codec(index = 26)]
+                        #[doc = "The validation code hash of the candidate is not valid."]
                         InvalidValidationCodeHash,
                         #[codec(index = 27)]
+                        #[doc = "The `para_head` hash in the candidate descriptor doesn't match the hash of the actual para head in the"]
+                        #[doc = "commitments."]
                         ParaHeadMismatch,
                         #[codec(index = 28)]
+                        #[doc = "A bitfield that references a freed core,"]
+                        #[doc = "either intentionally or as part of a concluded"]
+                        #[doc = "invalid dispute."]
                         BitfieldReferencesFreedCore,
                     }
                     #[derive(
@@ -29584,6 +32540,7 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "A candidate was backed. `[candidate, head_data]`"]
                         CandidateBacked(
                             runtime_types::polkadot_primitives::v2::CandidateReceipt<
                                 ::subxt::sp_core::H256,
@@ -29593,6 +32550,7 @@ pub mod api {
                             runtime_types::polkadot_primitives::v2::GroupIndex,
                         ),
                         #[codec(index = 1)]
+                        #[doc = "A candidate was included. `[candidate, head_data]`"]
                         CandidateIncluded(
                             runtime_types::polkadot_primitives::v2::CandidateReceipt<
                                 ::subxt::sp_core::H256,
@@ -29602,6 +32560,7 @@ pub mod api {
                             runtime_types::polkadot_primitives::v2::GroupIndex,
                         ),
                         #[codec(index = 2)]
+                        #[doc = "A candidate timed out. `[candidate, head_data]`"]
                         CandidateTimedOut(
                             runtime_types::polkadot_primitives::v2::CandidateReceipt<
                                 ::subxt::sp_core::H256,
@@ -29649,6 +32608,9 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Issue a signal to the consensus engine to forcibly act as though all parachain"]
+                        #[doc = "blocks in all relay chain blocks up to and including the given number in the current"]
+                        #[doc = "chain are valid and should be finalized."]
                         force_approve { up_to: ::core::primitive::u32 },
                     }
                 }
@@ -29686,41 +32648,54 @@ pub mod api {
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Call {
-                        # [codec (index = 0)] force_set_current_code { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] force_set_current_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 2)] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] force_note_new_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 4)] force_queue_action { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 6)] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v2 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v2 :: validator_app :: Signature , } , }
+                        # [codec (index = 0)] # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 2)] # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 4)] # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the latter"] # [doc = "prefer to use the `poke_unused_validation_code` dispatchable to raw storage manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 6)] # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v2 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v2 :: validator_app :: Signature , } , }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Para is not registered in our system."]
                         NotRegistered,
                         #[codec(index = 1)]
+                        #[doc = "Para cannot be onboarded because it is already tracked by our system."]
                         CannotOnboard,
                         #[codec(index = 2)]
+                        #[doc = "Para cannot be offboarded at this time."]
                         CannotOffboard,
                         #[codec(index = 3)]
+                        #[doc = "Para cannot be upgraded to a parachain."]
                         CannotUpgrade,
                         #[codec(index = 4)]
+                        #[doc = "Para cannot be downgraded to a parathread."]
                         CannotDowngrade,
                         #[codec(index = 5)]
+                        #[doc = "The statement for PVF pre-checking is stale."]
                         PvfCheckStatementStale,
                         #[codec(index = 6)]
+                        #[doc = "The statement for PVF pre-checking is for a future session."]
                         PvfCheckStatementFuture,
                         #[codec(index = 7)]
+                        #[doc = "Claimed validator index is out of bounds."]
                         PvfCheckValidatorIndexOutOfBounds,
                         #[codec(index = 8)]
+                        #[doc = "The signature for the PVF pre-checking is invalid."]
                         PvfCheckInvalidSignature,
                         #[codec(index = 9)]
+                        #[doc = "The given validator already has cast a vote."]
                         PvfCheckDoubleVote,
                         #[codec(index = 10)]
+                        #[doc = "The given PVF does not exist at the moment of process a vote."]
                         PvfCheckSubjectInvalid,
                         #[codec(index = 11)]
+                        #[doc = "The PVF pre-checking statement cannot be included since the PVF pre-checking mechanism"]
+                        #[doc = "is disabled."]
                         PvfCheckDisabled,
                     }
                     #[derive(
                         :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
                     )]
                     pub enum Event {
-                        # [codec (index = 0)] CurrentCodeUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 1)] CurrentHeadUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 2)] CodeUpgradeScheduled (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 3)] NewHeadNoted (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 4)] ActionQueued (runtime_types :: polkadot_parachain :: primitives :: Id , :: core :: primitive :: u32 ,) , # [codec (index = 5)] PvfCheckStarted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 6)] PvfCheckAccepted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 7)] PvfCheckRejected (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , }
+                        # [codec (index = 0)] # [doc = "Current code has been updated for a Para. `para_id`"] CurrentCodeUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 1)] # [doc = "Current head has been updated for a Para. `para_id`"] CurrentHeadUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 2)] # [doc = "A code upgrade has been scheduled for a Para. `para_id`"] CodeUpgradeScheduled (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 3)] # [doc = "A new head has been noted for a Para. `para_id`"] NewHeadNoted (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 4)] # [doc = "A para has been queued to execute pending actions. `para_id`"] ActionQueued (runtime_types :: polkadot_parachain :: primitives :: Id , :: core :: primitive :: u32 ,) , # [codec (index = 5)] # [doc = "The given para either initiated or subscribed to a PVF check for the given validation"] # [doc = "code. `code_hash` `para_id`"] PvfCheckStarted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 6)] # [doc = "The given validation code was accepted by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckAccepted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 7)] # [doc = "The given validation code was rejected by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckRejected (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , }
                 }
                 #[derive(
                     :: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug,
@@ -29804,6 +32779,7 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Enter the paras inherent. This will process bitfields and backed candidates."]
                         enter {
                             data: runtime_types::polkadot_primitives::v2::InherentData<
                                 runtime_types::sp_runtime::generic::header::Header<
@@ -29818,16 +32794,23 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "Inclusion inherent called more than once per block."]
                         TooManyInclusionInherents,
                         #[codec(index = 1)]
+                        #[doc = "The hash of the submitted parent header doesn't correspond to the saved block hash of"]
+                        #[doc = "the parent."]
                         InvalidParentHeader,
                         #[codec(index = 2)]
+                        #[doc = "Disputed candidate that was concluded invalid."]
                         CandidateConcludedInvalid,
                         #[codec(index = 3)]
+                        #[doc = "The data given to the inherent will result in an overweight block."]
                         InherentOverweight,
                         #[codec(index = 4)]
+                        #[doc = "The ordering of dispute statements was invalid."]
                         DisputeStatementsUnsortedOrDuplicates,
                         #[codec(index = 5)]
+                        #[doc = "A dispute statement was invalid."]
                         DisputeInvalid,
                     }
                 }
@@ -29881,6 +32864,18 @@ pub mod api {
                     )]
                     pub enum Call {
                         #[codec(index = 0)]
+                        #[doc = "Service a single overweight upward message."]
+                        #[doc = ""]
+                        #[doc = "- `origin`: Must pass `ExecuteOverweightOrigin`."]
+                        #[doc = "- `index`: The index of the overweight message to service."]
+                        #[doc = "- `weight_limit`: The amount of weight that message execution may take."]
+                        #[doc = ""]
+                        #[doc = "Errors:"]
+                        #[doc = "- `UnknownMessageIndex`: Message of `index` is unknown."]
+                        #[doc = "- `WeightOverLimit`: Message execution may use greater than `weight_limit`."]
+                        #[doc = ""]
+                        #[doc = "Events:"]
+                        #[doc = "- `OverweightServiced`: On success."]
                         service_overweight {
                             index: ::core::primitive::u64,
                             weight_limit: ::core::primitive::u64,
@@ -29891,8 +32886,10 @@ pub mod api {
                     )]
                     pub enum Error {
                         #[codec(index = 0)]
+                        #[doc = "The message index given is unknown."]
                         UnknownMessageIndex,
                         #[codec(index = 1)]
+                        #[doc = "The amount of weight given is possibly not enough for executing the message."]
                         WeightOverLimit,
                     }
                     #[derive(
@@ -29900,27 +32897,43 @@ pub mod api {
                     )]
                     pub enum Event {
                         #[codec(index = 0)]
+                        #[doc = "Upward message is invalid XCM."]
+                        #[doc = "\\[ id \\]"]
                         InvalidFormat([::core::primitive::u8; 32usize]),
                         #[codec(index = 1)]
+                        #[doc = "Upward message is unsupported version of XCM."]
+                        #[doc = "\\[ id \\]"]
                         UnsupportedVersion([::core::primitive::u8; 32usize]),
                         #[codec(index = 2)]
+                        #[doc = "Upward message executed with the given outcome."]
+                        #[doc = "\\[ id, outcome \\]"]
                         ExecutedUpward(
                             [::core::primitive::u8; 32usize],
                             runtime_types::xcm::v2::traits::Outcome,
                         ),
                         #[codec(index = 3)]
+                        #[doc = "The weight limit for handling upward messages was reached."]
+                        #[doc = "\\[ id, remaining, required \\]"]
                         WeightExhausted(
                             [::core::primitive::u8; 32usize],
                             ::core::primitive::u64,
                             ::core::primitive::u64,
                         ),
                         #[codec(index = 4)]
+                        #[doc = "Some upward messages have been received and will be processed."]
+                        #[doc = "\\[ para, count, size \\]"]
                         UpwardMessagesReceived(
                             runtime_types::polkadot_parachain::primitives::Id,
                             ::core::primitive::u32,
                             ::core::primitive::u32,
                         ),
                         #[codec(index = 5)]
+                        #[doc = "The weight budget was exceeded for an individual upward message."]
+                        #[doc = ""]
+                        #[doc = "This message can be later dispatched manually using `service_overweight` dispatchable"]
+                        #[doc = "using the assigned `overweight_index`."]
+                        #[doc = ""]
+                        #[doc = "\\[ para, id, overweight_index, required \\]"]
                         OverweightEnqueued(
                             runtime_types::polkadot_parachain::primitives::Id,
                             [::core::primitive::u8; 32usize],
@@ -29928,6 +32941,10 @@ pub mod api {
                             ::core::primitive::u64,
                         ),
                         #[codec(index = 6)]
+                        #[doc = "Upward message from the overweight queue was executed with the given actual weight"]
+                        #[doc = "used."]
+                        #[doc = ""]
+                        #[doc = "\\[ overweight_index, used \\]"]
                         OverweightServiced(
                             ::core::primitive::u64,
                             ::core::primitive::u64,
