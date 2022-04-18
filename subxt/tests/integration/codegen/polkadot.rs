@@ -79,11 +79,15 @@ pub mod api {
         XcmPallet(xcm_pallet::Event),
     }
     pub mod system {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct FillBlock {
@@ -754,6 +758,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Block & extrinsics weights: base values and limits."]
                 pub fn block_weights(
                     &self,
                 ) -> ::core::result::Result<
@@ -765,6 +770,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum length of a block (in bytes)."]
                 pub fn block_length(
                     &self,
                 ) -> ::core::result::Result<
@@ -776,6 +782,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum number of block number to block hash mappings to keep (oldest pruned first)."]
                 pub fn block_hash_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -785,6 +792,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The weight of runtime database operations the runtime can invoke."]
                 pub fn db_weight(
                     &self,
                 ) -> ::core::result::Result<
@@ -796,6 +804,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Get the chain's current version."]
                 pub fn version(
                     &self,
                 ) -> ::core::result::Result<
@@ -807,6 +816,11 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The designated SS85 prefix of this chain."]
+                #[doc = ""]
+                #[doc = " This replaces the \"ss58Format\" property declared in the chain spec. Reason is"]
+                #[doc = " that the runtime should know about the prefix in order to make use of it as"]
+                #[doc = " an identifier of the chain."]
                 pub fn ss58_prefix(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
@@ -820,11 +834,15 @@ pub mod api {
         }
     }
     pub mod scheduler {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Schedule {
@@ -1217,6 +1235,8 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The maximum weight that may be scheduled per block for any dispatchables of less"]
+                #[doc = " priority than `schedule::HARD_DEADLINE`."]
                 pub fn maximum_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -1226,6 +1246,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of scheduled calls in the queue for a single block."]
+                #[doc = " Not strictly enforced, but used for weight estimation."]
                 pub fn max_scheduled_per_block(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -1239,11 +1261,15 @@ pub mod api {
         }
     }
     pub mod preimage {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct NotePreimage {
@@ -1470,11 +1496,15 @@ pub mod api {
         }
     }
     pub mod babe {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportEquivocation {
@@ -1917,6 +1947,9 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The amount of time, in slots, that each epoch should last."]
+                #[doc = " NOTE: Currently it is not possible to change the epoch duration after"]
+                #[doc = " the chain has started. Attempting to do so will brick block production."]
                 pub fn epoch_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -1926,6 +1959,11 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The expected average block time at which BABE should be creating"]
+                #[doc = " blocks. Since BABE is probabilistic it is not trivial to figure out"]
+                #[doc = " what the expected average block time should be based on the slot"]
+                #[doc = " duration and the security parameter `c` (where `1 - c` represents"]
+                #[doc = " the probability of a slot being empty)."]
                 pub fn expected_block_time(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -1935,6 +1973,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Max number of authorities allowed"]
                 pub fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -1948,11 +1987,15 @@ pub mod api {
         }
     }
     pub mod timestamp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Set {
@@ -2048,6 +2091,10 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The minimum period between blocks. Beware that this is different to the *expected*"]
+                #[doc = " period that the block production apparatus provides. Your chosen consensus system will"]
+                #[doc = " generally work with this to determine a sensible block time. e.g. For Aura, it will be"]
+                #[doc = " double this period on default settings."]
                 pub fn minimum_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -2061,11 +2108,15 @@ pub mod api {
         }
     }
     pub mod indices {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -2310,6 +2361,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The deposit needed for reserving an index."]
                 pub fn deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -2323,11 +2375,15 @@ pub mod api {
         }
     }
     pub mod balances {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Transfer {
@@ -2804,6 +2860,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The minimum amount required to keep an account open."]
                 pub fn existential_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -2813,6 +2870,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of locks that should exist on an account."]
+                #[doc = " Not strictly enforced, but used for weight estimation."]
                 pub fn max_locks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -2822,6 +2881,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of named reserves that can exist on an account."]
                 pub fn max_reserves(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -2835,8 +2895,10 @@ pub mod api {
         }
     }
     pub mod transaction_payment {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct NextFeeMultiplier;
@@ -2895,6 +2957,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The fee to be paid for making a transaction; the per-byte portion."]
                 pub fn transaction_byte_fee(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -2904,6 +2967,27 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " A fee mulitplier for `Operational` extrinsics to compute \"virtual tip\" to boost their"]
+                #[doc = " `priority`"]
+                #[doc = ""]
+                #[doc = " This value is multipled by the `final_fee` to obtain a \"virtual tip\" that is later"]
+                #[doc = " added to a tip component in regular `priority` calculations."]
+                #[doc = " It means that a `Normal` transaction can front-run a similarly-sized `Operational`"]
+                #[doc = " extrinsic (with no tip), by including a tip value greater than the virtual tip."]
+                #[doc = ""]
+                #[doc = " ```rust,ignore"]
+                #[doc = " // For `Normal`"]
+                #[doc = " let priority = priority_calc(tip);"]
+                #[doc = ""]
+                #[doc = " // For `Operational`"]
+                #[doc = " let virtual_tip = (inclusion_fee + tip) * OperationalFeeMultiplier;"]
+                #[doc = " let priority = priority_calc(tip + virtual_tip);"]
+                #[doc = " ```"]
+                #[doc = ""]
+                #[doc = " Note that since we use `final_fee` the multiplier applies also to the regular `tip`"]
+                #[doc = " sent with the transaction. So, not only does the transaction get a priority bump based"]
+                #[doc = " on the `inclusion_fee`, but we also amplify the impact of tips applied to `Operational`"]
+                #[doc = " transactions."]
                 pub fn operational_fee_multiplier(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u8, ::subxt::BasicError>
@@ -2913,6 +2997,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The polynomial that is applied in order to derive fee from weight."]
                 pub fn weight_to_fee(
                     &self,
                 ) -> ::core::result::Result<
@@ -2932,11 +3017,15 @@ pub mod api {
         }
     }
     pub mod authorship {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetUncles {
@@ -3074,6 +3163,9 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The number of blocks back we should accept uncles."]
+                #[doc = " This means that we will deal with uncle-parents that are"]
+                #[doc = " `UncleGenerations + 1` before `now`."]
                 pub fn uncle_generations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -3087,11 +3179,15 @@ pub mod api {
         }
     }
     pub mod staking {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Bond {
@@ -4964,6 +5060,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Maximum number of nominations per nominator."]
                 pub fn max_nominations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -4973,6 +5070,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Number of sessions per era."]
                 pub fn sessions_per_era(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -4982,6 +5080,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Number of eras that staked funds must remain bonded for."]
                 pub fn bonding_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -4991,6 +5090,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Number of eras that slashes are deferred by, after computation."]
+                #[doc = ""]
+                #[doc = " This should be less than the bonding duration. Set to 0 if slashes"]
+                #[doc = " should be applied immediately, without opportunity for intervention."]
                 pub fn slash_defer_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -5000,6 +5103,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of nominators rewarded for each validator."]
+                #[doc = ""]
+                #[doc = " For each validator only the `$MaxNominatorRewardedPerValidator` biggest stakers can"]
+                #[doc = " claim their reward. This used to limit the i/o cost for the nominator payout."]
                 pub fn max_nominator_rewarded_per_validator(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -5009,6 +5116,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of `unlocking` chunks a [`StakingLedger`] can have. Effectively"]
+                #[doc = " determines how many unique eras a staker may be unbonding in."]
                 pub fn max_unlocking_chunks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -5022,8 +5131,10 @@ pub mod api {
         }
     }
     pub mod offences {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -5176,15 +5287,21 @@ pub mod api {
         }
     }
     pub mod historical {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod session {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetKeys {
@@ -5441,11 +5558,15 @@ pub mod api {
         }
     }
     pub mod grandpa {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportEquivocation {
@@ -5737,6 +5858,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Max Authorities in use"]
                 pub fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -5750,11 +5872,15 @@ pub mod api {
         }
     }
     pub mod im_online {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Heartbeat {
@@ -5974,6 +6100,10 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " A configuration for base priority of unsigned transactions."]
+                #[doc = ""]
+                #[doc = " This is exposed so that it can be tuned for particular runtime, when"]
+                #[doc = " multiple pallets send unsigned transactions."]
                 pub fn unsigned_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -5987,15 +6117,21 @@ pub mod api {
         }
     }
     pub mod authority_discovery {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod democracy {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Propose {
@@ -7211,6 +7347,11 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The period between a proposal being approved and enacted."]
+                #[doc = ""]
+                #[doc = " It should generally be a little more than the unstake period to ensure that"]
+                #[doc = " voting stakers have an opportunity to remove themselves from the system in the case"]
+                #[doc = " where they are on the losing side of a vote."]
                 pub fn enactment_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7220,6 +7361,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " How often (in blocks) new public referenda are launched."]
                 pub fn launch_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7229,6 +7371,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " How often (in blocks) to check for new votes."]
                 pub fn voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7238,6 +7381,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The minimum period of vote locking."]
+                #[doc = ""]
+                #[doc = " It should be no shorter than enactment period to ensure that in the case of an approval,"]
+                #[doc = " those successful voters are locked into the consequences that their votes entail."]
                 pub fn vote_locking_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7247,6 +7394,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The minimum amount to be used as a deposit for a public referendum proposal."]
                 pub fn minimum_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -7256,6 +7404,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Indicator for whether an emergency origin is even allowed to happen. Some chains may"]
+                #[doc = " want to set this permanently to `false`, others may want to condition it on things such"]
+                #[doc = " as an upgrade having happened recently."]
                 pub fn instant_allowed(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
@@ -7265,6 +7416,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Minimum voting period allowed for a fast-track referendum."]
                 pub fn fast_track_voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7274,6 +7426,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Period in blocks where an external proposal may not be re-submitted after being vetoed."]
                 pub fn cooloff_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7283,6 +7436,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount of balance that must be deposited per byte of preimage stored."]
                 pub fn preimage_byte_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -7292,6 +7446,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of votes for an account."]
+                #[doc = ""]
+                #[doc = " Also used to compute weight, an overly big value can"]
+                #[doc = " lead to extrinsic with very big weight: see `delegate` for instance."]
                 pub fn max_votes(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7301,6 +7459,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of public proposals that can exist at any time."]
                 pub fn max_proposals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -7314,11 +7473,15 @@ pub mod api {
         }
     }
     pub mod council {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetMembers {
@@ -7753,11 +7916,15 @@ pub mod api {
         }
     }
     pub mod technical_committee {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SetMembers {
@@ -8192,11 +8359,15 @@ pub mod api {
         }
     }
     pub mod phragmen_election {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Vote {
@@ -8583,6 +8754,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Identifier for the elections-phragmen pallet's lock"]
                 pub fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
@@ -8594,6 +8766,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " How much should be locked up in order to submit one's candidacy."]
                 pub fn candidacy_bond(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -8603,6 +8776,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Base deposit associated with voting."]
+                #[doc = ""]
+                #[doc = " This should be sensibly high to economically ensure the pallet cannot be attacked by"]
+                #[doc = " creating a gigantic number of votes."]
                 pub fn voting_bond_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -8612,6 +8789,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount of bond that need to be locked for each vote (32 bytes)."]
                 pub fn voting_bond_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -8621,6 +8799,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Number of members to elect."]
                 pub fn desired_members(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -8630,6 +8809,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Number of runners_up to keep."]
                 pub fn desired_runners_up(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -8639,6 +8819,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " How long each seat is kept. This defines the next block number at which an election"]
+                #[doc = " round will happen. If set to zero, no elections are ever triggered and the module will"]
+                #[doc = " be in passive mode."]
                 pub fn term_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -8652,11 +8835,15 @@ pub mod api {
         }
     }
     pub mod technical_membership {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddMember {
@@ -8919,11 +9106,15 @@ pub mod api {
         }
     }
     pub mod treasury {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ProposeSpend {
@@ -9208,6 +9399,8 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Fraction of a proposal's value that should be bonded in order to place the proposal."]
+                #[doc = " An accepted proposal gets these back. A rejected proposal does not."]
                 pub fn proposal_bond(
                     &self,
                 ) -> ::core::result::Result<
@@ -9219,6 +9412,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -9228,6 +9422,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn proposal_bond_maximum(
                     &self,
                 ) -> ::core::result::Result<
@@ -9239,6 +9434,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Period between successive spends."]
                 pub fn spend_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -9248,6 +9444,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Percentage of spare funds (if any) that are burnt per spend period."]
                 pub fn burn(
                     &self,
                 ) -> ::core::result::Result<
@@ -9259,6 +9456,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The treasury's pallet id, used for deriving its sovereign account ID."]
                 pub fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
@@ -9270,6 +9468,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of approvals that can wait in the spending queue."]
+                #[doc = ""]
+                #[doc = " NOTE: This parameter is also used within the Bounties Pallet extension if enabled."]
                 pub fn max_approvals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -9283,11 +9484,15 @@ pub mod api {
         }
     }
     pub mod claims {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Claim {
@@ -9679,11 +9884,15 @@ pub mod api {
         }
     }
     pub mod vesting {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Vest;
@@ -9965,6 +10174,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The minimum amount transferred to call `vested_transfer`."]
                 pub fn min_vested_transfer(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -9987,11 +10197,15 @@ pub mod api {
         }
     }
     pub mod utility {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Batch {
@@ -10152,6 +10366,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The limit on the number of batched calls."]
                 pub fn batched_calls_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -10165,11 +10380,15 @@ pub mod api {
         }
     }
     pub mod identity {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddRegistrar {
@@ -10864,6 +11083,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The amount held on deposit for a registered identity"]
                 pub fn basic_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -10873,6 +11093,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount held on deposit per additional field for a registered identity."]
                 pub fn field_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -10882,6 +11103,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount held on deposit for a registered subaccount. This should account for the fact"]
+                #[doc = " that one storage item's value will increase by the size of an account ID, and there will"]
+                #[doc = " be another trie item whose value is the size of an account ID plus 32 bytes."]
                 pub fn sub_account_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -10891,6 +11115,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of sub-accounts allowed per identified account."]
                 pub fn max_sub_accounts(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -10900,6 +11125,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum number of additional fields that may be stored in an ID. Needed to bound the I/O"]
+                #[doc = " required to access an identity, but can be pretty high."]
                 pub fn max_additional_fields(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -10909,6 +11136,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maxmimum number of registrars allowed in the system. Needed to bound the complexity"]
+                #[doc = " of, e.g., updating judgements."]
                 pub fn max_registrars(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -10922,11 +11151,15 @@ pub mod api {
         }
     }
     pub mod proxy {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Proxy {
@@ -11412,6 +11645,10 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The base amount of currency needed to reserve for creating a proxy."]
+                #[doc = ""]
+                #[doc = " This is held for an additional storage item whose value size is"]
+                #[doc = " `sizeof(Balance)` bytes and whose key size is `sizeof(AccountId)` bytes."]
                 pub fn proxy_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11421,6 +11658,11 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount of currency needed per proxy added."]
+                #[doc = ""]
+                #[doc = " This is held for adding 32 bytes plus an instance of `ProxyType` more into a"]
+                #[doc = " pre-existing storage value. Thus, when configuring `ProxyDepositFactor` one should take"]
+                #[doc = " into account `32 + proxy_type.encode().len()` bytes of data."]
                 pub fn proxy_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11430,6 +11672,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum amount of proxies allowed for a single account."]
                 pub fn max_proxies(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -11439,6 +11682,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum amount of time-delayed announcements that are allowed to be pending."]
                 pub fn max_pending(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -11448,6 +11692,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The base amount of currency needed to reserve for creating an announcement."]
+                #[doc = ""]
+                #[doc = " This is held when a new storage item holding a `Balance` is created (typically 16"]
+                #[doc = " bytes)."]
                 pub fn announcement_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11457,6 +11705,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount of currency needed per announcement made."]
+                #[doc = ""]
+                #[doc = " This is held for adding an `AccountId`, `Hash` and `BlockNumber` (typically 68 bytes)"]
+                #[doc = " into a pre-existing storage value."]
                 pub fn announcement_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11470,11 +11722,15 @@ pub mod api {
         }
     }
     pub mod multisig {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AsMultiThreshold1 {
@@ -11818,6 +12074,12 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The base amount of currency needed to reserve for creating a multisig execution or to"]
+                #[doc = " store a dispatch call for later."]
+                #[doc = ""]
+                #[doc = " This is held for an additional storage item whose value size is"]
+                #[doc = " `4 + sizeof((BlockNumber, Balance, AccountId))` bytes and whose key size is"]
+                #[doc = " `32 + sizeof(AccountId)` bytes."]
                 pub fn deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11827,6 +12089,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount of currency needed per unit threshold when creating a multisig execution."]
+                #[doc = ""]
+                #[doc = " This is held for adding 32 bytes more into a pre-existing storage value."]
                 pub fn deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -11836,6 +12101,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum amount of signatories allowed in the multisig."]
                 pub fn max_signatories(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
@@ -11849,11 +12115,15 @@ pub mod api {
         }
     }
     pub mod bounties {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ProposeBounty {
@@ -12335,6 +12605,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The amount held on deposit for placing a bounty proposal."]
                 pub fn bounty_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -12344,6 +12615,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The delay period for which a bounty beneficiary need to wait before claim the payout."]
                 pub fn bounty_deposit_payout_delay(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -12353,6 +12625,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Bounty duration in blocks."]
                 pub fn bounty_update_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -12362,6 +12635,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The curator deposit is calculated as a percentage of the curator fee."]
+                #[doc = ""]
+                #[doc = " This deposit has optional upper and lower bounds with `CuratorDepositMax` and"]
+                #[doc = " `CuratorDepositMin`."]
                 pub fn curator_deposit_multiplier(
                     &self,
                 ) -> ::core::result::Result<
@@ -12373,6 +12650,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_max(
                     &self,
                 ) -> ::core::result::Result<
@@ -12384,6 +12662,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
                 pub fn curator_deposit_min(
                     &self,
                 ) -> ::core::result::Result<
@@ -12395,6 +12674,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Minimum value for a bounty."]
                 pub fn bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -12404,6 +12684,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -12413,6 +12694,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum acceptable reason length."]
+                #[doc = ""]
+                #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
                 pub fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -12426,11 +12710,15 @@ pub mod api {
         }
     }
     pub mod child_bounties {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct AddChildBounty {
@@ -12908,6 +13196,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Maximum number of child-bounties that can be added to a parent bounty."]
                 pub fn max_active_child_bounty_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -12917,6 +13206,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Minimum value for a child-bounty."]
                 pub fn child_bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -12930,11 +13220,15 @@ pub mod api {
         }
     }
     pub mod tips {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ReportAwesome {
@@ -13243,6 +13537,9 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Maximum acceptable reason length."]
+                #[doc = ""]
+                #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
                 pub fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13252,6 +13549,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13261,6 +13559,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The period for which a tip remains open after is has achieved threshold tippers."]
                 pub fn tip_countdown(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13270,6 +13569,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The percent of the final tip which goes to the original reporter of the tip."]
                 pub fn tip_finders_fee(
                     &self,
                 ) -> ::core::result::Result<
@@ -13281,6 +13581,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The amount held on deposit for placing a tip report."]
                 pub fn tip_report_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13294,11 +13595,15 @@ pub mod api {
         }
     }
     pub mod election_provider_multi_phase {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct SubmitUnsigned { pub raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , pub witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , }
@@ -13716,6 +14021,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " Duration of the unsigned phase."]
                 pub fn unsigned_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13728,6 +14034,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Duration of the signed phase."]
                 pub fn signed_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13740,6 +14047,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The minimum amount of improvement to the solution score that defines a solution as"]
+                #[doc = " \"better\" (in any phase)."]
                 pub fn solution_improvement_threshold(
                     &self,
                 ) -> ::core::result::Result<
@@ -13754,6 +14063,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The repeat threshold of the offchain worker."]
+                #[doc = ""]
+                #[doc = " For example, if it is 5, that means that at least 5 blocks will elapse between attempts"]
+                #[doc = " to submit the worker's solution."]
                 pub fn offchain_repeat(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13766,6 +14079,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The priority of the unsigned transaction submitted in the unsigned-phase"]
                 pub fn miner_tx_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -13778,6 +14092,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum weight that the miner should consume."]
+                #[doc = ""]
+                #[doc = " The miner will ensure that the total weight of the unsigned solution will not exceed"]
+                #[doc = " this value, based on [`WeightInfo::submit_unsigned`]."]
                 pub fn miner_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -13790,6 +14108,13 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum number of signed submissions that can be queued."]
+                #[doc = ""]
+                #[doc = " It is best to avoid adjusting this during an election, as it impacts downstream data"]
+                #[doc = " structures. In particular, `SignedSubmissionIndices<T>` is bounded on this value. If you"]
+                #[doc = " update this value during an election, you _must_ ensure that"]
+                #[doc = " `SignedSubmissionIndices.len()` is less than or equal to the new value. Otherwise,"]
+                #[doc = " attempts to submit new solutions may cause a runtime panic."]
                 pub fn signed_max_submissions(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13802,6 +14127,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum weight of a signed solution."]
+                #[doc = ""]
+                #[doc = " This should probably be similar to [`Config::MinerMaxWeight`]."]
                 pub fn signed_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
@@ -13814,6 +14142,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Base reward for a signed solution"]
                 pub fn signed_reward_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13826,6 +14155,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Base deposit for a signed solution."]
                 pub fn signed_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13838,6 +14168,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Per-byte deposit for a signed solution."]
                 pub fn signed_deposit_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13850,6 +14181,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Per-weight deposit for a signed solution."]
                 pub fn signed_deposit_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -13862,6 +14194,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of electing voters to put in the snapshot. At the moment, snapshots"]
+                #[doc = " are only over a single block, but once multi-block elections are introduced they will"]
+                #[doc = " take place over multiple blocks."]
                 pub fn max_electing_voters(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13874,6 +14209,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The maximum number of electable targets to put in the snapshot."]
                 pub fn max_electable_targets(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
@@ -13886,6 +14222,10 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Maximum length (bytes) that the mined solution should consume."]
+                #[doc = ""]
+                #[doc = " The miner will ensure that the total length of the unsigned solution will not exceed"]
+                #[doc = " this value."]
                 pub fn miner_max_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -13902,11 +14242,15 @@ pub mod api {
         }
     }
     pub mod bags_list {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Rebag {
@@ -14084,6 +14428,49 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The list of thresholds separating the various bags."]
+                #[doc = ""]
+                #[doc = " Ids are separated into unsorted bags according to their score. This specifies the"]
+                #[doc = " thresholds separating the bags. An id's bag is the largest bag for which the id's score"]
+                #[doc = " is less than or equal to its upper threshold."]
+                #[doc = ""]
+                #[doc = " When ids are iterated, higher bags are iterated completely before lower bags. This means"]
+                #[doc = " that iteration is _semi-sorted_: ids of higher score tend to come before ids of lower"]
+                #[doc = " score, but peer ids within a particular bag are sorted in insertion order."]
+                #[doc = ""]
+                #[doc = " # Expressing the constant"]
+                #[doc = ""]
+                #[doc = " This constant must be sorted in strictly increasing order. Duplicate items are not"]
+                #[doc = " permitted."]
+                #[doc = ""]
+                #[doc = " There is an implied upper limit of `Score::MAX`; that value does not need to be"]
+                #[doc = " specified within the bag. For any two threshold lists, if one ends with"]
+                #[doc = " `Score::MAX`, the other one does not, and they are otherwise equal, the two"]
+                #[doc = " lists will behave identically."]
+                #[doc = ""]
+                #[doc = " # Calculation"]
+                #[doc = ""]
+                #[doc = " It is recommended to generate the set of thresholds in a geometric series, such that"]
+                #[doc = " there exists some constant ratio such that `threshold[k + 1] == (threshold[k] *"]
+                #[doc = " constant_ratio).max(threshold[k] + 1)` for all `k`."]
+                #[doc = ""]
+                #[doc = " The helpers in the `/utils/frame/generate-bags` module can simplify this calculation."]
+                #[doc = ""]
+                #[doc = " # Examples"]
+                #[doc = ""]
+                #[doc = " - If `BagThresholds::get().is_empty()`, then all ids are put into the same bag, and"]
+                #[doc = "   iteration is strictly in insertion order."]
+                #[doc = " - If `BagThresholds::get().len() == 64`, and the thresholds are determined according to"]
+                #[doc = "   the procedure given above, then the constant ratio is equal to 2."]
+                #[doc = " - If `BagThresholds::get().len() == 200`, and the thresholds are determined according to"]
+                #[doc = "   the procedure given above, then the constant ratio is approximately equal to 1.248."]
+                #[doc = " - If the threshold list begins `[1, 2, 3, ...]`, then an id with score 0 or 1 will fall"]
+                #[doc = "   into bag 0, an id with score 2 will fall into bag 1, etc."]
+                #[doc = ""]
+                #[doc = " # Migration"]
+                #[doc = ""]
+                #[doc = " In the event that this list ever changes, a copy of the old bags list must be retained."]
+                #[doc = " With that `List::migrate` can be called, which will perform the appropriate migration."]
                 pub fn bag_thresholds(
                     &self,
                 ) -> ::core::result::Result<
@@ -14099,15 +14486,21 @@ pub mod api {
         }
     }
     pub mod parachains_origin {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
     }
     pub mod configuration {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -15402,11 +15795,15 @@ pub mod api {
         }
     }
     pub mod paras_shared {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -15501,11 +15898,15 @@ pub mod api {
         }
     }
     pub mod para_inclusion {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -15672,11 +16073,15 @@ pub mod api {
         }
     }
     pub mod para_inherent {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Enter {
@@ -15782,8 +16187,10 @@ pub mod api {
         }
     }
     pub mod para_scheduler {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct ValidatorGroups;
@@ -15914,11 +16321,15 @@ pub mod api {
         }
     }
     pub mod paras {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceSetCurrentCode {
@@ -16845,11 +17256,15 @@ pub mod api {
         }
     }
     pub mod initializer {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(
                 :: subxt :: codec :: Encode,
@@ -16937,11 +17352,15 @@ pub mod api {
         }
     }
     pub mod dmp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
@@ -17047,11 +17466,15 @@ pub mod api {
         }
     }
     pub mod ump {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ServiceOverweight {
@@ -17339,11 +17762,15 @@ pub mod api {
         }
     }
     pub mod hrmp {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct HrmpInitOpenChannel {
@@ -17997,8 +18424,10 @@ pub mod api {
         }
     }
     pub mod para_session_info {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod storage {
             use super::runtime_types;
             pub struct AssignmentKeysUnsafe;
@@ -18086,11 +18515,15 @@ pub mod api {
         }
     }
     pub mod paras_disputes {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceUnfreeze;
@@ -18343,11 +18776,15 @@ pub mod api {
         }
     }
     pub mod registrar {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Register {
@@ -18670,6 +19107,8 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The deposit to be paid to run a parathread."]
+                #[doc = " This should include the cost for storing the genesis head and validation code."]
                 pub fn para_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -18679,6 +19118,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The deposit to be paid per byte stored on chain."]
                 pub fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -18692,11 +19132,15 @@ pub mod api {
         }
     }
     pub mod slots {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ForceLease {
@@ -18887,6 +19331,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The number of blocks over which a single period lasts."]
                 pub fn lease_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -18896,6 +19341,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The number of blocks to offset each lease period by."]
                 pub fn lease_offset(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -18909,11 +19355,15 @@ pub mod api {
         }
     }
     pub mod auctions {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct NewAuction {
@@ -19233,6 +19683,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " The number of blocks over which an auction may be retroactively ended."]
                 pub fn ending_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -19242,6 +19693,9 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The length of each sample to take during the ending period."]
+                #[doc = ""]
+                #[doc = " `EndingPeriod` / `SampleLength` = Total # of Samples"]
                 pub fn sample_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -19273,11 +19727,15 @@ pub mod api {
         }
     }
     pub mod crowdloan {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Create {
@@ -19773,6 +20231,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
+                #[doc = " `PalletId` for the crowdloan pallet. An appropriate value could be `PalletId(*b\"py/cfund\")`"]
                 pub fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
@@ -19784,6 +20243,8 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " The minimum amount that may be contributed into a crowdloan. Should almost certainly be at"]
+                #[doc = " least `ExistentialDeposit`."]
                 pub fn min_contribution(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
@@ -19793,6 +20254,7 @@ pub mod api {
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)
                 }
+                #[doc = " Max number of storage keys to remove per extrinsic call."]
                 pub fn remove_keys_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -19806,11 +20268,15 @@ pub mod api {
         }
     }
     pub mod xcm_pallet {
-        use super::root_mod;
-        use super::runtime_types;
+        use super::{
+            root_mod,
+            runtime_types,
+        };
         pub mod calls {
-            use super::root_mod;
-            use super::runtime_types;
+            use super::{
+                root_mod,
+                runtime_types,
+            };
             type DispatchError = runtime_types::sp_runtime::DispatchError;
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct Send {
@@ -27232,6 +27698,8 @@ pub mod api {
                 Token(runtime_types::sp_runtime::TokenError),
                 #[codec(index = 8)]
                 Arithmetic(runtime_types::sp_runtime::ArithmeticError),
+                #[codec(index = 9)]
+                Transactional(runtime_types::sp_runtime::TransactionalError),
             }
             #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
             pub struct ModuleError {
@@ -27272,6 +27740,13 @@ pub mod api {
                 Frozen,
                 #[codec(index = 6)]
                 Unsupported,
+            }
+            #[derive(:: subxt :: codec :: Encode, :: subxt :: codec :: Decode, Debug)]
+            pub enum TransactionalError {
+                #[codec(index = 0)]
+                LimitReached,
+                #[codec(index = 1)]
+                NoLayer,
             }
         }
         pub mod sp_session {
