@@ -103,13 +103,18 @@ impl CompositeDef {
     }
 
     /// Construct a definition which will generate code for an `enum` variant.
-    pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
+    pub fn enum_variant_def(
+        ident: &str,
+        fields: CompositeDefFields,
+        docs: &[String],
+    ) -> Self {
         let name = format_ident!("{}", ident);
+        let docs_token = quote! { #( #[doc = #docs ] )* };
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
             fields,
-            docs: quote!(),
+            docs: docs_token,
         }
     }
 }

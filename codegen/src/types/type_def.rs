@@ -108,7 +108,7 @@ impl<'a> TypeDefGen<'a> {
                         );
                         type_params.update_unused(fields.field_types());
                         let variant_def =
-                            CompositeDef::enum_variant_def(v.name(), fields);
+                            CompositeDef::enum_variant_def(v.name(), fields, v.docs());
                         (v.index(), variant_def)
                     })
                     .collect();
