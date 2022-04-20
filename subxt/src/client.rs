@@ -46,7 +46,10 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
-use std::sync::Arc;
+use std::sync::{
+    Arc,
+    RwLock,
+};
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -107,7 +110,7 @@ impl ClientBuilder {
             genesis_hash: genesis_hash?,
             metadata: Arc::new(metadata),
             properties: properties.unwrap_or_else(|_| Default::default()),
-            runtime_version: runtime_version?,
+            runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
         })
     }
@@ -121,7 +124,7 @@ pub struct Client<T: Config> {
     genesis_hash: T::Hash,
     metadata: Arc<Metadata>,
     properties: SystemProperties,
-    runtime_version: RuntimeVersion,
+    runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,
 }
 
@@ -178,6 +181,18 @@ impl<T: Config> Client<T> {
     /// to the target runtime.
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
+    }
+
+    /// Returns a snapshot of the client Runtime Version.
+    pub fn runtime_version(&self) -> RuntimeVersion {
+        let runtime = self.runtime_version.read().unwrap();
+        runtime.clone()
+    }
+
+    /// Set the given Runtime Version on the client.
+    pub fn set_runtime_version(&self, runtime: RuntimeVersion) {
+        let mut actual = self.runtime_version.write().unwrap();
+        *actual = runtime;
     }
 }
 
@@ -305,10 +320,13 @@ where
             Encoded(bytes)
         };
 
+        // Obtain spec version and transaction version from the runtime version of the client.
+        let runtime = self.client.runtime_version();
+
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = X::new(
-            self.client.runtime_version.spec_version,
-            self.client.runtime_version.transaction_version,
+            runtime.spec_version,
+            runtime.transaction_version,
             account_nonce,
             self.client.genesis_hash,
             other_params,
