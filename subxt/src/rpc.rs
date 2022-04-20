@@ -480,6 +480,21 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
+    /// Subscribe to runtime version updates that produce changes in the metadata.
+    pub async fn subscribe_runtime_version(
+        &self,
+    ) -> Result<Subscription<RuntimeVersion>, BasicError> {
+        let subscription = self
+            .client
+            .subscribe(
+                "state_subscribeRuntimeVersion",
+                rpc_params![],
+                "state_unsubscribeRuntimeVersion",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn submit_extrinsic<X: Encode>(
         &self,
