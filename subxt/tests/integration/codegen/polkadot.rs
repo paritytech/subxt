@@ -83,6 +83,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -352,6 +353,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "Event for the System pallet."]
         pub type Event = runtime_types::frame_system::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -921,6 +923,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -1198,6 +1201,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "Events type."]
         pub type Event = runtime_types::pallet_scheduler::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -1370,6 +1374,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -1493,6 +1498,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_preimage::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -1624,6 +1630,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -2180,6 +2187,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -2319,6 +2327,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -2568,6 +2577,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_indices::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -2686,6 +2696,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -2977,6 +2988,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_balances::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -3463,6 +3475,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -3629,6 +3642,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -4649,6 +4663,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_staking::pallet::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -6104,6 +6119,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Events type."]
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -6285,6 +6301,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -6381,6 +6398,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_session::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -6597,6 +6615,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -6731,6 +6750,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_grandpa::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -6948,6 +6968,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -7011,6 +7032,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_im_online::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -7231,6 +7253,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -8124,6 +8147,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_democracy::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -8899,6 +8923,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -9232,6 +9257,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_collective::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -9490,6 +9516,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -9823,6 +9850,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_collective::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -10081,6 +10109,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -10338,6 +10367,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_elections_phragmen::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -10678,6 +10708,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -10880,6 +10911,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_membership::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -10983,6 +11015,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -11111,6 +11144,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_treasury::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -11400,6 +11434,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -11664,6 +11699,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::claims::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -11895,6 +11931,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -12160,6 +12197,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_vesting::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -12300,6 +12338,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -12478,6 +12517,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_utility::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -12544,6 +12584,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Identity pallet declaration."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -13187,6 +13228,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_identity::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -13566,6 +13608,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -14042,6 +14085,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_proxy::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -14311,6 +14355,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -14617,6 +14662,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_multisig::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -14832,6 +14878,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -15185,6 +15232,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_bounties::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -15533,6 +15581,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -15926,6 +15975,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_child_bounties::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -16200,6 +16250,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -16481,6 +16532,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_tips::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -16702,6 +16754,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -16902,6 +16955,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::pallet_election_provider_multi_phase::pallet::Event;
         pub mod events {
@@ -17451,6 +17505,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -17534,6 +17589,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_bags_list::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -17731,6 +17787,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19101,6 +19158,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19209,6 +19267,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19232,6 +19291,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_parachains::inclusion::pallet::Event;
         pub mod events {
@@ -19393,6 +19453,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19683,6 +19744,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19932,6 +19994,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::paras::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -20773,6 +20836,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -20887,6 +20951,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -21017,6 +21082,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -21079,6 +21145,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::ump::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -21397,6 +21464,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -21651,6 +21719,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::hrmp::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -22302,6 +22371,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -22344,6 +22414,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_parachains::disputes::pallet::Event;
         pub mod events {
@@ -22594,6 +22665,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -22824,6 +22896,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_common::paras_registrar::pallet::Event;
         pub mod events {
@@ -23013,6 +23086,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -23130,6 +23204,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::slots::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -23287,6 +23362,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -23423,6 +23499,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::auctions::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -23713,6 +23790,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -24050,6 +24128,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::crowdloan::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -24311,6 +24390,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -24729,6 +24809,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_xcm::pallet::Event;
         pub mod events {
             use super::runtime_types;
