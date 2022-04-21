@@ -65,8 +65,37 @@ fn generate_runtime_interface() -> String {
     generator.generate_runtime(item_mod, derives).to_string()
 }
 
+fn interface_docs() -> Vec<String> {
+    // Generate the runtime interface from the node's metadata.
+    // Note: the API is generated on a single line.
+    let runtime_api = generate_runtime_interface();
+
+    // Documentation lines have the following format:
+    //    # [ doc = "Upward message is invalid XCM."]
+    // Given the API is generated on a single line, the regex matching
+    // must be lazy hence the `?` in the matched group `(.*?)`.
+    // The `(.*?)` stands for match any character zero or more times lazily.
+    let re = Regex::new(r#"\# \[doc = "(.*?)"\]"#).unwrap();
+    re.captures_iter(&runtime_api)
+        .filter_map(|capture| {
+            // Get the matched group (ie index 1).
+            capture.get(1).as_ref().map(|doc| {
+                // Generated documentation will escape special characters.
+                // Replace escaped characters with unescaped variants for
+                // exact matching on the raw metadata documentation.
+                doc.as_str()
+                    .replace("\\n", "\n")
+                    .replace("\\t", "\t")
+                    .replace("\\\"", "\"")
+            })
+        })
+        .collect()
+}
+
 #[test]
 fn check_documentation() {
     // Inspect metadata recursively and obtain all associated documentation.
     let _raw_docs = metadata_docs();
+    // Obtain documentation from the generated API.
+    let _runtime_docs = interface_docs();
 }
