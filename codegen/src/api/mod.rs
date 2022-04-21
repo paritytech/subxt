@@ -36,6 +36,8 @@ mod constants;
 mod errors;
 mod events;
 mod storage;
+#[cfg(test)]
+mod tests;
 
 use super::GeneratedTypeDerives;
 use crate::{
