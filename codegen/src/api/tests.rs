@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use super::*;
+
 fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
     let bytes = test_runtime::METADATA;
@@ -46,6 +48,21 @@ fn metadata_docs() -> Vec<String> {
     // associated Type.
 
     docs
+}
+
+fn generate_runtime_interface() -> String {
+    // Load the runtime metadata downloaded from a node via `test-runtime`.
+    let bytes = test_runtime::METADATA;
+    let metadata: frame_metadata::RuntimeMetadataPrefixed =
+        codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+
+    // Generate a runtime interface form the provided metadata.
+    let generator = RuntimeGenerator::new(metadata);
+    let item_mod = syn::parse_quote!(
+        pub mod api {}
+    );
+    let mut derives = GeneratedTypeDerives::default();
+    generator.generate_runtime(item_mod, derives).to_string()
 }
 
 #[test]
