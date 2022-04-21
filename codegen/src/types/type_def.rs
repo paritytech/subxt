@@ -46,6 +46,8 @@ pub struct TypeDefGen<'a> {
     derives: &'a GeneratedTypeDerives,
     /// The kind of type to be generated.
     ty_kind: TypeDefGenKind,
+    /// Type documentation.
+    ty_docs: TokenStream,
 }
 
 impl<'a> TypeDefGen<'a> {
@@ -118,10 +120,14 @@ impl<'a> TypeDefGen<'a> {
             _ => TypeDefGenKind::BuiltIn,
         };
 
+        let docs = ty.docs();
+        let ty_docs = quote! { #( #[doc = #docs ] )* };
+
         Self {
             type_params,
             derives,
             ty_kind,
+            ty_docs,
         }
     }
 }
@@ -151,8 +157,10 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
                 let enum_ident = format_ident!("{}", type_name);
                 let type_params = &self.type_params;
                 let derives = self.derives;
+                let docs = &self.ty_docs;
                 let ty_toks = quote! {
                     #derives
+                    #docs
                     pub enum #enum_ident #type_params {
                         #( #variants, )*
                     }
