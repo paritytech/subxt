@@ -90,6 +90,7 @@ impl<'a> TypeDefGen<'a> {
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
+                    ty.docs(),
                 );
                 TypeDefGenKind::Struct(composite_def)
             }
@@ -107,7 +108,7 @@ impl<'a> TypeDefGen<'a> {
                         );
                         type_params.update_unused(fields.field_types());
                         let variant_def =
-                            CompositeDef::enum_variant_def(v.name(), fields);
+                            CompositeDef::enum_variant_def(v.name(), fields, v.docs());
                         (v.index(), variant_def)
                     })
                     .collect();

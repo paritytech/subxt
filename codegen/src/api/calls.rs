@@ -40,14 +40,14 @@ pub fn generate_calls(
     call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs = super::generate_structs_from_variants(
+    let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
         |name| name.to_upper_camel_case().into(),
         "Call",
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
-        .iter()
+        .iter_mut()
         .map(|struct_def| {
             let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
                 match struct_def.fields {
@@ -78,6 +78,10 @@ pub fn generate_calls(
             let function_name = struct_def.name.to_string().to_snake_case();
             let fn_name = format_ident!("{}", function_name);
 
+            // Propagate the documentation just to `TransactionApi` methods, while
+            // draining the documentation of inner call structures.
+            let docs = struct_def.docs.take();
+            // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
 
@@ -87,6 +91,7 @@ pub fn generate_calls(
                 }
             };
             let client_fn = quote! {
+                #docs
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*

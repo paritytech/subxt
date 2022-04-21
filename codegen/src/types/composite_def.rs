@@ -45,6 +45,8 @@ pub struct CompositeDef {
     pub kind: CompositeDefKind,
     /// The fields of the type, which are either all named or all unnamed.
     pub fields: CompositeDefFields,
+    /// Documentation of the composite type as presented in metadata.
+    pub docs: Option<TokenStream>,
 }
 
 impl CompositeDef {
@@ -55,6 +57,7 @@ impl CompositeDef {
         fields_def: CompositeDefFields,
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
+        docs: &[String],
     ) -> Self {
         let mut derives = type_gen.derives().clone();
         let fields: Vec<_> = fields_def.field_types().collect();
@@ -85,6 +88,7 @@ impl CompositeDef {
         }
 
         let name = format_ident!("{}", ident);
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
 
         Self {
             name,
@@ -94,16 +98,23 @@ impl CompositeDef {
                 field_visibility,
             },
             fields: fields_def,
+            docs: docs_token,
         }
     }
 
     /// Construct a definition which will generate code for an `enum` variant.
-    pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
+    pub fn enum_variant_def(
+        ident: &str,
+        fields: CompositeDefFields,
+        docs: &[String],
+    ) -> Self {
         let name = format_ident!("{}", ident);
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
             fields,
+            docs: docs_token,
         }
     }
 }
@@ -111,6 +122,7 @@ impl CompositeDef {
 impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
+        let docs = &self.docs;
 
         let decl = match &self.kind {
             CompositeDefKind::Struct {
@@ -130,6 +142,7 @@ impl quote::ToTokens for CompositeDef {
 
                 quote! {
                     #derives
+                    #docs
                     pub struct #name #type_params #fields #trailing_semicolon
                 }
             }
@@ -137,6 +150,7 @@ impl quote::ToTokens for CompositeDef {
                 let fields = self.fields.to_enum_variant_field_tokens();
 
                 quote! {
+                    #docs
                     #name #fields
                 }
             }

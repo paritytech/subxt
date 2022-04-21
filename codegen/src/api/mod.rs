@@ -412,6 +412,7 @@ where
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
+                    var.docs(),
                 )
             })
             .collect()
