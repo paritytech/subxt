@@ -15,6 +15,7 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::*;
+use regex::Regex;
 
 fn metadata_docs() -> Vec<String> {
     // Load the runtime metadata downloaded from a node via `test-runtime`.
@@ -61,7 +62,7 @@ fn generate_runtime_interface() -> String {
     let item_mod = syn::parse_quote!(
         pub mod api {}
     );
-    let mut derives = GeneratedTypeDerives::default();
+    let derives = GeneratedTypeDerives::default();
     generator.generate_runtime(item_mod, derives).to_string()
 }
 
@@ -95,7 +96,15 @@ fn interface_docs() -> Vec<String> {
 #[test]
 fn check_documentation() {
     // Inspect metadata recursively and obtain all associated documentation.
-    let _raw_docs = metadata_docs();
+    let raw_docs = metadata_docs();
     // Obtain documentation from the generated API.
-    let _runtime_docs = interface_docs();
+    let runtime_docs = interface_docs();
+
+    for raw in raw_docs.iter() {
+        assert!(
+            runtime_docs.contains(raw),
+            "Documentation not present in runtime API: {}",
+            raw
+        );
+    }
 }
