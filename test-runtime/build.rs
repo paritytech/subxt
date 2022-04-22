@@ -33,6 +33,7 @@ use subxt::rpc::{
 };
 
 static SUBSTRATE_BIN_ENV_VAR: &str = "SUBSTRATE_NODE_PATH";
+static INTEGRATION_FEATURE_FLAG: &str = "CARGO_FEATURE_INTEGRATION_TESTS";
 
 #[tokio::main]
 async fn main() {
@@ -40,6 +41,12 @@ async fn main() {
 }
 
 async fn run() {
+    // The build script must run only in test context, as having `integration-tests` feature
+    // flag enabled.
+    if env::var_os(INTEGRATION_FEATURE_FLAG).is_none() {
+        return
+    }
+
     // Select substrate binary to run based on env var.
     let substrate_bin =
         env::var(SUBSTRATE_BIN_ENV_VAR).unwrap_or_else(|_| "substrate".to_owned());
