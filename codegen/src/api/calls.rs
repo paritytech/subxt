@@ -54,7 +54,7 @@ pub fn generate_calls(
                     CompositeDefFields::Named(ref named_fields) => {
                         named_fields
                             .iter()
-                            .map(|(_, name, field)| {
+                            .map(|(name, field)| {
                                 let fn_arg_type = &field.type_path;
                                 let call_arg = if field.is_boxed() {
                                     quote! { #name: ::std::boxed::Box::new(#name) }

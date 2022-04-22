@@ -178,7 +178,7 @@ pub enum CompositeDefKind {
 #[derive(Debug)]
 pub enum CompositeDefFields {
     NoFields,
-    Named(Vec<(TokenStream, syn::Ident, CompositeDefFieldType)>),
+    Named(Vec<(syn::Ident, CompositeDefFieldType)>),
     Unnamed(Vec<CompositeDefFieldType>),
 }
 
@@ -207,10 +207,8 @@ impl CompositeDefFields {
             );
 
             if let Some(name) = field.name() {
-                let docs = field.docs();
-                let docs_token = quote! { #( #[doc = #docs ] )* };
                 let field_name = format_ident!("{}", name);
-                named_fields.push((docs_token, field_name, field_type))
+                named_fields.push((field_name, field_type))
             } else {
                 unnamed_fields.push(field_type)
             }
@@ -234,7 +232,7 @@ impl CompositeDefFields {
     pub fn field_types(&self) -> Box<dyn Iterator<Item = &CompositeDefFieldType> + '_> {
         match self {
             Self::NoFields => Box::new([].iter()),
-            Self::Named(named_fields) => Box::new(named_fields.iter().map(|(_, _, f)| f)),
+            Self::Named(named_fields) => Box::new(named_fields.iter().map(|(_, f)| f)),
             Self::Unnamed(unnamed_fields) => Box::new(unnamed_fields.iter()),
         }
     }
@@ -254,9 +252,9 @@ impl CompositeDefFields {
                 }
             }
             Self::Named(ref fields) => {
-                let fields = fields.iter().map(|(docs, name, ty)| {
+                let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #docs #compact_attr #visibility #name: #ty }
+                    quote! { #compact_attr #visibility #name: #ty }
                 });
                 let marker = phantom_data.map(|phantom_data| {
                     quote!(
@@ -297,9 +295,9 @@ impl CompositeDefFields {
         match self {
             Self::NoFields => quote! {},
             Self::Named(ref fields) => {
-                let fields = fields.iter().map(|(docs, name, ty)| {
+                let fields = fields.iter().map(|(name, ty)| {
                     let compact_attr = ty.compact_attr();
-                    quote! { #docs #compact_attr #name: #ty }
+                    quote! { #compact_attr #name: #ty }
                 });
                 quote!( { #( #fields, )* } )
             }
