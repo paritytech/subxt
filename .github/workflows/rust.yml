@@ -127,7 +127,7 @@ jobs:
         uses: actions-rs/cargo@v1.0.3
         with:
           command: test
-          args: --all-targets --workspace
+          args: --features integration-tests --all-targets --workspace
 
   clippy:
     name: Cargo clippy
@@ -158,4 +158,4 @@ jobs:
         uses: actions-rs/cargo@v1
         with:
           command: clippy
-          args: --all-targets -- -D warnings
+          args: --features integration-tests --all-targets -- -D warnings
