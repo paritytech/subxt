@@ -75,6 +75,12 @@ fn interface_docs() -> Vec<String> {
     //    # [ doc = "Upward message is invalid XCM."]
     // Given the API is generated on a single line, the regex matching
     // must be lazy hence the `?` in the matched group `(.*?)`.
+    //
+    // The greedy `non-?` matching would lead to one single match
+    // from the beginning of the first documentation tag, containing everything up to
+    // the last documentation tag
+    // `# [ doc = "msg"] # [ doc = "msg2"] ... api ... # [ doc = "msgN" ]`
+    //
     // The `(.*?)` stands for match any character zero or more times lazily.
     let re = Regex::new(r#"\# \[doc = "(.*?)"\]"#).unwrap();
     re.captures_iter(&runtime_api)
