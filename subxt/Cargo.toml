@@ -12,6 +12,9 @@ homepage = "https://www.parity.io/"
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
+[features]
+integration-tests = []
+
 [dependencies]
 async-trait = "0.1.49"
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
