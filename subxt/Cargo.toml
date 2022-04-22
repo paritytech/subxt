@@ -13,7 +13,7 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
-integration-tests = []
+integration-tests = ["test-runtime/integration-tests"]
 
 [dependencies]
 async-trait = "0.1.49"
