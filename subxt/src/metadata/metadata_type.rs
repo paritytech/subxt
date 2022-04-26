@@ -40,7 +40,7 @@ use std::{
 };
 
 /// Metadata error.
-#[derive(Debug, thiserror::Error)]
+#[derive(Debug, thiserror::Error, PartialEq)]
 pub enum MetadataError {
     /// Module is not in metadata.
     #[error("Pallet not found")]
