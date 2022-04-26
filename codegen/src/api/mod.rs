@@ -37,7 +37,7 @@ mod errors;
 mod events;
 mod storage;
 
-use super::GeneratedTypeDerives;
+use super::DerivesRegistry;
 use crate::{
     ir,
     types::{
@@ -68,13 +68,12 @@ use std::{
 };
 use syn::{
     parse_quote,
-    punctuated::Punctuated,
 };
 
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
-    generated_type_derives: Option<Punctuated<syn::Path, syn::Token![,]>>,
+    generated_type_derives: &[GeneratedTypeDerives],
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,

@@ -27,12 +27,16 @@ use syn::{
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
     runtime_metadata_path: String,
-    #[darling(default)]
-    generated_type_derives: Option<GeneratedTypeDerives>,
+    #[darling(multiple)]
+    generated_type_derives: Vec<GeneratedTypeDerives>,
 }
 
 #[derive(Debug, FromMeta)]
-struct GeneratedTypeDerives(Punctuated<syn::Path, syn::Token![,]>);
+struct GeneratedTypeDerives{
+    #[darling(rename = "type")]
+    ty: String,
+    derive: Punctuated<syn::Path, syn::Token![,]>
+}
 
 #[proc_macro_attribute]
 #[proc_macro_error]
@@ -48,7 +52,5 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    let generated_type_derives = args.generated_type_derives.map(|derives| derives.0);
-
-    subxt_codegen::generate_runtime_api(item_mod, &path, generated_type_derives).into()
+    subxt_codegen::generate_runtime_api(item_mod, &path, &args.generated_type_derives).into()
 }

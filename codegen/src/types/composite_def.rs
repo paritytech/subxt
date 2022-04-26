@@ -16,7 +16,6 @@
 
 use super::{
     Field,
-    GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,

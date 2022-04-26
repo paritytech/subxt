@@ -14,51 +14,92 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use syn::{
-    parse_quote,
-    punctuated::Punctuated,
+use syn::{parse_quote, Path, punctuated::Punctuated};
+
+use std::borrow::Cow;
+use std::collections::{
+    HashMap, HashSet
 };
 
 #[derive(Debug, Clone)]
+pub struct DerivesRegistry {
+    all_type_derives: GeneratedTypeDerives,
+    specific_type_derives: HashMap<syn::Path, GeneratedTypeDerives>,
+}
+
+impl DerivesRegistry {
+    pub fn new(defaults: impl IntoIterator<Item = syn::Path>) -> Self {
+        let all_type_derives = defaults.into_iter().collect();
+        Self {
+            all_type_derives,
+            specific_type_derives: HashMap::new(),
+        }
+    }
+
+    /// Insert derives to be applied to a specific generated type.
+    pub fn insert_for_type(&mut self, ty: syn::Path, derives: impl Iterator<Item = syn::Path>) {
+        let type_derives = self.specific_type_derives.entry(ty).or_insert_with(GeneratedTypeDerives::default);
+        type_derives.derives.extend(derives)
+    }
+
+    /// Resolve the derives for a generated type. Includes:
+    ///     - The default global derives e.g. `scale::Encode, scale::Decode`
+    ///     - Any user-defined global derives via `generated_type_derives`
+    ///     - Any user-defined derives for this specific type
+    pub fn resolve(&self, ty: &syn::Path) -> Cow<GeneratedTypeDerives> {
+        if let Some(specific) = self.specific_type_derives.get(ty) {
+            let mut globals = self.all_type_derives.derives.clone();
+            globals.extend(specific.derives.iter().cloned());
+            Cow::Owned(GeneratedTypeDerives { derives: globals })
+        } else {
+            Cow::Borrowed(&self.all_type_derives)
+        }
+    }
+}
+
+#[derive(Debug, Clone)]
 pub struct GeneratedTypeDerives {
-    derives: Punctuated<syn::Path, syn::Token![,]>,
+    derives: HashSet<syn::Path>,
+}
+
+impl FromIterator<syn::Path> for GeneratedTypeDerives {
+    fn from_iter<T: IntoIterator<Item=Path>>(iter: T) -> Self {
+        let derives = iter.into_iter().collect();
+        Self { derives }
+    }
 }
 
 impl GeneratedTypeDerives {
-    pub fn new(derives: Punctuated<syn::Path, syn::Token!(,)>) -> Self {
-        Self { derives }
-    }
-
     /// Add `::subxt::codec::CompactAs` to the derives.
     pub fn push_codec_compact_as(&mut self) {
-        self.derives.push(parse_quote!(::subxt::codec::CompactAs));
+        self.insert(parse_quote!(::subxt::codec::CompactAs));
     }
 
     pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
         for derive in derives {
-            self.derives.push(derive)
+            self.insert(derive)
         }
     }
 
-    pub fn push(&mut self, derive: syn::Path) {
-        self.derives.push(derive);
+    pub fn insert(&mut self, derive: syn::Path) {
+        self.derives.insert(derive);
     }
 }
 
 impl Default for GeneratedTypeDerives {
     fn default() -> Self {
-        let mut derives = Punctuated::new();
-        derives.push(syn::parse_quote!(::subxt::codec::Encode));
-        derives.push(syn::parse_quote!(::subxt::codec::Decode));
-        derives.push(syn::parse_quote!(Debug));
-        Self::new(derives)
+        let mut derives = HashSet::new();
+        derives.insert(syn::parse_quote!(::subxt::codec::Encode));
+        derives.insert(syn::parse_quote!(::subxt::codec::Decode));
+        derives.insert(syn::parse_quote!(Debug));
+        Self { derives }
     }
 }
 
 impl quote::ToTokens for GeneratedTypeDerives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.derives.is_empty() {
-            let derives = &self.derives;
+            let derives: Punctuated<syn::Path, syn::Token![,]> = self.derives.iter().cloned().collect();
             tokens.extend(quote::quote! {
                 #[derive(#derives)]
             })
