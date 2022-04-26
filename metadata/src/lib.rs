@@ -302,8 +302,11 @@ pub fn get_constant_hash(
         .find(|c| c.name == constant_name)
         .ok_or(NotFound::Item)?;
 
-    let hash = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
-    Ok(hash)
+    let mut bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
+    bytes = xor(bytes, hash(constant.name.as_bytes()));
+    bytes = xor(bytes, hash(&constant.value));
+
+    Ok(bytes)
 }
 
 /// Obtain the hash for a specific call, or an error if it's not found.
