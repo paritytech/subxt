@@ -44,8 +44,10 @@ pub fn generate_constants(
             .unwrap_or_else(|_| abort_call_site!("Metadata information for the constant {}_{} could not be found", pallet_name, constant_name));
 
         let return_ty = type_gen.resolve_type_path(constant.ty.id(), &[]);
+        let docs = &constant.docs;
 
         quote! {
+            #( #[doc = #docs ] )*
             pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
                 if self.client.metadata().constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
                     let pallet = self.client.metadata().pallet(#pallet_name)?;

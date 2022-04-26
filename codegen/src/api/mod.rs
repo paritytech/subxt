@@ -453,6 +453,7 @@ where
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
+                    var.docs(),
                 );
                 (var.name().to_string(), struct_def)
             })

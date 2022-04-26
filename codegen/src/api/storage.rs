@@ -262,8 +262,11 @@ fn generate_storage_entry_fns(
         }
     };
 
+    let docs = &storage_entry.docs;
+    let docs_token = quote! { #( #[doc = #docs ] )* };
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
+            #docs_token
             pub async fn #fn_name_iter(
                 &self,
                 block_hash: ::core::option::Option<T::Hash>,
@@ -291,6 +294,7 @@ fn generate_storage_entry_fns(
     });
 
     let client_fns = quote! {
+        #docs_token
         pub async fn #fn_name(
             &self,
             #( #key_args, )*

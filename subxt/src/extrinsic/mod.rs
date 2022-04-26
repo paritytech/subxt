@@ -22,6 +22,8 @@ mod signer;
 pub use self::{
     params::{
         AssetTip,
+        BaseExtrinsicParams,
+        BaseExtrinsicParamsBuilder,
         Era,
         ExtrinsicParams,
         PlainTip,
