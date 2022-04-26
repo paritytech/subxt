@@ -14,19 +14,11 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod codegen;
-mod utils;
+use crate::test_context;
 
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod events;
-#[cfg(test)]
-mod frame;
-#[cfg(test)]
-mod metadata;
-#[cfg(test)]
-mod storage;
-
-use test_runtime::node_runtime;
-use utils::*;
+#[tokio::test]
+async fn full_metadata_check() {
+    let cxt = test_context().await;
+    let api = &cxt.api;
+    assert!(api.validate_metadata().is_ok());
+}
