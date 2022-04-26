@@ -52,6 +52,7 @@ use derivative::Derivative;
 pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
+    metadata: Option<Metadata>,
     page_size: Option<u32>,
 }
 
@@ -61,6 +62,7 @@ impl ClientBuilder {
         Self {
             url: None,
             client: None,
+            metadata: None,
             page_size: None,
         }
     }
@@ -83,6 +85,14 @@ impl ClientBuilder {
         self
     }
 
+    /// Set the metadata.
+    ///
+    /// *Note:* Metadata will no longer be downloaded from the runtime node.
+    pub fn set_metadata(mut self, metadata: Metadata) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+
     /// Creates a new Client.
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
@@ -92,14 +102,19 @@ impl ClientBuilder {
             crate::rpc::ws_client(url).await?
         };
         let rpc = Rpc::new(client);
-        let (metadata, genesis_hash, runtime_version, properties) = future::join4(
-            rpc.metadata(),
+        let (genesis_hash, runtime_version, properties) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
             rpc.system_properties(),
         )
         .await;
-        let metadata = metadata?;
+
+        let metadata = if let Some(metadata) = self.metadata {
+            metadata
+        } else {
+            let metadata = rpc.metadata().await;
+            metadata?
+        };
 
         Ok(Client {
             rpc,
