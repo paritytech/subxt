@@ -58,7 +58,7 @@ async fn full_metadata_check() {
     // Runtime metadata is identical to the metadata used during API generation.
     assert!(api.validate_metadata().is_ok());
 
-    // Modify the metadata
+    // Modify the metadata.
     let mut metadata: RuntimeMetadataV14 =
         api.client.metadata().runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
@@ -71,4 +71,40 @@ async fn full_metadata_check() {
             .expect("Validation should fail for incompatible metadata"),
         ::subxt::MetadataError::IncompatibleMetadata
     );
+}
+
+#[tokio::test]
+async fn constants_check() {
+    let cxt = test_context().await;
+    let api = &cxt.api;
+
+    // Ensure that `ExistentialDeposit` is compatible before altering the metadata.
+    assert!(cxt.api.constants().balances().existential_deposit().is_ok());
+
+    // Modify the metadata.
+    let mut metadata: RuntimeMetadataV14 =
+        api.client.metadata().runtime_metadata().clone();
+
+    let mut existential = metadata
+        .pallets
+        .iter_mut()
+        .find(|pallet| pallet.name == "Balances")
+        .expect("Metadata must contain Balances pallet")
+        .constants
+        .iter_mut()
+        .find(|constant| constant.name == "ExistentialDeposit")
+        .expect("ExistentialDeposit constant must be present");
+    existential.value = vec![0u8; 32];
+
+    let new_api = metadata_to_api(metadata, &cxt).await;
+
+    assert!(new_api.validate_metadata().is_err());
+    assert!(new_api
+        .constants()
+        .balances()
+        .existential_deposit()
+        .is_err());
+
+    // Other constant validation should not be impacted.
+    assert!(new_api.constants().balances().max_locks().is_ok());
 }
