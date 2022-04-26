@@ -14,10 +14,10 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+use parking_lot::RwLock;
 use std::{
     borrow::Cow,
     collections::HashMap,
-    sync::RwLock,
 };
 
 /// A cache with the simple goal of storing 32 byte hashes against pallet+item keys
@@ -41,7 +41,6 @@ impl HashCache {
         let maybe_hash = self
             .inner
             .read()
-            .unwrap()
             .get(&PalletItemKey::new(pallet, item))
             .copied();
 
@@ -50,7 +49,7 @@ impl HashCache {
         }
 
         let hash = f()?;
-        self.inner.write().unwrap().insert(
+        self.inner.write().insert(
             PalletItemKey::new(pallet.to_string(), item.to_string()),
             hash,
         );
@@ -96,7 +95,6 @@ mod tests {
             cache
                 .inner
                 .read()
-                .unwrap()
                 .get(&PalletItemKey::new(pallet, item))
                 .unwrap(),
             &value.unwrap()
