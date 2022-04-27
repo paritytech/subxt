@@ -31,11 +31,11 @@ struct RuntimeMetadataArgs {
     #[darling(default)]
     derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(multiple)]
-    derive_for_type: Vec<GeneratedTypeDerives>,
+    derive_for_type: Vec<DeriveForType>,
 }
 
 #[derive(Debug, FromMeta)]
-struct GeneratedTypeDerives {
+struct DeriveForType {
     ty: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
 }
