@@ -33,7 +33,7 @@ use std::{
     path::PathBuf,
 };
 use structopt::StructOpt;
-use subxt_codegen::Derives;
+use subxt_codegen::DerivesRegistry;
 
 /// Utilities for working with substrate metadata for subxt.
 #[derive(Debug, StructOpt)]
@@ -163,8 +163,8 @@ fn codegen<I: Input>(
         .iter()
         .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
-    let mut derives = Derives::default();
-    derives.append(p.into_iter());
+    let mut derives = DerivesRegistry::default();
+    derives.extend_for_all(p.into_iter());
 
     let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);

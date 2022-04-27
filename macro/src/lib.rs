@@ -19,10 +19,7 @@ extern crate proc_macro;
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use proc_macro_error::proc_macro_error;
-use subxt_codegen::{
-    Derives,
-    DerivesRegistry,
-};
+use subxt_codegen::DerivesRegistry;
 use syn::{
     parse_macro_input,
     punctuated::Punctuated,
@@ -31,14 +28,15 @@ use syn::{
 #[derive(Debug, FromMeta)]
 struct RuntimeMetadataArgs {
     runtime_metadata_path: String,
+    #[darling(default)]
+    derive_for_all_types: Option<Punctuated<syn::Path, syn::Token![,]>>,
     #[darling(multiple)]
-    generated_type_derives: Vec<GeneratedTypeDerives>,
+    derive_for_type: Vec<GeneratedTypeDerives>,
 }
 
 #[derive(Debug, FromMeta)]
 struct GeneratedTypeDerives {
-    #[darling(rename = "type")]
-    ty: String,
+    ty: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
 }
 
@@ -56,6 +54,14 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    subxt_codegen::generate_runtime_api(item_mod, &path, &args.generated_type_derives)
-        .into()
+    let mut derives_registry = DerivesRegistry::default();
+    if let Some(derive_for_all) = args.derive_for_all_types {
+        derives_registry.extend_for_all(derive_for_all.iter().cloned());
+    }
+    for derives in &args.derive_for_type {
+        derives_registry
+            .extend_for_type(derives.ty.clone(), derives.derive.iter().cloned())
+    }
+
+    subxt_codegen::generate_runtime_api(item_mod, &path, derives_registry).into()
 }
