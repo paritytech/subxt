@@ -88,6 +88,7 @@ impl ClientBuilder {
     /// Set the metadata.
     ///
     /// *Note:* Metadata will no longer be downloaded from the runtime node.
+    #[cfg(test)]
     pub fn set_metadata(mut self, metadata: Metadata) -> Self {
         self.metadata = Some(metadata);
         self
@@ -112,8 +113,7 @@ impl ClientBuilder {
         let metadata = if let Some(metadata) = self.metadata {
             metadata
         } else {
-            let metadata = rpc.metadata().await;
-            metadata?
+            rpc.metadata().await?
         };
 
         Ok(Client {
