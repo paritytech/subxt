@@ -46,16 +46,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let block_number = 1u32;
-
     // For non-finalised blocks use `.subscribe_finalized_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
         api.client.rpc().subscribe_finalized_blocks().await?;
 
     while let Some(Ok(block)) = blocks.next().await {
         println!(
-            "block number: {} parent:{} state root:{} extrinsics root:{}",
-            block.number, block.parent_hash, block.state_root, block.extrinsics_root
+            "block number: {} hash:{} parent:{} state root:{} extrinsics root:{}",
+            block.number, block.hash(), block.parent_hash, block.state_root, block.extrinsics_root
         );
     }
 
