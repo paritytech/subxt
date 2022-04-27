@@ -73,7 +73,7 @@ use syn::{
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
-    generated_type_derives: &[GeneratedTypeDerives],
+    derives: DerivesRegistry,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -88,11 +88,6 @@ where
 
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
-
-    let mut derives = GeneratedTypeDerives::default();
-    if let Some(user_derives) = generated_type_derives {
-        derives.append(user_derives.iter().cloned())
-    }
 
     let generator = RuntimeGenerator::new(metadata);
     generator.generate_runtime(item_mod, derives)
@@ -113,9 +108,10 @@ impl RuntimeGenerator {
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: GeneratedTypeDerives,
+        derives: DerivesRegistry,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
+        let default_derives = derives.default_derives();
 
         // some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
@@ -236,7 +232,7 @@ impl RuntimeGenerator {
         });
 
         let outer_event = quote! {
-            #derives
+            #default_derives
             pub enum Event {
                 #( #outer_event_variants )*
             }
@@ -406,6 +402,7 @@ where
                     type_gen,
                 );
                 CompositeDef::struct_def(
+                    &ty,
                     struct_name.as_ref(),
                     Default::default(),
                     fields,

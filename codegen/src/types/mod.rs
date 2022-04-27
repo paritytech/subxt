@@ -27,6 +27,7 @@ use proc_macro2::{
     Span,
     TokenStream,
 };
+use proc_macro_error::abort_call_site;
 use quote::{
     quote,
     ToTokens,
@@ -48,7 +49,10 @@ pub use self::{
         CompositeDefFieldType,
         CompositeDefFields,
     },
-    derives::DerivesRegistry,
+    derives::{
+        DerivesRegistry,
+        GeneratedTypeDerives,
+    },
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,
     type_path::{
@@ -92,7 +96,7 @@ impl<'a> TypeGenerator<'a> {
     }
 
     /// Generate a module containing all types defined in the supplied type registry.
-    pub fn generate_types_mod(&'a self) -> Module<'a> {
+    pub fn generate_types_mod(&self) -> Module {
         let mut root_mod =
             Module::new(self.types_mod_ident.clone(), self.types_mod_ident.clone());
 
@@ -119,7 +123,7 @@ impl<'a> TypeGenerator<'a> {
         id: u32,
         path: Vec<String>,
         root_mod_ident: &Ident,
-        module: &mut Module<'a>,
+        module: &mut Module,
     ) {
         let joined_path = path.join("::");
         if self.type_substitutes.contains_key(&joined_path) {
@@ -215,22 +219,35 @@ impl<'a> TypeGenerator<'a> {
         }
     }
 
-    /// Returns a registry of derives to be applied to generated types.
-    pub fn derives(&self) -> &DerivesRegistry {
-        &self.derives
+    /// Returns a the derives to be applied to all generated types.
+    pub fn default_derives(&self) -> &GeneratedTypeDerives {
+        self.derives.default_derives()
+    }
+
+    /// Returns a the derives to be applied to a generated type.
+    pub fn type_derives(&self, ty: &Type<PortableForm>) -> GeneratedTypeDerives {
+        let joined_path = ty.path().segments().join("::");
+        let ty_path: syn::TypePath = syn::parse_str(&joined_path).unwrap_or_else(|e|
+            abort_call_site!(
+                "'{}' is an invalid type path: {:?}",
+                joined_path,
+                e,
+            )
+        );
+        self.derives.resolve(&ty_path)
     }
 }
 
 /// Represents a Rust `mod`, containing generated types and child `mod`s.
 #[derive(Debug)]
-pub struct Module<'a> {
+pub struct Module {
     name: Ident,
     root_mod: Ident,
-    children: BTreeMap<Ident, Module<'a>>,
-    types: BTreeMap<scale_info::Path<scale_info::form::PortableForm>, TypeDefGen<'a>>,
+    children: BTreeMap<Ident, Module>,
+    types: BTreeMap<scale_info::Path<scale_info::form::PortableForm>, TypeDefGen>,
 }
 
-impl<'a> ToTokens for Module<'a> {
+impl ToTokens for Module {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
         let root_mod = &self.root_mod;
@@ -248,7 +265,7 @@ impl<'a> ToTokens for Module<'a> {
     }
 }
 
-impl<'a> Module<'a> {
+impl Module {
     /// Create a new [`Module`], with a reference to the root `mod` for resolving type paths.
     pub(crate) fn new(name: Ident, root_mod: Ident) -> Self {
         Self {

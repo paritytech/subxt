@@ -24,7 +24,7 @@ use scale_info::{
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
 
-fn get_mod<'a>(module: &'a Module, path_segs: &[&'static str]) -> Option<&'a Module<'a>> {
+fn get_mod<'a>(module: &'a Module, path_segs: &[&'static str]) -> Option<&'a Module> {
     let (mod_name, rest) = path_segs.split_first()?;
     let mod_ident = Ident::new(mod_name, Span::call_site());
     let module = module.children.get(&mod_ident)?;

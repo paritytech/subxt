@@ -39,19 +39,19 @@ use syn::parse_quote;
 /// Field type paths are resolved via the `TypeGenerator`, which contains the registry of all
 /// generated types in the module.
 #[derive(Debug)]
-pub struct TypeDefGen<'a> {
+pub struct TypeDefGen {
     /// The type parameters of the type to be generated
     type_params: TypeDefParameters,
     /// The derives with which to annotate the generated type.
-    derives: &'a GeneratedTypeDerives,
+    derives: GeneratedTypeDerives,
     /// The kind of type to be generated.
     ty_kind: TypeDefGenKind,
 }
 
-impl<'a> TypeDefGen<'a> {
+impl TypeDefGen {
     /// Construct a type definition for codegen from the given [`scale_info::Type`].
-    pub fn from_type(ty: Type<PortableForm>, type_gen: &'a TypeGenerator) -> Self {
-        let derives = type_gen.derives();
+    pub fn from_type(ty: Type<PortableForm>, type_gen: &TypeGenerator) -> Self {
+        let derives = type_gen.type_derives(&ty);
 
         let type_params = ty
             .type_params()
@@ -85,6 +85,7 @@ impl<'a> TypeDefGen<'a> {
                 );
                 type_params.update_unused(fields.field_types());
                 let composite_def = CompositeDef::struct_def(
+                    &ty,
                     &type_name,
                     type_params.clone(),
                     fields,
@@ -126,7 +127,7 @@ impl<'a> TypeDefGen<'a> {
     }
 }
 
-impl<'a> quote::ToTokens for TypeDefGen<'a> {
+impl quote::ToTokens for TypeDefGen {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         match &self.ty_kind {
             TypeDefGenKind::Struct(composite) => composite.to_tokens(tokens),
@@ -150,7 +151,7 @@ impl<'a> quote::ToTokens for TypeDefGen<'a> {
 
                 let enum_ident = format_ident!("{}", type_name);
                 let type_params = &self.type_params;
-                let derives = self.derives;
+                let derives = &self.derives;
                 let ty_toks = quote! {
                     #derives
                     pub enum #enum_ident #type_params {

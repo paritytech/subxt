@@ -16,44 +16,38 @@
 
 use syn::{parse_quote, Path, punctuated::Punctuated};
 
-use std::borrow::Cow;
 use std::collections::{
     HashMap, HashSet
 };
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Default, Clone)]
 pub struct DerivesRegistry {
-    all_type_derives: GeneratedTypeDerives,
-    specific_type_derives: HashMap<syn::Path, GeneratedTypeDerives>,
+    default_derives: GeneratedTypeDerives,
+    specific_type_derives: HashMap<syn::TypePath, GeneratedTypeDerives>,
 }
 
 impl DerivesRegistry {
-    pub fn new(defaults: impl IntoIterator<Item = syn::Path>) -> Self {
-        let all_type_derives = defaults.into_iter().collect();
-        Self {
-            all_type_derives,
-            specific_type_derives: HashMap::new(),
-        }
-    }
-
     /// Insert derives to be applied to a specific generated type.
-    pub fn insert_for_type(&mut self, ty: syn::Path, derives: impl Iterator<Item = syn::Path>) {
+    pub fn insert_for_type(&mut self, ty: syn::TypePath, derives: impl Iterator<Item = syn::Path>) {
         let type_derives = self.specific_type_derives.entry(ty).or_insert_with(GeneratedTypeDerives::default);
         type_derives.derives.extend(derives)
     }
 
+    /// Returns a the derives to be applied to all generated types.
+    pub fn default_derives(&self) -> &GeneratedTypeDerives {
+        &self.default_derives
+    }
+
     /// Resolve the derives for a generated type. Includes:
-    ///     - The default global derives e.g. `scale::Encode, scale::Decode`
-    ///     - Any user-defined global derives via `generated_type_derives`
+    ///     - The default derives for all types e.g. `scale::Encode, scale::Decode`
+    ///     - Any user-defined derives for all types via `generated_type_derives`
     ///     - Any user-defined derives for this specific type
-    pub fn resolve(&self, ty: &syn::Path) -> Cow<GeneratedTypeDerives> {
+    pub fn resolve(&self, ty: &syn::TypePath) -> GeneratedTypeDerives {
+        let mut defaults = self.default_derives.derives.clone();
         if let Some(specific) = self.specific_type_derives.get(ty) {
-            let mut globals = self.all_type_derives.derives.clone();
-            globals.extend(specific.derives.iter().cloned());
-            Cow::Owned(GeneratedTypeDerives { derives: globals })
-        } else {
-            Cow::Borrowed(&self.all_type_derives)
+            defaults.extend(specific.derives.iter().cloned());
         }
+        GeneratedTypeDerives { derives: defaults }
     }
 }
 

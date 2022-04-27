@@ -16,6 +16,7 @@
 
 use super::{
     Field,
+    GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
@@ -28,9 +29,11 @@ use quote::{
     quote,
 };
 use scale_info::{
+    Type,
     TypeDef,
     TypeDefPrimitive,
 };
+use scale_info::form::PortableForm;
 
 /// Representation of a type which consists of a set of fields. Used to generate Rust code for
 /// either a standalone `struct` definition, or an `enum` variant.
@@ -51,6 +54,7 @@ pub struct CompositeDef {
 impl CompositeDef {
     /// Construct a definition which will generate code for a standalone `struct`.
     pub fn struct_def(
+        ty: &Type<PortableForm>,
         ident: &str,
         type_params: TypeDefParameters,
         fields_def: CompositeDefFields,
@@ -58,7 +62,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
     ) -> Self {
-        let mut derives = type_gen.derives().clone();
+        let mut derives = type_gen.type_derives(ty).clone();
         let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
