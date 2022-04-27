@@ -22,8 +22,12 @@ use frame_metadata::{
     ExtrinsicMetadata,
     PalletCallMetadata,
     PalletMetadata,
+    PalletStorageMetadata,
     RuntimeMetadataPrefixed,
     RuntimeMetadataV14,
+    StorageEntryMetadata,
+    StorageEntryModifier,
+    StorageEntryType,
 };
 use scale_info::{
     build::{
@@ -225,4 +229,106 @@ async fn calls_check() {
     // Unbond call should fail, while withdraw_unbonded remains compatible.
     assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_err());
     assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
+}
+
+#[tokio::test]
+async fn storage_check() {
+    let cxt = test_context().await;
+
+    // Ensure that `ExtrinsicCount` and `EventCount` storages are compatible before altering the metadata.
+    assert!(cxt
+        .api
+        .storage()
+        .system()
+        .extrinsic_count(None)
+        .await
+        .is_ok());
+    assert!(cxt
+        .api
+        .storage()
+        .system()
+        .all_extrinsics_len(None)
+        .await
+        .is_ok());
+
+    // Reconstruct the storage.
+    let storage = PalletStorageMetadata {
+        prefix: "System",
+        entries: vec![
+            StorageEntryMetadata {
+                name: "ExtrinsicCount",
+                modifier: StorageEntryModifier::Optional,
+                ty: StorageEntryType::Plain(meta_type::<u32>()),
+                default: vec![0],
+                docs: vec![],
+            },
+            StorageEntryMetadata {
+                name: "AllExtrinsicsLen",
+                modifier: StorageEntryModifier::Optional,
+                ty: StorageEntryType::Plain(meta_type::<u32>()),
+                default: vec![0],
+                docs: vec![],
+            },
+        ],
+    };
+    let pallet = PalletMetadata {
+        name: "System",
+        storage: Some(storage),
+        ..default_pallet()
+    };
+    let metadata = pallets_to_metadata(vec![pallet]);
+    let new_api = metadata_to_api(metadata, &cxt).await;
+    assert!(new_api
+        .storage()
+        .system()
+        .extrinsic_count(None)
+        .await
+        .is_ok());
+    assert!(new_api
+        .storage()
+        .system()
+        .all_extrinsics_len(None)
+        .await
+        .is_ok());
+
+    // Reconstruct the storage while modifying ExtrinsicCount.
+    let storage = PalletStorageMetadata {
+        prefix: "System",
+        entries: vec![
+            StorageEntryMetadata {
+                name: "ExtrinsicCount",
+                modifier: StorageEntryModifier::Optional,
+                // Previously was u32.
+                ty: StorageEntryType::Plain(meta_type::<u8>()),
+                default: vec![0],
+                docs: vec![],
+            },
+            StorageEntryMetadata {
+                name: "AllExtrinsicsLen",
+                modifier: StorageEntryModifier::Optional,
+                ty: StorageEntryType::Plain(meta_type::<u32>()),
+                default: vec![0],
+                docs: vec![],
+            },
+        ],
+    };
+    let pallet = PalletMetadata {
+        name: "System",
+        storage: Some(storage),
+        ..default_pallet()
+    };
+    let metadata = pallets_to_metadata(vec![pallet]);
+    let new_api = metadata_to_api(metadata, &cxt).await;
+    assert!(new_api
+        .storage()
+        .system()
+        .extrinsic_count(None)
+        .await
+        .is_err());
+    assert!(new_api
+        .storage()
+        .system()
+        .all_extrinsics_len(None)
+        .await
+        .is_ok());
 }
