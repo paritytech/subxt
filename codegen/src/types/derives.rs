@@ -14,10 +14,15 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use syn::{parse_quote, Path, punctuated::Punctuated};
+use syn::{
+    parse_quote,
+    punctuated::Punctuated,
+    Path,
+};
 
 use std::collections::{
-    HashMap, HashSet
+    HashMap,
+    HashSet,
 };
 
 #[derive(Debug, Default, Clone)]
@@ -28,8 +33,15 @@ pub struct DerivesRegistry {
 
 impl DerivesRegistry {
     /// Insert derives to be applied to a specific generated type.
-    pub fn insert_for_type(&mut self, ty: syn::TypePath, derives: impl Iterator<Item = syn::Path>) {
-        let type_derives = self.specific_type_derives.entry(ty).or_insert_with(GeneratedTypeDerives::default);
+    pub fn insert_for_type(
+        &mut self,
+        ty: syn::TypePath,
+        derives: impl Iterator<Item = syn::Path>,
+    ) {
+        let type_derives = self
+            .specific_type_derives
+            .entry(ty)
+            .or_insert_with(GeneratedTypeDerives::default);
         type_derives.derives.extend(derives)
     }
 
@@ -57,7 +69,7 @@ pub struct GeneratedTypeDerives {
 }
 
 impl FromIterator<syn::Path> for GeneratedTypeDerives {
-    fn from_iter<T: IntoIterator<Item=Path>>(iter: T) -> Self {
+    fn from_iter<T: IntoIterator<Item = Path>>(iter: T) -> Self {
         let derives = iter.into_iter().collect();
         Self { derives }
     }
@@ -93,7 +105,8 @@ impl Default for GeneratedTypeDerives {
 impl quote::ToTokens for GeneratedTypeDerives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.derives.is_empty() {
-            let derives: Punctuated<syn::Path, syn::Token![,]> = self.derives.iter().cloned().collect();
+            let derives: Punctuated<syn::Path, syn::Token![,]> =
+                self.derives.iter().cloned().collect();
             tokens.extend(quote::quote! {
                 #[derive(#derives)]
             })

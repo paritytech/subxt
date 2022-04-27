@@ -32,10 +32,10 @@ struct RuntimeMetadataArgs {
 }
 
 #[derive(Debug, FromMeta)]
-struct GeneratedTypeDerives{
+struct GeneratedTypeDerives {
     #[darling(rename = "type")]
     ty: String,
-    derive: Punctuated<syn::Path, syn::Token![,]>
+    derive: Punctuated<syn::Path, syn::Token![,]>,
 }
 
 #[proc_macro_attribute]
@@ -52,5 +52,6 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
 
-    subxt_codegen::generate_runtime_api(item_mod, &path, &args.generated_type_derives).into()
+    subxt_codegen::generate_runtime_api(item_mod, &path, &args.generated_type_derives)
+        .into()
 }

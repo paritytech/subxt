@@ -29,11 +29,11 @@ use quote::{
     quote,
 };
 use scale_info::{
+    form::PortableForm,
     Type,
     TypeDef,
     TypeDefPrimitive,
 };
-use scale_info::form::PortableForm;
 
 /// Representation of a type which consists of a set of fields. Used to generate Rust code for
 /// either a standalone `struct` definition, or an `enum` variant.

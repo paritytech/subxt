@@ -227,13 +227,9 @@ impl<'a> TypeGenerator<'a> {
     /// Returns a the derives to be applied to a generated type.
     pub fn type_derives(&self, ty: &Type<PortableForm>) -> GeneratedTypeDerives {
         let joined_path = ty.path().segments().join("::");
-        let ty_path: syn::TypePath = syn::parse_str(&joined_path).unwrap_or_else(|e|
-            abort_call_site!(
-                "'{}' is an invalid type path: {:?}",
-                joined_path,
-                e,
-            )
-        );
+        let ty_path: syn::TypePath = syn::parse_str(&joined_path).unwrap_or_else(|e| {
+            abort_call_site!("'{}' is an invalid type path: {:?}", joined_path, e,)
+        });
         self.derives.resolve(&ty_path)
     }
 }

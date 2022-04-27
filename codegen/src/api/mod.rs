@@ -66,9 +66,7 @@ use std::{
     path,
     string::ToString,
 };
-use syn::{
-    parse_quote,
-};
+use syn::parse_quote;
 
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
