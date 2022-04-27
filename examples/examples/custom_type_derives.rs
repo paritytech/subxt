@@ -24,7 +24,9 @@
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    derive_for_all_types = "Clone, PartialEq, Hash"
+    derive_for_all_types = "Clone, PartialEq, Hash",
+    // todo: docs
+    derive_for_type(ty = "frame_support::PalletId", derive = "Eq, PartialEq"),
 )]
 pub mod polkadot {}
 
