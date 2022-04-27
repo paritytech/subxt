@@ -19,8 +19,21 @@ use crate::{
     TestContext,
 };
 use frame_metadata::{
+    ExtrinsicMetadata,
+    PalletCallMetadata,
+    PalletMetadata,
     RuntimeMetadataPrefixed,
     RuntimeMetadataV14,
+};
+use scale_info::{
+    build::{
+        Fields,
+        Variants,
+    },
+    meta_type,
+    Path,
+    Type,
+    TypeInfo,
 };
 use subxt::{
     ClientBuilder,
@@ -107,4 +120,109 @@ async fn constants_check() {
 
     // Other constant validation should not be impacted.
     assert!(new_api.constants().balances().max_locks().is_ok());
+}
+
+fn default_pallet() -> PalletMetadata {
+    PalletMetadata {
+        name: "Test",
+        storage: None,
+        calls: None,
+        event: None,
+        constants: vec![],
+        error: None,
+        index: 0,
+    }
+}
+
+fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
+    RuntimeMetadataV14::new(
+        pallets,
+        ExtrinsicMetadata {
+            ty: meta_type::<()>(),
+            version: 0,
+            signed_extensions: vec![],
+        },
+        meta_type::<()>(),
+    )
+}
+
+#[tokio::test]
+async fn calls_check() {
+    let cxt = test_context().await;
+
+    // Ensure that `Unbond` and `WinthdrawUnbonded` calls are compatible before altering the metadata.
+    assert!(cxt.api.tx().staking().unbond(123_456_789_012_345).is_ok());
+    assert!(cxt.api.tx().staking().withdraw_unbonded(10).is_ok());
+
+    // Reconstruct the `Staking` call as is.
+    struct CallRec;
+    impl TypeInfo for CallRec {
+        type Identity = Self;
+        fn type_info() -> Type {
+            Type::builder()
+                .path(Path::new("Call", "pallet_staking::pallet::pallet"))
+                .variant(
+                    Variants::new()
+                        .variant("unbond", |v| {
+                            v.index(0).fields(Fields::named().field(|f| {
+                                f.compact::<u128>()
+                                    .name("value")
+                                    .type_name("BalanceOf<T>")
+                            }))
+                        })
+                        .variant("withdraw_unbonded", |v| {
+                            v.index(1).fields(Fields::named().field(|f| {
+                                f.ty::<u32>().name("num_slashing_spans").type_name("u32")
+                            }))
+                        }),
+                )
+        }
+    }
+    let pallet = PalletMetadata {
+        name: "Staking",
+        calls: Some(PalletCallMetadata {
+            ty: meta_type::<CallRec>(),
+        }),
+        ..default_pallet()
+    };
+    let metadata = pallets_to_metadata(vec![pallet]);
+    let new_api = metadata_to_api(metadata, &cxt).await;
+    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_ok());
+    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
+
+    // Change `Unbond` call but leave the rest as is.
+    struct CallRecSecond;
+    impl TypeInfo for CallRecSecond {
+        type Identity = Self;
+        fn type_info() -> Type {
+            Type::builder()
+                .path(Path::new("Call", "pallet_staking::pallet::pallet"))
+                .variant(
+                    Variants::new()
+                        .variant("unbond", |v| {
+                            v.index(0).fields(Fields::named().field(|f| {
+                                // Is of type u32 instead of u128.
+                                f.compact::<u32>().name("value").type_name("BalanceOf<T>")
+                            }))
+                        })
+                        .variant("withdraw_unbonded", |v| {
+                            v.index(1).fields(Fields::named().field(|f| {
+                                f.ty::<u32>().name("num_slashing_spans").type_name("u32")
+                            }))
+                        }),
+                )
+        }
+    }
+    let pallet = PalletMetadata {
+        name: "Staking",
+        calls: Some(PalletCallMetadata {
+            ty: meta_type::<CallRecSecond>(),
+        }),
+        ..default_pallet()
+    };
+    let metadata = pallets_to_metadata(vec![pallet]);
+    let new_api = metadata_to_api(metadata, &cxt).await;
+    // Unbond call should fail, while withdraw_unbonded remains compatible.
+    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_err());
+    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
 }
