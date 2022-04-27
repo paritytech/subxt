@@ -62,7 +62,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
     ) -> Self {
-        let mut derives = type_gen.type_derives(ty).clone();
+        let mut derives = type_gen.type_derives(ty);
         let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
