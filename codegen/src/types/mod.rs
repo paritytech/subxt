@@ -50,8 +50,8 @@ pub use self::{
         CompositeDefFields,
     },
     derives::{
-        DerivesRegistry,
         Derives,
+        DerivesRegistry,
     },
     type_def::TypeDefGen,
     type_def_params::TypeDefParameters,

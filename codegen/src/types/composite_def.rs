@@ -15,8 +15,8 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
-    Field,
     Derives,
+    Field,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,

@@ -26,8 +26,8 @@ pub use self::{
         RuntimeGenerator,
     },
     types::{
-        DerivesRegistry,
         Derives,
+        DerivesRegistry,
         Module,
         TypeGenerator,
     },
