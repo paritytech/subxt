@@ -110,8 +110,14 @@ impl Default for Derives {
 impl quote::ToTokens for Derives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.derives.is_empty() {
+            let mut sorted = self.derives.iter().cloned().collect::<Vec<_>>();
+            sorted.sort_by(|a, b| {
+                quote::quote!(#a)
+                    .to_string()
+                    .cmp(&quote::quote!(#b).to_string())
+            });
             let derives: Punctuated<syn::Path, syn::Token![,]> =
-                self.derives.iter().cloned().collect();
+                sorted.iter().cloned().collect();
             tokens.extend(quote::quote! {
                 #[derive(#derives)]
             })
