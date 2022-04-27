@@ -20,13 +20,19 @@
 
 #[subxt::subxt(
     runtime_metadata_path = "examples/polkadot_metadata.scale",
+
     // We can add (certain) custom derives to the generated types by providing
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
     // types relied upon by the codegen implement.
-    derive_for_all_types = "Clone, PartialEq, Hash",
-    // todo: docs
-    derive_for_type(ty = "frame_support::PalletId", derive = "Eq, PartialEq"),
+    derive_for_all_types = "Clone, PartialEq",
+
+    // To apply derives to specific generated types, add a `derive_for_type` per type,
+    // mapping the type path to the derives which should be added for that type only.
+    // Note that these derives will be in addition to those specified above in
+    // `derive_for_all_types`
+    derive_for_type(ty = "frame_support::PalletId", derive = "Eq, Ord, PartialOrd"),
+    derive_for_type(ty = "sp_runtime::ModuleError", derive = "Eq, Hash"),
 )]
 pub mod polkadot {}
 
