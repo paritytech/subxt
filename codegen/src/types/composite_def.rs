@@ -16,7 +16,7 @@
 
 use super::{
     Field,
-    GeneratedTypeDerives,
+    Derives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
@@ -168,7 +168,7 @@ impl quote::ToTokens for CompositeDef {
 pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
     Struct {
-        derives: GeneratedTypeDerives,
+        derives: Derives,
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
     },

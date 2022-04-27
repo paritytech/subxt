@@ -27,7 +27,7 @@ pub use self::{
     },
     types::{
         DerivesRegistry,
-        GeneratedTypeDerives,
+        Derives,
         Module,
         TypeGenerator,
     },

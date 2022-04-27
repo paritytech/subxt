@@ -19,6 +19,7 @@ extern crate proc_macro;
 use darling::FromMeta;
 use proc_macro::TokenStream;
 use proc_macro_error::proc_macro_error;
+use subxt_codegen::{DerivesRegistry, Derives};
 use syn::{
     parse_macro_input,
     punctuated::Punctuated,
@@ -51,6 +52,7 @@ pub fn subxt(args: TokenStream, input: TokenStream) -> TokenStream {
     let root = std::env::var("CARGO_MANIFEST_DIR").unwrap_or_else(|_| ".".into());
     let root_path = std::path::Path::new(&root);
     let path = root_path.join(args.runtime_metadata_path);
+
 
     subxt_codegen::generate_runtime_api(item_mod, &path, &args.generated_type_derives)
         .into()

@@ -27,8 +27,8 @@ use std::collections::{
 
 #[derive(Debug, Default, Clone)]
 pub struct DerivesRegistry {
-    default_derives: GeneratedTypeDerives,
-    specific_type_derives: HashMap<syn::TypePath, GeneratedTypeDerives>,
+    default_derives: Derives,
+    specific_type_derives: HashMap<syn::TypePath, Derives>,
 }
 
 impl DerivesRegistry {
@@ -41,12 +41,12 @@ impl DerivesRegistry {
         let type_derives = self
             .specific_type_derives
             .entry(ty)
-            .or_insert_with(GeneratedTypeDerives::default);
+            .or_insert_with(Derives::default);
         type_derives.derives.extend(derives)
     }
 
     /// Returns a the derives to be applied to all generated types.
-    pub fn default_derives(&self) -> &GeneratedTypeDerives {
+    pub fn default_derives(&self) -> &Derives {
         &self.default_derives
     }
 
@@ -54,28 +54,28 @@ impl DerivesRegistry {
     ///     - The default derives for all types e.g. `scale::Encode, scale::Decode`
     ///     - Any user-defined derives for all types via `generated_type_derives`
     ///     - Any user-defined derives for this specific type
-    pub fn resolve(&self, ty: &syn::TypePath) -> GeneratedTypeDerives {
+    pub fn resolve(&self, ty: &syn::TypePath) -> Derives {
         let mut defaults = self.default_derives.derives.clone();
         if let Some(specific) = self.specific_type_derives.get(ty) {
             defaults.extend(specific.derives.iter().cloned());
         }
-        GeneratedTypeDerives { derives: defaults }
+        Derives { derives: defaults }
     }
 }
 
 #[derive(Debug, Clone)]
-pub struct GeneratedTypeDerives {
+pub struct Derives {
     derives: HashSet<syn::Path>,
 }
 
-impl FromIterator<syn::Path> for GeneratedTypeDerives {
+impl FromIterator<syn::Path> for Derives {
     fn from_iter<T: IntoIterator<Item = Path>>(iter: T) -> Self {
         let derives = iter.into_iter().collect();
         Self { derives }
     }
 }
 
-impl GeneratedTypeDerives {
+impl Derives {
     /// Add `::subxt::codec::CompactAs` to the derives.
     pub fn push_codec_compact_as(&mut self) {
         self.insert(parse_quote!(::subxt::codec::CompactAs));
@@ -92,7 +92,7 @@ impl GeneratedTypeDerives {
     }
 }
 
-impl Default for GeneratedTypeDerives {
+impl Default for Derives {
     fn default() -> Self {
         let mut derives = HashSet::new();
         derives.insert(syn::parse_quote!(::subxt::codec::Encode));
@@ -102,7 +102,7 @@ impl Default for GeneratedTypeDerives {
     }
 }
 
-impl quote::ToTokens for GeneratedTypeDerives {
+impl quote::ToTokens for Derives {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.derives.is_empty() {
             let derives: Punctuated<syn::Path, syn::Token![,]> =

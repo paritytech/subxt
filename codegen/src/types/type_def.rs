@@ -17,7 +17,7 @@
 use super::{
     CompositeDef,
     CompositeDefFields,
-    GeneratedTypeDerives,
+    Derives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
@@ -43,7 +43,7 @@ pub struct TypeDefGen {
     /// The type parameters of the type to be generated
     type_params: TypeDefParameters,
     /// The derives with which to annotate the generated type.
-    derives: GeneratedTypeDerives,
+    derives: Derives,
     /// The kind of type to be generated.
     ty_kind: TypeDefGenKind,
 }
