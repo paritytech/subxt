@@ -36,6 +36,7 @@ struct RuntimeMetadataArgs {
 
 #[derive(Debug, FromMeta)]
 struct DeriveForType {
+    #[darling(rename = "type")]
     ty: syn::TypePath,
     derive: Punctuated<syn::Path, syn::Token![,]>,
 }
