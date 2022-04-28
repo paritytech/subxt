@@ -3,9 +3,6 @@ name = "test-runtime"
 version = "0.20.0"
 edition = "2021"
 
-[features]
-integration-tests = []
-
 [dependencies]
 subxt = { path = "../subxt" }
 sp-runtime = "6.0.0"
