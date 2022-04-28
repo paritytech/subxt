@@ -22,6 +22,8 @@ proc-macro-error = "1.0.4"
 quote = "1.0.8"
 syn = "1.0.58"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
+sp-core = { version = "6.0.0"  }
+subxt-metadata = { version = "0.20.0", path = "../metadata" }
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
