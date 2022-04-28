@@ -24,6 +24,7 @@ mod events;
 #[cfg(test)]
 mod frame;
 #[cfg(test)]
+#[cfg(integration_tests)]
 mod metadata;
 #[cfg(test)]
 mod storage;

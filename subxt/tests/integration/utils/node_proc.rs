@@ -37,6 +37,7 @@ use subxt::{
 pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
     client: Client<R>,
+    #[cfg(integration_tests)]
     ws_url: String,
 }
 
@@ -78,6 +79,7 @@ where
     }
 
     /// Returns the address to which the client is connected.
+    #[cfg(integration_tests)]
     pub fn ws_url(&self) -> &str {
         &self.ws_url
     }
@@ -147,6 +149,7 @@ impl TestNodeProcessBuilder {
                 Ok(TestNodeProcess {
                     proc,
                     client,
+                    #[cfg(integration_tests)]
                     ws_url,
                 })
             }
