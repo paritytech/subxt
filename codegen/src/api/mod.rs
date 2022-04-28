@@ -15,21 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Generate code for submitting extrinsics and query storage of a Substrate runtime.
-//!
-//! ## Note
-//!
-//! By default the codegen will search for the `System` pallet's `Account` storage item, which is
-//! the conventional location where an account's index (aka nonce) is stored.
-//!
-//! If this `System::Account` storage item is discovered, then it is assumed that:
-//!
-//!   1. The type of the storage item is a `struct` (aka a composite type)
-//!   2. There exists a field called `nonce` which contains the account index.
-//!
-//! These assumptions are based on the fact that the `frame_system::AccountInfo` type is the default
-//! configured type, and that the vast majority of chain configurations will use this.
-//!
-//! If either of these conditions are not satisfied, the codegen will fail.
 
 mod calls;
 mod constants;
