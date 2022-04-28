@@ -88,7 +88,7 @@ impl ClientBuilder {
     /// Set the metadata.
     ///
     /// *Note:* Metadata will no longer be downloaded from the runtime node.
-    #[cfg(integration_tests)]
+    #[cfg(feature = "integration-tests")]
     pub fn set_metadata(mut self, metadata: Metadata) -> Self {
         self.metadata = Some(metadata);
         self
