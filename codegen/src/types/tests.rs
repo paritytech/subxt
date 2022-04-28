@@ -21,6 +21,7 @@ use scale_info::{
     Registry,
     TypeInfo,
 };
+use syn::parse_quote;
 
 const MOD_PATH: &[&str] = &["subxt_codegen", "types", "tests"];
 
@@ -884,5 +885,107 @@ fn dont_force_struct_names_camel_case() {
             }
         }
         .to_string()
+    )
+}
+
+#[test]
+fn apply_user_defined_derives_for_all_types() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct A(B);
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct B;
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<A>());
+    let portable_types: PortableRegistry = registry.into();
+
+    // configure derives
+    let mut derives = DerivesRegistry::default();
+    derives.extend_for_all(vec![parse_quote!(Clone), parse_quote!(Eq)]);
+
+    let type_gen =
+        TypeGenerator::new(&portable_types, "root", Default::default(), derives);
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Clone, Debug, Eq)]
+                pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
+
+                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Clone, Debug, Eq)]
+                pub struct B;
+            }
+        }
+            .to_string()
+    )
+}
+
+#[test]
+fn apply_user_defined_derives_for_specific_types() {
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct A(B);
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct B(C);
+
+    #[allow(unused)]
+    #[derive(TypeInfo)]
+    struct C;
+
+    let mut registry = Registry::new();
+    registry.register_type(&meta_type::<A>());
+    let portable_types: PortableRegistry = registry.into();
+
+    // configure derives
+    let mut derives = DerivesRegistry::default();
+    // for all types
+    derives.extend_for_all(vec![parse_quote!(Eq)]);
+    // for specific types
+    derives.extend_for_type(
+        parse_quote!(subxt_codegen::types::tests::B),
+        vec![parse_quote!(Hash)],
+    );
+    // duplicates (in this case `Eq`) will be combined (i.e. a set union)
+    derives.extend_for_type(
+        parse_quote!(subxt_codegen::types::tests::C),
+        vec![
+            parse_quote!(Eq),
+            parse_quote!(Ord),
+            parse_quote!(PartialOrd),
+        ],
+    );
+
+    let type_gen =
+        TypeGenerator::new(&portable_types, "root", Default::default(), derives);
+    let types = type_gen.generate_types_mod();
+    let tests_mod = get_mod(&types, MOD_PATH).unwrap();
+
+    assert_eq!(
+        tests_mod.into_token_stream().to_string(),
+        quote! {
+            pub mod tests {
+                use super::root;
+
+                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq)]
+                pub struct A(pub root :: subxt_codegen :: types :: tests :: B,);
+
+                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq, Hash)]
+                pub struct B(pub root :: subxt_codegen :: types :: tests :: C,);
+
+                #[derive(::subxt::codec::Decode, ::subxt::codec::Encode, Debug, Eq, Ord, PartialOrd)]
+                pub struct C;
+            }
+        }
+            .to_string()
     )
 }

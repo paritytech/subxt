@@ -33,7 +33,7 @@ pub struct DerivesRegistry {
 
 impl DerivesRegistry {
     /// Insert derives to be applied to all generated types.
-    pub fn extend_for_all(&mut self, derives: impl Iterator<Item = syn::Path>) {
+    pub fn extend_for_all(&mut self, derives: impl IntoIterator<Item = syn::Path>) {
         self.default_derives.derives.extend(derives)
     }
 
@@ -41,7 +41,7 @@ impl DerivesRegistry {
     pub fn extend_for_type(
         &mut self,
         ty: syn::TypePath,
-        derives: impl Iterator<Item = syn::Path>,
+        derives: impl IntoIterator<Item = syn::Path>,
     ) {
         let type_derives = self
             .specific_type_derives
