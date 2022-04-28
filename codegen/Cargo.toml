@@ -28,5 +28,3 @@ subxt-metadata = { version = "0.20.0", path = "../metadata" }
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 pretty_assertions = "1.0.0"
-test-runtime = { path = "../test-runtime" }
-regex = "1.5"

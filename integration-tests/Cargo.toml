@@ -23,11 +23,14 @@ frame-metadata = "15.0.0"
 futures = "0.3.13"
 hex = "0.4.3"
 log = "0.4.14"
+regex = "1.5"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "6.0.0", default-features = false  }
 sp-keyring = "6.0.0"
 sp-runtime = "6.0.0"
 subxt = { version = "0.20.0", path = "../subxt" }
+subxt-codegen = { version = "0.20.0", path = "../codegen" }
+syn = "1.0.58"
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.8", features = ["macros", "time"] }
 wabt = "0.10.0"
