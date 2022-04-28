@@ -14,25 +14,21 @@ description = "Subxt integration tests that rely on the Substrate binary"
 [features]
 default = ["subxt/integration-tests"]
 
-[dependencies]
+[dev-dependencies]
+assert_matches = "1.5.0"
 async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-scale-info = { version = "2.0.0", features = ["bit-vec"] }
+env_logger = "0.9.0"
+frame-metadata = "15.0.0"
 futures = "0.3.13"
 hex = "0.4.3"
 log = "0.4.14"
-
-subxt = { version = "0.20.0", path = "../subxt" }
-
+scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "6.0.0", default-features = false  }
+sp-keyring = "6.0.0"
 sp-runtime = "6.0.0"
-
-frame-metadata = "15.0.0"
-
-assert_matches = "1.5.0"
+subxt = { version = "0.20.0", path = "../subxt" }
+test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.8", features = ["macros", "time"] }
-env_logger = "0.9.0"
 wabt = "0.10.0"
 which = "4.0.2"
-test-runtime = { path = "../test-runtime" }
-sp-keyring = "6.0.0"
