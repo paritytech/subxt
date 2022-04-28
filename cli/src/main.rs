@@ -43,7 +43,7 @@ use std::{
     path::PathBuf,
 };
 use structopt::StructOpt;
-use subxt_codegen::GeneratedTypeDerives;
+use subxt_codegen::DerivesRegistry;
 use subxt_metadata::{
     get_metadata_hash,
     get_pallet_hash,
@@ -288,8 +288,8 @@ fn codegen<I: Input>(
         .iter()
         .map(|raw| syn::parse_str(raw))
         .collect::<Result<Vec<_>, _>>()?;
-    let mut derives = GeneratedTypeDerives::default();
-    derives.append(p.into_iter());
+    let mut derives = DerivesRegistry::default();
+    derives.extend_for_all(p.into_iter());
 
     let runtime_api = generator.generate_runtime(item_mod, derives);
     println!("{}", runtime_api);
