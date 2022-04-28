@@ -58,7 +58,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let events = api
         .tx()
         .balances()
-        .transfer(bob_address, 10_000)
+        .transfer(bob_address, 10_000)?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -114,7 +114,7 @@ async fn multiple_transfers_work_nonce_incremented(
         api
             .tx()
             .balances()
-            .transfer(bob_address.clone(), 10_000)
+            .transfer(bob_address.clone(), 10_000)?
             .sign_and_submit_then_watch_default(&alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
@@ -159,7 +159,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
             charlie.into(),
             100_000_000_000_000,
             runtime_types::pallet_staking::RewardDestination::Stash,
-        )
+        )?
         .sign_and_submit_then_watch_default(&bob)
         .await?
         .wait_for_finalized_success()
@@ -200,6 +200,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -212,6 +213,7 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&hans)
         .await
         .unwrap()
@@ -239,6 +241,7 @@ async fn transfer_implicit_subscription() {
         .tx()
         .balances()
         .transfer(bob_addr, 10_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()

@@ -48,7 +48,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
     ctx.api
         .tx()
         .system()
-        .remark(vec![1, 2, 3, 4, 5])
+        .remark(vec![1, 2, 3, 4, 5])?
         .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
@@ -113,7 +113,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     ctx.api
         .tx()
         .assets()
-        .create(99, alice.clone().into(), 1)
+        .create(99, alice.clone().into(), 1)?
         .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
@@ -121,7 +121,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     ctx.api
         .tx()
         .assets()
-        .approve_transfer(99, bob.clone().into(), 123)
+        .approve_transfer(99, bob.clone().into(), 123)?
         .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
