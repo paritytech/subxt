@@ -15,21 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Generate code for submitting extrinsics and query storage of a Substrate runtime.
-//!
-//! ## Note
-//!
-//! By default the codegen will search for the `System` pallet's `Account` storage item, which is
-//! the conventional location where an account's index (aka nonce) is stored.
-//!
-//! If this `System::Account` storage item is discovered, then it is assumed that:
-//!
-//!   1. The type of the storage item is a `struct` (aka a composite type)
-//!   2. There exists a field called `nonce` which contains the account index.
-//!
-//! These assumptions are based on the fact that the `frame_system::AccountInfo` type is the default
-//! configured type, and that the vast majority of chain configurations will use this.
-//!
-//! If either of these conditions are not satisfied, the codegen will fail.
 
 mod calls;
 mod constants;
@@ -39,7 +24,7 @@ mod storage;
 
 use subxt_metadata::get_metadata_per_pallet_hash;
 
-use super::GeneratedTypeDerives;
+use super::DerivesRegistry;
 use crate::{
     ir,
     types::{
@@ -68,15 +53,12 @@ use std::{
     path,
     string::ToString,
 };
-use syn::{
-    parse_quote,
-    punctuated::Punctuated,
-};
+use syn::parse_quote;
 
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
-    generated_type_derives: Option<Punctuated<syn::Path, syn::Token![,]>>,
+    derives: DerivesRegistry,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -91,11 +73,6 @@ where
 
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
-
-    let mut derives = GeneratedTypeDerives::default();
-    if let Some(user_derives) = generated_type_derives {
-        derives.append(user_derives.iter().cloned())
-    }
 
     let generator = RuntimeGenerator::new(metadata);
     generator.generate_runtime(item_mod, derives)
@@ -116,9 +93,10 @@ impl RuntimeGenerator {
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: GeneratedTypeDerives,
+        derives: DerivesRegistry,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
+        let default_derives = derives.default_derives();
 
         // some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
@@ -265,7 +243,7 @@ impl RuntimeGenerator {
         });
 
         let outer_event = quote! {
-            #derives
+            #default_derives
             pub enum Event {
                 #( #outer_event_variants )*
             }
@@ -448,6 +426,7 @@ where
                     type_gen,
                 );
                 let struct_def = CompositeDef::struct_def(
+                    &ty,
                     struct_name.as_ref(),
                     Default::default(),
                     fields,

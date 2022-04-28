@@ -111,7 +111,7 @@ async fn run() {
         r#"
         #[subxt::subxt(
             runtime_metadata_path = "{}",
-            generated_type_derives = "Eq, PartialEq"
+            derive_for_all_types = "Eq, PartialEq"
         )]
         pub mod node_runtime {{
             #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
