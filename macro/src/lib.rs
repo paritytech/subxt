@@ -14,6 +14,79 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+//! Generate a strongly typed API for interacting with a Substrate runtime from its metadata.
+//!
+//! Usage:
+//!
+//! Download metadata from a running Substrate node using `subxt-cli`:
+//!
+//! ```bash
+//! subxt metadata -f bytes > polkadot_metadata.scale
+//! ```
+//!
+//! Annotate a Rust module with the `subxt` attribute referencing the aforementioned metadata file.
+//!
+//! ```ignore
+//! #[subxt::subxt(
+//!     runtime_metadata_path = "polkadot_metadata.scale",
+//! )]
+//! pub mod polkadot {}
+//! ```
+//!
+//! The `subxt` macro will populate the annotated module with all of the methods and types required
+//! for submitting extrinsics and reading from storage for the given runtime.
+//!
+//! ## Substituting types
+//!
+//! In order to replace a generated type by a user-defined type, use `substitute_type`:
+//!
+//! ```ignore
+//! #[subxt::subxt(
+//!     runtime_metadata_path = "polkadot_metadata.scale",
+//! )]
+//! pub mod polkadot {
+//!     #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
+//!     use sp_runtime::Perbill;
+//! }
+//! ```
+//!
+//! This will replace the generated type and any usages with the specified type at the `use` import.
+//! It is useful for using custom decoding for specific types, or to provide a type with foreign
+//! trait implementations, or other specialized functionality.
+
+//! ## Custom Derives
+//!
+//! By default all generated types are annotated with `scale::Encode` and `scale::Decode` derives.
+//! However when using the generated types in the client, they may require additional derives to be
+//! useful.
+//!
+//! ### Adding derives for all types
+//!
+//! Add `derive_for_all_types` with a comma seperated list of the derives to apply to *all* types
+//!
+//! ```ignore
+//! #[subxt::subxt(
+//!     runtime_metadata_path = "polkadot_metadata.scale",
+//!     derive_for_all_types = "Eq, PartialEq"
+//! )]
+//! pub mod polkadot {}
+//! ```
+//!
+//! ### Adding derives for specific types
+//!
+//! Add `derive_for_type` for each specific type with a comma seperated list of the derives to
+//! apply for that type only.
+//!
+//! ```ignore
+//! #[subxt::subxt(
+//!     runtime_metadata_path = "polkadot_metadata.scale",
+//!     derive_for_all_types = "Eq, PartialEq",
+//!     derive_for_type(type = "frame_support::PalletId", derive = "Ord, PartialOrd"),
+//!     derive_for_type(type = "sp_runtime::ModuleError", derive = "Hash"),
+//! )]
+//! pub mod polkadot {}
+//! ```
+
 extern crate proc_macro;
 
 use darling::FromMeta;
