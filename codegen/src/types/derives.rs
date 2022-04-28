@@ -82,7 +82,7 @@ impl FromIterator<syn::Path> for Derives {
 
 impl Derives {
     /// Add `::subxt::codec::CompactAs` to the derives.
-    pub fn push_codec_compact_as(&mut self) {
+    pub fn insert_codec_compact_as(&mut self) {
         self.insert(parse_quote!(::subxt::codec::CompactAs));
     }
 

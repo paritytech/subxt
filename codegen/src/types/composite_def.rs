@@ -85,7 +85,7 @@ impl CompositeDef {
                             | TypeDefPrimitive::U128
                     )
                 ) {
-                    derives.push_codec_compact_as()
+                    derives.insert_codec_compact_as()
                 }
             }
         }
