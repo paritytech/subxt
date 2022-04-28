@@ -50,7 +50,7 @@ impl DerivesRegistry {
         type_derives.derives.extend(derives)
     }
 
-    /// Returns a the derives to be applied to all generated types.
+    /// Returns the derives to be applied to all generated types.
     pub fn default_derives(&self) -> &Derives {
         &self.default_derives
     }

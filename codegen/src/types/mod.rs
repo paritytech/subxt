@@ -219,12 +219,12 @@ impl<'a> TypeGenerator<'a> {
         }
     }
 
-    /// Returns a the derives to be applied to all generated types.
+    /// Returns the derives to be applied to all generated types.
     pub fn default_derives(&self) -> &Derives {
         self.derives.default_derives()
     }
 
-    /// Returns a the derives to be applied to a generated type.
+    /// Returns the derives to be applied to a generated type.
     pub fn type_derives(&self, ty: &Type<PortableForm>) -> Derives {
         let joined_path = ty.path().segments().join("::");
         let ty_path: syn::TypePath = syn::parse_str(&joined_path).unwrap_or_else(|e| {
