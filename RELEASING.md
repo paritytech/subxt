@@ -67,7 +67,8 @@ We also assume that ongoing work done is being merged directly to the `master` b
         a little time in between each to let crates.io catch up with what we've published).
 
         ```
-        (cd codegen && cargo publish) && \
+        (cd metadata && cargo publish) && \
+            (cd codegen && cargo publish) && \
             sleep 10 && \
             (cd macro && cargo publish) && \
             sleep 10 && \

@@ -50,7 +50,7 @@ async fn tx_remark_with_event() -> Result<(), subxt::Error<DispatchError>> {
         .api
         .tx()
         .system()
-        .remark_with_event(b"remarkable".to_vec())
+        .remark_with_event(b"remarkable".to_vec())?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
