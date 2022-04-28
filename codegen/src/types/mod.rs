@@ -219,7 +219,7 @@ impl<'a> TypeGenerator<'a> {
         }
     }
 
-    /// Returns a the derives to be applied to all generated types.
+    /// Returns the derives to be applied to all generated types.
     pub fn default_derives(&self) -> &Derives {
         self.derives.default_derives()
     }
