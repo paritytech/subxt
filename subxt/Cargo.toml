@@ -13,6 +13,7 @@ description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
 [features]
+# Feature flag is active when running integration-tests from the dedicated crate.
 integration-tests = []
 
 [dependencies]
