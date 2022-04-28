@@ -26,6 +26,10 @@ use scale_info::{
     TypeDef,
     TypeDefVariant,
 };
+use std::{
+    fs,
+    path::Path,
+};
 use subxt_metadata::{
     get_call_hash,
     get_constant_hash,
@@ -35,7 +39,8 @@ use subxt_metadata::{
 };
 
 fn load_metadata() -> RuntimeMetadataV14 {
-    let bytes = test_runtime::METADATA;
+    let bytes = fs::read(Path::new("../artifacts/polkadot_metadata.scale"))
+        .expect("Cannot read metadata blob");
     let meta: RuntimeMetadataPrefixed =
         Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
 
