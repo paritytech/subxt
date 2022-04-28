@@ -14,20 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod codegen;
-mod utils;
+mod hash_cache;
+mod metadata_type;
 
-#[cfg(test)]
-mod client;
-#[cfg(test)]
-mod events;
-#[cfg(test)]
-mod frame;
-#[cfg(test)]
-#[cfg(integration_tests)]
-mod metadata;
-#[cfg(test)]
-mod storage;
-
-use test_runtime::node_runtime;
-use utils::*;
+pub use metadata_type::{
+    ErrorMetadata,
+    EventMetadata,
+    InvalidMetadataError,
+    Metadata,
+    MetadataError,
+    PalletMetadata,
+};

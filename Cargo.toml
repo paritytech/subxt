@@ -5,6 +5,7 @@ members = [
     "codegen",
     "examples",
     "macro",
+    "metadata",
     "subxt",
     "test-runtime"
 ]

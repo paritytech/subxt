@@ -37,6 +37,8 @@ use subxt::{
 pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
     client: Client<R>,
+    #[cfg(integration_tests)]
+    ws_url: String,
 }
 
 impl<R> Drop for TestNodeProcess<R>
@@ -74,6 +76,12 @@ where
     /// Returns the subxt client connected to the running node.
     pub fn client(&self) -> &Client<R> {
         &self.client
+    }
+
+    /// Returns the address to which the client is connected.
+    #[cfg(integration_tests)]
+    pub fn ws_url(&self) -> &str {
+        &self.ws_url
     }
 }
 
@@ -137,7 +145,14 @@ impl TestNodeProcessBuilder {
         // Connect to the node with a subxt client:
         let client = ClientBuilder::new().set_url(ws_url.clone()).build().await;
         match client {
-            Ok(client) => Ok(TestNodeProcess { proc, client }),
+            Ok(client) => {
+                Ok(TestNodeProcess {
+                    proc,
+                    client,
+                    #[cfg(integration_tests)]
+                    ws_url,
+                })
+            }
             Err(err) => {
                 let err = format!("Failed to connect to node rpc at {}: {}", ws_url, err);
                 log::error!("{}", err);

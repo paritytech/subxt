@@ -37,6 +37,8 @@ mod errors;
 mod events;
 mod storage;
 
+use subxt_metadata::get_metadata_per_pallet_hash;
+
 use super::DerivesRegistry;
 use crate::{
     ir,
@@ -174,9 +176,28 @@ impl RuntimeGenerator {
             })
             .collect::<Vec<_>>();
 
+        // Pallet names and their length are used to create PALLETS array.
+        // The array is used to identify the pallets composing the metadata for
+        // validation of just those pallets.
+        let pallet_names: Vec<_> = self
+            .metadata
+            .pallets
+            .iter()
+            .map(|pallet| &pallet.name)
+            .collect();
+        let pallet_names_len = pallet_names.len();
+
+        let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
+
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
             let calls = if let Some(ref calls) = pallet.calls {
-                calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
+                calls::generate_calls(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    calls,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
@@ -188,13 +209,20 @@ impl RuntimeGenerator {
             };
 
             let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(&type_gen, pallet, storage, types_mod_ident)
+                storage::generate_storage(
+                    &self.metadata,
+                    &type_gen,
+                    pallet,
+                    storage,
+                    types_mod_ident,
+                )
             } else {
                 quote!()
             };
 
             let constants_mod = if !pallet.constants.is_empty() {
                 constants::generate_constants(
+                    &self.metadata,
                     &type_gen,
                     pallet,
                     &pallet.constants,
@@ -237,24 +265,26 @@ impl RuntimeGenerator {
         };
 
         let mod_ident = item_mod_ir.ident;
-        let pallets_with_constants =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    (!pallet.constants.is_empty()).then(|| pallet_mod_name)
-                });
-        let pallets_with_storage =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.storage.as_ref().map(|_| pallet_mod_name)
-                });
-        let pallets_with_calls =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.calls.as_ref().map(|_| pallet_mod_name)
-                });
+        let pallets_with_constants: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+            })
+            .collect();
+
+        let pallets_with_storage: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.storage.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
+
+        let pallets_with_calls: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.calls.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
 
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
@@ -264,6 +294,8 @@ impl RuntimeGenerator {
             pub mod #mod_ident {
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
+                // Identify the pallets composing the static metadata by name.
+                pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
                 #outer_event
                 #( #modules )*
@@ -294,6 +326,14 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
+                    pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
+                        if self.client.metadata().metadata_hash(&PALLETS) != [ #(#metadata_hash,)* ] {
+                            Err(::subxt::MetadataError::IncompatibleMetadata)
+                        } else {
+                            Ok(())
+                        }
+                    }
+
                     pub fn constants(&'a self) -> ConstantsApi<'a, T> {
                         ConstantsApi { client: &self.client }
                     }
@@ -377,12 +417,13 @@ impl RuntimeGenerator {
     }
 }
 
+/// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<'a, F>(
     type_gen: &'a TypeGenerator,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-) -> Vec<CompositeDef>
+) -> Vec<(String, CompositeDef)>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
@@ -399,7 +440,7 @@ where
                     &[],
                     type_gen,
                 );
-                CompositeDef::struct_def(
+                let struct_def = CompositeDef::struct_def(
                     &ty,
                     struct_name.as_ref(),
                     Default::default(),
@@ -407,7 +448,8 @@ where
                     Some(parse_quote!(pub)),
                     type_gen,
                     var.docs(),
-                )
+                );
+                (var.name().to_string(), struct_def)
             })
             .collect()
     } else {
