@@ -478,13 +478,64 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 mod tests {
     use super::*;
     use crate::StorageEntryKey;
+    use frame_metadata::{
+        ExtrinsicMetadata,
+        PalletStorageMetadata,
+        StorageEntryModifier,
+        StorageEntryType,
+    };
+    use scale_info::{
+        meta_type,
+        TypeInfo,
+    };
 
     fn load_metadata() -> Metadata {
-        let bytes = test_runtime::METADATA;
-        let meta: RuntimeMetadataPrefixed =
-            codec::Decode::decode(&mut &*bytes).expect("Cannot decode scale metadata");
+        #[allow(dead_code)]
+        #[allow(non_camel_case_types)]
+        #[derive(TypeInfo)]
+        enum Call {
+            fill_block { param: u128 },
+        }
+        let storage = PalletStorageMetadata {
+            prefix: "System",
+            entries: vec![StorageEntryMetadata {
+                name: "Account",
+                modifier: StorageEntryModifier::Optional,
+                ty: StorageEntryType::Plain(meta_type::<u32>()),
+                default: vec![0],
+                docs: vec![],
+            }],
+        };
+        let constant = PalletConstantMetadata {
+            name: "BlockWeights",
+            ty: meta_type::<u32>(),
+            value: vec![1, 2, 3],
+            docs: vec![],
+        };
+        let pallet = frame_metadata::PalletMetadata {
+            index: 0,
+            name: "System",
+            calls: Some(frame_metadata::PalletCallMetadata {
+                ty: meta_type::<Call>(),
+            }),
+            storage: Some(storage),
+            constants: vec![constant],
+            event: None,
+            error: None,
+        };
 
-        Metadata::try_from(meta)
+        let metadata = RuntimeMetadataV14::new(
+            vec![pallet],
+            ExtrinsicMetadata {
+                ty: meta_type::<()>(),
+                version: 0,
+                signed_extensions: vec![],
+            },
+            meta_type::<()>(),
+        );
+        let prefixed = RuntimeMetadataPrefixed::from(metadata);
+
+        Metadata::try_from(prefixed)
             .expect("Cannot translate runtime metadata to internal Metadata")
     }
 
