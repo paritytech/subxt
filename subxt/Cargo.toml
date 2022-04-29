@@ -14,6 +14,8 @@ keywords = ["parity", "substrate", "blockchain"]
 
 [features]
 # Activate this to expose functionality only used for integration testing.
+# The exposed functionality is subject to breaking changes at any point,
+# and should not be relied upon.
 integration-tests = []
 
 [dependencies]
