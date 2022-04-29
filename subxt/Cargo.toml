@@ -19,10 +19,8 @@ keywords = ["parity", "substrate", "blockchain"]
 integration-tests = []
 
 [dependencies]
-async-trait = "0.1.49"
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-chameleon = "0.1.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
