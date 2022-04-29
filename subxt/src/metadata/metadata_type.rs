@@ -552,10 +552,10 @@ mod tests {
             hash
         );
 
-        // Currently the caching does not take into account different pallets
-        // as the intended behavior is to use this method only once.
-        // Enforce this behavior into testing.
-        let hash_old = metadata.metadata_hash(&["Balances"]);
+        // The cache `metadata.inner.cached_metadata_hash` is already populated from
+        // the previous call. Therefore, changing the pallets argument must not
+        // change the methods behavior.
+        let hash_old = metadata.metadata_hash(&["no-pallet"]);
         assert_eq!(hash_old, hash);
     }
 
