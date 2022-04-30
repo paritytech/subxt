@@ -31,7 +31,7 @@ use subxt::{
     PolkadotExtrinsicParams,
 };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 #[tokio::main]

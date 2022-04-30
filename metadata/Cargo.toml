@@ -21,7 +21,6 @@ sp-core = { version = "6.0.0"  }
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 criterion = "0.3"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-test-runtime = { path = "../test-runtime" }
 
 [lib]
 # Without this, libtest cli opts interfere with criteron benches:

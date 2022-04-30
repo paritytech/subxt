@@ -19,8 +19,7 @@
 #![allow(clippy::redundant_clone)]
 
 #[subxt::subxt(
-    runtime_metadata_path = "examples/polkadot_metadata.scale",
-
+    runtime_metadata_path = "../artifacts/polkadot_metadata.scale",
     // We can add (certain) custom derives to the generated types by providing
     // a comma separated list to the below attribute. Most useful for adding `Clone`.
     // The derives that we can add ultimately is limited to the traits that the base
