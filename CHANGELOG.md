@@ -11,7 +11,7 @@ metadata. This implies a breaking change in the subxt API, as the user receives 
 incompatible API at the storage, call, and constant level.
 
 The `subxt-cli` can check the compatibility of multiple runtime nodes, either full metadata compatibility or
-compatibility at pallet level.
+compatibility at the pallet level.
 
 Users can define custom derives for specific generated types of the API via adding the `derive_for_type` configuration
 to the `subxt` attribute.
