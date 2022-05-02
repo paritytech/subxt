@@ -4,6 +4,42 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.21.0] - 2022-05-02
+
+This release adds static metadata validation, via comparing the statically generated API with the target node's runtime
+metadata. This implies a breaking change in the subxt API, as the user receives an error when interacting with an
+incompatible API at storage, call, constant level.
+
+The `subxt-cli` can check the compatibility of multiple runtime nodes, either full metadata compatibility or
+compatibility at pallet level.
+
+Users can define custom derives for specific generated types of the API via adding the `derive_for_type` configuration
+to the `subxt` attribute.
+
+The metadata documentation is propagated to the statically generated API.
+
+Previously developers wanting to build the subxt crate needed the `substrate` binary dependency in their local
+environment. This restriction is removed via moving the integration tests to a dedicated crate.
+
+The number of dependencies is reduced for individual subxt crates.
+
+### Fixed
+- test-runtime: Add exponential backoff ([#518](https://github.com/paritytech/subxt/pull/518))
+
+### Added
+
+- Add custom derives for specific generated types ([#520](https://github.com/paritytech/subxt/pull/520))
+- Static Metadata Validation ([#478](https://github.com/paritytech/subxt/pull/478))
+- Propagate documentation to runtime API ([#511](https://github.com/paritytech/subxt/pull/511))
+- Add `tidext` in real world usage ([#508](https://github.com/paritytech/subxt/pull/508))
+- Add system health rpc ([#510](https://github.com/paritytech/subxt/pull/510))
+
+### Changed
+- Put integration tests behind feature flag ([#515](https://github.com/paritytech/subxt/pull/515))
+- Use minimum amount of dependencies for crates ([#524](https://github.com/paritytech/subxt/pull/524))
+- Export `BaseExtrinsicParams` ([#516](https://github.com/paritytech/subxt/pull/516))
+- bump jsonrpsee to v0.10.1 ([#504](https://github.com/paritytech/subxt/pull/504))
+
 ## [0.20.0] - 2022-04-06
 
 The most significant change in this release is how we create and sign extrinsics, and how we manage the
