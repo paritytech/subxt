@@ -46,10 +46,8 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
-use std::sync::{
-    Arc,
-    RwLock,
-};
+use parking_lot::RwLock;
+use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -187,7 +185,7 @@ impl<T: Config> Client<T> {
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
+        StorageClient::new(&self.rpc, self.metadata(), self.iter_page_size)
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
@@ -201,12 +199,6 @@ impl<T: Config> Client<T> {
     /// Returns the client's Runtime Version.
     pub fn runtime_version(&self) -> Arc<RwLock<RuntimeVersion>> {
         Arc::clone(&self.runtime_version)
-    }
-
-    /// Set the given Runtime Version on the client.
-    pub fn set_runtime_version(&self, runtime: RuntimeVersion) {
-        let mut actual = self.runtime_version.write().unwrap();
-        *actual = runtime;
     }
 }
 
@@ -338,7 +330,7 @@ where
         let additional_and_extra_params = {
             // Obtain spec version and transaction version from the runtime version of the client.
             let locked_runtime = self.client.runtime_version();
-            let runtime = locked_runtime.read().unwrap();
+            let runtime = locked_runtime.read();
             X::new(
                 runtime.spec_version,
                 runtime.transaction_version,
