@@ -65,6 +65,7 @@ mod metadata;
 pub mod rpc;
 pub mod storage;
 mod transaction;
+pub mod updates;
 
 pub use crate::{
     client::{

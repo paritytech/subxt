@@ -35,6 +35,7 @@ use crate::{
     },
     storage::StorageClient,
     transaction::TransactionProgress,
+    updates::UpdateClient,
     Call,
     Config,
     Encoded,
@@ -186,6 +187,15 @@ impl<T: Config> Client<T> {
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
         StorageClient::new(&self.rpc, self.metadata(), self.iter_page_size)
+    }
+
+    /// Create a wrapper for performing runtime updates on this client.
+    pub fn updates(&self) -> UpdateClient<T> {
+        UpdateClient::new(
+            self.rpc.clone(),
+            self.metadata(),
+            self.runtime_version.clone(),
+        )
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
