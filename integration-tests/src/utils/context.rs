@@ -46,7 +46,6 @@ pub async fn test_node_process_with(
 
     let proc = TestNodeProcess::<DefaultConfig>::build(path.as_str())
         .with_authority(key)
-        .scan_for_open_ports()
         .spawn::<DefaultConfig>()
         .await;
     proc.unwrap()

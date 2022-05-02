@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Create signed or unsigned extrinsics.
+mod hash_cache;
+mod metadata_type;
 
-mod params;
-mod signer;
-
-pub use self::{
-    params::{
-        AssetTip, BaseExtrinsicParams, BaseExtrinsicParamsBuilder, Era, ExtrinsicParams,
-        PlainTip, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder,
-        SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder,
-    },
-    signer::{PairSigner, Signer},
+pub use metadata_type::{
+    ErrorMetadata,
+    EventMetadata,
+    InvalidMetadataError,
+    Metadata,
+    MetadataError,
+    PalletMetadata,
 };

@@ -16,6 +16,7 @@
 
 use crate::types::TypeGenerator;
 use frame_metadata::{
+    v14::RuntimeMetadataV14,
     PalletMetadata,
     PalletStorageMetadata,
     StorageEntryMetadata,
@@ -36,6 +37,7 @@ use scale_info::{
 };
 
 pub fn generate_storage(
+    metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     storage: &PalletStorageMetadata<PortableForm>,
@@ -44,7 +46,7 @@ pub fn generate_storage(
     let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
         .entries
         .iter()
-        .map(|entry| generate_storage_entry_fns(type_gen, pallet, entry))
+        .map(|entry| generate_storage_entry_fns(metadata, type_gen, pallet, entry))
         .unzip();
 
     quote! {
@@ -69,6 +71,7 @@ pub fn generate_storage(
 }
 
 fn generate_storage_entry_fns(
+    metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
@@ -205,8 +208,19 @@ fn generate_storage_entry_fns(
             }
         }
     };
+
     let pallet_name = &pallet.name;
     let storage_name = &storage_entry.name;
+    let storage_hash =
+        subxt_metadata::get_storage_hash(metadata, pallet_name, storage_name)
+            .unwrap_or_else(|_| {
+                abort_call_site!(
+                    "Metadata information for the storage entry {}_{} could not be found",
+                    pallet_name,
+                    storage_name
+                )
+            });
+
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
     let fn_name_iter = format_ident!("{}_iter", fn_name);
     let storage_entry_ty = match storage_entry.ty {
@@ -248,13 +262,20 @@ fn generate_storage_entry_fns(
         }
     };
 
+    let docs = &storage_entry.docs;
+    let docs_token = quote! { #( #[doc = #docs ] )* };
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
+            #docs_token
             pub async fn #fn_name_iter(
                 &self,
-                hash: ::core::option::Option<T::Hash>,
+                block_hash: ::core::option::Option<T::Hash>,
             ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
-                self.client.storage().iter(hash).await
+                if self.client.metadata().storage_hash::<#entry_struct_ident>()? == [#(#storage_hash,)*] {
+                    self.client.storage().iter(block_hash).await
+                } else {
+                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                }
             }
         )
     } else {
@@ -271,14 +292,20 @@ fn generate_storage_entry_fns(
         };
         quote!( #field_name: #reference #field_ty )
     });
+
     let client_fns = quote! {
+        #docs_token
         pub async fn #fn_name(
             &self,
             #( #key_args, )*
-            hash: ::core::option::Option<T::Hash>,
+            block_hash: ::core::option::Option<T::Hash>,
         ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-            let entry = #constructor;
-            self.client.storage().#fetch(&entry, hash).await
+            if self.client.metadata().storage_hash::<#entry_struct_ident>()? == [#(#storage_hash,)*] {
+                let entry = #constructor;
+                self.client.storage().#fetch(&entry, block_hash).await
+            } else {
+                Err(::subxt::MetadataError::IncompatibleMetadata.into())
+            }
         }
 
         #client_iter_fn

@@ -222,6 +222,20 @@ pub struct BlockStats {
     pub num_extrinsics: u64,
 }
 
+/// Health struct returned by the RPC
+#[derive(Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct Health {
+    /// Number of connected peers
+    pub peers: usize,
+    /// Is the node syncing
+    pub is_syncing: bool,
+    /// Should this node have any peers
+    ///
+    /// Might be false for local chains or when running without discovery.
+    pub should_have_peers: bool,
+}
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
@@ -327,6 +341,11 @@ impl<T: Config> Rpc<T> {
             .client
             .request("system_properties", rpc_params![])
             .await?)
+    }
+
+    /// Fetch system health
+    pub async fn system_health(&self) -> Result<Health, BasicError> {
+        Ok(self.client.request("system_health", rpc_params![]).await?)
     }
 
     /// Fetch system chain

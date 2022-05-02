@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-f6d6ab005d-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
 //!
 //! E.g.
 //! ```bash
@@ -30,7 +30,7 @@ use subxt::{
     PolkadotExtrinsicParams,
 };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
@@ -47,7 +47,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hash = api
         .tx()
         .balances()
-        .transfer(dest, 123_456_789_012_345)
+        .transfer(dest, 123_456_789_012_345)?
         .sign_and_submit_default(&signer)
         .await?;
 

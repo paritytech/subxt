@@ -4,7 +4,9 @@ members = [
     "cli",
     "codegen",
     "examples",
+    "integration-tests",
     "macro",
+    "metadata",
     "subxt",
     "test-runtime"
 ]
