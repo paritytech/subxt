@@ -41,7 +41,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     ```
 
     Ensure that the script picked the latest published release tag (e.g. if releasing `v0.17.0`, the script should
-    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Added" and "Changed" sections, and make any
+    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Fixed", "Added" and "Changed" sections, and make any
     other adjustments that you feel are necessary for clarity.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
