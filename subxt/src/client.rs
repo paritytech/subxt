@@ -319,7 +319,9 @@ where
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = {
             let mut bytes = Vec::new();
-            let pallet = self.client.metadata().pallet(C::PALLET)?;
+            let locked_metadata = self.client.metadata();
+            let metadata = locked_metadata.read();
+            let pallet = metadata.pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
             self.call.encode_to(&mut bytes);
