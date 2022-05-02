@@ -317,7 +317,7 @@ mod test {
                 )],
             ),
             events::<PalletEvents>(
-                metadata.clone(),
+                metadata,
                 vec![
                     event_record(Phase::ApplyExtrinsic(2), PalletEvents::B(EventB(true))),
                     event_record(Phase::ApplyExtrinsic(3), PalletEvents::A(EventA(3))),
