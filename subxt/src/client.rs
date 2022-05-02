@@ -123,7 +123,7 @@ impl ClientBuilder {
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata,
+            metadata: Arc::new(RwLock::new(metadata)),
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
@@ -137,7 +137,7 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Metadata,
+    metadata: Arc<RwLock<Metadata>>,
     properties: SystemProperties,
     runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,
@@ -164,8 +164,8 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the chain metadata.
-    pub fn metadata(&self) -> &Metadata {
-        &self.metadata
+    pub fn metadata(&self) -> Arc<RwLock<Metadata>> {
+        Arc::clone(&self.metadata)
     }
 
     /// Returns the properties defined in the chain spec as a JSON object.
