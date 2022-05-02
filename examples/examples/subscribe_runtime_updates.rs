@@ -34,13 +34,32 @@ use subxt::{
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
-type RuntimeApi =
-    polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>;
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    env_logger::init();
 
-/// This function is representative of the main customer use case.
-async fn user_use_case(api: &RuntimeApi) {
+    let api = ClientBuilder::new()
+        .build()
+        .await?
+        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+
+    // Start a new tokio task to perform the runtime updates while
+    // utilizing the API for other use cases.
+    let update_client = api.client.updates();
+    tokio::spawn(async move {
+        let result = update_client.perform_runtime_updates().await;
+        println!("Runtime update failed with result={:?}", result);
+    });
+
+    // Make multiple transfers to simulate a long running `subxt::Client` use-case.
+    //
+    // Meanwhile, the tokio task will perform any necessary updates to ensure
+    // that submitted extrinsics are still valid.
+    //
+    // Ideally, the polkadot node should perform a few runtime updates
+    // For more details on how to perform updates on a node, please follow:
+    // https://docs.substrate.io/tutorials/v3/forkless-upgrades/
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
-
     // Make small balance transfers from Alice to Bob:
     for _ in 0..10 {
         let hash = api
@@ -57,74 +76,6 @@ async fn user_use_case(api: &RuntimeApi) {
 
         println!("Balance transfer extrinsic submitted: {}", hash);
         tokio::time::sleep(Duration::from_secs(30)).await;
-    }
-}
-
-/// This function handles runtime updates via subscribing to the
-/// node's RuntimeVersion.
-async fn runtime_update(api: &RuntimeApi) {
-    // Obtain an update subscription to further detect changes in the runtime version of the node.
-    let mut update_subscription =
-        api.client.rpc().subscribe_runtime_version().await.unwrap();
-    println!("    [RuntimeUpdate] Application subscribed to RuntimeVersion updates");
-
-    while let Some(runtime_version) = update_subscription.next().await {
-        // The Runtime Version obtained via subscription.
-        let runtime_version = runtime_version.unwrap();
-        // The Runtime Version of the client, as set during building the client.
-        let current_runtime = api.client.runtime_version();
-
-        // Ensure that the provided Runtime Version can be applied to the current
-        // version of the client. There are cases when the subscription to the
-        // Runtime Version of the node would produce spurious update events.
-        // In those cases, set the Runtime Version on the client if and only if
-        // the provided runtime version is bigger than what the client currently
-        // has stored.
-        if current_runtime.spec_version >= runtime_version.spec_version {
-            println!(
-                "    [RuntimeUpdate] Update not performed for received spec_version={}, client has spec_version={}",
-                runtime_version.spec_version, current_runtime.spec_version
-            );
-            continue
-        }
-
-        // Perform the actual client update to ensure that further extrinsics
-        // include the appropriate `spec_version` and `transaction_version`.
-        println!(
-            "    [RuntimeUpdate] Updating RuntimeVersion from {} to {}",
-            current_runtime.spec_version, runtime_version.spec_version
-        );
-        api.client.set_runtime_version(runtime_version);
-        println!("    [RuntimeUpdate] Update completed");
-    }
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
-
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<RuntimeApi>();
-
-    // Start two concurrent branches:
-    //   - One branch performs runtime update
-    //   - Another branch performs the main customer use case.
-    //
-    // Ideally this examples should be targeting a node that would perform
-    // runtime updates to demonstrate the functionality.
-    //
-    // For more details on how to perform updates on a node, please follow:
-    // https://docs.substrate.io/tutorials/v3/forkless-upgrades/
-    tokio::select! {
-        _ = runtime_update(&api) => {
-            println!("Runtime update branch finished");
-        }
-        _ = user_use_case(&api) =>
-        {
-            println!("User main use case finished");
-        }
     }
 
     Ok(())
