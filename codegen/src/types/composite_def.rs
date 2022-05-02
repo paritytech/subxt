@@ -15,8 +15,8 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
+    Derives,
     Field,
-    GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
@@ -29,6 +29,8 @@ use quote::{
     quote,
 };
 use scale_info::{
+    form::PortableForm,
+    Type,
     TypeDef,
     TypeDefPrimitive,
 };
@@ -45,18 +47,22 @@ pub struct CompositeDef {
     pub kind: CompositeDefKind,
     /// The fields of the type, which are either all named or all unnamed.
     pub fields: CompositeDefFields,
+    /// Documentation of the composite type as presented in metadata.
+    pub docs: Option<TokenStream>,
 }
 
 impl CompositeDef {
     /// Construct a definition which will generate code for a standalone `struct`.
     pub fn struct_def(
+        ty: &Type<PortableForm>,
         ident: &str,
         type_params: TypeDefParameters,
         fields_def: CompositeDefFields,
         field_visibility: Option<syn::Visibility>,
         type_gen: &TypeGenerator,
+        docs: &[String],
     ) -> Self {
-        let mut derives = type_gen.derives().clone();
+        let mut derives = type_gen.type_derives(ty);
         let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
@@ -79,12 +85,13 @@ impl CompositeDef {
                             | TypeDefPrimitive::U128
                     )
                 ) {
-                    derives.push_codec_compact_as()
+                    derives.insert_codec_compact_as()
                 }
             }
         }
 
         let name = format_ident!("{}", ident);
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
 
         Self {
             name,
@@ -94,16 +101,23 @@ impl CompositeDef {
                 field_visibility,
             },
             fields: fields_def,
+            docs: docs_token,
         }
     }
 
     /// Construct a definition which will generate code for an `enum` variant.
-    pub fn enum_variant_def(ident: &str, fields: CompositeDefFields) -> Self {
+    pub fn enum_variant_def(
+        ident: &str,
+        fields: CompositeDefFields,
+        docs: &[String],
+    ) -> Self {
         let name = format_ident!("{}", ident);
+        let docs_token = Some(quote! { #( #[doc = #docs ] )* });
         Self {
             name,
             kind: CompositeDefKind::EnumVariant,
             fields,
+            docs: docs_token,
         }
     }
 }
@@ -111,6 +125,7 @@ impl CompositeDef {
 impl quote::ToTokens for CompositeDef {
     fn to_tokens(&self, tokens: &mut TokenStream) {
         let name = &self.name;
+        let docs = &self.docs;
 
         let decl = match &self.kind {
             CompositeDefKind::Struct {
@@ -130,6 +145,7 @@ impl quote::ToTokens for CompositeDef {
 
                 quote! {
                     #derives
+                    #docs
                     pub struct #name #type_params #fields #trailing_semicolon
                 }
             }
@@ -137,6 +153,7 @@ impl quote::ToTokens for CompositeDef {
                 let fields = self.fields.to_enum_variant_field_tokens();
 
                 quote! {
+                    #docs
                     #name #fields
                 }
             }
@@ -151,7 +168,7 @@ impl quote::ToTokens for CompositeDef {
 pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
     Struct {
-        derives: GeneratedTypeDerives,
+        derives: Derives,
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
     },

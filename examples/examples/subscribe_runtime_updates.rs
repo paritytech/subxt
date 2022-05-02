@@ -31,7 +31,7 @@ use subxt::{
     PolkadotExtrinsicParams,
 };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 type RuntimeApi =
@@ -50,6 +50,7 @@ async fn user_use_case(api: &RuntimeApi) {
                 AccountKeyring::Bob.to_account_id().into(),
                 123_456_789_012_345,
             )
+            .unwrap()
             .sign_and_submit_default(&signer)
             .await
             .unwrap();

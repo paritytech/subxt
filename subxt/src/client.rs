@@ -56,6 +56,7 @@ use std::sync::{
 pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
+    metadata: Option<Metadata>,
     page_size: Option<u32>,
 }
 
@@ -65,6 +66,7 @@ impl ClientBuilder {
         Self {
             url: None,
             client: None,
+            metadata: None,
             page_size: None,
         }
     }
@@ -87,6 +89,15 @@ impl ClientBuilder {
         self
     }
 
+    /// Set the metadata.
+    ///
+    /// *Note:* Metadata will no longer be downloaded from the runtime node.
+    #[cfg(feature = "integration-tests")]
+    pub fn set_metadata(mut self, metadata: Metadata) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+
     /// Creates a new Client.
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
@@ -96,19 +107,23 @@ impl ClientBuilder {
             crate::rpc::ws_client(url).await?
         };
         let rpc = Rpc::new(client);
-        let (metadata, genesis_hash, runtime_version, properties) = future::join4(
-            rpc.metadata(),
+        let (genesis_hash, runtime_version, properties) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
             rpc.system_properties(),
         )
         .await;
-        let metadata = metadata?;
+
+        let metadata = if let Some(metadata) = self.metadata {
+            metadata
+        } else {
+            rpc.metadata().await?
+        };
 
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: Arc::new(metadata),
+            metadata,
             properties: properties.unwrap_or_else(|_| Default::default()),
             runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
@@ -122,7 +137,7 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Arc<Metadata>,
+    metadata: Metadata,
     properties: SystemProperties,
     runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,

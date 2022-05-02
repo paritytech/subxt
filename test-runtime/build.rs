@@ -64,7 +64,7 @@ async fn run() {
 
     // Download metadata from binary; retry until successful, or a limit is hit.
     let metadata_bytes: sp_core::Bytes = {
-        const MAX_RETRIES: usize = 20;
+        const MAX_RETRIES: usize = 6;
         let mut retries = 0;
 
         loop {
@@ -85,7 +85,7 @@ async fn run() {
                     break res
                 }
                 _ => {
-                    thread::sleep(time::Duration::from_secs(1));
+                    thread::sleep(time::Duration::from_secs(1 << retries));
                     retries += 1;
                 }
             };
@@ -104,7 +104,7 @@ async fn run() {
         r#"
         #[subxt::subxt(
             runtime_metadata_path = "{}",
-            generated_type_derives = "Eq, PartialEq"
+            derive_for_all_types = "Eq, PartialEq"
         )]
         pub mod node_runtime {{
             #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]

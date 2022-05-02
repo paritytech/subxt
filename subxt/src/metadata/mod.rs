@@ -14,21 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Library to generate an API for a Substrate runtime from its metadata.
+mod hash_cache;
+mod metadata_type;
 
-mod api;
-mod ir;
-mod types;
-
-pub use self::{
-    api::{
-        generate_runtime_api,
-        RuntimeGenerator,
-    },
-    types::{
-        Derives,
-        DerivesRegistry,
-        Module,
-        TypeGenerator,
-    },
+pub use metadata_type::{
+    ErrorMetadata,
+    EventMetadata,
+    InvalidMetadataError,
+    Metadata,
+    MetadataError,
+    PalletMetadata,
 };

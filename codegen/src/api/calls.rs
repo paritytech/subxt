@@ -19,6 +19,7 @@ use crate::types::{
     TypeGenerator,
 };
 use frame_metadata::{
+    v14::RuntimeMetadataV14,
     PalletCallMetadata,
     PalletMetadata,
 };
@@ -35,20 +36,21 @@ use quote::{
 use scale_info::form::PortableForm;
 
 pub fn generate_calls(
+    metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    let struct_defs = super::generate_structs_from_variants(
+    let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
         |name| name.to_upper_camel_case().into(),
         "Call",
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
-        .iter()
-        .map(|struct_def| {
+        .iter_mut()
+        .map(|(variant_name, struct_def)| {
             let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
                 match struct_def.fields {
                     CompositeDefFields::Named(ref named_fields) => {
@@ -74,25 +76,36 @@ pub fn generate_calls(
                 };
 
             let pallet_name = &pallet.name;
-            let call_struct_name = &struct_def.name;
-            let function_name = struct_def.name.to_string().to_snake_case();
-            let fn_name = format_ident!("{}", function_name);
+            let call_name = &variant_name;
+            let struct_name = &struct_def.name;
+            let call_hash = subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
+                .unwrap_or_else(|_| abort_call_site!("Metadata information for the call {}_{} could not be found", pallet_name, call_name));
 
+            let fn_name = format_ident!("{}", variant_name.to_snake_case());
+            // Propagate the documentation just to `TransactionApi` methods, while
+            // draining the documentation of inner call structures.
+            let docs = struct_def.docs.take();
+            // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
 
-                impl ::subxt::Call for #call_struct_name {
+                impl ::subxt::Call for #struct_name {
                     const PALLET: &'static str = #pallet_name;
-                    const FUNCTION: &'static str = #function_name;
+                    const FUNCTION: &'static str = #call_name;
                 }
             };
             let client_fn = quote! {
+                #docs
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, #call_struct_name, DispatchError, root_mod::Event> {
-                    let call = #call_struct_name { #( #call_args, )* };
-                    ::subxt::SubmittableExtrinsic::new(self.client, call)
+                ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
+                    if self.client.metadata().call_hash::<#struct_name>()? == [#(#call_hash,)*] {
+                        let call = #struct_name { #( #call_args, )* };
+                        Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
                 }
             };
             (call_struct, client_fn)

@@ -12,11 +12,15 @@ homepage = "https://www.parity.io/"
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
+[features]
+# Activate this to expose functionality only used for integration testing.
+# The exposed functionality is subject to breaking changes at any point,
+# and should not be relied upon.
+integration-tests = []
+
 [dependencies]
-async-trait = "0.1.49"
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-chameleon = "0.1.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
@@ -25,8 +29,10 @@ log = "0.4.14"
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
+parking_lot = "0.12.0"
 
 subxt-macro = { version = "0.20.0", path = "../macro" }
+subxt-metadata = { version = "0.20.0", path = "../metadata" }
 
 sp-core = { version = "6.0.0", default-features = false  }
 sp-runtime = "6.0.0"
@@ -42,5 +48,4 @@ env_logger = "0.9.0"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
-test-runtime = { path = "../test-runtime" }
 sp-keyring = "6.0.0"
