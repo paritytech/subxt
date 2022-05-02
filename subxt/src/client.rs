@@ -198,10 +198,9 @@ impl<T: Config> Client<T> {
         self.into()
     }
 
-    /// Returns a snapshot of the client Runtime Version.
-    pub fn runtime_version(&self) -> RuntimeVersion {
-        let runtime = self.runtime_version.read().unwrap();
-        runtime.clone()
+    /// Returns the client's Runtime Version.
+    pub fn runtime_version(&self) -> Arc<RwLock<RuntimeVersion>> {
+        Arc::clone(&self.runtime_version)
     }
 
     /// Set the given Runtime Version on the client.
@@ -335,17 +334,19 @@ where
             Encoded(bytes)
         };
 
-        // Obtain spec version and transaction version from the runtime version of the client.
-        let runtime = self.client.runtime_version();
-
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = X::new(
-            runtime.spec_version,
-            runtime.transaction_version,
-            account_nonce,
-            self.client.genesis_hash,
-            other_params,
-        );
+        let additional_and_extra_params = {
+            // Obtain spec version and transaction version from the runtime version of the client.
+            let locked_runtime = self.client.runtime_version();
+            let runtime = locked_runtime.read().unwrap();
+            X::new(
+                runtime.spec_version,
+                runtime.transaction_version,
+                account_nonce,
+                self.client.genesis_hash,
+                other_params,
+            )
+        };
 
         // 4. Construct signature. This is compatible with the Encode impl
         //    for SignedPayload (which is this payload of bytes that we'd like)
