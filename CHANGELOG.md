@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 This release adds static metadata validation, via comparing the statically generated API with the target node's runtime
 metadata. This implies a breaking change in the subxt API, as the user receives an error when interacting with an
-incompatible API at storage, call, constant level.
+incompatible API at the storage, call, and constant level.
 
 The `subxt-cli` can check the compatibility of multiple runtime nodes, either full metadata compatibility or
 compatibility at pallet level.
