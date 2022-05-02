@@ -1,6 +1,6 @@
 [package]
 name = "subxt-integration"
-version = "0.20.0"
+version = "0.21.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -27,7 +27,7 @@ scale-info = { version = "2.0.0", features = ["bit-vec"] }
 sp-core = { version = "6.0.0", default-features = false  }
 sp-keyring = "6.0.0"
 sp-runtime = "6.0.0"
-subxt = { version = "0.20.0", path = "../subxt" }
+subxt = { version = "0.21.0", path = "../subxt" }
 test-runtime = { path = "../test-runtime" }
 tokio = { version = "1.8", features = ["macros", "time"] }
 wabt = "0.10.0"
