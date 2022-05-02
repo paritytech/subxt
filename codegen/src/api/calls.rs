@@ -100,7 +100,9 @@ pub fn generate_calls(
                     &self,
                     #( #call_fn_args, )*
                 ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
-                    if self.client.metadata().call_hash::<#struct_name>()? == [#(#call_hash,)*] {
+                    let locked_metadata = self.client.metadata();
+                    let metadata = locked_metadata.read();
+                    if metadata.call_hash::<#struct_name>()? == [#(#call_hash,)*] {
                         let call = #struct_name { #( #call_args, )* };
                         Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
                     } else {

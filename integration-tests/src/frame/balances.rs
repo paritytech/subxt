@@ -265,7 +265,9 @@ async fn transfer_implicit_subscription() {
 #[tokio::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
-    let balances_metadata = cxt.client().metadata().pallet("Balances").unwrap();
+    let locked_metadata = cxt.client().metadata();
+    let metadata = locked_metadata.read();
+    let balances_metadata = metadata.pallet("Balances").unwrap();
     let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
     let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);

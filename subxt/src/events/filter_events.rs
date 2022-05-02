@@ -70,7 +70,7 @@ impl<'a, Sub: 'a, T: Config, Filter: EventFilter> FilterEvents<'a, Sub, T, Filte
 
 impl<'a, Sub, T, Evs, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
 where
-    Sub: Stream<Item = Result<Events<'a, T, Evs>, BasicError>> + Unpin + 'a,
+    Sub: Stream<Item = Result<Events<T, Evs>, BasicError>> + Unpin + 'a,
     T: Config,
     Evs: Decode + 'static,
     Filter: EventFilter,
@@ -125,7 +125,7 @@ pub trait EventFilter: private::Sealed {
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
     fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<'a, T, Evs>,
+        events: Events<T, Evs>,
     ) -> Box<
         dyn Iterator<
                 Item = Result<
@@ -150,7 +150,7 @@ impl<Ev: Event> private::Sealed for (Ev,) {}
 impl<Ev: Event> EventFilter for (Ev,) {
     type ReturnType = Ev;
     fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<'a, T, Evs>,
+        events: Events<T, Evs>,
     ) -> Box<
         dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>>
             + Send
@@ -192,7 +192,7 @@ macro_rules! impl_event_filter {
         impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
             fn filter<'a, T: Config, Evs: Decode + 'static>(
-                events: Events<'a, T, Evs>
+                events: Events<T, Evs>
             ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
                 let block_hash = events.block_hash();
                 let mut iter = events.into_iter_raw();
@@ -259,7 +259,9 @@ mod test {
         Stream,
         StreamExt,
     };
+    use parking_lot::RwLock;
     use scale_info::TypeInfo;
+    use std::sync::Arc;
 
     // Some pretend events in a pallet
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
@@ -295,13 +297,12 @@ mod test {
 
     // A stream of fake events for us to try filtering on.
     fn events_stream(
-        metadata: &'_ Metadata,
-    ) -> impl Stream<
-        Item = Result<Events<'_, DefaultConfig, AllEvents<PalletEvents>>, BasicError>,
-    > {
+        metadata: Arc<RwLock<Metadata>>,
+    ) -> impl Stream<Item = Result<Events<DefaultConfig, AllEvents<PalletEvents>>, BasicError>>
+    {
         stream::iter(vec![
             events::<PalletEvents>(
-                metadata,
+                metadata.clone(),
                 vec![
                     event_record(Phase::Initialization, PalletEvents::A(EventA(1))),
                     event_record(Phase::ApplyExtrinsic(0), PalletEvents::B(EventB(true))),
@@ -309,14 +310,14 @@ mod test {
                 ],
             ),
             events::<PalletEvents>(
-                metadata,
+                metadata.clone(),
                 vec![event_record(
                     Phase::ApplyExtrinsic(1),
                     PalletEvents::B(EventB(false)),
                 )],
             ),
             events::<PalletEvents>(
-                metadata,
+                metadata.clone(),
                 vec![
                     event_record(Phase::ApplyExtrinsic(2), PalletEvents::B(EventB(true))),
                     event_record(Phase::ApplyExtrinsic(3), PalletEvents::A(EventA(3))),
@@ -328,11 +329,11 @@ mod test {
 
     #[tokio::test]
     async fn filter_one_event_from_stream() {
-        let metadata = metadata::<PalletEvents>();
+        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventA` only.
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventA,)>::new(events_stream(&metadata))
+            FilterEvents::<_, DefaultConfig, (EventA,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;
@@ -360,11 +361,11 @@ mod test {
 
     #[tokio::test]
     async fn filter_some_events_from_stream() {
-        let metadata = metadata::<PalletEvents>();
+        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventA` or `EventB`.
         let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
-            events_stream(&metadata),
+            events_stream(metadata),
         )
         .map(|e| e.unwrap())
         .collect()
@@ -408,11 +409,11 @@ mod test {
 
     #[tokio::test]
     async fn filter_no_events_from_stream() {
-        let metadata = metadata::<PalletEvents>();
+        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventC` (none exist).
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventC,)>::new(events_stream(&metadata))
+            FilterEvents::<_, DefaultConfig, (EventC,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;
