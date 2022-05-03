@@ -305,9 +305,12 @@ fn generate_storage_entry_fns(
             #( #key_args, )*
             block_hash: ::core::option::Option<T::Hash>,
         ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-            let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
-            if metadata.storage_hash::<#entry_struct_ident>()? == [#(#storage_hash,)*] {
+            let runtime_storage_hash = {
+                let locked_metadata = self.client.metadata();
+                let metadata = locked_metadata.read();
+                metadata.storage_hash::<#entry_struct_ident>()?
+            };
+            if runtime_storage_hash == [#(#storage_hash,)*] {
                 let entry = #constructor;
                 self.client.storage().#fetch(&entry, block_hash).await
             } else {
