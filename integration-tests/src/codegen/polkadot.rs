@@ -253,9 +253,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<FillBlock>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<FillBlock>()?
+                    };
+                    if runtime_call_hash
                         == [
                             228u8, 117u8, 251u8, 95u8, 47u8, 56u8, 32u8, 177u8, 191u8,
                             72u8, 75u8, 23u8, 193u8, 175u8, 227u8, 218u8, 127u8, 94u8,
@@ -288,9 +291,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Remark>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Remark>()?
+                    };
+                    if runtime_call_hash
                         == [
                             186u8, 79u8, 33u8, 199u8, 216u8, 115u8, 19u8, 146u8, 220u8,
                             174u8, 98u8, 61u8, 179u8, 230u8, 40u8, 70u8, 22u8, 251u8,
@@ -319,9 +325,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHeapPages>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHeapPages>()?
+                    };
+                    if runtime_call_hash
                         == [
                             77u8, 138u8, 122u8, 55u8, 179u8, 101u8, 60u8, 137u8, 173u8,
                             39u8, 28u8, 36u8, 237u8, 243u8, 232u8, 162u8, 76u8, 176u8,
@@ -361,9 +370,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetCode>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetCode>()?
+                    };
+                    if runtime_call_hash
                         == [
                             35u8, 75u8, 103u8, 203u8, 91u8, 141u8, 77u8, 95u8, 37u8,
                             157u8, 107u8, 240u8, 54u8, 242u8, 245u8, 205u8, 104u8, 165u8,
@@ -400,9 +412,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetCodeWithoutChecks>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetCodeWithoutChecks>()?
+                    };
+                    if runtime_call_hash
                         == [
                             150u8, 148u8, 119u8, 129u8, 77u8, 216u8, 135u8, 187u8, 127u8,
                             24u8, 238u8, 15u8, 227u8, 229u8, 191u8, 217u8, 106u8, 129u8,
@@ -434,9 +449,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetStorage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetStorage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             197u8, 12u8, 119u8, 205u8, 152u8, 103u8, 211u8, 170u8, 146u8,
                             253u8, 25u8, 56u8, 180u8, 146u8, 74u8, 75u8, 38u8, 108u8,
@@ -465,9 +483,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<KillStorage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<KillStorage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             154u8, 115u8, 185u8, 20u8, 126u8, 90u8, 222u8, 131u8, 199u8,
                             57u8, 184u8, 226u8, 43u8, 245u8, 161u8, 176u8, 194u8, 123u8,
@@ -500,9 +521,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<KillPrefix>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<KillPrefix>()?
+                    };
+                    if runtime_call_hash
                         == [
                             214u8, 101u8, 191u8, 241u8, 1u8, 241u8, 144u8, 116u8, 246u8,
                             199u8, 159u8, 249u8, 155u8, 164u8, 220u8, 221u8, 75u8, 33u8,
@@ -531,9 +555,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemarkWithEvent>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemarkWithEvent>()?
+                    };
+                    if runtime_call_hash
                         == [
                             171u8, 82u8, 75u8, 237u8, 69u8, 197u8, 223u8, 125u8, 123u8,
                             51u8, 241u8, 35u8, 202u8, 210u8, 227u8, 109u8, 1u8, 241u8,
@@ -797,9 +824,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Account>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Account>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 184u8, 2u8, 14u8, 38u8, 177u8, 223u8, 98u8, 223u8,
                             15u8, 130u8, 23u8, 212u8, 69u8, 61u8, 165u8, 171u8, 61u8,
@@ -824,9 +854,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Account<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Account>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Account>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 184u8, 2u8, 14u8, 38u8, 177u8, 223u8, 98u8, 223u8,
                             15u8, 130u8, 23u8, 212u8, 69u8, 61u8, 165u8, 171u8, 61u8,
@@ -847,9 +880,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ExtrinsicCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ExtrinsicCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             223u8, 60u8, 201u8, 120u8, 36u8, 44u8, 180u8, 210u8, 242u8,
                             53u8, 222u8, 154u8, 123u8, 176u8, 249u8, 8u8, 225u8, 28u8,
@@ -873,9 +909,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BlockWeight>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BlockWeight>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             2u8, 236u8, 190u8, 174u8, 244u8, 98u8, 194u8, 168u8, 89u8,
                             208u8, 7u8, 45u8, 175u8, 171u8, 177u8, 121u8, 215u8, 190u8,
@@ -900,9 +939,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AllExtrinsicsLen>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AllExtrinsicsLen>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             202u8, 145u8, 209u8, 225u8, 40u8, 220u8, 174u8, 74u8, 93u8,
                             164u8, 254u8, 248u8, 254u8, 192u8, 32u8, 117u8, 96u8, 149u8,
@@ -923,9 +965,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::subxt::sp_core::H256, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BlockHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BlockHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             24u8, 99u8, 146u8, 142u8, 205u8, 166u8, 4u8, 32u8, 218u8,
                             213u8, 24u8, 236u8, 45u8, 116u8, 145u8, 204u8, 27u8, 141u8,
@@ -950,9 +995,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, BlockHash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BlockHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BlockHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             24u8, 99u8, 146u8, 142u8, 205u8, 166u8, 4u8, 32u8, 218u8,
                             213u8, 24u8, 236u8, 45u8, 116u8, 145u8, 204u8, 27u8, 141u8,
@@ -974,9 +1022,12 @@ pub mod api {
                     ::std::vec::Vec<::core::primitive::u8>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ExtrinsicData>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ExtrinsicData>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             210u8, 224u8, 211u8, 186u8, 118u8, 210u8, 185u8, 194u8,
                             238u8, 211u8, 254u8, 73u8, 67u8, 184u8, 31u8, 229u8, 168u8,
@@ -1001,9 +1052,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ExtrinsicData<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ExtrinsicData>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ExtrinsicData>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             210u8, 224u8, 211u8, 186u8, 118u8, 210u8, 185u8, 194u8,
                             238u8, 211u8, 254u8, 73u8, 67u8, 184u8, 31u8, 229u8, 168u8,
@@ -1022,9 +1076,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Number>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Number>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             228u8, 96u8, 102u8, 190u8, 252u8, 130u8, 239u8, 172u8, 126u8,
                             235u8, 246u8, 139u8, 208u8, 15u8, 88u8, 245u8, 141u8, 232u8,
@@ -1047,9 +1104,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::subxt::sp_core::H256, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParentHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParentHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             194u8, 221u8, 147u8, 22u8, 68u8, 141u8, 32u8, 6u8, 202u8,
                             39u8, 164u8, 184u8, 69u8, 126u8, 190u8, 101u8, 215u8, 27u8,
@@ -1074,9 +1134,12 @@ pub mod api {
                     runtime_types::sp_runtime::generic::digest::Digest,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Digest>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Digest>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             10u8, 176u8, 13u8, 228u8, 226u8, 42u8, 210u8, 151u8, 107u8,
                             212u8, 136u8, 15u8, 38u8, 182u8, 225u8, 12u8, 250u8, 56u8,
@@ -1109,9 +1172,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Events>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Events>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             51u8, 117u8, 189u8, 125u8, 155u8, 137u8, 63u8, 1u8, 80u8,
                             211u8, 18u8, 228u8, 58u8, 237u8, 241u8, 176u8, 127u8, 189u8,
@@ -1134,9 +1200,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EventCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EventCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             236u8, 93u8, 90u8, 177u8, 250u8, 211u8, 138u8, 187u8, 26u8,
                             208u8, 203u8, 113u8, 221u8, 233u8, 227u8, 9u8, 249u8, 25u8,
@@ -1171,9 +1240,12 @@ pub mod api {
                     ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EventTopics>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EventTopics>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             231u8, 73u8, 172u8, 223u8, 210u8, 145u8, 151u8, 102u8, 73u8,
                             23u8, 140u8, 55u8, 97u8, 40u8, 219u8, 239u8, 229u8, 177u8,
@@ -1207,9 +1279,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, EventTopics<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EventTopics>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EventTopics>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             231u8, 73u8, 172u8, 223u8, 210u8, 145u8, 151u8, 102u8, 73u8,
                             23u8, 140u8, 55u8, 97u8, 40u8, 219u8, 239u8, 229u8, 177u8,
@@ -1232,9 +1307,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<LastRuntimeUpgrade>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<LastRuntimeUpgrade>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             219u8, 153u8, 158u8, 38u8, 45u8, 65u8, 151u8, 137u8, 53u8,
                             76u8, 11u8, 181u8, 218u8, 248u8, 125u8, 190u8, 100u8, 240u8,
@@ -1254,9 +1332,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradedToU32RefCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradedToU32RefCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             171u8, 88u8, 244u8, 92u8, 122u8, 67u8, 27u8, 18u8, 59u8,
                             175u8, 175u8, 178u8, 20u8, 150u8, 213u8, 59u8, 222u8, 141u8,
@@ -1280,9 +1361,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradedToTripleRefCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradedToTripleRefCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             90u8, 33u8, 56u8, 86u8, 90u8, 101u8, 89u8, 133u8, 203u8,
                             56u8, 201u8, 210u8, 244u8, 232u8, 150u8, 18u8, 51u8, 105u8,
@@ -1307,9 +1391,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::frame_system::Phase>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ExecutionPhase>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ExecutionPhase>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 13u8, 230u8, 220u8, 239u8, 161u8, 172u8, 122u8, 188u8,
                             95u8, 141u8, 118u8, 91u8, 158u8, 111u8, 145u8, 243u8, 173u8,
@@ -1638,9 +1725,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Schedule>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Schedule>()?
+                    };
+                    if runtime_call_hash
                         == [
                             171u8, 203u8, 174u8, 141u8, 138u8, 30u8, 100u8, 95u8, 14u8,
                             2u8, 34u8, 14u8, 199u8, 60u8, 129u8, 160u8, 8u8, 166u8, 4u8,
@@ -1675,9 +1765,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Cancel>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Cancel>()?
+                    };
+                    if runtime_call_hash
                         == [
                             118u8, 0u8, 188u8, 218u8, 148u8, 86u8, 139u8, 15u8, 3u8,
                             161u8, 6u8, 150u8, 46u8, 32u8, 85u8, 179u8, 106u8, 113u8,
@@ -1716,9 +1809,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ScheduleNamed>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ScheduleNamed>()?
+                    };
+                    if runtime_call_hash
                         == [
                             47u8, 156u8, 239u8, 248u8, 198u8, 13u8, 10u8, 156u8, 176u8,
                             254u8, 247u8, 152u8, 108u8, 255u8, 224u8, 185u8, 109u8, 56u8,
@@ -1753,9 +1849,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelNamed>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelNamed>()?
+                    };
+                    if runtime_call_hash
                         == [
                             118u8, 221u8, 232u8, 126u8, 67u8, 134u8, 33u8, 7u8, 224u8,
                             110u8, 181u8, 18u8, 57u8, 39u8, 15u8, 64u8, 90u8, 132u8, 2u8,
@@ -1797,9 +1896,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ScheduleAfter>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ScheduleAfter>()?
+                    };
+                    if runtime_call_hash
                         == [
                             150u8, 70u8, 131u8, 52u8, 50u8, 73u8, 176u8, 193u8, 17u8,
                             31u8, 218u8, 113u8, 220u8, 23u8, 160u8, 196u8, 100u8, 27u8,
@@ -1847,9 +1949,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ScheduleNamedAfter>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ScheduleNamedAfter>()?
+                    };
+                    if runtime_call_hash
                         == [
                             127u8, 121u8, 141u8, 162u8, 95u8, 211u8, 214u8, 15u8, 22u8,
                             28u8, 23u8, 71u8, 92u8, 58u8, 249u8, 163u8, 216u8, 85u8,
@@ -1964,9 +2069,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub async fn agenda (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Agenda>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Agenda>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             235u8, 95u8, 118u8, 134u8, 98u8, 235u8, 250u8, 110u8, 250u8,
                             7u8, 75u8, 190u8, 53u8, 194u8, 153u8, 51u8, 125u8, 69u8,
@@ -1991,9 +2099,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Agenda<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Agenda>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Agenda>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             235u8, 95u8, 118u8, 134u8, 98u8, 235u8, 250u8, 110u8, 250u8,
                             7u8, 75u8, 190u8, 53u8, 194u8, 153u8, 51u8, 125u8, 69u8,
@@ -2018,9 +2129,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Lookup>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Lookup>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             56u8, 105u8, 156u8, 110u8, 251u8, 141u8, 219u8, 56u8, 131u8,
                             57u8, 180u8, 33u8, 48u8, 30u8, 193u8, 194u8, 169u8, 182u8,
@@ -2042,9 +2156,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Lookup<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Lookup>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Lookup>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             56u8, 105u8, 156u8, 110u8, 251u8, 141u8, 219u8, 56u8, 131u8,
                             57u8, 180u8, 33u8, 48u8, 30u8, 193u8, 194u8, 169u8, 182u8,
@@ -2197,9 +2314,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NotePreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NotePreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             116u8, 66u8, 88u8, 251u8, 187u8, 86u8, 82u8, 136u8, 215u8,
                             82u8, 240u8, 255u8, 70u8, 190u8, 116u8, 187u8, 232u8, 168u8,
@@ -2228,9 +2348,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<UnnotePreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<UnnotePreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             162u8, 195u8, 220u8, 134u8, 147u8, 150u8, 145u8, 130u8,
                             231u8, 104u8, 83u8, 70u8, 42u8, 90u8, 248u8, 61u8, 223u8,
@@ -2262,9 +2385,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RequestPreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RequestPreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             186u8, 108u8, 235u8, 145u8, 104u8, 29u8, 22u8, 33u8, 21u8,
                             121u8, 32u8, 75u8, 141u8, 125u8, 205u8, 186u8, 210u8, 184u8,
@@ -2295,9 +2421,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<UnrequestPreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<UnrequestPreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             160u8, 6u8, 6u8, 198u8, 77u8, 37u8, 28u8, 86u8, 240u8, 160u8,
                             128u8, 123u8, 144u8, 150u8, 150u8, 60u8, 107u8, 148u8, 189u8,
@@ -2397,9 +2526,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StatusFor>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StatusFor>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             239u8, 53u8, 52u8, 248u8, 196u8, 74u8, 99u8, 113u8, 135u8,
                             186u8, 100u8, 46u8, 246u8, 245u8, 160u8, 102u8, 81u8, 96u8,
@@ -2421,9 +2553,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, StatusFor<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StatusFor>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StatusFor>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             239u8, 53u8, 52u8, 248u8, 196u8, 74u8, 99u8, 113u8, 135u8,
                             186u8, 100u8, 46u8, 246u8, 245u8, 160u8, 102u8, 81u8, 96u8,
@@ -2449,9 +2584,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PreimageFor>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PreimageFor>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             153u8, 48u8, 185u8, 144u8, 57u8, 68u8, 133u8, 92u8, 225u8,
                             172u8, 36u8, 62u8, 152u8, 162u8, 15u8, 139u8, 140u8, 82u8,
@@ -2473,9 +2611,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PreimageFor<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PreimageFor>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PreimageFor>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             153u8, 48u8, 185u8, 144u8, 57u8, 68u8, 133u8, 92u8, 225u8,
                             172u8, 36u8, 62u8, 152u8, 162u8, 15u8, 139u8, 140u8, 82u8,
@@ -2579,9 +2720,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReportEquivocation>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReportEquivocation>()?
+                    };
+                    if runtime_call_hash
                         == [
                             123u8, 212u8, 216u8, 77u8, 79u8, 132u8, 201u8, 155u8, 166u8,
                             230u8, 50u8, 89u8, 98u8, 68u8, 56u8, 213u8, 206u8, 245u8,
@@ -2623,9 +2767,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReportEquivocationUnsigned>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReportEquivocationUnsigned>()?
+                    };
+                    if runtime_call_hash
                         == [
                             32u8, 163u8, 168u8, 251u8, 251u8, 9u8, 1u8, 195u8, 173u8,
                             32u8, 235u8, 125u8, 141u8, 201u8, 130u8, 207u8, 239u8, 76u8,
@@ -2662,9 +2809,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<PlanConfigChange>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<PlanConfigChange>()?
+                    };
+                    if runtime_call_hash
                         == [
                             215u8, 121u8, 90u8, 87u8, 178u8, 247u8, 114u8, 53u8, 174u8,
                             28u8, 20u8, 33u8, 139u8, 216u8, 13u8, 187u8, 74u8, 198u8,
@@ -2846,9 +2996,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EpochIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EpochIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             51u8, 27u8, 91u8, 156u8, 118u8, 99u8, 46u8, 219u8, 190u8,
                             147u8, 205u8, 23u8, 106u8, 169u8, 121u8, 218u8, 208u8, 235u8,
@@ -2866,9 +3019,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Current epoch authorities."]                pub async fn authorities (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Authorities>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Authorities>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             39u8, 102u8, 251u8, 125u8, 230u8, 247u8, 174u8, 255u8, 2u8,
                             81u8, 86u8, 69u8, 182u8, 92u8, 191u8, 163u8, 66u8, 181u8,
@@ -2894,9 +3050,12 @@ pub mod api {
                     runtime_types::sp_consensus_slots::Slot,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<GenesisSlot>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<GenesisSlot>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 244u8, 7u8, 142u8, 224u8, 33u8, 144u8, 186u8, 155u8,
                             144u8, 68u8, 81u8, 241u8, 57u8, 40u8, 207u8, 35u8, 39u8,
@@ -2921,9 +3080,12 @@ pub mod api {
                     runtime_types::sp_consensus_slots::Slot,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentSlot>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentSlot>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             233u8, 102u8, 77u8, 99u8, 103u8, 50u8, 151u8, 229u8, 46u8,
                             226u8, 181u8, 37u8, 117u8, 204u8, 234u8, 120u8, 116u8, 166u8,
@@ -2957,9 +3119,12 @@ pub mod api {
                     [::core::primitive::u8; 32usize],
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Randomness>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Randomness>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             191u8, 197u8, 25u8, 164u8, 104u8, 248u8, 247u8, 193u8, 244u8,
                             60u8, 181u8, 195u8, 248u8, 90u8, 41u8, 199u8, 82u8, 123u8,
@@ -2986,9 +3151,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingEpochConfigChange>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingEpochConfigChange>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             98u8, 52u8, 22u8, 32u8, 76u8, 196u8, 89u8, 78u8, 119u8,
                             181u8, 17u8, 49u8, 220u8, 159u8, 195u8, 74u8, 33u8, 59u8,
@@ -3010,9 +3178,12 @@ pub mod api {
                     [::core::primitive::u8; 32usize],
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextRandomness>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextRandomness>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             185u8, 98u8, 45u8, 109u8, 253u8, 38u8, 238u8, 221u8, 240u8,
                             29u8, 38u8, 107u8, 118u8, 117u8, 131u8, 115u8, 21u8, 255u8,
@@ -3030,9 +3201,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Next epoch authorities."]                pub async fn next_authorities (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextAuthorities>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextAuthorities>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             211u8, 175u8, 218u8, 0u8, 212u8, 114u8, 210u8, 137u8, 146u8,
                             135u8, 78u8, 133u8, 85u8, 253u8, 140u8, 242u8, 101u8, 155u8,
@@ -3063,9 +3237,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SegmentIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SegmentIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             128u8, 45u8, 87u8, 58u8, 174u8, 152u8, 241u8, 156u8, 56u8,
                             192u8, 19u8, 45u8, 75u8, 160u8, 35u8, 253u8, 145u8, 11u8,
@@ -3093,9 +3270,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UnderConstruction>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UnderConstruction>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             12u8, 167u8, 30u8, 96u8, 161u8, 63u8, 210u8, 63u8, 91u8,
                             199u8, 188u8, 78u8, 254u8, 255u8, 253u8, 202u8, 203u8, 26u8,
@@ -3120,9 +3300,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, UnderConstruction<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UnderConstruction>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UnderConstruction>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             12u8, 167u8, 30u8, 96u8, 161u8, 63u8, 210u8, 63u8, 91u8,
                             199u8, 188u8, 78u8, 254u8, 255u8, 253u8, 202u8, 203u8, 26u8,
@@ -3146,9 +3329,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Initialized>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Initialized>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             48u8, 206u8, 111u8, 118u8, 149u8, 175u8, 148u8, 53u8, 233u8,
                             82u8, 220u8, 57u8, 22u8, 164u8, 116u8, 228u8, 134u8, 237u8,
@@ -3173,9 +3359,12 @@ pub mod api {
                     ::core::option::Option<[::core::primitive::u8; 32usize]>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AuthorVrfRandomness>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AuthorVrfRandomness>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             66u8, 235u8, 74u8, 252u8, 222u8, 135u8, 19u8, 28u8, 74u8,
                             191u8, 170u8, 197u8, 207u8, 127u8, 77u8, 121u8, 138u8, 138u8,
@@ -3204,9 +3393,12 @@ pub mod api {
                     (::core::primitive::u32, ::core::primitive::u32),
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EpochStart>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EpochStart>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             196u8, 39u8, 241u8, 20u8, 150u8, 180u8, 136u8, 4u8, 195u8,
                             205u8, 218u8, 10u8, 130u8, 131u8, 168u8, 243u8, 207u8, 249u8,
@@ -3233,9 +3425,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Lateness>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Lateness>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             229u8, 230u8, 224u8, 89u8, 49u8, 213u8, 198u8, 236u8, 144u8,
                             56u8, 193u8, 234u8, 62u8, 242u8, 191u8, 199u8, 105u8, 131u8,
@@ -3263,9 +3458,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EpochConfig>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EpochConfig>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             169u8, 189u8, 214u8, 159u8, 181u8, 232u8, 243u8, 4u8, 113u8,
                             24u8, 221u8, 229u8, 27u8, 35u8, 3u8, 121u8, 136u8, 88u8,
@@ -3290,9 +3488,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextEpochConfig>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextEpochConfig>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             239u8, 125u8, 203u8, 223u8, 161u8, 107u8, 232u8, 54u8, 158u8,
                             100u8, 244u8, 140u8, 119u8, 58u8, 253u8, 245u8, 73u8, 236u8,
@@ -3463,9 +3664,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Set>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Set>()?
+                    };
+                    if runtime_call_hash
                         == [
                             191u8, 73u8, 102u8, 150u8, 65u8, 157u8, 172u8, 194u8, 7u8,
                             72u8, 1u8, 35u8, 54u8, 99u8, 245u8, 139u8, 40u8, 136u8,
@@ -3514,9 +3718,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Now>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Now>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             148u8, 53u8, 50u8, 54u8, 13u8, 161u8, 57u8, 150u8, 16u8,
                             83u8, 144u8, 221u8, 59u8, 75u8, 158u8, 130u8, 39u8, 123u8,
@@ -3539,9 +3746,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DidUpdate>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DidUpdate>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             70u8, 13u8, 92u8, 186u8, 80u8, 151u8, 167u8, 90u8, 158u8,
                             232u8, 175u8, 13u8, 103u8, 135u8, 2u8, 78u8, 16u8, 6u8, 39u8,
@@ -3715,9 +3925,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Claim>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Claim>()?
+                    };
+                    if runtime_call_hash
                         == [
                             27u8, 4u8, 108u8, 55u8, 23u8, 109u8, 175u8, 25u8, 201u8,
                             230u8, 228u8, 51u8, 164u8, 15u8, 79u8, 10u8, 219u8, 182u8,
@@ -3766,9 +3979,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Transfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Transfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             124u8, 83u8, 33u8, 230u8, 23u8, 70u8, 83u8, 59u8, 76u8,
                             100u8, 219u8, 100u8, 165u8, 163u8, 102u8, 193u8, 11u8, 22u8,
@@ -3814,9 +4030,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Free>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Free>()?
+                    };
+                    if runtime_call_hash
                         == [
                             153u8, 143u8, 162u8, 33u8, 229u8, 3u8, 159u8, 153u8, 111u8,
                             100u8, 160u8, 250u8, 227u8, 24u8, 157u8, 226u8, 173u8, 39u8,
@@ -3867,9 +4086,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceTransfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceTransfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             181u8, 143u8, 90u8, 135u8, 132u8, 11u8, 145u8, 85u8, 4u8,
                             211u8, 56u8, 110u8, 213u8, 153u8, 224u8, 106u8, 198u8, 250u8,
@@ -3915,9 +4137,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Freeze>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Freeze>()?
+                    };
+                    if runtime_call_hash
                         == [
                             204u8, 127u8, 214u8, 137u8, 138u8, 28u8, 171u8, 169u8, 184u8,
                             164u8, 235u8, 114u8, 132u8, 176u8, 14u8, 207u8, 72u8, 39u8,
@@ -4009,9 +4234,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Accounts>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Accounts>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             105u8, 208u8, 81u8, 30u8, 157u8, 108u8, 22u8, 122u8, 152u8,
                             220u8, 40u8, 97u8, 255u8, 166u8, 222u8, 11u8, 81u8, 245u8,
@@ -4033,9 +4261,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Accounts<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Accounts>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Accounts>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             105u8, 208u8, 81u8, 30u8, 157u8, 108u8, 22u8, 122u8, 152u8,
                             220u8, 40u8, 97u8, 255u8, 166u8, 222u8, 11u8, 81u8, 245u8,
@@ -4237,9 +4468,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Transfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Transfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             250u8, 8u8, 164u8, 186u8, 80u8, 220u8, 134u8, 247u8, 142u8,
                             121u8, 34u8, 22u8, 169u8, 39u8, 6u8, 93u8, 72u8, 47u8, 44u8,
@@ -4280,9 +4514,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetBalance>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetBalance>()?
+                    };
+                    if runtime_call_hash
                         == [
                             232u8, 6u8, 27u8, 131u8, 163u8, 72u8, 148u8, 197u8, 14u8,
                             239u8, 94u8, 1u8, 32u8, 94u8, 17u8, 14u8, 123u8, 82u8, 39u8,
@@ -4328,9 +4565,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceTransfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceTransfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             120u8, 66u8, 111u8, 84u8, 176u8, 241u8, 214u8, 118u8, 219u8,
                             75u8, 127u8, 222u8, 45u8, 33u8, 204u8, 147u8, 126u8, 214u8,
@@ -4372,9 +4612,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<TransferKeepAlive>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<TransferKeepAlive>()?
+                    };
+                    if runtime_call_hash
                         == [
                             111u8, 233u8, 125u8, 71u8, 223u8, 141u8, 112u8, 94u8, 157u8,
                             11u8, 88u8, 7u8, 239u8, 145u8, 247u8, 183u8, 245u8, 87u8,
@@ -4423,9 +4666,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<TransferAll>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<TransferAll>()?
+                    };
+                    if runtime_call_hash
                         == [
                             240u8, 165u8, 185u8, 144u8, 24u8, 149u8, 15u8, 46u8, 60u8,
                             147u8, 19u8, 187u8, 96u8, 24u8, 150u8, 53u8, 151u8, 232u8,
@@ -4460,9 +4706,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceUnreserve>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceUnreserve>()?
+                    };
+                    if runtime_call_hash
                         == [
                             106u8, 42u8, 48u8, 136u8, 41u8, 155u8, 214u8, 112u8, 99u8,
                             122u8, 202u8, 250u8, 95u8, 60u8, 182u8, 13u8, 25u8, 149u8,
@@ -4665,9 +4914,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<TotalIssuance>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<TotalIssuance>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             1u8, 206u8, 252u8, 237u8, 6u8, 30u8, 20u8, 232u8, 164u8,
                             115u8, 51u8, 156u8, 156u8, 206u8, 241u8, 187u8, 44u8, 84u8,
@@ -4716,9 +4968,12 @@ pub mod api {
                     runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Account>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Account>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             129u8, 169u8, 171u8, 206u8, 229u8, 178u8, 69u8, 118u8, 199u8,
                             64u8, 254u8, 67u8, 16u8, 154u8, 160u8, 197u8, 177u8, 161u8,
@@ -4766,9 +5021,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Account<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Account>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Account>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             129u8, 169u8, 171u8, 206u8, 229u8, 178u8, 69u8, 118u8, 199u8,
                             64u8, 254u8, 67u8, 16u8, 154u8, 160u8, 197u8, 177u8, 161u8,
@@ -4783,9 +5041,12 @@ pub mod api {
                 }
                 #[doc = " Any liquidity locks on some account balances."]
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]                pub async fn locks (& self , _0 : & :: subxt :: sp_core :: crypto :: AccountId32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_balances :: BalanceLock < :: core :: primitive :: u128 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Locks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Locks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             31u8, 76u8, 213u8, 60u8, 86u8, 11u8, 155u8, 151u8, 33u8,
                             212u8, 74u8, 89u8, 174u8, 74u8, 195u8, 107u8, 29u8, 163u8,
@@ -4811,9 +5072,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Locks<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Locks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Locks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             31u8, 76u8, 213u8, 60u8, 86u8, 11u8, 155u8, 151u8, 33u8,
                             212u8, 74u8, 89u8, 174u8, 74u8, 195u8, 107u8, 29u8, 163u8,
@@ -4840,9 +5104,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reserves>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reserves>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 6u8, 69u8, 151u8, 81u8, 40u8, 146u8, 113u8, 56u8,
                             239u8, 104u8, 31u8, 168u8, 242u8, 141u8, 121u8, 213u8, 213u8,
@@ -4867,9 +5134,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Reserves<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reserves>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reserves>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 6u8, 69u8, 151u8, 81u8, 40u8, 146u8, 113u8, 56u8,
                             239u8, 104u8, 31u8, 168u8, 242u8, 141u8, 121u8, 213u8, 213u8,
@@ -4892,9 +5162,12 @@ pub mod api {
                     runtime_types::pallet_balances::Releases,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StorageVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StorageVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             135u8, 96u8, 28u8, 234u8, 124u8, 212u8, 56u8, 140u8, 40u8,
                             101u8, 235u8, 128u8, 136u8, 221u8, 182u8, 81u8, 17u8, 9u8,
@@ -5037,9 +5310,12 @@ pub mod api {
                     runtime_types::sp_arithmetic::fixed_point::FixedU128,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextFeeMultiplier>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextFeeMultiplier>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             232u8, 48u8, 68u8, 202u8, 209u8, 29u8, 249u8, 71u8, 0u8,
                             84u8, 229u8, 250u8, 176u8, 203u8, 27u8, 26u8, 34u8, 55u8,
@@ -5063,9 +5339,12 @@ pub mod api {
                     runtime_types::pallet_transaction_payment::Releases,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StorageVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StorageVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             219u8, 243u8, 82u8, 176u8, 65u8, 5u8, 132u8, 114u8, 8u8,
                             82u8, 176u8, 200u8, 97u8, 150u8, 177u8, 164u8, 166u8, 11u8,
@@ -5255,9 +5534,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetUncles>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetUncles>()?
+                    };
+                    if runtime_call_hash
                         == [
                             5u8, 56u8, 71u8, 152u8, 103u8, 232u8, 101u8, 171u8, 200u8,
                             2u8, 177u8, 102u8, 0u8, 93u8, 210u8, 90u8, 56u8, 151u8, 5u8,
@@ -5329,9 +5611,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Uncles>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Uncles>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             71u8, 135u8, 85u8, 172u8, 221u8, 165u8, 212u8, 2u8, 208u8,
                             50u8, 9u8, 92u8, 251u8, 25u8, 194u8, 123u8, 210u8, 4u8,
@@ -5356,9 +5641,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Author>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Author>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             191u8, 57u8, 3u8, 242u8, 220u8, 123u8, 103u8, 215u8, 149u8,
                             120u8, 20u8, 139u8, 146u8, 234u8, 180u8, 105u8, 129u8, 128u8,
@@ -5378,9 +5666,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DidSetUncles>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DidSetUncles>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             64u8, 3u8, 208u8, 187u8, 50u8, 45u8, 37u8, 88u8, 163u8,
                             226u8, 37u8, 126u8, 232u8, 107u8, 156u8, 187u8, 29u8, 15u8,
@@ -5764,9 +6055,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Bond>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Bond>()?
+                    };
+                    if runtime_call_hash
                         == [
                             41u8, 8u8, 237u8, 132u8, 236u8, 61u8, 222u8, 146u8, 255u8,
                             136u8, 174u8, 104u8, 120u8, 64u8, 198u8, 147u8, 80u8, 237u8,
@@ -5813,9 +6107,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<BondExtra>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<BondExtra>()?
+                    };
+                    if runtime_call_hash
                         == [
                             170u8, 38u8, 37u8, 71u8, 243u8, 41u8, 24u8, 59u8, 17u8,
                             229u8, 61u8, 20u8, 130u8, 167u8, 1u8, 1u8, 158u8, 180u8,
@@ -5862,9 +6159,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Unbond>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Unbond>()?
+                    };
+                    if runtime_call_hash
                         == [
                             85u8, 188u8, 141u8, 62u8, 242u8, 15u8, 6u8, 20u8, 96u8,
                             220u8, 201u8, 163u8, 29u8, 136u8, 24u8, 4u8, 143u8, 13u8,
@@ -5907,9 +6207,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<WithdrawUnbonded>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<WithdrawUnbonded>()?
+                    };
+                    if runtime_call_hash
                         == [
                             252u8, 47u8, 185u8, 86u8, 179u8, 203u8, 20u8, 5u8, 88u8,
                             252u8, 212u8, 173u8, 20u8, 202u8, 206u8, 56u8, 10u8, 186u8,
@@ -5942,9 +6245,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Validate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Validate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             138u8, 13u8, 146u8, 216u8, 4u8, 27u8, 20u8, 159u8, 148u8,
                             25u8, 169u8, 229u8, 145u8, 2u8, 251u8, 58u8, 13u8, 128u8,
@@ -5988,9 +6294,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Nominate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Nominate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             199u8, 181u8, 123u8, 171u8, 186u8, 9u8, 23u8, 220u8, 147u8,
                             7u8, 252u8, 26u8, 25u8, 195u8, 126u8, 175u8, 181u8, 118u8,
@@ -6028,9 +6337,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Chill>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Chill>()?
+                    };
+                    if runtime_call_hash
                         == [
                             94u8, 20u8, 196u8, 31u8, 220u8, 125u8, 115u8, 167u8, 140u8,
                             3u8, 20u8, 132u8, 81u8, 120u8, 215u8, 166u8, 230u8, 56u8,
@@ -6076,9 +6388,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetPayee>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetPayee>()?
+                    };
+                    if runtime_call_hash
                         == [
                             185u8, 62u8, 154u8, 65u8, 135u8, 104u8, 38u8, 171u8, 237u8,
                             16u8, 169u8, 38u8, 53u8, 161u8, 170u8, 232u8, 249u8, 185u8,
@@ -6125,9 +6440,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetController>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetController>()?
+                    };
+                    if runtime_call_hash
                         == [
                             239u8, 105u8, 43u8, 234u8, 201u8, 103u8, 93u8, 252u8, 26u8,
                             52u8, 27u8, 23u8, 219u8, 153u8, 195u8, 150u8, 244u8, 13u8,
@@ -6163,9 +6481,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetValidatorCount>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetValidatorCount>()?
+                    };
+                    if runtime_call_hash
                         == [
                             181u8, 82u8, 21u8, 239u8, 81u8, 194u8, 166u8, 66u8, 55u8,
                             156u8, 68u8, 22u8, 76u8, 251u8, 241u8, 113u8, 168u8, 8u8,
@@ -6200,9 +6521,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<IncreaseValidatorCount>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<IncreaseValidatorCount>()?
+                    };
+                    if runtime_call_hash
                         == [
                             219u8, 143u8, 69u8, 205u8, 182u8, 155u8, 101u8, 39u8, 59u8,
                             214u8, 81u8, 47u8, 247u8, 54u8, 106u8, 92u8, 183u8, 42u8,
@@ -6237,9 +6561,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ScaleValidatorCount>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ScaleValidatorCount>()?
+                    };
+                    if runtime_call_hash
                         == [
                             170u8, 156u8, 101u8, 109u8, 117u8, 199u8, 38u8, 157u8, 132u8,
                             210u8, 54u8, 66u8, 251u8, 10u8, 123u8, 120u8, 237u8, 31u8,
@@ -6281,9 +6608,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceNoEras>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceNoEras>()?
+                    };
+                    if runtime_call_hash
                         == [
                             16u8, 81u8, 207u8, 168u8, 23u8, 236u8, 11u8, 75u8, 141u8,
                             107u8, 92u8, 2u8, 53u8, 111u8, 252u8, 116u8, 91u8, 120u8,
@@ -6326,9 +6656,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceNewEra>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceNewEra>()?
+                    };
+                    if runtime_call_hash
                         == [
                             230u8, 242u8, 169u8, 196u8, 78u8, 145u8, 24u8, 191u8, 113u8,
                             68u8, 5u8, 138u8, 48u8, 51u8, 109u8, 126u8, 73u8, 136u8,
@@ -6359,9 +6692,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetInvulnerables>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetInvulnerables>()?
+                    };
+                    if runtime_call_hash
                         == [
                             0u8, 119u8, 27u8, 243u8, 238u8, 65u8, 133u8, 89u8, 210u8,
                             202u8, 154u8, 243u8, 168u8, 158u8, 9u8, 147u8, 146u8, 215u8,
@@ -6393,9 +6729,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceUnstake>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceUnstake>()?
+                    };
+                    if runtime_call_hash
                         == [
                             254u8, 115u8, 250u8, 15u8, 235u8, 119u8, 2u8, 131u8, 237u8,
                             144u8, 247u8, 66u8, 150u8, 92u8, 12u8, 112u8, 137u8, 195u8,
@@ -6434,9 +6773,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceNewEraAlways>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceNewEraAlways>()?
+                    };
+                    if runtime_call_hash
                         == [
                             179u8, 118u8, 189u8, 54u8, 248u8, 141u8, 207u8, 142u8, 80u8,
                             37u8, 241u8, 185u8, 138u8, 254u8, 117u8, 147u8, 225u8, 118u8,
@@ -6470,9 +6812,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelDeferredSlash>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelDeferredSlash>()?
+                    };
+                    if runtime_call_hash
                         == [
                             217u8, 175u8, 246u8, 108u8, 78u8, 134u8, 98u8, 49u8, 178u8,
                             209u8, 98u8, 178u8, 52u8, 242u8, 173u8, 135u8, 171u8, 70u8,
@@ -6522,9 +6867,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<PayoutStakers>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<PayoutStakers>()?
+                    };
+                    if runtime_call_hash
                         == [
                             235u8, 65u8, 65u8, 249u8, 162u8, 235u8, 127u8, 48u8, 216u8,
                             51u8, 252u8, 111u8, 186u8, 191u8, 174u8, 245u8, 144u8, 77u8,
@@ -6564,9 +6912,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Rebond>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Rebond>()?
+                    };
+                    if runtime_call_hash
                         == [
                             138u8, 156u8, 164u8, 170u8, 178u8, 236u8, 221u8, 242u8,
                             157u8, 176u8, 173u8, 145u8, 254u8, 94u8, 158u8, 27u8, 138u8,
@@ -6617,9 +6968,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHistoryDepth>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHistoryDepth>()?
+                    };
+                    if runtime_call_hash
                         == [
                             128u8, 149u8, 139u8, 192u8, 213u8, 239u8, 248u8, 215u8, 57u8,
                             145u8, 177u8, 225u8, 43u8, 214u8, 228u8, 14u8, 213u8, 181u8,
@@ -6663,9 +7017,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReapStash>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReapStash>()?
+                    };
+                    if runtime_call_hash
                         == [
                             84u8, 192u8, 207u8, 193u8, 133u8, 53u8, 93u8, 148u8, 153u8,
                             112u8, 54u8, 145u8, 68u8, 195u8, 42u8, 158u8, 17u8, 230u8,
@@ -6712,9 +7069,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Kick>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Kick>()?
+                    };
+                    if runtime_call_hash
                         == [
                             145u8, 201u8, 168u8, 147u8, 25u8, 39u8, 62u8, 48u8, 236u8,
                             44u8, 45u8, 233u8, 178u8, 196u8, 117u8, 117u8, 74u8, 193u8,
@@ -6764,9 +7124,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetStakingConfigs>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetStakingConfigs>()?
+                    };
+                    if runtime_call_hash
                         == [
                             249u8, 192u8, 107u8, 126u8, 200u8, 50u8, 63u8, 120u8, 116u8,
                             53u8, 183u8, 80u8, 134u8, 135u8, 49u8, 112u8, 232u8, 140u8,
@@ -6827,9 +7190,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ChillOther>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ChillOther>()?
+                    };
+                    if runtime_call_hash
                         == [
                             219u8, 114u8, 146u8, 43u8, 175u8, 216u8, 70u8, 148u8, 137u8,
                             192u8, 77u8, 247u8, 134u8, 80u8, 188u8, 100u8, 79u8, 141u8,
@@ -6860,9 +7226,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceApplyMinCommission>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceApplyMinCommission>()?
+                    };
+                    if runtime_call_hash
                         == [
                             8u8, 57u8, 61u8, 141u8, 175u8, 100u8, 174u8, 161u8, 236u8,
                             2u8, 133u8, 169u8, 249u8, 168u8, 236u8, 188u8, 168u8, 221u8,
@@ -7501,9 +7870,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HistoryDepth>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HistoryDepth>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             41u8, 54u8, 118u8, 245u8, 75u8, 136u8, 220u8, 25u8, 55u8,
                             255u8, 149u8, 177u8, 49u8, 155u8, 167u8, 188u8, 170u8, 29u8,
@@ -7526,9 +7898,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ValidatorCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ValidatorCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             245u8, 75u8, 214u8, 110u8, 66u8, 164u8, 86u8, 206u8, 69u8,
                             89u8, 12u8, 111u8, 117u8, 16u8, 228u8, 184u8, 207u8, 6u8,
@@ -7551,9 +7926,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MinimumValidatorCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MinimumValidatorCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             82u8, 95u8, 128u8, 55u8, 136u8, 134u8, 71u8, 117u8, 135u8,
                             76u8, 44u8, 46u8, 174u8, 34u8, 170u8, 228u8, 175u8, 1u8,
@@ -7580,9 +7958,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Invulnerables>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Invulnerables>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 93u8, 29u8, 166u8, 244u8, 19u8, 78u8, 182u8, 235u8,
                             37u8, 199u8, 127u8, 211u8, 124u8, 168u8, 145u8, 111u8, 251u8,
@@ -7608,9 +7989,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Bonded>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Bonded>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             9u8, 214u8, 190u8, 93u8, 116u8, 143u8, 174u8, 103u8, 102u8,
                             25u8, 123u8, 201u8, 12u8, 44u8, 188u8, 241u8, 74u8, 33u8,
@@ -7632,9 +8016,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Bonded<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Bonded>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Bonded>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             9u8, 214u8, 190u8, 93u8, 116u8, 143u8, 174u8, 103u8, 102u8,
                             25u8, 123u8, 201u8, 12u8, 44u8, 188u8, 241u8, 74u8, 33u8,
@@ -7653,9 +8040,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MinNominatorBond>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MinNominatorBond>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             187u8, 66u8, 149u8, 226u8, 72u8, 219u8, 57u8, 246u8, 102u8,
                             47u8, 71u8, 12u8, 219u8, 204u8, 127u8, 223u8, 58u8, 134u8,
@@ -7678,9 +8068,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MinValidatorBond>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MinValidatorBond>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             48u8, 105u8, 85u8, 178u8, 142u8, 208u8, 208u8, 19u8, 236u8,
                             130u8, 129u8, 169u8, 35u8, 245u8, 66u8, 182u8, 92u8, 20u8,
@@ -7707,9 +8100,12 @@ pub mod api {
                     runtime_types::sp_arithmetic::per_things::Perbill,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MinCommission>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MinCommission>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             198u8, 29u8, 53u8, 56u8, 181u8, 170u8, 164u8, 240u8, 27u8,
                             171u8, 69u8, 57u8, 151u8, 40u8, 23u8, 166u8, 157u8, 68u8,
@@ -7740,9 +8136,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Ledger>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Ledger>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 46u8, 130u8, 228u8, 126u8, 95u8, 46u8, 57u8, 222u8,
                             98u8, 250u8, 145u8, 83u8, 135u8, 240u8, 153u8, 57u8, 21u8,
@@ -7764,9 +8163,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Ledger<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Ledger>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Ledger>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 46u8, 130u8, 228u8, 126u8, 95u8, 46u8, 57u8, 222u8,
                             98u8, 250u8, 145u8, 83u8, 135u8, 240u8, 153u8, 57u8, 21u8,
@@ -7790,9 +8192,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Payee>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Payee>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             108u8, 35u8, 28u8, 189u8, 146u8, 103u8, 200u8, 73u8, 220u8,
                             230u8, 193u8, 7u8, 66u8, 147u8, 55u8, 34u8, 1u8, 21u8, 255u8,
@@ -7817,9 +8222,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Payee<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Payee>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Payee>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             108u8, 35u8, 28u8, 189u8, 146u8, 103u8, 200u8, 73u8, 220u8,
                             230u8, 193u8, 7u8, 66u8, 147u8, 55u8, 34u8, 1u8, 21u8, 255u8,
@@ -7841,9 +8249,12 @@ pub mod api {
                     runtime_types::pallet_staking::ValidatorPrefs,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Validators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Validators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             45u8, 57u8, 106u8, 30u8, 123u8, 251u8, 148u8, 37u8, 52u8,
                             129u8, 103u8, 88u8, 54u8, 216u8, 174u8, 181u8, 51u8, 181u8,
@@ -7868,9 +8279,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Validators<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Validators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Validators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             45u8, 57u8, 106u8, 30u8, 123u8, 251u8, 148u8, 37u8, 52u8,
                             129u8, 103u8, 88u8, 54u8, 216u8, 174u8, 181u8, 51u8, 181u8,
@@ -7889,9 +8303,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CounterForValidators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CounterForValidators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             139u8, 25u8, 223u8, 6u8, 160u8, 239u8, 212u8, 85u8, 36u8,
                             185u8, 69u8, 63u8, 21u8, 156u8, 144u8, 241u8, 112u8, 85u8,
@@ -7918,9 +8335,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MaxValidatorsCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MaxValidatorsCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             250u8, 62u8, 16u8, 68u8, 192u8, 216u8, 236u8, 211u8, 217u8,
                             9u8, 213u8, 49u8, 41u8, 37u8, 58u8, 62u8, 131u8, 112u8, 64u8,
@@ -7958,9 +8378,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::pallet_staking::Nominations>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Nominators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Nominators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 26u8, 169u8, 68u8, 99u8, 216u8, 95u8, 198u8, 5u8,
                             123u8, 21u8, 83u8, 220u8, 140u8, 122u8, 111u8, 22u8, 133u8,
@@ -7997,9 +8420,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Nominators<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Nominators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Nominators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 26u8, 169u8, 68u8, 99u8, 216u8, 95u8, 198u8, 5u8,
                             123u8, 21u8, 83u8, 220u8, 140u8, 122u8, 111u8, 22u8, 133u8,
@@ -8018,9 +8444,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CounterForNominators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CounterForNominators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             31u8, 94u8, 130u8, 138u8, 75u8, 8u8, 38u8, 162u8, 181u8, 5u8,
                             125u8, 116u8, 9u8, 51u8, 22u8, 234u8, 40u8, 117u8, 215u8,
@@ -8047,9 +8476,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MaxNominatorsCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MaxNominatorsCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             180u8, 190u8, 180u8, 66u8, 235u8, 173u8, 76u8, 160u8, 197u8,
                             92u8, 96u8, 165u8, 220u8, 188u8, 32u8, 119u8, 3u8, 73u8,
@@ -8074,9 +8506,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             105u8, 150u8, 49u8, 122u8, 4u8, 78u8, 8u8, 121u8, 34u8,
                             136u8, 157u8, 227u8, 59u8, 139u8, 7u8, 253u8, 7u8, 10u8,
@@ -8101,9 +8536,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::pallet_staking::ActiveEraInfo>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActiveEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActiveEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             230u8, 144u8, 49u8, 201u8, 36u8, 253u8, 97u8, 135u8, 57u8,
                             169u8, 157u8, 138u8, 21u8, 35u8, 14u8, 2u8, 151u8, 214u8,
@@ -8129,9 +8567,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStartSessionIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStartSessionIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             92u8, 157u8, 168u8, 144u8, 132u8, 3u8, 212u8, 80u8, 230u8,
                             229u8, 251u8, 218u8, 97u8, 55u8, 79u8, 100u8, 163u8, 91u8,
@@ -8156,9 +8597,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasStartSessionIndex<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStartSessionIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStartSessionIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             92u8, 157u8, 168u8, 144u8, 132u8, 3u8, 212u8, 80u8, 230u8,
                             229u8, 251u8, 218u8, 97u8, 55u8, 79u8, 100u8, 163u8, 91u8,
@@ -8189,9 +8633,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStakers>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStakers>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 250u8, 76u8, 183u8, 219u8, 180u8, 156u8, 138u8, 111u8,
                             153u8, 154u8, 90u8, 14u8, 194u8, 56u8, 133u8, 197u8, 199u8,
@@ -8221,9 +8668,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasStakers<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStakers>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStakers>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 250u8, 76u8, 183u8, 219u8, 180u8, 156u8, 138u8, 111u8,
                             153u8, 154u8, 90u8, 14u8, 194u8, 56u8, 133u8, 197u8, 199u8,
@@ -8259,9 +8709,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStakersClipped>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStakersClipped>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 87u8, 165u8, 255u8, 253u8, 169u8, 48u8, 28u8, 254u8,
                             124u8, 93u8, 108u8, 252u8, 15u8, 141u8, 139u8, 152u8, 118u8,
@@ -8296,9 +8749,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasStakersClipped<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasStakersClipped>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasStakersClipped>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 87u8, 165u8, 255u8, 253u8, 169u8, 48u8, 28u8, 254u8,
                             124u8, 93u8, 108u8, 252u8, 15u8, 141u8, 139u8, 152u8, 118u8,
@@ -8325,9 +8781,12 @@ pub mod api {
                     runtime_types::pallet_staking::ValidatorPrefs,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasValidatorPrefs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasValidatorPrefs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             8u8, 55u8, 222u8, 216u8, 126u8, 126u8, 131u8, 18u8, 145u8,
                             58u8, 91u8, 123u8, 92u8, 19u8, 178u8, 200u8, 133u8, 140u8,
@@ -8356,9 +8815,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasValidatorPrefs<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasValidatorPrefs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasValidatorPrefs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             8u8, 55u8, 222u8, 216u8, 126u8, 126u8, 131u8, 18u8, 145u8,
                             58u8, 91u8, 123u8, 92u8, 19u8, 178u8, 200u8, 133u8, 140u8,
@@ -8382,9 +8844,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasValidatorReward>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasValidatorReward>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             87u8, 80u8, 156u8, 123u8, 107u8, 77u8, 203u8, 37u8, 231u8,
                             84u8, 124u8, 155u8, 227u8, 212u8, 212u8, 179u8, 84u8, 161u8,
@@ -8408,9 +8873,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasValidatorReward<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasValidatorReward>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasValidatorReward>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             87u8, 80u8, 156u8, 123u8, 107u8, 77u8, 203u8, 37u8, 231u8,
                             84u8, 124u8, 155u8, 227u8, 212u8, 212u8, 179u8, 84u8, 161u8,
@@ -8435,9 +8903,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasRewardPoints>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasRewardPoints>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             76u8, 221u8, 158u8, 62u8, 3u8, 254u8, 139u8, 170u8, 103u8,
                             218u8, 191u8, 103u8, 57u8, 212u8, 208u8, 7u8, 105u8, 52u8,
@@ -8463,9 +8934,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasRewardPoints<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasRewardPoints>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasRewardPoints>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             76u8, 221u8, 158u8, 62u8, 3u8, 254u8, 139u8, 170u8, 103u8,
                             218u8, 191u8, 103u8, 57u8, 212u8, 208u8, 7u8, 105u8, 52u8,
@@ -8486,9 +8960,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasTotalStake>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasTotalStake>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 240u8, 168u8, 69u8, 148u8, 140u8, 249u8, 240u8, 4u8,
                             46u8, 77u8, 11u8, 224u8, 65u8, 26u8, 239u8, 1u8, 110u8, 53u8,
@@ -8514,9 +8991,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ErasTotalStake<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ErasTotalStake>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ErasTotalStake>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 240u8, 168u8, 69u8, 148u8, 140u8, 249u8, 240u8, 4u8,
                             46u8, 77u8, 11u8, 224u8, 65u8, 26u8, 239u8, 1u8, 110u8, 53u8,
@@ -8537,9 +9017,12 @@ pub mod api {
                     runtime_types::pallet_staking::Forcing,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ForceEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ForceEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             221u8, 41u8, 71u8, 21u8, 28u8, 193u8, 65u8, 97u8, 103u8,
                             37u8, 145u8, 146u8, 183u8, 194u8, 57u8, 131u8, 214u8, 136u8,
@@ -8566,9 +9049,12 @@ pub mod api {
                     runtime_types::sp_arithmetic::per_things::Perbill,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SlashRewardFraction>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SlashRewardFraction>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             92u8, 55u8, 255u8, 233u8, 174u8, 125u8, 32u8, 21u8, 78u8,
                             237u8, 123u8, 241u8, 113u8, 243u8, 48u8, 101u8, 190u8, 165u8,
@@ -8592,9 +9078,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CanceledSlashPayout>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CanceledSlashPayout>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             126u8, 218u8, 66u8, 92u8, 82u8, 124u8, 145u8, 161u8, 40u8,
                             176u8, 14u8, 211u8, 178u8, 216u8, 8u8, 156u8, 83u8, 14u8,
@@ -8625,9 +9114,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UnappliedSlashes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UnappliedSlashes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             213u8, 28u8, 144u8, 139u8, 187u8, 184u8, 7u8, 192u8, 114u8,
                             57u8, 238u8, 66u8, 7u8, 254u8, 41u8, 230u8, 189u8, 188u8,
@@ -8652,9 +9144,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, UnappliedSlashes<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UnappliedSlashes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UnappliedSlashes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             213u8, 28u8, 144u8, 139u8, 187u8, 184u8, 7u8, 192u8, 114u8,
                             57u8, 238u8, 66u8, 7u8, 254u8, 41u8, 230u8, 189u8, 188u8,
@@ -8678,9 +9173,12 @@ pub mod api {
                     ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BondedEras>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BondedEras>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             243u8, 162u8, 236u8, 198u8, 122u8, 182u8, 37u8, 55u8, 171u8,
                             156u8, 235u8, 223u8, 226u8, 129u8, 89u8, 206u8, 2u8, 155u8,
@@ -8711,9 +9209,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ValidatorSlashInEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ValidatorSlashInEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             241u8, 177u8, 227u8, 239u8, 150u8, 186u8, 50u8, 97u8, 144u8,
                             224u8, 24u8, 149u8, 189u8, 166u8, 71u8, 232u8, 221u8, 129u8,
@@ -8736,9 +9237,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ValidatorSlashInEra<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ValidatorSlashInEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ValidatorSlashInEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             241u8, 177u8, 227u8, 239u8, 150u8, 186u8, 50u8, 97u8, 144u8,
                             224u8, 24u8, 149u8, 189u8, 166u8, 71u8, 232u8, 221u8, 129u8,
@@ -8761,9 +9265,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NominatorSlashInEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NominatorSlashInEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             149u8, 144u8, 51u8, 167u8, 71u8, 119u8, 218u8, 110u8, 25u8,
                             45u8, 168u8, 149u8, 62u8, 195u8, 248u8, 50u8, 215u8, 216u8,
@@ -8785,9 +9292,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, NominatorSlashInEra<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NominatorSlashInEra>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NominatorSlashInEra>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             149u8, 144u8, 51u8, 167u8, 71u8, 119u8, 218u8, 110u8, 25u8,
                             45u8, 168u8, 149u8, 62u8, 195u8, 248u8, 50u8, 215u8, 216u8,
@@ -8811,9 +9321,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SlashingSpans>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SlashingSpans>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 73u8, 200u8, 194u8, 106u8, 157u8, 84u8, 5u8, 119u8,
                             5u8, 73u8, 247u8, 125u8, 213u8, 80u8, 37u8, 154u8, 192u8,
@@ -8835,9 +9348,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SlashingSpans<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SlashingSpans>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SlashingSpans>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 73u8, 200u8, 194u8, 106u8, 157u8, 84u8, 5u8, 119u8,
                             5u8, 73u8, 247u8, 125u8, 213u8, 80u8, 37u8, 154u8, 192u8,
@@ -8863,9 +9379,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SpanSlash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SpanSlash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             95u8, 42u8, 40u8, 167u8, 201u8, 140u8, 142u8, 55u8, 69u8,
                             238u8, 248u8, 118u8, 209u8, 11u8, 117u8, 132u8, 179u8, 33u8,
@@ -8891,9 +9410,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SpanSlash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SpanSlash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SpanSlash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             95u8, 42u8, 40u8, 167u8, 201u8, 140u8, 142u8, 55u8, 69u8,
                             238u8, 248u8, 118u8, 209u8, 11u8, 117u8, 132u8, 179u8, 33u8,
@@ -8914,9 +9436,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EarliestUnappliedSlash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EarliestUnappliedSlash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             2u8, 167u8, 88u8, 76u8, 113u8, 225u8, 232u8, 80u8, 183u8,
                             162u8, 104u8, 28u8, 162u8, 13u8, 120u8, 45u8, 200u8, 130u8,
@@ -8938,9 +9463,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentPlannedSession>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentPlannedSession>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             38u8, 22u8, 56u8, 250u8, 17u8, 154u8, 99u8, 37u8, 155u8,
                             253u8, 100u8, 117u8, 5u8, 239u8, 31u8, 190u8, 53u8, 241u8,
@@ -8973,9 +9501,12 @@ pub mod api {
                     ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::bool)>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<OffendingValidators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<OffendingValidators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 254u8, 0u8, 50u8, 76u8, 232u8, 51u8, 153u8, 118u8,
                             14u8, 70u8, 101u8, 112u8, 215u8, 173u8, 82u8, 182u8, 104u8,
@@ -9003,9 +9534,12 @@ pub mod api {
                     runtime_types::pallet_staking::Releases,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StorageVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StorageVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             156u8, 107u8, 113u8, 89u8, 107u8, 89u8, 171u8, 229u8, 13u8,
                             96u8, 203u8, 67u8, 119u8, 153u8, 199u8, 158u8, 63u8, 114u8,
@@ -9034,9 +9568,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChillThreshold>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChillThreshold>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             254u8, 131u8, 112u8, 90u8, 234u8, 72u8, 26u8, 240u8, 38u8,
                             14u8, 128u8, 234u8, 133u8, 169u8, 66u8, 48u8, 234u8, 170u8,
@@ -9321,9 +9858,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reports>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reports>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             82u8, 209u8, 30u8, 189u8, 152u8, 16u8, 7u8, 24u8, 178u8,
                             140u8, 17u8, 226u8, 97u8, 37u8, 80u8, 211u8, 252u8, 36u8,
@@ -9345,9 +9885,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Reports<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reports>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reports>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             82u8, 209u8, 30u8, 189u8, 152u8, 16u8, 7u8, 24u8, 178u8,
                             140u8, 17u8, 226u8, 97u8, 37u8, 80u8, 211u8, 252u8, 36u8,
@@ -9370,9 +9913,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::H256>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ConcurrentReportsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ConcurrentReportsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             110u8, 42u8, 178u8, 19u8, 180u8, 109u8, 26u8, 134u8, 74u8,
                             223u8, 19u8, 172u8, 149u8, 194u8, 228u8, 11u8, 205u8, 189u8,
@@ -9397,9 +9943,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ConcurrentReportsIndex<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ConcurrentReportsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ConcurrentReportsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             110u8, 42u8, 178u8, 19u8, 180u8, 109u8, 26u8, 134u8, 74u8,
                             223u8, 19u8, 172u8, 149u8, 194u8, 228u8, 11u8, 205u8, 189u8,
@@ -9426,9 +9975,12 @@ pub mod api {
                     ::std::vec::Vec<::core::primitive::u8>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReportsByKindIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReportsByKindIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             162u8, 66u8, 131u8, 48u8, 250u8, 237u8, 179u8, 214u8, 36u8,
                             137u8, 226u8, 136u8, 120u8, 61u8, 215u8, 43u8, 164u8, 50u8,
@@ -9458,9 +10010,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ReportsByKindIndex<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReportsByKindIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReportsByKindIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             162u8, 66u8, 131u8, 48u8, 250u8, 237u8, 179u8, 214u8, 36u8,
                             137u8, 226u8, 136u8, 120u8, 61u8, 215u8, 43u8, 164u8, 50u8,
@@ -9552,9 +10107,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetKeys>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetKeys>()?
+                    };
+                    if runtime_call_hash
                         == [
                             194u8, 88u8, 145u8, 74u8, 215u8, 181u8, 126u8, 21u8, 193u8,
                             174u8, 42u8, 142u8, 229u8, 213u8, 104u8, 36u8, 134u8, 83u8,
@@ -9597,9 +10155,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<PurgeKeys>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<PurgeKeys>()?
+                    };
+                    if runtime_call_hash
                         == [
                             200u8, 255u8, 4u8, 213u8, 188u8, 92u8, 99u8, 116u8, 163u8,
                             152u8, 29u8, 35u8, 133u8, 119u8, 246u8, 44u8, 91u8, 31u8,
@@ -9726,9 +10287,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Validators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Validators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             186u8, 248u8, 234u8, 74u8, 245u8, 141u8, 90u8, 152u8, 226u8,
                             220u8, 255u8, 104u8, 174u8, 1u8, 37u8, 152u8, 23u8, 208u8,
@@ -9751,9 +10315,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             148u8, 179u8, 159u8, 15u8, 197u8, 95u8, 214u8, 30u8, 209u8,
                             251u8, 183u8, 231u8, 91u8, 25u8, 181u8, 191u8, 143u8, 252u8,
@@ -9777,9 +10344,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<QueuedChanged>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<QueuedChanged>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             105u8, 140u8, 235u8, 218u8, 96u8, 100u8, 252u8, 10u8, 58u8,
                             221u8, 244u8, 251u8, 67u8, 91u8, 80u8, 202u8, 152u8, 42u8,
@@ -9808,9 +10378,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<QueuedKeys>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<QueuedKeys>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 85u8, 104u8, 215u8, 108u8, 102u8, 70u8, 179u8, 201u8,
                             132u8, 63u8, 148u8, 29u8, 97u8, 185u8, 117u8, 153u8, 236u8,
@@ -9839,9 +10412,12 @@ pub mod api {
                     ::std::vec::Vec<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DisabledValidators>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DisabledValidators>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             135u8, 22u8, 22u8, 97u8, 82u8, 217u8, 144u8, 141u8, 121u8,
                             240u8, 189u8, 16u8, 176u8, 88u8, 177u8, 31u8, 20u8, 242u8,
@@ -9867,9 +10443,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::polkadot_runtime::SessionKeys>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextKeys>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextKeys>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             18u8, 229u8, 236u8, 115u8, 189u8, 239u8, 3u8, 100u8, 6u8,
                             254u8, 237u8, 61u8, 223u8, 21u8, 226u8, 203u8, 214u8, 213u8,
@@ -9891,9 +10470,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, NextKeys<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextKeys>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextKeys>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             18u8, 229u8, 236u8, 115u8, 189u8, 239u8, 3u8, 100u8, 6u8,
                             254u8, 237u8, 61u8, 223u8, 21u8, 226u8, 203u8, 214u8, 213u8,
@@ -9916,9 +10498,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<KeyOwner>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<KeyOwner>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             49u8, 245u8, 212u8, 141u8, 211u8, 208u8, 109u8, 102u8, 249u8,
                             161u8, 41u8, 93u8, 220u8, 230u8, 14u8, 59u8, 251u8, 176u8,
@@ -9940,9 +10525,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, KeyOwner<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<KeyOwner>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<KeyOwner>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             49u8, 245u8, 212u8, 141u8, 211u8, 208u8, 109u8, 102u8, 249u8,
                             161u8, 41u8, 93u8, 220u8, 230u8, 14u8, 59u8, 251u8, 176u8,
@@ -10040,9 +10628,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReportEquivocation>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReportEquivocation>()?
+                    };
+                    if runtime_call_hash
                         == [
                             230u8, 252u8, 24u8, 207u8, 164u8, 127u8, 177u8, 30u8, 113u8,
                             175u8, 207u8, 252u8, 230u8, 225u8, 181u8, 190u8, 236u8,
@@ -10085,9 +10676,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReportEquivocationUnsigned>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReportEquivocationUnsigned>()?
+                    };
+                    if runtime_call_hash
                         == [
                             141u8, 235u8, 27u8, 135u8, 124u8, 124u8, 234u8, 51u8, 100u8,
                             105u8, 188u8, 248u8, 133u8, 10u8, 84u8, 14u8, 40u8, 235u8,
@@ -10128,9 +10722,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NoteStalled>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NoteStalled>()?
+                    };
+                    if runtime_call_hash
                         == [
                             227u8, 98u8, 249u8, 158u8, 96u8, 124u8, 72u8, 188u8, 27u8,
                             215u8, 73u8, 62u8, 103u8, 79u8, 38u8, 48u8, 212u8, 88u8,
@@ -10256,9 +10853,12 @@ pub mod api {
                     runtime_types::pallet_grandpa::StoredState<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<State>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<State>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             159u8, 75u8, 78u8, 23u8, 98u8, 89u8, 239u8, 230u8, 192u8,
                             67u8, 139u8, 222u8, 151u8, 237u8, 216u8, 20u8, 235u8, 247u8,
@@ -10287,9 +10887,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingChange>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingChange>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             128u8, 176u8, 209u8, 41u8, 231u8, 111u8, 205u8, 198u8, 154u8,
                             44u8, 228u8, 231u8, 44u8, 110u8, 74u8, 9u8, 31u8, 86u8,
@@ -10311,9 +10914,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextForced>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextForced>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             99u8, 43u8, 245u8, 201u8, 60u8, 9u8, 122u8, 99u8, 188u8,
                             29u8, 67u8, 6u8, 193u8, 133u8, 179u8, 67u8, 202u8, 208u8,
@@ -10338,9 +10944,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Stalled>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Stalled>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             219u8, 8u8, 37u8, 78u8, 150u8, 55u8, 0u8, 57u8, 201u8, 170u8,
                             186u8, 189u8, 56u8, 161u8, 44u8, 15u8, 53u8, 178u8, 224u8,
@@ -10361,9 +10970,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentSetId>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentSetId>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             129u8, 7u8, 62u8, 101u8, 199u8, 60u8, 56u8, 33u8, 54u8,
                             158u8, 20u8, 178u8, 244u8, 145u8, 189u8, 197u8, 157u8, 163u8,
@@ -10392,9 +11004,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SetIdSession>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SetIdSession>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 175u8, 145u8, 127u8, 242u8, 81u8, 13u8, 231u8, 110u8,
                             11u8, 166u8, 169u8, 103u8, 146u8, 123u8, 133u8, 157u8, 15u8,
@@ -10419,9 +11034,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SetIdSession<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SetIdSession>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SetIdSession>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 175u8, 145u8, 127u8, 242u8, 81u8, 13u8, 231u8, 110u8,
                             11u8, 166u8, 169u8, 103u8, 146u8, 123u8, 133u8, 157u8, 15u8,
@@ -10535,9 +11153,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Heartbeat>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Heartbeat>()?
+                    };
+                    if runtime_call_hash
                         == [
                             246u8, 83u8, 28u8, 233u8, 69u8, 55u8, 28u8, 178u8, 82u8,
                             159u8, 56u8, 241u8, 111u8, 78u8, 194u8, 15u8, 14u8, 250u8,
@@ -10679,9 +11300,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HeartbeatAfter>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HeartbeatAfter>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             108u8, 100u8, 85u8, 198u8, 226u8, 122u8, 94u8, 225u8, 97u8,
                             154u8, 135u8, 95u8, 106u8, 28u8, 185u8, 78u8, 192u8, 196u8,
@@ -10699,9 +11323,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The current set of keys that may issue a heartbeat."]                pub async fn keys (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Public > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Keys>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Keys>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             105u8, 250u8, 99u8, 106u8, 9u8, 29u8, 73u8, 176u8, 158u8,
                             247u8, 28u8, 171u8, 95u8, 1u8, 109u8, 11u8, 231u8, 52u8,
@@ -10733,9 +11360,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReceivedHeartbeats>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReceivedHeartbeats>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             29u8, 40u8, 67u8, 222u8, 59u8, 104u8, 24u8, 193u8, 249u8,
                             200u8, 152u8, 225u8, 72u8, 243u8, 140u8, 114u8, 121u8, 216u8,
@@ -10758,9 +11388,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ReceivedHeartbeats<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReceivedHeartbeats>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReceivedHeartbeats>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             29u8, 40u8, 67u8, 222u8, 59u8, 104u8, 24u8, 193u8, 249u8,
                             200u8, 152u8, 225u8, 72u8, 243u8, 140u8, 114u8, 121u8, 216u8,
@@ -10782,9 +11415,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AuthoredBlocks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AuthoredBlocks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 193u8, 107u8, 126u8, 3u8, 13u8, 28u8, 151u8, 197u8,
                             226u8, 224u8, 48u8, 138u8, 113u8, 31u8, 57u8, 111u8, 184u8,
@@ -10810,9 +11446,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, AuthoredBlocks<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AuthoredBlocks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AuthoredBlocks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 193u8, 107u8, 126u8, 3u8, 13u8, 28u8, 151u8, 197u8,
                             226u8, 224u8, 48u8, 138u8, 113u8, 31u8, 57u8, 111u8, 184u8,
@@ -11155,9 +11794,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Propose>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Propose>()?
+                    };
+                    if runtime_call_hash
                         == [
                             149u8, 60u8, 16u8, 143u8, 114u8, 16u8, 124u8, 96u8, 97u8,
                             5u8, 176u8, 137u8, 188u8, 164u8, 65u8, 145u8, 142u8, 104u8,
@@ -11199,9 +11841,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Second>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Second>()?
+                    };
+                    if runtime_call_hash
                         == [
                             37u8, 226u8, 138u8, 26u8, 138u8, 46u8, 39u8, 147u8, 22u8,
                             32u8, 245u8, 40u8, 49u8, 228u8, 218u8, 225u8, 72u8, 89u8,
@@ -11244,9 +11889,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Vote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Vote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             1u8, 235u8, 77u8, 58u8, 54u8, 224u8, 30u8, 168u8, 150u8,
                             169u8, 20u8, 172u8, 137u8, 191u8, 189u8, 184u8, 28u8, 118u8,
@@ -11282,9 +11930,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<EmergencyCancel>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<EmergencyCancel>()?
+                    };
+                    if runtime_call_hash
                         == [
                             4u8, 129u8, 205u8, 102u8, 202u8, 197u8, 75u8, 155u8, 24u8,
                             125u8, 157u8, 73u8, 50u8, 243u8, 173u8, 103u8, 49u8, 60u8,
@@ -11321,9 +11972,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ExternalPropose>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ExternalPropose>()?
+                    };
+                    if runtime_call_hash
                         == [
                             50u8, 82u8, 155u8, 206u8, 57u8, 61u8, 64u8, 43u8, 30u8, 71u8,
                             89u8, 91u8, 221u8, 46u8, 15u8, 222u8, 15u8, 211u8, 56u8,
@@ -11362,9 +12016,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ExternalProposeMajority>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ExternalProposeMajority>()?
+                    };
+                    if runtime_call_hash
                         == [
                             18u8, 92u8, 204u8, 120u8, 189u8, 60u8, 223u8, 166u8, 213u8,
                             49u8, 20u8, 131u8, 202u8, 1u8, 87u8, 226u8, 168u8, 156u8,
@@ -11403,9 +12060,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ExternalProposeDefault>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ExternalProposeDefault>()?
+                    };
+                    if runtime_call_hash
                         == [
                             51u8, 75u8, 236u8, 51u8, 53u8, 39u8, 26u8, 231u8, 212u8,
                             191u8, 175u8, 233u8, 181u8, 156u8, 210u8, 221u8, 181u8,
@@ -11450,9 +12110,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<FastTrack>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<FastTrack>()?
+                    };
+                    if runtime_call_hash
                         == [
                             232u8, 255u8, 150u8, 13u8, 151u8, 28u8, 253u8, 37u8, 183u8,
                             127u8, 53u8, 228u8, 160u8, 11u8, 223u8, 48u8, 74u8, 5u8,
@@ -11493,9 +12156,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<VetoExternal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<VetoExternal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             230u8, 207u8, 43u8, 137u8, 173u8, 97u8, 143u8, 183u8, 193u8,
                             78u8, 252u8, 104u8, 237u8, 32u8, 151u8, 164u8, 91u8, 247u8,
@@ -11530,9 +12196,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelReferendum>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelReferendum>()?
+                    };
+                    if runtime_call_hash
                         == [
                             107u8, 144u8, 114u8, 224u8, 39u8, 217u8, 156u8, 202u8, 62u8,
                             4u8, 196u8, 63u8, 145u8, 196u8, 107u8, 241u8, 3u8, 61u8,
@@ -11567,9 +12236,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelQueued>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelQueued>()?
+                    };
+                    if runtime_call_hash
                         == [
                             130u8, 218u8, 212u8, 143u8, 89u8, 134u8, 207u8, 161u8, 165u8,
                             202u8, 237u8, 237u8, 81u8, 125u8, 165u8, 147u8, 222u8, 198u8,
@@ -11619,9 +12291,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Delegate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Delegate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             33u8, 155u8, 180u8, 53u8, 39u8, 251u8, 59u8, 100u8, 16u8,
                             124u8, 209u8, 40u8, 42u8, 152u8, 3u8, 109u8, 97u8, 211u8,
@@ -11664,9 +12339,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Undelegate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Undelegate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             165u8, 40u8, 183u8, 209u8, 57u8, 153u8, 111u8, 29u8, 114u8,
                             109u8, 107u8, 235u8, 97u8, 61u8, 53u8, 155u8, 44u8, 245u8,
@@ -11698,9 +12376,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClearPublicProposals>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClearPublicProposals>()?
+                    };
+                    if runtime_call_hash
                         == [
                             59u8, 126u8, 254u8, 223u8, 252u8, 225u8, 75u8, 185u8, 188u8,
                             181u8, 42u8, 179u8, 211u8, 73u8, 12u8, 141u8, 243u8, 197u8,
@@ -11738,9 +12419,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NotePreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NotePreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             121u8, 179u8, 204u8, 32u8, 104u8, 133u8, 99u8, 153u8, 226u8,
                             190u8, 89u8, 121u8, 232u8, 154u8, 89u8, 133u8, 124u8, 222u8,
@@ -11769,9 +12453,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NotePreimageOperational>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NotePreimageOperational>()?
+                    };
+                    if runtime_call_hash
                         == [
                             102u8, 20u8, 213u8, 32u8, 64u8, 28u8, 150u8, 241u8, 173u8,
                             182u8, 201u8, 70u8, 52u8, 211u8, 95u8, 211u8, 127u8, 12u8,
@@ -11811,9 +12498,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NoteImminentPreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NoteImminentPreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             240u8, 77u8, 42u8, 178u8, 110u8, 117u8, 152u8, 158u8, 64u8,
                             26u8, 49u8, 37u8, 177u8, 178u8, 203u8, 227u8, 23u8, 251u8,
@@ -11842,9 +12532,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NoteImminentPreimageOperational>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NoteImminentPreimageOperational>()?
+                    };
+                    if runtime_call_hash
                         == [
                             119u8, 17u8, 140u8, 81u8, 7u8, 103u8, 162u8, 112u8, 160u8,
                             179u8, 116u8, 34u8, 126u8, 150u8, 64u8, 117u8, 93u8, 225u8,
@@ -11888,9 +12581,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReapPreimage>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReapPreimage>()?
+                    };
+                    if runtime_call_hash
                         == [
                             45u8, 191u8, 46u8, 19u8, 87u8, 216u8, 48u8, 29u8, 124u8,
                             205u8, 39u8, 178u8, 158u8, 95u8, 163u8, 116u8, 232u8, 58u8,
@@ -11928,9 +12624,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Unlock>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Unlock>()?
+                    };
+                    if runtime_call_hash
                         == [
                             106u8, 17u8, 189u8, 71u8, 208u8, 26u8, 49u8, 71u8, 162u8,
                             196u8, 126u8, 192u8, 242u8, 239u8, 77u8, 196u8, 62u8, 171u8,
@@ -11985,9 +12684,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveVote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveVote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             33u8, 72u8, 14u8, 166u8, 152u8, 18u8, 232u8, 153u8, 163u8,
                             96u8, 146u8, 180u8, 98u8, 155u8, 119u8, 75u8, 247u8, 175u8,
@@ -12031,9 +12733,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveOtherVote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveOtherVote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             43u8, 194u8, 32u8, 219u8, 87u8, 143u8, 240u8, 34u8, 236u8,
                             232u8, 128u8, 7u8, 99u8, 113u8, 106u8, 124u8, 92u8, 115u8,
@@ -12063,9 +12768,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<EnactProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<EnactProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             246u8, 188u8, 9u8, 244u8, 56u8, 81u8, 201u8, 59u8, 212u8,
                             11u8, 204u8, 7u8, 173u8, 7u8, 212u8, 34u8, 173u8, 248u8,
@@ -12112,9 +12820,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Blacklist>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Blacklist>()?
+                    };
+                    if runtime_call_hash
                         == [
                             105u8, 99u8, 153u8, 150u8, 122u8, 234u8, 105u8, 238u8, 152u8,
                             152u8, 121u8, 181u8, 133u8, 246u8, 159u8, 35u8, 8u8, 65u8,
@@ -12152,9 +12863,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             26u8, 117u8, 180u8, 24u8, 12u8, 177u8, 77u8, 254u8, 113u8,
                             53u8, 146u8, 48u8, 164u8, 255u8, 45u8, 205u8, 207u8, 46u8,
@@ -12557,9 +13271,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PublicPropCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PublicPropCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             91u8, 14u8, 171u8, 94u8, 37u8, 157u8, 46u8, 157u8, 254u8,
                             13u8, 68u8, 144u8, 23u8, 146u8, 128u8, 159u8, 9u8, 174u8,
@@ -12588,9 +13305,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PublicProps>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PublicProps>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             78u8, 208u8, 211u8, 20u8, 85u8, 237u8, 161u8, 149u8, 99u8,
                             158u8, 6u8, 54u8, 204u8, 228u8, 132u8, 10u8, 75u8, 247u8,
@@ -12621,9 +13341,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DepositOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DepositOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             116u8, 57u8, 200u8, 96u8, 150u8, 62u8, 162u8, 169u8, 28u8,
                             18u8, 134u8, 161u8, 210u8, 217u8, 80u8, 225u8, 22u8, 185u8,
@@ -12647,9 +13370,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, DepositOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DepositOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DepositOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             116u8, 57u8, 200u8, 96u8, 150u8, 62u8, 162u8, 169u8, 28u8,
                             18u8, 134u8, 161u8, 210u8, 217u8, 80u8, 225u8, 22u8, 185u8,
@@ -12678,9 +13404,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Preimages>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Preimages>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             20u8, 82u8, 223u8, 51u8, 178u8, 115u8, 71u8, 83u8, 23u8,
                             15u8, 85u8, 66u8, 0u8, 69u8, 68u8, 20u8, 28u8, 159u8, 74u8,
@@ -12703,9 +13432,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Preimages<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Preimages>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Preimages>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             20u8, 82u8, 223u8, 51u8, 178u8, 115u8, 71u8, 83u8, 23u8,
                             15u8, 85u8, 66u8, 0u8, 69u8, 68u8, 20u8, 28u8, 159u8, 74u8,
@@ -12724,9 +13456,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReferendumCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReferendumCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             153u8, 210u8, 106u8, 244u8, 156u8, 70u8, 124u8, 251u8, 123u8,
                             75u8, 7u8, 189u8, 199u8, 145u8, 95u8, 119u8, 137u8, 11u8,
@@ -12750,9 +13485,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<LowestUnbaked>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<LowestUnbaked>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             4u8, 51u8, 108u8, 11u8, 48u8, 165u8, 19u8, 251u8, 182u8,
                             76u8, 163u8, 73u8, 227u8, 2u8, 212u8, 74u8, 128u8, 27u8,
@@ -12786,9 +13524,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReferendumInfoOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReferendumInfoOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             112u8, 206u8, 173u8, 93u8, 255u8, 76u8, 85u8, 122u8, 24u8,
                             97u8, 177u8, 67u8, 44u8, 143u8, 53u8, 159u8, 206u8, 135u8,
@@ -12812,9 +13553,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ReferendumInfoOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReferendumInfoOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReferendumInfoOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             112u8, 206u8, 173u8, 93u8, 255u8, 76u8, 85u8, 122u8, 24u8,
                             97u8, 177u8, 67u8, 44u8, 143u8, 53u8, 159u8, 206u8, 135u8,
@@ -12843,9 +13587,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VotingOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VotingOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             194u8, 13u8, 151u8, 207u8, 194u8, 79u8, 233u8, 214u8, 193u8,
                             52u8, 78u8, 62u8, 71u8, 35u8, 139u8, 11u8, 41u8, 163u8,
@@ -12873,9 +13620,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, VotingOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VotingOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VotingOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             194u8, 13u8, 151u8, 207u8, 194u8, 79u8, 233u8, 214u8, 193u8,
                             52u8, 78u8, 62u8, 71u8, 35u8, 139u8, 11u8, 41u8, 163u8,
@@ -12895,9 +13645,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<LastTabledWasExternal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<LastTabledWasExternal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             3u8, 67u8, 106u8, 1u8, 89u8, 204u8, 4u8, 145u8, 121u8, 44u8,
                             34u8, 76u8, 18u8, 206u8, 65u8, 214u8, 222u8, 82u8, 31u8,
@@ -12928,9 +13681,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextExternal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextExternal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             167u8, 226u8, 113u8, 10u8, 12u8, 157u8, 190u8, 117u8, 233u8,
                             177u8, 254u8, 126u8, 2u8, 55u8, 100u8, 249u8, 78u8, 127u8,
@@ -12957,9 +13713,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Blacklist>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Blacklist>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             9u8, 76u8, 174u8, 143u8, 210u8, 103u8, 197u8, 219u8, 152u8,
                             134u8, 67u8, 78u8, 109u8, 39u8, 246u8, 214u8, 3u8, 51u8,
@@ -12982,9 +13741,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Blacklist<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Blacklist>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Blacklist>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             9u8, 76u8, 174u8, 143u8, 210u8, 103u8, 197u8, 219u8, 152u8,
                             134u8, 67u8, 78u8, 109u8, 39u8, 246u8, 214u8, 3u8, 51u8,
@@ -13004,9 +13766,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Cancellations>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Cancellations>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 55u8, 142u8, 79u8, 35u8, 110u8, 215u8, 163u8, 134u8,
                             172u8, 171u8, 71u8, 180u8, 175u8, 7u8, 29u8, 126u8, 141u8,
@@ -13031,9 +13796,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Cancellations<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Cancellations>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Cancellations>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 55u8, 142u8, 79u8, 35u8, 110u8, 215u8, 163u8, 134u8,
                             172u8, 171u8, 71u8, 180u8, 175u8, 7u8, 29u8, 126u8, 141u8,
@@ -13056,9 +13824,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::pallet_democracy::Releases>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StorageVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StorageVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             39u8, 219u8, 134u8, 64u8, 250u8, 96u8, 95u8, 156u8, 100u8,
                             236u8, 18u8, 78u8, 59u8, 146u8, 5u8, 245u8, 113u8, 125u8,
@@ -13501,9 +14272,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMembers>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMembers>()?
+                    };
+                    if runtime_call_hash
                         == [
                             228u8, 186u8, 17u8, 12u8, 231u8, 231u8, 139u8, 15u8, 96u8,
                             200u8, 68u8, 27u8, 61u8, 106u8, 245u8, 199u8, 120u8, 141u8,
@@ -13547,9 +14321,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Execute>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Execute>()?
+                    };
+                    if runtime_call_hash
                         == [
                             170u8, 77u8, 65u8, 3u8, 95u8, 88u8, 81u8, 103u8, 220u8, 72u8,
                             237u8, 80u8, 181u8, 46u8, 196u8, 106u8, 142u8, 55u8, 244u8,
@@ -13609,9 +14386,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Propose>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Propose>()?
+                    };
+                    if runtime_call_hash
                         == [
                             180u8, 170u8, 72u8, 21u8, 96u8, 25u8, 177u8, 147u8, 98u8,
                             143u8, 186u8, 112u8, 99u8, 197u8, 146u8, 170u8, 35u8, 195u8,
@@ -13660,9 +14440,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Vote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Vote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             184u8, 236u8, 80u8, 133u8, 26u8, 207u8, 3u8, 2u8, 120u8,
                             27u8, 38u8, 135u8, 195u8, 86u8, 169u8, 229u8, 125u8, 253u8,
@@ -13729,9 +14512,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Close>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Close>()?
+                    };
+                    if runtime_call_hash
                         == [
                             242u8, 208u8, 108u8, 202u8, 24u8, 139u8, 8u8, 150u8, 108u8,
                             217u8, 30u8, 209u8, 178u8, 1u8, 80u8, 25u8, 154u8, 146u8,
@@ -13778,9 +14564,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<DisapproveProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<DisapproveProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             199u8, 113u8, 221u8, 167u8, 60u8, 241u8, 77u8, 166u8, 205u8,
                             191u8, 183u8, 121u8, 191u8, 206u8, 230u8, 212u8, 215u8,
@@ -13963,9 +14752,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proposals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proposals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 75u8, 108u8, 245u8, 86u8, 50u8, 107u8, 212u8, 244u8,
                             113u8, 232u8, 168u8, 194u8, 33u8, 247u8, 97u8, 54u8, 115u8,
@@ -13991,9 +14783,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::polkadot_runtime::Call>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
                             26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
@@ -14015,9 +14810,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ProposalOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
                             26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
@@ -14044,9 +14842,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             145u8, 223u8, 203u8, 2u8, 137u8, 33u8, 22u8, 239u8, 175u8,
                             149u8, 254u8, 185u8, 0u8, 139u8, 71u8, 134u8, 109u8, 95u8,
@@ -14068,9 +14869,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Voting<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             145u8, 223u8, 203u8, 2u8, 137u8, 33u8, 22u8, 239u8, 175u8,
                             149u8, 254u8, 185u8, 0u8, 139u8, 71u8, 134u8, 109u8, 95u8,
@@ -14089,9 +14893,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             132u8, 145u8, 78u8, 218u8, 51u8, 189u8, 55u8, 172u8, 143u8,
                             33u8, 140u8, 99u8, 124u8, 208u8, 57u8, 232u8, 154u8, 110u8,
@@ -14116,9 +14923,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Members>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Members>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 91u8, 140u8, 173u8, 238u8, 221u8, 4u8, 132u8, 238u8,
                             99u8, 195u8, 142u8, 10u8, 35u8, 210u8, 227u8, 22u8, 72u8,
@@ -14143,9 +14953,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Prime>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Prime>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             70u8, 101u8, 20u8, 160u8, 173u8, 87u8, 190u8, 85u8, 60u8,
                             249u8, 144u8, 77u8, 175u8, 195u8, 51u8, 196u8, 234u8, 62u8,
@@ -14301,9 +15114,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMembers>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMembers>()?
+                    };
+                    if runtime_call_hash
                         == [
                             228u8, 186u8, 17u8, 12u8, 231u8, 231u8, 139u8, 15u8, 96u8,
                             200u8, 68u8, 27u8, 61u8, 106u8, 245u8, 199u8, 120u8, 141u8,
@@ -14347,9 +15163,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Execute>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Execute>()?
+                    };
+                    if runtime_call_hash
                         == [
                             170u8, 77u8, 65u8, 3u8, 95u8, 88u8, 81u8, 103u8, 220u8, 72u8,
                             237u8, 80u8, 181u8, 46u8, 196u8, 106u8, 142u8, 55u8, 244u8,
@@ -14409,9 +15228,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Propose>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Propose>()?
+                    };
+                    if runtime_call_hash
                         == [
                             180u8, 170u8, 72u8, 21u8, 96u8, 25u8, 177u8, 147u8, 98u8,
                             143u8, 186u8, 112u8, 99u8, 197u8, 146u8, 170u8, 35u8, 195u8,
@@ -14460,9 +15282,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Vote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Vote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             184u8, 236u8, 80u8, 133u8, 26u8, 207u8, 3u8, 2u8, 120u8,
                             27u8, 38u8, 135u8, 195u8, 86u8, 169u8, 229u8, 125u8, 253u8,
@@ -14529,9 +15354,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Close>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Close>()?
+                    };
+                    if runtime_call_hash
                         == [
                             242u8, 208u8, 108u8, 202u8, 24u8, 139u8, 8u8, 150u8, 108u8,
                             217u8, 30u8, 209u8, 178u8, 1u8, 80u8, 25u8, 154u8, 146u8,
@@ -14578,9 +15406,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<DisapproveProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<DisapproveProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             199u8, 113u8, 221u8, 167u8, 60u8, 241u8, 77u8, 166u8, 205u8,
                             191u8, 183u8, 121u8, 191u8, 206u8, 230u8, 212u8, 215u8,
@@ -14763,9 +15594,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proposals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proposals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 75u8, 108u8, 245u8, 86u8, 50u8, 107u8, 212u8, 244u8,
                             113u8, 232u8, 168u8, 194u8, 33u8, 247u8, 97u8, 54u8, 115u8,
@@ -14791,9 +15625,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::polkadot_runtime::Call>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
                             26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
@@ -14815,9 +15652,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ProposalOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
                             26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
@@ -14844,9 +15684,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             145u8, 223u8, 203u8, 2u8, 137u8, 33u8, 22u8, 239u8, 175u8,
                             149u8, 254u8, 185u8, 0u8, 139u8, 71u8, 134u8, 109u8, 95u8,
@@ -14868,9 +15711,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Voting<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             145u8, 223u8, 203u8, 2u8, 137u8, 33u8, 22u8, 239u8, 175u8,
                             149u8, 254u8, 185u8, 0u8, 139u8, 71u8, 134u8, 109u8, 95u8,
@@ -14889,9 +15735,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             132u8, 145u8, 78u8, 218u8, 51u8, 189u8, 55u8, 172u8, 143u8,
                             33u8, 140u8, 99u8, 124u8, 208u8, 57u8, 232u8, 154u8, 110u8,
@@ -14916,9 +15765,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Members>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Members>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 91u8, 140u8, 173u8, 238u8, 221u8, 4u8, 132u8, 238u8,
                             99u8, 195u8, 142u8, 10u8, 35u8, 210u8, 227u8, 22u8, 72u8,
@@ -14943,9 +15795,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Prime>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Prime>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             70u8, 101u8, 20u8, 160u8, 173u8, 87u8, 190u8, 85u8, 60u8,
                             249u8, 144u8, 77u8, 175u8, 195u8, 51u8, 196u8, 234u8, 62u8,
@@ -15080,9 +15935,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Vote>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Vote>()?
+                    };
+                    if runtime_call_hash
                         == [
                             245u8, 122u8, 160u8, 64u8, 234u8, 121u8, 191u8, 224u8, 12u8,
                             16u8, 153u8, 70u8, 41u8, 236u8, 211u8, 145u8, 238u8, 112u8,
@@ -15114,9 +15972,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveVoter>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveVoter>()?
+                    };
+                    if runtime_call_hash
                         == [
                             254u8, 46u8, 140u8, 4u8, 218u8, 45u8, 150u8, 72u8, 67u8,
                             131u8, 108u8, 201u8, 46u8, 157u8, 104u8, 161u8, 53u8, 155u8,
@@ -15159,9 +16020,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SubmitCandidacy>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SubmitCandidacy>()?
+                    };
+                    if runtime_call_hash
                         == [
                             100u8, 38u8, 146u8, 5u8, 234u8, 101u8, 193u8, 9u8, 245u8,
                             237u8, 220u8, 21u8, 36u8, 64u8, 205u8, 103u8, 11u8, 194u8,
@@ -15207,9 +16071,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RenounceCandidacy>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RenounceCandidacy>()?
+                    };
+                    if runtime_call_hash
                         == [
                             184u8, 45u8, 220u8, 198u8, 21u8, 54u8, 15u8, 235u8, 192u8,
                             78u8, 96u8, 172u8, 12u8, 152u8, 147u8, 183u8, 172u8, 85u8,
@@ -15255,9 +16122,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveMember>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveMember>()?
+                    };
+                    if runtime_call_hash
                         == [
                             0u8, 99u8, 154u8, 250u8, 4u8, 102u8, 172u8, 220u8, 86u8,
                             147u8, 113u8, 248u8, 152u8, 189u8, 179u8, 149u8, 73u8, 97u8,
@@ -15299,9 +16169,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CleanDefunctVoters>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CleanDefunctVoters>()?
+                    };
+                    if runtime_call_hash
                         == [
                             80u8, 248u8, 122u8, 6u8, 88u8, 255u8, 17u8, 206u8, 104u8,
                             208u8, 66u8, 191u8, 118u8, 163u8, 154u8, 9u8, 37u8, 106u8,
@@ -15485,9 +16358,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Members>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Members>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             193u8, 166u8, 79u8, 96u8, 31u8, 4u8, 133u8, 133u8, 115u8,
                             236u8, 253u8, 177u8, 176u8, 10u8, 50u8, 97u8, 254u8, 234u8,
@@ -15520,9 +16396,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<RunnersUp>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<RunnersUp>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             59u8, 65u8, 218u8, 225u8, 49u8, 140u8, 168u8, 143u8, 195u8,
                             106u8, 207u8, 181u8, 157u8, 129u8, 140u8, 122u8, 145u8,
@@ -15555,9 +16434,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Candidates>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Candidates>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             172u8, 196u8, 249u8, 114u8, 195u8, 161u8, 43u8, 219u8, 208u8,
                             127u8, 144u8, 87u8, 13u8, 253u8, 114u8, 209u8, 199u8, 65u8,
@@ -15580,9 +16462,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ElectionRounds>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ElectionRounds>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             144u8, 146u8, 10u8, 32u8, 149u8, 147u8, 59u8, 205u8, 61u8,
                             246u8, 28u8, 169u8, 130u8, 136u8, 143u8, 104u8, 253u8, 86u8,
@@ -15613,9 +16498,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             107u8, 14u8, 228u8, 167u8, 43u8, 105u8, 221u8, 70u8, 234u8,
                             157u8, 36u8, 16u8, 63u8, 225u8, 89u8, 111u8, 201u8, 172u8,
@@ -15642,9 +16530,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Voting<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Voting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Voting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             107u8, 14u8, 228u8, 167u8, 43u8, 105u8, 221u8, 70u8, 234u8,
                             157u8, 36u8, 16u8, 63u8, 225u8, 89u8, 111u8, 201u8, 172u8,
@@ -15944,9 +16835,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddMember>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddMember>()?
+                    };
+                    if runtime_call_hash
                         == [
                             1u8, 149u8, 115u8, 222u8, 93u8, 9u8, 208u8, 58u8, 22u8,
                             148u8, 215u8, 141u8, 204u8, 48u8, 107u8, 210u8, 202u8, 165u8,
@@ -15977,9 +16871,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveMember>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveMember>()?
+                    };
+                    if runtime_call_hash
                         == [
                             137u8, 249u8, 148u8, 139u8, 147u8, 47u8, 226u8, 228u8, 139u8,
                             219u8, 109u8, 128u8, 254u8, 51u8, 227u8, 154u8, 105u8, 91u8,
@@ -16013,9 +16910,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SwapMember>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SwapMember>()?
+                    };
+                    if runtime_call_hash
                         == [
                             159u8, 62u8, 254u8, 117u8, 56u8, 185u8, 99u8, 29u8, 146u8,
                             210u8, 40u8, 77u8, 169u8, 224u8, 215u8, 34u8, 106u8, 95u8,
@@ -16047,9 +16947,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ResetMembers>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ResetMembers>()?
+                    };
+                    if runtime_call_hash
                         == [
                             246u8, 84u8, 91u8, 191u8, 61u8, 245u8, 171u8, 80u8, 18u8,
                             120u8, 61u8, 86u8, 23u8, 115u8, 161u8, 203u8, 128u8, 34u8,
@@ -16082,9 +16985,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ChangeKey>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ChangeKey>()?
+                    };
+                    if runtime_call_hash
                         == [
                             198u8, 93u8, 41u8, 52u8, 241u8, 11u8, 225u8, 82u8, 30u8,
                             114u8, 111u8, 204u8, 13u8, 31u8, 34u8, 82u8, 171u8, 58u8,
@@ -16115,9 +17021,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetPrime>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetPrime>()?
+                    };
+                    if runtime_call_hash
                         == [
                             185u8, 53u8, 61u8, 154u8, 234u8, 77u8, 195u8, 126u8, 19u8,
                             39u8, 78u8, 205u8, 109u8, 210u8, 137u8, 245u8, 128u8, 110u8,
@@ -16147,9 +17056,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClearPrime>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClearPrime>()?
+                    };
+                    if runtime_call_hash
                         == [
                             186u8, 182u8, 225u8, 90u8, 71u8, 124u8, 69u8, 100u8, 234u8,
                             25u8, 53u8, 23u8, 182u8, 32u8, 176u8, 81u8, 54u8, 140u8,
@@ -16246,9 +17158,12 @@ pub mod api {
                     ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Members>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Members>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 91u8, 140u8, 173u8, 238u8, 221u8, 4u8, 132u8, 238u8,
                             99u8, 195u8, 142u8, 10u8, 35u8, 210u8, 227u8, 22u8, 72u8,
@@ -16273,9 +17188,12 @@ pub mod api {
                     ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Prime>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Prime>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             70u8, 101u8, 20u8, 160u8, 173u8, 87u8, 190u8, 85u8, 60u8,
                             249u8, 144u8, 77u8, 175u8, 195u8, 51u8, 196u8, 234u8, 62u8,
@@ -16376,9 +17294,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProposeSpend>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProposeSpend>()?
+                    };
+                    if runtime_call_hash
                         == [
                             117u8, 11u8, 194u8, 76u8, 160u8, 114u8, 119u8, 94u8, 47u8,
                             239u8, 193u8, 54u8, 42u8, 208u8, 225u8, 47u8, 22u8, 90u8,
@@ -16415,9 +17336,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RejectProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RejectProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             153u8, 238u8, 223u8, 212u8, 86u8, 178u8, 184u8, 150u8, 117u8,
                             91u8, 69u8, 30u8, 196u8, 134u8, 56u8, 54u8, 236u8, 145u8,
@@ -16455,9 +17379,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ApproveProposal>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ApproveProposal>()?
+                    };
+                    if runtime_call_hash
                         == [
                             191u8, 81u8, 78u8, 230u8, 230u8, 192u8, 144u8, 232u8, 81u8,
                             70u8, 227u8, 212u8, 194u8, 228u8, 231u8, 147u8, 57u8, 222u8,
@@ -16619,9 +17546,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ProposalCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ProposalCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             132u8, 145u8, 78u8, 218u8, 51u8, 189u8, 55u8, 172u8, 143u8,
                             33u8, 140u8, 99u8, 124u8, 208u8, 57u8, 232u8, 154u8, 110u8,
@@ -16652,9 +17582,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proposals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proposals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             46u8, 242u8, 203u8, 56u8, 166u8, 200u8, 95u8, 110u8, 47u8,
                             71u8, 71u8, 45u8, 12u8, 93u8, 222u8, 120u8, 40u8, 130u8,
@@ -16676,9 +17609,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Proposals<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proposals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proposals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             46u8, 242u8, 203u8, 56u8, 166u8, 200u8, 95u8, 110u8, 47u8,
                             71u8, 71u8, 45u8, 12u8, 93u8, 222u8, 120u8, 40u8, 130u8,
@@ -16701,9 +17637,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Approvals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Approvals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             152u8, 185u8, 127u8, 54u8, 169u8, 155u8, 124u8, 22u8, 142u8,
                             132u8, 254u8, 197u8, 162u8, 152u8, 15u8, 18u8, 192u8, 138u8,
@@ -17035,9 +17974,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Claim>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Claim>()?
+                    };
+                    if runtime_call_hash
                         == [
                             8u8, 205u8, 188u8, 57u8, 197u8, 203u8, 156u8, 65u8, 246u8,
                             236u8, 199u8, 6u8, 152u8, 34u8, 251u8, 178u8, 206u8, 127u8,
@@ -17092,9 +18034,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<MintClaim>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<MintClaim>()?
+                    };
+                    if runtime_call_hash
                         == [
                             10u8, 141u8, 200u8, 102u8, 21u8, 205u8, 178u8, 247u8, 154u8,
                             245u8, 172u8, 178u8, 26u8, 249u8, 179u8, 236u8, 198u8, 4u8,
@@ -17155,9 +18100,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClaimAttest>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClaimAttest>()?
+                    };
+                    if runtime_call_hash
                         == [
                             116u8, 181u8, 28u8, 215u8, 245u8, 86u8, 215u8, 114u8, 201u8,
                             250u8, 168u8, 43u8, 91u8, 74u8, 0u8, 61u8, 40u8, 135u8, 6u8,
@@ -17206,9 +18154,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Attest>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Attest>()?
+                    };
+                    if runtime_call_hash
                         == [
                             7u8, 206u8, 87u8, 155u8, 225u8, 220u8, 145u8, 206u8, 87u8,
                             132u8, 171u8, 67u8, 104u8, 91u8, 247u8, 39u8, 114u8, 156u8,
@@ -17240,9 +18191,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<MoveClaim>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<MoveClaim>()?
+                    };
+                    if runtime_call_hash
                         == [
                             7u8, 59u8, 57u8, 165u8, 149u8, 105u8, 40u8, 11u8, 62u8,
                             212u8, 35u8, 185u8, 38u8, 244u8, 14u8, 170u8, 73u8, 160u8,
@@ -17363,9 +18317,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Claims>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Claims>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             66u8, 232u8, 109u8, 190u8, 15u8, 207u8, 114u8, 12u8, 91u8,
                             228u8, 103u8, 37u8, 152u8, 245u8, 51u8, 121u8, 179u8, 228u8,
@@ -17386,9 +18343,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Claims<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Claims>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Claims>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             66u8, 232u8, 109u8, 190u8, 15u8, 207u8, 114u8, 12u8, 91u8,
                             228u8, 103u8, 37u8, 152u8, 245u8, 51u8, 121u8, 179u8, 228u8,
@@ -17406,9 +18366,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Total>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Total>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             162u8, 59u8, 237u8, 63u8, 23u8, 44u8, 74u8, 169u8, 131u8,
                             166u8, 174u8, 61u8, 127u8, 165u8, 32u8, 115u8, 73u8, 171u8,
@@ -17441,9 +18404,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Vesting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Vesting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 177u8, 83u8, 172u8, 137u8, 213u8, 11u8, 74u8, 192u8,
                             92u8, 96u8, 63u8, 139u8, 156u8, 62u8, 207u8, 47u8, 156u8,
@@ -17468,9 +18434,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Vesting<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Vesting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Vesting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 177u8, 83u8, 172u8, 137u8, 213u8, 11u8, 74u8, 192u8,
                             92u8, 96u8, 63u8, 139u8, 156u8, 62u8, 207u8, 47u8, 156u8,
@@ -17494,9 +18463,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Signing>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Signing>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             85u8, 167u8, 23u8, 218u8, 101u8, 189u8, 129u8, 64u8, 189u8,
                             159u8, 108u8, 22u8, 234u8, 189u8, 122u8, 145u8, 225u8, 202u8,
@@ -17518,9 +18490,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Signing<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Signing>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Signing>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             85u8, 167u8, 23u8, 218u8, 101u8, 189u8, 129u8, 64u8, 189u8,
                             159u8, 108u8, 22u8, 234u8, 189u8, 122u8, 145u8, 225u8, 202u8,
@@ -17544,9 +18519,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Preclaims>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Preclaims>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 208u8, 119u8, 9u8, 98u8, 68u8, 27u8, 159u8, 132u8,
                             22u8, 72u8, 80u8, 83u8, 147u8, 224u8, 241u8, 98u8, 143u8,
@@ -17568,9 +18546,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Preclaims<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Preclaims>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Preclaims>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 208u8, 119u8, 9u8, 98u8, 68u8, 27u8, 159u8, 132u8,
                             22u8, 72u8, 80u8, 83u8, 147u8, 224u8, 241u8, 98u8, 143u8,
@@ -17734,9 +18715,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Vest>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Vest>()?
+                    };
+                    if runtime_call_hash
                         == [
                             123u8, 54u8, 10u8, 208u8, 154u8, 24u8, 39u8, 166u8, 64u8,
                             27u8, 74u8, 29u8, 243u8, 97u8, 155u8, 5u8, 130u8, 155u8,
@@ -17782,9 +18766,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<VestOther>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<VestOther>()?
+                    };
+                    if runtime_call_hash
                         == [
                             220u8, 214u8, 201u8, 84u8, 89u8, 137u8, 126u8, 80u8, 57u8,
                             1u8, 178u8, 144u8, 1u8, 79u8, 232u8, 136u8, 62u8, 227u8,
@@ -17836,9 +18823,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<VestedTransfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<VestedTransfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             117u8, 107u8, 28u8, 234u8, 240u8, 253u8, 122u8, 25u8, 134u8,
                             41u8, 162u8, 36u8, 157u8, 82u8, 214u8, 174u8, 132u8, 24u8,
@@ -17895,9 +18885,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceVestedTransfer>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceVestedTransfer>()?
+                    };
+                    if runtime_call_hash
                         == [
                             32u8, 195u8, 99u8, 57u8, 6u8, 182u8, 106u8, 47u8, 9u8, 19u8,
                             255u8, 80u8, 244u8, 205u8, 129u8, 78u8, 6u8, 215u8, 224u8,
@@ -17951,9 +18944,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<MergeSchedules>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<MergeSchedules>()?
+                    };
+                    if runtime_call_hash
                         == [
                             185u8, 253u8, 214u8, 24u8, 208u8, 226u8, 0u8, 212u8, 92u8,
                             174u8, 252u8, 44u8, 250u8, 96u8, 66u8, 55u8, 88u8, 252u8,
@@ -18048,9 +19044,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Vesting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Vesting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             237u8, 216u8, 145u8, 89u8, 52u8, 38u8, 126u8, 212u8, 173u8,
                             3u8, 57u8, 156u8, 208u8, 160u8, 249u8, 177u8, 83u8, 140u8,
@@ -18072,9 +19071,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Vesting<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Vesting>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Vesting>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             237u8, 216u8, 145u8, 89u8, 52u8, 38u8, 126u8, 212u8, 173u8,
                             3u8, 57u8, 156u8, 208u8, 160u8, 249u8, 177u8, 83u8, 140u8,
@@ -18097,9 +19099,12 @@ pub mod api {
                     runtime_types::pallet_vesting::Releases,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<StorageVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<StorageVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             50u8, 143u8, 26u8, 88u8, 129u8, 31u8, 61u8, 118u8, 19u8,
                             202u8, 119u8, 160u8, 34u8, 219u8, 60u8, 57u8, 189u8, 66u8,
@@ -18271,9 +19276,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Batch>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Batch>()?
+                    };
+                    if runtime_call_hash
                         == [
                             102u8, 106u8, 179u8, 188u8, 99u8, 111u8, 210u8, 69u8, 179u8,
                             206u8, 207u8, 163u8, 116u8, 184u8, 55u8, 228u8, 157u8, 241u8,
@@ -18315,9 +19323,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AsDerivative>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AsDerivative>()?
+                    };
+                    if runtime_call_hash
                         == [
                             195u8, 145u8, 176u8, 37u8, 226u8, 104u8, 213u8, 93u8, 246u8,
                             7u8, 117u8, 101u8, 123u8, 125u8, 244u8, 74u8, 67u8, 118u8,
@@ -18362,9 +19373,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<BatchAll>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<BatchAll>()?
+                    };
+                    if runtime_call_hash
                         == [
                             199u8, 220u8, 25u8, 148u8, 69u8, 105u8, 234u8, 113u8, 221u8,
                             220u8, 186u8, 34u8, 184u8, 101u8, 41u8, 87u8, 134u8, 92u8,
@@ -18403,9 +19417,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<DispatchAs>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<DispatchAs>()?
+                    };
+                    if runtime_call_hash
                         == [
                             188u8, 19u8, 178u8, 56u8, 121u8, 41u8, 46u8, 232u8, 118u8,
                             56u8, 66u8, 6u8, 174u8, 184u8, 92u8, 66u8, 178u8, 213u8,
@@ -18712,9 +19729,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddRegistrar>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddRegistrar>()?
+                    };
+                    if runtime_call_hash
                         == [
                             252u8, 233u8, 148u8, 186u8, 42u8, 127u8, 183u8, 107u8, 205u8,
                             34u8, 63u8, 170u8, 82u8, 218u8, 141u8, 136u8, 174u8, 45u8,
@@ -18761,9 +19781,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetIdentity>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetIdentity>()?
+                    };
+                    if runtime_call_hash
                         == [
                             174u8, 5u8, 84u8, 201u8, 219u8, 147u8, 45u8, 241u8, 46u8,
                             192u8, 221u8, 20u8, 233u8, 128u8, 206u8, 1u8, 71u8, 244u8,
@@ -18817,9 +19840,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetSubs>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetSubs>()?
+                    };
+                    if runtime_call_hash
                         == [
                             157u8, 141u8, 52u8, 45u8, 109u8, 252u8, 84u8, 0u8, 38u8,
                             209u8, 193u8, 212u8, 177u8, 47u8, 219u8, 132u8, 254u8, 234u8,
@@ -18864,9 +19890,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClearIdentity>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClearIdentity>()?
+                    };
+                    if runtime_call_hash
                         == [
                             75u8, 44u8, 74u8, 122u8, 149u8, 202u8, 114u8, 230u8, 0u8,
                             255u8, 140u8, 122u8, 14u8, 196u8, 205u8, 249u8, 220u8, 94u8,
@@ -18918,9 +19947,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RequestJudgement>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RequestJudgement>()?
+                    };
+                    if runtime_call_hash
                         == [
                             90u8, 137u8, 162u8, 2u8, 124u8, 245u8, 7u8, 200u8, 235u8,
                             138u8, 217u8, 247u8, 77u8, 87u8, 152u8, 2u8, 13u8, 175u8,
@@ -18965,9 +19997,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelRequest>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelRequest>()?
+                    };
+                    if runtime_call_hash
                         == [
                             153u8, 44u8, 7u8, 70u8, 91u8, 44u8, 138u8, 219u8, 118u8,
                             67u8, 166u8, 133u8, 90u8, 234u8, 248u8, 42u8, 108u8, 51u8,
@@ -19009,9 +20044,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetFee>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetFee>()?
+                    };
+                    if runtime_call_hash
                         == [
                             222u8, 115u8, 155u8, 44u8, 68u8, 179u8, 201u8, 247u8, 141u8,
                             226u8, 124u8, 20u8, 188u8, 47u8, 190u8, 21u8, 212u8, 192u8,
@@ -19053,9 +20091,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetAccountId>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetAccountId>()?
+                    };
+                    if runtime_call_hash
                         == [
                             191u8, 243u8, 30u8, 116u8, 109u8, 235u8, 23u8, 106u8, 24u8,
                             23u8, 80u8, 203u8, 68u8, 40u8, 116u8, 38u8, 68u8, 161u8,
@@ -19099,9 +20140,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetFields>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetFields>()?
+                    };
+                    if runtime_call_hash
                         == [
                             253u8, 43u8, 154u8, 17u8, 161u8, 187u8, 72u8, 96u8, 20u8,
                             240u8, 97u8, 43u8, 242u8, 79u8, 115u8, 38u8, 130u8, 243u8,
@@ -19155,9 +20199,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProvideJudgement>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProvideJudgement>()?
+                    };
+                    if runtime_call_hash
                         == [
                             238u8, 210u8, 71u8, 239u8, 251u8, 52u8, 145u8, 71u8, 68u8,
                             185u8, 103u8, 82u8, 21u8, 164u8, 128u8, 189u8, 123u8, 141u8,
@@ -19211,9 +20258,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<KillIdentity>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<KillIdentity>()?
+                    };
+                    if runtime_call_hash
                         == [
                             91u8, 164u8, 242u8, 44u8, 253u8, 203u8, 102u8, 89u8, 218u8,
                             150u8, 227u8, 56u8, 179u8, 135u8, 93u8, 107u8, 166u8, 157u8,
@@ -19252,9 +20302,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddSub>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddSub>()?
+                    };
+                    if runtime_call_hash
                         == [
                             105u8, 38u8, 167u8, 99u8, 224u8, 183u8, 88u8, 133u8, 180u8,
                             78u8, 211u8, 239u8, 49u8, 128u8, 224u8, 61u8, 23u8, 249u8,
@@ -19290,9 +20343,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RenameSub>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RenameSub>()?
+                    };
+                    if runtime_call_hash
                         == [
                             17u8, 110u8, 213u8, 124u8, 4u8, 76u8, 182u8, 53u8, 102u8,
                             224u8, 240u8, 250u8, 94u8, 96u8, 181u8, 107u8, 114u8, 127u8,
@@ -19330,9 +20386,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveSub>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveSub>()?
+                    };
+                    if runtime_call_hash
                         == [
                             161u8, 114u8, 68u8, 57u8, 166u8, 240u8, 150u8, 95u8, 176u8,
                             93u8, 62u8, 67u8, 185u8, 226u8, 117u8, 97u8, 119u8, 139u8,
@@ -19369,9 +20428,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<QuitSub>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<QuitSub>()?
+                    };
+                    if runtime_call_hash
                         == [
                             62u8, 57u8, 73u8, 72u8, 119u8, 216u8, 250u8, 155u8, 57u8,
                             169u8, 157u8, 44u8, 87u8, 51u8, 63u8, 231u8, 77u8, 7u8, 0u8,
@@ -19585,9 +20647,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<IdentityOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<IdentityOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             225u8, 101u8, 83u8, 137u8, 207u8, 77u8, 139u8, 227u8, 36u8,
                             100u8, 14u8, 30u8, 197u8, 65u8, 248u8, 227u8, 175u8, 19u8,
@@ -19611,9 +20676,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, IdentityOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<IdentityOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<IdentityOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             225u8, 101u8, 83u8, 137u8, 207u8, 77u8, 139u8, 227u8, 36u8,
                             100u8, 14u8, 30u8, 197u8, 65u8, 248u8, 227u8, 175u8, 19u8,
@@ -19639,9 +20707,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SuperOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SuperOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             128u8, 234u8, 82u8, 152u8, 41u8, 4u8, 220u8, 41u8, 179u8,
                             131u8, 72u8, 121u8, 131u8, 17u8, 40u8, 87u8, 186u8, 159u8,
@@ -19664,9 +20735,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SuperOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SuperOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SuperOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             128u8, 234u8, 82u8, 152u8, 41u8, 4u8, 220u8, 41u8, 179u8,
                             131u8, 72u8, 121u8, 131u8, 17u8, 40u8, 87u8, 186u8, 159u8,
@@ -19697,9 +20771,12 @@ pub mod api {
                     ),
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SubsOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SubsOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 240u8, 238u8, 121u8, 194u8, 242u8, 139u8, 155u8, 32u8,
                             201u8, 123u8, 76u8, 116u8, 219u8, 193u8, 45u8, 251u8, 212u8,
@@ -19728,9 +20805,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SubsOf<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SubsOf>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SubsOf>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             136u8, 240u8, 238u8, 121u8, 194u8, 242u8, 139u8, 155u8, 32u8,
                             201u8, 123u8, 76u8, 116u8, 219u8, 193u8, 45u8, 251u8, 212u8,
@@ -19761,9 +20841,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Registrars>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Registrars>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             92u8, 161u8, 80u8, 77u8, 121u8, 65u8, 69u8, 26u8, 171u8,
                             158u8, 66u8, 36u8, 81u8, 1u8, 79u8, 144u8, 188u8, 236u8,
@@ -20101,9 +21184,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Proxy>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Proxy>()?
+                    };
+                    if runtime_call_hash
                         == [
                             182u8, 110u8, 37u8, 47u8, 200u8, 93u8, 71u8, 195u8, 61u8,
                             58u8, 197u8, 39u8, 17u8, 203u8, 192u8, 222u8, 55u8, 103u8,
@@ -20150,9 +21236,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddProxy>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddProxy>()?
+                    };
+                    if runtime_call_hash
                         == [
                             97u8, 149u8, 34u8, 218u8, 51u8, 242u8, 47u8, 167u8, 203u8,
                             128u8, 248u8, 193u8, 156u8, 141u8, 184u8, 221u8, 209u8, 79u8,
@@ -20197,9 +21286,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveProxy>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveProxy>()?
+                    };
+                    if runtime_call_hash
                         == [
                             246u8, 251u8, 192u8, 17u8, 128u8, 248u8, 24u8, 118u8, 127u8,
                             101u8, 140u8, 72u8, 248u8, 161u8, 187u8, 89u8, 193u8, 44u8,
@@ -20240,9 +21332,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveProxies>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveProxies>()?
+                    };
+                    if runtime_call_hash
                         == [
                             15u8, 237u8, 27u8, 166u8, 254u8, 218u8, 92u8, 5u8, 213u8,
                             239u8, 99u8, 59u8, 1u8, 26u8, 73u8, 252u8, 81u8, 94u8, 214u8,
@@ -20295,9 +21390,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Anonymous>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Anonymous>()?
+                    };
+                    if runtime_call_hash
                         == [
                             159u8, 186u8, 126u8, 58u8, 255u8, 163u8, 207u8, 66u8, 165u8,
                             182u8, 248u8, 28u8, 134u8, 186u8, 1u8, 122u8, 40u8, 64u8,
@@ -20353,9 +21451,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<KillAnonymous>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<KillAnonymous>()?
+                    };
+                    if runtime_call_hash
                         == [
                             59u8, 188u8, 45u8, 180u8, 9u8, 242u8, 36u8, 245u8, 25u8,
                             57u8, 66u8, 216u8, 82u8, 220u8, 144u8, 233u8, 83u8, 1u8,
@@ -20411,9 +21512,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Announce>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Announce>()?
+                    };
+                    if runtime_call_hash
                         == [
                             102u8, 8u8, 136u8, 179u8, 13u8, 47u8, 158u8, 24u8, 93u8,
                             196u8, 52u8, 22u8, 118u8, 98u8, 17u8, 8u8, 12u8, 51u8, 181u8,
@@ -20458,9 +21562,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RemoveAnnouncement>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveAnnouncement>()?
+                    };
+                    if runtime_call_hash
                         == [
                             209u8, 156u8, 215u8, 188u8, 225u8, 230u8, 171u8, 228u8,
                             241u8, 105u8, 43u8, 183u8, 234u8, 18u8, 170u8, 239u8, 232u8,
@@ -20505,9 +21612,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RejectAnnouncement>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RejectAnnouncement>()?
+                    };
+                    if runtime_call_hash
                         == [
                             26u8, 67u8, 197u8, 169u8, 243u8, 11u8, 94u8, 153u8, 50u8,
                             22u8, 176u8, 103u8, 88u8, 2u8, 13u8, 10u8, 96u8, 7u8, 121u8,
@@ -20560,9 +21670,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProxyAnnounced>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProxyAnnounced>()?
+                    };
+                    if runtime_call_hash
                         == [
                             4u8, 205u8, 80u8, 128u8, 70u8, 110u8, 11u8, 69u8, 145u8,
                             61u8, 218u8, 229u8, 208u8, 105u8, 190u8, 234u8, 189u8, 169u8,
@@ -20715,9 +21828,12 @@ pub mod api {
                     ),
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proxies>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proxies>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             252u8, 154u8, 187u8, 5u8, 19u8, 254u8, 127u8, 64u8, 214u8,
                             133u8, 33u8, 95u8, 47u8, 5u8, 39u8, 107u8, 27u8, 117u8,
@@ -20743,9 +21859,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Proxies<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Proxies>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Proxies>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             252u8, 154u8, 187u8, 5u8, 19u8, 254u8, 127u8, 64u8, 214u8,
                             133u8, 33u8, 95u8, 47u8, 5u8, 39u8, 107u8, 27u8, 117u8,
@@ -20776,9 +21895,12 @@ pub mod api {
                     ),
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Announcements>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Announcements>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             247u8, 243u8, 109u8, 142u8, 99u8, 156u8, 61u8, 101u8, 200u8,
                             211u8, 158u8, 60u8, 159u8, 232u8, 147u8, 125u8, 139u8, 150u8,
@@ -20803,9 +21925,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Announcements<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Announcements>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Announcements>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             247u8, 243u8, 109u8, 142u8, 99u8, 156u8, 61u8, 101u8, 200u8,
                             211u8, 158u8, 60u8, 159u8, 232u8, 147u8, 125u8, 139u8, 150u8,
@@ -21103,9 +22228,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AsMultiThreshold1>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AsMultiThreshold1>()?
+                    };
+                    if runtime_call_hash
                         == [
                             95u8, 132u8, 202u8, 110u8, 113u8, 89u8, 78u8, 7u8, 190u8,
                             143u8, 107u8, 158u8, 56u8, 3u8, 41u8, 167u8, 115u8, 34u8,
@@ -21192,9 +22320,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AsMulti>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AsMulti>()?
+                    };
+                    if runtime_call_hash
                         == [
                             248u8, 250u8, 144u8, 85u8, 79u8, 224u8, 92u8, 55u8, 76u8,
                             55u8, 171u8, 48u8, 122u8, 6u8, 62u8, 155u8, 69u8, 41u8,
@@ -21272,9 +22403,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ApproveAsMulti>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ApproveAsMulti>()?
+                    };
+                    if runtime_call_hash
                         == [
                             114u8, 29u8, 118u8, 154u8, 91u8, 4u8, 127u8, 126u8, 190u8,
                             180u8, 57u8, 112u8, 72u8, 8u8, 248u8, 126u8, 25u8, 190u8,
@@ -21341,9 +22475,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelAsMulti>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelAsMulti>()?
+                    };
+                    if runtime_call_hash
                         == [
                             195u8, 216u8, 37u8, 179u8, 9u8, 19u8, 238u8, 94u8, 156u8,
                             5u8, 120u8, 78u8, 129u8, 99u8, 239u8, 142u8, 68u8, 12u8,
@@ -21486,9 +22623,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Multisigs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Multisigs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             137u8, 130u8, 173u8, 65u8, 126u8, 244u8, 194u8, 167u8, 93u8,
                             174u8, 104u8, 131u8, 115u8, 155u8, 93u8, 185u8, 54u8, 204u8,
@@ -21510,9 +22650,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Multisigs<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Multisigs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Multisigs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             137u8, 130u8, 173u8, 65u8, 126u8, 244u8, 194u8, 167u8, 93u8,
                             174u8, 104u8, 131u8, 115u8, 155u8, 93u8, 185u8, 54u8, 204u8,
@@ -21537,9 +22680,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Calls>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Calls>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             51u8, 122u8, 79u8, 127u8, 1u8, 182u8, 39u8, 88u8, 57u8,
                             227u8, 141u8, 253u8, 217u8, 23u8, 89u8, 94u8, 37u8, 244u8,
@@ -21560,9 +22706,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Calls<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Calls>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Calls>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             51u8, 122u8, 79u8, 127u8, 1u8, 182u8, 39u8, 88u8, 57u8,
                             227u8, 141u8, 253u8, 217u8, 23u8, 89u8, 94u8, 37u8, 244u8,
@@ -21814,9 +22963,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProposeBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProposeBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             208u8, 22u8, 157u8, 134u8, 214u8, 95u8, 249u8, 10u8, 67u8,
                             223u8, 190u8, 192u8, 69u8, 32u8, 7u8, 235u8, 205u8, 145u8,
@@ -21852,9 +23004,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ApproveBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ApproveBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             127u8, 220u8, 25u8, 197u8, 19u8, 183u8, 177u8, 17u8, 164u8,
                             29u8, 250u8, 136u8, 125u8, 90u8, 247u8, 177u8, 37u8, 180u8,
@@ -21894,9 +23049,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProposeCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProposeCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             180u8, 13u8, 171u8, 39u8, 160u8, 233u8, 162u8, 39u8, 100u8,
                             144u8, 156u8, 212u8, 139u8, 128u8, 105u8, 49u8, 157u8, 16u8,
@@ -21946,9 +23104,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<UnassignCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<UnassignCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             156u8, 163u8, 248u8, 148u8, 22u8, 231u8, 232u8, 182u8, 48u8,
                             87u8, 85u8, 118u8, 169u8, 249u8, 123u8, 199u8, 248u8, 206u8,
@@ -21984,9 +23145,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AcceptCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AcceptCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             50u8, 149u8, 252u8, 40u8, 169u8, 113u8, 60u8, 153u8, 123u8,
                             146u8, 40u8, 196u8, 176u8, 195u8, 95u8, 94u8, 14u8, 81u8,
@@ -22029,9 +23193,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AwardBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AwardBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             42u8, 49u8, 134u8, 134u8, 5u8, 98u8, 72u8, 95u8, 227u8,
                             156u8, 224u8, 249u8, 209u8, 42u8, 160u8, 15u8, 239u8, 195u8,
@@ -22071,9 +23238,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClaimBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClaimBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             119u8, 9u8, 122u8, 55u8, 224u8, 139u8, 26u8, 186u8, 3u8,
                             178u8, 78u8, 41u8, 91u8, 183u8, 222u8, 197u8, 189u8, 172u8,
@@ -22111,9 +23281,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CloseBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CloseBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             119u8, 47u8, 246u8, 188u8, 235u8, 22u8, 53u8, 70u8, 182u8,
                             15u8, 247u8, 153u8, 208u8, 191u8, 144u8, 132u8, 30u8, 200u8,
@@ -22152,9 +23325,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ExtendBountyExpiry>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ExtendBountyExpiry>()?
+                    };
+                    if runtime_call_hash
                         == [
                             127u8, 142u8, 138u8, 230u8, 147u8, 187u8, 201u8, 210u8,
                             216u8, 61u8, 62u8, 125u8, 168u8, 188u8, 16u8, 73u8, 157u8,
@@ -22328,9 +23504,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BountyCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BountyCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             5u8, 188u8, 134u8, 220u8, 64u8, 49u8, 188u8, 98u8, 185u8,
                             186u8, 230u8, 65u8, 247u8, 199u8, 28u8, 178u8, 202u8, 193u8,
@@ -22362,9 +23541,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Bounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Bounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             27u8, 154u8, 97u8, 199u8, 230u8, 195u8, 155u8, 198u8, 4u8,
                             28u8, 5u8, 202u8, 175u8, 11u8, 243u8, 166u8, 67u8, 231u8,
@@ -22386,9 +23568,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Bounties<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Bounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Bounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             27u8, 154u8, 97u8, 199u8, 230u8, 195u8, 155u8, 198u8, 4u8,
                             28u8, 5u8, 202u8, 175u8, 11u8, 243u8, 166u8, 67u8, 231u8,
@@ -22414,9 +23599,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BountyDescriptions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BountyDescriptions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             41u8, 78u8, 19u8, 48u8, 241u8, 95u8, 175u8, 69u8, 236u8,
                             54u8, 84u8, 58u8, 69u8, 28u8, 20u8, 20u8, 214u8, 138u8,
@@ -22438,9 +23626,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, BountyDescriptions<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BountyDescriptions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BountyDescriptions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             41u8, 78u8, 19u8, 48u8, 241u8, 95u8, 175u8, 69u8, 236u8,
                             54u8, 84u8, 58u8, 69u8, 28u8, 20u8, 20u8, 214u8, 138u8,
@@ -22463,9 +23654,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BountyApprovals>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BountyApprovals>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             18u8, 142u8, 244u8, 64u8, 172u8, 62u8, 230u8, 114u8, 165u8,
                             158u8, 123u8, 163u8, 35u8, 125u8, 218u8, 23u8, 113u8, 73u8,
@@ -22872,9 +24066,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddChildBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddChildBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             235u8, 216u8, 166u8, 226u8, 107u8, 159u8, 235u8, 35u8, 207u8,
                             154u8, 124u8, 226u8, 242u8, 241u8, 4u8, 20u8, 1u8, 215u8,
@@ -22927,9 +24124,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ProposeCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ProposeCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             34u8, 219u8, 159u8, 152u8, 29u8, 12u8, 222u8, 91u8, 193u8,
                             218u8, 28u8, 0u8, 102u8, 15u8, 180u8, 155u8, 135u8, 175u8,
@@ -22982,9 +24182,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AcceptCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AcceptCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             115u8, 24u8, 36u8, 188u8, 30u8, 11u8, 184u8, 102u8, 151u8,
                             96u8, 41u8, 162u8, 104u8, 54u8, 76u8, 251u8, 189u8, 50u8,
@@ -23050,9 +24253,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<UnassignCurator>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<UnassignCurator>()?
+                    };
+                    if runtime_call_hash
                         == [
                             210u8, 24u8, 20u8, 200u8, 106u8, 200u8, 33u8, 43u8, 169u8,
                             133u8, 157u8, 108u8, 220u8, 36u8, 110u8, 172u8, 218u8, 1u8,
@@ -23105,9 +24311,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AwardChildBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AwardChildBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             135u8, 134u8, 237u8, 216u8, 152u8, 75u8, 11u8, 209u8, 152u8,
                             99u8, 166u8, 78u8, 162u8, 34u8, 37u8, 158u8, 95u8, 74u8,
@@ -23156,9 +24365,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClaimChildBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClaimChildBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             54u8, 194u8, 203u8, 13u8, 230u8, 207u8, 25u8, 249u8, 203u8,
                             199u8, 123u8, 79u8, 255u8, 85u8, 40u8, 125u8, 73u8, 5u8,
@@ -23212,9 +24424,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CloseChildBounty>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CloseChildBounty>()?
+                    };
+                    if runtime_call_hash
                         == [
                             123u8, 201u8, 206u8, 242u8, 80u8, 37u8, 113u8, 182u8, 237u8,
                             187u8, 51u8, 229u8, 226u8, 250u8, 129u8, 203u8, 196u8, 22u8,
@@ -23368,9 +24583,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildBountyCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildBountyCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             46u8, 10u8, 183u8, 160u8, 98u8, 215u8, 39u8, 253u8, 81u8,
                             94u8, 114u8, 147u8, 115u8, 162u8, 33u8, 117u8, 160u8, 214u8,
@@ -23395,9 +24613,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParentChildBounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParentChildBounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             127u8, 161u8, 181u8, 79u8, 235u8, 196u8, 252u8, 162u8, 39u8,
                             15u8, 251u8, 49u8, 125u8, 80u8, 101u8, 24u8, 234u8, 88u8,
@@ -23423,9 +24644,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ParentChildBounties<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParentChildBounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParentChildBounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             127u8, 161u8, 181u8, 79u8, 235u8, 196u8, 252u8, 162u8, 39u8,
                             15u8, 251u8, 49u8, 125u8, 80u8, 101u8, 24u8, 234u8, 88u8,
@@ -23454,9 +24678,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildBounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildBounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             66u8, 224u8, 32u8, 188u8, 0u8, 175u8, 253u8, 132u8, 17u8,
                             243u8, 51u8, 237u8, 230u8, 40u8, 198u8, 178u8, 222u8, 159u8,
@@ -23478,9 +24705,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ChildBounties<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildBounties>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildBounties>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             66u8, 224u8, 32u8, 188u8, 0u8, 175u8, 253u8, 132u8, 17u8,
                             243u8, 51u8, 237u8, 230u8, 40u8, 198u8, 178u8, 222u8, 159u8,
@@ -23506,9 +24736,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildBountyDescriptions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildBountyDescriptions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             20u8, 134u8, 50u8, 207u8, 242u8, 159u8, 242u8, 22u8, 76u8,
                             80u8, 193u8, 247u8, 73u8, 51u8, 113u8, 241u8, 186u8, 26u8,
@@ -23530,9 +24763,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ChildBountyDescriptions<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildBountyDescriptions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildBountyDescriptions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             20u8, 134u8, 50u8, 207u8, 242u8, 159u8, 242u8, 22u8, 76u8,
                             80u8, 193u8, 247u8, 73u8, 51u8, 113u8, 241u8, 186u8, 26u8,
@@ -23552,9 +24788,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildrenCuratorFees>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildrenCuratorFees>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 128u8, 86u8, 179u8, 133u8, 76u8, 98u8, 169u8, 234u8,
                             166u8, 249u8, 214u8, 172u8, 171u8, 8u8, 161u8, 105u8, 69u8,
@@ -23579,9 +24818,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ChildrenCuratorFees<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ChildrenCuratorFees>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ChildrenCuratorFees>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 128u8, 86u8, 179u8, 133u8, 76u8, 98u8, 169u8, 234u8,
                             166u8, 249u8, 214u8, 172u8, 171u8, 8u8, 161u8, 105u8, 69u8,
@@ -23772,9 +25014,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReportAwesome>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReportAwesome>()?
+                    };
+                    if runtime_call_hash
                         == [
                             90u8, 58u8, 149u8, 226u8, 88u8, 237u8, 150u8, 165u8, 172u8,
                             179u8, 195u8, 226u8, 200u8, 20u8, 152u8, 103u8, 157u8, 208u8,
@@ -23821,9 +25066,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<RetractTip>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RetractTip>()?
+                    };
+                    if runtime_call_hash
                         == [
                             213u8, 70u8, 11u8, 81u8, 39u8, 125u8, 42u8, 247u8, 80u8,
                             55u8, 123u8, 247u8, 45u8, 18u8, 86u8, 205u8, 26u8, 229u8,
@@ -23875,9 +25123,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<TipNew>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<TipNew>()?
+                    };
+                    if runtime_call_hash
                         == [
                             137u8, 119u8, 91u8, 139u8, 238u8, 180u8, 247u8, 5u8, 194u8,
                             35u8, 33u8, 151u8, 50u8, 212u8, 208u8, 134u8, 98u8, 133u8,
@@ -23934,9 +25185,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Tip>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Tip>()?
+                    };
+                    if runtime_call_hash
                         == [
                             2u8, 38u8, 219u8, 220u8, 183u8, 243u8, 108u8, 40u8, 179u8,
                             21u8, 218u8, 158u8, 126u8, 19u8, 22u8, 115u8, 95u8, 17u8,
@@ -23980,9 +25234,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CloseTip>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CloseTip>()?
+                    };
+                    if runtime_call_hash
                         == [
                             85u8, 180u8, 115u8, 177u8, 2u8, 252u8, 139u8, 37u8, 233u8,
                             127u8, 115u8, 4u8, 169u8, 169u8, 214u8, 223u8, 181u8, 150u8,
@@ -24022,9 +25279,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SlashTip>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SlashTip>()?
+                    };
+                    if runtime_call_hash
                         == [
                             135u8, 7u8, 55u8, 167u8, 26u8, 108u8, 43u8, 20u8, 162u8,
                             185u8, 209u8, 88u8, 148u8, 181u8, 51u8, 102u8, 17u8, 105u8,
@@ -24149,9 +25409,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Tips>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Tips>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             147u8, 163u8, 201u8, 236u8, 134u8, 199u8, 172u8, 47u8, 40u8,
                             168u8, 105u8, 145u8, 238u8, 204u8, 133u8, 116u8, 185u8,
@@ -24175,9 +25438,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Tips<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Tips>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Tips>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             147u8, 163u8, 201u8, 236u8, 134u8, 199u8, 172u8, 47u8, 40u8,
                             168u8, 105u8, 145u8, 238u8, 204u8, 133u8, 116u8, 185u8,
@@ -24200,9 +25466,12 @@ pub mod api {
                     ::core::option::Option<::std::vec::Vec<::core::primitive::u8>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reasons>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reasons>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 172u8, 6u8, 195u8, 254u8, 210u8, 186u8, 62u8, 224u8,
                             53u8, 196u8, 78u8, 84u8, 218u8, 0u8, 135u8, 247u8, 130u8,
@@ -24225,9 +25494,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Reasons<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Reasons>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Reasons>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             224u8, 172u8, 6u8, 195u8, 254u8, 210u8, 186u8, 62u8, 224u8,
                             53u8, 196u8, 78u8, 84u8, 218u8, 0u8, 135u8, 247u8, 130u8,
@@ -24483,9 +25755,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SubmitUnsigned>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SubmitUnsigned>()?
+                    };
+                    if runtime_call_hash
                         == [
                             202u8, 104u8, 247u8, 250u8, 171u8, 119u8, 119u8, 96u8, 213u8,
                             119u8, 41u8, 116u8, 29u8, 99u8, 71u8, 203u8, 168u8, 212u8,
@@ -24523,9 +25798,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMinimumUntrustedScore>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMinimumUntrustedScore>()?
+                    };
+                    if runtime_call_hash
                         == [
                             207u8, 31u8, 247u8, 72u8, 55u8, 18u8, 99u8, 157u8, 155u8,
                             89u8, 59u8, 156u8, 254u8, 3u8, 181u8, 85u8, 48u8, 42u8, 73u8,
@@ -24566,9 +25844,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetEmergencyElectionResult>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetEmergencyElectionResult>()?
+                    };
+                    if runtime_call_hash
                         == [
                             195u8, 164u8, 133u8, 193u8, 58u8, 154u8, 182u8, 83u8, 231u8,
                             217u8, 199u8, 27u8, 239u8, 143u8, 60u8, 103u8, 139u8, 253u8,
@@ -24605,9 +25886,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Submit>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Submit>()?
+                    };
+                    if runtime_call_hash
                         == [
                             192u8, 193u8, 242u8, 99u8, 80u8, 253u8, 100u8, 234u8, 199u8,
                             15u8, 119u8, 251u8, 94u8, 248u8, 110u8, 171u8, 216u8, 218u8,
@@ -24642,9 +25926,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<GovernanceFallback>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<GovernanceFallback>()?
+                    };
+                    if runtime_call_hash
                         == [
                             195u8, 190u8, 140u8, 94u8, 209u8, 100u8, 92u8, 194u8, 78u8,
                             226u8, 16u8, 168u8, 52u8, 117u8, 88u8, 178u8, 84u8, 248u8,
@@ -24863,9 +26150,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Round>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Round>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             16u8, 49u8, 176u8, 52u8, 202u8, 111u8, 120u8, 8u8, 217u8,
                             96u8, 35u8, 14u8, 233u8, 130u8, 47u8, 98u8, 34u8, 44u8,
@@ -24892,9 +26182,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentPhase>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentPhase>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             162u8, 177u8, 133u8, 63u8, 175u8, 78u8, 85u8, 0u8, 233u8,
                             84u8, 10u8, 250u8, 190u8, 39u8, 101u8, 11u8, 52u8, 31u8,
@@ -24912,9 +26205,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Current best solution, signed or unsigned, queued to be returned upon `elect`."]                pub async fn queued_solution (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: ReadySolution < :: subxt :: sp_core :: crypto :: AccountId32 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<QueuedSolution>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<QueuedSolution>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             145u8, 177u8, 147u8, 52u8, 30u8, 135u8, 33u8, 145u8, 204u8,
                             82u8, 1u8, 165u8, 208u8, 39u8, 181u8, 2u8, 96u8, 236u8, 19u8,
@@ -24931,9 +26227,12 @@ pub mod api {
                 #[doc = " Snapshot data of the round."]
                 #[doc = ""]
                 #[doc = " This is created at the beginning of the signed phase and cleared upon calling `elect`."]                pub async fn snapshot (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: RoundSnapshot > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Snapshot>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Snapshot>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             28u8, 163u8, 105u8, 94u8, 66u8, 226u8, 134u8, 29u8, 210u8,
                             211u8, 182u8, 236u8, 180u8, 109u8, 203u8, 44u8, 1u8, 50u8,
@@ -24957,9 +26256,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DesiredTargets>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DesiredTargets>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             16u8, 247u8, 4u8, 181u8, 93u8, 79u8, 12u8, 212u8, 146u8,
                             167u8, 80u8, 58u8, 118u8, 52u8, 68u8, 87u8, 90u8, 140u8,
@@ -24976,9 +26278,12 @@ pub mod api {
                 #[doc = " The metadata of the [`RoundSnapshot`]"]
                 #[doc = ""]
                 #[doc = " Only exists when [`Snapshot`] is present."]                pub async fn snapshot_metadata (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SnapshotMetadata>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SnapshotMetadata>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             240u8, 57u8, 126u8, 76u8, 84u8, 244u8, 120u8, 136u8, 164u8,
                             49u8, 185u8, 89u8, 126u8, 18u8, 117u8, 235u8, 33u8, 226u8,
@@ -25006,9 +26311,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SignedSubmissionNextIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SignedSubmissionNextIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             242u8, 11u8, 157u8, 105u8, 96u8, 7u8, 31u8, 20u8, 51u8,
                             141u8, 182u8, 180u8, 13u8, 172u8, 155u8, 59u8, 42u8, 238u8,
@@ -25031,9 +26339,12 @@ pub mod api {
                 #[doc = " We never need to process more than a single signed submission at a time. Signed submissions"]
                 #[doc = " can be quite large, so we're willing to pay the cost of multiple database accesses to access"]
                 #[doc = " them one at a time instead of reading and decoding all of them at once."]                pub async fn signed_submission_indices (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: bounded_btree_map :: BoundedBTreeMap < runtime_types :: sp_npos_elections :: ElectionScore , :: core :: primitive :: u32 > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SignedSubmissionIndices>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SignedSubmissionIndices>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             191u8, 143u8, 241u8, 251u8, 74u8, 9u8, 145u8, 136u8, 135u8,
                             76u8, 182u8, 85u8, 140u8, 252u8, 58u8, 183u8, 217u8, 121u8,
@@ -25057,9 +26368,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Twox note: the key of the map is an auto-incrementing index which users cannot inspect or"]
                 #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub async fn signed_submissions_map (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SignedSubmissionsMap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SignedSubmissionsMap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 51u8, 117u8, 215u8, 100u8, 250u8, 9u8, 70u8, 131u8,
                             21u8, 2u8, 142u8, 177u8, 117u8, 21u8, 190u8, 10u8, 15u8,
@@ -25087,9 +26401,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SignedSubmissionsMap<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SignedSubmissionsMap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SignedSubmissionsMap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             94u8, 51u8, 117u8, 215u8, 100u8, 250u8, 9u8, 70u8, 131u8,
                             21u8, 2u8, 142u8, 177u8, 117u8, 21u8, 190u8, 10u8, 15u8,
@@ -25115,9 +26432,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<MinimumUntrustedScore>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<MinimumUntrustedScore>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             18u8, 171u8, 56u8, 63u8, 7u8, 1u8, 53u8, 42u8, 72u8, 35u8,
                             26u8, 124u8, 223u8, 95u8, 170u8, 176u8, 134u8, 140u8, 66u8,
@@ -25606,9 +26926,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Rebag>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Rebag>()?
+                    };
+                    if runtime_call_hash
                         == [
                             46u8, 138u8, 28u8, 6u8, 58u8, 153u8, 5u8, 41u8, 44u8, 7u8,
                             228u8, 72u8, 135u8, 184u8, 185u8, 132u8, 146u8, 181u8, 47u8,
@@ -25644,9 +26967,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<PutInFrontOf>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<PutInFrontOf>()?
+                    };
+                    if runtime_call_hash
                         == [
                             79u8, 254u8, 222u8, 19u8, 17u8, 80u8, 7u8, 68u8, 54u8, 9u8,
                             23u8, 133u8, 108u8, 29u8, 166u8, 177u8, 230u8, 247u8, 226u8,
@@ -25730,9 +27056,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::pallet_bags_list::list::Node>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ListNodes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ListNodes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             114u8, 219u8, 206u8, 128u8, 160u8, 134u8, 95u8, 214u8, 195u8,
                             15u8, 140u8, 174u8, 89u8, 85u8, 191u8, 85u8, 96u8, 58u8,
@@ -25756,9 +27085,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ListNodes<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ListNodes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ListNodes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             114u8, 219u8, 206u8, 128u8, 160u8, 134u8, 95u8, 214u8, 195u8,
                             15u8, 140u8, 174u8, 89u8, 85u8, 191u8, 85u8, 96u8, 58u8,
@@ -25777,9 +27109,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CounterForListNodes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CounterForListNodes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             156u8, 168u8, 97u8, 33u8, 84u8, 117u8, 220u8, 89u8, 62u8,
                             182u8, 24u8, 88u8, 231u8, 244u8, 41u8, 19u8, 210u8, 131u8,
@@ -25807,9 +27142,12 @@ pub mod api {
                     ::core::option::Option<runtime_types::pallet_bags_list::list::Bag>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ListBags>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ListBags>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             117u8, 35u8, 42u8, 116u8, 5u8, 68u8, 168u8, 75u8, 112u8,
                             29u8, 54u8, 49u8, 169u8, 103u8, 22u8, 163u8, 53u8, 122u8,
@@ -25833,9 +27171,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ListBags<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ListBags>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ListBags>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             117u8, 35u8, 42u8, 116u8, 5u8, 68u8, 168u8, 75u8, 112u8,
                             29u8, 54u8, 49u8, 169u8, 103u8, 22u8, 163u8, 53u8, 122u8,
@@ -26545,9 +27886,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetValidationUpgradeCooldown>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetValidationUpgradeCooldown>()?
+                    };
+                    if runtime_call_hash
                         == [
                             153u8, 60u8, 171u8, 164u8, 241u8, 214u8, 235u8, 141u8, 4u8,
                             32u8, 129u8, 253u8, 128u8, 148u8, 185u8, 51u8, 65u8, 34u8,
@@ -26576,9 +27920,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetValidationUpgradeDelay>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetValidationUpgradeDelay>()?
+                    };
+                    if runtime_call_hash
                         == [
                             136u8, 220u8, 63u8, 166u8, 202u8, 19u8, 241u8, 32u8, 100u8,
                             14u8, 101u8, 244u8, 241u8, 141u8, 144u8, 213u8, 185u8, 88u8,
@@ -26607,9 +27954,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetCodeRetentionPeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetCodeRetentionPeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             94u8, 104u8, 13u8, 127u8, 95u8, 137u8, 66u8, 224u8, 22u8,
                             53u8, 14u8, 161u8, 67u8, 85u8, 78u8, 161u8, 92u8, 81u8,
@@ -26638,9 +27988,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxCodeSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxCodeSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             74u8, 39u8, 190u8, 155u8, 121u8, 60u8, 233u8, 95u8, 177u8,
                             57u8, 116u8, 107u8, 200u8, 44u8, 2u8, 215u8, 209u8, 50u8,
@@ -26669,9 +28022,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxPovSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxPovSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             77u8, 199u8, 18u8, 53u8, 223u8, 107u8, 57u8, 141u8, 8u8,
                             138u8, 180u8, 175u8, 73u8, 88u8, 205u8, 185u8, 56u8, 106u8,
@@ -26700,9 +28056,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxHeadDataSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxHeadDataSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             30u8, 132u8, 5u8, 207u8, 126u8, 145u8, 187u8, 129u8, 36u8,
                             235u8, 179u8, 61u8, 243u8, 87u8, 178u8, 107u8, 8u8, 21u8,
@@ -26731,9 +28090,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetParathreadCores>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetParathreadCores>()?
+                    };
+                    if runtime_call_hash
                         == [
                             5u8, 198u8, 156u8, 226u8, 125u8, 16u8, 2u8, 64u8, 28u8,
                             189u8, 213u8, 85u8, 6u8, 112u8, 173u8, 183u8, 174u8, 207u8,
@@ -26762,9 +28124,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetParathreadRetries>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetParathreadRetries>()?
+                    };
+                    if runtime_call_hash
                         == [
                             146u8, 134u8, 204u8, 109u8, 167u8, 35u8, 255u8, 245u8, 98u8,
                             24u8, 213u8, 33u8, 144u8, 194u8, 196u8, 196u8, 66u8, 220u8,
@@ -26793,9 +28158,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetGroupRotationFrequency>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetGroupRotationFrequency>()?
+                    };
+                    if runtime_call_hash
                         == [
                             102u8, 192u8, 226u8, 120u8, 69u8, 117u8, 239u8, 156u8, 111u8,
                             239u8, 197u8, 191u8, 221u8, 18u8, 140u8, 214u8, 154u8, 212u8,
@@ -26824,9 +28192,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetChainAvailabilityPeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetChainAvailabilityPeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             3u8, 83u8, 31u8, 241u8, 73u8, 137u8, 18u8, 95u8, 119u8,
                             143u8, 28u8, 110u8, 151u8, 229u8, 172u8, 208u8, 50u8, 25u8,
@@ -26855,9 +28226,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetThreadAvailabilityPeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetThreadAvailabilityPeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             242u8, 204u8, 158u8, 5u8, 123u8, 163u8, 6u8, 209u8, 44u8,
                             73u8, 112u8, 249u8, 96u8, 160u8, 188u8, 151u8, 107u8, 21u8,
@@ -26886,9 +28260,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetSchedulingLookahead>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetSchedulingLookahead>()?
+                    };
+                    if runtime_call_hash
                         == [
                             146u8, 149u8, 10u8, 57u8, 122u8, 116u8, 61u8, 181u8, 97u8,
                             240u8, 87u8, 37u8, 227u8, 233u8, 123u8, 26u8, 243u8, 58u8,
@@ -26917,9 +28294,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxValidatorsPerCore>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxValidatorsPerCore>()?
+                    };
+                    if runtime_call_hash
                         == [
                             27u8, 160u8, 153u8, 252u8, 121u8, 42u8, 94u8, 131u8, 199u8,
                             216u8, 15u8, 65u8, 94u8, 69u8, 127u8, 130u8, 179u8, 236u8,
@@ -26948,9 +28328,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxValidators>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxValidators>()?
+                    };
+                    if runtime_call_hash
                         == [
                             192u8, 156u8, 115u8, 10u8, 225u8, 94u8, 190u8, 180u8, 242u8,
                             131u8, 202u8, 13u8, 82u8, 27u8, 8u8, 144u8, 70u8, 92u8,
@@ -26979,9 +28362,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetDisputePeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetDisputePeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             232u8, 96u8, 104u8, 249u8, 183u8, 148u8, 126u8, 80u8, 64u8,
                             39u8, 2u8, 208u8, 183u8, 189u8, 139u8, 201u8, 61u8, 63u8,
@@ -27010,9 +28396,13 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetDisputePostConclusionAcceptancePeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata
+                            .call_hash::<SetDisputePostConclusionAcceptancePeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             45u8, 140u8, 213u8, 62u8, 212u8, 31u8, 126u8, 94u8, 102u8,
                             176u8, 203u8, 240u8, 28u8, 25u8, 116u8, 77u8, 187u8, 147u8,
@@ -27041,9 +28431,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetDisputeMaxSpamSlots>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetDisputeMaxSpamSlots>()?
+                    };
+                    if runtime_call_hash
                         == [
                             180u8, 195u8, 6u8, 141u8, 89u8, 252u8, 245u8, 202u8, 36u8,
                             123u8, 105u8, 35u8, 161u8, 60u8, 233u8, 213u8, 191u8, 65u8,
@@ -27072,9 +28465,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetDisputeConclusionByTimeOutPeriod>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetDisputeConclusionByTimeOutPeriod>()?
+                    };
+                    if runtime_call_hash
                         == [
                             50u8, 221u8, 129u8, 199u8, 147u8, 98u8, 11u8, 104u8, 133u8,
                             161u8, 53u8, 163u8, 100u8, 155u8, 228u8, 167u8, 146u8, 87u8,
@@ -27104,9 +28500,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetNoShowSlots>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetNoShowSlots>()?
+                    };
+                    if runtime_call_hash
                         == [
                             235u8, 5u8, 35u8, 159u8, 200u8, 58u8, 171u8, 179u8, 78u8,
                             70u8, 161u8, 47u8, 237u8, 245u8, 77u8, 81u8, 1u8, 138u8,
@@ -27135,9 +28534,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetNDelayTranches>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetNDelayTranches>()?
+                    };
+                    if runtime_call_hash
                         == [
                             109u8, 208u8, 13u8, 18u8, 178u8, 117u8, 101u8, 169u8, 162u8,
                             255u8, 28u8, 88u8, 199u8, 89u8, 83u8, 59u8, 46u8, 105u8,
@@ -27166,9 +28568,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetZerothDelayTrancheWidth>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetZerothDelayTrancheWidth>()?
+                    };
+                    if runtime_call_hash
                         == [
                             162u8, 20u8, 162u8, 90u8, 59u8, 194u8, 147u8, 255u8, 198u8,
                             203u8, 50u8, 13u8, 134u8, 142u8, 6u8, 156u8, 205u8, 128u8,
@@ -27197,9 +28602,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetNeededApprovals>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetNeededApprovals>()?
+                    };
+                    if runtime_call_hash
                         == [
                             83u8, 164u8, 204u8, 168u8, 93u8, 165u8, 118u8, 111u8, 149u8,
                             129u8, 126u8, 250u8, 95u8, 148u8, 193u8, 173u8, 239u8, 1u8,
@@ -27228,9 +28636,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetRelayVrfModuloSamples>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetRelayVrfModuloSamples>()?
+                    };
+                    if runtime_call_hash
                         == [
                             22u8, 11u8, 132u8, 96u8, 58u8, 253u8, 183u8, 31u8, 137u8,
                             231u8, 187u8, 145u8, 119u8, 164u8, 55u8, 142u8, 37u8, 151u8,
@@ -27259,9 +28670,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxUpwardQueueCount>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxUpwardQueueCount>()?
+                    };
+                    if runtime_call_hash
                         == [
                             16u8, 31u8, 245u8, 94u8, 243u8, 122u8, 55u8, 155u8, 161u8,
                             239u8, 5u8, 59u8, 186u8, 207u8, 136u8, 253u8, 255u8, 176u8,
@@ -27290,9 +28704,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxUpwardQueueSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxUpwardQueueSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             203u8, 170u8, 21u8, 149u8, 170u8, 246u8, 91u8, 54u8, 197u8,
                             91u8, 41u8, 114u8, 210u8, 239u8, 73u8, 236u8, 68u8, 194u8,
@@ -27321,9 +28738,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxDownwardMessageSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxDownwardMessageSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             55u8, 181u8, 6u8, 126u8, 31u8, 154u8, 42u8, 194u8, 64u8,
                             23u8, 34u8, 255u8, 151u8, 186u8, 52u8, 32u8, 168u8, 233u8,
@@ -27352,9 +28772,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetUmpServiceTotalWeight>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetUmpServiceTotalWeight>()?
+                    };
+                    if runtime_call_hash
                         == [
                             14u8, 179u8, 217u8, 169u8, 84u8, 45u8, 193u8, 3u8, 7u8,
                             196u8, 56u8, 209u8, 50u8, 148u8, 32u8, 205u8, 99u8, 202u8,
@@ -27383,9 +28806,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxUpwardMessageSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxUpwardMessageSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             134u8, 232u8, 5u8, 70u8, 81u8, 177u8, 81u8, 235u8, 93u8,
                             145u8, 193u8, 42u8, 150u8, 61u8, 236u8, 20u8, 38u8, 176u8,
@@ -27414,9 +28840,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMaxUpwardMessageNumPerCandidate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMaxUpwardMessageNumPerCandidate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             14u8, 79u8, 128u8, 66u8, 119u8, 24u8, 26u8, 116u8, 249u8,
                             254u8, 86u8, 228u8, 248u8, 75u8, 111u8, 90u8, 101u8, 96u8,
@@ -27445,9 +28874,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpOpenRequestTtl>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpOpenRequestTtl>()?
+                    };
+                    if runtime_call_hash
                         == [
                             168u8, 254u8, 189u8, 22u8, 61u8, 90u8, 131u8, 1u8, 103u8,
                             208u8, 179u8, 85u8, 80u8, 215u8, 9u8, 3u8, 34u8, 73u8, 130u8,
@@ -27476,9 +28908,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpSenderDeposit>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpSenderDeposit>()?
+                    };
+                    if runtime_call_hash
                         == [
                             250u8, 23u8, 196u8, 206u8, 34u8, 86u8, 28u8, 14u8, 110u8,
                             189u8, 38u8, 39u8, 2u8, 16u8, 212u8, 32u8, 65u8, 249u8,
@@ -27508,9 +28943,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpRecipientDeposit>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpRecipientDeposit>()?
+                    };
+                    if runtime_call_hash
                         == [
                             104u8, 35u8, 129u8, 31u8, 111u8, 57u8, 190u8, 42u8, 159u8,
                             220u8, 86u8, 136u8, 200u8, 4u8, 62u8, 241u8, 141u8, 90u8,
@@ -27539,9 +28977,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpChannelMaxCapacity>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpChannelMaxCapacity>()?
+                    };
+                    if runtime_call_hash
                         == [
                             211u8, 49u8, 82u8, 59u8, 16u8, 97u8, 253u8, 64u8, 185u8,
                             216u8, 235u8, 10u8, 84u8, 194u8, 231u8, 115u8, 153u8, 20u8,
@@ -27570,9 +29011,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpChannelMaxTotalSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpChannelMaxTotalSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             254u8, 196u8, 171u8, 29u8, 208u8, 179u8, 204u8, 58u8, 64u8,
                             41u8, 52u8, 73u8, 153u8, 245u8, 29u8, 132u8, 129u8, 29u8,
@@ -27601,9 +29045,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpMaxParachainInboundChannels>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpMaxParachainInboundChannels>()?
+                    };
+                    if runtime_call_hash
                         == [
                             219u8, 88u8, 3u8, 249u8, 16u8, 182u8, 182u8, 233u8, 152u8,
                             24u8, 29u8, 96u8, 227u8, 50u8, 156u8, 98u8, 71u8, 196u8,
@@ -27632,9 +29079,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpMaxParathreadInboundChannels>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpMaxParathreadInboundChannels>()?
+                    };
+                    if runtime_call_hash
                         == [
                             153u8, 169u8, 153u8, 141u8, 45u8, 21u8, 26u8, 33u8, 207u8,
                             234u8, 186u8, 154u8, 12u8, 148u8, 2u8, 226u8, 55u8, 125u8,
@@ -27663,9 +29113,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpChannelMaxMessageSize>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpChannelMaxMessageSize>()?
+                    };
+                    if runtime_call_hash
                         == [
                             237u8, 103u8, 126u8, 197u8, 164u8, 247u8, 67u8, 144u8, 30u8,
                             192u8, 161u8, 243u8, 254u8, 26u8, 254u8, 33u8, 59u8, 216u8,
@@ -27694,9 +29147,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpMaxParachainOutboundChannels>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpMaxParachainOutboundChannels>()?
+                    };
+                    if runtime_call_hash
                         == [
                             173u8, 184u8, 49u8, 66u8, 158u8, 142u8, 95u8, 225u8, 90u8,
                             171u8, 4u8, 20u8, 210u8, 180u8, 54u8, 236u8, 60u8, 5u8, 76u8,
@@ -27725,9 +29181,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpMaxParathreadOutboundChannels>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpMaxParathreadOutboundChannels>()?
+                    };
+                    if runtime_call_hash
                         == [
                             166u8, 73u8, 121u8, 53u8, 27u8, 77u8, 150u8, 115u8, 29u8,
                             202u8, 34u8, 4u8, 35u8, 161u8, 113u8, 15u8, 66u8, 60u8,
@@ -27756,9 +29215,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetHrmpMaxMessageNumPerCandidate>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetHrmpMaxMessageNumPerCandidate>()?
+                    };
+                    if runtime_call_hash
                         == [
                             235u8, 47u8, 114u8, 29u8, 87u8, 198u8, 62u8, 200u8, 235u8,
                             184u8, 204u8, 35u8, 251u8, 210u8, 88u8, 150u8, 22u8, 61u8,
@@ -27787,9 +29249,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetUmpMaxIndividualWeight>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetUmpMaxIndividualWeight>()?
+                    };
+                    if runtime_call_hash
                         == [
                             61u8, 174u8, 42u8, 53u8, 120u8, 56u8, 252u8, 117u8, 173u8,
                             223u8, 100u8, 141u8, 209u8, 29u8, 173u8, 240u8, 180u8, 113u8,
@@ -27818,9 +29283,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetPvfCheckingEnabled>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetPvfCheckingEnabled>()?
+                    };
+                    if runtime_call_hash
                         == [
                             224u8, 199u8, 197u8, 208u8, 178u8, 211u8, 14u8, 102u8, 174u8,
                             205u8, 207u8, 181u8, 75u8, 125u8, 209u8, 69u8, 85u8, 1u8,
@@ -27849,9 +29317,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetPvfVotingTtl>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetPvfVotingTtl>()?
+                    };
+                    if runtime_call_hash
                         == [
                             179u8, 71u8, 42u8, 140u8, 187u8, 43u8, 138u8, 16u8, 104u8,
                             41u8, 30u8, 220u8, 131u8, 179u8, 200u8, 184u8, 105u8, 58u8,
@@ -27883,9 +29354,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetMinimumValidationUpgradeDelay>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetMinimumValidationUpgradeDelay>()?
+                    };
+                    if runtime_call_hash
                         == [
                             225u8, 178u8, 41u8, 194u8, 154u8, 222u8, 247u8, 129u8, 35u8,
                             102u8, 248u8, 144u8, 21u8, 74u8, 42u8, 239u8, 135u8, 205u8,
@@ -27915,9 +29389,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<SetBypassConsistencyCheck>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<SetBypassConsistencyCheck>()?
+                    };
+                    if runtime_call_hash
                         == [
                             5u8, 54u8, 178u8, 218u8, 46u8, 61u8, 99u8, 23u8, 227u8,
                             202u8, 201u8, 164u8, 121u8, 226u8, 65u8, 253u8, 29u8, 164u8,
@@ -27982,9 +29459,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The active configuration for the current session."]                pub async fn active_config (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActiveConfig>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActiveConfig>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             6u8, 31u8, 218u8, 51u8, 202u8, 166u8, 183u8, 192u8, 151u8,
                             184u8, 103u8, 73u8, 239u8, 78u8, 183u8, 38u8, 192u8, 201u8,
@@ -28004,9 +29484,12 @@ pub mod api {
                 #[doc = " Pending configuration (if any) for the next session."]
                 #[doc = ""]
                 #[doc = " DEPRECATED: This is no longer used, and will be removed in the future."]                pub async fn pending_config (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: configuration :: migration :: v1 :: HostConfiguration < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingConfig>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingConfig>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             152u8, 192u8, 135u8, 74u8, 174u8, 47u8, 192u8, 95u8, 147u8,
                             137u8, 41u8, 219u8, 149u8, 198u8, 186u8, 16u8, 158u8, 160u8,
@@ -28030,9 +29513,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PendingConfig<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingConfig>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingConfig>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             152u8, 192u8, 135u8, 74u8, 174u8, 47u8, 192u8, 95u8, 147u8,
                             137u8, 41u8, 219u8, 149u8, 198u8, 186u8, 16u8, 158u8, 160u8,
@@ -28052,9 +29538,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " The list is sorted ascending by session index. Also, this list can only contain at most"]
                 #[doc = " 2 items: for the next session and for the `scheduled_session`."]                pub async fn pending_configs (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < (:: core :: primitive :: u32 , runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > ,) > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingConfigs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingConfigs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             198u8, 168u8, 227u8, 228u8, 110u8, 98u8, 34u8, 21u8, 159u8,
                             114u8, 202u8, 135u8, 39u8, 190u8, 40u8, 214u8, 170u8, 126u8,
@@ -28078,9 +29567,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BypassConsistencyCheck>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BypassConsistencyCheck>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             42u8, 191u8, 122u8, 163u8, 112u8, 2u8, 148u8, 59u8, 79u8,
                             219u8, 184u8, 172u8, 246u8, 136u8, 185u8, 251u8, 189u8,
@@ -28174,9 +29666,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentSessionIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentSessionIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             83u8, 15u8, 20u8, 55u8, 103u8, 65u8, 76u8, 202u8, 69u8, 14u8,
                             221u8, 93u8, 38u8, 163u8, 167u8, 83u8, 18u8, 245u8, 33u8,
@@ -28204,9 +29699,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActiveValidatorIndices>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActiveValidatorIndices>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             128u8, 98u8, 186u8, 22u8, 178u8, 51u8, 151u8, 235u8, 201u8,
                             2u8, 245u8, 177u8, 4u8, 125u8, 1u8, 245u8, 56u8, 102u8,
@@ -28234,9 +29732,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActiveValidatorKeys>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActiveValidatorKeys>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             130u8, 19u8, 46u8, 117u8, 211u8, 113u8, 90u8, 42u8, 173u8,
                             87u8, 209u8, 185u8, 102u8, 142u8, 161u8, 60u8, 118u8, 246u8,
@@ -28384,9 +29885,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub async fn availability_bitfields (& self , _0 : & runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AvailabilityBitfields>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AvailabilityBitfields>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             223u8, 74u8, 17u8, 152u8, 136u8, 20u8, 241u8, 47u8, 169u8,
                             34u8, 128u8, 78u8, 121u8, 47u8, 165u8, 35u8, 222u8, 15u8,
@@ -28408,9 +29912,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, AvailabilityBitfields<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AvailabilityBitfields>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AvailabilityBitfields>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             223u8, 74u8, 17u8, 152u8, 136u8, 20u8, 241u8, 47u8, 169u8,
                             34u8, 128u8, 78u8, 121u8, 47u8, 165u8, 35u8, 222u8, 15u8,
@@ -28424,9 +29931,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Candidates pending availability by `ParaId`."]                pub async fn pending_availability (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: Id , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: sp_core :: H256 , :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingAvailability>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingAvailability>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             201u8, 235u8, 244u8, 21u8, 107u8, 106u8, 50u8, 211u8, 165u8,
                             102u8, 113u8, 3u8, 54u8, 155u8, 159u8, 255u8, 117u8, 107u8,
@@ -28448,9 +29958,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PendingAvailability<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingAvailability>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingAvailability>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             201u8, 235u8, 244u8, 21u8, 107u8, 106u8, 50u8, 211u8, 165u8,
                             102u8, 113u8, 3u8, 54u8, 155u8, 159u8, 255u8, 117u8, 107u8,
@@ -28476,9 +29989,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingAvailabilityCommitments>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingAvailabilityCommitments>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             164u8, 245u8, 130u8, 208u8, 141u8, 88u8, 99u8, 247u8, 90u8,
                             215u8, 40u8, 99u8, 239u8, 7u8, 231u8, 13u8, 233u8, 204u8,
@@ -28500,9 +30016,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PendingAvailabilityCommitments<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingAvailabilityCommitments>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingAvailabilityCommitments>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             164u8, 245u8, 130u8, 208u8, 141u8, 88u8, 99u8, 247u8, 90u8,
                             215u8, 40u8, 99u8, 239u8, 7u8, 231u8, 13u8, 233u8, 204u8,
@@ -28577,9 +30096,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Enter>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Enter>()?
+                    };
+                    if runtime_call_hash
                         == [
                             208u8, 134u8, 126u8, 30u8, 50u8, 219u8, 225u8, 133u8, 3u8,
                             2u8, 121u8, 154u8, 133u8, 141u8, 159u8, 193u8, 66u8, 252u8,
@@ -28635,9 +30157,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::option::Option<()>, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Included>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Included>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             208u8, 213u8, 76u8, 64u8, 90u8, 141u8, 144u8, 52u8, 220u8,
                             35u8, 143u8, 171u8, 45u8, 59u8, 9u8, 218u8, 29u8, 186u8,
@@ -28663,9 +30188,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<OnChainVotes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<OnChainVotes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             163u8, 22u8, 172u8, 81u8, 10u8, 19u8, 149u8, 111u8, 22u8,
                             92u8, 203u8, 33u8, 225u8, 124u8, 69u8, 70u8, 66u8, 188u8,
@@ -28778,9 +30306,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ValidatorGroups>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ValidatorGroups>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             84u8, 195u8, 53u8, 111u8, 186u8, 61u8, 3u8, 36u8, 10u8, 9u8,
                             66u8, 119u8, 116u8, 213u8, 86u8, 153u8, 18u8, 149u8, 83u8,
@@ -28801,9 +30332,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " The number of queued claims is bounded at the `scheduling_lookahead`"]
                 #[doc = " multiplied by the number of parathread multiplexer cores. Reasonably, 10 * 50 = 500."]                pub async fn parathread_queue (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: polkadot_runtime_parachains :: scheduler :: ParathreadClaimQueue , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParathreadQueue>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParathreadQueue>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             55u8, 142u8, 211u8, 227u8, 167u8, 35u8, 168u8, 23u8, 227u8,
                             185u8, 5u8, 154u8, 147u8, 237u8, 137u8, 133u8, 81u8, 121u8,
@@ -28839,9 +30373,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AvailabilityCores>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AvailabilityCores>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             170u8, 116u8, 249u8, 112u8, 156u8, 147u8, 94u8, 44u8, 114u8,
                             10u8, 32u8, 91u8, 229u8, 56u8, 60u8, 222u8, 212u8, 176u8,
@@ -28869,9 +30406,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParathreadClaimIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParathreadClaimIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             187u8, 105u8, 221u8, 0u8, 103u8, 9u8, 52u8, 127u8, 47u8,
                             155u8, 147u8, 84u8, 249u8, 213u8, 140u8, 75u8, 99u8, 238u8,
@@ -28899,9 +30439,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SessionStartBlock>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SessionStartBlock>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             122u8, 37u8, 150u8, 1u8, 185u8, 201u8, 168u8, 67u8, 55u8,
                             17u8, 101u8, 18u8, 133u8, 212u8, 6u8, 73u8, 191u8, 204u8,
@@ -28924,9 +30467,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " The value contained here will not be valid after the end of a block. Runtime APIs should be used to determine scheduled cores/"]
                 #[doc = " for the upcoming block."]                pub async fn scheduled (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: CoreAssignment > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Scheduled>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Scheduled>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             29u8, 43u8, 158u8, 142u8, 50u8, 67u8, 4u8, 30u8, 158u8, 99u8,
                             47u8, 13u8, 151u8, 141u8, 163u8, 63u8, 140u8, 179u8, 247u8,
@@ -29063,9 +30609,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceSetCurrentCode>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceSetCurrentCode>()?
+                    };
+                    if runtime_call_hash
                         == [
                             100u8, 36u8, 105u8, 246u8, 77u8, 252u8, 162u8, 139u8, 60u8,
                             37u8, 12u8, 148u8, 206u8, 160u8, 134u8, 105u8, 50u8, 52u8,
@@ -29095,9 +30644,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceSetCurrentHead>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceSetCurrentHead>()?
+                    };
+                    if runtime_call_hash
                         == [
                             119u8, 46u8, 120u8, 202u8, 138u8, 190u8, 179u8, 78u8, 155u8,
                             167u8, 220u8, 233u8, 170u8, 248u8, 202u8, 92u8, 73u8, 246u8,
@@ -29128,9 +30680,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceScheduleCodeUpgrade>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceScheduleCodeUpgrade>()?
+                    };
+                    if runtime_call_hash
                         == [
                             254u8, 60u8, 105u8, 37u8, 116u8, 190u8, 30u8, 255u8, 210u8,
                             24u8, 120u8, 99u8, 174u8, 215u8, 233u8, 83u8, 57u8, 200u8,
@@ -29164,9 +30719,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceNoteNewHead>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceNoteNewHead>()?
+                    };
+                    if runtime_call_hash
                         == [
                             203u8, 31u8, 68u8, 125u8, 105u8, 218u8, 177u8, 205u8, 248u8,
                             131u8, 25u8, 170u8, 140u8, 56u8, 183u8, 106u8, 2u8, 118u8,
@@ -29197,9 +30755,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceQueueAction>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceQueueAction>()?
+                    };
+                    if runtime_call_hash
                         == [
                             141u8, 235u8, 245u8, 93u8, 24u8, 155u8, 106u8, 136u8, 190u8,
                             236u8, 216u8, 131u8, 245u8, 5u8, 186u8, 131u8, 159u8, 240u8,
@@ -29240,9 +30801,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddTrustedValidationCode>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddTrustedValidationCode>()?
+                    };
+                    if runtime_call_hash
                         == [
                             110u8, 255u8, 249u8, 176u8, 109u8, 54u8, 87u8, 19u8, 7u8,
                             62u8, 220u8, 143u8, 196u8, 99u8, 66u8, 49u8, 18u8, 225u8,
@@ -29275,9 +30839,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<PokeUnusedValidationCode>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<PokeUnusedValidationCode>()?
+                    };
+                    if runtime_call_hash
                         == [
                             159u8, 142u8, 14u8, 7u8, 29u8, 74u8, 213u8, 165u8, 206u8,
                             45u8, 135u8, 121u8, 0u8, 146u8, 217u8, 59u8, 189u8, 120u8,
@@ -29310,9 +30877,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<IncludePvfCheckStatement>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<IncludePvfCheckStatement>()?
+                    };
+                    if runtime_call_hash
                         == [
                             187u8, 231u8, 113u8, 29u8, 177u8, 92u8, 2u8, 116u8, 88u8,
                             114u8, 19u8, 170u8, 167u8, 254u8, 149u8, 142u8, 24u8, 57u8,
@@ -29686,9 +31256,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Invariant:"]
                 #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub async fn pvf_active_vote_map (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PvfActiveVoteMap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PvfActiveVoteMap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             113u8, 142u8, 66u8, 141u8, 249u8, 227u8, 84u8, 128u8, 137u8,
                             111u8, 215u8, 93u8, 246u8, 49u8, 126u8, 213u8, 77u8, 139u8,
@@ -29713,9 +31286,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PvfActiveVoteMap<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PvfActiveVoteMap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PvfActiveVoteMap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             113u8, 142u8, 66u8, 141u8, 249u8, 227u8, 84u8, 128u8, 137u8,
                             111u8, 215u8, 93u8, 246u8, 49u8, 126u8, 213u8, 77u8, 139u8,
@@ -29738,9 +31314,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PvfActiveVoteList>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PvfActiveVoteList>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             30u8, 117u8, 174u8, 227u8, 251u8, 95u8, 176u8, 153u8, 151u8,
                             188u8, 89u8, 252u8, 168u8, 203u8, 174u8, 241u8, 209u8, 45u8,
@@ -29767,9 +31346,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Parachains>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Parachains>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             174u8, 146u8, 170u8, 102u8, 125u8, 176u8, 74u8, 177u8, 28u8,
                             54u8, 13u8, 73u8, 188u8, 248u8, 78u8, 144u8, 88u8, 183u8,
@@ -29797,9 +31379,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParaLifecycles>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParaLifecycles>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             38u8, 31u8, 0u8, 253u8, 63u8, 27u8, 13u8, 12u8, 247u8, 34u8,
                             21u8, 166u8, 166u8, 236u8, 178u8, 217u8, 230u8, 117u8, 215u8,
@@ -29821,9 +31406,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ParaLifecycles<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ParaLifecycles>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ParaLifecycles>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             38u8, 31u8, 0u8, 253u8, 63u8, 27u8, 13u8, 12u8, 247u8, 34u8,
                             21u8, 166u8, 166u8, 236u8, 178u8, 217u8, 230u8, 117u8, 215u8,
@@ -29847,9 +31435,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Heads>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Heads>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             242u8, 145u8, 237u8, 33u8, 204u8, 183u8, 18u8, 135u8, 182u8,
                             47u8, 220u8, 187u8, 118u8, 79u8, 163u8, 122u8, 227u8, 215u8,
@@ -29871,9 +31462,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Heads<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Heads>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Heads>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             242u8, 145u8, 237u8, 33u8, 204u8, 183u8, 18u8, 135u8, 182u8,
                             47u8, 220u8, 187u8, 118u8, 79u8, 163u8, 122u8, 227u8, 215u8,
@@ -29899,9 +31493,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             146u8, 139u8, 159u8, 78u8, 13u8, 151u8, 18u8, 117u8, 15u8,
                             107u8, 251u8, 200u8, 100u8, 200u8, 170u8, 50u8, 250u8, 189u8,
@@ -29925,9 +31522,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, CurrentCodeHash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             146u8, 139u8, 159u8, 78u8, 13u8, 151u8, 18u8, 117u8, 15u8,
                             107u8, 251u8, 200u8, 100u8, 200u8, 170u8, 50u8, 250u8, 189u8,
@@ -29955,9 +31555,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PastCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PastCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             158u8, 40u8, 107u8, 17u8, 201u8, 114u8, 104u8, 4u8, 50u8,
                             4u8, 245u8, 186u8, 104u8, 25u8, 142u8, 118u8, 196u8, 165u8,
@@ -29982,9 +31585,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PastCodeHash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PastCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PastCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             158u8, 40u8, 107u8, 17u8, 201u8, 114u8, 104u8, 4u8, 50u8,
                             4u8, 245u8, 186u8, 104u8, 25u8, 142u8, 118u8, 196u8, 165u8,
@@ -30010,9 +31616,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PastCodeMeta>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PastCodeMeta>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             121u8, 14u8, 91u8, 135u8, 231u8, 67u8, 189u8, 66u8, 108u8,
                             27u8, 241u8, 117u8, 101u8, 34u8, 24u8, 16u8, 52u8, 198u8,
@@ -30039,9 +31648,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PastCodeMeta<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PastCodeMeta>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PastCodeMeta>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             121u8, 14u8, 91u8, 135u8, 231u8, 67u8, 189u8, 66u8, 108u8,
                             27u8, 241u8, 117u8, 101u8, 34u8, 24u8, 16u8, 52u8, 198u8,
@@ -30070,9 +31682,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PastCodePruning>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PastCodePruning>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             142u8, 32u8, 134u8, 51u8, 34u8, 214u8, 75u8, 69u8, 77u8,
                             178u8, 103u8, 117u8, 180u8, 105u8, 249u8, 178u8, 143u8, 25u8,
@@ -30100,9 +31715,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<FutureCodeUpgrades>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<FutureCodeUpgrades>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             211u8, 254u8, 201u8, 63u8, 89u8, 112u8, 57u8, 82u8, 255u8,
                             163u8, 49u8, 246u8, 197u8, 154u8, 55u8, 10u8, 65u8, 188u8,
@@ -30126,9 +31744,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, FutureCodeUpgrades<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<FutureCodeUpgrades>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<FutureCodeUpgrades>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             211u8, 254u8, 201u8, 63u8, 89u8, 112u8, 57u8, 82u8, 255u8,
                             163u8, 49u8, 246u8, 197u8, 154u8, 55u8, 10u8, 65u8, 188u8,
@@ -30154,9 +31775,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<FutureCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<FutureCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             221u8, 2u8, 237u8, 170u8, 64u8, 60u8, 98u8, 146u8, 135u8,
                             69u8, 6u8, 38u8, 2u8, 239u8, 22u8, 94u8, 180u8, 163u8, 76u8,
@@ -30180,9 +31804,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, FutureCodeHash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<FutureCodeHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<FutureCodeHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             221u8, 2u8, 237u8, 170u8, 64u8, 60u8, 98u8, 146u8, 135u8,
                             69u8, 6u8, 38u8, 2u8, 239u8, 22u8, 94u8, 180u8, 163u8, 76u8,
@@ -30214,9 +31841,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradeGoAheadSignal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradeGoAheadSignal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             100u8, 87u8, 135u8, 185u8, 95u8, 13u8, 74u8, 134u8, 19u8,
                             97u8, 80u8, 104u8, 177u8, 30u8, 82u8, 145u8, 171u8, 250u8,
@@ -30246,9 +31876,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, UpgradeGoAheadSignal<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradeGoAheadSignal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradeGoAheadSignal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             100u8, 87u8, 135u8, 185u8, 95u8, 13u8, 74u8, 134u8, 19u8,
                             97u8, 80u8, 104u8, 177u8, 30u8, 82u8, 145u8, 171u8, 250u8,
@@ -30280,9 +31913,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradeRestrictionSignal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradeRestrictionSignal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             173u8, 198u8, 89u8, 108u8, 43u8, 93u8, 143u8, 224u8, 141u8,
                             248u8, 238u8, 221u8, 237u8, 220u8, 140u8, 24u8, 7u8, 14u8,
@@ -30312,9 +31948,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, UpgradeRestrictionSignal<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradeRestrictionSignal>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradeRestrictionSignal>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             173u8, 198u8, 89u8, 108u8, 43u8, 93u8, 143u8, 224u8, 141u8,
                             248u8, 238u8, 221u8, 237u8, 220u8, 140u8, 24u8, 7u8, 14u8,
@@ -30340,9 +31979,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpgradeCooldowns>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpgradeCooldowns>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             120u8, 214u8, 165u8, 35u8, 125u8, 56u8, 152u8, 76u8, 124u8,
                             159u8, 160u8, 93u8, 16u8, 30u8, 208u8, 199u8, 162u8, 74u8,
@@ -30373,9 +32015,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpcomingUpgrades>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpcomingUpgrades>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             16u8, 74u8, 254u8, 39u8, 241u8, 98u8, 106u8, 203u8, 189u8,
                             157u8, 66u8, 99u8, 164u8, 176u8, 20u8, 206u8, 15u8, 212u8,
@@ -30401,9 +32046,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActionsQueue>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActionsQueue>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 197u8, 76u8, 84u8, 133u8, 3u8, 67u8, 57u8, 107u8,
                             31u8, 87u8, 33u8, 196u8, 130u8, 119u8, 93u8, 171u8, 173u8,
@@ -30428,9 +32076,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ActionsQueue<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ActionsQueue>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ActionsQueue>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 197u8, 76u8, 84u8, 133u8, 3u8, 67u8, 57u8, 107u8,
                             31u8, 87u8, 33u8, 196u8, 130u8, 119u8, 93u8, 171u8, 173u8,
@@ -30447,9 +32098,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " NOTE that after PVF pre-checking is enabled the para genesis arg will have it's code set"]
                 #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]                pub async fn upcoming_paras_genesis (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: Id , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: paras :: ParaGenesisArgs > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpcomingParasGenesis>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpcomingParasGenesis>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             98u8, 249u8, 92u8, 177u8, 21u8, 84u8, 199u8, 194u8, 150u8,
                             213u8, 143u8, 107u8, 99u8, 194u8, 141u8, 225u8, 55u8, 94u8,
@@ -30474,9 +32128,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, UpcomingParasGenesis<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<UpcomingParasGenesis>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<UpcomingParasGenesis>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             98u8, 249u8, 92u8, 177u8, 21u8, 84u8, 199u8, 194u8, 150u8,
                             213u8, 143u8, 107u8, 99u8, 194u8, 141u8, 225u8, 55u8, 94u8,
@@ -30496,9 +32153,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CodeByHashRefs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CodeByHashRefs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             194u8, 100u8, 213u8, 115u8, 143u8, 181u8, 255u8, 227u8,
                             232u8, 163u8, 209u8, 99u8, 2u8, 138u8, 118u8, 169u8, 210u8,
@@ -30523,9 +32183,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, CodeByHashRefs<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CodeByHashRefs>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CodeByHashRefs>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             194u8, 100u8, 213u8, 115u8, 143u8, 181u8, 255u8, 227u8,
                             232u8, 163u8, 209u8, 99u8, 2u8, 138u8, 118u8, 169u8, 210u8,
@@ -30552,9 +32215,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CodeByHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CodeByHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             41u8, 242u8, 100u8, 156u8, 32u8, 20u8, 72u8, 228u8, 143u8,
                             3u8, 169u8, 169u8, 27u8, 111u8, 119u8, 135u8, 155u8, 17u8,
@@ -30579,9 +32245,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, CodeByHash<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CodeByHash>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CodeByHash>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             41u8, 242u8, 100u8, 156u8, 32u8, 20u8, 72u8, 228u8, 143u8,
                             3u8, 169u8, 169u8, 27u8, 111u8, 119u8, 135u8, 155u8, 17u8,
@@ -30687,9 +32356,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceApprove>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceApprove>()?
+                    };
+                    if runtime_call_hash
                         == [
                             61u8, 29u8, 75u8, 222u8, 82u8, 250u8, 124u8, 164u8, 70u8,
                             114u8, 150u8, 28u8, 103u8, 53u8, 185u8, 147u8, 168u8, 239u8,
@@ -30745,9 +32417,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::option::Option<()>, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HasInitialized>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HasInitialized>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             251u8, 135u8, 247u8, 61u8, 139u8, 102u8, 12u8, 122u8, 227u8,
                             123u8, 11u8, 232u8, 120u8, 80u8, 81u8, 48u8, 216u8, 115u8,
@@ -30768,9 +32443,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " However this is a `Vec` regardless to handle various edge cases that may occur at runtime"]
                 #[doc = " upgrade boundaries or if governance intervenes."]                pub async fn buffered_session_changes (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: initializer :: BufferedSessionChange > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<BufferedSessionChanges>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<BufferedSessionChanges>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             79u8, 184u8, 104u8, 7u8, 11u8, 216u8, 205u8, 95u8, 155u8,
                             51u8, 17u8, 160u8, 239u8, 14u8, 38u8, 99u8, 206u8, 87u8,
@@ -30872,9 +32550,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DownwardMessageQueues>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DownwardMessageQueues>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             104u8, 117u8, 177u8, 125u8, 208u8, 212u8, 216u8, 171u8,
                             212u8, 235u8, 43u8, 255u8, 146u8, 230u8, 243u8, 27u8, 133u8,
@@ -30899,9 +32580,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, DownwardMessageQueues<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DownwardMessageQueues>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DownwardMessageQueues>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             104u8, 117u8, 177u8, 125u8, 208u8, 212u8, 216u8, 171u8,
                             212u8, 235u8, 43u8, 255u8, 146u8, 230u8, 243u8, 27u8, 133u8,
@@ -30927,9 +32611,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::subxt::sp_core::H256, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DownwardMessageQueueHeads>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DownwardMessageQueueHeads>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             88u8, 45u8, 62u8, 250u8, 186u8, 97u8, 121u8, 56u8, 136u8,
                             216u8, 73u8, 65u8, 253u8, 81u8, 94u8, 162u8, 132u8, 217u8,
@@ -30960,9 +32647,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, DownwardMessageQueueHeads<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<DownwardMessageQueueHeads>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<DownwardMessageQueueHeads>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             88u8, 45u8, 62u8, 250u8, 186u8, 97u8, 121u8, 56u8, 136u8,
                             216u8, 73u8, 65u8, 253u8, 81u8, 94u8, 162u8, 132u8, 217u8,
@@ -31040,9 +32730,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ServiceOverweight>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ServiceOverweight>()?
+                    };
+                    if runtime_call_hash
                         == [
                             229u8, 167u8, 106u8, 63u8, 141u8, 80u8, 8u8, 201u8, 156u8,
                             34u8, 47u8, 104u8, 116u8, 57u8, 35u8, 216u8, 132u8, 3u8,
@@ -31240,9 +32933,12 @@ pub mod api {
                     ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<RelayDispatchQueues>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<RelayDispatchQueues>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 48u8, 215u8, 37u8, 42u8, 115u8, 27u8, 8u8, 249u8, 65u8,
                             47u8, 61u8, 96u8, 1u8, 196u8, 143u8, 53u8, 7u8, 241u8, 126u8,
@@ -31272,9 +32968,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, RelayDispatchQueues<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<RelayDispatchQueues>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<RelayDispatchQueues>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             22u8, 48u8, 215u8, 37u8, 42u8, 115u8, 27u8, 8u8, 249u8, 65u8,
                             47u8, 61u8, 96u8, 1u8, 196u8, 143u8, 53u8, 7u8, 241u8, 126u8,
@@ -31306,9 +33005,12 @@ pub mod api {
                     (::core::primitive::u32, ::core::primitive::u32),
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<RelayDispatchQueueSize>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<RelayDispatchQueueSize>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             8u8, 0u8, 54u8, 33u8, 185u8, 112u8, 21u8, 174u8, 15u8, 147u8,
                             134u8, 184u8, 108u8, 144u8, 55u8, 138u8, 24u8, 66u8, 255u8,
@@ -31343,9 +33045,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, RelayDispatchQueueSize<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<RelayDispatchQueueSize>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<RelayDispatchQueueSize>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             8u8, 0u8, 54u8, 33u8, 185u8, 112u8, 21u8, 174u8, 15u8, 147u8,
                             134u8, 184u8, 108u8, 144u8, 55u8, 138u8, 24u8, 66u8, 255u8,
@@ -31370,9 +33075,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NeedsDispatch>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NeedsDispatch>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             75u8, 38u8, 232u8, 83u8, 71u8, 101u8, 248u8, 170u8, 5u8,
                             32u8, 209u8, 97u8, 190u8, 31u8, 241u8, 1u8, 98u8, 87u8, 64u8,
@@ -31403,9 +33111,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextDispatchRoundStartWith>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextDispatchRoundStartWith>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             102u8, 165u8, 118u8, 140u8, 84u8, 122u8, 91u8, 169u8, 232u8,
                             125u8, 52u8, 228u8, 15u8, 228u8, 91u8, 79u8, 218u8, 62u8,
@@ -31433,9 +33144,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Overweight>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Overweight>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             223u8, 155u8, 1u8, 100u8, 77u8, 13u8, 92u8, 235u8, 64u8,
                             30u8, 199u8, 178u8, 149u8, 66u8, 155u8, 201u8, 84u8, 26u8,
@@ -31459,9 +33173,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Overweight<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Overweight>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Overweight>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             223u8, 155u8, 1u8, 100u8, 77u8, 13u8, 92u8, 235u8, 64u8,
                             30u8, 199u8, 178u8, 149u8, 66u8, 155u8, 201u8, 84u8, 26u8,
@@ -31481,9 +33198,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<OverweightCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<OverweightCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             102u8, 180u8, 196u8, 148u8, 115u8, 62u8, 46u8, 238u8, 97u8,
                             116u8, 117u8, 42u8, 14u8, 5u8, 72u8, 237u8, 230u8, 46u8,
@@ -31628,9 +33348,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<HrmpInitOpenChannel>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<HrmpInitOpenChannel>()?
+                    };
+                    if runtime_call_hash
                         == [
                             244u8, 142u8, 161u8, 144u8, 109u8, 104u8, 164u8, 198u8,
                             201u8, 79u8, 178u8, 136u8, 107u8, 104u8, 83u8, 11u8, 167u8,
@@ -31665,9 +33388,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<HrmpAcceptOpenChannel>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<HrmpAcceptOpenChannel>()?
+                    };
+                    if runtime_call_hash
                         == [
                             95u8, 196u8, 155u8, 220u8, 235u8, 120u8, 67u8, 247u8, 245u8,
                             20u8, 162u8, 41u8, 4u8, 204u8, 125u8, 16u8, 224u8, 72u8,
@@ -31699,9 +33425,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<HrmpCloseChannel>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<HrmpCloseChannel>()?
+                    };
+                    if runtime_call_hash
                         == [
                             199u8, 9u8, 55u8, 184u8, 196u8, 45u8, 46u8, 251u8, 48u8,
                             23u8, 132u8, 74u8, 188u8, 121u8, 41u8, 18u8, 71u8, 65u8,
@@ -31738,9 +33467,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceCleanHrmp>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceCleanHrmp>()?
+                    };
+                    if runtime_call_hash
                         == [
                             182u8, 231u8, 99u8, 129u8, 130u8, 109u8, 97u8, 108u8, 37u8,
                             107u8, 203u8, 70u8, 133u8, 106u8, 226u8, 77u8, 110u8, 189u8,
@@ -31778,9 +33510,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceProcessHrmpOpen>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceProcessHrmpOpen>()?
+                    };
+                    if runtime_call_hash
                         == [
                             162u8, 53u8, 194u8, 175u8, 117u8, 32u8, 217u8, 177u8, 9u8,
                             255u8, 88u8, 40u8, 8u8, 174u8, 8u8, 11u8, 26u8, 82u8, 213u8,
@@ -31814,9 +33549,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceProcessHrmpClose>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceProcessHrmpClose>()?
+                    };
+                    if runtime_call_hash
                         == [
                             128u8, 141u8, 191u8, 255u8, 204u8, 137u8, 27u8, 170u8, 180u8,
                             166u8, 93u8, 144u8, 70u8, 56u8, 132u8, 100u8, 5u8, 114u8,
@@ -31853,9 +33591,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<HrmpCancelOpenRequest>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<HrmpCancelOpenRequest>()?
+                    };
+                    if runtime_call_hash
                         == [
                             8u8, 83u8, 32u8, 187u8, 220u8, 1u8, 212u8, 226u8, 72u8, 61u8,
                             110u8, 211u8, 238u8, 119u8, 95u8, 48u8, 150u8, 51u8, 177u8,
@@ -32109,9 +33850,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Invariant:"]
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub async fn hrmp_open_channel_requests (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest > , :: subxt :: BasicError >{
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpOpenChannelRequests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpOpenChannelRequests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             58u8, 216u8, 106u8, 4u8, 117u8, 77u8, 168u8, 230u8, 50u8,
                             6u8, 175u8, 26u8, 110u8, 45u8, 143u8, 207u8, 174u8, 77u8,
@@ -32138,9 +33882,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpOpenChannelRequests<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpOpenChannelRequests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpOpenChannelRequests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             58u8, 216u8, 106u8, 4u8, 117u8, 77u8, 168u8, 230u8, 50u8,
                             6u8, 175u8, 26u8, 110u8, 45u8, 143u8, 207u8, 174u8, 77u8,
@@ -32162,9 +33909,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpOpenChannelRequestsList>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpOpenChannelRequestsList>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             176u8, 22u8, 136u8, 206u8, 243u8, 208u8, 67u8, 150u8, 187u8,
                             163u8, 141u8, 37u8, 235u8, 84u8, 176u8, 63u8, 55u8, 38u8,
@@ -32190,9 +33940,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 47u8, 152u8, 1u8, 119u8, 244u8, 62u8, 249u8, 141u8,
                             194u8, 157u8, 149u8, 58u8, 208u8, 113u8, 77u8, 4u8, 248u8,
@@ -32219,9 +33972,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpOpenChannelRequestCount<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             103u8, 47u8, 152u8, 1u8, 119u8, 244u8, 62u8, 249u8, 141u8,
                             194u8, 157u8, 149u8, 58u8, 208u8, 113u8, 77u8, 4u8, 248u8,
@@ -32243,9 +33999,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             166u8, 207u8, 97u8, 222u8, 30u8, 204u8, 203u8, 122u8, 72u8,
                             66u8, 247u8, 169u8, 128u8, 122u8, 145u8, 124u8, 214u8, 183u8,
@@ -32272,9 +34031,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpAcceptedChannelRequestCount<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             166u8, 207u8, 97u8, 222u8, 30u8, 204u8, 203u8, 122u8, 72u8,
                             66u8, 247u8, 169u8, 128u8, 122u8, 145u8, 124u8, 214u8, 183u8,
@@ -32300,9 +34062,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::option::Option<()>, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpCloseChannelRequests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpCloseChannelRequests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             118u8, 8u8, 142u8, 158u8, 184u8, 200u8, 38u8, 112u8, 217u8,
                             69u8, 161u8, 255u8, 116u8, 143u8, 94u8, 185u8, 95u8, 247u8,
@@ -32330,9 +34095,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpCloseChannelRequests<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpCloseChannelRequests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpCloseChannelRequests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             118u8, 8u8, 142u8, 158u8, 184u8, 200u8, 38u8, 112u8, 217u8,
                             69u8, 161u8, 255u8, 116u8, 143u8, 94u8, 185u8, 95u8, 247u8,
@@ -32354,9 +34122,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpCloseChannelRequestsList>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpCloseChannelRequestsList>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             203u8, 46u8, 200u8, 63u8, 120u8, 238u8, 88u8, 170u8, 239u8,
                             27u8, 99u8, 104u8, 254u8, 194u8, 152u8, 221u8, 126u8, 188u8,
@@ -32384,9 +34155,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpWatermarks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpWatermarks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             28u8, 187u8, 5u8, 0u8, 130u8, 11u8, 241u8, 171u8, 141u8,
                             109u8, 236u8, 151u8, 194u8, 124u8, 172u8, 180u8, 36u8, 144u8,
@@ -32410,9 +34184,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpWatermarks<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpWatermarks>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpWatermarks>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             28u8, 187u8, 5u8, 0u8, 130u8, 11u8, 241u8, 171u8, 141u8,
                             109u8, 236u8, 151u8, 194u8, 124u8, 172u8, 180u8, 36u8, 144u8,
@@ -32438,9 +34215,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannels>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannels>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             241u8, 160u8, 242u8, 167u8, 251u8, 8u8, 131u8, 194u8, 179u8,
                             216u8, 231u8, 125u8, 58u8, 118u8, 61u8, 113u8, 46u8, 47u8,
@@ -32464,9 +34244,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpChannels<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannels>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannels>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             241u8, 160u8, 242u8, 167u8, 251u8, 8u8, 131u8, 194u8, 179u8,
                             216u8, 231u8, 125u8, 58u8, 118u8, 61u8, 113u8, 46u8, 47u8,
@@ -32500,9 +34283,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpIngressChannelsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpIngressChannelsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             193u8, 185u8, 164u8, 194u8, 89u8, 218u8, 214u8, 184u8, 100u8,
                             238u8, 232u8, 90u8, 243u8, 230u8, 93u8, 191u8, 197u8, 182u8,
@@ -32539,9 +34325,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpIngressChannelsIndex<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpIngressChannelsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpIngressChannelsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             193u8, 185u8, 164u8, 194u8, 89u8, 218u8, 214u8, 184u8, 100u8,
                             238u8, 232u8, 90u8, 243u8, 230u8, 93u8, 191u8, 197u8, 182u8,
@@ -32562,9 +34351,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpEgressChannelsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpEgressChannelsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             242u8, 138u8, 89u8, 201u8, 60u8, 216u8, 73u8, 66u8, 167u8,
                             82u8, 225u8, 42u8, 61u8, 50u8, 54u8, 187u8, 212u8, 8u8,
@@ -32588,9 +34380,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpEgressChannelsIndex<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpEgressChannelsIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpEgressChannelsIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             242u8, 138u8, 89u8, 201u8, 60u8, 216u8, 73u8, 66u8, 167u8,
                             82u8, 225u8, 42u8, 61u8, 50u8, 54u8, 187u8, 212u8, 8u8,
@@ -32617,9 +34412,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannelContents>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannelContents>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             71u8, 246u8, 41u8, 12u8, 125u8, 10u8, 60u8, 209u8, 14u8,
                             254u8, 125u8, 217u8, 251u8, 172u8, 243u8, 73u8, 33u8, 230u8,
@@ -32645,9 +34443,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpChannelContents<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannelContents>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannelContents>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             71u8, 246u8, 41u8, 12u8, 125u8, 10u8, 60u8, 209u8, 14u8,
                             254u8, 125u8, 217u8, 251u8, 172u8, 243u8, 73u8, 33u8, 230u8,
@@ -32679,9 +34480,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannelDigests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannelDigests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             54u8, 106u8, 76u8, 21u8, 18u8, 49u8, 1u8, 34u8, 247u8, 101u8,
                             150u8, 142u8, 214u8, 137u8, 193u8, 100u8, 208u8, 162u8, 55u8,
@@ -32711,9 +34515,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, HrmpChannelDigests<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<HrmpChannelDigests>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<HrmpChannelDigests>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             54u8, 106u8, 76u8, 21u8, 18u8, 49u8, 1u8, 34u8, 247u8, 101u8,
                             150u8, 142u8, 214u8, 137u8, 193u8, 100u8, 208u8, 162u8, 55u8,
@@ -32787,9 +34594,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AssignmentKeysUnsafe>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AssignmentKeysUnsafe>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             243u8, 5u8, 37u8, 167u8, 29u8, 59u8, 87u8, 66u8, 53u8, 91u8,
                             181u8, 9u8, 144u8, 248u8, 225u8, 121u8, 130u8, 111u8, 140u8,
@@ -32812,9 +34622,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EarliestStoredSession>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EarliestStoredSession>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             25u8, 143u8, 246u8, 184u8, 35u8, 166u8, 140u8, 147u8, 171u8,
                             5u8, 164u8, 159u8, 228u8, 21u8, 248u8, 236u8, 48u8, 210u8,
@@ -32844,9 +34657,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Sessions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Sessions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             95u8, 222u8, 240u8, 96u8, 203u8, 233u8, 100u8, 160u8, 180u8,
                             161u8, 180u8, 123u8, 168u8, 102u8, 93u8, 172u8, 93u8, 174u8,
@@ -32870,9 +34686,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Sessions<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Sessions>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Sessions>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             95u8, 222u8, 240u8, 96u8, 203u8, 233u8, 100u8, 160u8, 180u8,
                             161u8, 180u8, 123u8, 168u8, 102u8, 93u8, 172u8, 93u8, 174u8,
@@ -32933,9 +34752,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceUnfreeze>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceUnfreeze>()?
+                    };
+                    if runtime_call_hash
                         == [
                             212u8, 211u8, 58u8, 159u8, 23u8, 220u8, 64u8, 175u8, 65u8,
                             50u8, 192u8, 122u8, 113u8, 189u8, 74u8, 191u8, 48u8, 93u8,
@@ -33094,9 +34916,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<LastPrunedSession>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<LastPrunedSession>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             125u8, 138u8, 99u8, 242u8, 9u8, 246u8, 215u8, 246u8, 141u8,
                             6u8, 129u8, 87u8, 27u8, 58u8, 53u8, 121u8, 61u8, 119u8, 35u8,
@@ -33124,9 +34949,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Disputes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Disputes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             37u8, 50u8, 243u8, 127u8, 8u8, 137u8, 232u8, 140u8, 200u8,
                             76u8, 211u8, 245u8, 26u8, 63u8, 113u8, 31u8, 169u8, 92u8,
@@ -33148,9 +34976,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Disputes<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Disputes>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Disputes>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             37u8, 50u8, 243u8, 127u8, 8u8, 137u8, 232u8, 140u8, 200u8,
                             76u8, 211u8, 245u8, 26u8, 63u8, 113u8, 31u8, 169u8, 92u8,
@@ -33174,9 +35005,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Included>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Included>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             32u8, 107u8, 8u8, 112u8, 201u8, 81u8, 66u8, 223u8, 120u8,
                             51u8, 166u8, 240u8, 229u8, 141u8, 231u8, 132u8, 114u8, 36u8,
@@ -33199,9 +35033,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Included<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Included>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Included>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             32u8, 107u8, 8u8, 112u8, 201u8, 81u8, 66u8, 223u8, 120u8,
                             51u8, 166u8, 240u8, 229u8, 141u8, 231u8, 132u8, 114u8, 36u8,
@@ -33227,9 +35064,12 @@ pub mod api {
                     ::core::option::Option<::std::vec::Vec<::core::primitive::u32>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SpamSlots>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SpamSlots>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             172u8, 23u8, 120u8, 188u8, 71u8, 248u8, 252u8, 41u8, 132u8,
                             221u8, 98u8, 215u8, 33u8, 242u8, 168u8, 196u8, 90u8, 123u8,
@@ -33255,9 +35095,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SpamSlots<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SpamSlots>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SpamSlots>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             172u8, 23u8, 120u8, 188u8, 71u8, 248u8, 252u8, 41u8, 132u8,
                             221u8, 98u8, 215u8, 33u8, 242u8, 168u8, 196u8, 90u8, 123u8,
@@ -33281,9 +35124,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Frozen>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Frozen>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             133u8, 100u8, 86u8, 220u8, 180u8, 189u8, 65u8, 131u8, 64u8,
                             56u8, 219u8, 47u8, 130u8, 167u8, 210u8, 125u8, 49u8, 7u8,
@@ -33414,9 +35260,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Register>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Register>()?
+                    };
+                    if runtime_call_hash
                         == [
                             180u8, 21u8, 142u8, 73u8, 21u8, 31u8, 64u8, 210u8, 196u8,
                             4u8, 142u8, 153u8, 172u8, 207u8, 95u8, 209u8, 177u8, 75u8,
@@ -33458,9 +35307,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceRegister>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceRegister>()?
+                    };
+                    if runtime_call_hash
                         == [
                             191u8, 198u8, 172u8, 68u8, 118u8, 126u8, 110u8, 47u8, 193u8,
                             147u8, 61u8, 27u8, 122u8, 107u8, 49u8, 222u8, 87u8, 199u8,
@@ -33497,9 +35349,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Deregister>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Deregister>()?
+                    };
+                    if runtime_call_hash
                         == [
                             147u8, 4u8, 172u8, 215u8, 67u8, 142u8, 93u8, 245u8, 108u8,
                             83u8, 5u8, 250u8, 87u8, 138u8, 231u8, 10u8, 159u8, 216u8,
@@ -33539,9 +35394,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Swap>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Swap>()?
+                    };
+                    if runtime_call_hash
                         == [
                             145u8, 163u8, 246u8, 239u8, 241u8, 209u8, 58u8, 241u8, 63u8,
                             134u8, 102u8, 55u8, 217u8, 125u8, 176u8, 91u8, 27u8, 32u8,
@@ -33573,9 +35431,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceRemoveLock>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceRemoveLock>()?
+                    };
+                    if runtime_call_hash
                         == [
                             205u8, 174u8, 132u8, 188u8, 1u8, 59u8, 82u8, 135u8, 123u8,
                             55u8, 144u8, 39u8, 205u8, 171u8, 13u8, 252u8, 65u8, 56u8,
@@ -33616,9 +35477,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Reserve>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Reserve>()?
+                    };
+                    if runtime_call_hash
                         == [
                             22u8, 210u8, 13u8, 54u8, 253u8, 13u8, 89u8, 174u8, 232u8,
                             119u8, 148u8, 206u8, 130u8, 133u8, 199u8, 127u8, 201u8,
@@ -33726,9 +35590,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingSwap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingSwap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             130u8, 4u8, 116u8, 91u8, 196u8, 41u8, 66u8, 48u8, 17u8, 2u8,
                             255u8, 189u8, 132u8, 10u8, 129u8, 102u8, 117u8, 56u8, 114u8,
@@ -33750,9 +35617,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, PendingSwap<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<PendingSwap>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<PendingSwap>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             130u8, 4u8, 116u8, 91u8, 196u8, 41u8, 66u8, 48u8, 17u8, 2u8,
                             255u8, 189u8, 132u8, 10u8, 129u8, 102u8, 117u8, 56u8, 114u8,
@@ -33782,9 +35652,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Paras>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Paras>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             180u8, 146u8, 122u8, 242u8, 222u8, 203u8, 19u8, 110u8, 22u8,
                             53u8, 147u8, 127u8, 165u8, 158u8, 113u8, 196u8, 105u8, 209u8,
@@ -33809,9 +35682,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Paras<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Paras>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Paras>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             180u8, 146u8, 122u8, 242u8, 222u8, 203u8, 19u8, 110u8, 22u8,
                             53u8, 147u8, 127u8, 165u8, 158u8, 113u8, 196u8, 105u8, 209u8,
@@ -33832,9 +35708,12 @@ pub mod api {
                     runtime_types::polkadot_parachain::primitives::Id,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextFreeParaId>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextFreeParaId>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             112u8, 52u8, 84u8, 181u8, 132u8, 61u8, 46u8, 69u8, 165u8,
                             85u8, 253u8, 243u8, 228u8, 151u8, 15u8, 239u8, 172u8, 28u8,
@@ -33990,9 +35869,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceLease>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceLease>()?
+                    };
+                    if runtime_call_hash
                         == [
                             110u8, 205u8, 106u8, 226u8, 3u8, 177u8, 198u8, 116u8, 52u8,
                             161u8, 90u8, 240u8, 43u8, 160u8, 144u8, 63u8, 97u8, 231u8,
@@ -34029,9 +35911,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ClearAllLeases>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ClearAllLeases>()?
+                    };
+                    if runtime_call_hash
                         == [
                             101u8, 225u8, 10u8, 139u8, 34u8, 12u8, 48u8, 76u8, 97u8,
                             178u8, 5u8, 110u8, 19u8, 3u8, 237u8, 183u8, 54u8, 113u8, 7u8,
@@ -34066,9 +35951,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<TriggerOnboard>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<TriggerOnboard>()?
+                    };
+                    if runtime_call_hash
                         == [
                             85u8, 246u8, 247u8, 252u8, 46u8, 143u8, 200u8, 102u8, 105u8,
                             51u8, 148u8, 164u8, 27u8, 25u8, 139u8, 167u8, 150u8, 129u8,
@@ -34174,9 +36062,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Leases>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Leases>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             83u8, 145u8, 119u8, 74u8, 166u8, 90u8, 141u8, 47u8, 125u8,
                             250u8, 173u8, 63u8, 193u8, 78u8, 96u8, 119u8, 111u8, 126u8,
@@ -34216,9 +36107,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Leases<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Leases>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Leases>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             83u8, 145u8, 119u8, 74u8, 166u8, 90u8, 141u8, 47u8, 125u8,
                             250u8, 173u8, 63u8, 193u8, 78u8, 96u8, 119u8, 111u8, 126u8,
@@ -34373,9 +36267,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<NewAuction>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<NewAuction>()?
+                    };
+                    if runtime_call_hash
                         == [
                             12u8, 43u8, 152u8, 0u8, 229u8, 15u8, 32u8, 205u8, 208u8,
                             71u8, 57u8, 169u8, 201u8, 177u8, 52u8, 10u8, 93u8, 183u8,
@@ -34426,9 +36323,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Bid>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Bid>()?
+                    };
+                    if runtime_call_hash
                         == [
                             206u8, 22u8, 15u8, 251u8, 222u8, 193u8, 192u8, 125u8, 160u8,
                             131u8, 209u8, 129u8, 105u8, 46u8, 77u8, 204u8, 107u8, 112u8,
@@ -34464,9 +36364,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<CancelAuction>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<CancelAuction>()?
+                    };
+                    if runtime_call_hash
                         == [
                             182u8, 223u8, 178u8, 136u8, 1u8, 115u8, 229u8, 78u8, 166u8,
                             128u8, 28u8, 106u8, 6u8, 248u8, 46u8, 55u8, 110u8, 120u8,
@@ -34635,9 +36538,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AuctionCounter>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AuctionCounter>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             67u8, 247u8, 96u8, 152u8, 0u8, 224u8, 230u8, 98u8, 194u8,
                             107u8, 3u8, 203u8, 51u8, 201u8, 149u8, 22u8, 184u8, 80u8,
@@ -34669,9 +36575,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AuctionInfo>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AuctionInfo>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             73u8, 216u8, 173u8, 230u8, 132u8, 78u8, 83u8, 62u8, 200u8,
                             69u8, 17u8, 73u8, 57u8, 107u8, 160u8, 90u8, 147u8, 84u8,
@@ -34696,9 +36605,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReservedAmounts>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReservedAmounts>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             195u8, 56u8, 142u8, 154u8, 193u8, 115u8, 13u8, 64u8, 101u8,
                             179u8, 69u8, 175u8, 185u8, 12u8, 31u8, 65u8, 147u8, 211u8,
@@ -34721,9 +36633,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, ReservedAmounts<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<ReservedAmounts>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<ReservedAmounts>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             195u8, 56u8, 142u8, 154u8, 193u8, 115u8, 13u8, 64u8, 101u8,
                             179u8, 69u8, 175u8, 185u8, 12u8, 31u8, 65u8, 147u8, 211u8,
@@ -34753,9 +36668,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Winning>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Winning>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             152u8, 246u8, 158u8, 193u8, 21u8, 56u8, 204u8, 29u8, 146u8,
                             90u8, 133u8, 246u8, 75u8, 111u8, 157u8, 150u8, 175u8, 33u8,
@@ -34779,9 +36697,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Winning<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Winning>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Winning>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             152u8, 246u8, 158u8, 193u8, 21u8, 56u8, 204u8, 29u8, 146u8,
                             90u8, 133u8, 246u8, 75u8, 111u8, 157u8, 150u8, 175u8, 33u8,
@@ -35062,9 +36983,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Create>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Create>()?
+                    };
+                    if runtime_call_hash
                         == [
                             94u8, 115u8, 154u8, 239u8, 215u8, 180u8, 175u8, 240u8, 137u8,
                             240u8, 74u8, 159u8, 67u8, 54u8, 69u8, 199u8, 161u8, 155u8,
@@ -35105,9 +37029,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Contribute>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Contribute>()?
+                    };
+                    if runtime_call_hash
                         == [
                             95u8, 255u8, 35u8, 30u8, 44u8, 150u8, 10u8, 166u8, 0u8,
                             204u8, 106u8, 59u8, 150u8, 254u8, 216u8, 128u8, 232u8, 129u8,
@@ -35157,9 +37084,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Withdraw>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Withdraw>()?
+                    };
+                    if runtime_call_hash
                         == [
                             67u8, 65u8, 89u8, 108u8, 193u8, 99u8, 74u8, 32u8, 163u8,
                             13u8, 81u8, 131u8, 64u8, 107u8, 72u8, 23u8, 35u8, 177u8,
@@ -35192,9 +37122,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Refund>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Refund>()?
+                    };
+                    if runtime_call_hash
                         == [
                             202u8, 206u8, 79u8, 226u8, 114u8, 228u8, 110u8, 18u8, 178u8,
                             173u8, 23u8, 83u8, 64u8, 11u8, 201u8, 19u8, 57u8, 75u8,
@@ -35223,9 +37156,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Dissolve>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Dissolve>()?
+                    };
+                    if runtime_call_hash
                         == [
                             210u8, 3u8, 221u8, 185u8, 64u8, 178u8, 56u8, 132u8, 72u8,
                             127u8, 105u8, 31u8, 167u8, 107u8, 127u8, 224u8, 174u8, 221u8,
@@ -35263,9 +37199,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Edit>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Edit>()?
+                    };
+                    if runtime_call_hash
                         == [
                             34u8, 43u8, 47u8, 39u8, 106u8, 245u8, 49u8, 40u8, 191u8,
                             195u8, 202u8, 113u8, 137u8, 98u8, 143u8, 172u8, 191u8, 55u8,
@@ -35304,9 +37243,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<AddMemo>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<AddMemo>()?
+                    };
+                    if runtime_call_hash
                         == [
                             97u8, 218u8, 115u8, 187u8, 167u8, 70u8, 229u8, 231u8, 148u8,
                             77u8, 169u8, 139u8, 16u8, 15u8, 116u8, 128u8, 32u8, 59u8,
@@ -35337,9 +37279,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Poke>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Poke>()?
+                    };
+                    if runtime_call_hash
                         == [
                             99u8, 158u8, 48u8, 3u8, 228u8, 210u8, 249u8, 42u8, 44u8,
                             49u8, 24u8, 212u8, 69u8, 69u8, 189u8, 194u8, 124u8, 251u8,
@@ -35372,9 +37317,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ContributeAll>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ContributeAll>()?
+                    };
+                    if runtime_call_hash
                         == [
                             64u8, 224u8, 233u8, 196u8, 182u8, 109u8, 69u8, 220u8, 46u8,
                             60u8, 189u8, 125u8, 17u8, 28u8, 207u8, 63u8, 129u8, 56u8,
@@ -35556,9 +37504,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Funds>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Funds>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             13u8, 211u8, 240u8, 138u8, 231u8, 78u8, 123u8, 252u8, 210u8,
                             27u8, 202u8, 82u8, 157u8, 118u8, 209u8, 218u8, 160u8, 183u8,
@@ -35580,9 +37531,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Funds<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Funds>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Funds>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             13u8, 211u8, 240u8, 138u8, 231u8, 78u8, 123u8, 252u8, 210u8,
                             27u8, 202u8, 82u8, 157u8, 118u8, 209u8, 218u8, 160u8, 183u8,
@@ -35604,9 +37558,12 @@ pub mod api {
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NewRaise>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NewRaise>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             243u8, 204u8, 121u8, 230u8, 151u8, 223u8, 248u8, 199u8, 68u8,
                             209u8, 226u8, 159u8, 217u8, 105u8, 39u8, 127u8, 162u8, 133u8,
@@ -35629,9 +37586,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<EndingsCount>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<EndingsCount>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             12u8, 159u8, 166u8, 75u8, 192u8, 33u8, 21u8, 244u8, 149u8,
                             200u8, 49u8, 54u8, 191u8, 174u8, 202u8, 86u8, 76u8, 115u8,
@@ -35654,9 +37614,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<NextFundIndex>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<NextFundIndex>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             1u8, 215u8, 164u8, 194u8, 231u8, 34u8, 207u8, 19u8, 149u8,
                             187u8, 3u8, 176u8, 194u8, 240u8, 180u8, 169u8, 214u8, 194u8,
@@ -35908,9 +37871,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Send>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Send>()?
+                    };
+                    if runtime_call_hash
                         == [
                             232u8, 188u8, 205u8, 27u8, 92u8, 141u8, 251u8, 24u8, 90u8,
                             155u8, 20u8, 139u8, 7u8, 160u8, 39u8, 85u8, 205u8, 11u8,
@@ -35959,9 +37925,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<TeleportAssets>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<TeleportAssets>()?
+                    };
+                    if runtime_call_hash
                         == [
                             55u8, 192u8, 217u8, 186u8, 230u8, 234u8, 26u8, 194u8, 243u8,
                             199u8, 16u8, 227u8, 225u8, 88u8, 130u8, 219u8, 228u8, 110u8,
@@ -36013,9 +37982,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ReserveTransferAssets>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ReserveTransferAssets>()?
+                    };
+                    if runtime_call_hash
                         == [
                             134u8, 229u8, 104u8, 209u8, 160u8, 7u8, 99u8, 175u8, 128u8,
                             110u8, 189u8, 225u8, 141u8, 1u8, 10u8, 17u8, 247u8, 233u8,
@@ -36060,9 +38032,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<Execute>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<Execute>()?
+                    };
+                    if runtime_call_hash
                         == [
                             95u8, 48u8, 201u8, 232u8, 83u8, 23u8, 20u8, 126u8, 116u8,
                             116u8, 176u8, 206u8, 145u8, 9u8, 155u8, 109u8, 141u8, 226u8,
@@ -36100,9 +38075,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceXcmVersion>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceXcmVersion>()?
+                    };
+                    if runtime_call_hash
                         == [
                             32u8, 219u8, 213u8, 152u8, 203u8, 73u8, 121u8, 64u8, 78u8,
                             53u8, 110u8, 23u8, 87u8, 93u8, 34u8, 166u8, 205u8, 189u8,
@@ -36138,9 +38116,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceDefaultXcmVersion>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceDefaultXcmVersion>()?
+                    };
+                    if runtime_call_hash
                         == [
                             44u8, 161u8, 28u8, 189u8, 162u8, 221u8, 14u8, 31u8, 8u8,
                             211u8, 181u8, 51u8, 197u8, 14u8, 87u8, 198u8, 3u8, 240u8,
@@ -36172,9 +38153,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceSubscribeVersionNotify>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceSubscribeVersionNotify>()?
+                    };
+                    if runtime_call_hash
                         == [
                             41u8, 248u8, 187u8, 195u8, 146u8, 143u8, 0u8, 246u8, 248u8,
                             38u8, 128u8, 200u8, 143u8, 149u8, 127u8, 73u8, 3u8, 247u8,
@@ -36210,9 +38194,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<ForceUnsubscribeVersionNotify>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceUnsubscribeVersionNotify>()?
+                    };
+                    if runtime_call_hash
                         == [
                             150u8, 202u8, 148u8, 13u8, 187u8, 169u8, 5u8, 60u8, 25u8,
                             144u8, 43u8, 196u8, 35u8, 215u8, 184u8, 72u8, 143u8, 220u8,
@@ -36264,9 +38251,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<LimitedReserveTransferAssets>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<LimitedReserveTransferAssets>()?
+                    };
+                    if runtime_call_hash
                         == [
                             242u8, 206u8, 126u8, 164u8, 44u8, 116u8, 181u8, 90u8, 121u8,
                             124u8, 120u8, 240u8, 129u8, 217u8, 131u8, 100u8, 248u8,
@@ -36321,9 +38311,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.call_hash::<LimitedTeleportAssets>()?
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<LimitedTeleportAssets>()?
+                    };
+                    if runtime_call_hash
                         == [
                             189u8, 233u8, 43u8, 16u8, 158u8, 114u8, 154u8, 233u8, 179u8,
                             144u8, 81u8, 179u8, 169u8, 38u8, 4u8, 130u8, 95u8, 237u8,
@@ -36720,9 +38713,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<QueryCounter>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<QueryCounter>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             137u8, 58u8, 184u8, 88u8, 247u8, 22u8, 151u8, 64u8, 50u8,
                             77u8, 49u8, 10u8, 234u8, 84u8, 213u8, 156u8, 26u8, 200u8,
@@ -36752,9 +38748,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Queries>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Queries>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             47u8, 241u8, 126u8, 71u8, 203u8, 121u8, 171u8, 226u8, 89u8,
                             17u8, 61u8, 198u8, 123u8, 73u8, 20u8, 197u8, 6u8, 23u8, 34u8,
@@ -36776,9 +38775,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, Queries<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<Queries>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<Queries>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             47u8, 241u8, 126u8, 71u8, 203u8, 121u8, 171u8, 226u8, 89u8,
                             17u8, 61u8, 198u8, 123u8, 73u8, 20u8, 197u8, 6u8, 23u8, 34u8,
@@ -36801,9 +38803,12 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AssetTraps>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AssetTraps>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             46u8, 170u8, 126u8, 101u8, 101u8, 243u8, 31u8, 53u8, 166u8,
                             45u8, 90u8, 63u8, 2u8, 87u8, 36u8, 221u8, 101u8, 190u8, 51u8,
@@ -36831,9 +38836,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, AssetTraps<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<AssetTraps>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<AssetTraps>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             46u8, 170u8, 126u8, 101u8, 101u8, 243u8, 31u8, 53u8, 166u8,
                             45u8, 90u8, 63u8, 2u8, 87u8, 36u8, 221u8, 101u8, 190u8, 51u8,
@@ -36855,9 +38863,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SafeXcmVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SafeXcmVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             1u8, 223u8, 218u8, 204u8, 222u8, 129u8, 137u8, 237u8, 197u8,
                             142u8, 233u8, 66u8, 229u8, 153u8, 138u8, 222u8, 113u8, 164u8,
@@ -36881,9 +38892,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u32>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SupportedVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SupportedVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             231u8, 202u8, 129u8, 82u8, 121u8, 63u8, 67u8, 57u8, 191u8,
                             190u8, 25u8, 27u8, 219u8, 42u8, 180u8, 142u8, 71u8, 119u8,
@@ -36905,9 +38919,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, SupportedVersion<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<SupportedVersion>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<SupportedVersion>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             231u8, 202u8, 129u8, 82u8, 121u8, 63u8, 67u8, 57u8, 191u8,
                             190u8, 25u8, 27u8, 219u8, 42u8, 180u8, 142u8, 71u8, 119u8,
@@ -36930,9 +38947,12 @@ pub mod api {
                     ::core::option::Option<::core::primitive::u64>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VersionNotifiers>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VersionNotifiers>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             126u8, 49u8, 13u8, 135u8, 137u8, 68u8, 248u8, 211u8, 160u8,
                             160u8, 93u8, 128u8, 157u8, 230u8, 62u8, 119u8, 191u8, 51u8,
@@ -36954,9 +38974,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, VersionNotifiers<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VersionNotifiers>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VersionNotifiers>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             126u8, 49u8, 13u8, 135u8, 137u8, 68u8, 248u8, 211u8, 160u8,
                             160u8, 93u8, 128u8, 157u8, 230u8, 62u8, 119u8, 191u8, 51u8,
@@ -36984,9 +39007,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VersionNotifyTargets>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VersionNotifyTargets>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             251u8, 128u8, 243u8, 94u8, 162u8, 11u8, 206u8, 101u8, 33u8,
                             24u8, 163u8, 157u8, 112u8, 50u8, 91u8, 155u8, 241u8, 73u8,
@@ -37009,9 +39035,12 @@ pub mod api {
                     ::subxt::KeyIter<'a, T, VersionNotifyTargets<'a>>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VersionNotifyTargets>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VersionNotifyTargets>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             251u8, 128u8, 243u8, 94u8, 162u8, 11u8, 206u8, 101u8, 33u8,
                             24u8, 163u8, 157u8, 112u8, 50u8, 91u8, 155u8, 241u8, 73u8,
@@ -37037,9 +39066,12 @@ pub mod api {
                     )>,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<VersionDiscoveryQueue>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<VersionDiscoveryQueue>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             45u8, 28u8, 29u8, 233u8, 239u8, 65u8, 24u8, 214u8, 153u8,
                             189u8, 132u8, 235u8, 62u8, 197u8, 252u8, 56u8, 38u8, 97u8,
@@ -37066,9 +39098,12 @@ pub mod api {
                     >,
                     ::subxt::BasicError,
                 > {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata.storage_hash::<CurrentMigration>()?
+                    let runtime_storage_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.storage_hash::<CurrentMigration>()?
+                    };
+                    if runtime_storage_hash
                         == [
                             228u8, 254u8, 240u8, 20u8, 92u8, 79u8, 40u8, 65u8, 176u8,
                             111u8, 243u8, 168u8, 238u8, 147u8, 247u8, 170u8, 185u8,
