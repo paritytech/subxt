@@ -25,6 +25,7 @@ use frame_metadata::{
     StorageEntryMetadata,
     META_RESERVED,
 };
+use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
     Type,
@@ -33,10 +34,6 @@ use scale_info::{
 use std::{
     collections::HashMap,
     convert::TryFrom,
-    sync::{
-        Arc,
-        RwLock,
-    },
 };
 
 /// Metadata error.
@@ -84,9 +81,9 @@ pub enum MetadataError {
 }
 
 /// Runtime metadata.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub struct Metadata {
-    inner: Arc<MetadataInner>,
+    inner: MetadataInner,
 }
 
 // We hide the innards behind an Arc so that it's easy to clone and share.
@@ -460,7 +457,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .collect();
 
         Ok(Metadata {
-            inner: Arc::new(MetadataInner {
+            inner: MetadataInner {
                 metadata,
                 pallets,
                 events,
@@ -469,7 +466,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
-            }),
+            },
         })
     }
 }
