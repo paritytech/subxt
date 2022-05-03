@@ -83,12 +83,6 @@ pub enum MetadataError {
 /// Runtime metadata.
 #[derive(Debug)]
 pub struct Metadata {
-    inner: MetadataInner,
-}
-
-// We hide the innards behind an Arc so that it's easy to clone and share.
-#[derive(Debug)]
-struct MetadataInner {
     metadata: RuntimeMetadataV14,
     pallets: HashMap<String, PalletMetadata>,
     events: HashMap<(u8, u8), EventMetadata>,
@@ -105,10 +99,7 @@ struct MetadataInner {
 impl Metadata {
     /// Returns a reference to [`PalletMetadata`].
     pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
-        self.inner
-            .pallets
-            .get(name)
-            .ok_or(MetadataError::PalletNotFound)
+        self.pallets.get(name).ok_or(MetadataError::PalletNotFound)
     }
 
     /// Returns the metadata for the event at the given pallet and event indices.
@@ -118,7 +109,6 @@ impl Metadata {
         event_index: u8,
     ) -> Result<&EventMetadata, MetadataError> {
         let event = self
-            .inner
             .events
             .get(&(pallet_index, event_index))
             .ok_or(MetadataError::EventNotFound(pallet_index, event_index))?;
@@ -132,7 +122,6 @@ impl Metadata {
         error_index: u8,
     ) -> Result<&ErrorMetadata, MetadataError> {
         let error = self
-            .inner
             .errors
             .get(&(pallet_index, error_index))
             .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
@@ -141,32 +130,31 @@ impl Metadata {
 
     /// Resolve a type definition.
     pub fn resolve_type(&self, id: u32) -> Option<&Type<PortableForm>> {
-        self.inner.metadata.types.resolve(id)
+        self.metadata.types.resolve(id)
     }
 
     /// Return the runtime metadata.
     pub fn runtime_metadata(&self) -> &RuntimeMetadataV14 {
-        &self.inner.metadata
+        &self.metadata
     }
 
     /// Obtain the unique hash for a specific storage entry.
     pub fn storage_hash<S: crate::StorageEntry>(
         &self,
     ) -> Result<[u8; 32], MetadataError> {
-        self.inner
-            .cached_storage_hashes
+        self.cached_storage_hashes
             .get_or_insert(S::PALLET, S::STORAGE, || {
-                subxt_metadata::get_storage_hash(
-                    &self.inner.metadata,
-                    S::PALLET,
-                    S::STORAGE,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
-                    }
-                })
+                subxt_metadata::get_storage_hash(&self.metadata, S::PALLET, S::STORAGE)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => {
+                                MetadataError::StorageNotFound
+                            }
+                        }
+                    })
             })
     }
 
@@ -176,10 +164,9 @@ impl Metadata {
         pallet: &str,
         constant: &str,
     ) -> Result<[u8; 32], MetadataError> {
-        self.inner
-            .cached_constant_hashes
+        self.cached_constant_hashes
             .get_or_insert(pallet, constant, || {
-                subxt_metadata::get_constant_hash(&self.inner.metadata, pallet, constant)
+                subxt_metadata::get_constant_hash(&self.metadata, pallet, constant)
                     .map_err(|e| {
                         match e {
                             subxt_metadata::NotFound::Pallet => {
@@ -195,26 +182,23 @@ impl Metadata {
 
     /// Obtain the unique hash for a call.
     pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
-        self.inner
-            .cached_call_hashes
+        self.cached_call_hashes
             .get_or_insert(C::PALLET, C::FUNCTION, || {
-                subxt_metadata::get_call_hash(
-                    &self.inner.metadata,
-                    C::PALLET,
-                    C::FUNCTION,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
-                    }
-                })
+                subxt_metadata::get_call_hash(&self.metadata, C::PALLET, C::FUNCTION)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
+                        }
+                    })
             })
     }
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
-        if let Some(hash) = *self.inner.cached_metadata_hash.read().unwrap() {
+        if let Some(hash) = *self.cached_metadata_hash.read() {
             return hash
         }
 
@@ -222,7 +206,7 @@ impl Metadata {
             self.runtime_metadata(),
             pallets,
         );
-        *self.inner.cached_metadata_hash.write().unwrap() = Some(hash);
+        *self.cached_metadata_hash.write() = Some(hash);
 
         hash
     }
@@ -457,16 +441,14 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .collect();
 
         Ok(Metadata {
-            inner: MetadataInner {
-                metadata,
-                pallets,
-                events,
-                errors,
-                cached_metadata_hash: Default::default(),
-                cached_call_hashes: Default::default(),
-                cached_constant_hashes: Default::default(),
-                cached_storage_hashes: Default::default(),
-            },
+            metadata,
+            pallets,
+            events,
+            errors,
+            cached_metadata_hash: Default::default(),
+            cached_call_hashes: Default::default(),
+            cached_constant_hashes: Default::default(),
+            cached_storage_hashes: Default::default(),
         })
     }
 }
@@ -544,12 +526,9 @@ mod tests {
 
         let hash = metadata.metadata_hash(&["System"]);
         // Check inner caching.
-        assert_eq!(
-            metadata.inner.cached_metadata_hash.read().unwrap().unwrap(),
-            hash
-        );
+        assert_eq!(metadata.cached_metadata_hash.read().unwrap(), hash);
 
-        // The cache `metadata.inner.cached_metadata_hash` is already populated from
+        // The cache `metadata.cached_metadata_hash` is already populated from
         // the previous call. Therefore, changing the pallets argument must not
         // change the methods behavior.
         let hash_old = metadata.metadata_hash(&["no-pallet"]);
@@ -570,7 +549,7 @@ mod tests {
         let hash = metadata.call_hash::<ValidCall>();
 
         let mut call_number = 0;
-        let hash_cached = metadata.inner.cached_call_hashes.get_or_insert(
+        let hash_cached = metadata.cached_call_hashes.get_or_insert(
             "System",
             "fill_block",
             || -> Result<[u8; 32], MetadataError> {
@@ -591,7 +570,7 @@ mod tests {
         let hash = metadata.constant_hash("System", "BlockWeights");
 
         let mut call_number = 0;
-        let hash_cached = metadata.inner.cached_constant_hashes.get_or_insert(
+        let hash_cached = metadata.cached_constant_hashes.get_or_insert(
             "System",
             "BlockWeights",
             || -> Result<[u8; 32], MetadataError> {
@@ -624,7 +603,7 @@ mod tests {
         let hash = metadata.storage_hash::<ValidStorage>();
 
         let mut call_number = 0;
-        let hash_cached = metadata.inner.cached_storage_hashes.get_or_insert(
+        let hash_cached = metadata.cached_storage_hashes.get_or_insert(
             "System",
             "Account",
             || -> Result<[u8; 32], MetadataError> {
