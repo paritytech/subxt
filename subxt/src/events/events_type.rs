@@ -181,7 +181,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     /// This method is safe to use even if you do not statically know about
     /// all of the possible events; it splits events up using the metadata
     /// obtained at runtime, which does.
-    pub async fn iter_raw(
+    pub fn iter_raw(
         &self,
     ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
         let event_bytes = &self.event_bytes;
@@ -196,7 +196,6 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
                 None
             } else {
                 match decode_raw_event_details::<T>(self.metadata.clone(), index, cursor)
-                    .await
                 {
                     Ok(raw_event) => {
                         // Skip over decoded bytes in next iteration:
@@ -241,7 +240,6 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
                 None
             } else {
                 match decode_raw_event_details::<T>(self.metadata.clone(), index, cursor)
-                    .await
                 {
                     Ok(raw_event) => {
                         // Skip over decoded bytes in next iteration:
@@ -337,7 +335,7 @@ impl RawEventDetails {
 }
 
 // Attempt to dynamically decode a single event from our events input.
-async fn decode_raw_event_details<T: Config>(
+fn decode_raw_event_details<T: Config>(
     metadata: Arc<Mutex<Metadata>>,
     index: u32,
     input: &mut &[u8],
@@ -354,31 +352,41 @@ async fn decode_raw_event_details<T: Config>(
     );
     log::debug!("remaining input: {}", hex::encode(&input));
 
-    // Get metadata for the event:
-    let metadata = metadata.lock().await;
-    let event_metadata = metadata.event(pallet_index, variant_index)?;
-    log::debug!(
-        "Decoding Event '{}::{}'",
-        event_metadata.pallet(),
-        event_metadata.event()
-    );
+    let async_res: Result<_, BasicError> = futures::executor::block_on(async {
+        // Get metadata for the event:
+        let metadata = metadata.lock().await;
+        let event_metadata = metadata.event(pallet_index, variant_index)?;
 
-    // Use metadata to figure out which bytes belong to this event:
-    let mut event_bytes = Vec::new();
-    for arg in event_metadata.variant().fields() {
-        let type_id = arg.ty().id();
-        let all_bytes = *input;
-        // consume some bytes, moving the cursor forward:
-        decoding::decode_and_consume_type(
-            type_id,
-            &metadata.runtime_metadata().types,
-            input,
-        )?;
-        // count how many bytes were consumed based on remaining length:
-        let consumed_len = all_bytes.len() - input.len();
-        // move those consumed bytes to the output vec unaltered:
-        event_bytes.extend(&all_bytes[0..consumed_len]);
-    }
+        log::debug!(
+            "Decoding Event '{}::{}'",
+            event_metadata.pallet(),
+            event_metadata.event()
+        );
+
+        let mut event_bytes = Vec::new();
+        // Use metadata to figure out which bytes belong to this event:
+        for arg in event_metadata.variant().fields() {
+            let type_id = arg.ty().id();
+            let all_bytes = *input;
+            // consume some bytes, moving the cursor forward:
+            decoding::decode_and_consume_type(
+                type_id,
+                &metadata.runtime_metadata().types,
+                input,
+            )?;
+            // count how many bytes were consumed based on remaining length:
+            let consumed_len = all_bytes.len() - input.len();
+            // move those consumed bytes to the output vec unaltered:
+            event_bytes.extend(&all_bytes[0..consumed_len]);
+        }
+
+        Ok((
+            event_bytes,
+            event_metadata.pallet().to_string(),
+            event_metadata.event().to_string(),
+        ))
+    });
+    let (event_bytes, pallet, variant) = async_res?;
 
     // topics come after the event data in EventRecord. They aren't used for
     // anything at the moment, so just decode and throw them away.
@@ -389,9 +397,9 @@ async fn decode_raw_event_details<T: Config>(
         phase,
         index,
         pallet_index,
-        pallet: event_metadata.pallet().to_string(),
+        pallet,
         variant_index,
-        variant: event_metadata.event().to_string(),
+        variant,
         data: event_bytes.into(),
     })
 }
