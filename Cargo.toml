@@ -7,6 +7,7 @@ members = [
     "integration-tests",
     "macro",
     "metadata",
+    "value",
     "subxt",
     "test-runtime"
 ]
