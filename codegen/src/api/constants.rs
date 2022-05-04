@@ -48,9 +48,9 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
+            pub async fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
                 let locked_metadata = self.client.metadata();
-                let metadata = locked_metadata.read();
+                let metadata = locked_metadata.lock().await;
                 if metadata.constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
                     let pallet = metadata.pallet(#pallet_name)?;
                     let constant = pallet.constant(#constant_name)?;

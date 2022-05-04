@@ -96,13 +96,13 @@ pub fn generate_calls(
             };
             let client_fn = quote! {
                 #docs
-                pub fn #fn_name(
+                pub async fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
                 ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<#struct_name>()?
                     };
                     if runtime_call_hash == [#(#call_hash,)*] {
