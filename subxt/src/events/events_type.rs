@@ -33,7 +33,6 @@ use codec::{
 };
 use derivative::Derivative;
 use futures::lock::Mutex;
-use parking_lot::RwLock;
 use sp_core::{
     storage::StorageKey,
     twox_128,

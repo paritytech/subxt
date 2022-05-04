@@ -48,7 +48,6 @@ use codec::{
 };
 use derivative::Derivative;
 use futures::lock::Mutex;
-use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.

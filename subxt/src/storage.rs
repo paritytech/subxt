@@ -21,7 +21,6 @@ use codec::{
     Encode,
 };
 use futures::lock::Mutex;
-use parking_lot::RwLock;
 use sp_core::storage::{
     StorageChangeSet,
     StorageData,

@@ -26,7 +26,6 @@ use crate::{
     Metadata,
 };
 use futures::lock::Mutex;
-use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// Client wrapper for performing runtime updates.
