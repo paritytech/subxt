@@ -14,6 +14,17 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-desub.  If not, see <http://www.gnu.org/licenses/>.
 
+/*!
+This module implements the [`Deserializer`] (note the 'r') trait on our Value enum.
+
+A deserializer is a thing which implements methods like `deserialize_i128`. Each of these
+methods serves as a hint about what the thing calling it (probably a thing implementing
+[`Deserialize`]) actually wants back. The methods are given a "visitor" which actually accepts
+values back. We might not give the visitor back the value that it hinted that it wanted, but
+it's up to the visitor to do its best to accept what it's handed, or reject it if it's simply
+not going to work out.
+*/
+
 use crate::{Composite, Primitive, Value, ValueDef, Variant};
 use serde::{
 	de::{self, EnumAccess, IntoDeserializer, VariantAccess},
@@ -21,46 +32,6 @@ use serde::{
 };
 use std::borrow::Cow;
 use std::fmt::Display;
-
-/*
-This module implements the Deserializer trait on our Value enum
-===============================================================
-
-Deserializing using Serde is a bit weird to wrap your head around at first (at least, it was for me).
-I'd def recommend checking out the serde book, and inparticular https://serde.rs/impl-deserializer.html,
-but here's a very quick explainer on how things work:
-
-We have a `Deserialize` trait (commonly automatically implemented via `#[derive(Deserialize)]`). This trait
-(and the `Visitor` trait which I'll talk about in a moment) is concerned with getting the right values needed to
-create an instance of the data type (struct, enum, whatever it is) in question.
-
-We also have a `Deserializer` trait (note the R at the end). this guy is responsible for plucking values out of some
-format (could be JSON or TOML or, as we have here, another rust data type!) and handing them to a Deserialize impl.
-That way, the Deserialize impl doesn't have to care about any particular format; only what it wants to be given back).
-
-So, how it works is that the `Deserialize` impl asks this guy for data of a certain type by calling methods like
-`deserializer.deserialize_bool` or `deserializer.deserialize_i32` or whatever. (the actual methods available define
-the "serde data model"; that is; the known types that can be passed between a Deserialize and Deserializer).
-
-But! Calling methods like `deserialize_bool` or `deserialize_i32` is really just the Deserialize impls way of
-hinting to the Deserializer what it wants to be given back. In reality, the Deserializer might want to give
-back something different (maybe it is being asked for a u8 but it knows it only has a u16 to give back, say).
-
-How? Well, the Deserialize impl calls something like `deserializer.deserialize_i32(visitor)`; it says "I want an i32, but
-here's this visitor thing where you can give me back whatever you have, and I'll try and handle it if I can". So maybe
-when the Deserialize impl calls `deserializer.deserialize_i32(visitor)`, the Deserializer impl for `deserialize_i32`
-actually calls `visitor.visit_i64`. Who knows!
-
-It's basically a negotiation. The Deserialize impl asks for a value of a certain type, and it provides a visitor that will
-try to accept as many types as it can. The Deserializer impl then does it's best to give back what it's asked for. If
-the visitor can't handle the type given back, we are given back an error trying to deserialize; we can't convert a map
-into an i32 for instance, or whatever.
-
-Here, we want to allow people to deserialize a `Value` type into some arbitrary struct or enum. So we implement the
-Deserializer trait, and do our best to hand the visitor we're given back the data it's asking for. Since we know exactly
-what data we actually have, we can often just give it back whatever we have and hope the visitor will accept it! We have
-various "special cases" though (like newtype wrapper structs) where we try to be more accomodating.
-*/
 
 /// An opaque error to describe in human terms what went wrong.
 /// Many internal serialization/deserialization errors are relayed

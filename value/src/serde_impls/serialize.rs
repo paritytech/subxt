@@ -14,16 +14,24 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-desub.  If not, see <http://www.gnu.org/licenses/>.
 
+/*!
+This [`Serialize`] impl allows [`Value`]s to be serialized to some format
+(eg JSON); we do our best to hand the [`Serializer`] values which most
+accurately represent what we've stored, but there is always some amount of
+converstion between our [`Value`] type and the types supported by the
+serde data model that we're serializing things into.
+*/
+
 use crate::{Composite, Primitive, Value, ValueDef, Variant};
 use serde::{
 	ser::{SerializeMap, SerializeSeq},
-	Serialize,
+	Serialize, Serializer
 };
 
 impl<T> Serialize for Value<T> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-		S: serde::Serializer,
+		S: Serializer,
 	{
 		self.value.serialize(serializer)
 	}
@@ -32,7 +40,7 @@ impl<T> Serialize for Value<T> {
 impl<T> Serialize for ValueDef<T> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-		S: serde::Serializer,
+		S: Serializer,
 	{
 		match self {
 			ValueDef::Composite(val) => val.serialize(serializer),
@@ -46,7 +54,7 @@ impl<T> Serialize for ValueDef<T> {
 impl<T> Serialize for Composite<T> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-		S: serde::Serializer,
+		S: Serializer,
 	{
 		match self {
 			Composite::Named(vals) => {
@@ -70,7 +78,7 @@ impl<T> Serialize for Composite<T> {
 impl Serialize for Primitive {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-		S: serde::Serializer,
+		S: Serializer,
 	{
 		// Delegate to the serialization strategy used by the primitive types.
 		match self {
@@ -96,7 +104,7 @@ impl Serialize for Primitive {
 impl<T> Serialize for Variant<T> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
 	where
-		S: serde::Serializer,
+		S: Serializer,
 	{
 		// We can't use the enum serializing in the serde data model because that requires static
 		// strs and enum indexes, which we don't have (since this is a runtime value), so we serialize
@@ -112,10 +120,7 @@ impl<T> Serialize for Variant<T> {
 
 #[cfg(test)]
 mod test {
-
-	use crate::BitSequence;
-
-use super::*;
+	use super::*;
 	use serde_json::json;
 
 	fn assert_value(value: Value<()>, expected: serde_json::Value) {
@@ -188,22 +193,5 @@ use super::*;
 				]
 			}),
 		)
-	}
-
-	#[test]
-	fn serialize_bitvec() {
-		use bitvec::{ bitvec, order::Lsb0 };
-
-		// This is handled entirely by BitVec, but we care about this format when deserializing,
-		// so this test exists to check that it hasn't changed.
-		assert_value(
-			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 0, 1, 1, 1, 0]),
-			json!({
-				"order": "bitvec::order::Lsb0",
-				"head": { "index": 0, "width": 8 },
-				"bits": 9,
-				"data": [0b11100110, 0]
-			}),
-		);
 	}
 }

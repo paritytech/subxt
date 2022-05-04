@@ -14,6 +14,22 @@
 // You should have received a copy of the GNU General Public License
 // along with substrate-desub.  If not, see <http://www.gnu.org/licenses/>.
 
+/*!
+This module implements the [`Deserialize`] (no R!) trait on our [`Value`] enum.
+
+The [`Deserialize`] trait is responsible for telling some deserializer (note the 'r')
+what sorts of values we need back in order to construst an instance of our [`Value`] type.
+Since the [`Value`] type accepts a range of possible values, it leans heavily on the
+`deserialize_any` method; this means that the deserializer needs to know what structure it's
+working with in order to be able to provide back the right values; we can't tell it what structure
+we expect.
+
+One thing we aim for is to be able to losslessly deserialize a [`Value`] into a
+[`Value`]. This would allow for partial type deserialization, for instance we might want to turn
+only part of our input into a struct, say, and leave the rest as [`Value`] types until we know what
+to do with them.
+*/
+
 use crate::{Composite, Primitive, Value, ValueDef, Variant};
 use serde::{
 	self,
@@ -21,22 +37,6 @@ use serde::{
 	Deserialize, Deserializer,
 };
 use std::convert::TryInto;
-
-/*
-This module implements the [`Deserialize`] (no R!) trait on our [`Value`] enum.
-======================================================================
-
-See deserializer.rs for more of a description.
-
-The Deserialize trait is responsible for describing how some other value (or at least,
-the repreentastion of it in terms of the serde data model) can be turned into our `Value`
-enum.
-
-One thing we aim for is to be able to losslessly deserialize a [`Value`] into a
-[`Value`]. This would allow for partial type deserialization, for instance we might want to turn
-only part of our input into a struct, say, and leave the rest as [`Value`] types until we know what
-to do with them.
-*/
 
 impl<'de> Deserialize<'de> for Value<()> {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
