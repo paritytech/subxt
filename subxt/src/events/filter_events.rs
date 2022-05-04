@@ -255,11 +255,11 @@ mod test {
     };
     use codec::Encode;
     use futures::{
+        lock::Mutex,
         stream,
         Stream,
         StreamExt,
     };
-    use parking_lot::RwLock;
     use scale_info::TypeInfo;
     use std::sync::Arc;
 
@@ -297,7 +297,7 @@ mod test {
 
     // A stream of fake events for us to try filtering on.
     fn events_stream(
-        metadata: Arc<RwLock<Metadata>>,
+        metadata: Arc<Mutex<Metadata>>,
     ) -> impl Stream<Item = Result<Events<DefaultConfig, AllEvents<PalletEvents>>, BasicError>>
     {
         stream::iter(vec![
@@ -329,7 +329,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_one_event_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = Arc::new(Mutex::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventA` only.
         let actual: Vec<_> =
@@ -361,7 +361,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_some_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = Arc::new(Mutex::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventA` or `EventB`.
         let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
@@ -409,7 +409,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_no_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = Arc::new(Mutex::new(metadata::<PalletEvents>()));
 
         // Filter out fake event stream to select events matching `EventC` (none exist).
         let actual: Vec<_> =

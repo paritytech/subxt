@@ -69,6 +69,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             api.tx()
                 .balances()
                 .transfer(AccountKeyring::Bob.to_account_id().into(), transfer_amount)
+                .await
                 .expect("compatible transfer call on runtime node")
                 .sign_and_submit_default(&signer)
                 .await

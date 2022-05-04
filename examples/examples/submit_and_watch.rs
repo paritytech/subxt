@@ -60,7 +60,8 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let balance_transfer = api
         .tx()
         .balances()
-        .transfer(dest, 10_000)?
+        .transfer(dest, 10_000)
+        .await?
         .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized_success()
@@ -92,7 +93,8 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let balance_transfer = api
         .tx()
         .balances()
-        .transfer(dest, 10_000)?
+        .transfer(dest, 10_000)
+        .await?
         .sign_and_submit_then_watch_default(&signer)
         .await?
         .wait_for_finalized()
@@ -143,7 +145,8 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let mut balance_transfer_progress = api
         .tx()
         .balances()
-        .transfer(dest, 10_000)?
+        .transfer(dest, 10_000)
+        .await?
         .sign_and_submit_then_watch_default(&signer)
         .await?;
 

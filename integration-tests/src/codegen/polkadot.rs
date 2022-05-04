@@ -239,7 +239,7 @@ pub mod api {
                     }
                 }
                 #[doc = "A dispatch that will fill the block weight up to the given ratio."]
-                pub fn fill_block(
+                pub async fn fill_block(
                     &self,
                     ratio: runtime_types::sp_arithmetic::per_things::Perbill,
                 ) -> Result<
@@ -255,7 +255,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<FillBlock>()?
                     };
                     if runtime_call_hash
@@ -277,7 +277,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- `O(1)`"]
                 #[doc = "# </weight>"]
-                pub fn remark(
+                pub async fn remark(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -293,7 +293,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Remark>()?
                     };
                     if runtime_call_hash
@@ -311,7 +311,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of pages in the WebAssembly environment's heap."]
-                pub fn set_heap_pages(
+                pub async fn set_heap_pages(
                     &self,
                     pages: ::core::primitive::u64,
                 ) -> Result<
@@ -327,7 +327,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHeapPages>()?
                     };
                     if runtime_call_hash
@@ -356,7 +356,7 @@ pub mod api {
                 #[doc = "The weight of this function is dependent on the runtime, but generally this is very"]
                 #[doc = "expensive. We will treat this as a full block."]
                 #[doc = "# </weight>"]
-                pub fn set_code(
+                pub async fn set_code(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -372,7 +372,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetCode>()?
                     };
                     if runtime_call_hash
@@ -398,7 +398,7 @@ pub mod api {
                 #[doc = "- 1 event."]
                 #[doc = "The weight of this function is dependent on the runtime. We will treat this as a full"]
                 #[doc = "block. # </weight>"]
-                pub fn set_code_without_checks(
+                pub async fn set_code_without_checks(
                     &self,
                     code: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -414,7 +414,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetCodeWithoutChecks>()?
                     };
                     if runtime_call_hash
@@ -432,7 +432,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set some items of storage."]
-                pub fn set_storage(
+                pub async fn set_storage(
                     &self,
                     items: ::std::vec::Vec<(
                         ::std::vec::Vec<::core::primitive::u8>,
@@ -451,7 +451,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetStorage>()?
                     };
                     if runtime_call_hash
@@ -469,7 +469,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Kill some items from storage."]
-                pub fn kill_storage(
+                pub async fn kill_storage(
                     &self,
                     keys: ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
                 ) -> Result<
@@ -485,7 +485,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<KillStorage>()?
                     };
                     if runtime_call_hash
@@ -506,7 +506,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "**NOTE:** We rely on the Root origin to provide us the number of subkeys under"]
                 #[doc = "the prefix we are removing to accurately calculate the weight of this function."]
-                pub fn kill_prefix(
+                pub async fn kill_prefix(
                     &self,
                     prefix: ::std::vec::Vec<::core::primitive::u8>,
                     subkeys: ::core::primitive::u32,
@@ -523,7 +523,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<KillPrefix>()?
                     };
                     if runtime_call_hash
@@ -541,7 +541,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Make some on-chain remark and emit event."]
-                pub fn remark_with_event(
+                pub async fn remark_with_event(
                     &self,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -557,7 +557,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemarkWithEvent>()?
                     };
                     if runtime_call_hash
@@ -826,7 +826,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Account>()?
                     };
                     if runtime_storage_hash
@@ -856,7 +856,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Account>()?
                     };
                     if runtime_storage_hash
@@ -882,7 +882,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ExtrinsicCount>()?
                     };
                     if runtime_storage_hash
@@ -911,7 +911,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BlockWeight>()?
                     };
                     if runtime_storage_hash
@@ -941,7 +941,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AllExtrinsicsLen>()?
                     };
                     if runtime_storage_hash
@@ -967,7 +967,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BlockHash>()?
                     };
                     if runtime_storage_hash
@@ -997,7 +997,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BlockHash>()?
                     };
                     if runtime_storage_hash
@@ -1024,7 +1024,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ExtrinsicData>()?
                     };
                     if runtime_storage_hash
@@ -1054,7 +1054,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ExtrinsicData>()?
                     };
                     if runtime_storage_hash
@@ -1078,7 +1078,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Number>()?
                     };
                     if runtime_storage_hash
@@ -1106,7 +1106,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParentHash>()?
                     };
                     if runtime_storage_hash
@@ -1136,7 +1136,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Digest>()?
                     };
                     if runtime_storage_hash
@@ -1174,7 +1174,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Events>()?
                     };
                     if runtime_storage_hash
@@ -1202,7 +1202,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EventCount>()?
                     };
                     if runtime_storage_hash
@@ -1242,7 +1242,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EventTopics>()?
                     };
                     if runtime_storage_hash
@@ -1281,7 +1281,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EventTopics>()?
                     };
                     if runtime_storage_hash
@@ -1309,7 +1309,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<LastRuntimeUpgrade>()?
                     };
                     if runtime_storage_hash
@@ -1334,7 +1334,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradedToU32RefCount>()?
                     };
                     if runtime_storage_hash
@@ -1363,7 +1363,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradedToTripleRefCount>()?
                     };
                     if runtime_storage_hash
@@ -1393,7 +1393,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ExecutionPhase>()?
                     };
                     if runtime_storage_hash
@@ -1422,14 +1422,14 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Block & extrinsics weights: base values and limits."]
-                pub fn block_weights(
+                pub async fn block_weights(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_system::limits::BlockWeights,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "BlockWeights")?
                         == [
                             12u8, 113u8, 191u8, 55u8, 3u8, 129u8, 43u8, 135u8, 41u8,
@@ -1448,14 +1448,14 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum length of a block (in bytes)."]
-                pub fn block_length(
+                pub async fn block_length(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_system::limits::BlockLength,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "BlockLength")?
                         == [
                             120u8, 249u8, 182u8, 103u8, 246u8, 214u8, 149u8, 44u8, 42u8,
@@ -1474,12 +1474,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Maximum number of block number to block hash mappings to keep (oldest pruned first)."]
-                pub fn block_hash_count(
+                pub async fn block_hash_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "BlockHashCount")?
                         == [
                             123u8, 126u8, 182u8, 103u8, 71u8, 187u8, 233u8, 8u8, 47u8,
@@ -1498,14 +1498,14 @@ pub mod api {
                     }
                 }
                 #[doc = " The weight of runtime database operations the runtime can invoke."]
-                pub fn db_weight(
+                pub async fn db_weight(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_support::weights::RuntimeDbWeight,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "DbWeight")?
                         == [
                             159u8, 93u8, 33u8, 204u8, 10u8, 85u8, 53u8, 104u8, 180u8,
@@ -1524,14 +1524,14 @@ pub mod api {
                     }
                 }
                 #[doc = " Get the chain's current version."]
-                pub fn version(
+                pub async fn version(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_version::RuntimeVersion,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "Version")?
                         == [
                             237u8, 208u8, 32u8, 121u8, 44u8, 122u8, 19u8, 109u8, 43u8,
@@ -1554,12 +1554,12 @@ pub mod api {
                 #[doc = " This replaces the \"ss58Format\" property declared in the chain spec. Reason is"]
                 #[doc = " that the runtime should know about the prefix in order to make use of it as"]
                 #[doc = " an identifier of the chain."]
-                pub fn ss58_prefix(
+                pub async fn ss58_prefix(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("System", "SS58Prefix")?
                         == [
                             80u8, 239u8, 133u8, 243u8, 151u8, 113u8, 37u8, 41u8, 100u8,
@@ -1702,7 +1702,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Anonymously schedule a task."]
-                pub fn schedule(
+                pub async fn schedule(
                     &self,
                     when: ::core::primitive::u32,
                     maybe_periodic: ::core::option::Option<(
@@ -1727,7 +1727,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Schedule>()?
                     };
                     if runtime_call_hash
@@ -1750,7 +1750,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Cancel an anonymously scheduled task."]
-                pub fn cancel(
+                pub async fn cancel(
                     &self,
                     when: ::core::primitive::u32,
                     index: ::core::primitive::u32,
@@ -1767,7 +1767,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Cancel>()?
                     };
                     if runtime_call_hash
@@ -1785,7 +1785,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Schedule a named task."]
-                pub fn schedule_named(
+                pub async fn schedule_named(
                     &self,
                     id: ::std::vec::Vec<::core::primitive::u8>,
                     when: ::core::primitive::u32,
@@ -1811,7 +1811,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ScheduleNamed>()?
                     };
                     if runtime_call_hash
@@ -1835,7 +1835,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Cancel a named scheduled task."]
-                pub fn cancel_named(
+                pub async fn cancel_named(
                     &self,
                     id: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -1851,7 +1851,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelNamed>()?
                     };
                     if runtime_call_hash
@@ -1873,7 +1873,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Same as [`schedule`]."]
                 #[doc = "# </weight>"]
-                pub fn schedule_after(
+                pub async fn schedule_after(
                     &self,
                     after: ::core::primitive::u32,
                     maybe_periodic: ::core::option::Option<(
@@ -1898,7 +1898,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ScheduleAfter>()?
                     };
                     if runtime_call_hash
@@ -1925,7 +1925,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Same as [`schedule_named`](Self::schedule_named)."]
                 #[doc = "# </weight>"]
-                pub fn schedule_named_after(
+                pub async fn schedule_named_after(
                     &self,
                     id: ::std::vec::Vec<::core::primitive::u8>,
                     after: ::core::primitive::u32,
@@ -1951,7 +1951,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ScheduleNamedAfter>()?
                     };
                     if runtime_call_hash
@@ -2071,7 +2071,7 @@ pub mod api {
                 #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub async fn agenda (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Agenda>()?
                     };
                     if runtime_storage_hash
@@ -2101,7 +2101,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Agenda>()?
                     };
                     if runtime_storage_hash
@@ -2131,7 +2131,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Lookup>()?
                     };
                     if runtime_storage_hash
@@ -2158,7 +2158,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Lookup>()?
                     };
                     if runtime_storage_hash
@@ -2187,12 +2187,12 @@ pub mod api {
                 }
                 #[doc = " The maximum weight that may be scheduled per block for any dispatchables of less"]
                 #[doc = " priority than `schedule::HARD_DEADLINE`."]
-                pub fn maximum_weight(
+                pub async fn maximum_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Scheduler", "MaximumWeight")?
                         == [
                             235u8, 167u8, 74u8, 91u8, 5u8, 188u8, 76u8, 138u8, 208u8,
@@ -2212,12 +2212,12 @@ pub mod api {
                 }
                 #[doc = " The maximum number of scheduled calls in the queue for a single block."]
                 #[doc = " Not strictly enforced, but used for weight estimation."]
-                pub fn max_scheduled_per_block(
+                pub async fn max_scheduled_per_block(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Scheduler", "MaxScheduledPerBlock")?
                         == [
                             64u8, 25u8, 128u8, 202u8, 165u8, 97u8, 30u8, 196u8, 174u8,
@@ -2300,7 +2300,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "If the preimage was previously requested, no fees or deposits are taken for providing"]
                 #[doc = "the preimage. Otherwise, a deposit is taken proportional to the size of the preimage."]
-                pub fn note_preimage(
+                pub async fn note_preimage(
                     &self,
                     bytes: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -2316,7 +2316,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NotePreimage>()?
                     };
                     if runtime_call_hash
@@ -2334,7 +2334,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Clear an unrequested preimage from the runtime storage."]
-                pub fn unnote_preimage(
+                pub async fn unnote_preimage(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -2350,7 +2350,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<UnnotePreimage>()?
                     };
                     if runtime_call_hash
@@ -2371,7 +2371,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "If the preimage requests has already been provided on-chain, we unreserve any deposit"]
                 #[doc = "a user may have paid, and take the control of the preimage out of their hands."]
-                pub fn request_preimage(
+                pub async fn request_preimage(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -2387,7 +2387,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RequestPreimage>()?
                     };
                     if runtime_call_hash
@@ -2407,7 +2407,7 @@ pub mod api {
                 #[doc = "Clear a previously made request for a preimage."]
                 #[doc = ""]
                 #[doc = "NOTE: THIS MUST NOT BE CALLED ON `hash` MORE TIMES THAN `request_preimage`."]
-                pub fn unrequest_preimage(
+                pub async fn unrequest_preimage(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -2423,7 +2423,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<UnrequestPreimage>()?
                     };
                     if runtime_call_hash
@@ -2528,7 +2528,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StatusFor>()?
                     };
                     if runtime_storage_hash
@@ -2555,7 +2555,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StatusFor>()?
                     };
                     if runtime_storage_hash
@@ -2586,7 +2586,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PreimageFor>()?
                     };
                     if runtime_storage_hash
@@ -2613,7 +2613,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PreimageFor>()?
                     };
                     if runtime_storage_hash
@@ -2705,7 +2705,7 @@ pub mod api {
                 #[doc = "the equivocation proof and validate the given key ownership proof"]
                 #[doc = "against the extracted offender. If both are valid, the offence will"]
                 #[doc = "be reported."]
-                pub fn report_equivocation(
+                pub async fn report_equivocation(
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
@@ -2722,7 +2722,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReportEquivocation>()?
                     };
                     if runtime_call_hash
@@ -2752,7 +2752,7 @@ pub mod api {
                 #[doc = "block authors will call it (validated in `ValidateUnsigned`), as such"]
                 #[doc = "if the block author is defined it will be defined as the equivocation"]
                 #[doc = "reporter."]
-                pub fn report_equivocation_unsigned(
+                pub async fn report_equivocation_unsigned(
                     &self,
                     equivocation_proof : runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
@@ -2769,7 +2769,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReportEquivocationUnsigned>()?
                     };
                     if runtime_call_hash
@@ -2795,7 +2795,7 @@ pub mod api {
                 #[doc = "the next call to `enact_epoch_change`. The config will be activated one epoch after."]
                 #[doc = "Multiple calls to this method will replace any existing planned config change that had"]
                 #[doc = "not been enacted yet."]
-                pub fn plan_config_change(
+                pub async fn plan_config_change(
                     &self,
                     config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor,
                 ) -> Result<
@@ -2811,7 +2811,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<PlanConfigChange>()?
                     };
                     if runtime_call_hash
@@ -2998,7 +2998,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EpochIndex>()?
                     };
                     if runtime_storage_hash
@@ -3021,7 +3021,7 @@ pub mod api {
                 #[doc = " Current epoch authorities."]                pub async fn authorities (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Authorities>()?
                     };
                     if runtime_storage_hash
@@ -3052,7 +3052,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<GenesisSlot>()?
                     };
                     if runtime_storage_hash
@@ -3082,7 +3082,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentSlot>()?
                     };
                     if runtime_storage_hash
@@ -3121,7 +3121,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Randomness>()?
                     };
                     if runtime_storage_hash
@@ -3153,7 +3153,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingEpochConfigChange>()?
                     };
                     if runtime_storage_hash
@@ -3180,7 +3180,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextRandomness>()?
                     };
                     if runtime_storage_hash
@@ -3203,7 +3203,7 @@ pub mod api {
                 #[doc = " Next epoch authorities."]                pub async fn next_authorities (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextAuthorities>()?
                     };
                     if runtime_storage_hash
@@ -3239,7 +3239,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SegmentIndex>()?
                     };
                     if runtime_storage_hash
@@ -3272,7 +3272,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UnderConstruction>()?
                     };
                     if runtime_storage_hash
@@ -3302,7 +3302,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UnderConstruction>()?
                     };
                     if runtime_storage_hash
@@ -3331,7 +3331,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Initialized>()?
                     };
                     if runtime_storage_hash
@@ -3361,7 +3361,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AuthorVrfRandomness>()?
                     };
                     if runtime_storage_hash
@@ -3395,7 +3395,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EpochStart>()?
                     };
                     if runtime_storage_hash
@@ -3427,7 +3427,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Lateness>()?
                     };
                     if runtime_storage_hash
@@ -3460,7 +3460,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EpochConfig>()?
                     };
                     if runtime_storage_hash
@@ -3490,7 +3490,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextEpochConfig>()?
                     };
                     if runtime_storage_hash
@@ -3521,12 +3521,12 @@ pub mod api {
                 #[doc = " The amount of time, in slots, that each epoch should last."]
                 #[doc = " NOTE: Currently it is not possible to change the epoch duration after"]
                 #[doc = " the chain has started. Attempting to do so will brick block production."]
-                pub fn epoch_duration(
+                pub async fn epoch_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Babe", "EpochDuration")?
                         == [
                             40u8, 54u8, 255u8, 20u8, 89u8, 2u8, 38u8, 235u8, 70u8, 145u8,
@@ -3549,12 +3549,12 @@ pub mod api {
                 #[doc = " what the expected average block time should be based on the slot"]
                 #[doc = " duration and the security parameter `c` (where `1 - c` represents"]
                 #[doc = " the probability of a slot being empty)."]
-                pub fn expected_block_time(
+                pub async fn expected_block_time(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Babe", "ExpectedBlockTime")?
                         == [
                             249u8, 170u8, 37u8, 7u8, 132u8, 115u8, 106u8, 71u8, 116u8,
@@ -3573,12 +3573,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Max number of authorities allowed"]
-                pub fn max_authorities(
+                pub async fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Babe", "MaxAuthorities")?
                         == [
                             248u8, 195u8, 131u8, 166u8, 10u8, 50u8, 71u8, 223u8, 41u8,
@@ -3650,7 +3650,7 @@ pub mod api {
                 #[doc = "  `on_finalize`)"]
                 #[doc = "- 1 event handler `on_timestamp_set`. Must be `O(1)`."]
                 #[doc = "# </weight>"]
-                pub fn set(
+                pub async fn set(
                     &self,
                     now: ::core::primitive::u64,
                 ) -> Result<
@@ -3666,7 +3666,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Set>()?
                     };
                     if runtime_call_hash
@@ -3720,7 +3720,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Now>()?
                     };
                     if runtime_storage_hash
@@ -3748,7 +3748,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DidUpdate>()?
                     };
                     if runtime_storage_hash
@@ -3783,12 +3783,12 @@ pub mod api {
                 #[doc = " period that the block production apparatus provides. Your chosen consensus system will"]
                 #[doc = " generally work with this to determine a sensible block time. e.g. For Aura, it will be"]
                 #[doc = " double this period on default settings."]
-                pub fn minimum_period(
+                pub async fn minimum_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Timestamp", "MinimumPeriod")?
                         == [
                             141u8, 242u8, 40u8, 24u8, 83u8, 43u8, 33u8, 194u8, 156u8,
@@ -3911,7 +3911,7 @@ pub mod api {
                 #[doc = "-------------------"]
                 #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
                 #[doc = "# </weight>"]
-                pub fn claim(
+                pub async fn claim(
                     &self,
                     index: ::core::primitive::u32,
                 ) -> Result<
@@ -3927,7 +3927,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Claim>()?
                     };
                     if runtime_call_hash
@@ -3964,7 +3964,7 @@ pub mod api {
                 #[doc = "   - Reads: Indices Accounts, System Account (recipient)"]
                 #[doc = "   - Writes: Indices Accounts, System Account (recipient)"]
                 #[doc = "# </weight>"]
-                pub fn transfer(
+                pub async fn transfer(
                     &self,
                     new: ::subxt::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
@@ -3981,7 +3981,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Transfer>()?
                     };
                     if runtime_call_hash
@@ -4016,7 +4016,7 @@ pub mod api {
                 #[doc = "-------------------"]
                 #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
                 #[doc = "# </weight>"]
-                pub fn free(
+                pub async fn free(
                     &self,
                     index: ::core::primitive::u32,
                 ) -> Result<
@@ -4032,7 +4032,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Free>()?
                     };
                     if runtime_call_hash
@@ -4070,7 +4070,7 @@ pub mod api {
                 #[doc = "   - Reads: Indices Accounts, System Account (original owner)"]
                 #[doc = "   - Writes: Indices Accounts, System Account (original owner)"]
                 #[doc = "# </weight>"]
-                pub fn force_transfer(
+                pub async fn force_transfer(
                     &self,
                     new: ::subxt::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
@@ -4088,7 +4088,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceTransfer>()?
                     };
                     if runtime_call_hash
@@ -4123,7 +4123,7 @@ pub mod api {
                 #[doc = "-------------------"]
                 #[doc = "- DB Weight: 1 Read/Write (Accounts)"]
                 #[doc = "# </weight>"]
-                pub fn freeze(
+                pub async fn freeze(
                     &self,
                     index: ::core::primitive::u32,
                 ) -> Result<
@@ -4139,7 +4139,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Freeze>()?
                     };
                     if runtime_call_hash
@@ -4236,7 +4236,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Accounts>()?
                     };
                     if runtime_storage_hash
@@ -4263,7 +4263,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Accounts>()?
                     };
                     if runtime_storage_hash
@@ -4291,12 +4291,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The deposit needed for reserving an index."]
-                pub fn deposit(
+                pub async fn deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Indices", "Deposit")?
                         == [
                             249u8, 18u8, 129u8, 140u8, 50u8, 11u8, 128u8, 63u8, 198u8,
@@ -4450,7 +4450,7 @@ pub mod api {
                 #[doc = "---------------------------------"]
                 #[doc = "- Origin account is already in memory, so no DB operations for them."]
                 #[doc = "# </weight>"]
-                pub fn transfer(
+                pub async fn transfer(
                     &self,
                     dest: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4470,7 +4470,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Transfer>()?
                     };
                     if runtime_call_hash
@@ -4495,7 +4495,7 @@ pub mod api {
                 #[doc = "it will reset the account nonce (`frame_system::AccountNonce`)."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call is `root`."]
-                pub fn set_balance(
+                pub async fn set_balance(
                     &self,
                     who: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4516,7 +4516,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetBalance>()?
                     };
                     if runtime_call_hash
@@ -4543,7 +4543,7 @@ pub mod api {
                 #[doc = "- Same as transfer, but additional read and write because the source account is not"]
                 #[doc = "  assumed to be in the overlay."]
                 #[doc = "# </weight>"]
-                pub fn force_transfer(
+                pub async fn force_transfer(
                     &self,
                     source: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4567,7 +4567,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceTransfer>()?
                     };
                     if runtime_call_hash
@@ -4594,7 +4594,7 @@ pub mod api {
                 #[doc = "99% of the time you want [`transfer`] instead."]
                 #[doc = ""]
                 #[doc = "[`transfer`]: struct.Pallet.html#method.transfer"]
-                pub fn transfer_keep_alive(
+                pub async fn transfer_keep_alive(
                     &self,
                     dest: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4614,7 +4614,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<TransferKeepAlive>()?
                     };
                     if runtime_call_hash
@@ -4648,7 +4648,7 @@ pub mod api {
                 #[doc = "  keep the sender account alive (true). # <weight>"]
                 #[doc = "- O(1). Just like transfer, but reading the user's transferable balance first."]
                 #[doc = "  #</weight>"]
-                pub fn transfer_all(
+                pub async fn transfer_all(
                     &self,
                     dest: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4668,7 +4668,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<TransferAll>()?
                     };
                     if runtime_call_hash
@@ -4688,7 +4688,7 @@ pub mod api {
                 #[doc = "Unreserve some balance from a user by force."]
                 #[doc = ""]
                 #[doc = "Can only be called by ROOT."]
-                pub fn force_unreserve(
+                pub async fn force_unreserve(
                     &self,
                     who: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -4708,7 +4708,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceUnreserve>()?
                     };
                     if runtime_call_hash
@@ -4916,7 +4916,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<TotalIssuance>()?
                     };
                     if runtime_storage_hash
@@ -4970,7 +4970,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Account>()?
                     };
                     if runtime_storage_hash
@@ -5023,7 +5023,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Account>()?
                     };
                     if runtime_storage_hash
@@ -5043,7 +5043,7 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]                pub async fn locks (& self , _0 : & :: subxt :: sp_core :: crypto :: AccountId32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_balances :: BalanceLock < :: core :: primitive :: u128 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Locks>()?
                     };
                     if runtime_storage_hash
@@ -5074,7 +5074,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Locks>()?
                     };
                     if runtime_storage_hash
@@ -5106,7 +5106,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reserves>()?
                     };
                     if runtime_storage_hash
@@ -5136,7 +5136,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reserves>()?
                     };
                     if runtime_storage_hash
@@ -5164,7 +5164,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StorageVersion>()?
                     };
                     if runtime_storage_hash
@@ -5196,12 +5196,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The minimum amount required to keep an account open."]
-                pub fn existential_deposit(
+                pub async fn existential_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Balances", "ExistentialDeposit")?
                         == [
                             100u8, 197u8, 144u8, 241u8, 166u8, 142u8, 204u8, 246u8,
@@ -5221,12 +5221,12 @@ pub mod api {
                 }
                 #[doc = " The maximum number of locks that should exist on an account."]
                 #[doc = " Not strictly enforced, but used for weight estimation."]
-                pub fn max_locks(
+                pub async fn max_locks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Balances", "MaxLocks")?
                         == [
                             250u8, 58u8, 19u8, 15u8, 35u8, 113u8, 227u8, 89u8, 39u8,
@@ -5245,12 +5245,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum number of named reserves that can exist on an account."]
-                pub fn max_reserves(
+                pub async fn max_reserves(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Balances", "MaxReserves")?
                         == [
                             24u8, 30u8, 77u8, 89u8, 216u8, 114u8, 140u8, 11u8, 127u8,
@@ -5312,7 +5312,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextFeeMultiplier>()?
                     };
                     if runtime_storage_hash
@@ -5341,7 +5341,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StorageVersion>()?
                     };
                     if runtime_storage_hash
@@ -5373,12 +5373,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The fee to be paid for making a transaction; the per-byte portion."]
-                pub fn transaction_byte_fee(
+                pub async fn transaction_byte_fee(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("TransactionPayment", "TransactionByteFee")?
                         == [
@@ -5418,12 +5418,12 @@ pub mod api {
                 #[doc = " sent with the transaction. So, not only does the transaction get a priority bump based"]
                 #[doc = " on the `inclusion_fee`, but we also amplify the impact of tips applied to `Operational`"]
                 #[doc = " transactions."]
-                pub fn operational_fee_multiplier(
+                pub async fn operational_fee_multiplier(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u8, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("TransactionPayment", "OperationalFeeMultiplier")?
                         == [
@@ -5443,7 +5443,7 @@ pub mod api {
                     }
                 }
                 #[doc = " The polynomial that is applied in order to derive fee from weight."]
-                pub fn weight_to_fee(
+                pub async fn weight_to_fee(
                     &self,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<
@@ -5454,7 +5454,7 @@ pub mod api {
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("TransactionPayment", "WeightToFee")?
                         == [
                             194u8, 136u8, 54u8, 114u8, 5u8, 242u8, 3u8, 197u8, 151u8,
@@ -5515,7 +5515,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Provide a set of uncles."]
-                pub fn set_uncles(
+                pub async fn set_uncles(
                     &self,
                     new_uncles: ::std::vec::Vec<
                         runtime_types::sp_runtime::generic::header::Header<
@@ -5536,7 +5536,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetUncles>()?
                     };
                     if runtime_call_hash
@@ -5613,7 +5613,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Uncles>()?
                     };
                     if runtime_storage_hash
@@ -5643,7 +5643,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Author>()?
                     };
                     if runtime_storage_hash
@@ -5668,7 +5668,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DidSetUncles>()?
                     };
                     if runtime_storage_hash
@@ -5702,12 +5702,12 @@ pub mod api {
                 #[doc = " The number of blocks back we should accept uncles."]
                 #[doc = " This means that we will deal with uncle-parents that are"]
                 #[doc = " `UncleGenerations + 1` before `now`."]
-                pub fn uncle_generations(
+                pub async fn uncle_generations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Authorship", "UncleGenerations")?
                         == [
                             0u8, 72u8, 57u8, 175u8, 222u8, 143u8, 191u8, 33u8, 163u8,
@@ -6034,7 +6034,7 @@ pub mod api {
                 #[doc = "unless the `origin` falls below _existential deposit_ and gets removed as dust."]
                 #[doc = "------------------"]
                 #[doc = "# </weight>"]
-                pub fn bond(
+                pub async fn bond(
                     &self,
                     controller: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -6057,7 +6057,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Bond>()?
                     };
                     if runtime_call_hash
@@ -6093,7 +6093,7 @@ pub mod api {
                 #[doc = "- Independent of the arguments. Insignificant complexity."]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn bond_extra(
+                pub async fn bond_extra(
                     &self,
                     max_additional: ::core::primitive::u128,
                 ) -> Result<
@@ -6109,7 +6109,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<BondExtra>()?
                     };
                     if runtime_call_hash
@@ -6145,7 +6145,7 @@ pub mod api {
                 #[doc = "Emits `Unbonded`."]
                 #[doc = ""]
                 #[doc = "See also [`Call::withdraw_unbonded`]."]
-                pub fn unbond(
+                pub async fn unbond(
                     &self,
                     value: ::core::primitive::u128,
                 ) -> Result<
@@ -6161,7 +6161,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Unbond>()?
                     };
                     if runtime_call_hash
@@ -6193,7 +6193,7 @@ pub mod api {
                 #[doc = "Complexity O(S) where S is the number of slashing spans to remove"]
                 #[doc = "NOTE: Weight annotation is the kill scenario, we refund otherwise."]
                 #[doc = "# </weight>"]
-                pub fn withdraw_unbonded(
+                pub async fn withdraw_unbonded(
                     &self,
                     num_slashing_spans: ::core::primitive::u32,
                 ) -> Result<
@@ -6209,7 +6209,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<WithdrawUnbonded>()?
                     };
                     if runtime_call_hash
@@ -6231,7 +6231,7 @@ pub mod api {
                 #[doc = "Effects will be felt at the beginning of the next era."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
-                pub fn validate(
+                pub async fn validate(
                     &self,
                     prefs: runtime_types::pallet_staking::ValidatorPrefs,
                 ) -> Result<
@@ -6247,7 +6247,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Validate>()?
                     };
                     if runtime_call_hash
@@ -6275,7 +6275,7 @@ pub mod api {
                 #[doc = "which is capped at CompactAssignments::LIMIT (T::MaxNominations)."]
                 #[doc = "- Both the reads and writes follow a similar pattern."]
                 #[doc = "# </weight>"]
-                pub fn nominate(
+                pub async fn nominate(
                     &self,
                     targets: ::std::vec::Vec<
                         ::subxt::sp_runtime::MultiAddress<
@@ -6296,7 +6296,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Nominate>()?
                     };
                     if runtime_call_hash
@@ -6324,7 +6324,7 @@ pub mod api {
                 #[doc = "- Contains one read."]
                 #[doc = "- Writes are limited to the `origin` account key."]
                 #[doc = "# </weight>"]
-                pub fn chill(
+                pub async fn chill(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -6339,7 +6339,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Chill>()?
                     };
                     if runtime_call_hash
@@ -6372,7 +6372,7 @@ pub mod api {
                 #[doc = "    - Read: Ledger"]
                 #[doc = "    - Write: Payee"]
                 #[doc = "# </weight>"]
-                pub fn set_payee(
+                pub async fn set_payee(
                     &self,
                     payee: runtime_types::pallet_staking::RewardDestination<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -6390,7 +6390,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetPayee>()?
                     };
                     if runtime_call_hash
@@ -6423,7 +6423,7 @@ pub mod api {
                 #[doc = "- Read: Bonded, Ledger New Controller, Ledger Old Controller"]
                 #[doc = "- Write: Bonded, Ledger New Controller, Ledger Old Controller"]
                 #[doc = "# </weight>"]
-                pub fn set_controller(
+                pub async fn set_controller(
                     &self,
                     controller: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -6442,7 +6442,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetController>()?
                     };
                     if runtime_call_hash
@@ -6467,7 +6467,7 @@ pub mod api {
                 #[doc = "Weight: O(1)"]
                 #[doc = "Write: Validator Count"]
                 #[doc = "# </weight>"]
-                pub fn set_validator_count(
+                pub async fn set_validator_count(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -6483,7 +6483,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetValidatorCount>()?
                     };
                     if runtime_call_hash
@@ -6507,7 +6507,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Same as [`Self::set_validator_count`]."]
                 #[doc = "# </weight>"]
-                pub fn increase_validator_count(
+                pub async fn increase_validator_count(
                     &self,
                     additional: ::core::primitive::u32,
                 ) -> Result<
@@ -6523,7 +6523,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<IncreaseValidatorCount>()?
                     };
                     if runtime_call_hash
@@ -6547,7 +6547,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Same as [`Self::set_validator_count`]."]
                 #[doc = "# </weight>"]
-                pub fn scale_validator_count(
+                pub async fn scale_validator_count(
                     &self,
                     factor: runtime_types::sp_arithmetic::per_things::Percent,
                 ) -> Result<
@@ -6563,7 +6563,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ScaleValidatorCount>()?
                     };
                     if runtime_call_hash
@@ -6595,7 +6595,7 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write: ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_no_eras(
+                pub async fn force_no_eras(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -6610,7 +6610,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceNoEras>()?
                     };
                     if runtime_call_hash
@@ -6643,7 +6643,7 @@ pub mod api {
                 #[doc = "- Weight: O(1)"]
                 #[doc = "- Write ForceEra"]
                 #[doc = "# </weight>"]
-                pub fn force_new_era(
+                pub async fn force_new_era(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -6658,7 +6658,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceNewEra>()?
                     };
                     if runtime_call_hash
@@ -6678,7 +6678,7 @@ pub mod api {
                 #[doc = "Set the validators who cannot be slashed (if any)."]
                 #[doc = ""]
                 #[doc = "The dispatch origin must be Root."]
-                pub fn set_invulnerables(
+                pub async fn set_invulnerables(
                     &self,
                     invulnerables: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                 ) -> Result<
@@ -6694,7 +6694,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetInvulnerables>()?
                     };
                     if runtime_call_hash
@@ -6714,7 +6714,7 @@ pub mod api {
                 #[doc = "Force a current staker to become completely unstaked, immediately."]
                 #[doc = ""]
                 #[doc = "The dispatch origin must be Root."]
-                pub fn force_unstake(
+                pub async fn force_unstake(
                     &self,
                     stash: ::subxt::sp_core::crypto::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
@@ -6731,7 +6731,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceUnstake>()?
                     };
                     if runtime_call_hash
@@ -6760,7 +6760,7 @@ pub mod api {
                 #[doc = "The election process starts multiple blocks before the end of the era."]
                 #[doc = "If this is called just before a new era is triggered, the election process may not"]
                 #[doc = "have enough blocks to get a result."]
-                pub fn force_new_era_always(
+                pub async fn force_new_era_always(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -6775,7 +6775,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceNewEraAlways>()?
                     };
                     if runtime_call_hash
@@ -6797,7 +6797,7 @@ pub mod api {
                 #[doc = "Can be called by the `T::SlashCancelOrigin`."]
                 #[doc = ""]
                 #[doc = "Parameters: era and indices of the slashes for that era to kill."]
-                pub fn cancel_deferred_slash(
+                pub async fn cancel_deferred_slash(
                     &self,
                     era: ::core::primitive::u32,
                     slash_indices: ::std::vec::Vec<::core::primitive::u32>,
@@ -6814,7 +6814,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelDeferredSlash>()?
                     };
                     if runtime_call_hash
@@ -6852,7 +6852,7 @@ pub mod api {
                 #[doc = "  NOTE: weights are assuming that payouts are made to alive stash account (Staked)."]
                 #[doc = "  Paying even a dead controller is cheaper weight-wise. We don't do any refunds here."]
                 #[doc = "# </weight>"]
-                pub fn payout_stakers(
+                pub async fn payout_stakers(
                     &self,
                     validator_stash: ::subxt::sp_core::crypto::AccountId32,
                     era: ::core::primitive::u32,
@@ -6869,7 +6869,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<PayoutStakers>()?
                     };
                     if runtime_call_hash
@@ -6898,7 +6898,7 @@ pub mod api {
                 #[doc = "- Bounded by `MaxUnlockingChunks`."]
                 #[doc = "- Storage changes: Can't increase storage, only decrease it."]
                 #[doc = "# </weight>"]
-                pub fn rebond(
+                pub async fn rebond(
                     &self,
                     value: ::core::primitive::u128,
                 ) -> Result<
@@ -6914,7 +6914,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Rebond>()?
                     };
                     if runtime_call_hash
@@ -6953,7 +6953,7 @@ pub mod api {
                 #[doc = "    - Writes Each: ErasValidatorReward, ErasRewardPoints, ErasTotalStake,"]
                 #[doc = "      ErasStartSessionIndex"]
                 #[doc = "# </weight>"]
-                pub fn set_history_depth(
+                pub async fn set_history_depth(
                     &self,
                     new_history_depth: ::core::primitive::u32,
                     era_items_deleted: ::core::primitive::u32,
@@ -6970,7 +6970,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHistoryDepth>()?
                     };
                     if runtime_call_hash
@@ -7002,7 +7002,7 @@ pub mod api {
                 #[doc = "It can be called by anyone, as long as `stash` meets the above requirements."]
                 #[doc = ""]
                 #[doc = "Refunds the transaction fees upon successful execution."]
-                pub fn reap_stash(
+                pub async fn reap_stash(
                     &self,
                     stash: ::subxt::sp_core::crypto::AccountId32,
                     num_slashing_spans: ::core::primitive::u32,
@@ -7019,7 +7019,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReapStash>()?
                     };
                     if runtime_call_hash
@@ -7050,7 +7050,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Note: Making this call only makes sense if you first set the validator preferences to"]
                 #[doc = "block any further nominations."]
-                pub fn kick(
+                pub async fn kick(
                     &self,
                     who: ::std::vec::Vec<
                         ::subxt::sp_runtime::MultiAddress<
@@ -7071,7 +7071,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Kick>()?
                     };
                     if runtime_call_hash
@@ -7105,7 +7105,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "NOTE: Existing nominators and validators will not be affected by this update."]
                 #[doc = "to kick people under the new limits, `chill_other` should be called."]
-                pub fn set_staking_configs(
+                pub async fn set_staking_configs(
                     &self,
                     min_nominator_bond : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < :: core :: primitive :: u128 >,
                     min_validator_bond : runtime_types :: pallet_staking :: pallet :: pallet :: ConfigOp < :: core :: primitive :: u128 >,
@@ -7126,7 +7126,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetStakingConfigs>()?
                     };
                     if runtime_call_hash
@@ -7176,7 +7176,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "This can be helpful if bond requirements are updated, and we need to remove old users"]
                 #[doc = "who do not satisfy these requirements."]
-                pub fn chill_other(
+                pub async fn chill_other(
                     &self,
                     controller: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -7192,7 +7192,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ChillOther>()?
                     };
                     if runtime_call_hash
@@ -7212,7 +7212,7 @@ pub mod api {
                 #[doc = "Force a validator to have at least the minimum commission. This will not affect a"]
                 #[doc = "validator who already has a commission greater than or equal to the minimum. Any account"]
                 #[doc = "can call this."]
-                pub fn force_apply_min_commission(
+                pub async fn force_apply_min_commission(
                     &self,
                     validator_stash: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -7228,7 +7228,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceApplyMinCommission>()?
                     };
                     if runtime_call_hash
@@ -7872,7 +7872,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HistoryDepth>()?
                     };
                     if runtime_storage_hash
@@ -7900,7 +7900,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ValidatorCount>()?
                     };
                     if runtime_storage_hash
@@ -7928,7 +7928,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MinimumValidatorCount>()?
                     };
                     if runtime_storage_hash
@@ -7960,7 +7960,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Invulnerables>()?
                     };
                     if runtime_storage_hash
@@ -7991,7 +7991,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Bonded>()?
                     };
                     if runtime_storage_hash
@@ -8018,7 +8018,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Bonded>()?
                     };
                     if runtime_storage_hash
@@ -8042,7 +8042,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MinNominatorBond>()?
                     };
                     if runtime_storage_hash
@@ -8070,7 +8070,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MinValidatorBond>()?
                     };
                     if runtime_storage_hash
@@ -8102,7 +8102,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MinCommission>()?
                     };
                     if runtime_storage_hash
@@ -8138,7 +8138,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Ledger>()?
                     };
                     if runtime_storage_hash
@@ -8165,7 +8165,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Ledger>()?
                     };
                     if runtime_storage_hash
@@ -8194,7 +8194,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Payee>()?
                     };
                     if runtime_storage_hash
@@ -8224,7 +8224,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Payee>()?
                     };
                     if runtime_storage_hash
@@ -8251,7 +8251,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Validators>()?
                     };
                     if runtime_storage_hash
@@ -8281,7 +8281,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Validators>()?
                     };
                     if runtime_storage_hash
@@ -8305,7 +8305,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CounterForValidators>()?
                     };
                     if runtime_storage_hash
@@ -8337,7 +8337,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MaxValidatorsCount>()?
                     };
                     if runtime_storage_hash
@@ -8380,7 +8380,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Nominators>()?
                     };
                     if runtime_storage_hash
@@ -8422,7 +8422,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Nominators>()?
                     };
                     if runtime_storage_hash
@@ -8446,7 +8446,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CounterForNominators>()?
                     };
                     if runtime_storage_hash
@@ -8478,7 +8478,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MaxNominatorsCount>()?
                     };
                     if runtime_storage_hash
@@ -8508,7 +8508,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentEra>()?
                     };
                     if runtime_storage_hash
@@ -8538,7 +8538,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActiveEra>()?
                     };
                     if runtime_storage_hash
@@ -8569,7 +8569,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStartSessionIndex>()?
                     };
                     if runtime_storage_hash
@@ -8599,7 +8599,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStartSessionIndex>()?
                     };
                     if runtime_storage_hash
@@ -8635,7 +8635,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStakers>()?
                     };
                     if runtime_storage_hash
@@ -8670,7 +8670,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStakers>()?
                     };
                     if runtime_storage_hash
@@ -8711,7 +8711,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStakersClipped>()?
                     };
                     if runtime_storage_hash
@@ -8751,7 +8751,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasStakersClipped>()?
                     };
                     if runtime_storage_hash
@@ -8783,7 +8783,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasValidatorPrefs>()?
                     };
                     if runtime_storage_hash
@@ -8817,7 +8817,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasValidatorPrefs>()?
                     };
                     if runtime_storage_hash
@@ -8846,7 +8846,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasValidatorReward>()?
                     };
                     if runtime_storage_hash
@@ -8875,7 +8875,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasValidatorReward>()?
                     };
                     if runtime_storage_hash
@@ -8905,7 +8905,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasRewardPoints>()?
                     };
                     if runtime_storage_hash
@@ -8936,7 +8936,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasRewardPoints>()?
                     };
                     if runtime_storage_hash
@@ -8962,7 +8962,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasTotalStake>()?
                     };
                     if runtime_storage_hash
@@ -8993,7 +8993,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ErasTotalStake>()?
                     };
                     if runtime_storage_hash
@@ -9019,7 +9019,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ForceEra>()?
                     };
                     if runtime_storage_hash
@@ -9051,7 +9051,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SlashRewardFraction>()?
                     };
                     if runtime_storage_hash
@@ -9080,7 +9080,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CanceledSlashPayout>()?
                     };
                     if runtime_storage_hash
@@ -9116,7 +9116,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UnappliedSlashes>()?
                     };
                     if runtime_storage_hash
@@ -9146,7 +9146,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UnappliedSlashes>()?
                     };
                     if runtime_storage_hash
@@ -9175,7 +9175,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BondedEras>()?
                     };
                     if runtime_storage_hash
@@ -9211,7 +9211,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ValidatorSlashInEra>()?
                     };
                     if runtime_storage_hash
@@ -9239,7 +9239,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ValidatorSlashInEra>()?
                     };
                     if runtime_storage_hash
@@ -9267,7 +9267,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NominatorSlashInEra>()?
                     };
                     if runtime_storage_hash
@@ -9294,7 +9294,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NominatorSlashInEra>()?
                     };
                     if runtime_storage_hash
@@ -9323,7 +9323,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SlashingSpans>()?
                     };
                     if runtime_storage_hash
@@ -9350,7 +9350,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SlashingSpans>()?
                     };
                     if runtime_storage_hash
@@ -9381,7 +9381,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SpanSlash>()?
                     };
                     if runtime_storage_hash
@@ -9412,7 +9412,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SpanSlash>()?
                     };
                     if runtime_storage_hash
@@ -9438,7 +9438,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EarliestUnappliedSlash>()?
                     };
                     if runtime_storage_hash
@@ -9465,7 +9465,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentPlannedSession>()?
                     };
                     if runtime_storage_hash
@@ -9503,7 +9503,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<OffendingValidators>()?
                     };
                     if runtime_storage_hash
@@ -9536,7 +9536,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StorageVersion>()?
                     };
                     if runtime_storage_hash
@@ -9570,7 +9570,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChillThreshold>()?
                     };
                     if runtime_storage_hash
@@ -9599,12 +9599,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Maximum number of nominations per nominator."]
-                pub fn max_nominations(
+                pub async fn max_nominations(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Staking", "MaxNominations")?
                         == [
                             155u8, 58u8, 120u8, 225u8, 19u8, 30u8, 64u8, 6u8, 16u8, 72u8,
@@ -9623,12 +9623,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Number of sessions per era."]
-                pub fn sessions_per_era(
+                pub async fn sessions_per_era(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Staking", "SessionsPerEra")?
                         == [
                             73u8, 207u8, 178u8, 212u8, 159u8, 9u8, 41u8, 31u8, 205u8,
@@ -9647,12 +9647,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Number of eras that staked funds must remain bonded for."]
-                pub fn bonding_duration(
+                pub async fn bonding_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Staking", "BondingDuration")?
                         == [
                             205u8, 83u8, 35u8, 244u8, 140u8, 127u8, 183u8, 152u8, 242u8,
@@ -9674,12 +9674,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This should be less than the bonding duration. Set to 0 if slashes"]
                 #[doc = " should be applied immediately, without opportunity for intervention."]
-                pub fn slash_defer_duration(
+                pub async fn slash_defer_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Staking", "SlashDeferDuration")?
                         == [
                             119u8, 238u8, 165u8, 29u8, 118u8, 219u8, 225u8, 241u8, 249u8,
@@ -9701,12 +9701,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " For each validator only the `$MaxNominatorRewardedPerValidator` biggest stakers can"]
                 #[doc = " claim their reward. This used to limit the i/o cost for the nominator payout."]
-                pub fn max_nominator_rewarded_per_validator(
+                pub async fn max_nominator_rewarded_per_validator(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("Staking", "MaxNominatorRewardedPerValidator")?
                         == [
@@ -9728,12 +9728,12 @@ pub mod api {
                 }
                 #[doc = " The maximum number of `unlocking` chunks a [`StakingLedger`] can have. Effectively"]
                 #[doc = " determines how many unique eras a staker may be unbonding in."]
-                pub fn max_unlocking_chunks(
+                pub async fn max_unlocking_chunks(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Staking", "MaxUnlockingChunks")?
                         == [
                             60u8, 255u8, 33u8, 12u8, 50u8, 253u8, 93u8, 203u8, 3u8,
@@ -9860,7 +9860,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reports>()?
                     };
                     if runtime_storage_hash
@@ -9887,7 +9887,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reports>()?
                     };
                     if runtime_storage_hash
@@ -9915,7 +9915,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ConcurrentReportsIndex>()?
                     };
                     if runtime_storage_hash
@@ -9945,7 +9945,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ConcurrentReportsIndex>()?
                     };
                     if runtime_storage_hash
@@ -9977,7 +9977,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReportsByKindIndex>()?
                     };
                     if runtime_storage_hash
@@ -10012,7 +10012,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReportsByKindIndex>()?
                     };
                     if runtime_storage_hash
@@ -10092,7 +10092,7 @@ pub mod api {
                 #[doc = "- DbReads per key id: `KeyOwner`"]
                 #[doc = "- DbWrites per key id: `KeyOwner`"]
                 #[doc = "# </weight>"]
-                pub fn set_keys(
+                pub async fn set_keys(
                     &self,
                     keys: runtime_types::polkadot_runtime::SessionKeys,
                     proof: ::std::vec::Vec<::core::primitive::u8>,
@@ -10109,7 +10109,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetKeys>()?
                     };
                     if runtime_call_hash
@@ -10142,7 +10142,7 @@ pub mod api {
                 #[doc = "- DbWrites: `NextKeys`, `origin account`"]
                 #[doc = "- DbWrites per key id: `KeyOwner`"]
                 #[doc = "# </weight>"]
-                pub fn purge_keys(
+                pub async fn purge_keys(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -10157,7 +10157,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<PurgeKeys>()?
                     };
                     if runtime_call_hash
@@ -10289,7 +10289,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Validators>()?
                     };
                     if runtime_storage_hash
@@ -10317,7 +10317,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentIndex>()?
                     };
                     if runtime_storage_hash
@@ -10346,7 +10346,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<QueuedChanged>()?
                     };
                     if runtime_storage_hash
@@ -10380,7 +10380,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<QueuedKeys>()?
                     };
                     if runtime_storage_hash
@@ -10414,7 +10414,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DisabledValidators>()?
                     };
                     if runtime_storage_hash
@@ -10445,7 +10445,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextKeys>()?
                     };
                     if runtime_storage_hash
@@ -10472,7 +10472,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextKeys>()?
                     };
                     if runtime_storage_hash
@@ -10500,7 +10500,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<KeyOwner>()?
                     };
                     if runtime_storage_hash
@@ -10527,7 +10527,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<KeyOwner>()?
                     };
                     if runtime_storage_hash
@@ -10613,7 +10613,7 @@ pub mod api {
                 #[doc = "equivocation proof and validate the given key ownership proof"]
                 #[doc = "against the extracted offender. If both are valid, the offence"]
                 #[doc = "will be reported."]
-                pub fn report_equivocation(
+                pub async fn report_equivocation(
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: sp_core :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
@@ -10630,7 +10630,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReportEquivocation>()?
                     };
                     if runtime_call_hash
@@ -10661,7 +10661,7 @@ pub mod api {
                 #[doc = "block authors will call it (validated in `ValidateUnsigned`), as such"]
                 #[doc = "if the block author is defined it will be defined as the equivocation"]
                 #[doc = "reporter."]
-                pub fn report_equivocation_unsigned(
+                pub async fn report_equivocation_unsigned(
                     &self,
                     equivocation_proof : runtime_types :: sp_finality_grandpa :: EquivocationProof < :: subxt :: sp_core :: H256 , :: core :: primitive :: u32 >,
                     key_owner_proof: runtime_types::sp_session::MembershipProof,
@@ -10678,7 +10678,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReportEquivocationUnsigned>()?
                     };
                     if runtime_call_hash
@@ -10707,7 +10707,7 @@ pub mod api {
                 #[doc = "forced change will not be re-orged (e.g. 1000 blocks). The GRANDPA voters"]
                 #[doc = "will start the new authority set using the given finalized block as base."]
                 #[doc = "Only callable by root."]
-                pub fn note_stalled(
+                pub async fn note_stalled(
                     &self,
                     delay: ::core::primitive::u32,
                     best_finalized_block_number: ::core::primitive::u32,
@@ -10724,7 +10724,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NoteStalled>()?
                     };
                     if runtime_call_hash
@@ -10855,7 +10855,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<State>()?
                     };
                     if runtime_storage_hash
@@ -10889,7 +10889,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingChange>()?
                     };
                     if runtime_storage_hash
@@ -10916,7 +10916,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextForced>()?
                     };
                     if runtime_storage_hash
@@ -10946,7 +10946,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Stalled>()?
                     };
                     if runtime_storage_hash
@@ -10972,7 +10972,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentSetId>()?
                     };
                     if runtime_storage_hash
@@ -11006,7 +11006,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SetIdSession>()?
                     };
                     if runtime_storage_hash
@@ -11036,7 +11036,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SetIdSession>()?
                     };
                     if runtime_storage_hash
@@ -11064,12 +11064,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Max Authorities in use"]
-                pub fn max_authorities(
+                pub async fn max_authorities(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Grandpa", "MaxAuthorities")?
                         == [
                             248u8, 195u8, 131u8, 166u8, 10u8, 50u8, 71u8, 223u8, 41u8,
@@ -11136,7 +11136,7 @@ pub mod api {
                 #[doc = "  `ReceivedHeartbeats`"]
                 #[doc = "- DbWrites: `ReceivedHeartbeats`"]
                 #[doc = "# </weight>"]
-                pub fn heartbeat(
+                pub async fn heartbeat(
                     &self,
                     heartbeat: runtime_types::pallet_im_online::Heartbeat<
                         ::core::primitive::u32,
@@ -11155,7 +11155,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Heartbeat>()?
                     };
                     if runtime_call_hash
@@ -11302,7 +11302,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HeartbeatAfter>()?
                     };
                     if runtime_storage_hash
@@ -11325,7 +11325,7 @@ pub mod api {
                 #[doc = " The current set of keys that may issue a heartbeat."]                pub async fn keys (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Public > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Keys>()?
                     };
                     if runtime_storage_hash
@@ -11362,7 +11362,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReceivedHeartbeats>()?
                     };
                     if runtime_storage_hash
@@ -11390,7 +11390,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReceivedHeartbeats>()?
                     };
                     if runtime_storage_hash
@@ -11417,7 +11417,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AuthoredBlocks>()?
                     };
                     if runtime_storage_hash
@@ -11448,7 +11448,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AuthoredBlocks>()?
                     };
                     if runtime_storage_hash
@@ -11479,12 +11479,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This is exposed so that it can be tuned for particular runtime, when"]
                 #[doc = " multiple pallets send unsigned transactions."]
-                pub fn unsigned_priority(
+                pub async fn unsigned_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("ImOnline", "UnsignedPriority")?
                         == [
                             78u8, 226u8, 84u8, 70u8, 162u8, 23u8, 167u8, 100u8, 156u8,
@@ -11779,7 +11779,7 @@ pub mod api {
                 #[doc = "Emits `Proposed`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(p)`"]
-                pub fn propose(
+                pub async fn propose(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     value: ::core::primitive::u128,
@@ -11796,7 +11796,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Propose>()?
                     };
                     if runtime_call_hash
@@ -11826,7 +11826,7 @@ pub mod api {
                 #[doc = "  proposal. Extrinsic is weighted according to this value with no refund."]
                 #[doc = ""]
                 #[doc = "Weight: `O(S)` where S is the number of seconds a proposal already has."]
-                pub fn second(
+                pub async fn second(
                     &self,
                     proposal: ::core::primitive::u32,
                     seconds_upper_bound: ::core::primitive::u32,
@@ -11843,7 +11843,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Second>()?
                     };
                     if runtime_call_hash
@@ -11872,7 +11872,7 @@ pub mod api {
                 #[doc = "- `vote`: The vote configuration."]
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of referendums the voter has voted on."]
-                pub fn vote(
+                pub async fn vote(
                     &self,
                     ref_index: ::core::primitive::u32,
                     vote: runtime_types::pallet_democracy::vote::AccountVote<
@@ -11891,7 +11891,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Vote>()?
                     };
                     if runtime_call_hash
@@ -11916,7 +11916,7 @@ pub mod api {
                 #[doc = "-`ref_index`: The index of the referendum to cancel."]
                 #[doc = ""]
                 #[doc = "Weight: `O(1)`."]
-                pub fn emergency_cancel(
+                pub async fn emergency_cancel(
                     &self,
                     ref_index: ::core::primitive::u32,
                 ) -> Result<
@@ -11932,7 +11932,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<EmergencyCancel>()?
                     };
                     if runtime_call_hash
@@ -11958,7 +11958,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(V)` with V number of vetoers in the blacklist of proposal."]
                 #[doc = "  Decoding vec of length V. Charged as maximum"]
-                pub fn external_propose(
+                pub async fn external_propose(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -11974,7 +11974,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ExternalPropose>()?
                     };
                     if runtime_call_hash
@@ -12002,7 +12002,7 @@ pub mod api {
                 #[doc = "pre-scheduled `external_propose` call."]
                 #[doc = ""]
                 #[doc = "Weight: `O(1)`"]
-                pub fn external_propose_majority(
+                pub async fn external_propose_majority(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -12018,7 +12018,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ExternalProposeMajority>()?
                     };
                     if runtime_call_hash
@@ -12046,7 +12046,7 @@ pub mod api {
                 #[doc = "pre-scheduled `external_propose` call."]
                 #[doc = ""]
                 #[doc = "Weight: `O(1)`"]
-                pub fn external_propose_default(
+                pub async fn external_propose_default(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -12062,7 +12062,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ExternalProposeDefault>()?
                     };
                     if runtime_call_hash
@@ -12094,7 +12094,7 @@ pub mod api {
                 #[doc = "Emits `Started`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(1)`"]
-                pub fn fast_track(
+                pub async fn fast_track(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     voting_period: ::core::primitive::u32,
@@ -12112,7 +12112,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<FastTrack>()?
                     };
                     if runtime_call_hash
@@ -12142,7 +12142,7 @@ pub mod api {
                 #[doc = "Emits `Vetoed`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(V + log(V))` where V is number of `existing vetoers`"]
-                pub fn veto_external(
+                pub async fn veto_external(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -12158,7 +12158,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<VetoExternal>()?
                     };
                     if runtime_call_hash
@@ -12182,7 +12182,7 @@ pub mod api {
                 #[doc = "- `ref_index`: The index of the referendum to cancel."]
                 #[doc = ""]
                 #[doc = "# Weight: `O(1)`."]
-                pub fn cancel_referendum(
+                pub async fn cancel_referendum(
                     &self,
                     ref_index: ::core::primitive::u32,
                 ) -> Result<
@@ -12198,7 +12198,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelReferendum>()?
                     };
                     if runtime_call_hash
@@ -12222,7 +12222,7 @@ pub mod api {
                 #[doc = "- `which`: The index of the referendum to cancel."]
                 #[doc = ""]
                 #[doc = "Weight: `O(D)` where `D` is the items in the dispatch queue. Weighted as `D = 10`."]
-                pub fn cancel_queued(
+                pub async fn cancel_queued(
                     &self,
                     which: ::core::primitive::u32,
                 ) -> Result<
@@ -12238,7 +12238,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelQueued>()?
                     };
                     if runtime_call_hash
@@ -12275,7 +12275,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
                 #[doc = "  voted on. Weight is charged as if maximum votes."]
-                pub fn delegate(
+                pub async fn delegate(
                     &self,
                     to: ::subxt::sp_core::crypto::AccountId32,
                     conviction: runtime_types::pallet_democracy::conviction::Conviction,
@@ -12293,7 +12293,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Delegate>()?
                     };
                     if runtime_call_hash
@@ -12326,7 +12326,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` where R is the number of referendums the voter delegating to has"]
                 #[doc = "  voted on. Weight is charged as if maximum votes."]
-                pub fn undelegate(
+                pub async fn undelegate(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -12341,7 +12341,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Undelegate>()?
                     };
                     if runtime_call_hash
@@ -12363,7 +12363,7 @@ pub mod api {
                 #[doc = "The dispatch origin of this call must be _Root_."]
                 #[doc = ""]
                 #[doc = "Weight: `O(1)`."]
-                pub fn clear_public_proposals(
+                pub async fn clear_public_proposals(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -12378,7 +12378,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClearPublicProposals>()?
                     };
                     if runtime_call_hash
@@ -12405,7 +12405,7 @@ pub mod api {
                 #[doc = "Emits `PreimageNoted`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(E)` with E size of `encoded_proposal` (protected by a required deposit)."]
-                pub fn note_preimage(
+                pub async fn note_preimage(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -12421,7 +12421,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NotePreimage>()?
                     };
                     if runtime_call_hash
@@ -12439,7 +12439,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Same as `note_preimage` but origin is `OperationalPreimageOrigin`."]
-                pub fn note_preimage_operational(
+                pub async fn note_preimage_operational(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -12455,7 +12455,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NotePreimageOperational>()?
                     };
                     if runtime_call_hash
@@ -12484,7 +12484,7 @@ pub mod api {
                 #[doc = "Emits `PreimageNoted`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(E)` with E size of `encoded_proposal` (protected by a required deposit)."]
-                pub fn note_imminent_preimage(
+                pub async fn note_imminent_preimage(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -12500,7 +12500,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NoteImminentPreimage>()?
                     };
                     if runtime_call_hash
@@ -12518,7 +12518,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Same as `note_imminent_preimage` but origin is `OperationalPreimageOrigin`."]
-                pub fn note_imminent_preimage_operational(
+                pub async fn note_imminent_preimage_operational(
                     &self,
                     encoded_proposal: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -12534,7 +12534,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NoteImminentPreimageOperational>()?
                     };
                     if runtime_call_hash
@@ -12566,7 +12566,7 @@ pub mod api {
                 #[doc = "Emits `PreimageReaped`."]
                 #[doc = ""]
                 #[doc = "Weight: `O(D)` where D is length of proposal."]
-                pub fn reap_preimage(
+                pub async fn reap_preimage(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     proposal_len_upper_bound: ::core::primitive::u32,
@@ -12583,7 +12583,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReapPreimage>()?
                     };
                     if runtime_call_hash
@@ -12610,7 +12610,7 @@ pub mod api {
                 #[doc = "- `target`: The account to remove the lock on."]
                 #[doc = ""]
                 #[doc = "Weight: `O(R)` with R number of vote of target."]
-                pub fn unlock(
+                pub async fn unlock(
                     &self,
                     target: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -12626,7 +12626,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Unlock>()?
                     };
                     if runtime_call_hash
@@ -12670,7 +12670,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R + log R)` where R is the number of referenda that `target` has voted on."]
                 #[doc = "  Weight is calculated for the maximum number of vote."]
-                pub fn remove_vote(
+                pub async fn remove_vote(
                     &self,
                     index: ::core::primitive::u32,
                 ) -> Result<
@@ -12686,7 +12686,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveVote>()?
                     };
                     if runtime_call_hash
@@ -12718,7 +12718,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(R + log R)` where R is the number of referenda that `target` has voted on."]
                 #[doc = "  Weight is calculated for the maximum number of vote."]
-                pub fn remove_other_vote(
+                pub async fn remove_other_vote(
                     &self,
                     target: ::subxt::sp_core::crypto::AccountId32,
                     index: ::core::primitive::u32,
@@ -12735,7 +12735,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveOtherVote>()?
                     };
                     if runtime_call_hash
@@ -12753,7 +12753,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Enact a proposal from a referendum. For now we just make the weight be the maximum."]
-                pub fn enact_proposal(
+                pub async fn enact_proposal(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     index: ::core::primitive::u32,
@@ -12770,7 +12770,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<EnactProposal>()?
                     };
                     if runtime_call_hash
@@ -12805,7 +12805,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Weight: `O(p)` (though as this is an high-privilege dispatch, we assume it has a"]
                 #[doc = "  reasonable value)."]
-                pub fn blacklist(
+                pub async fn blacklist(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     maybe_ref_index: ::core::option::Option<::core::primitive::u32>,
@@ -12822,7 +12822,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Blacklist>()?
                     };
                     if runtime_call_hash
@@ -12849,7 +12849,7 @@ pub mod api {
                 #[doc = "- `prop_index`: The index of the proposal to cancel."]
                 #[doc = ""]
                 #[doc = "Weight: `O(p)` where `p = PublicProps::<T>::decode_len()`"]
-                pub fn cancel_proposal(
+                pub async fn cancel_proposal(
                     &self,
                     prop_index: ::core::primitive::u32,
                 ) -> Result<
@@ -12865,7 +12865,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelProposal>()?
                     };
                     if runtime_call_hash
@@ -13273,7 +13273,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PublicPropCount>()?
                     };
                     if runtime_storage_hash
@@ -13307,7 +13307,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PublicProps>()?
                     };
                     if runtime_storage_hash
@@ -13343,7 +13343,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DepositOf>()?
                     };
                     if runtime_storage_hash
@@ -13372,7 +13372,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DepositOf>()?
                     };
                     if runtime_storage_hash
@@ -13406,7 +13406,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Preimages>()?
                     };
                     if runtime_storage_hash
@@ -13434,7 +13434,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Preimages>()?
                     };
                     if runtime_storage_hash
@@ -13458,7 +13458,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReferendumCount>()?
                     };
                     if runtime_storage_hash
@@ -13487,7 +13487,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<LowestUnbaked>()?
                     };
                     if runtime_storage_hash
@@ -13526,7 +13526,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReferendumInfoOf>()?
                     };
                     if runtime_storage_hash
@@ -13555,7 +13555,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReferendumInfoOf>()?
                     };
                     if runtime_storage_hash
@@ -13589,7 +13589,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VotingOf>()?
                     };
                     if runtime_storage_hash
@@ -13622,7 +13622,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VotingOf>()?
                     };
                     if runtime_storage_hash
@@ -13647,7 +13647,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<LastTabledWasExternal>()?
                     };
                     if runtime_storage_hash
@@ -13683,7 +13683,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextExternal>()?
                     };
                     if runtime_storage_hash
@@ -13715,7 +13715,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Blacklist>()?
                     };
                     if runtime_storage_hash
@@ -13743,7 +13743,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Blacklist>()?
                     };
                     if runtime_storage_hash
@@ -13768,7 +13768,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Cancellations>()?
                     };
                     if runtime_storage_hash
@@ -13798,7 +13798,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Cancellations>()?
                     };
                     if runtime_storage_hash
@@ -13826,7 +13826,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StorageVersion>()?
                     };
                     if runtime_storage_hash
@@ -13859,12 +13859,12 @@ pub mod api {
                 #[doc = " It should generally be a little more than the unstake period to ensure that"]
                 #[doc = " voting stakers have an opportunity to remove themselves from the system in the case"]
                 #[doc = " where they are on the losing side of a vote."]
-                pub fn enactment_period(
+                pub async fn enactment_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "EnactmentPeriod")?
                         == [
                             227u8, 73u8, 197u8, 72u8, 142u8, 160u8, 229u8, 180u8, 110u8,
@@ -13883,12 +13883,12 @@ pub mod api {
                     }
                 }
                 #[doc = " How often (in blocks) new public referenda are launched."]
-                pub fn launch_period(
+                pub async fn launch_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "LaunchPeriod")?
                         == [
                             107u8, 166u8, 54u8, 10u8, 127u8, 204u8, 15u8, 249u8, 71u8,
@@ -13907,12 +13907,12 @@ pub mod api {
                     }
                 }
                 #[doc = " How often (in blocks) to check for new votes."]
-                pub fn voting_period(
+                pub async fn voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "VotingPeriod")?
                         == [
                             53u8, 228u8, 6u8, 131u8, 171u8, 179u8, 33u8, 29u8, 46u8,
@@ -13934,12 +13934,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " It should be no shorter than enactment period to ensure that in the case of an approval,"]
                 #[doc = " those successful voters are locked into the consequences that their votes entail."]
-                pub fn vote_locking_period(
+                pub async fn vote_locking_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "VoteLockingPeriod")?
                         == [
                             30u8, 71u8, 100u8, 117u8, 139u8, 71u8, 77u8, 189u8, 33u8,
@@ -13958,12 +13958,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The minimum amount to be used as a deposit for a public referendum proposal."]
-                pub fn minimum_deposit(
+                pub async fn minimum_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "MinimumDeposit")?
                         == [
                             13u8, 97u8, 190u8, 80u8, 197u8, 219u8, 115u8, 167u8, 134u8,
@@ -13984,12 +13984,12 @@ pub mod api {
                 #[doc = " Indicator for whether an emergency origin is even allowed to happen. Some chains may"]
                 #[doc = " want to set this permanently to `false`, others may want to condition it on things such"]
                 #[doc = " as an upgrade having happened recently."]
-                pub fn instant_allowed(
+                pub async fn instant_allowed(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::bool, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "InstantAllowed")?
                         == [
                             66u8, 19u8, 43u8, 75u8, 149u8, 2u8, 157u8, 136u8, 33u8,
@@ -14008,12 +14008,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Minimum voting period allowed for a fast-track referendum."]
-                pub fn fast_track_voting_period(
+                pub async fn fast_track_voting_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "FastTrackVotingPeriod")?
                         == [
                             72u8, 110u8, 169u8, 125u8, 65u8, 142u8, 75u8, 117u8, 252u8,
@@ -14032,12 +14032,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Period in blocks where an external proposal may not be re-submitted after being vetoed."]
-                pub fn cooloff_period(
+                pub async fn cooloff_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "CooloffPeriod")?
                         == [
                             216u8, 225u8, 208u8, 207u8, 23u8, 216u8, 8u8, 144u8, 183u8,
@@ -14056,12 +14056,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount of balance that must be deposited per byte of preimage stored."]
-                pub fn preimage_byte_deposit(
+                pub async fn preimage_byte_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "PreimageByteDeposit")?
                         == [
                             123u8, 228u8, 214u8, 37u8, 90u8, 98u8, 166u8, 29u8, 231u8,
@@ -14083,12 +14083,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " Also used to compute weight, an overly big value can"]
                 #[doc = " lead to extrinsic with very big weight: see `delegate` for instance."]
-                pub fn max_votes(
+                pub async fn max_votes(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "MaxVotes")?
                         == [
                             218u8, 111u8, 73u8, 160u8, 254u8, 247u8, 22u8, 113u8, 78u8,
@@ -14107,12 +14107,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum number of public proposals that can exist at any time."]
-                pub fn max_proposals(
+                pub async fn max_proposals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Democracy", "MaxProposals")?
                         == [
                             125u8, 103u8, 31u8, 211u8, 29u8, 50u8, 100u8, 13u8, 229u8,
@@ -14256,7 +14256,7 @@ pub mod api {
                 #[doc = "  - `P` storage mutations (codec `O(M)`) for updating the votes for each proposal"]
                 #[doc = "  - 1 storage write (codec `O(1)`) for deleting the old `prime` and setting the new one"]
                 #[doc = "# </weight>"]
-                pub fn set_members(
+                pub async fn set_members(
                     &self,
                     new_members: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     prime: ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
@@ -14274,7 +14274,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMembers>()?
                     };
                     if runtime_call_hash
@@ -14306,7 +14306,7 @@ pub mod api {
                 #[doc = "- DB: 1 read (codec `O(M)`) + DB access of `proposal`"]
                 #[doc = "- 1 event"]
                 #[doc = "# </weight>"]
-                pub fn execute(
+                pub async fn execute(
                     &self,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
@@ -14323,7 +14323,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Execute>()?
                     };
                     if runtime_call_hash
@@ -14370,7 +14370,7 @@ pub mod api {
                 #[doc = "      - 1 storage write `Voting` (codec `O(M)`)"]
                 #[doc = "  - 1 event"]
                 #[doc = "# </weight>"]
-                pub fn propose(
+                pub async fn propose(
                     &self,
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::polkadot_runtime::Call,
@@ -14388,7 +14388,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Propose>()?
                     };
                     if runtime_call_hash
@@ -14424,7 +14424,7 @@ pub mod api {
                 #[doc = "  - 1 storage mutation `Voting` (codec `O(M)`)"]
                 #[doc = "- 1 event"]
                 #[doc = "# </weight>"]
-                pub fn vote(
+                pub async fn vote(
                     &self,
                     proposal: ::subxt::sp_core::H256,
                     index: ::core::primitive::u32,
@@ -14442,7 +14442,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Vote>()?
                     };
                     if runtime_call_hash
@@ -14495,7 +14495,7 @@ pub mod api {
                 #[doc = " - any mutations done while executing `proposal` (`P1`)"]
                 #[doc = "- up to 3 events"]
                 #[doc = "# </weight>"]
-                pub fn close(
+                pub async fn close(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     index: ::core::primitive::u32,
@@ -14514,7 +14514,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Close>()?
                     };
                     if runtime_call_hash
@@ -14550,7 +14550,7 @@ pub mod api {
                 #[doc = "* Reads: Proposals"]
                 #[doc = "* Writes: Voting, Proposals, ProposalOf"]
                 #[doc = "# </weight>"]
-                pub fn disapprove_proposal(
+                pub async fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -14566,7 +14566,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<DisapproveProposal>()?
                     };
                     if runtime_call_hash
@@ -14754,7 +14754,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proposals>()?
                     };
                     if runtime_storage_hash
@@ -14785,7 +14785,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalOf>()?
                     };
                     if runtime_storage_hash
@@ -14812,7 +14812,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalOf>()?
                     };
                     if runtime_storage_hash
@@ -14844,7 +14844,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -14871,7 +14871,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -14895,7 +14895,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalCount>()?
                     };
                     if runtime_storage_hash
@@ -14925,7 +14925,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Members>()?
                     };
                     if runtime_storage_hash
@@ -14955,7 +14955,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Prime>()?
                     };
                     if runtime_storage_hash
@@ -15098,7 +15098,7 @@ pub mod api {
                 #[doc = "  - `P` storage mutations (codec `O(M)`) for updating the votes for each proposal"]
                 #[doc = "  - 1 storage write (codec `O(1)`) for deleting the old `prime` and setting the new one"]
                 #[doc = "# </weight>"]
-                pub fn set_members(
+                pub async fn set_members(
                     &self,
                     new_members: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     prime: ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
@@ -15116,7 +15116,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMembers>()?
                     };
                     if runtime_call_hash
@@ -15148,7 +15148,7 @@ pub mod api {
                 #[doc = "- DB: 1 read (codec `O(M)`) + DB access of `proposal`"]
                 #[doc = "- 1 event"]
                 #[doc = "# </weight>"]
-                pub fn execute(
+                pub async fn execute(
                     &self,
                     proposal: runtime_types::polkadot_runtime::Call,
                     length_bound: ::core::primitive::u32,
@@ -15165,7 +15165,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Execute>()?
                     };
                     if runtime_call_hash
@@ -15212,7 +15212,7 @@ pub mod api {
                 #[doc = "      - 1 storage write `Voting` (codec `O(M)`)"]
                 #[doc = "  - 1 event"]
                 #[doc = "# </weight>"]
-                pub fn propose(
+                pub async fn propose(
                     &self,
                     threshold: ::core::primitive::u32,
                     proposal: runtime_types::polkadot_runtime::Call,
@@ -15230,7 +15230,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Propose>()?
                     };
                     if runtime_call_hash
@@ -15266,7 +15266,7 @@ pub mod api {
                 #[doc = "  - 1 storage mutation `Voting` (codec `O(M)`)"]
                 #[doc = "- 1 event"]
                 #[doc = "# </weight>"]
-                pub fn vote(
+                pub async fn vote(
                     &self,
                     proposal: ::subxt::sp_core::H256,
                     index: ::core::primitive::u32,
@@ -15284,7 +15284,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Vote>()?
                     };
                     if runtime_call_hash
@@ -15337,7 +15337,7 @@ pub mod api {
                 #[doc = " - any mutations done while executing `proposal` (`P1`)"]
                 #[doc = "- up to 3 events"]
                 #[doc = "# </weight>"]
-                pub fn close(
+                pub async fn close(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                     index: ::core::primitive::u32,
@@ -15356,7 +15356,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Close>()?
                     };
                     if runtime_call_hash
@@ -15392,7 +15392,7 @@ pub mod api {
                 #[doc = "* Reads: Proposals"]
                 #[doc = "* Writes: Voting, Proposals, ProposalOf"]
                 #[doc = "# </weight>"]
-                pub fn disapprove_proposal(
+                pub async fn disapprove_proposal(
                     &self,
                     proposal_hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -15408,7 +15408,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<DisapproveProposal>()?
                     };
                     if runtime_call_hash
@@ -15596,7 +15596,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proposals>()?
                     };
                     if runtime_storage_hash
@@ -15627,7 +15627,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalOf>()?
                     };
                     if runtime_storage_hash
@@ -15654,7 +15654,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalOf>()?
                     };
                     if runtime_storage_hash
@@ -15686,7 +15686,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -15713,7 +15713,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -15737,7 +15737,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalCount>()?
                     };
                     if runtime_storage_hash
@@ -15767,7 +15767,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Members>()?
                     };
                     if runtime_storage_hash
@@ -15797,7 +15797,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Prime>()?
                     };
                     if runtime_storage_hash
@@ -15920,7 +15920,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "We assume the maximum weight among all 3 cases: vote_equal, vote_more and vote_less."]
                 #[doc = "# </weight>"]
-                pub fn vote(
+                pub async fn vote(
                     &self,
                     votes: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                     value: ::core::primitive::u128,
@@ -15937,7 +15937,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Vote>()?
                     };
                     if runtime_call_hash
@@ -15959,7 +15959,7 @@ pub mod api {
                 #[doc = "This removes the lock and returns the deposit."]
                 #[doc = ""]
                 #[doc = "The dispatch origin of this call must be signed and be a voter."]
-                pub fn remove_voter(
+                pub async fn remove_voter(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -15974,7 +15974,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveVoter>()?
                     };
                     if runtime_call_hash
@@ -16006,7 +16006,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "The number of current candidates must be provided as witness data."]
                 #[doc = "# </weight>"]
-                pub fn submit_candidacy(
+                pub async fn submit_candidacy(
                     &self,
                     candidate_count: ::core::primitive::u32,
                 ) -> Result<
@@ -16022,7 +16022,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SubmitCandidacy>()?
                     };
                     if runtime_call_hash
@@ -16057,7 +16057,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "The type of renouncing must be provided as witness data."]
                 #[doc = "# </weight>"]
-                pub fn renounce_candidacy(
+                pub async fn renounce_candidacy(
                     &self,
                     renouncing: runtime_types::pallet_elections_phragmen::Renouncing,
                 ) -> Result<
@@ -16073,7 +16073,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RenounceCandidacy>()?
                     };
                     if runtime_call_hash
@@ -16104,7 +16104,7 @@ pub mod api {
                 #[doc = "If we have a replacement, we use a small weight. Else, since this is a root call and"]
                 #[doc = "will go into phragmen, we assume full block for now."]
                 #[doc = "# </weight>"]
-                pub fn remove_member(
+                pub async fn remove_member(
                     &self,
                     who: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -16124,7 +16124,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveMember>()?
                     };
                     if runtime_call_hash
@@ -16154,7 +16154,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "The total number of voters and those that are defunct must be provided as witness data."]
                 #[doc = "# </weight>"]
-                pub fn clean_defunct_voters(
+                pub async fn clean_defunct_voters(
                     &self,
                     num_voters: ::core::primitive::u32,
                     num_defunct: ::core::primitive::u32,
@@ -16171,7 +16171,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CleanDefunctVoters>()?
                     };
                     if runtime_call_hash
@@ -16360,7 +16360,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Members>()?
                     };
                     if runtime_storage_hash
@@ -16398,7 +16398,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<RunnersUp>()?
                     };
                     if runtime_storage_hash
@@ -16436,7 +16436,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Candidates>()?
                     };
                     if runtime_storage_hash
@@ -16464,7 +16464,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ElectionRounds>()?
                     };
                     if runtime_storage_hash
@@ -16500,7 +16500,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -16532,7 +16532,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Voting>()?
                     };
                     if runtime_storage_hash
@@ -16560,14 +16560,14 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Identifier for the elections-phragmen pallet's lock"]
-                pub fn pallet_id(
+                pub async fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
                     [::core::primitive::u8; 8usize],
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "PalletId")?
                         == [
                             95u8, 63u8, 229u8, 200u8, 231u8, 11u8, 95u8, 106u8, 62u8,
@@ -16586,12 +16586,12 @@ pub mod api {
                     }
                 }
                 #[doc = " How much should be locked up in order to submit one's candidacy."]
-                pub fn candidacy_bond(
+                pub async fn candidacy_bond(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "CandidacyBond")?
                         == [
                             14u8, 234u8, 73u8, 125u8, 101u8, 97u8, 55u8, 15u8, 230u8,
@@ -16613,12 +16613,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This should be sensibly high to economically ensure the pallet cannot be attacked by"]
                 #[doc = " creating a gigantic number of votes."]
-                pub fn voting_bond_base(
+                pub async fn voting_bond_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "VotingBondBase")?
                         == [
                             180u8, 167u8, 175u8, 40u8, 243u8, 172u8, 143u8, 55u8, 194u8,
@@ -16637,12 +16637,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount of bond that need to be locked for each vote (32 bytes)."]
-                pub fn voting_bond_factor(
+                pub async fn voting_bond_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "VotingBondFactor")?
                         == [
                             221u8, 163u8, 2u8, 102u8, 69u8, 249u8, 39u8, 153u8, 236u8,
@@ -16661,12 +16661,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Number of members to elect."]
-                pub fn desired_members(
+                pub async fn desired_members(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "DesiredMembers")?
                         == [
                             202u8, 93u8, 82u8, 184u8, 101u8, 152u8, 110u8, 247u8, 155u8,
@@ -16685,12 +16685,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Number of runners_up to keep."]
-                pub fn desired_runners_up(
+                pub async fn desired_runners_up(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "DesiredRunnersUp")?
                         == [
                             126u8, 79u8, 206u8, 94u8, 16u8, 223u8, 112u8, 34u8, 160u8,
@@ -16711,12 +16711,12 @@ pub mod api {
                 #[doc = " How long each seat is kept. This defines the next block number at which an election"]
                 #[doc = " round will happen. If set to zero, no elections are ever triggered and the module will"]
                 #[doc = " be in passive mode."]
-                pub fn term_duration(
+                pub async fn term_duration(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("PhragmenElection", "TermDuration")?
                         == [
                             193u8, 236u8, 82u8, 251u8, 38u8, 164u8, 72u8, 149u8, 65u8,
@@ -16821,7 +16821,7 @@ pub mod api {
                 #[doc = "Add a member `who` to the set."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::AddOrigin`."]
-                pub fn add_member(
+                pub async fn add_member(
                     &self,
                     who: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -16837,7 +16837,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddMember>()?
                     };
                     if runtime_call_hash
@@ -16857,7 +16857,7 @@ pub mod api {
                 #[doc = "Remove a member `who` from the set."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::RemoveOrigin`."]
-                pub fn remove_member(
+                pub async fn remove_member(
                     &self,
                     who: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -16873,7 +16873,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveMember>()?
                     };
                     if runtime_call_hash
@@ -16895,7 +16895,7 @@ pub mod api {
                 #[doc = "May only be called from `T::SwapOrigin`."]
                 #[doc = ""]
                 #[doc = "Prime membership is *not* passed from `remove` to `add`, if extant."]
-                pub fn swap_member(
+                pub async fn swap_member(
                     &self,
                     remove: ::subxt::sp_core::crypto::AccountId32,
                     add: ::subxt::sp_core::crypto::AccountId32,
@@ -16912,7 +16912,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SwapMember>()?
                     };
                     if runtime_call_hash
@@ -16933,7 +16933,7 @@ pub mod api {
                 #[doc = "pass `members` pre-sorted."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::ResetOrigin`."]
-                pub fn reset_members(
+                pub async fn reset_members(
                     &self,
                     members: ::std::vec::Vec<::subxt::sp_core::crypto::AccountId32>,
                 ) -> Result<
@@ -16949,7 +16949,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ResetMembers>()?
                     };
                     if runtime_call_hash
@@ -16971,7 +16971,7 @@ pub mod api {
                 #[doc = "May only be called from `Signed` origin of a current member."]
                 #[doc = ""]
                 #[doc = "Prime membership is passed from the origin account to `new`, if extant."]
-                pub fn change_key(
+                pub async fn change_key(
                     &self,
                     new: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -16987,7 +16987,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ChangeKey>()?
                     };
                     if runtime_call_hash
@@ -17007,7 +17007,7 @@ pub mod api {
                 #[doc = "Set the prime member. Must be a current member."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::PrimeOrigin`."]
-                pub fn set_prime(
+                pub async fn set_prime(
                     &self,
                     who: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -17023,7 +17023,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetPrime>()?
                     };
                     if runtime_call_hash
@@ -17043,7 +17043,7 @@ pub mod api {
                 #[doc = "Remove the prime member if it exists."]
                 #[doc = ""]
                 #[doc = "May only be called from `T::PrimeOrigin`."]
-                pub fn clear_prime(
+                pub async fn clear_prime(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -17058,7 +17058,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClearPrime>()?
                     };
                     if runtime_call_hash
@@ -17160,7 +17160,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Members>()?
                     };
                     if runtime_storage_hash
@@ -17190,7 +17190,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Prime>()?
                     };
                     if runtime_storage_hash
@@ -17276,7 +17276,7 @@ pub mod api {
                 #[doc = "- DbReads: `ProposalCount`, `origin account`"]
                 #[doc = "- DbWrites: `ProposalCount`, `Proposals`, `origin account`"]
                 #[doc = "# </weight>"]
-                pub fn propose_spend(
+                pub async fn propose_spend(
                     &self,
                     value: ::core::primitive::u128,
                     beneficiary: ::subxt::sp_runtime::MultiAddress<
@@ -17296,7 +17296,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProposeSpend>()?
                     };
                     if runtime_call_hash
@@ -17322,7 +17322,7 @@ pub mod api {
                 #[doc = "- DbReads: `Proposals`, `rejected proposer account`"]
                 #[doc = "- DbWrites: `Proposals`, `rejected proposer account`"]
                 #[doc = "# </weight>"]
-                pub fn reject_proposal(
+                pub async fn reject_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
                 ) -> Result<
@@ -17338,7 +17338,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RejectProposal>()?
                     };
                     if runtime_call_hash
@@ -17365,7 +17365,7 @@ pub mod api {
                 #[doc = "- DbReads: `Proposals`, `Approvals`"]
                 #[doc = "- DbWrite: `Approvals`"]
                 #[doc = "# </weight>"]
-                pub fn approve_proposal(
+                pub async fn approve_proposal(
                     &self,
                     proposal_id: ::core::primitive::u32,
                 ) -> Result<
@@ -17381,7 +17381,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ApproveProposal>()?
                     };
                     if runtime_call_hash
@@ -17548,7 +17548,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ProposalCount>()?
                     };
                     if runtime_storage_hash
@@ -17584,7 +17584,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proposals>()?
                     };
                     if runtime_storage_hash
@@ -17611,7 +17611,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proposals>()?
                     };
                     if runtime_storage_hash
@@ -17639,7 +17639,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Approvals>()?
                     };
                     if runtime_storage_hash
@@ -17672,14 +17672,14 @@ pub mod api {
                 }
                 #[doc = " Fraction of a proposal's value that should be bonded in order to place the proposal."]
                 #[doc = " An accepted proposal gets these back. A rejected proposal does not."]
-                pub fn proposal_bond(
+                pub async fn proposal_bond(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "ProposalBond")?
                         == [
                             254u8, 112u8, 56u8, 108u8, 71u8, 90u8, 128u8, 114u8, 54u8,
@@ -17698,12 +17698,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
-                pub fn proposal_bond_minimum(
+                pub async fn proposal_bond_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "ProposalBondMinimum")?
                         == [
                             233u8, 16u8, 162u8, 158u8, 32u8, 30u8, 243u8, 215u8, 145u8,
@@ -17722,14 +17722,14 @@ pub mod api {
                     }
                 }
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
-                pub fn proposal_bond_maximum(
+                pub async fn proposal_bond_maximum(
                     &self,
                 ) -> ::core::result::Result<
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "ProposalBondMaximum")?
                         == [
                             12u8, 199u8, 104u8, 127u8, 224u8, 233u8, 186u8, 181u8, 74u8,
@@ -17748,12 +17748,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Period between successive spends."]
-                pub fn spend_period(
+                pub async fn spend_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "SpendPeriod")?
                         == [
                             71u8, 58u8, 201u8, 70u8, 240u8, 191u8, 67u8, 71u8, 12u8,
@@ -17772,14 +17772,14 @@ pub mod api {
                     }
                 }
                 #[doc = " Percentage of spare funds (if any) that are burnt per spend period."]
-                pub fn burn(
+                pub async fn burn(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "Burn")?
                         == [
                             179u8, 112u8, 148u8, 197u8, 209u8, 103u8, 231u8, 44u8, 227u8,
@@ -17798,14 +17798,14 @@ pub mod api {
                     }
                 }
                 #[doc = " The treasury's pallet id, used for deriving its sovereign account ID."]
-                pub fn pallet_id(
+                pub async fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_support::PalletId,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "PalletId")?
                         == [
                             65u8, 140u8, 92u8, 164u8, 174u8, 209u8, 169u8, 31u8, 29u8,
@@ -17826,12 +17826,12 @@ pub mod api {
                 #[doc = " The maximum number of approvals that can wait in the spending queue."]
                 #[doc = ""]
                 #[doc = " NOTE: This parameter is also used within the Bounties Pallet extension if enabled."]
-                pub fn max_approvals(
+                pub async fn max_approvals(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Treasury", "MaxApprovals")?
                         == [
                             90u8, 101u8, 189u8, 20u8, 137u8, 178u8, 7u8, 81u8, 148u8,
@@ -17959,7 +17959,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(1)"]
                 #[doc = "</weight>"]
-                pub fn claim(
+                pub async fn claim(
                     &self,
                     dest: ::subxt::sp_core::crypto::AccountId32,
                     ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature,
@@ -17976,7 +17976,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Claim>()?
                     };
                     if runtime_call_hash
@@ -18011,7 +18011,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(1)"]
                 #[doc = "</weight>"]
-                pub fn mint_claim(
+                pub async fn mint_claim(
                     &self,
                     who: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     value: ::core::primitive::u128,
@@ -18036,7 +18036,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<MintClaim>()?
                     };
                     if runtime_call_hash
@@ -18084,7 +18084,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(1)"]
                 #[doc = "</weight>"]
-                pub fn claim_attest(
+                pub async fn claim_attest(
                     &self,
                     dest: ::subxt::sp_core::crypto::AccountId32,
                     ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature,
@@ -18102,7 +18102,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClaimAttest>()?
                     };
                     if runtime_call_hash
@@ -18140,7 +18140,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total Complexity: O(1)"]
                 #[doc = "</weight>"]
-                pub fn attest(
+                pub async fn attest(
                     &self,
                     statement: ::std::vec::Vec<::core::primitive::u8>,
                 ) -> Result<
@@ -18156,7 +18156,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Attest>()?
                     };
                     if runtime_call_hash
@@ -18173,7 +18173,7 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                pub fn move_claim(
+                pub async fn move_claim(
                     &self,
                     old: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     new: runtime_types::polkadot_runtime_common::claims::EthereumAddress,
@@ -18193,7 +18193,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<MoveClaim>()?
                     };
                     if runtime_call_hash
@@ -18319,7 +18319,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Claims>()?
                     };
                     if runtime_storage_hash
@@ -18345,7 +18345,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Claims>()?
                     };
                     if runtime_storage_hash
@@ -18368,7 +18368,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Total>()?
                     };
                     if runtime_storage_hash
@@ -18406,7 +18406,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Vesting>()?
                     };
                     if runtime_storage_hash
@@ -18436,7 +18436,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Vesting>()?
                     };
                     if runtime_storage_hash
@@ -18465,7 +18465,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Signing>()?
                     };
                     if runtime_storage_hash
@@ -18492,7 +18492,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Signing>()?
                     };
                     if runtime_storage_hash
@@ -18521,7 +18521,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Preclaims>()?
                     };
                     if runtime_storage_hash
@@ -18548,7 +18548,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Preclaims>()?
                     };
                     if runtime_storage_hash
@@ -18575,14 +18575,14 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
-                pub fn prefix(
+                pub async fn prefix(
                     &self,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<::core::primitive::u8>,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Claims", "Prefix")?
                         == [
                             151u8, 15u8, 166u8, 7u8, 98u8, 182u8, 188u8, 119u8, 175u8,
@@ -18702,7 +18702,7 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, [Sender Account]"]
                 #[doc = "# </weight>"]
-                pub fn vest(
+                pub async fn vest(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -18717,7 +18717,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Vest>()?
                     };
                     if runtime_call_hash
@@ -18749,7 +18749,7 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account"]
                 #[doc = "# </weight>"]
-                pub fn vest_other(
+                pub async fn vest_other(
                     &self,
                     target: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -18768,7 +18768,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<VestOther>()?
                     };
                     if runtime_call_hash
@@ -18802,7 +18802,7 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account, [Sender Account]"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account, [Sender Account]"]
                 #[doc = "# </weight>"]
-                pub fn vested_transfer(
+                pub async fn vested_transfer(
                     &self,
                     target: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -18825,7 +18825,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<VestedTransfer>()?
                     };
                     if runtime_call_hash
@@ -18860,7 +18860,7 @@ pub mod api {
                 #[doc = "    - Reads: Vesting Storage, Balances Locks, Target Account, Source Account"]
                 #[doc = "    - Writes: Vesting Storage, Balances Locks, Target Account, Source Account"]
                 #[doc = "# </weight>"]
-                pub fn force_vested_transfer(
+                pub async fn force_vested_transfer(
                     &self,
                     source: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -18887,7 +18887,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceVestedTransfer>()?
                     };
                     if runtime_call_hash
@@ -18929,7 +18929,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `schedule1_index`: index of the first schedule to merge."]
                 #[doc = "- `schedule2_index`: index of the second schedule to merge."]
-                pub fn merge_schedules(
+                pub async fn merge_schedules(
                     &self,
                     schedule1_index: ::core::primitive::u32,
                     schedule2_index: ::core::primitive::u32,
@@ -18946,7 +18946,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<MergeSchedules>()?
                     };
                     if runtime_call_hash
@@ -19046,7 +19046,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Vesting>()?
                     };
                     if runtime_storage_hash
@@ -19073,7 +19073,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Vesting>()?
                     };
                     if runtime_storage_hash
@@ -19101,7 +19101,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<StorageVersion>()?
                     };
                     if runtime_storage_hash
@@ -19133,12 +19133,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The minimum amount transferred to call `vested_transfer`."]
-                pub fn min_vested_transfer(
+                pub async fn min_vested_transfer(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Vesting", "MinVestedTransfer")?
                         == [
                             92u8, 250u8, 99u8, 224u8, 124u8, 3u8, 41u8, 238u8, 116u8,
@@ -19156,12 +19156,12 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                pub fn max_vesting_schedules(
+                pub async fn max_vesting_schedules(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Vesting", "MaxVestingSchedules")?
                         == [
                             156u8, 82u8, 251u8, 182u8, 112u8, 167u8, 99u8, 73u8, 181u8,
@@ -19262,7 +19262,7 @@ pub mod api {
                 #[doc = "`BatchInterrupted` event is deposited, along with the number of successful calls made"]
                 #[doc = "and the error of the failed call. If all were successful, then the `BatchCompleted`"]
                 #[doc = "event is deposited."]
-                pub fn batch(
+                pub async fn batch(
                     &self,
                     calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
                 ) -> Result<
@@ -19278,7 +19278,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Batch>()?
                     };
                     if runtime_call_hash
@@ -19308,7 +19308,7 @@ pub mod api {
                 #[doc = "NOTE: Prior to version *12, this was called `as_limited_sub`."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_."]
-                pub fn as_derivative(
+                pub async fn as_derivative(
                     &self,
                     index: ::core::primitive::u16,
                     call: runtime_types::polkadot_runtime::Call,
@@ -19325,7 +19325,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AsDerivative>()?
                     };
                     if runtime_call_hash
@@ -19359,7 +19359,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- Complexity: O(C) where C is the number of calls to be batched."]
                 #[doc = "# </weight>"]
-                pub fn batch_all(
+                pub async fn batch_all(
                     &self,
                     calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
                 ) -> Result<
@@ -19375,7 +19375,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<BatchAll>()?
                     };
                     if runtime_call_hash
@@ -19402,7 +19402,7 @@ pub mod api {
                 #[doc = "- One DB write (event)."]
                 #[doc = "- Weight of derivative `call` execution + T::WeightInfo::dispatch_as()."]
                 #[doc = "# </weight>"]
-                pub fn dispatch_as(
+                pub async fn dispatch_as(
                     &self,
                     as_origin: runtime_types::polkadot_runtime::OriginCaller,
                     call: runtime_types::polkadot_runtime::Call,
@@ -19419,7 +19419,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<DispatchAs>()?
                     };
                     if runtime_call_hash
@@ -19490,12 +19490,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The limit on the number of batched calls."]
-                pub fn batched_calls_limit(
+                pub async fn batched_calls_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Utility", "batched_calls_limit")?
                         == [
                             230u8, 161u8, 6u8, 191u8, 162u8, 108u8, 149u8, 245u8, 68u8,
@@ -19715,7 +19715,7 @@ pub mod api {
                 #[doc = "- One storage mutation (codec `O(R)`)."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn add_registrar(
+                pub async fn add_registrar(
                     &self,
                     account: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -19731,7 +19731,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddRegistrar>()?
                     };
                     if runtime_call_hash
@@ -19767,7 +19767,7 @@ pub mod api {
                 #[doc = "- One storage mutation (codec-read `O(X' + R)`, codec-write `O(X + R)`)."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn set_identity(
+                pub async fn set_identity(
                     &self,
                     info: runtime_types::pallet_identity::types::IdentityInfo,
                 ) -> Result<
@@ -19783,7 +19783,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetIdentity>()?
                     };
                     if runtime_call_hash
@@ -19823,7 +19823,7 @@ pub mod api {
                 #[doc = "  - One storage write (codec complexity `O(S)`)."]
                 #[doc = "  - One storage-exists (`IdentityOf::contains_key`)."]
                 #[doc = "# </weight>"]
-                pub fn set_subs(
+                pub async fn set_subs(
                     &self,
                     subs: ::std::vec::Vec<(
                         ::subxt::sp_core::crypto::AccountId32,
@@ -19842,7 +19842,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetSubs>()?
                     };
                     if runtime_call_hash
@@ -19877,7 +19877,7 @@ pub mod api {
                 #[doc = "- `2` storage reads and `S + 2` storage deletions."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn clear_identity(
+                pub async fn clear_identity(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -19892,7 +19892,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClearIdentity>()?
                     };
                     if runtime_call_hash
@@ -19932,7 +19932,7 @@ pub mod api {
                 #[doc = "- Storage: 1 read `O(R)`, 1 mutate `O(X + R)`."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn request_judgement(
+                pub async fn request_judgement(
                     &self,
                     reg_index: ::core::primitive::u32,
                     max_fee: ::core::primitive::u128,
@@ -19949,7 +19949,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RequestJudgement>()?
                     };
                     if runtime_call_hash
@@ -19983,7 +19983,7 @@ pub mod api {
                 #[doc = "- One storage mutation `O(R + X)`."]
                 #[doc = "- One event"]
                 #[doc = "# </weight>"]
-                pub fn cancel_request(
+                pub async fn cancel_request(
                     &self,
                     reg_index: ::core::primitive::u32,
                 ) -> Result<
@@ -19999,7 +19999,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelRequest>()?
                     };
                     if runtime_call_hash
@@ -20029,7 +20029,7 @@ pub mod api {
                 #[doc = "- One storage mutation `O(R)`."]
                 #[doc = "- Benchmark: 7.315 + R * 0.329 µs (min squares analysis)"]
                 #[doc = "# </weight>"]
-                pub fn set_fee(
+                pub async fn set_fee(
                     &self,
                     index: ::core::primitive::u32,
                     fee: ::core::primitive::u128,
@@ -20046,7 +20046,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetFee>()?
                     };
                     if runtime_call_hash
@@ -20076,7 +20076,7 @@ pub mod api {
                 #[doc = "- One storage mutation `O(R)`."]
                 #[doc = "- Benchmark: 8.823 + R * 0.32 µs (min squares analysis)"]
                 #[doc = "# </weight>"]
-                pub fn set_account_id(
+                pub async fn set_account_id(
                     &self,
                     index: ::core::primitive::u32,
                     new: ::subxt::sp_core::crypto::AccountId32,
@@ -20093,7 +20093,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetAccountId>()?
                     };
                     if runtime_call_hash
@@ -20123,7 +20123,7 @@ pub mod api {
                 #[doc = "- One storage mutation `O(R)`."]
                 #[doc = "- Benchmark: 7.464 + R * 0.325 µs (min squares analysis)"]
                 #[doc = "# </weight>"]
-                pub fn set_fields(
+                pub async fn set_fields(
                     &self,
                     index: ::core::primitive::u32,
                     fields: runtime_types::pallet_identity::types::BitFlags<
@@ -20142,7 +20142,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetFields>()?
                     };
                     if runtime_call_hash
@@ -20178,7 +20178,7 @@ pub mod api {
                 #[doc = "- Storage: 1 read `O(R)`, 1 mutate `O(R + X)`."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn provide_judgement(
+                pub async fn provide_judgement(
                     &self,
                     reg_index: ::core::primitive::u32,
                     target: ::subxt::sp_runtime::MultiAddress<
@@ -20201,7 +20201,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProvideJudgement>()?
                     };
                     if runtime_call_hash
@@ -20241,7 +20241,7 @@ pub mod api {
                 #[doc = "- `S + 2` storage mutations."]
                 #[doc = "- One event."]
                 #[doc = "# </weight>"]
-                pub fn kill_identity(
+                pub async fn kill_identity(
                     &self,
                     target: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -20260,7 +20260,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<KillIdentity>()?
                     };
                     if runtime_call_hash
@@ -20284,7 +20284,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
                 #[doc = "sub identity of `sub`."]
-                pub fn add_sub(
+                pub async fn add_sub(
                     &self,
                     sub: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -20304,7 +20304,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddSub>()?
                     };
                     if runtime_call_hash
@@ -20325,7 +20325,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
                 #[doc = "sub identity of `sub`."]
-                pub fn rename_sub(
+                pub async fn rename_sub(
                     &self,
                     sub: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -20345,7 +20345,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RenameSub>()?
                     };
                     if runtime_call_hash
@@ -20369,7 +20369,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ and the sender must have a registered"]
                 #[doc = "sub identity of `sub`."]
-                pub fn remove_sub(
+                pub async fn remove_sub(
                     &self,
                     sub: ::subxt::sp_runtime::MultiAddress<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -20388,7 +20388,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveSub>()?
                     };
                     if runtime_call_hash
@@ -20415,7 +20415,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "NOTE: This should not normally be used, but is provided in the case that the non-"]
                 #[doc = "controller of an account is maliciously registered as a sub-account."]
-                pub fn quit_sub(
+                pub async fn quit_sub(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -20430,7 +20430,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<QuitSub>()?
                     };
                     if runtime_call_hash
@@ -20649,7 +20649,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<IdentityOf>()?
                     };
                     if runtime_storage_hash
@@ -20678,7 +20678,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<IdentityOf>()?
                     };
                     if runtime_storage_hash
@@ -20709,7 +20709,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SuperOf>()?
                     };
                     if runtime_storage_hash
@@ -20737,7 +20737,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SuperOf>()?
                     };
                     if runtime_storage_hash
@@ -20773,7 +20773,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SubsOf>()?
                     };
                     if runtime_storage_hash
@@ -20807,7 +20807,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SubsOf>()?
                     };
                     if runtime_storage_hash
@@ -20843,7 +20843,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Registrars>()?
                     };
                     if runtime_storage_hash
@@ -20875,12 +20875,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The amount held on deposit for a registered identity"]
-                pub fn basic_deposit(
+                pub async fn basic_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "BasicDeposit")?
                         == [
                             240u8, 163u8, 226u8, 52u8, 199u8, 248u8, 206u8, 2u8, 38u8,
@@ -20899,12 +20899,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount held on deposit per additional field for a registered identity."]
-                pub fn field_deposit(
+                pub async fn field_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "FieldDeposit")?
                         == [
                             165u8, 151u8, 74u8, 173u8, 28u8, 8u8, 195u8, 171u8, 159u8,
@@ -20925,12 +20925,12 @@ pub mod api {
                 #[doc = " The amount held on deposit for a registered subaccount. This should account for the fact"]
                 #[doc = " that one storage item's value will increase by the size of an account ID, and there will"]
                 #[doc = " be another trie item whose value is the size of an account ID plus 32 bytes."]
-                pub fn sub_account_deposit(
+                pub async fn sub_account_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "SubAccountDeposit")?
                         == [
                             132u8, 115u8, 135u8, 88u8, 142u8, 44u8, 215u8, 122u8, 22u8,
@@ -20949,12 +20949,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum number of sub-accounts allowed per identified account."]
-                pub fn max_sub_accounts(
+                pub async fn max_sub_accounts(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "MaxSubAccounts")?
                         == [
                             75u8, 1u8, 223u8, 132u8, 121u8, 0u8, 145u8, 246u8, 118u8,
@@ -20974,12 +20974,12 @@ pub mod api {
                 }
                 #[doc = " Maximum number of additional fields that may be stored in an ID. Needed to bound the I/O"]
                 #[doc = " required to access an identity, but can be pretty high."]
-                pub fn max_additional_fields(
+                pub async fn max_additional_fields(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "MaxAdditionalFields")?
                         == [
                             52u8, 246u8, 245u8, 172u8, 242u8, 40u8, 79u8, 11u8, 106u8,
@@ -20999,12 +20999,12 @@ pub mod api {
                 }
                 #[doc = " Maxmimum number of registrars allowed in the system. Needed to bound the complexity"]
                 #[doc = " of, e.g., updating judgements."]
-                pub fn max_registrars(
+                pub async fn max_registrars(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Identity", "MaxRegistrars")?
                         == [
                             172u8, 101u8, 183u8, 243u8, 249u8, 249u8, 95u8, 104u8, 100u8,
@@ -21166,7 +21166,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
-                pub fn proxy(
+                pub async fn proxy(
                     &self,
                     real: ::subxt::sp_core::crypto::AccountId32,
                     force_proxy_type: ::core::option::Option<
@@ -21186,7 +21186,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Proxy>()?
                     };
                     if runtime_call_hash
@@ -21220,7 +21220,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
-                pub fn add_proxy(
+                pub async fn add_proxy(
                     &self,
                     delegate: ::subxt::sp_core::crypto::AccountId32,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
@@ -21238,7 +21238,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddProxy>()?
                     };
                     if runtime_call_hash
@@ -21270,7 +21270,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
-                pub fn remove_proxy(
+                pub async fn remove_proxy(
                     &self,
                     delegate: ::subxt::sp_core::crypto::AccountId32,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
@@ -21288,7 +21288,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveProxy>()?
                     };
                     if runtime_call_hash
@@ -21319,7 +21319,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
-                pub fn remove_proxies(
+                pub async fn remove_proxies(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -21334,7 +21334,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveProxies>()?
                     };
                     if runtime_call_hash
@@ -21374,7 +21374,7 @@ pub mod api {
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
                 #[doc = "TODO: Might be over counting 1 read"]
-                pub fn anonymous(
+                pub async fn anonymous(
                     &self,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
                     delay: ::core::primitive::u32,
@@ -21392,7 +21392,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Anonymous>()?
                     };
                     if runtime_call_hash
@@ -21433,7 +21433,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "Weight is a function of the number of proxies the user has (P)."]
                 #[doc = "# </weight>"]
-                pub fn kill_anonymous(
+                pub async fn kill_anonymous(
                     &self,
                     spawner: ::subxt::sp_core::crypto::AccountId32,
                     proxy_type: runtime_types::polkadot_runtime::ProxyType,
@@ -21453,7 +21453,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<KillAnonymous>()?
                     };
                     if runtime_call_hash
@@ -21497,7 +21497,7 @@ pub mod api {
                 #[doc = "- A: the number of announcements made."]
                 #[doc = "- P: the number of proxies the user has."]
                 #[doc = "# </weight>"]
-                pub fn announce(
+                pub async fn announce(
                     &self,
                     real: ::subxt::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::sp_core::H256,
@@ -21514,7 +21514,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Announce>()?
                     };
                     if runtime_call_hash
@@ -21547,7 +21547,7 @@ pub mod api {
                 #[doc = "- A: the number of announcements made."]
                 #[doc = "- P: the number of proxies the user has."]
                 #[doc = "# </weight>"]
-                pub fn remove_announcement(
+                pub async fn remove_announcement(
                     &self,
                     real: ::subxt::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::sp_core::H256,
@@ -21564,7 +21564,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RemoveAnnouncement>()?
                     };
                     if runtime_call_hash
@@ -21597,7 +21597,7 @@ pub mod api {
                 #[doc = "- A: the number of announcements made."]
                 #[doc = "- P: the number of proxies the user has."]
                 #[doc = "# </weight>"]
-                pub fn reject_announcement(
+                pub async fn reject_announcement(
                     &self,
                     delegate: ::subxt::sp_core::crypto::AccountId32,
                     call_hash: ::subxt::sp_core::H256,
@@ -21614,7 +21614,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RejectAnnouncement>()?
                     };
                     if runtime_call_hash
@@ -21651,7 +21651,7 @@ pub mod api {
                 #[doc = "- A: the number of announcements made."]
                 #[doc = "- P: the number of proxies the user has."]
                 #[doc = "# </weight>"]
-                pub fn proxy_announced(
+                pub async fn proxy_announced(
                     &self,
                     delegate: ::subxt::sp_core::crypto::AccountId32,
                     real: ::subxt::sp_core::crypto::AccountId32,
@@ -21672,7 +21672,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProxyAnnounced>()?
                     };
                     if runtime_call_hash
@@ -21830,7 +21830,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proxies>()?
                     };
                     if runtime_storage_hash
@@ -21861,7 +21861,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Proxies>()?
                     };
                     if runtime_storage_hash
@@ -21897,7 +21897,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Announcements>()?
                     };
                     if runtime_storage_hash
@@ -21927,7 +21927,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Announcements>()?
                     };
                     if runtime_storage_hash
@@ -21958,12 +21958,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This is held for an additional storage item whose value size is"]
                 #[doc = " `sizeof(Balance)` bytes and whose key size is `sizeof(AccountId)` bytes."]
-                pub fn proxy_deposit_base(
+                pub async fn proxy_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "ProxyDepositBase")?
                         == [
                             103u8, 165u8, 87u8, 140u8, 136u8, 233u8, 165u8, 158u8, 117u8,
@@ -21986,12 +21986,12 @@ pub mod api {
                 #[doc = " This is held for adding 32 bytes plus an instance of `ProxyType` more into a"]
                 #[doc = " pre-existing storage value. Thus, when configuring `ProxyDepositFactor` one should take"]
                 #[doc = " into account `32 + proxy_type.encode().len()` bytes of data."]
-                pub fn proxy_deposit_factor(
+                pub async fn proxy_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "ProxyDepositFactor")?
                         == [
                             163u8, 148u8, 34u8, 63u8, 153u8, 113u8, 173u8, 220u8, 242u8,
@@ -22010,12 +22010,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum amount of proxies allowed for a single account."]
-                pub fn max_proxies(
+                pub async fn max_proxies(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "MaxProxies")?
                         == [
                             249u8, 153u8, 224u8, 128u8, 161u8, 3u8, 39u8, 192u8, 120u8,
@@ -22034,12 +22034,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum amount of time-delayed announcements that are allowed to be pending."]
-                pub fn max_pending(
+                pub async fn max_pending(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "MaxPending")?
                         == [
                             88u8, 148u8, 146u8, 152u8, 151u8, 208u8, 255u8, 193u8, 239u8,
@@ -22061,12 +22061,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This is held when a new storage item holding a `Balance` is created (typically 16"]
                 #[doc = " bytes)."]
-                pub fn announcement_deposit_base(
+                pub async fn announcement_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "AnnouncementDepositBase")?
                         == [
                             167u8, 193u8, 39u8, 36u8, 61u8, 75u8, 122u8, 88u8, 86u8,
@@ -22088,12 +22088,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This is held for adding an `AccountId`, `Hash` and `BlockNumber` (typically 68 bytes)"]
                 #[doc = " into a pre-existing storage value."]
-                pub fn announcement_deposit_factor(
+                pub async fn announcement_deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Proxy", "AnnouncementDepositFactor")?
                         == [
                             234u8, 50u8, 92u8, 12u8, 170u8, 230u8, 151u8, 220u8, 202u8,
@@ -22211,7 +22211,7 @@ pub mod api {
                 #[doc = "- DB Weight: None"]
                 #[doc = "- Plus Call Weight"]
                 #[doc = "# </weight>"]
-                pub fn as_multi_threshold_1(
+                pub async fn as_multi_threshold_1(
                     &self,
                     other_signatories: ::std::vec::Vec<
                         ::subxt::sp_core::crypto::AccountId32,
@@ -22230,7 +22230,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AsMultiThreshold1>()?
                     };
                     if runtime_call_hash
@@ -22295,7 +22295,7 @@ pub mod api {
                 #[doc = "    - Writes: Multisig Storage, [Caller Account], Calls (if `store_call`)"]
                 #[doc = "- Plus Call Weight"]
                 #[doc = "# </weight>"]
-                pub fn as_multi(
+                pub async fn as_multi(
                     &self,
                     threshold: ::core::primitive::u16,
                     other_signatories: ::std::vec::Vec<
@@ -22322,7 +22322,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AsMulti>()?
                     };
                     if runtime_call_hash
@@ -22381,7 +22381,7 @@ pub mod api {
                 #[doc = "    - Read: Multisig Storage, [Caller Account]"]
                 #[doc = "    - Write: Multisig Storage, [Caller Account]"]
                 #[doc = "# </weight>"]
-                pub fn approve_as_multi(
+                pub async fn approve_as_multi(
                     &self,
                     threshold: ::core::primitive::u16,
                     other_signatories: ::std::vec::Vec<
@@ -22405,7 +22405,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ApproveAsMulti>()?
                     };
                     if runtime_call_hash
@@ -22454,7 +22454,7 @@ pub mod api {
                 #[doc = "    - Read: Multisig Storage, [Caller Account], Refund Account, Calls"]
                 #[doc = "    - Write: Multisig Storage, [Caller Account], Refund Account, Calls"]
                 #[doc = "# </weight>"]
-                pub fn cancel_as_multi(
+                pub async fn cancel_as_multi(
                     &self,
                     threshold: ::core::primitive::u16,
                     other_signatories: ::std::vec::Vec<
@@ -22477,7 +22477,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelAsMulti>()?
                     };
                     if runtime_call_hash
@@ -22625,7 +22625,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Multisigs>()?
                     };
                     if runtime_storage_hash
@@ -22652,7 +22652,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Multisigs>()?
                     };
                     if runtime_storage_hash
@@ -22682,7 +22682,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Calls>()?
                     };
                     if runtime_storage_hash
@@ -22708,7 +22708,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Calls>()?
                     };
                     if runtime_storage_hash
@@ -22741,12 +22741,12 @@ pub mod api {
                 #[doc = " This is held for an additional storage item whose value size is"]
                 #[doc = " `4 + sizeof((BlockNumber, Balance, AccountId))` bytes and whose key size is"]
                 #[doc = " `32 + sizeof(AccountId)` bytes."]
-                pub fn deposit_base(
+                pub async fn deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Multisig", "DepositBase")?
                         == [
                             184u8, 205u8, 30u8, 80u8, 201u8, 56u8, 94u8, 154u8, 82u8,
@@ -22767,12 +22767,12 @@ pub mod api {
                 #[doc = " The amount of currency needed per unit threshold when creating a multisig execution."]
                 #[doc = ""]
                 #[doc = " This is held for adding 32 bytes more into a pre-existing storage value."]
-                pub fn deposit_factor(
+                pub async fn deposit_factor(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Multisig", "DepositFactor")?
                         == [
                             226u8, 132u8, 1u8, 18u8, 51u8, 22u8, 235u8, 140u8, 210u8,
@@ -22791,12 +22791,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum amount of signatories allowed in the multisig."]
-                pub fn max_signatories(
+                pub async fn max_signatories(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Multisig", "MaxSignatories")?
                         == [
                             139u8, 36u8, 140u8, 198u8, 176u8, 106u8, 89u8, 194u8, 33u8,
@@ -22948,7 +22948,7 @@ pub mod api {
                 #[doc = "- `fee`: The curator fee."]
                 #[doc = "- `value`: The total payment amount of this bounty, curator fee included."]
                 #[doc = "- `description`: The description of this bounty."]
-                pub fn propose_bounty(
+                pub async fn propose_bounty(
                     &self,
                     value: ::core::primitive::u128,
                     description: ::std::vec::Vec<::core::primitive::u8>,
@@ -22965,7 +22965,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProposeBounty>()?
                     };
                     if runtime_call_hash
@@ -22990,7 +22990,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn approve_bounty(
+                pub async fn approve_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
                 ) -> Result<
@@ -23006,7 +23006,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ApproveBounty>()?
                     };
                     if runtime_call_hash
@@ -23030,7 +23030,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn propose_curator(
+                pub async fn propose_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
                     curator: ::subxt::sp_runtime::MultiAddress<
@@ -23051,7 +23051,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProposeCurator>()?
                     };
                     if runtime_call_hash
@@ -23090,7 +23090,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn unassign_curator(
+                pub async fn unassign_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
                 ) -> Result<
@@ -23106,7 +23106,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<UnassignCurator>()?
                     };
                     if runtime_call_hash
@@ -23131,7 +23131,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn accept_curator(
+                pub async fn accept_curator(
                     &self,
                     bounty_id: ::core::primitive::u32,
                 ) -> Result<
@@ -23147,7 +23147,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AcceptCurator>()?
                     };
                     if runtime_call_hash
@@ -23175,7 +23175,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn award_bounty(
+                pub async fn award_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
                     beneficiary: ::subxt::sp_runtime::MultiAddress<
@@ -23195,7 +23195,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AwardBounty>()?
                     };
                     if runtime_call_hash
@@ -23224,7 +23224,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn claim_bounty(
+                pub async fn claim_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
                 ) -> Result<
@@ -23240,7 +23240,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClaimBounty>()?
                     };
                     if runtime_call_hash
@@ -23267,7 +23267,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn close_bounty(
+                pub async fn close_bounty(
                     &self,
                     bounty_id: ::core::primitive::u32,
                 ) -> Result<
@@ -23283,7 +23283,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CloseBounty>()?
                     };
                     if runtime_call_hash
@@ -23310,7 +23310,7 @@ pub mod api {
                 #[doc = "# <weight>"]
                 #[doc = "- O(1)."]
                 #[doc = "# </weight>"]
-                pub fn extend_bounty_expiry(
+                pub async fn extend_bounty_expiry(
                     &self,
                     bounty_id: ::core::primitive::u32,
                     remark: ::std::vec::Vec<::core::primitive::u8>,
@@ -23327,7 +23327,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ExtendBountyExpiry>()?
                     };
                     if runtime_call_hash
@@ -23506,7 +23506,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BountyCount>()?
                     };
                     if runtime_storage_hash
@@ -23543,7 +23543,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Bounties>()?
                     };
                     if runtime_storage_hash
@@ -23570,7 +23570,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Bounties>()?
                     };
                     if runtime_storage_hash
@@ -23601,7 +23601,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BountyDescriptions>()?
                     };
                     if runtime_storage_hash
@@ -23628,7 +23628,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BountyDescriptions>()?
                     };
                     if runtime_storage_hash
@@ -23656,7 +23656,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BountyApprovals>()?
                     };
                     if runtime_storage_hash
@@ -23688,12 +23688,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The amount held on deposit for placing a bounty proposal."]
-                pub fn bounty_deposit_base(
+                pub async fn bounty_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "BountyDepositBase")?
                         == [
                             239u8, 17u8, 86u8, 242u8, 39u8, 104u8, 7u8, 123u8, 210u8,
@@ -23712,12 +23712,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The delay period for which a bounty beneficiary need to wait before claim the payout."]
-                pub fn bounty_deposit_payout_delay(
+                pub async fn bounty_deposit_payout_delay(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "BountyDepositPayoutDelay")?
                         == [
                             128u8, 86u8, 220u8, 124u8, 89u8, 11u8, 42u8, 36u8, 116u8,
@@ -23736,12 +23736,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Bounty duration in blocks."]
-                pub fn bounty_update_period(
+                pub async fn bounty_update_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "BountyUpdatePeriod")?
                         == [
                             10u8, 209u8, 160u8, 42u8, 47u8, 204u8, 58u8, 28u8, 137u8,
@@ -23763,14 +23763,14 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " This deposit has optional upper and lower bounds with `CuratorDepositMax` and"]
                 #[doc = " `CuratorDepositMin`."]
-                pub fn curator_deposit_multiplier(
+                pub async fn curator_deposit_multiplier(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Permill,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "CuratorDepositMultiplier")?
                         == [
                             119u8, 126u8, 117u8, 41u8, 6u8, 165u8, 141u8, 28u8, 50u8,
@@ -23789,14 +23789,14 @@ pub mod api {
                     }
                 }
                 #[doc = " Maximum amount of funds that should be placed in a deposit for making a proposal."]
-                pub fn curator_deposit_max(
+                pub async fn curator_deposit_max(
                     &self,
                 ) -> ::core::result::Result<
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "CuratorDepositMax")?
                         == [
                             197u8, 116u8, 193u8, 36u8, 38u8, 161u8, 84u8, 35u8, 214u8,
@@ -23815,14 +23815,14 @@ pub mod api {
                     }
                 }
                 #[doc = " Minimum amount of funds that should be placed in a deposit for making a proposal."]
-                pub fn curator_deposit_min(
+                pub async fn curator_deposit_min(
                     &self,
                 ) -> ::core::result::Result<
                     ::core::option::Option<::core::primitive::u128>,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "CuratorDepositMin")?
                         == [
                             103u8, 117u8, 57u8, 115u8, 148u8, 210u8, 125u8, 147u8, 240u8,
@@ -23841,12 +23841,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Minimum value for a bounty."]
-                pub fn bounty_value_minimum(
+                pub async fn bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "BountyValueMinimum")?
                         == [
                             151u8, 218u8, 51u8, 10u8, 253u8, 91u8, 115u8, 68u8, 30u8,
@@ -23865,12 +23865,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
-                pub fn data_deposit_per_byte(
+                pub async fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "DataDepositPerByte")?
                         == [
                             70u8, 208u8, 250u8, 66u8, 143u8, 90u8, 112u8, 229u8, 138u8,
@@ -23891,12 +23891,12 @@ pub mod api {
                 #[doc = " Maximum acceptable reason length."]
                 #[doc = ""]
                 #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
-                pub fn maximum_reason_length(
+                pub async fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Bounties", "MaximumReasonLength")?
                         == [
                             137u8, 135u8, 60u8, 208u8, 169u8, 200u8, 219u8, 180u8, 48u8,
@@ -24050,7 +24050,7 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty for which child-bounty is being added."]
                 #[doc = "- `value`: Value for executing the proposal."]
                 #[doc = "- `description`: Text description for the child-bounty."]
-                pub fn add_child_bounty(
+                pub async fn add_child_bounty(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     value: ::core::primitive::u128,
@@ -24068,7 +24068,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddChildBounty>()?
                     };
                     if runtime_call_hash
@@ -24104,7 +24104,7 @@ pub mod api {
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 #[doc = "- `curator`: Address of child-bounty curator."]
                 #[doc = "- `fee`: payment fee to child-bounty curator for execution."]
-                pub fn propose_curator(
+                pub async fn propose_curator(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24126,7 +24126,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ProposeCurator>()?
                     };
                     if runtime_call_hash
@@ -24167,7 +24167,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
-                pub fn accept_curator(
+                pub async fn accept_curator(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24184,7 +24184,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AcceptCurator>()?
                     };
                     if runtime_call_hash
@@ -24238,7 +24238,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
-                pub fn unassign_curator(
+                pub async fn unassign_curator(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24255,7 +24255,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<UnassignCurator>()?
                     };
                     if runtime_call_hash
@@ -24292,7 +24292,7 @@ pub mod api {
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
                 #[doc = "- `beneficiary`: Beneficiary account."]
-                pub fn award_child_bounty(
+                pub async fn award_child_bounty(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24313,7 +24313,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AwardChildBounty>()?
                     };
                     if runtime_call_hash
@@ -24350,7 +24350,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
-                pub fn claim_child_bounty(
+                pub async fn claim_child_bounty(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24367,7 +24367,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClaimChildBounty>()?
                     };
                     if runtime_call_hash
@@ -24409,7 +24409,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `parent_bounty_id`: Index of parent bounty."]
                 #[doc = "- `child_bounty_id`: Index of child bounty."]
-                pub fn close_child_bounty(
+                pub async fn close_child_bounty(
                     &self,
                     parent_bounty_id: ::core::primitive::u32,
                     child_bounty_id: ::core::primitive::u32,
@@ -24426,7 +24426,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CloseChildBounty>()?
                     };
                     if runtime_call_hash
@@ -24585,7 +24585,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildBountyCount>()?
                     };
                     if runtime_storage_hash
@@ -24615,7 +24615,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParentChildBounties>()?
                     };
                     if runtime_storage_hash
@@ -24646,7 +24646,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParentChildBounties>()?
                     };
                     if runtime_storage_hash
@@ -24680,7 +24680,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildBounties>()?
                     };
                     if runtime_storage_hash
@@ -24707,7 +24707,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildBounties>()?
                     };
                     if runtime_storage_hash
@@ -24738,7 +24738,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildBountyDescriptions>()?
                     };
                     if runtime_storage_hash
@@ -24765,7 +24765,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildBountyDescriptions>()?
                     };
                     if runtime_storage_hash
@@ -24790,7 +24790,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildrenCuratorFees>()?
                     };
                     if runtime_storage_hash
@@ -24820,7 +24820,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ChildrenCuratorFees>()?
                     };
                     if runtime_storage_hash
@@ -24848,12 +24848,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Maximum number of child-bounties that can be added to a parent bounty."]
-                pub fn max_active_child_bounty_count(
+                pub async fn max_active_child_bounty_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ChildBounties", "MaxActiveChildBountyCount")?
                         == [
@@ -24873,12 +24873,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Minimum value for a child-bounty."]
-                pub fn child_bounty_value_minimum(
+                pub async fn child_bounty_value_minimum(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ChildBounties", "ChildBountyValueMinimum")?
                         == [
@@ -24999,7 +24999,7 @@ pub mod api {
                 #[doc = "- DbReads: `Reasons`, `Tips`"]
                 #[doc = "- DbWrites: `Reasons`, `Tips`"]
                 #[doc = "# </weight>"]
-                pub fn report_awesome(
+                pub async fn report_awesome(
                     &self,
                     reason: ::std::vec::Vec<::core::primitive::u8>,
                     who: ::subxt::sp_core::crypto::AccountId32,
@@ -25016,7 +25016,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReportAwesome>()?
                     };
                     if runtime_call_hash
@@ -25052,7 +25052,7 @@ pub mod api {
                 #[doc = "- DbReads: `Tips`, `origin account`"]
                 #[doc = "- DbWrites: `Reasons`, `Tips`, `origin account`"]
                 #[doc = "# </weight>"]
-                pub fn retract_tip(
+                pub async fn retract_tip(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -25068,7 +25068,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<RetractTip>()?
                     };
                     if runtime_call_hash
@@ -25107,7 +25107,7 @@ pub mod api {
                 #[doc = "- DbReads: `Tippers`, `Reasons`"]
                 #[doc = "- DbWrites: `Reasons`, `Tips`"]
                 #[doc = "# </weight>"]
-                pub fn tip_new(
+                pub async fn tip_new(
                     &self,
                     reason: ::std::vec::Vec<::core::primitive::u8>,
                     who: ::subxt::sp_core::crypto::AccountId32,
@@ -25125,7 +25125,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<TipNew>()?
                     };
                     if runtime_call_hash
@@ -25170,7 +25170,7 @@ pub mod api {
                 #[doc = "- DbReads: `Tippers`, `Tips`"]
                 #[doc = "- DbWrites: `Tips`"]
                 #[doc = "# </weight>"]
-                pub fn tip(
+                pub async fn tip(
                     &self,
                     hash: ::subxt::sp_core::H256,
                     tip_value: ::core::primitive::u128,
@@ -25187,7 +25187,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Tip>()?
                     };
                     if runtime_call_hash
@@ -25220,7 +25220,7 @@ pub mod api {
                 #[doc = "- DbReads: `Tips`, `Tippers`, `tip finder`"]
                 #[doc = "- DbWrites: `Reasons`, `Tips`, `Tippers`, `tip finder`"]
                 #[doc = "# </weight>"]
-                pub fn close_tip(
+                pub async fn close_tip(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -25236,7 +25236,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CloseTip>()?
                     };
                     if runtime_call_hash
@@ -25265,7 +25265,7 @@ pub mod api {
                 #[doc = "  `T` is charged as upper bound given by `ContainsLengthBound`."]
                 #[doc = "  The actual cost depends on the implementation of `T::Tippers`."]
                 #[doc = "# </weight>"]
-                pub fn slash_tip(
+                pub async fn slash_tip(
                     &self,
                     hash: ::subxt::sp_core::H256,
                 ) -> Result<
@@ -25281,7 +25281,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SlashTip>()?
                     };
                     if runtime_call_hash
@@ -25411,7 +25411,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Tips>()?
                     };
                     if runtime_storage_hash
@@ -25440,7 +25440,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Tips>()?
                     };
                     if runtime_storage_hash
@@ -25468,7 +25468,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reasons>()?
                     };
                     if runtime_storage_hash
@@ -25496,7 +25496,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Reasons>()?
                     };
                     if runtime_storage_hash
@@ -25526,12 +25526,12 @@ pub mod api {
                 #[doc = " Maximum acceptable reason length."]
                 #[doc = ""]
                 #[doc = " Benchmarks depend on this value, be sure to update weights file when changing this value"]
-                pub fn maximum_reason_length(
+                pub async fn maximum_reason_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Tips", "MaximumReasonLength")?
                         == [
                             137u8, 135u8, 60u8, 208u8, 169u8, 200u8, 219u8, 180u8, 48u8,
@@ -25550,12 +25550,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount held on deposit per byte within the tip report reason or bounty description."]
-                pub fn data_deposit_per_byte(
+                pub async fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Tips", "DataDepositPerByte")?
                         == [
                             70u8, 208u8, 250u8, 66u8, 143u8, 90u8, 112u8, 229u8, 138u8,
@@ -25574,12 +25574,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The period for which a tip remains open after is has achieved threshold tippers."]
-                pub fn tip_countdown(
+                pub async fn tip_countdown(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Tips", "TipCountdown")?
                         == [
                             77u8, 181u8, 253u8, 112u8, 168u8, 146u8, 251u8, 28u8, 30u8,
@@ -25598,14 +25598,14 @@ pub mod api {
                     }
                 }
                 #[doc = " The percent of the final tip which goes to the original reporter of the tip."]
-                pub fn tip_finders_fee(
+                pub async fn tip_finders_fee(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Percent,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Tips", "TipFindersFee")?
                         == [
                             27u8, 137u8, 241u8, 28u8, 69u8, 248u8, 212u8, 12u8, 176u8,
@@ -25624,12 +25624,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The amount held on deposit for placing a tip report."]
-                pub fn tip_report_deposit_base(
+                pub async fn tip_report_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Tips", "TipReportDepositBase")?
                         == [
                             101u8, 101u8, 22u8, 17u8, 169u8, 8u8, 182u8, 88u8, 11u8,
@@ -25740,7 +25740,7 @@ pub mod api {
                 #[doc = "putting their authoring reward at risk."]
                 #[doc = ""]
                 #[doc = "No deposit or reward is associated with this submission."]
-                pub fn submit_unsigned(
+                pub async fn submit_unsigned(
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 >,
                     witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize,
@@ -25757,7 +25757,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SubmitUnsigned>()?
                     };
                     if runtime_call_hash
@@ -25782,7 +25782,7 @@ pub mod api {
                 #[doc = "Dispatch origin must be aligned with `T::ForceOrigin`."]
                 #[doc = ""]
                 #[doc = "This check can be turned off by setting the value to `None`."]
-                pub fn set_minimum_untrusted_score(
+                pub async fn set_minimum_untrusted_score(
                     &self,
                     maybe_next_score: ::core::option::Option<
                         runtime_types::sp_npos_elections::ElectionScore,
@@ -25800,7 +25800,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMinimumUntrustedScore>()?
                     };
                     if runtime_call_hash
@@ -25825,7 +25825,7 @@ pub mod api {
                 #[doc = "The solution is not checked for any feasibility and is assumed to be trustworthy, as any"]
                 #[doc = "feasibility check itself can in principle cause the election process to fail (due to"]
                 #[doc = "memory/weight constrains)."]
-                pub fn set_emergency_election_result(
+                pub async fn set_emergency_election_result(
                     &self,
                     supports: ::std::vec::Vec<(
                         ::subxt::sp_core::crypto::AccountId32,
@@ -25846,7 +25846,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetEmergencyElectionResult>()?
                     };
                     if runtime_call_hash
@@ -25872,7 +25872,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "A deposit is reserved and recorded for the solution. Based on the outcome, the solution"]
                 #[doc = "might be rewarded, slashed, or get all or a part of the deposit back."]
-                pub fn submit(
+                pub async fn submit(
                     &self,
                     raw_solution : runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 >,
                 ) -> Result<
@@ -25888,7 +25888,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Submit>()?
                     };
                     if runtime_call_hash
@@ -25911,7 +25911,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "This can only be called when [`Phase::Emergency`] is enabled, as an alternative to"]
                 #[doc = "calling [`Call::set_emergency_election_result`]."]
-                pub fn governance_fallback(
+                pub async fn governance_fallback(
                     &self,
                     maybe_max_voters: ::core::option::Option<::core::primitive::u32>,
                     maybe_max_targets: ::core::option::Option<::core::primitive::u32>,
@@ -25928,7 +25928,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<GovernanceFallback>()?
                     };
                     if runtime_call_hash
@@ -26152,7 +26152,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Round>()?
                     };
                     if runtime_storage_hash
@@ -26184,7 +26184,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentPhase>()?
                     };
                     if runtime_storage_hash
@@ -26207,7 +26207,7 @@ pub mod api {
                 #[doc = " Current best solution, signed or unsigned, queued to be returned upon `elect`."]                pub async fn queued_solution (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: ReadySolution < :: subxt :: sp_core :: crypto :: AccountId32 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<QueuedSolution>()?
                     };
                     if runtime_storage_hash
@@ -26229,7 +26229,7 @@ pub mod api {
                 #[doc = " This is created at the beginning of the signed phase and cleared upon calling `elect`."]                pub async fn snapshot (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: RoundSnapshot > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Snapshot>()?
                     };
                     if runtime_storage_hash
@@ -26258,7 +26258,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DesiredTargets>()?
                     };
                     if runtime_storage_hash
@@ -26280,7 +26280,7 @@ pub mod api {
                 #[doc = " Only exists when [`Snapshot`] is present."]                pub async fn snapshot_metadata (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SnapshotMetadata>()?
                     };
                     if runtime_storage_hash
@@ -26313,7 +26313,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SignedSubmissionNextIndex>()?
                     };
                     if runtime_storage_hash
@@ -26341,7 +26341,7 @@ pub mod api {
                 #[doc = " them one at a time instead of reading and decoding all of them at once."]                pub async fn signed_submission_indices (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: frame_support :: storage :: bounded_btree_map :: BoundedBTreeMap < runtime_types :: sp_npos_elections :: ElectionScore , :: core :: primitive :: u32 > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SignedSubmissionIndices>()?
                     };
                     if runtime_storage_hash
@@ -26370,7 +26370,7 @@ pub mod api {
                 #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub async fn signed_submissions_map (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SignedSubmissionsMap>()?
                     };
                     if runtime_storage_hash
@@ -26403,7 +26403,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SignedSubmissionsMap>()?
                     };
                     if runtime_storage_hash
@@ -26434,7 +26434,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<MinimumUntrustedScore>()?
                     };
                     if runtime_storage_hash
@@ -26463,12 +26463,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " Duration of the unsigned phase."]
-                pub fn unsigned_phase(
+                pub async fn unsigned_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "UnsignedPhase")?
                         == [
@@ -26488,12 +26488,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Duration of the signed phase."]
-                pub fn signed_phase(
+                pub async fn signed_phase(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "SignedPhase")?
                         == [
@@ -26514,14 +26514,14 @@ pub mod api {
                 }
                 #[doc = " The minimum amount of improvement to the solution score that defines a solution as"]
                 #[doc = " \"better\" (in any phase)."]
-                pub fn solution_improvement_threshold(
+                pub async fn solution_improvement_threshold(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Perbill,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "SolutionImprovementThreshold",
@@ -26544,12 +26544,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " For example, if it is 5, that means that at least 5 blocks will elapse between attempts"]
                 #[doc = " to submit the worker's solution."]
-                pub fn offchain_repeat(
+                pub async fn offchain_repeat(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "OffchainRepeat")?
                         == [
@@ -26569,12 +26569,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The priority of the unsigned transaction submitted in the unsigned-phase"]
-                pub fn miner_tx_priority(
+                pub async fn miner_tx_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "MinerTxPriority")?
                         == [
@@ -26597,12 +26597,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " The miner will ensure that the total weight of the unsigned solution will not exceed"]
                 #[doc = " this value, based on [`WeightInfo::submit_unsigned`]."]
-                pub fn miner_max_weight(
+                pub async fn miner_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "MinerMaxWeight")?
                         == [
@@ -26628,12 +26628,12 @@ pub mod api {
                 #[doc = " update this value during an election, you _must_ ensure that"]
                 #[doc = " `SignedSubmissionIndices.len()` is less than or equal to the new value. Otherwise,"]
                 #[doc = " attempts to submit new solutions may cause a runtime panic."]
-                pub fn signed_max_submissions(
+                pub async fn signed_max_submissions(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "SignedMaxSubmissions",
@@ -26655,12 +26655,12 @@ pub mod api {
                 #[doc = " Maximum weight of a signed solution."]
                 #[doc = ""]
                 #[doc = " This should probably be similar to [`Config::MinerMaxWeight`]."]
-                pub fn signed_max_weight(
+                pub async fn signed_max_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "SignedMaxWeight")?
                         == [
@@ -26680,12 +26680,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Base reward for a signed solution"]
-                pub fn signed_reward_base(
+                pub async fn signed_reward_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "SignedRewardBase")?
                         == [
@@ -26705,12 +26705,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Base deposit for a signed solution."]
-                pub fn signed_deposit_base(
+                pub async fn signed_deposit_base(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "SignedDepositBase",
@@ -26730,12 +26730,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Per-byte deposit for a signed solution."]
-                pub fn signed_deposit_byte(
+                pub async fn signed_deposit_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "SignedDepositByte",
@@ -26755,12 +26755,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Per-weight deposit for a signed solution."]
-                pub fn signed_deposit_weight(
+                pub async fn signed_deposit_weight(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "SignedDepositWeight",
@@ -26782,12 +26782,12 @@ pub mod api {
                 #[doc = " The maximum number of electing voters to put in the snapshot. At the moment, snapshots"]
                 #[doc = " are only over a single block, but once multi-block elections are introduced they will"]
                 #[doc = " take place over multiple blocks."]
-                pub fn max_electing_voters(
+                pub async fn max_electing_voters(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "MaxElectingVoters",
@@ -26807,12 +26807,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The maximum number of electable targets to put in the snapshot."]
-                pub fn max_electable_targets(
+                pub async fn max_electable_targets(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u16, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
                         "MaxElectableTargets",
@@ -26835,12 +26835,12 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " The miner will ensure that the total length of the unsigned solution will not exceed"]
                 #[doc = " this value."]
-                pub fn miner_max_length(
+                pub async fn miner_max_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "MinerMaxLength")?
                         == [
@@ -26912,7 +26912,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Will never return an error; if `dislocated` does not exist or doesn't need a rebag, then"]
                 #[doc = "it is a noop and fees are still collected from `origin`."]
-                pub fn rebag(
+                pub async fn rebag(
                     &self,
                     dislocated: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -26928,7 +26928,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Rebag>()?
                     };
                     if runtime_call_hash
@@ -26953,7 +26953,7 @@ pub mod api {
                 #[doc = "Only works if"]
                 #[doc = "- both nodes are within the same bag,"]
                 #[doc = "- and `origin` has a greater `Score` than `lighter`."]
-                pub fn put_in_front_of(
+                pub async fn put_in_front_of(
                     &self,
                     lighter: ::subxt::sp_core::crypto::AccountId32,
                 ) -> Result<
@@ -26969,7 +26969,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<PutInFrontOf>()?
                     };
                     if runtime_call_hash
@@ -27058,7 +27058,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ListNodes>()?
                     };
                     if runtime_storage_hash
@@ -27087,7 +27087,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ListNodes>()?
                     };
                     if runtime_storage_hash
@@ -27111,7 +27111,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CounterForListNodes>()?
                     };
                     if runtime_storage_hash
@@ -27144,7 +27144,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ListBags>()?
                     };
                     if runtime_storage_hash
@@ -27173,7 +27173,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ListBags>()?
                     };
                     if runtime_storage_hash
@@ -27243,14 +27243,14 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " In the event that this list ever changes, a copy of the old bags list must be retained."]
                 #[doc = " With that `List::migrate` can be called, which will perform the appropriate migration."]
-                pub fn bag_thresholds(
+                pub async fn bag_thresholds(
                     &self,
                 ) -> ::core::result::Result<
                     ::std::vec::Vec<::core::primitive::u64>,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("BagsList", "BagThresholds")?
                         == [
                             95u8, 68u8, 224u8, 175u8, 149u8, 202u8, 192u8, 181u8, 221u8,
@@ -27872,7 +27872,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the validation upgrade cooldown."]
-                pub fn set_validation_upgrade_cooldown(
+                pub async fn set_validation_upgrade_cooldown(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -27888,7 +27888,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetValidationUpgradeCooldown>()?
                     };
                     if runtime_call_hash
@@ -27906,7 +27906,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the validation upgrade delay."]
-                pub fn set_validation_upgrade_delay(
+                pub async fn set_validation_upgrade_delay(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -27922,7 +27922,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetValidationUpgradeDelay>()?
                     };
                     if runtime_call_hash
@@ -27940,7 +27940,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the acceptance period for an included candidate."]
-                pub fn set_code_retention_period(
+                pub async fn set_code_retention_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -27956,7 +27956,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetCodeRetentionPeriod>()?
                     };
                     if runtime_call_hash
@@ -27974,7 +27974,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the max validation code size for incoming upgrades."]
-                pub fn set_max_code_size(
+                pub async fn set_max_code_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -27990,7 +27990,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxCodeSize>()?
                     };
                     if runtime_call_hash
@@ -28008,7 +28008,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the max POV block size for incoming upgrades."]
-                pub fn set_max_pov_size(
+                pub async fn set_max_pov_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28024,7 +28024,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxPovSize>()?
                     };
                     if runtime_call_hash
@@ -28042,7 +28042,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the max head data size for paras."]
-                pub fn set_max_head_data_size(
+                pub async fn set_max_head_data_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28058,7 +28058,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxHeadDataSize>()?
                     };
                     if runtime_call_hash
@@ -28076,7 +28076,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of parathread execution cores."]
-                pub fn set_parathread_cores(
+                pub async fn set_parathread_cores(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28092,7 +28092,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetParathreadCores>()?
                     };
                     if runtime_call_hash
@@ -28110,7 +28110,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of retries for a particular parathread."]
-                pub fn set_parathread_retries(
+                pub async fn set_parathread_retries(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28126,7 +28126,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetParathreadRetries>()?
                     };
                     if runtime_call_hash
@@ -28144,7 +28144,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the parachain validator-group rotation frequency"]
-                pub fn set_group_rotation_frequency(
+                pub async fn set_group_rotation_frequency(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28160,7 +28160,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetGroupRotationFrequency>()?
                     };
                     if runtime_call_hash
@@ -28178,7 +28178,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the availability period for parachains."]
-                pub fn set_chain_availability_period(
+                pub async fn set_chain_availability_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28194,7 +28194,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetChainAvailabilityPeriod>()?
                     };
                     if runtime_call_hash
@@ -28212,7 +28212,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the availability period for parathreads."]
-                pub fn set_thread_availability_period(
+                pub async fn set_thread_availability_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28228,7 +28228,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetThreadAvailabilityPeriod>()?
                     };
                     if runtime_call_hash
@@ -28246,7 +28246,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the scheduling lookahead, in expected number of blocks at peak throughput."]
-                pub fn set_scheduling_lookahead(
+                pub async fn set_scheduling_lookahead(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28262,7 +28262,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetSchedulingLookahead>()?
                     };
                     if runtime_call_hash
@@ -28280,7 +28280,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the maximum number of validators to assign to any core."]
-                pub fn set_max_validators_per_core(
+                pub async fn set_max_validators_per_core(
                     &self,
                     new: ::core::option::Option<::core::primitive::u32>,
                 ) -> Result<
@@ -28296,7 +28296,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxValidatorsPerCore>()?
                     };
                     if runtime_call_hash
@@ -28314,7 +28314,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the maximum number of validators to use in parachain consensus."]
-                pub fn set_max_validators(
+                pub async fn set_max_validators(
                     &self,
                     new: ::core::option::Option<::core::primitive::u32>,
                 ) -> Result<
@@ -28330,7 +28330,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxValidators>()?
                     };
                     if runtime_call_hash
@@ -28348,7 +28348,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the dispute period, in number of sessions to keep for disputes."]
-                pub fn set_dispute_period(
+                pub async fn set_dispute_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28364,7 +28364,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetDisputePeriod>()?
                     };
                     if runtime_call_hash
@@ -28382,7 +28382,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the dispute post conclusion acceptance period."]
-                pub fn set_dispute_post_conclusion_acceptance_period(
+                pub async fn set_dispute_post_conclusion_acceptance_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28398,7 +28398,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata
                             .call_hash::<SetDisputePostConclusionAcceptancePeriod>()?
                     };
@@ -28417,7 +28417,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the maximum number of dispute spam slots."]
-                pub fn set_dispute_max_spam_slots(
+                pub async fn set_dispute_max_spam_slots(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28433,7 +28433,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetDisputeMaxSpamSlots>()?
                     };
                     if runtime_call_hash
@@ -28451,7 +28451,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the dispute conclusion by time out period."]
-                pub fn set_dispute_conclusion_by_time_out_period(
+                pub async fn set_dispute_conclusion_by_time_out_period(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28467,7 +28467,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetDisputeConclusionByTimeOutPeriod>()?
                     };
                     if runtime_call_hash
@@ -28486,7 +28486,7 @@ pub mod api {
                 }
                 #[doc = "Set the no show slots, in number of number of consensus slots."]
                 #[doc = "Must be at least 1."]
-                pub fn set_no_show_slots(
+                pub async fn set_no_show_slots(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28502,7 +28502,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetNoShowSlots>()?
                     };
                     if runtime_call_hash
@@ -28520,7 +28520,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the total number of delay tranches."]
-                pub fn set_n_delay_tranches(
+                pub async fn set_n_delay_tranches(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28536,7 +28536,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetNDelayTranches>()?
                     };
                     if runtime_call_hash
@@ -28554,7 +28554,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the zeroth delay tranche width."]
-                pub fn set_zeroth_delay_tranche_width(
+                pub async fn set_zeroth_delay_tranche_width(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28570,7 +28570,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetZerothDelayTrancheWidth>()?
                     };
                     if runtime_call_hash
@@ -28588,7 +28588,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of validators needed to approve a block."]
-                pub fn set_needed_approvals(
+                pub async fn set_needed_approvals(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28604,7 +28604,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetNeededApprovals>()?
                     };
                     if runtime_call_hash
@@ -28622,7 +28622,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of samples to do of the `RelayVRFModulo` approval assignment criterion."]
-                pub fn set_relay_vrf_modulo_samples(
+                pub async fn set_relay_vrf_modulo_samples(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28638,7 +28638,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetRelayVrfModuloSamples>()?
                     };
                     if runtime_call_hash
@@ -28656,7 +28656,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum items that can present in a upward dispatch queue at once."]
-                pub fn set_max_upward_queue_count(
+                pub async fn set_max_upward_queue_count(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28672,7 +28672,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxUpwardQueueCount>()?
                     };
                     if runtime_call_hash
@@ -28690,7 +28690,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum total size of items that can present in a upward dispatch queue at once."]
-                pub fn set_max_upward_queue_size(
+                pub async fn set_max_upward_queue_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28706,7 +28706,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxUpwardQueueSize>()?
                     };
                     if runtime_call_hash
@@ -28724,7 +28724,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the critical downward message size."]
-                pub fn set_max_downward_message_size(
+                pub async fn set_max_downward_message_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28740,7 +28740,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxDownwardMessageSize>()?
                     };
                     if runtime_call_hash
@@ -28758,7 +28758,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the soft limit for the phase of dispatching dispatchable upward messages."]
-                pub fn set_ump_service_total_weight(
+                pub async fn set_ump_service_total_weight(
                     &self,
                     new: ::core::primitive::u64,
                 ) -> Result<
@@ -28774,7 +28774,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetUmpServiceTotalWeight>()?
                     };
                     if runtime_call_hash
@@ -28792,7 +28792,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum size of an upward message that can be sent by a candidate."]
-                pub fn set_max_upward_message_size(
+                pub async fn set_max_upward_message_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28808,7 +28808,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxUpwardMessageSize>()?
                     };
                     if runtime_call_hash
@@ -28826,7 +28826,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of messages that a candidate can contain."]
-                pub fn set_max_upward_message_num_per_candidate(
+                pub async fn set_max_upward_message_num_per_candidate(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28842,7 +28842,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMaxUpwardMessageNumPerCandidate>()?
                     };
                     if runtime_call_hash
@@ -28860,7 +28860,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the number of sessions after which an HRMP open channel request expires."]
-                pub fn set_hrmp_open_request_ttl(
+                pub async fn set_hrmp_open_request_ttl(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28876,7 +28876,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpOpenRequestTtl>()?
                     };
                     if runtime_call_hash
@@ -28894,7 +28894,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the amount of funds that the sender should provide for opening an HRMP channel."]
-                pub fn set_hrmp_sender_deposit(
+                pub async fn set_hrmp_sender_deposit(
                     &self,
                     new: ::core::primitive::u128,
                 ) -> Result<
@@ -28910,7 +28910,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpSenderDeposit>()?
                     };
                     if runtime_call_hash
@@ -28929,7 +28929,7 @@ pub mod api {
                 }
                 #[doc = "Sets the amount of funds that the recipient should provide for accepting opening an HRMP"]
                 #[doc = "channel."]
-                pub fn set_hrmp_recipient_deposit(
+                pub async fn set_hrmp_recipient_deposit(
                     &self,
                     new: ::core::primitive::u128,
                 ) -> Result<
@@ -28945,7 +28945,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpRecipientDeposit>()?
                     };
                     if runtime_call_hash
@@ -28963,7 +28963,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of messages allowed in an HRMP channel at once."]
-                pub fn set_hrmp_channel_max_capacity(
+                pub async fn set_hrmp_channel_max_capacity(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -28979,7 +28979,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpChannelMaxCapacity>()?
                     };
                     if runtime_call_hash
@@ -28997,7 +28997,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum total size of messages in bytes allowed in an HRMP channel at once."]
-                pub fn set_hrmp_channel_max_total_size(
+                pub async fn set_hrmp_channel_max_total_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29013,7 +29013,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpChannelMaxTotalSize>()?
                     };
                     if runtime_call_hash
@@ -29031,7 +29031,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of inbound HRMP channels a parachain is allowed to accept."]
-                pub fn set_hrmp_max_parachain_inbound_channels(
+                pub async fn set_hrmp_max_parachain_inbound_channels(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29047,7 +29047,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpMaxParachainInboundChannels>()?
                     };
                     if runtime_call_hash
@@ -29065,7 +29065,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of inbound HRMP channels a parathread is allowed to accept."]
-                pub fn set_hrmp_max_parathread_inbound_channels(
+                pub async fn set_hrmp_max_parathread_inbound_channels(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29081,7 +29081,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpMaxParathreadInboundChannels>()?
                     };
                     if runtime_call_hash
@@ -29099,7 +29099,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum size of a message that could ever be put into an HRMP channel."]
-                pub fn set_hrmp_channel_max_message_size(
+                pub async fn set_hrmp_channel_max_message_size(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29115,7 +29115,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpChannelMaxMessageSize>()?
                     };
                     if runtime_call_hash
@@ -29133,7 +29133,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of outbound HRMP channels a parachain is allowed to open."]
-                pub fn set_hrmp_max_parachain_outbound_channels(
+                pub async fn set_hrmp_max_parachain_outbound_channels(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29149,7 +29149,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpMaxParachainOutboundChannels>()?
                     };
                     if runtime_call_hash
@@ -29167,7 +29167,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of outbound HRMP channels a parathread is allowed to open."]
-                pub fn set_hrmp_max_parathread_outbound_channels(
+                pub async fn set_hrmp_max_parathread_outbound_channels(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29183,7 +29183,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpMaxParathreadOutboundChannels>()?
                     };
                     if runtime_call_hash
@@ -29201,7 +29201,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum number of outbound HRMP messages can be sent by a candidate."]
-                pub fn set_hrmp_max_message_num_per_candidate(
+                pub async fn set_hrmp_max_message_num_per_candidate(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29217,7 +29217,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetHrmpMaxMessageNumPerCandidate>()?
                     };
                     if runtime_call_hash
@@ -29235,7 +29235,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Sets the maximum amount of weight any individual upward message may consume."]
-                pub fn set_ump_max_individual_weight(
+                pub async fn set_ump_max_individual_weight(
                     &self,
                     new: ::core::primitive::u64,
                 ) -> Result<
@@ -29251,7 +29251,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetUmpMaxIndividualWeight>()?
                     };
                     if runtime_call_hash
@@ -29269,7 +29269,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Enable or disable PVF pre-checking. Consult the field documentation prior executing."]
-                pub fn set_pvf_checking_enabled(
+                pub async fn set_pvf_checking_enabled(
                     &self,
                     new: ::core::primitive::bool,
                 ) -> Result<
@@ -29285,7 +29285,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetPvfCheckingEnabled>()?
                     };
                     if runtime_call_hash
@@ -29303,7 +29303,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the number of session changes after which a PVF pre-checking voting is rejected."]
-                pub fn set_pvf_voting_ttl(
+                pub async fn set_pvf_voting_ttl(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29319,7 +29319,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetPvfVotingTtl>()?
                     };
                     if runtime_call_hash
@@ -29340,7 +29340,7 @@ pub mod api {
                 #[doc = "upgrade taking place."]
                 #[doc = ""]
                 #[doc = "See the field documentation for information and constraints for the new value."]
-                pub fn set_minimum_validation_upgrade_delay(
+                pub async fn set_minimum_validation_upgrade_delay(
                     &self,
                     new: ::core::primitive::u32,
                 ) -> Result<
@@ -29356,7 +29356,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetMinimumValidationUpgradeDelay>()?
                     };
                     if runtime_call_hash
@@ -29375,7 +29375,7 @@ pub mod api {
                 }
                 #[doc = "Setting this to true will disable consistency checks for the configuration setters."]
                 #[doc = "Use with caution."]
-                pub fn set_bypass_consistency_check(
+                pub async fn set_bypass_consistency_check(
                     &self,
                     new: ::core::primitive::bool,
                 ) -> Result<
@@ -29391,7 +29391,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<SetBypassConsistencyCheck>()?
                     };
                     if runtime_call_hash
@@ -29461,7 +29461,7 @@ pub mod api {
                 #[doc = " The active configuration for the current session."]                pub async fn active_config (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActiveConfig>()?
                     };
                     if runtime_storage_hash
@@ -29486,7 +29486,7 @@ pub mod api {
                 #[doc = " DEPRECATED: This is no longer used, and will be removed in the future."]                pub async fn pending_config (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: configuration :: migration :: v1 :: HostConfiguration < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingConfig>()?
                     };
                     if runtime_storage_hash
@@ -29515,7 +29515,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingConfig>()?
                     };
                     if runtime_storage_hash
@@ -29540,7 +29540,7 @@ pub mod api {
                 #[doc = " 2 items: for the next session and for the `scheduled_session`."]                pub async fn pending_configs (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < (:: core :: primitive :: u32 , runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > ,) > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingConfigs>()?
                     };
                     if runtime_storage_hash
@@ -29569,7 +29569,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BypassConsistencyCheck>()?
                     };
                     if runtime_storage_hash
@@ -29668,7 +29668,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentSessionIndex>()?
                     };
                     if runtime_storage_hash
@@ -29701,7 +29701,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActiveValidatorIndices>()?
                     };
                     if runtime_storage_hash
@@ -29734,7 +29734,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActiveValidatorKeys>()?
                     };
                     if runtime_storage_hash
@@ -29887,7 +29887,7 @@ pub mod api {
                 #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub async fn availability_bitfields (& self , _0 : & runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AvailabilityBitfields>()?
                     };
                     if runtime_storage_hash
@@ -29914,7 +29914,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AvailabilityBitfields>()?
                     };
                     if runtime_storage_hash
@@ -29933,7 +29933,7 @@ pub mod api {
                 #[doc = " Candidates pending availability by `ParaId`."]                pub async fn pending_availability (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: Id , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: sp_core :: H256 , :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingAvailability>()?
                     };
                     if runtime_storage_hash
@@ -29960,7 +29960,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingAvailability>()?
                     };
                     if runtime_storage_hash
@@ -29991,7 +29991,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingAvailabilityCommitments>()?
                     };
                     if runtime_storage_hash
@@ -30018,7 +30018,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingAvailabilityCommitments>()?
                     };
                     if runtime_storage_hash
@@ -30077,7 +30077,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Enter the paras inherent. This will process bitfields and backed candidates."]
-                pub fn enter(
+                pub async fn enter(
                     &self,
                     data: runtime_types::polkadot_primitives::v2::InherentData<
                         runtime_types::sp_runtime::generic::header::Header<
@@ -30098,7 +30098,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Enter>()?
                     };
                     if runtime_call_hash
@@ -30159,7 +30159,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Included>()?
                     };
                     if runtime_storage_hash
@@ -30190,7 +30190,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<OnChainVotes>()?
                     };
                     if runtime_storage_hash
@@ -30308,7 +30308,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ValidatorGroups>()?
                     };
                     if runtime_storage_hash
@@ -30334,7 +30334,7 @@ pub mod api {
                 #[doc = " multiplied by the number of parathread multiplexer cores. Reasonably, 10 * 50 = 500."]                pub async fn parathread_queue (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < runtime_types :: polkadot_runtime_parachains :: scheduler :: ParathreadClaimQueue , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParathreadQueue>()?
                     };
                     if runtime_storage_hash
@@ -30375,7 +30375,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AvailabilityCores>()?
                     };
                     if runtime_storage_hash
@@ -30408,7 +30408,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParathreadClaimIndex>()?
                     };
                     if runtime_storage_hash
@@ -30441,7 +30441,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SessionStartBlock>()?
                     };
                     if runtime_storage_hash
@@ -30469,7 +30469,7 @@ pub mod api {
                 #[doc = " for the upcoming block."]                pub async fn scheduled (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: CoreAssignment > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Scheduled>()?
                     };
                     if runtime_storage_hash
@@ -30594,7 +30594,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the storage for the parachain validation code immediately."]
-                pub fn force_set_current_code(
+                pub async fn force_set_current_code(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
@@ -30611,7 +30611,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceSetCurrentCode>()?
                     };
                     if runtime_call_hash
@@ -30629,7 +30629,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Set the storage for the current parachain head data immediately."]
-                pub fn force_set_current_head(
+                pub async fn force_set_current_head(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_head: runtime_types::polkadot_parachain::primitives::HeadData,
@@ -30646,7 +30646,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceSetCurrentHead>()?
                     };
                     if runtime_call_hash
@@ -30664,7 +30664,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."]
-                pub fn force_schedule_code_upgrade(
+                pub async fn force_schedule_code_upgrade(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
@@ -30682,7 +30682,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceScheduleCodeUpgrade>()?
                     };
                     if runtime_call_hash
@@ -30704,7 +30704,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Note a new block head for para within the context of the current block."]
-                pub fn force_note_new_head(
+                pub async fn force_note_new_head(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     new_head: runtime_types::polkadot_parachain::primitives::HeadData,
@@ -30721,7 +30721,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceNoteNewHead>()?
                     };
                     if runtime_call_hash
@@ -30741,7 +30741,7 @@ pub mod api {
                 #[doc = "Put a parachain directly into the next session's action queue."]
                 #[doc = "We can't queue it any sooner than this without going into the"]
                 #[doc = "initializer..."]
-                pub fn force_queue_action(
+                pub async fn force_queue_action(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -30757,7 +30757,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceQueueAction>()?
                     };
                     if runtime_call_hash
@@ -30787,7 +30787,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "This function is mainly meant to be used for upgrading parachains that do not follow"]
                 #[doc = "the go-ahead signal while the PVF pre-checking feature is enabled."]
-                pub fn add_trusted_validation_code(
+                pub async fn add_trusted_validation_code(
                     &self,
                     validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode,
                 ) -> Result<
@@ -30803,7 +30803,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddTrustedValidationCode>()?
                     };
                     if runtime_call_hash
@@ -30825,7 +30825,7 @@ pub mod api {
                 #[doc = "This is better than removing the storage directly, because it will not remove the code"]
                 #[doc = "that was suddenly got used by some parachain while this dispatchable was pending"]
                 #[doc = "dispatching."]
-                pub fn poke_unused_validation_code(
+                pub async fn poke_unused_validation_code(
                     &self,
                     validation_code_hash : runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash,
                 ) -> Result<
@@ -30841,7 +30841,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<PokeUnusedValidationCode>()?
                     };
                     if runtime_call_hash
@@ -30862,7 +30862,7 @@ pub mod api {
                 }
                 #[doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"]
                 #[doc = "enacts the results if that was the last vote before achieving the supermajority."]
-                pub fn include_pvf_check_statement(
+                pub async fn include_pvf_check_statement(
                     &self,
                     stmt: runtime_types::polkadot_primitives::v2::PvfCheckStatement,
                     signature : runtime_types :: polkadot_primitives :: v2 :: validator_app :: Signature,
@@ -30879,7 +30879,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<IncludePvfCheckStatement>()?
                     };
                     if runtime_call_hash
@@ -31258,7 +31258,7 @@ pub mod api {
                 #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub async fn pvf_active_vote_map (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PvfActiveVoteMap>()?
                     };
                     if runtime_storage_hash
@@ -31288,7 +31288,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PvfActiveVoteMap>()?
                     };
                     if runtime_storage_hash
@@ -31316,7 +31316,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PvfActiveVoteList>()?
                     };
                     if runtime_storage_hash
@@ -31348,7 +31348,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Parachains>()?
                     };
                     if runtime_storage_hash
@@ -31381,7 +31381,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParaLifecycles>()?
                     };
                     if runtime_storage_hash
@@ -31408,7 +31408,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ParaLifecycles>()?
                     };
                     if runtime_storage_hash
@@ -31437,7 +31437,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Heads>()?
                     };
                     if runtime_storage_hash
@@ -31464,7 +31464,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Heads>()?
                     };
                     if runtime_storage_hash
@@ -31495,7 +31495,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31524,7 +31524,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31557,7 +31557,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PastCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31587,7 +31587,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PastCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31618,7 +31618,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PastCodeMeta>()?
                     };
                     if runtime_storage_hash
@@ -31650,7 +31650,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PastCodeMeta>()?
                     };
                     if runtime_storage_hash
@@ -31684,7 +31684,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PastCodePruning>()?
                     };
                     if runtime_storage_hash
@@ -31717,7 +31717,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<FutureCodeUpgrades>()?
                     };
                     if runtime_storage_hash
@@ -31746,7 +31746,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<FutureCodeUpgrades>()?
                     };
                     if runtime_storage_hash
@@ -31777,7 +31777,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<FutureCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31806,7 +31806,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<FutureCodeHash>()?
                     };
                     if runtime_storage_hash
@@ -31843,7 +31843,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradeGoAheadSignal>()?
                     };
                     if runtime_storage_hash
@@ -31878,7 +31878,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradeGoAheadSignal>()?
                     };
                     if runtime_storage_hash
@@ -31915,7 +31915,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradeRestrictionSignal>()?
                     };
                     if runtime_storage_hash
@@ -31950,7 +31950,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradeRestrictionSignal>()?
                     };
                     if runtime_storage_hash
@@ -31981,7 +31981,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpgradeCooldowns>()?
                     };
                     if runtime_storage_hash
@@ -32017,7 +32017,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpcomingUpgrades>()?
                     };
                     if runtime_storage_hash
@@ -32048,7 +32048,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActionsQueue>()?
                     };
                     if runtime_storage_hash
@@ -32078,7 +32078,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ActionsQueue>()?
                     };
                     if runtime_storage_hash
@@ -32100,7 +32100,7 @@ pub mod api {
                 #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]                pub async fn upcoming_paras_genesis (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: Id , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: paras :: ParaGenesisArgs > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpcomingParasGenesis>()?
                     };
                     if runtime_storage_hash
@@ -32130,7 +32130,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<UpcomingParasGenesis>()?
                     };
                     if runtime_storage_hash
@@ -32155,7 +32155,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CodeByHashRefs>()?
                     };
                     if runtime_storage_hash
@@ -32185,7 +32185,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CodeByHashRefs>()?
                     };
                     if runtime_storage_hash
@@ -32217,7 +32217,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CodeByHash>()?
                     };
                     if runtime_storage_hash
@@ -32247,7 +32247,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CodeByHash>()?
                     };
                     if runtime_storage_hash
@@ -32274,12 +32274,12 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
-                pub fn unsigned_priority(
+                pub async fn unsigned_priority(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u64, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Paras", "UnsignedPriority")?
                         == [
                             78u8, 226u8, 84u8, 70u8, 162u8, 23u8, 167u8, 100u8, 156u8,
@@ -32342,7 +32342,7 @@ pub mod api {
                 #[doc = "Issue a signal to the consensus engine to forcibly act as though all parachain"]
                 #[doc = "blocks in all relay chain blocks up to and including the given number in the current"]
                 #[doc = "chain are valid and should be finalized."]
-                pub fn force_approve(
+                pub async fn force_approve(
                     &self,
                     up_to: ::core::primitive::u32,
                 ) -> Result<
@@ -32358,7 +32358,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceApprove>()?
                     };
                     if runtime_call_hash
@@ -32419,7 +32419,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HasInitialized>()?
                     };
                     if runtime_storage_hash
@@ -32445,7 +32445,7 @@ pub mod api {
                 #[doc = " upgrade boundaries or if governance intervenes."]                pub async fn buffered_session_changes (& self , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: initializer :: BufferedSessionChange > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<BufferedSessionChanges>()?
                     };
                     if runtime_storage_hash
@@ -32552,7 +32552,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DownwardMessageQueues>()?
                     };
                     if runtime_storage_hash
@@ -32582,7 +32582,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DownwardMessageQueues>()?
                     };
                     if runtime_storage_hash
@@ -32613,7 +32613,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DownwardMessageQueueHeads>()?
                     };
                     if runtime_storage_hash
@@ -32649,7 +32649,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<DownwardMessageQueueHeads>()?
                     };
                     if runtime_storage_hash
@@ -32715,7 +32715,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Events:"]
                 #[doc = "- `OverweightServiced`: On success."]
-                pub fn service_overweight(
+                pub async fn service_overweight(
                     &self,
                     index: ::core::primitive::u64,
                     weight_limit: ::core::primitive::u64,
@@ -32732,7 +32732,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ServiceOverweight>()?
                     };
                     if runtime_call_hash
@@ -32935,7 +32935,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<RelayDispatchQueues>()?
                     };
                     if runtime_storage_hash
@@ -32970,7 +32970,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<RelayDispatchQueues>()?
                     };
                     if runtime_storage_hash
@@ -33007,7 +33007,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<RelayDispatchQueueSize>()?
                     };
                     if runtime_storage_hash
@@ -33047,7 +33047,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<RelayDispatchQueueSize>()?
                     };
                     if runtime_storage_hash
@@ -33077,7 +33077,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NeedsDispatch>()?
                     };
                     if runtime_storage_hash
@@ -33113,7 +33113,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextDispatchRoundStartWith>()?
                     };
                     if runtime_storage_hash
@@ -33146,7 +33146,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Overweight>()?
                     };
                     if runtime_storage_hash
@@ -33175,7 +33175,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Overweight>()?
                     };
                     if runtime_storage_hash
@@ -33200,7 +33200,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<OverweightCount>()?
                     };
                     if runtime_storage_hash
@@ -33332,7 +33332,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The channel can be opened only after the recipient confirms it and only on a session"]
                 #[doc = "change."]
-                pub fn hrmp_init_open_channel(
+                pub async fn hrmp_init_open_channel(
                     &self,
                     recipient: runtime_types::polkadot_parachain::primitives::Id,
                     proposed_max_capacity: ::core::primitive::u32,
@@ -33350,7 +33350,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<HrmpInitOpenChannel>()?
                     };
                     if runtime_call_hash
@@ -33374,7 +33374,7 @@ pub mod api {
                 #[doc = "Accept a pending open channel request from the given sender."]
                 #[doc = ""]
                 #[doc = "The channel will be opened only on the next session boundary."]
-                pub fn hrmp_accept_open_channel(
+                pub async fn hrmp_accept_open_channel(
                     &self,
                     sender: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -33390,7 +33390,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<HrmpAcceptOpenChannel>()?
                     };
                     if runtime_call_hash
@@ -33411,7 +33411,7 @@ pub mod api {
                 #[doc = "recipient in the channel being closed."]
                 #[doc = ""]
                 #[doc = "The closure can only happen on a session change."]
-                pub fn hrmp_close_channel(
+                pub async fn hrmp_close_channel(
                     &self,
                     channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId,
                 ) -> Result<
@@ -33427,7 +33427,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<HrmpCloseChannel>()?
                     };
                     if runtime_call_hash
@@ -33451,7 +33451,7 @@ pub mod api {
                 #[doc = "Origin must be Root."]
                 #[doc = ""]
                 #[doc = "Number of inbound and outbound channels for `para` must be provided as witness data of weighing."]
-                pub fn force_clean_hrmp(
+                pub async fn force_clean_hrmp(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     inbound: ::core::primitive::u32,
@@ -33469,7 +33469,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceCleanHrmp>()?
                     };
                     if runtime_call_hash
@@ -33496,7 +33496,7 @@ pub mod api {
                 #[doc = "function process all of those requests immediately."]
                 #[doc = ""]
                 #[doc = "Total number of opening channels must be provided as witness data of weighing."]
-                pub fn force_process_hrmp_open(
+                pub async fn force_process_hrmp_open(
                     &self,
                     channels: ::core::primitive::u32,
                 ) -> Result<
@@ -33512,7 +33512,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceProcessHrmpOpen>()?
                     };
                     if runtime_call_hash
@@ -33535,7 +33535,7 @@ pub mod api {
                 #[doc = "function process all of those requests immediately."]
                 #[doc = ""]
                 #[doc = "Total number of closing channels must be provided as witness data of weighing."]
-                pub fn force_process_hrmp_close(
+                pub async fn force_process_hrmp_close(
                     &self,
                     channels: ::core::primitive::u32,
                 ) -> Result<
@@ -33551,7 +33551,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceProcessHrmpClose>()?
                     };
                     if runtime_call_hash
@@ -33576,7 +33576,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "Total number of open requests (i.e. `HrmpOpenChannelRequestsList`) must be provided as"]
                 #[doc = "witness data."]
-                pub fn hrmp_cancel_open_request(
+                pub async fn hrmp_cancel_open_request(
                     &self,
                     channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId,
                     open_requests: ::core::primitive::u32,
@@ -33593,7 +33593,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<HrmpCancelOpenRequest>()?
                     };
                     if runtime_call_hash
@@ -33852,7 +33852,7 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub async fn hrmp_open_channel_requests (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest > , :: subxt :: BasicError >{
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpOpenChannelRequests>()?
                     };
                     if runtime_storage_hash
@@ -33884,7 +33884,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpOpenChannelRequests>()?
                     };
                     if runtime_storage_hash
@@ -33911,7 +33911,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpOpenChannelRequestsList>()?
                     };
                     if runtime_storage_hash
@@ -33942,7 +33942,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
                     };
                     if runtime_storage_hash
@@ -33974,7 +33974,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpOpenChannelRequestCount>()?
                     };
                     if runtime_storage_hash
@@ -34001,7 +34001,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
                     };
                     if runtime_storage_hash
@@ -34033,7 +34033,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpAcceptedChannelRequestCount>()?
                     };
                     if runtime_storage_hash
@@ -34064,7 +34064,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpCloseChannelRequests>()?
                     };
                     if runtime_storage_hash
@@ -34097,7 +34097,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpCloseChannelRequests>()?
                     };
                     if runtime_storage_hash
@@ -34124,7 +34124,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpCloseChannelRequestsList>()?
                     };
                     if runtime_storage_hash
@@ -34157,7 +34157,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpWatermarks>()?
                     };
                     if runtime_storage_hash
@@ -34186,7 +34186,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpWatermarks>()?
                     };
                     if runtime_storage_hash
@@ -34217,7 +34217,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannels>()?
                     };
                     if runtime_storage_hash
@@ -34246,7 +34246,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannels>()?
                     };
                     if runtime_storage_hash
@@ -34285,7 +34285,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpIngressChannelsIndex>()?
                     };
                     if runtime_storage_hash
@@ -34327,7 +34327,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpIngressChannelsIndex>()?
                     };
                     if runtime_storage_hash
@@ -34353,7 +34353,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpEgressChannelsIndex>()?
                     };
                     if runtime_storage_hash
@@ -34382,7 +34382,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpEgressChannelsIndex>()?
                     };
                     if runtime_storage_hash
@@ -34414,7 +34414,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannelContents>()?
                     };
                     if runtime_storage_hash
@@ -34445,7 +34445,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannelContents>()?
                     };
                     if runtime_storage_hash
@@ -34482,7 +34482,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannelDigests>()?
                     };
                     if runtime_storage_hash
@@ -34517,7 +34517,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<HrmpChannelDigests>()?
                     };
                     if runtime_storage_hash
@@ -34596,7 +34596,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AssignmentKeysUnsafe>()?
                     };
                     if runtime_storage_hash
@@ -34624,7 +34624,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EarliestStoredSession>()?
                     };
                     if runtime_storage_hash
@@ -34659,7 +34659,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Sessions>()?
                     };
                     if runtime_storage_hash
@@ -34688,7 +34688,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Sessions>()?
                     };
                     if runtime_storage_hash
@@ -34739,7 +34739,7 @@ pub mod api {
                         marker: ::core::marker::PhantomData,
                     }
                 }
-                pub fn force_unfreeze(
+                pub async fn force_unfreeze(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -34754,7 +34754,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceUnfreeze>()?
                     };
                     if runtime_call_hash
@@ -34918,7 +34918,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<LastPrunedSession>()?
                     };
                     if runtime_storage_hash
@@ -34951,7 +34951,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Disputes>()?
                     };
                     if runtime_storage_hash
@@ -34978,7 +34978,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Disputes>()?
                     };
                     if runtime_storage_hash
@@ -35007,7 +35007,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Included>()?
                     };
                     if runtime_storage_hash
@@ -35035,7 +35035,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Included>()?
                     };
                     if runtime_storage_hash
@@ -35066,7 +35066,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SpamSlots>()?
                     };
                     if runtime_storage_hash
@@ -35097,7 +35097,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SpamSlots>()?
                     };
                     if runtime_storage_hash
@@ -35126,7 +35126,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Frozen>()?
                     };
                     if runtime_storage_hash
@@ -35244,7 +35244,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "## Events"]
                 #[doc = "The `Registered` event is emitted in case of success."]
-                pub fn register(
+                pub async fn register(
                     &self,
                     id: runtime_types::polkadot_parachain::primitives::Id,
                     genesis_head: runtime_types::polkadot_parachain::primitives::HeadData,
@@ -35262,7 +35262,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Register>()?
                     };
                     if runtime_call_hash
@@ -35289,7 +35289,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The deposit taken can be specified for this registration. Any `ParaId`"]
                 #[doc = "can be registered, including sub-1000 IDs which are System Parachains."]
-                pub fn force_register(
+                pub async fn force_register(
                     &self,
                     who: ::subxt::sp_core::crypto::AccountId32,
                     deposit: ::core::primitive::u128,
@@ -35309,7 +35309,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceRegister>()?
                     };
                     if runtime_call_hash
@@ -35335,7 +35335,7 @@ pub mod api {
                 #[doc = "Deregister a Para Id, freeing all data and returning any deposit."]
                 #[doc = ""]
                 #[doc = "The caller must be Root, the `para` owner, or the `para` itself. The para must be a parathread."]
-                pub fn deregister(
+                pub async fn deregister(
                     &self,
                     id: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -35351,7 +35351,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Deregister>()?
                     };
                     if runtime_call_hash
@@ -35379,7 +35379,7 @@ pub mod api {
                 #[doc = "`ParaId` to be a long-term identifier of a notional \"parachain\". However, their"]
                 #[doc = "scheduling info (i.e. whether they're a parathread or parachain), auction information"]
                 #[doc = "and the auction deposit are switched."]
-                pub fn swap(
+                pub async fn swap(
                     &self,
                     id: runtime_types::polkadot_parachain::primitives::Id,
                     other: runtime_types::polkadot_parachain::primitives::Id,
@@ -35396,7 +35396,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Swap>()?
                     };
                     if runtime_call_hash
@@ -35417,7 +35417,7 @@ pub mod api {
                 #[doc = "previously locked para to deregister or swap a para without using governance."]
                 #[doc = ""]
                 #[doc = "Can only be called by the Root origin."]
-                pub fn force_remove_lock(
+                pub async fn force_remove_lock(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -35433,7 +35433,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceRemoveLock>()?
                     };
                     if runtime_call_hash
@@ -35464,7 +35464,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "## Events"]
                 #[doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for use."]
-                pub fn reserve(
+                pub async fn reserve(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -35479,7 +35479,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Reserve>()?
                     };
                     if runtime_call_hash
@@ -35592,7 +35592,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingSwap>()?
                     };
                     if runtime_storage_hash
@@ -35619,7 +35619,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<PendingSwap>()?
                     };
                     if runtime_storage_hash
@@ -35654,7 +35654,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Paras>()?
                     };
                     if runtime_storage_hash
@@ -35684,7 +35684,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Paras>()?
                     };
                     if runtime_storage_hash
@@ -35710,7 +35710,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextFreeParaId>()?
                     };
                     if runtime_storage_hash
@@ -35743,12 +35743,12 @@ pub mod api {
                 }
                 #[doc = " The deposit to be paid to run a parathread."]
                 #[doc = " This should include the cost for storing the genesis head and validation code."]
-                pub fn para_deposit(
+                pub async fn para_deposit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Registrar", "ParaDeposit")?
                         == [
                             18u8, 109u8, 161u8, 161u8, 151u8, 174u8, 243u8, 90u8, 220u8,
@@ -35767,12 +35767,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The deposit to be paid per byte stored on chain."]
-                pub fn data_deposit_per_byte(
+                pub async fn data_deposit_per_byte(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Registrar", "DataDepositPerByte")?
                         == [
                             112u8, 186u8, 158u8, 252u8, 99u8, 4u8, 201u8, 234u8, 99u8,
@@ -35851,7 +35851,7 @@ pub mod api {
                 #[doc = "independently of any other on-chain mechanism to use it."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
-                pub fn force_lease(
+                pub async fn force_lease(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     leaser: ::subxt::sp_core::crypto::AccountId32,
@@ -35871,7 +35871,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceLease>()?
                     };
                     if runtime_call_hash
@@ -35897,7 +35897,7 @@ pub mod api {
                 #[doc = "Clear all leases for a Para Id, refunding any deposits back to the original owners."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must match `T::ForceOrigin`."]
-                pub fn clear_all_leases(
+                pub async fn clear_all_leases(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -35913,7 +35913,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ClearAllLeases>()?
                     };
                     if runtime_call_hash
@@ -35937,7 +35937,7 @@ pub mod api {
                 #[doc = "let them onboard from here."]
                 #[doc = ""]
                 #[doc = "Origin must be signed, but can be called by anyone."]
-                pub fn trigger_onboard(
+                pub async fn trigger_onboard(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -35953,7 +35953,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<TriggerOnboard>()?
                     };
                     if runtime_call_hash
@@ -36064,7 +36064,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Leases>()?
                     };
                     if runtime_storage_hash
@@ -36109,7 +36109,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Leases>()?
                     };
                     if runtime_storage_hash
@@ -36137,12 +36137,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The number of blocks over which a single period lasts."]
-                pub fn lease_period(
+                pub async fn lease_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Slots", "LeasePeriod")?
                         == [
                             203u8, 21u8, 3u8, 22u8, 25u8, 46u8, 2u8, 223u8, 51u8, 234u8,
@@ -36161,12 +36161,12 @@ pub mod api {
                     }
                 }
                 #[doc = " The number of blocks to offset each lease period by."]
-                pub fn lease_offset(
+                pub async fn lease_offset(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Slots", "LeaseOffset")?
                         == [
                             7u8, 48u8, 194u8, 175u8, 129u8, 96u8, 39u8, 178u8, 104u8,
@@ -36252,7 +36252,7 @@ pub mod api {
                 #[doc = "This can only happen when there isn't already an auction in progress and may only be"]
                 #[doc = "called by the root origin. Accepts the `duration` of this auction and the"]
                 #[doc = "`lease_period_index` of the initial lease period of the four that are to be auctioned."]
-                pub fn new_auction(
+                pub async fn new_auction(
                     &self,
                     duration: ::core::primitive::u32,
                     lease_period_index: ::core::primitive::u32,
@@ -36269,7 +36269,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<NewAuction>()?
                     };
                     if runtime_call_hash
@@ -36305,7 +36305,7 @@ pub mod api {
                 #[doc = "absolute lease period index value, not an auction-specific offset."]
                 #[doc = "- `amount` is the amount to bid to be held as deposit for the parachain should the"]
                 #[doc = "bid win. This amount is held throughout the range."]
-                pub fn bid(
+                pub async fn bid(
                     &self,
                     para: runtime_types::polkadot_parachain::primitives::Id,
                     auction_index: ::core::primitive::u32,
@@ -36325,7 +36325,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Bid>()?
                     };
                     if runtime_call_hash
@@ -36351,7 +36351,7 @@ pub mod api {
                 #[doc = "Cancel an in-progress auction."]
                 #[doc = ""]
                 #[doc = "Can only be called by Root origin."]
-                pub fn cancel_auction(
+                pub async fn cancel_auction(
                     &self,
                 ) -> Result<
                     ::subxt::SubmittableExtrinsic<
@@ -36366,7 +36366,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<CancelAuction>()?
                     };
                     if runtime_call_hash
@@ -36540,7 +36540,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AuctionCounter>()?
                     };
                     if runtime_storage_hash
@@ -36577,7 +36577,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AuctionInfo>()?
                     };
                     if runtime_storage_hash
@@ -36607,7 +36607,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReservedAmounts>()?
                     };
                     if runtime_storage_hash
@@ -36635,7 +36635,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<ReservedAmounts>()?
                     };
                     if runtime_storage_hash
@@ -36670,7 +36670,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Winning>()?
                     };
                     if runtime_storage_hash
@@ -36699,7 +36699,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Winning>()?
                     };
                     if runtime_storage_hash
@@ -36727,12 +36727,12 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " The number of blocks over which an auction may be retroactively ended."]
-                pub fn ending_period(
+                pub async fn ending_period(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Auctions", "EndingPeriod")?
                         == [
                             36u8, 136u8, 230u8, 163u8, 145u8, 185u8, 224u8, 85u8, 228u8,
@@ -36753,12 +36753,12 @@ pub mod api {
                 #[doc = " The length of each sample to take during the ending period."]
                 #[doc = ""]
                 #[doc = " `EndingPeriod` / `SampleLength` = Total # of Samples"]
-                pub fn sample_length(
+                pub async fn sample_length(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Auctions", "SampleLength")?
                         == [
                             54u8, 145u8, 242u8, 8u8, 50u8, 152u8, 192u8, 64u8, 134u8,
@@ -36776,12 +36776,12 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                pub fn slot_range_count(
+                pub async fn slot_range_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Auctions", "SlotRangeCount")?
                         == [
                             32u8, 147u8, 38u8, 54u8, 172u8, 189u8, 240u8, 136u8, 216u8,
@@ -36799,12 +36799,12 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                pub fn lease_periods_per_slot(
+                pub async fn lease_periods_per_slot(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Auctions", "LeasePeriodsPerSlot")?
                         == [
                             174u8, 18u8, 150u8, 44u8, 219u8, 36u8, 218u8, 28u8, 34u8,
@@ -36962,7 +36962,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "This applies a lock to your parachain configuration, ensuring that it cannot be changed"]
                 #[doc = "by the parachain manager."]
-                pub fn create(
+                pub async fn create(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     cap: ::core::primitive::u128,
@@ -36985,7 +36985,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Create>()?
                     };
                     if runtime_call_hash
@@ -37011,7 +37011,7 @@ pub mod api {
                 }
                 #[doc = "Contribute to a crowd sale. This will transfer some balance over to fund a parachain"]
                 #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
-                pub fn contribute(
+                pub async fn contribute(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     value: ::core::primitive::u128,
@@ -37031,7 +37031,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Contribute>()?
                     };
                     if runtime_call_hash
@@ -37069,7 +37069,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `who`: The account whose contribution should be withdrawn."]
                 #[doc = "- `index`: The parachain to whose crowdloan the contribution was made."]
-                pub fn withdraw(
+                pub async fn withdraw(
                     &self,
                     who: ::subxt::sp_core::crypto::AccountId32,
                     index: runtime_types::polkadot_parachain::primitives::Id,
@@ -37086,7 +37086,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Withdraw>()?
                     };
                     if runtime_call_hash
@@ -37108,7 +37108,7 @@ pub mod api {
                 #[doc = "times to fully refund all users. We will refund `RemoveKeysLimit` users at a time."]
                 #[doc = ""]
                 #[doc = "Origin must be signed, but can come from anyone."]
-                pub fn refund(
+                pub async fn refund(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -37124,7 +37124,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Refund>()?
                     };
                     if runtime_call_hash
@@ -37142,7 +37142,7 @@ pub mod api {
                     }
                 }
                 #[doc = "Remove a fund after the retirement period has ended and all funds have been returned."]
-                pub fn dissolve(
+                pub async fn dissolve(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -37158,7 +37158,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Dissolve>()?
                     };
                     if runtime_call_hash
@@ -37178,7 +37178,7 @@ pub mod api {
                 #[doc = "Edit the configuration for an in-progress crowdloan."]
                 #[doc = ""]
                 #[doc = "Can only be called by Root origin."]
-                pub fn edit(
+                pub async fn edit(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     cap: ::core::primitive::u128,
@@ -37201,7 +37201,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Edit>()?
                     };
                     if runtime_call_hash
@@ -37228,7 +37228,7 @@ pub mod api {
                 #[doc = "Add an optional memo to an existing crowdloan contribution."]
                 #[doc = ""]
                 #[doc = "Origin must be Signed, and the user must have contributed to the crowdloan."]
-                pub fn add_memo(
+                pub async fn add_memo(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     memo: ::std::vec::Vec<::core::primitive::u8>,
@@ -37245,7 +37245,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<AddMemo>()?
                     };
                     if runtime_call_hash
@@ -37265,7 +37265,7 @@ pub mod api {
                 #[doc = "Poke the fund into `NewRaise`"]
                 #[doc = ""]
                 #[doc = "Origin must be Signed, and the fund has non-zero raise."]
-                pub fn poke(
+                pub async fn poke(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                 ) -> Result<
@@ -37281,7 +37281,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Poke>()?
                     };
                     if runtime_call_hash
@@ -37300,7 +37300,7 @@ pub mod api {
                 }
                 #[doc = "Contribute your entire balance to a crowd sale. This will transfer the entire balance of a user over to fund a parachain"]
                 #[doc = "slot. It will be withdrawable when the crowdloan has ended and the funds are unused."]
-                pub fn contribute_all(
+                pub async fn contribute_all(
                     &self,
                     index: runtime_types::polkadot_parachain::primitives::Id,
                     signature: ::core::option::Option<
@@ -37319,7 +37319,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ContributeAll>()?
                     };
                     if runtime_call_hash
@@ -37506,7 +37506,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Funds>()?
                     };
                     if runtime_storage_hash
@@ -37533,7 +37533,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Funds>()?
                     };
                     if runtime_storage_hash
@@ -37560,7 +37560,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NewRaise>()?
                     };
                     if runtime_storage_hash
@@ -37588,7 +37588,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<EndingsCount>()?
                     };
                     if runtime_storage_hash
@@ -37616,7 +37616,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<NextFundIndex>()?
                     };
                     if runtime_storage_hash
@@ -37648,14 +37648,14 @@ pub mod api {
                     Self { client }
                 }
                 #[doc = " `PalletId` for the crowdloan pallet. An appropriate value could be `PalletId(*b\"py/cfund\")`"]
-                pub fn pallet_id(
+                pub async fn pallet_id(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::frame_support::PalletId,
                     ::subxt::BasicError,
                 > {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Crowdloan", "PalletId")?
                         == [
                             190u8, 62u8, 112u8, 88u8, 48u8, 222u8, 234u8, 76u8, 230u8,
@@ -37675,12 +37675,12 @@ pub mod api {
                 }
                 #[doc = " The minimum amount that may be contributed into a crowdloan. Should almost certainly be at"]
                 #[doc = " least `ExistentialDeposit`."]
-                pub fn min_contribution(
+                pub async fn min_contribution(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Crowdloan", "MinContribution")?
                         == [
                             7u8, 98u8, 163u8, 178u8, 130u8, 130u8, 228u8, 145u8, 98u8,
@@ -37699,12 +37699,12 @@ pub mod api {
                     }
                 }
                 #[doc = " Max number of storage keys to remove per extrinsic call."]
-                pub fn remove_keys_limit(
+                pub async fn remove_keys_limit(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
                 {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
+                    let metadata = locked_metadata.lock().await;
                     if metadata.constant_hash("Crowdloan", "RemoveKeysLimit")?
                         == [
                             112u8, 103u8, 77u8, 231u8, 192u8, 202u8, 113u8, 241u8, 178u8,
@@ -37856,7 +37856,7 @@ pub mod api {
                         marker: ::core::marker::PhantomData,
                     }
                 }
-                pub fn send(
+                pub async fn send(
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     message: runtime_types::xcm::VersionedXcm,
@@ -37873,7 +37873,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Send>()?
                     };
                     if runtime_call_hash
@@ -37908,7 +37908,7 @@ pub mod api {
                 #[doc = "  `dest` side. May not be empty."]
                 #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
                 #[doc = "  fees."]
-                pub fn teleport_assets(
+                pub async fn teleport_assets(
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
@@ -37927,7 +37927,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<TeleportAssets>()?
                     };
                     if runtime_call_hash
@@ -37965,7 +37965,7 @@ pub mod api {
                 #[doc = "  `dest` side."]
                 #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
                 #[doc = "  fees."]
-                pub fn reserve_transfer_assets(
+                pub async fn reserve_transfer_assets(
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
@@ -37984,7 +37984,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ReserveTransferAssets>()?
                     };
                     if runtime_call_hash
@@ -38017,7 +38017,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "NOTE: A successful return to this does *not* imply that the `msg` was executed successfully"]
                 #[doc = "to completion; only that *some* of it was executed."]
-                pub fn execute(
+                pub async fn execute(
                     &self,
                     message: runtime_types::xcm::VersionedXcm,
                     max_weight: ::core::primitive::u64,
@@ -38034,7 +38034,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<Execute>()?
                     };
                     if runtime_call_hash
@@ -38060,7 +38060,7 @@ pub mod api {
                 #[doc = "- `origin`: Must be Root."]
                 #[doc = "- `location`: The destination that is being described."]
                 #[doc = "- `xcm_version`: The latest version of XCM that `location` supports."]
-                pub fn force_xcm_version(
+                pub async fn force_xcm_version(
                     &self,
                     location: runtime_types::xcm::v1::multilocation::MultiLocation,
                     xcm_version: ::core::primitive::u32,
@@ -38077,7 +38077,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceXcmVersion>()?
                     };
                     if runtime_call_hash
@@ -38102,7 +38102,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `origin`: Must be Root."]
                 #[doc = "- `maybe_xcm_version`: The default XCM encoding version, or `None` to disable."]
-                pub fn force_default_xcm_version(
+                pub async fn force_default_xcm_version(
                     &self,
                     maybe_xcm_version: ::core::option::Option<::core::primitive::u32>,
                 ) -> Result<
@@ -38118,7 +38118,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceDefaultXcmVersion>()?
                     };
                     if runtime_call_hash
@@ -38139,7 +38139,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "- `origin`: Must be Root."]
                 #[doc = "- `location`: The location to which we should subscribe for XCM version notifications."]
-                pub fn force_subscribe_version_notify(
+                pub async fn force_subscribe_version_notify(
                     &self,
                     location: runtime_types::xcm::VersionedMultiLocation,
                 ) -> Result<
@@ -38155,7 +38155,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceSubscribeVersionNotify>()?
                     };
                     if runtime_call_hash
@@ -38180,7 +38180,7 @@ pub mod api {
                 #[doc = "- `origin`: Must be Root."]
                 #[doc = "- `location`: The location to which we are currently subscribed for XCM version"]
                 #[doc = "  notifications which we no longer desire."]
-                pub fn force_unsubscribe_version_notify(
+                pub async fn force_unsubscribe_version_notify(
                     &self,
                     location: runtime_types::xcm::VersionedMultiLocation,
                 ) -> Result<
@@ -38196,7 +38196,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<ForceUnsubscribeVersionNotify>()?
                     };
                     if runtime_call_hash
@@ -38233,7 +38233,7 @@ pub mod api {
                 #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
                 #[doc = "  fees."]
                 #[doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."]
-                pub fn limited_reserve_transfer_assets(
+                pub async fn limited_reserve_transfer_assets(
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
@@ -38253,7 +38253,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<LimitedReserveTransferAssets>()?
                     };
                     if runtime_call_hash
@@ -38293,7 +38293,7 @@ pub mod api {
                 #[doc = "- `fee_asset_item`: The index into `assets` of the item which should be used to pay"]
                 #[doc = "  fees."]
                 #[doc = "- `weight_limit`: The remote-side weight limit, if any, for the XCM fee purchase."]
-                pub fn limited_teleport_assets(
+                pub async fn limited_teleport_assets(
                     &self,
                     dest: runtime_types::xcm::VersionedMultiLocation,
                     beneficiary: runtime_types::xcm::VersionedMultiLocation,
@@ -38313,7 +38313,7 @@ pub mod api {
                 > {
                     let runtime_call_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.call_hash::<LimitedTeleportAssets>()?
                     };
                     if runtime_call_hash
@@ -38715,7 +38715,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<QueryCounter>()?
                     };
                     if runtime_storage_hash
@@ -38750,7 +38750,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Queries>()?
                     };
                     if runtime_storage_hash
@@ -38777,7 +38777,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<Queries>()?
                     };
                     if runtime_storage_hash
@@ -38805,7 +38805,7 @@ pub mod api {
                 {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AssetTraps>()?
                     };
                     if runtime_storage_hash
@@ -38838,7 +38838,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<AssetTraps>()?
                     };
                     if runtime_storage_hash
@@ -38865,7 +38865,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SafeXcmVersion>()?
                     };
                     if runtime_storage_hash
@@ -38894,7 +38894,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SupportedVersion>()?
                     };
                     if runtime_storage_hash
@@ -38921,7 +38921,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<SupportedVersion>()?
                     };
                     if runtime_storage_hash
@@ -38949,7 +38949,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VersionNotifiers>()?
                     };
                     if runtime_storage_hash
@@ -38976,7 +38976,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VersionNotifiers>()?
                     };
                     if runtime_storage_hash
@@ -39009,7 +39009,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VersionNotifyTargets>()?
                     };
                     if runtime_storage_hash
@@ -39037,7 +39037,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VersionNotifyTargets>()?
                     };
                     if runtime_storage_hash
@@ -39068,7 +39068,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<VersionDiscoveryQueue>()?
                     };
                     if runtime_storage_hash
@@ -39100,7 +39100,7 @@ pub mod api {
                 > {
                     let runtime_storage_hash = {
                         let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
+                        let metadata = locked_metadata.lock().await;
                         metadata.storage_hash::<CurrentMigration>()?
                     };
                     if runtime_storage_hash
@@ -49966,9 +49966,9 @@ pub mod api {
         T: ::subxt::Config,
         X: ::subxt::extrinsic::ExtrinsicParams<T>,
     {
-        pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
+        pub async fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
             let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
+            let metadata = locked_metadata.lock().await;
             if metadata.metadata_hash(&PALLETS)
                 != [
                     222u8, 70u8, 96u8, 67u8, 220u8, 49u8, 147u8, 114u8, 199u8, 254u8,
