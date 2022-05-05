@@ -27,6 +27,7 @@ use serde::{
 	ser::{SerializeMap, SerializeSeq},
 	Serialize, Serializer
 };
+use super::bitvec_helpers;
 
 impl<T> Serialize for Value<T> {
 	fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -45,8 +46,8 @@ impl<T> Serialize for ValueDef<T> {
 		match self {
 			ValueDef::Composite(val) => val.serialize(serializer),
 			ValueDef::Variant(val) => val.serialize(serializer),
-			ValueDef::BitSequence(val) => val.serialize(serializer),
 			ValueDef::Primitive(val) => val.serialize(serializer),
+			ValueDef::BitSequence(val) => bitvec_helpers::serialize_bitvec(val, serializer),
 		}
 	}
 }

@@ -37,6 +37,7 @@ use serde::{
 	Deserialize, Deserializer,
 };
 use std::convert::TryInto;
+use super::bitvec_helpers;
 
 impl<'de> Deserialize<'de> for Value<()> {
 	fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
@@ -358,7 +359,8 @@ impl<'de> Visitor<'de> for ValueDefVisitor {
 	where
 		A: serde::de::MapAccess<'de>,
 	{
-		CompositeVisitor.visit_map(map).map(ValueDef::Composite)
+		// Return a bitvec or a composite type depending on the map values.
+		bitvec_helpers::MapOrBitSeqVisitor.visit_map(map)
 	}
 
 	fn visit_enum<A>(self, data: A) -> Result<Self::Value, A::Error>

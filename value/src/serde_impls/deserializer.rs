@@ -32,6 +32,7 @@ use serde::{
 };
 use std::borrow::Cow;
 use std::fmt::Display;
+use super::bitvec_helpers;
 
 /// An opaque error to describe in human terms what went wrong.
 /// Many internal serialization/deserialization errors are relayed
@@ -194,17 +195,8 @@ impl<'de, T> Deserializer<'de> for ValueDef<T> {
 	{
 		delegate_except_bitseq! { deserialize_any(self, visitor),
 			seq => {
-				// Note: currently doesn't work owing to https://github.com/bitvecto-rs/bitvec/issues/167,
-				// but the idea is that we serialize bitvec into an in-memory representation of the serde
-				// data model, and then hand this to the provided (bitvec) visitor to deserilaize it back
-				// to a bitvec on the other side.
-				//
-				// The alternative to doing this is a couple of hundred liens of custom messy serde logic
-				// to manually attempt the same.
-				serde_value::to_value(seq)
-					.map_err(|e| Error::from_string(format!("cannot serialize bitvec to temp in-memory value: {}", e)))?
-					.deserialize_any(visitor)
-					.map_err(|e| Error::from_string(format!("cannot deserialize bitvec from temp in-memory value: {}", e)))
+				let map = bitvec_helpers::map_access(seq);
+				visitor.visit_map(map)
 			}
 		}
 	}
@@ -678,10 +670,7 @@ impl<'de> IntoDeserializer<'de, Error> for Primitive {
 
 #[cfg(test)]
 mod test {
-
-	use crate::BitSequence;
 	use serde::Deserialize;
-
 	use super::*;
 
 	#[test]
@@ -889,14 +878,14 @@ mod test {
 	fn de_bitvec() {
 		use bitvec::{bitvec, order::Lsb0};
 
-		let val = Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0, 1, 0]);
-		assert_eq!(BitSequence::deserialize(val), Ok(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0, 1, 0]));
+		// If we deserialize a bitvec value into a value, it should come back out the same.
+		let val = Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0, 1, 0, 1]);
+		assert_eq!(Value::deserialize(val.clone()), Ok(val.clone()));
 
-		let val = Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0]);
-		assert_eq!(
-			BitSequence::deserialize(val),
-			Ok(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 1, 0, 0, 0, 1, 0])
-		);
+		// We can serialize a bitvec Value to something like JSON and deserialize it again, too.
+		let json_val = serde_json::to_value(&val).expect("can encode to json");
+		let new_val: Value<()> = serde_json::from_value(json_val).expect("can decode back from json");
+		assert_eq!(new_val, val);
 	}
 
 	#[test]
