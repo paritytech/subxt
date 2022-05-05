@@ -185,6 +185,11 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
         let event_bytes = &self.event_bytes;
 
+        let metadata = {
+            let metadata = self.metadata.read();
+            metadata.clone()
+        };
+
         let mut pos = 0;
         let mut index = 0;
         std::iter::from_fn(move || {
@@ -194,8 +199,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
             if start_len == 0 || self.num_events == index {
                 None
             } else {
-                match decode_raw_event_details::<T>(self.metadata.clone(), index, cursor)
-                {
+                match decode_raw_event_details::<T>(&metadata, index, cursor) {
                     Ok(raw_event) => {
                         // Skip over decoded bytes in next iteration:
                         pos += start_len - cursor.len();
@@ -231,6 +235,11 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a {
         let mut pos = 0;
         let mut index = 0;
+        let metadata = {
+            let metadata = self.metadata.read();
+            metadata.clone()
+        };
+
         std::iter::from_fn(move || {
             let cursor = &mut &self.event_bytes[pos..];
             let start_len = cursor.len();
@@ -238,8 +247,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
             if start_len == 0 || self.num_events == index {
                 None
             } else {
-                match decode_raw_event_details::<T>(self.metadata.clone(), index, cursor)
-                {
+                match decode_raw_event_details::<T>(&metadata, index, cursor) {
                     Ok(raw_event) => {
                         // Skip over decoded bytes in next iteration:
                         pos += start_len - cursor.len();
@@ -335,7 +343,7 @@ impl RawEventDetails {
 
 // Attempt to dynamically decode a single event from our events input.
 fn decode_raw_event_details<T: Config>(
-    metadata: Arc<RwLock<Metadata>>,
+    metadata: &Metadata,
     index: u32,
     input: &mut &[u8],
 ) -> Result<RawEventDetails, BasicError> {
@@ -352,7 +360,6 @@ fn decode_raw_event_details<T: Config>(
     log::debug!("remaining input: {}", hex::encode(&input));
 
     // Get metadata for the event:
-    let metadata = metadata.read();
     let event_metadata = metadata.event(pallet_index, variant_index)?;
     log::debug!(
         "Decoding Event '{}::{}'",

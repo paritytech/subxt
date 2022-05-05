@@ -545,10 +545,7 @@ mod tests {
 
         let hash = metadata.metadata_hash(&["System"]);
         // Check inner caching.
-        assert_eq!(
-            metadata.inner.cached_metadata_hash.read().unwrap(),
-            hash
-        );
+        assert_eq!(metadata.inner.cached_metadata_hash.read().unwrap(), hash);
 
         // The cache `metadata.inner.cached_metadata_hash` is already populated from
         // the previous call. Therefore, changing the pallets argument must not
