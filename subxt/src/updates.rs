@@ -79,21 +79,23 @@ impl<T: Config> UpdateClient<T> {
                 }
             }
 
+            // Update the RuntimeVersion first.
+            {
+                let mut runtime_version = self.runtime_version.write();
+                // Update both the `RuntimeVersion` and `Metadata` of the client.
+                log::info!(
+                    "Performing runtime update from {} to {}",
+                    runtime_version.spec_version,
+                    update_runtime_version.spec_version,
+                );
+                *runtime_version = update_runtime_version;
+            }
+
             // Fetch the new metadata of the runtime node.
             let update_metadata = self.rpc.metadata().await?;
-
-            let mut runtime_version = self.runtime_version.write();
-            // Update both the `RuntimeVersion` and `Metadata` of the client.
-            log::info!(
-                "Performing runtime update from {} to {}",
-                runtime_version.spec_version,
-                update_runtime_version.spec_version,
-            );
-            *runtime_version = update_runtime_version;
             log::debug!("Performing metadata update");
             let mut metadata = self.metadata.write();
             *metadata = update_metadata;
-
             log::debug!("Runtime update completed");
         }
 
