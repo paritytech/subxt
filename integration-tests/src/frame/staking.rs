@@ -55,7 +55,6 @@ async fn validate_with_controller_account() {
         .tx()
         .staking()
         .validate(default_validator_prefs())
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
@@ -73,8 +72,7 @@ async fn validate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .api
         .tx()
         .staking()
-        .validate(default_validator_prefs())
-        .await?
+        .validate(default_validator_prefs())?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -96,7 +94,6 @@ async fn nominate_with_controller_account() {
         .tx()
         .staking()
         .nominate(vec![bob.account_id().clone().into()])
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
@@ -116,8 +113,7 @@ async fn nominate_not_possible_for_stash_account() -> Result<(), Error<DispatchE
         .api
         .tx()
         .staking()
-        .nominate(vec![bob.account_id().clone().into()])
-        .await?
+        .nominate(vec![bob.account_id().clone().into()])?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -141,8 +137,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
     ctx.api
         .tx()
         .staking()
-        .nominate(vec![bob_stash.account_id().clone().into()])
-        .await?
+        .nominate(vec![bob_stash.account_id().clone().into()])?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -161,8 +156,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .api
         .tx()
         .staking()
-        .chill()
-        .await?
+        .chill()?
         .sign_and_submit_then_watch_default(&alice_stash)
         .await?
         .wait_for_finalized_success()
@@ -177,8 +171,7 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .api
         .tx()
         .staking()
-        .chill()
-        .await?
+        .chill()?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -203,7 +196,6 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
             100_000_000_000_000,
             RewardDestination::Stash,
         )
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await?
@@ -221,7 +213,6 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
             100_000_000_000_000,
             RewardDestination::Stash,
         )
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await?

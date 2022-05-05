@@ -273,7 +273,7 @@ fn generate_storage_entry_fns(
             ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
                 let runtime_storage_hash = {
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.lock().await;
+                    let metadata = locked_metadata.read();
                     metadata.storage_hash::<#entry_struct_ident>()?
                 };
                 if runtime_storage_hash == [#(#storage_hash,)*] {
@@ -307,7 +307,7 @@ fn generate_storage_entry_fns(
         ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
             let runtime_storage_hash = {
                 let locked_metadata = self.client.metadata();
-                let metadata = locked_metadata.lock().await;
+                let metadata = locked_metadata.read();
                 metadata.storage_hash::<#entry_struct_ident>()?
             };
             if runtime_storage_hash == [#(#storage_hash,)*] {

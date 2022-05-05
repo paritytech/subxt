@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     //
     // To make sure that all of our statically generated pallets are compatible with the
     // runtime node, we can run this check:
-    api.validate_metadata().await?;
+    api.validate_metadata()?;
 
     Ok(())
 }

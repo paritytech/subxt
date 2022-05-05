@@ -20,7 +20,7 @@ use codec::{
     Decode,
     Encode,
 };
-use futures::lock::Mutex;
+use parking_lot::RwLock;
 use sp_core::storage::{
     StorageChangeSet,
     StorageData,
@@ -137,7 +137,7 @@ impl StorageMapKey {
 /// Client for querying runtime storage.
 pub struct StorageClient<'a, T: Config> {
     rpc: &'a Rpc<T>,
-    metadata: Arc<Mutex<Metadata>>,
+    metadata: Arc<RwLock<Metadata>>,
     iter_page_size: u32,
 }
 
@@ -155,7 +155,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
     /// Create a new [`StorageClient`]
     pub fn new(
         rpc: &'a Rpc<T>,
-        metadata: Arc<Mutex<Metadata>>,
+        metadata: Arc<RwLock<Metadata>>,
         iter_page_size: u32,
     ) -> Self {
         Self {
@@ -207,7 +207,7 @@ impl<'a, T: Config> StorageClient<'a, T> {
         if let Some(data) = self.fetch(store, hash).await? {
             Ok(data)
         } else {
-            let metadata = self.metadata.lock().await;
+            let metadata = self.metadata.read();
             let pallet_metadata = metadata.pallet(F::PALLET)?;
             let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
             let default = Decode::decode(&mut &storage_metadata.default[..])

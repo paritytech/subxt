@@ -58,8 +58,7 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let events = api
         .tx()
         .balances()
-        .transfer(bob_address, 10_000)
-        .await?
+        .transfer(bob_address, 10_000)?
         .sign_and_submit_then_watch_default(&alice)
         .await?
         .wait_for_finalized_success()
@@ -115,8 +114,7 @@ async fn multiple_transfers_work_nonce_incremented(
         api
             .tx()
             .balances()
-            .transfer(bob_address.clone(), 10_000)
-            .await?
+            .transfer(bob_address.clone(), 10_000)?
             .sign_and_submit_then_watch_default(&alice)
             .await?
             .wait_for_in_block() // Don't need to wait for finalization; this is quicker.
@@ -161,8 +159,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
             charlie.into(),
             100_000_000_000_000,
             runtime_types::pallet_staking::RewardDestination::Stash,
-        )
-        .await?
+        )?
         .sign_and_submit_then_watch_default(&bob)
         .await?
         .wait_for_finalized_success()
@@ -203,7 +200,6 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(hans_address, 100_000_000_000_000_000)
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
@@ -217,7 +213,6 @@ async fn transfer_error() {
         .tx()
         .balances()
         .transfer(alice_addr, 100_000_000_000_000_000)
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&hans)
         .await
@@ -246,7 +241,6 @@ async fn transfer_implicit_subscription() {
         .tx()
         .balances()
         .transfer(bob_addr, 10_000)
-        .await
         .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
@@ -271,11 +265,9 @@ async fn transfer_implicit_subscription() {
 #[tokio::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
-    let balances_metadata = {
-        let locked_metadata = cxt.client().metadata();
-        let metadata = locked_metadata.lock().await;
-        metadata.pallet("Balances").unwrap().clone()
-    };
+    let locked_metadata = cxt.client().metadata();
+    let metadata = locked_metadata.read();
+    let balances_metadata = metadata.pallet("Balances").unwrap();
     let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
     let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);
@@ -285,7 +277,6 @@ async fn constant_existential_deposit() {
             .constants()
             .balances()
             .existential_deposit()
-            .await
             .unwrap()
     );
 }

@@ -25,22 +25,22 @@ use crate::{
     Config,
     Metadata,
 };
-use futures::lock::Mutex;
+use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// Client wrapper for performing runtime updates.
 pub struct UpdateClient<T: Config> {
     rpc: Rpc<T>,
-    metadata: Arc<Mutex<Metadata>>,
-    runtime_version: Arc<Mutex<RuntimeVersion>>,
+    metadata: Arc<RwLock<Metadata>>,
+    runtime_version: Arc<RwLock<RuntimeVersion>>,
 }
 
 impl<T: Config> UpdateClient<T> {
     /// Create a new [`UpdateClient`].
     pub fn new(
         rpc: Rpc<T>,
-        metadata: Arc<Mutex<Metadata>>,
-        runtime_version: Arc<Mutex<RuntimeVersion>>,
+        metadata: Arc<RwLock<Metadata>>,
+        runtime_version: Arc<RwLock<RuntimeVersion>>,
     ) -> Self {
         Self {
             rpc,
@@ -69,7 +69,7 @@ impl<T: Config> UpdateClient<T> {
             {
                 // The Runtime Version of the client, as set during building the client
                 // or during updates.
-                let runtime_version = self.runtime_version.lock().await;
+                let runtime_version = self.runtime_version.read();
                 if runtime_version.spec_version >= update_runtime_version.spec_version {
                     log::debug!(
                         "Runtime update not performed for spec_version={}, client has spec_version={}",
@@ -82,7 +82,7 @@ impl<T: Config> UpdateClient<T> {
             // Fetch the new metadata of the runtime node.
             let update_metadata = self.rpc.metadata().await?;
 
-            let mut runtime_version = self.runtime_version.lock().await;
+            let mut runtime_version = self.runtime_version.write();
             // Update both the `RuntimeVersion` and `Metadata` of the client.
             log::info!(
                 "Performing runtime update from {} to {}",
@@ -91,7 +91,7 @@ impl<T: Config> UpdateClient<T> {
             );
             *runtime_version = update_runtime_version;
             log::debug!("Performing metadata update");
-            let mut metadata = self.metadata.lock().await;
+            let mut metadata = self.metadata.write();
             *metadata = update_metadata;
 
             log::debug!("Runtime update completed");

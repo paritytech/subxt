@@ -390,7 +390,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
                 if let Some(error_data) = dispatch_error.module_error_data() {
                     // Error index is utilized as the first byte from the error array.
                     let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.lock().await;
+                    let metadata = locked_metadata.read();
                     let details = metadata
                         .error(error_data.pallet_index, error_data.error_index())?;
                     return Err(Error::Module(ModuleError {

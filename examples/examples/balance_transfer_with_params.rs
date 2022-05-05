@@ -59,8 +59,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let hash = api
         .tx()
         .balances()
-        .transfer(dest, 123_456_789_012_345)
-        .await?
+        .transfer(dest, 123_456_789_012_345)?
         .sign_and_submit(&signer, tx_params)
         .await?;
 

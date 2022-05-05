@@ -90,8 +90,7 @@ impl ContractsTestContext {
                 code,
                 vec![], // data
                 vec![], // salt
-            )
-            .await?
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
@@ -131,8 +130,7 @@ impl ContractsTestContext {
                 code_hash,
                 data,
                 salt,
-            )
-            .await?
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?
             .wait_for_finalized_success()
@@ -163,8 +161,7 @@ impl ContractsTestContext {
                 500_000_000, // gas_limit
                 None,        // storage_deposit_limit
                 input_data,
-            )
-            .await?
+            )?
             .sign_and_submit_then_watch_default(&self.signer)
             .await?;
 

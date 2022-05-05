@@ -32,7 +32,7 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
-use futures::lock::Mutex;
+use parking_lot::RwLock;
 use sp_core::{
     storage::StorageKey,
     twox_128,
@@ -93,7 +93,7 @@ fn system_events_key() -> StorageKey {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
 pub struct Events<T: Config, Evs> {
-    metadata: Arc<Mutex<Metadata>>,
+    metadata: Arc<RwLock<Metadata>>,
     block_hash: T::Hash,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. We should have stripped that off
@@ -335,7 +335,7 @@ impl RawEventDetails {
 
 // Attempt to dynamically decode a single event from our events input.
 fn decode_raw_event_details<T: Config>(
-    metadata: Arc<Mutex<Metadata>>,
+    metadata: Arc<RwLock<Metadata>>,
     index: u32,
     input: &mut &[u8],
 ) -> Result<RawEventDetails, BasicError> {
@@ -351,41 +351,31 @@ fn decode_raw_event_details<T: Config>(
     );
     log::debug!("remaining input: {}", hex::encode(&input));
 
-    let async_res: Result<_, BasicError> = futures::executor::block_on(async {
-        // Get metadata for the event:
-        let metadata = metadata.lock().await;
-        let event_metadata = metadata.event(pallet_index, variant_index)?;
+    // Get metadata for the event:
+    let metadata = metadata.read();
+    let event_metadata = metadata.event(pallet_index, variant_index)?;
+    log::debug!(
+        "Decoding Event '{}::{}'",
+        event_metadata.pallet(),
+        event_metadata.event()
+    );
 
-        log::debug!(
-            "Decoding Event '{}::{}'",
-            event_metadata.pallet(),
-            event_metadata.event()
-        );
-
-        let mut event_bytes = Vec::new();
-        // Use metadata to figure out which bytes belong to this event:
-        for arg in event_metadata.variant().fields() {
-            let type_id = arg.ty().id();
-            let all_bytes = *input;
-            // consume some bytes, moving the cursor forward:
-            decoding::decode_and_consume_type(
-                type_id,
-                &metadata.runtime_metadata().types,
-                input,
-            )?;
-            // count how many bytes were consumed based on remaining length:
-            let consumed_len = all_bytes.len() - input.len();
-            // move those consumed bytes to the output vec unaltered:
-            event_bytes.extend(&all_bytes[0..consumed_len]);
-        }
-
-        Ok((
-            event_bytes,
-            event_metadata.pallet().to_string(),
-            event_metadata.event().to_string(),
-        ))
-    });
-    let (event_bytes, pallet, variant) = async_res?;
+    // Use metadata to figure out which bytes belong to this event:
+    let mut event_bytes = Vec::new();
+    for arg in event_metadata.variant().fields() {
+        let type_id = arg.ty().id();
+        let all_bytes = *input;
+        // consume some bytes, moving the cursor forward:
+        decoding::decode_and_consume_type(
+            type_id,
+            &metadata.runtime_metadata().types,
+            input,
+        )?;
+        // count how many bytes were consumed based on remaining length:
+        let consumed_len = all_bytes.len() - input.len();
+        // move those consumed bytes to the output vec unaltered:
+        event_bytes.extend(&all_bytes[0..consumed_len]);
+    }
 
     // topics come after the event data in EventRecord. They aren't used for
     // anything at the moment, so just decode and throw them away.
@@ -396,9 +386,9 @@ fn decode_raw_event_details<T: Config>(
         phase,
         index,
         pallet_index,
-        pallet,
+        pallet: event_metadata.pallet().to_string(),
         variant_index,
-        variant,
+        variant: event_metadata.event().to_string(),
         data: event_bytes.into(),
     })
 }
@@ -483,7 +473,7 @@ pub(crate) mod test_utils {
     /// Build an `Events` object for test purposes, based on the details provided,
     /// and with a default block hash.
     pub fn events<E: Decode + Encode>(
-        metadata: Arc<Mutex<Metadata>>,
+        metadata: Arc<RwLock<Metadata>>,
         event_records: Vec<EventRecord<E>>,
     ) -> Events<DefaultConfig, AllEvents<E>> {
         let num_events = event_records.len() as u32;
@@ -497,7 +487,7 @@ pub(crate) mod test_utils {
     /// Much like [`events`], but takes pre-encoded events and event count, so that we can
     /// mess with the bytes in tests if we need to.
     pub fn events_raw<E: Decode + Encode>(
-        metadata: Arc<Mutex<Metadata>>,
+        metadata: Arc<RwLock<Metadata>>,
         event_bytes: Vec<u8>,
         num_events: u32,
     ) -> Events<DefaultConfig, AllEvents<E>> {
@@ -535,7 +525,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
@@ -565,7 +555,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -611,7 +601,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode 2 events:
         let mut event_bytes = vec![];
@@ -663,7 +653,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -705,7 +695,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -774,7 +764,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode 2 events:
         let mut event_bytes = vec![];
@@ -841,7 +831,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -896,7 +886,7 @@ mod tests {
         struct CompactWrapper(u64);
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
@@ -958,7 +948,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(Mutex::new(metadata::<Event>()));
+        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
 
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:

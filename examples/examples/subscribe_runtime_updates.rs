@@ -69,7 +69,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 AccountKeyring::Bob.to_account_id().into(),
                 123_456_789_012_345,
             )
-            .await
             .unwrap()
             .sign_and_submit_default(&signer)
             .await

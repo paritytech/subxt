@@ -73,11 +73,11 @@ async fn full_metadata_check() {
     let api = &cxt.api;
 
     // Runtime metadata is identical to the metadata used during API generation.
-    assert!(api.validate_metadata().await.is_ok());
+    assert!(api.validate_metadata().is_ok());
 
     // Modify the metadata.
     let locked_client_metadata = api.client.metadata();
-    let client_metadata = locked_client_metadata.lock().await;
+    let client_metadata = locked_client_metadata.read();
     let mut metadata: RuntimeMetadataV14 = client_metadata.runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
@@ -85,7 +85,6 @@ async fn full_metadata_check() {
     assert_eq!(
         new_api
             .validate_metadata()
-            .await
             .err()
             .expect("Validation should fail for incompatible metadata"),
         ::subxt::MetadataError::IncompatibleMetadata
@@ -98,17 +97,11 @@ async fn constants_check() {
     let api = &cxt.api;
 
     // Ensure that `ExistentialDeposit` is compatible before altering the metadata.
-    assert!(cxt
-        .api
-        .constants()
-        .balances()
-        .existential_deposit()
-        .await
-        .is_ok());
+    assert!(cxt.api.constants().balances().existential_deposit().is_ok());
 
     // Modify the metadata.
     let locked_client_metadata = api.client.metadata();
-    let client_metadata = locked_client_metadata.lock().await;
+    let client_metadata = locked_client_metadata.read();
     let mut metadata: RuntimeMetadataV14 = client_metadata.runtime_metadata().clone();
 
     let mut existential = metadata
@@ -124,16 +117,15 @@ async fn constants_check() {
 
     let new_api = metadata_to_api(metadata, &cxt).await;
 
-    assert!(new_api.validate_metadata().await.is_err());
+    assert!(new_api.validate_metadata().is_err());
     assert!(new_api
         .constants()
         .balances()
         .existential_deposit()
-        .await
         .is_err());
 
     // Other constant validation should not be impacted.
-    assert!(new_api.constants().balances().max_locks().await.is_ok());
+    assert!(new_api.constants().balances().max_locks().is_ok());
 }
 
 fn default_pallet() -> PalletMetadata {
@@ -165,14 +157,8 @@ async fn calls_check() {
     let cxt = test_context().await;
 
     // Ensure that `Unbond` and `WinthdrawUnbonded` calls are compatible before altering the metadata.
-    assert!(cxt
-        .api
-        .tx()
-        .staking()
-        .unbond(123_456_789_012_345)
-        .await
-        .is_ok());
-    assert!(cxt.api.tx().staking().withdraw_unbonded(10).await.is_ok());
+    assert!(cxt.api.tx().staking().unbond(123_456_789_012_345).is_ok());
+    assert!(cxt.api.tx().staking().withdraw_unbonded(10).is_ok());
 
     // Reconstruct the `Staking` call as is.
     struct CallRec;
@@ -207,13 +193,8 @@ async fn calls_check() {
     };
     let metadata = pallets_to_metadata(vec![pallet]);
     let new_api = metadata_to_api(metadata, &cxt).await;
-    assert!(new_api
-        .tx()
-        .staking()
-        .unbond(123_456_789_012_345)
-        .await
-        .is_ok());
-    assert!(new_api.tx().staking().withdraw_unbonded(10).await.is_ok());
+    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_ok());
+    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
 
     // Change `Unbond` call but leave the rest as is.
     struct CallRecSecond;
@@ -248,13 +229,8 @@ async fn calls_check() {
     let metadata = pallets_to_metadata(vec![pallet]);
     let new_api = metadata_to_api(metadata, &cxt).await;
     // Unbond call should fail, while withdraw_unbonded remains compatible.
-    assert!(new_api
-        .tx()
-        .staking()
-        .unbond(123_456_789_012_345)
-        .await
-        .is_err());
-    assert!(new_api.tx().staking().withdraw_unbonded(10).await.is_ok());
+    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_err());
+    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
 }
 
 #[tokio::test]

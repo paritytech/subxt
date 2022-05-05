@@ -47,7 +47,7 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
-use futures::lock::Mutex;
+use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
@@ -122,9 +122,9 @@ impl ClientBuilder {
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: Arc::new(Mutex::new(metadata)),
+            metadata: Arc::new(RwLock::new(metadata)),
             properties: properties.unwrap_or_else(|_| Default::default()),
-            runtime_version: Arc::new(Mutex::new(runtime_version?)),
+            runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
         })
     }
@@ -136,9 +136,9 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Arc<Mutex<Metadata>>,
+    metadata: Arc<RwLock<Metadata>>,
     properties: SystemProperties,
-    runtime_version: Arc<Mutex<RuntimeVersion>>,
+    runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,
 }
 
@@ -163,7 +163,7 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the chain metadata.
-    pub fn metadata(&self) -> Arc<Mutex<Metadata>> {
+    pub fn metadata(&self) -> Arc<RwLock<Metadata>> {
         Arc::clone(&self.metadata)
     }
 
@@ -207,7 +207,7 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the client's Runtime Version.
-    pub fn runtime_version(&self) -> Arc<Mutex<RuntimeVersion>> {
+    pub fn runtime_version(&self) -> Arc<RwLock<RuntimeVersion>> {
         Arc::clone(&self.runtime_version)
     }
 }
@@ -330,7 +330,7 @@ where
         let call_data = {
             let mut bytes = Vec::new();
             let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.lock().await;
+            let metadata = locked_metadata.read();
             let pallet = metadata.pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
@@ -342,7 +342,7 @@ where
         let additional_and_extra_params = {
             // Obtain spec version and transaction version from the runtime version of the client.
             let locked_runtime = self.client.runtime_version();
-            let runtime = locked_runtime.lock().await;
+            let runtime = locked_runtime.read();
             X::new(
                 runtime.spec_version,
                 runtime.transaction_version,
