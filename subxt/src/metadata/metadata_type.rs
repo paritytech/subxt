@@ -25,6 +25,7 @@ use frame_metadata::{
     StorageEntryMetadata,
     META_RESERVED,
 };
+use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
     Type,
@@ -33,10 +34,7 @@ use scale_info::{
 use std::{
     collections::HashMap,
     convert::TryFrom,
-    sync::{
-        Arc,
-        RwLock,
-    },
+    sync::Arc,
 };
 
 /// Metadata error.
@@ -217,7 +215,7 @@ impl Metadata {
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
-        if let Some(hash) = *self.inner.cached_metadata_hash.read().unwrap() {
+        if let Some(hash) = *self.inner.cached_metadata_hash.read() {
             return hash
         }
 
@@ -225,7 +223,7 @@ impl Metadata {
             self.runtime_metadata(),
             pallets,
         );
-        *self.inner.cached_metadata_hash.write().unwrap() = Some(hash);
+        *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
     }
@@ -548,7 +546,7 @@ mod tests {
         let hash = metadata.metadata_hash(&["System"]);
         // Check inner caching.
         assert_eq!(
-            metadata.inner.cached_metadata_hash.read().unwrap().unwrap(),
+            metadata.inner.cached_metadata_hash.read().unwrap(),
             hash
         );
 
