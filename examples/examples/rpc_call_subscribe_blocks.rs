@@ -46,7 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    // For non-finalised blocks use `.subscribe_finalized_blocks()`
+    // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
         api.client.rpc().subscribe_finalized_blocks().await?;
 
