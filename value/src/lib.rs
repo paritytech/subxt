@@ -1,18 +1,18 @@
-// Copyright 2019-2021 Parity Technologies (UK) Ltd.
-// This file is part of substrate-desub.
+// Copyright 2019-2022 Parity Technologies (UK) Ltd.
+// This file is part of subxt.
 //
-// substrate-desub is free software: you can redistribute it and/or modify
+// subxt is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
 //
-// substrate-desub is distributed in the hope that it will be useful,
+// subxt is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with substrate-desub.  If not, see <http://www.gnu.org/licenses/>.
+// along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 /*!
 This crate exposes the [`Value`] type and related subtypes, which are used as the runtime
@@ -21,6 +21,7 @@ of JSON data).
 */
 
 mod value_type;
+mod scale;
 #[cfg(feature = "serde")]
 mod serde_impls;
 #[cfg(feature = "serde")]
@@ -34,3 +35,25 @@ pub use value_type::{
     ValueDef,
     Variant,
 };
+
+/// Items related to decoding SCALE bytes into a [`crate::Value`].
+pub mod decode {
+    pub use crate::scale::{
+        DecodeValueError,
+        TypeId
+    };
+    pub use scale_info::PortableRegistry;
+}
+
+impl Value<scale::TypeId> {
+    /// Attempt to decode some SCALE encoded bytes into a value, by providing a pointer
+    /// to the bytes (which will be moved forwards as bytes are used in the decoding),
+    /// a type ID, and a type registry from which we'll look up the relevant type information.
+    pub fn decode_as_type<Id: Into<decode::TypeId>>(
+        data: &mut &[u8],
+        ty_id: Id,
+        types: &decode::PortableRegistry,
+    ) -> Result<Value<decode::TypeId>, decode::DecodeValueError> {
+        scale::decode_value_as_type(data, ty_id, types)
+    }
+}

@@ -14,15 +14,20 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-mod bitvec_helpers;
-mod deserialize;
-mod deserializer;
-mod serialize;
+mod type_id;
+mod decode;
 
-/// An opaque error that is returned if we cannot deserialize the [`Value`] type.
-pub use deserializer::Error as DeserializeError;
+/// The portable version of [`scale_info::Type`]
+type ScaleType = scale_info::Type<scale_info::form::PortableForm>;
 
-/// Attempt to deserialize a [`Value`] into some type that has [`serde::Deserialize`] implemented on it.
-pub fn deserialize_from_value<'de, Ctx, T: serde::Deserialize<'de>>(value: crate::Value<Ctx>) -> Result<T, DeserializeError> {
-	T::deserialize(value)
-}
+/// The portable version of a [`scale_info`] type ID.
+type ScaleTypeId = scale_info::interner::UntrackedSymbol<std::any::TypeId>; // equivalent to: <scale_info::form::PortableForm as scale_info::form::Form>::Type;
+
+/// The portable version of [`scale_info::TypeDef`]
+type ScaleTypeDef = scale_info::TypeDef<scale_info::form::PortableForm>;
+
+pub use decode::{
+    decode_value_as_type,
+    DecodeValueError
+};
+pub use type_id::TypeId;
