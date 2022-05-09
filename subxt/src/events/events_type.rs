@@ -515,7 +515,6 @@ mod tests {
             event_record,
             events,
             events_raw,
-            metadata,
             AllEvents,
         },
         *,
@@ -523,6 +522,11 @@ mod tests {
     use crate::Phase;
     use codec::Encode;
     use scale_info::TypeInfo;
+
+    /// Build a fake wrapped metadata.
+    fn metadata<E: TypeInfo + 'static>() -> Arc<RwLock<Metadata>> {
+        Arc::new(RwLock::new(test_utils::metadata::<E>()))
+    }
 
     #[test]
     fn statically_decode_single_event() {
@@ -532,8 +536,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
-
+        let metadata = metadata::<Event>();
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
@@ -562,7 +565,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -608,7 +611,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode 2 events:
         let mut event_bytes = vec![];
@@ -660,7 +663,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -702,7 +705,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -771,7 +774,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode 2 events:
         let mut event_bytes = vec![];
@@ -838,7 +841,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
@@ -893,7 +896,7 @@ mod tests {
         struct CompactWrapper(u64);
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
@@ -955,7 +958,7 @@ mod tests {
         }
 
         // Create fake metadata that knows about our single event, above:
-        let metadata = Arc::new(RwLock::new(metadata::<Event>()));
+        let metadata = metadata::<Event>();
 
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
