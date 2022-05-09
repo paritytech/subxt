@@ -16,6 +16,7 @@
 
 mod type_id;
 mod decode;
+mod encode;
 
 /// The portable version of [`scale_info::Type`]
 type ScaleType = scale_info::Type<scale_info::form::PortableForm>;
@@ -29,5 +30,9 @@ type ScaleTypeDef = scale_info::TypeDef<scale_info::form::PortableForm>;
 pub use decode::{
     decode_value_as_type,
     DecodeValueError
+};
+pub use encode::{
+    encode_value_as_type,
+    EncodeValueError,
 };
 pub use type_id::TypeId;

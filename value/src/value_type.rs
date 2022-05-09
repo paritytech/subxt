@@ -17,6 +17,7 @@
 use bitvec::{order::Lsb0, vec::BitVec};
 use std::convert::From;
 use std::fmt::Debug;
+use either::Either;
 
 /// [`Value`] holds a representation of some value that has been decoded, as well as some arbitrary context.
 ///
@@ -182,6 +183,18 @@ impl<T> Composite<T> {
 		match self {
 			Composite::Named(values) => values.is_empty(),
 			Composite::Unnamed(values) => values.is_empty(),
+		}
+	}
+
+	/// Iterate over the values stored in this composite type.
+	pub fn into_values(self) -> impl Iterator<Item = Value<T>> {
+		match self {
+			Composite::Named(values) => {
+				Either::Left(values.into_iter().map(|(_k,v)| v))
+			},
+			Composite::Unnamed(values) => {
+				Either::Right(values.into_iter())
+			},
 		}
 	}
 

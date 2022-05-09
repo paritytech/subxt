@@ -45,6 +45,14 @@ pub mod decode {
     pub use scale_info::PortableRegistry;
 }
 
+pub mod encode {
+    pub use crate::scale::{
+        EncodeValueError,
+        TypeId
+    };
+    pub use scale_info::PortableRegistry;
+}
+
 impl Value<scale::TypeId> {
     /// Attempt to decode some SCALE encoded bytes into a value, by providing a pointer
     /// to the bytes (which will be moved forwards as bytes are used in the decoding),
@@ -55,5 +63,16 @@ impl Value<scale::TypeId> {
         types: &decode::PortableRegistry,
     ) -> Result<Value<decode::TypeId>, decode::DecodeValueError> {
         scale::decode_value_as_type(data, ty_id, types)
+    }
+
+    /// Attempt to encode some [`Value<T>`] into SCALE bytes, by providing a pointer to the
+    /// type ID that we'd like to encode it as, and a type registry from which we'll look
+    /// up the relevant type information.
+    pub fn encode_as_type<T, Id: Into<decode::TypeId>>(
+        value: Value<T>,
+        ty_id: Id,
+        types: &decode::PortableRegistry,
+    ) -> Result<Vec<u8>, encode::EncodeValueError> {
+        scale::encode_value_as_type(value, ty_id, types)
     }
 }

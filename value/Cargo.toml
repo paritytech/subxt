@@ -18,6 +18,7 @@ serde = { version = "1.0.124", features = ["derive"], optional = true }
 frame-metadata = "15.0.0"
 thiserror = "1.0.24"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
+either = "1.6.1"
 
 [dev-dependencies]
 serde_json = "1.0.64"
