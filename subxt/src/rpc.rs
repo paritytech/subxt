@@ -579,7 +579,7 @@ pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
     let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
-        .build(sender, receiver))
+        .build_with_tokio(sender, receiver))
 }
 
 async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
