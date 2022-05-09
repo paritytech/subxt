@@ -312,9 +312,12 @@ impl RuntimeGenerator {
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
-                        let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
-                        if metadata.metadata_hash(&PALLETS) != [ #(#metadata_hash,)* ] {
+                        let runtime_metadata_hash = {
+                            let locked_metadata = self.client.metadata();
+                            let metadata = locked_metadata.read();
+                            metadata.metadata_hash(&PALLETS)
+                        };
+                        if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(())
