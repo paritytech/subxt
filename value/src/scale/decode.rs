@@ -153,7 +153,7 @@ fn decode_primitive_value(data: &mut &[u8], ty: &TypeDefPrimitive) -> Result<Pri
 	let val = match ty {
 		TypeDefPrimitive::Bool => Primitive::Bool(bool::decode(data)?),
 		TypeDefPrimitive::Char => {
-			// [jsdw] TODO: There isn't a `char::decode`. Why? Is it wrong to use u32 or is there a more "proper" way?
+			// Treat chars as u32's
 			let val = u32::decode(data)?;
 			Primitive::Char(char::from_u32(val).ok_or(DecodeValueError::InvalidChar(val))?)
 		}
