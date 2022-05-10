@@ -23,6 +23,9 @@ use scale_info::{
 	TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant,
 };
 use super::type_id::TypeId;
+use super::bit_sequence::{
+    BitOrderTy, BitSequenceError, BitStoreTy, get_bitsequence_details
+};
 
 #[derive(Debug, Clone, thiserror::Error, PartialEq)]
 pub enum EncodeValueError {
@@ -36,8 +39,8 @@ pub enum EncodeValueError {
     WrongType { actual: &'static str, expected: &'static str },
 	#[error("Variant {0} was not found")]
     VariantNotFound(String),
-	#[error("The bit sequence type you're trying to encode to is not supported")]
-    IncompatibleBitSequence,
+	#[error("Cannot encode bit sequence: {0}")]
+    BitSequenceError(BitSequenceError),
 	#[error("The type {0} cannot be compact encoded")]
     CannotCompactEncodeValueToType(u32),
 }
@@ -54,7 +57,7 @@ pub fn encode_value_as_type<T, Id: Into<TypeId>>(
     Ok(bytes)
 }
 
-pub fn encode_value<T, Id: Into<TypeId>>(
+fn encode_value<T, Id: Into<TypeId>>(
 	value: Value<T>,
 	ty_id: Id,
 	types: &PortableRegistry,
@@ -164,6 +167,9 @@ fn encode_sequence_value<T>(
             })
         }
     };
+
+    // Encode the sequence length first:
+    Compact(composite.len() as u64).encode_to(bytes);
 
     // We ignore names or not, and just expect each value to be
     // able to encode into the sequence type provided.
@@ -326,9 +332,7 @@ fn encode_variant_value<T>(
     }
 
     // Encode the variant index into our bytes, followed by the fields.
-    let idx = variant_type.index();
-    bytes.push(idx);
-
+    variant_type.index().encode_to(bytes);
     let field_value_pairs = variant_type.fields().iter().zip(variant.values.into_values());
     for (field, value) in field_value_pairs {
         encode_value(value, field.ty(), types, bytes)?;
@@ -672,7 +676,7 @@ fn encode_bitsequence_value<T>(
     };
 
     // next, turn those bools into a bit sequence of the expected shape.
-    match get_bitsequence_details(ty, types)? {
+    match get_bitsequence_details(ty, types).map_err(EncodeValueError::BitSequenceError)? {
         (BitOrderTy::U8, BitStoreTy::Lsb0) => {
             bools.into_iter().collect::<BitVec::<u8, Lsb0>>().encode_to(bytes);
         },
@@ -702,55 +706,3 @@ fn encode_bitsequence_value<T>(
     Ok(())
 }
 
-/// Obtain details about the bit sequence we're trying to encode to.
-fn get_bitsequence_details(
-	ty: &TypeDefBitSequence<PortableForm>,
-	types: &PortableRegistry,
-) -> Result<(BitOrderTy, BitStoreTy), EncodeValueError> {
-    let bit_store_ty = ty.bit_store_type().id();
-    let bit_order_ty = ty.bit_order_type().id();
-
-    // What is the backing store type expected?
-    let bit_store_def = types
-        .resolve(bit_store_ty)
-        .ok_or(EncodeValueError::TypeIdNotFound(bit_store_ty))?
-        .type_def();
-
-    // What is the bit order type expected?
-    let bit_order_def = types
-        .resolve(bit_order_ty)
-        .ok_or(EncodeValueError::TypeIdNotFound(bit_order_ty))?
-        .path()
-        .ident()
-        .ok_or(EncodeValueError::IncompatibleBitSequence)?;
-
-    let bit_order_out = match bit_store_def {
-        TypeDef::Primitive(TypeDefPrimitive::U8) => Some(BitOrderTy::U8),
-        TypeDef::Primitive(TypeDefPrimitive::U16) => Some(BitOrderTy::U16),
-        TypeDef::Primitive(TypeDefPrimitive::U32) => Some(BitOrderTy::U32),
-        TypeDef::Primitive(TypeDefPrimitive::U64) => Some(BitOrderTy::U64),
-        _ => None
-    }.ok_or(EncodeValueError::IncompatibleBitSequence)?;
-
-    let bit_store_out = match &*bit_order_def {
-        "Lsb0" => Some(BitStoreTy::Lsb0),
-        "Msb0" => Some(BitStoreTy::Msb0),
-        _ => None
-    }.ok_or(EncodeValueError::IncompatibleBitSequence)?;
-
-    Ok((bit_order_out, bit_store_out))
-}
-
-#[derive(Copy, Clone, PartialEq)]
-enum BitStoreTy {
-    Lsb0,
-    Msb0,
-}
-
-#[derive(Copy, Clone, PartialEq)]
-enum BitOrderTy {
-    U8,
-    U16,
-    U32,
-    U64
-}

@@ -21,7 +21,11 @@ use scale_info::{
 	form::PortableForm, Field, PortableRegistry, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
 	TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant,
 };
+use bitvec::{ vec::BitVec, order::{ Lsb0, Msb0 }, store::BitStore, order::BitOrder };
 use super::type_id::TypeId;
+use super::bit_sequence::{
+    BitOrderTy, BitSequenceError, BitStoreTy, get_bitsequence_details
+};
 
 #[derive(Debug, Clone, thiserror::Error, PartialEq)]
 pub enum DecodeValueError {
@@ -37,6 +41,8 @@ pub enum DecodeValueError {
 	VariantNotFound(u8, scale_info::TypeDefVariant<PortableForm>),
 	#[error("Could not decode compact encoded type into {0:?}")]
 	CannotDecodeCompactIntoType(Type),
+	#[error("Cannot decode bit sequence: {0}")]
+    BitSequenceError(BitSequenceError),
 }
 
 /// Decode data according to the [`TypeId`] provided.
@@ -230,14 +236,44 @@ fn decode_compact_value(
 
 fn decode_bit_sequence_value(
 	data: &mut &[u8],
-	_ty: &TypeDefBitSequence<PortableForm>,
-	_types: &PortableRegistry,
+	ty: &TypeDefBitSequence<PortableForm>,
+	types: &PortableRegistry,
 ) -> Result<BitSequence, DecodeValueError> {
-	// [jsdw] TODO: might be worth checking the bit_store and bit_order types
-	// and trying to work out whether they look like Lsb0 and u8, which is what
-	// we assume here.
-	let bit_vec: BitSequence = Decode::decode(data)?;
-	Ok(bit_vec)
+	let details = get_bitsequence_details(ty, types).map_err(DecodeValueError::BitSequenceError)?;
+
+	fn to_bit_sequence<S: BitStore, O: BitOrder>(bits: BitVec<S, O>) -> BitSequence {
+		bits.iter().by_vals().collect()
+	}
+
+	// Decode the native BitSequence type easily, or else convert to it from the type given.
+	let bits = match details {
+		(BitOrderTy::U8, BitStoreTy::Lsb0) => {
+			BitVec::<u8, Lsb0>::decode(data)?
+		},
+		(BitOrderTy::U8, BitStoreTy::Msb0) => {
+			to_bit_sequence(BitVec::<u8, Msb0>::decode(data)?)
+		},
+		(BitOrderTy::U16, BitStoreTy::Lsb0) => {
+			to_bit_sequence(BitVec::<u16, Lsb0>::decode(data)?)
+		},
+		(BitOrderTy::U16, BitStoreTy::Msb0) => {
+			to_bit_sequence(BitVec::<u16, Msb0>::decode(data)?)
+		},
+		(BitOrderTy::U32, BitStoreTy::Lsb0) => {
+			to_bit_sequence(BitVec::<u32, Lsb0>::decode(data)?)
+		},
+		(BitOrderTy::U32, BitStoreTy::Msb0) => {
+			to_bit_sequence(BitVec::<u32, Msb0>::decode(data)?)
+		},
+		(BitOrderTy::U64, BitStoreTy::Lsb0) => {
+			to_bit_sequence(BitVec::<u64, Lsb0>::decode(data)?)
+		},
+		(BitOrderTy::U64, BitStoreTy::Msb0) => {
+			to_bit_sequence(BitVec::<u64, Msb0>::decode(data)?)
+		},
+	};
+
+	Ok(bits)
 }
 
 #[cfg(test)]
@@ -449,10 +485,38 @@ mod test {
 
 	#[test]
 	fn decode_bit_sequence() {
-		use bitvec::{bitvec, order::Lsb0};
+		use bitvec::{bitvec, order::{ Lsb0, Msb0 }};
 
 		encode_decode_check(
 			bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u8, Msb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u16, Lsb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u16, Msb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u32, Lsb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u32, Msb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u64, Lsb0; 0, 1, 1, 0, 1, 0],
+			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
+		);
+		encode_decode_check(
+			bitvec![u64, Msb0; 0, 1, 1, 0, 1, 0],
 			Value::bit_sequence(bitvec![u8, Lsb0; 0, 1, 1, 0, 1, 0]),
 		);
 	}
