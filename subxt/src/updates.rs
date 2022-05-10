@@ -60,17 +60,19 @@ impl<T: Config> UpdateClient<T> {
             // The Runtime Version obtained via subscription.
             let update_runtime_version = update_runtime_version?;
 
-            // Ensure that the provided Runtime Version can be applied to the current
-            // version of the client. There are cases when the subscription to the
-            // Runtime Version of the node would produce spurious update events.
+            // To ensure there are no races between:
+            // - starting the subxt::Client (fetching runtime version / metadata)
+            // - subscribing to the runtime updates
+            // the node provides its runtime version immediately after subscribing.
+            //
             // In those cases, set the Runtime Version on the client if and only if
-            // the provided runtime version is bigger than what the client currently
+            // the provided runtime version is different than what the client currently
             // has stored.
             {
                 // The Runtime Version of the client, as set during building the client
                 // or during updates.
                 let runtime_version = self.runtime_version.read();
-                if runtime_version.spec_version >= update_runtime_version.spec_version {
+                if runtime_version.spec_version == update_runtime_version.spec_version {
                     log::debug!(
                         "Runtime update not performed for spec_version={}, client has spec_version={}",
                         update_runtime_version.spec_version, runtime_version.spec_version
