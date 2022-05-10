@@ -53,12 +53,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Make multiple transfers to simulate a long running `subxt::Client` use-case.
     //
-    // Meanwhile, the tokio task will perform any necessary updates to ensure
-    // that submitted extrinsics are still valid.
-    //
-    // Ideally, the polkadot node should perform a few runtime updates
-    // For more details on how to perform updates on a node, please follow:
-    // https://docs.substrate.io/tutorials/v3/forkless-upgrades/
+    // Meanwhile, the tokio task above will perform any necessary updates to keep in sync
+    // with the node we've connected to. Transactions submitted in the vicinity of a runtime
+    // update may still fail, however, owing to a race between the update happening and
+    // subxt synchronising its internal state with it.
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     // Make small balance transfers from Alice to Bob:
     for _ in 0..10 {
