@@ -35,7 +35,7 @@ pub enum EncodeValueError<T> {
     VariantFieldLengthMismatch { actual: usize, expected: usize },
 	#[error("Cannot find type with ID {0}")]
 	TypeIdNotFound(TypeId),
-	#[error("Value type is wrong; expected type {expected}, but got type ID {expected}")]
+	#[error("Value type is wrong; expected type ID {expected}, but got value {actual:?}, which could not be coerced into it")]
     WrongType { actual: Value<T>, expected: TypeId },
 	#[error("Variant {0} was not found")]
     VariantNotFound(String),
