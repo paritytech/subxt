@@ -36,4 +36,8 @@ pub use encode::{
     encode_value_as_type,
     EncodeValueError,
 };
+pub use bit_sequence::{
+    BitSequenceError
+};
+
 pub use type_id::TypeId;
