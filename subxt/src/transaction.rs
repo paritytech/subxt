@@ -165,7 +165,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
+    ) -> Result<TransactionEvents<T, Evs>, Error<E>> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
@@ -379,9 +379,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(
-        &self,
-    ) -> Result<TransactionEvents<'client, T, Evs>, Error<E>> {
+    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T, Evs>, Error<E>> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
@@ -391,9 +389,9 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
                 let dispatch_error = E::decode(&mut &*ev.data)?;
                 if let Some(error_data) = dispatch_error.module_error_data() {
                     // Error index is utilized as the first byte from the error array.
-                    let details = self
-                        .client
-                        .metadata()
+                    let locked_metadata = self.client.metadata();
+                    let metadata = locked_metadata.read();
+                    let details = metadata
                         .error(error_data.pallet_index, error_data.error_index())?;
                     return Err(Error::Module(ModuleError {
                         pallet: details.pallet().to_string(),
@@ -416,9 +414,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(
-        &self,
-    ) -> Result<TransactionEvents<'client, T, Evs>, BasicError> {
+    pub async fn fetch_events(&self) -> Result<TransactionEvents<T, Evs>, BasicError> {
         let block = self
             .client
             .rpc()
@@ -450,13 +446,13 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
 /// We can iterate over the events, or look for a specific one.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionEvents<'client, T: Config, Evs: Decode> {
+pub struct TransactionEvents<T: Config, Evs: Decode> {
     ext_hash: T::Hash,
     ext_idx: u32,
-    events: Events<'client, T, Evs>,
+    events: Events<T, Evs>,
 }
 
-impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
+impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.events.block_hash()
@@ -468,7 +464,7 @@ impl<'client, T: Config, Evs: Decode> TransactionEvents<'client, T, Evs> {
     }
 
     /// Return all of the events in the block that the transaction made it into.
-    pub fn all_events_in_block(&self) -> &events::Events<'client, T, Evs> {
+    pub fn all_events_in_block(&self) -> &events::Events<T, Evs> {
         &self.events
     }
 
