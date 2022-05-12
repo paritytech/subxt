@@ -18,6 +18,7 @@ use codec::{
     Compact,
     Encode,
 };
+use core::fmt::Debug;
 
 use crate::{
     Config,
@@ -31,7 +32,7 @@ pub use sp_runtime::generic::Era;
 /// "additional" parameters that are signed and used in transactions.
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
-pub trait ExtrinsicParams<T: Config> {
+pub trait ExtrinsicParams<T: Config>: Debug {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
@@ -84,7 +85,8 @@ pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Plain
 /// If your node differs in the "signed extra" and "additional" parameters expected
 /// to be sent/signed with a transaction, then you can define your own type which
 /// implements the [`ExtrinsicParams`] trait.
-pub struct BaseExtrinsicParams<T: Config, Tip> {
+#[derive(Debug)]
+pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
     era: Era,
     nonce: T::Index,
     tip: Tip,
@@ -142,7 +144,7 @@ impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
+impl<T: Config, Tip: Debug + Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(
@@ -186,7 +188,7 @@ impl<T: Config, Tip: Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> 
 }
 
 /// A tip payment.
-#[derive(Copy, Clone, Default, Encode)]
+#[derive(Copy, Clone, Debug, Default, Encode)]
 pub struct PlainTip {
     #[codec(compact)]
     tip: u128,
@@ -206,7 +208,7 @@ impl From<u128> for PlainTip {
 }
 
 /// A tip payment made in the form of a specific asset.
-#[derive(Copy, Clone, Default, Encode)]
+#[derive(Copy, Clone, Debug, Default, Encode)]
 pub struct AssetTip {
     #[codec(compact)]
     tip: u128,
