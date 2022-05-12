@@ -24,10 +24,16 @@
 
 use codec::Decode;
 use subxt::{
-    storage::StorageClient,
+    rpc::Rpc,
+    storage::{
+        StorageClient,
+        StorageKeyPrefix,
+    },
     ClientBuilder,
     DefaultConfig,
     PolkadotExtrinsicParams,
+    StorageEntryKey,
+    StorageMapKey,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -89,7 +95,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
             .await?;
 
-        println!("Example 2. Obtained keys:");
+        println!("\nExample 2. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
             println!("Key: 0x{}", hex::encode(&key));
             println!("  Value: {}", value);
@@ -104,10 +110,56 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .version_notifiers_iter(None)
             .await?;
 
-        println!("Example 3. Obtained keys:");
+        println!("\nExample 3. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
             println!("Key: 0x{}", hex::encode(&key));
             println!("  Value: {}", value);
+        }
+    }
+
+    // Example 4. Custom iteration over double maps.
+    {
+        // Obtain the inner RPC from the API.
+        let rpc: &Rpc<_> = api.client.rpc();
+
+        // Obtain the prefixed `twox_128("XcmPallet") ++ twox_128("VersionNotifiers")`
+        let prefix =
+            StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>();
+        // From the VersionNotifiers definition above, the first key is represented by
+        // ```
+        // 		Twox64Concat,
+        // 		XcmVersion,
+        // ```
+        // while `XcmVersion` is `u32`.
+        // Pass `2` as `XcmVersion` and concatenate the key to the prefix.
+        let entry_key = StorageEntryKey::Map {
+            0: vec![StorageMapKey::new(
+                &2u32,
+                ::subxt::StorageHasher::Twox64Concat,
+            )],
+        };
+
+        // The final query key is:
+        // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
+        let query_key = entry_key.final_key(prefix);
+        println!("\nExample 4\nQuery key: 0x{}", hex::encode(&query_key));
+
+        let keys = rpc
+            .storage_keys_paged(Some(query_key), 10, None, None)
+            .await?;
+
+        println!("Obtained keys:");
+        for key in keys.iter() {
+            println!("Key: 0x{}", hex::encode(&key));
+
+            if let Some(storage_data) = storage.fetch_raw(key.clone(), None).await? {
+                // We know the return value to be `QueryId` (`u64`) from inspecting either:
+                // - polkadot code
+                // - polkadot.rs generated file under `version_notifiers()` fn
+                // - metadata in json format
+                let value = u64::decode(&mut &storage_data.0[..])?;
+                println!("  Value: {}", value);
+            }
         }
     }
 
