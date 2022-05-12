@@ -73,7 +73,7 @@ impl<T: Config> UpdateClient<T> {
                 // or during updates.
                 let runtime_version = self.runtime_version.read();
                 if runtime_version.spec_version == update_runtime_version.spec_version {
-                    log::debug!(
+                    tracing::debug!(
                         "Runtime update not performed for spec_version={}, client has spec_version={}",
                         update_runtime_version.spec_version, runtime_version.spec_version
                     );
@@ -85,7 +85,7 @@ impl<T: Config> UpdateClient<T> {
             {
                 let mut runtime_version = self.runtime_version.write();
                 // Update both the `RuntimeVersion` and `Metadata` of the client.
-                log::info!(
+                tracing::info!(
                     "Performing runtime update from {} to {}",
                     runtime_version.spec_version,
                     update_runtime_version.spec_version,
@@ -95,10 +95,10 @@ impl<T: Config> UpdateClient<T> {
 
             // Fetch the new metadata of the runtime node.
             let update_metadata = self.rpc.metadata().await?;
-            log::debug!("Performing metadata update");
+            tracing::debug!("Performing metadata update");
             let mut metadata = self.metadata.write();
             *metadata = update_metadata;
-            log::debug!("Runtime update completed");
+            tracing::debug!("Runtime update completed");
         }
 
         Ok(())
