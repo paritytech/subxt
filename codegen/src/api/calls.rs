@@ -72,7 +72,7 @@ pub fn generate_calls(
     pallet: &PalletMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
-    // Early return if the pallet has no metadata for calls.
+    // Early return if the pallet has no calls.
     let call = if let Some(ref calls) = pallet.calls {
         calls
     } else {
