@@ -132,12 +132,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // ```
         // while `XcmVersion` is `u32`.
         // Pass `2` as `XcmVersion` and concatenate the key to the prefix.
-        let entry_key = StorageEntryKey::Map {
-            0: vec![StorageMapKey::new(
-                &2u32,
-                ::subxt::StorageHasher::Twox64Concat,
-            )],
-        };
+        let entry_key = StorageEntryKey::Map(vec![StorageMapKey::new(
+            &2u32,
+            ::subxt::StorageHasher::Twox64Concat,
+        )]);
 
         // The final query key is:
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
