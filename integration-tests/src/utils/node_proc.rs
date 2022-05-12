@@ -168,22 +168,24 @@ fn find_substrate_port_from_output(r: impl Read + Send + 'static) -> u16 {
     BufReader::new(r)
         .lines()
         .find_map(|line| {
-            let line = line
-                .expect("failed to obtain next line from stdout for port discovery");
+            let line =
+                line.expect("failed to obtain next line from stdout for port discovery");
 
             // does the line contain our port (we expect this specific output from substrate).
-            let line_end = match line.rsplit_once("Listening for new connections on 127.0.0.1:") {
-                None => return None,
-                Some((_, after)) => after
-            };
+            let line_end = line
+                .rsplit_once("Listening for new connections on 127.0.0.1:")
+                .or_else(|| {
+                    line.rsplit_once("Running JSON-RPC WS server: addr=127.0.0.1:")
+                })
+                .map(|(_, port_str)| port_str)?;
 
             // trim non-numeric chars from the end of the port part of the line.
             let port_str = line_end.trim_end_matches(|b| !('0'..='9').contains(&b));
 
             // expect to have a number here (the chars after '127.0.0.1:') and parse them into a u16.
-            let port_num = port_str
-                .parse()
-                .unwrap_or_else(|_| panic!("valid port expected on 'Listening for new connections' line, got '{port_str}'"));
+            let port_num = port_str.parse().unwrap_or_else(|_| {
+                panic!("valid port expected for log line, got '{port_str}'")
+            });
 
             Some(port_num)
         })
