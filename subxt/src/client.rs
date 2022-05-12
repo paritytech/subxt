@@ -267,6 +267,8 @@ where
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
 
+        tracing::info!("xt hash: {}", hex::encode(ext_hash.encode()));
+
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
 
@@ -352,6 +354,11 @@ where
             )
         };
 
+        tracing::debug!(
+            "additional_and_extra_params: {:?}",
+            additional_and_extra_params
+        );
+
         // 4. Construct signature. This is compatible with the Encode impl
         //    for SignedPayload (which is this payload of bytes that we'd like)
         //    to sign. See:
@@ -367,6 +374,8 @@ where
                 signer.sign(&bytes)
             }
         };
+
+        tracing::info!("xt signature: {}", hex::encode(signature.encode()));
 
         // 5. Encode extrinsic, now that we have the parts we need. This is compatible
         //    with the Encode impl for UncheckedExtrinsic (protocol version 4).

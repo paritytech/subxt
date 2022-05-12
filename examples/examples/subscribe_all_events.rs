@@ -39,7 +39,7 @@ pub mod polkadot {}
 /// pluck out the events that we care about.
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    env_logger::init();
+    tracing_subscriber::fmt::init();
 
     let api = ClientBuilder::new()
         .build()
