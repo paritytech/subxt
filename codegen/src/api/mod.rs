@@ -211,17 +211,12 @@ impl RuntimeGenerator {
                 quote!()
             };
 
-            let constants_mod = if !pallet.constants.is_empty() {
-                constants::generate_constants(
-                    &self.metadata,
-                    &type_gen,
-                    pallet,
-                    &pallet.constants,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let constants_mod = constants::generate_constants(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
             quote! {
                 pub mod #mod_name {

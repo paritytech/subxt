@@ -17,7 +17,6 @@
 use crate::types::TypeGenerator;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
-    PalletConstantMetadata,
     PalletMetadata,
 };
 use heck::ToSnakeCase as _;
@@ -29,13 +28,41 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
+/// Generate constants from the provided pallet metadata.
+///
+/// The function creates a new module named `constants` under the pallet's module.
+/// ```ignore
+/// pub mod PalletName {
+///     pub mod constants {
+///     ...
+///     }
+/// }
+/// ```
+///
+/// The constants are exposed via the `ConstantsApi` wrapper.
+///
+/// Although the constants are defined in the provided static metadata, the API
+/// ensures that the constants are returned from the runtime metadata of the node.
+/// This design choice was made to ease the contracts work.
+///
+/// # Arguments
+///
+/// - `metadata` - Runtime metadata from which the calls are generated.
+/// - `type_gen` - The type generator containing all types defined by metadata
+/// - `pallet` - Pallet metadata from which the calls are generated.
+/// - `types_mod_ident` - The indent of the module.
 pub fn generate_constants(
     metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
-    constants: &[PalletConstantMetadata<PortableForm>],
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
+    // Early return if the pallet has no constants.
+    if pallet.constants.is_empty() {
+        return quote!()
+    }
+    let constants = &pallet.constants;
+
     let constant_fns = constants.iter().map(|constant| {
         let fn_name = format_ident!("{}", constant.name.to_snake_case());
         let pallet_name = &pallet.name;
