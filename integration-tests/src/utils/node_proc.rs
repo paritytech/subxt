@@ -172,18 +172,12 @@ fn find_substrate_port_from_output(r: impl Read + Send + 'static) -> u16 {
                 line.expect("failed to obtain next line from stdout for port discovery");
 
             // does the line contain our port (we expect this specific output from substrate).
-            let line_end = match line
+            let line_end = line
                 .rsplit_once("Listening for new connections on 127.0.0.1:")
-            {
-                None => {
-                    match line.rsplit_once("Running JSON-RPC WS server: addr=127.0.0.1:")
-                    {
-                        None => return None,
-                        Some((_, after)) => after,
-                    }
-                }
-                Some((_, after)) => after,
-            };
+                .or_else(|| {
+                    line.rsplit_once("Running JSON-RPC WS server: addr=127.0.0.1:")
+                })
+                .map(|(_, port_str)| port_str)?;
 
             // trim non-numeric chars from the end of the port part of the line.
             let port_str = line_end.trim_end_matches(|b| !('0'..='9').contains(&b));
