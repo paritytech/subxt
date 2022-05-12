@@ -44,7 +44,6 @@ derivative = "2.2.0"
 sp-arithmetic = { version = "5.0.0", default-features = false }
 assert_matches = "1.5.0"
 tokio = { version = "1.8", features = ["macros", "time"] }
-env_logger = "0.9.0"
 tempdir = "0.3.7"
 wabt = "0.10.0"
 which = "4.0.2"
