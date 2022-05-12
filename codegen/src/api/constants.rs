@@ -49,8 +49,10 @@ pub fn generate_constants(
         quote! {
             #( #[doc = #docs ] )*
             pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-                if self.client.metadata().constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
-                    let pallet = self.client.metadata().pallet(#pallet_name)?;
+                let locked_metadata = self.client.metadata();
+                let metadata = locked_metadata.read();
+                if metadata.constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
+                    let pallet = metadata.pallet(#pallet_name)?;
                     let constant = pallet.constant(#constant_name)?;
                     let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                     Ok(value)

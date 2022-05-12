@@ -35,6 +35,7 @@ use crate::{
     },
     storage::StorageClient,
     transaction::TransactionProgress,
+    updates::UpdateClient,
     Call,
     Config,
     Encoded,
@@ -46,6 +47,8 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
+use parking_lot::RwLock;
+use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
 #[derive(Default)]
@@ -119,9 +122,9 @@ impl ClientBuilder {
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata,
+            metadata: Arc::new(RwLock::new(metadata)),
             properties: properties.unwrap_or_else(|_| Default::default()),
-            runtime_version: runtime_version?,
+            runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
         })
     }
@@ -133,9 +136,9 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Metadata,
+    metadata: Arc<RwLock<Metadata>>,
     properties: SystemProperties,
-    runtime_version: RuntimeVersion,
+    runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,
 }
 
@@ -160,8 +163,8 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the chain metadata.
-    pub fn metadata(&self) -> &Metadata {
-        &self.metadata
+    pub fn metadata(&self) -> Arc<RwLock<Metadata>> {
+        Arc::clone(&self.metadata)
     }
 
     /// Returns the properties defined in the chain spec as a JSON object.
@@ -183,7 +186,16 @@ impl<T: Config> Client<T> {
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
+        StorageClient::new(&self.rpc, self.metadata(), self.iter_page_size)
+    }
+
+    /// Create a wrapper for performing runtime updates on this client.
+    pub fn updates(&self) -> UpdateClient<T> {
+        UpdateClient::new(
+            self.rpc.clone(),
+            self.metadata(),
+            self.runtime_version.clone(),
+        )
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
@@ -192,6 +204,11 @@ impl<T: Config> Client<T> {
     /// to the target runtime.
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
+    }
+
+    /// Returns the client's Runtime Version.
+    pub fn runtime_version(&self) -> Arc<RwLock<RuntimeVersion>> {
+        Arc::clone(&self.runtime_version)
     }
 }
 
@@ -314,7 +331,9 @@ where
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = {
             let mut bytes = Vec::new();
-            let pallet = self.client.metadata().pallet(C::PALLET)?;
+            let locked_metadata = self.client.metadata();
+            let metadata = locked_metadata.read();
+            let pallet = metadata.pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
             self.call.encode_to(&mut bytes);
@@ -322,13 +341,18 @@ where
         };
 
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = X::new(
-            self.client.runtime_version.spec_version,
-            self.client.runtime_version.transaction_version,
-            account_nonce,
-            self.client.genesis_hash,
-            other_params,
-        );
+        let additional_and_extra_params = {
+            // Obtain spec version and transaction version from the runtime version of the client.
+            let locked_runtime = self.client.runtime_version();
+            let runtime = locked_runtime.read();
+            X::new(
+                runtime.spec_version,
+                runtime.transaction_version,
+                account_nonce,
+                self.client.genesis_hash,
+                other_params,
+            )
+        };
 
         tracing::debug!(
             "additional_and_extra_params: {:?}",

@@ -76,8 +76,9 @@ async fn full_metadata_check() {
     assert!(api.validate_metadata().is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 =
-        api.client.metadata().runtime_metadata().clone();
+    let locked_client_metadata = api.client.metadata();
+    let client_metadata = locked_client_metadata.read();
+    let mut metadata: RuntimeMetadataV14 = client_metadata.runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
     let new_api = metadata_to_api(metadata, &cxt).await;
@@ -99,8 +100,9 @@ async fn constants_check() {
     assert!(cxt.api.constants().balances().existential_deposit().is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 =
-        api.client.metadata().runtime_metadata().clone();
+    let locked_client_metadata = api.client.metadata();
+    let client_metadata = locked_client_metadata.read();
+    let mut metadata: RuntimeMetadataV14 = client_metadata.runtime_metadata().clone();
 
     let mut existential = metadata
         .pallets
