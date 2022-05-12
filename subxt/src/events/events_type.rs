@@ -339,17 +339,17 @@ fn decode_raw_event_details<T: Config>(
     let phase = Phase::decode(input)?;
     let pallet_index = input.read_byte()?;
     let variant_index = input.read_byte()?;
-    log::debug!(
+    tracing::debug!(
         "phase {:?}, pallet_index {}, event_variant: {}",
         phase,
         pallet_index,
         variant_index
     );
-    log::debug!("remaining input: {}", hex::encode(&input));
+    tracing::debug!("remaining input: {}", hex::encode(&input));
 
     // Get metadata for the event:
     let event_metadata = metadata.event(pallet_index, variant_index)?;
-    log::debug!(
+    tracing::debug!(
         "Decoding Event '{}::{}'",
         event_metadata.pallet(),
         event_metadata.event()
@@ -375,7 +375,7 @@ fn decode_raw_event_details<T: Config>(
     // topics come after the event data in EventRecord. They aren't used for
     // anything at the moment, so just decode and throw them away.
     let topics = Vec::<T::Hash>::decode(input)?;
-    log::debug!("topics: {:?}", topics);
+    tracing::debug!("topics: {:?}", topics);
 
     Ok(RawEventDetails {
         phase,
