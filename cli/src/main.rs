@@ -70,7 +70,7 @@ enum Command {
         )]
         url: url::Url,
         /// the format of the metadata to display: `json`, `hex` or `bytes`
-        #[structopt(long, short, default_value = "json")]
+        #[structopt(long, short, default_value = "bytes")]
         format: String,
     },
     /// Generate runtime API client code from metadata.

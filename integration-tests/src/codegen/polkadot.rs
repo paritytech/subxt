@@ -1158,8 +1158,11 @@ pub mod api {
                 }
                 #[doc = " Events deposited for the current block."]
                 #[doc = ""]
-                #[doc = " NOTE: This storage item is explicitly unbounded since it is never intended to be read"]
-                #[doc = " from within the runtime."]
+                #[doc = " NOTE: The item is unbound and should therefore never be read on chain."]
+                #[doc = " It could otherwise inflate the PoV size of a block."]
+                #[doc = ""]
+                #[doc = " Events have a large in-memory size. Box the events to not go out-of-memory"]
+                #[doc = " just in case someone still reads them from within the runtime."]
                 pub async fn events(
                     &self,
                     block_hash: ::core::option::Option<T::Hash>,
@@ -1179,10 +1182,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            51u8, 117u8, 189u8, 125u8, 155u8, 137u8, 63u8, 1u8, 80u8,
-                            211u8, 18u8, 228u8, 58u8, 237u8, 241u8, 176u8, 127u8, 189u8,
-                            246u8, 174u8, 50u8, 174u8, 102u8, 21u8, 108u8, 229u8, 132u8,
-                            20u8, 6u8, 205u8, 13u8, 88u8,
+                            240u8, 45u8, 247u8, 87u8, 187u8, 148u8, 241u8, 111u8, 210u8,
+                            52u8, 145u8, 237u8, 136u8, 30u8, 227u8, 45u8, 251u8, 110u8,
+                            19u8, 214u8, 5u8, 61u8, 98u8, 188u8, 186u8, 133u8, 106u8,
+                            145u8, 13u8, 64u8, 140u8, 226u8,
                         ]
                     {
                         let entry = Events;
@@ -1432,10 +1435,10 @@ pub mod api {
                     let metadata = locked_metadata.read();
                     if metadata.constant_hash("System", "BlockWeights")?
                         == [
-                            12u8, 113u8, 191u8, 55u8, 3u8, 129u8, 43u8, 135u8, 41u8,
-                            245u8, 198u8, 178u8, 233u8, 206u8, 94u8, 128u8, 153u8, 187u8,
-                            63u8, 159u8, 156u8, 53u8, 165u8, 201u8, 38u8, 121u8, 80u8,
-                            64u8, 93u8, 151u8, 48u8, 116u8,
+                            77u8, 188u8, 116u8, 105u8, 124u8, 67u8, 201u8, 169u8, 174u8,
+                            156u8, 7u8, 2u8, 231u8, 65u8, 13u8, 245u8, 220u8, 34u8,
+                            198u8, 223u8, 0u8, 30u8, 74u8, 148u8, 238u8, 5u8, 150u8,
+                            55u8, 223u8, 116u8, 97u8, 40u8,
                         ]
                     {
                         let pallet = metadata.pallet("System")?;
@@ -1534,10 +1537,10 @@ pub mod api {
                     let metadata = locked_metadata.read();
                     if metadata.constant_hash("System", "Version")?
                         == [
-                            237u8, 208u8, 32u8, 121u8, 44u8, 122u8, 19u8, 109u8, 43u8,
-                            24u8, 52u8, 255u8, 23u8, 97u8, 22u8, 44u8, 108u8, 76u8, 62u8,
-                            1u8, 199u8, 112u8, 36u8, 209u8, 209u8, 0u8, 160u8, 169u8,
-                            175u8, 33u8, 189u8, 194u8,
+                            71u8, 227u8, 99u8, 177u8, 47u8, 27u8, 21u8, 48u8, 38u8,
+                            211u8, 225u8, 124u8, 13u8, 40u8, 201u8, 250u8, 201u8, 88u8,
+                            166u8, 105u8, 185u8, 252u8, 100u8, 95u8, 198u8, 183u8, 24u8,
+                            153u8, 80u8, 223u8, 108u8, 21u8,
                         ]
                     {
                         let pallet = metadata.pallet("System")?;
@@ -1732,10 +1735,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            171u8, 203u8, 174u8, 141u8, 138u8, 30u8, 100u8, 95u8, 14u8,
-                            2u8, 34u8, 14u8, 199u8, 60u8, 129u8, 160u8, 8u8, 166u8, 4u8,
-                            20u8, 41u8, 86u8, 21u8, 73u8, 222u8, 151u8, 179u8, 209u8,
-                            74u8, 31u8, 71u8, 73u8,
+                            191u8, 57u8, 173u8, 36u8, 31u8, 180u8, 34u8, 23u8, 167u8,
+                            186u8, 119u8, 191u8, 175u8, 175u8, 54u8, 109u8, 136u8, 10u8,
+                            240u8, 124u8, 32u8, 83u8, 23u8, 22u8, 59u8, 189u8, 54u8,
+                            68u8, 13u8, 48u8, 43u8, 129u8,
                         ]
                     {
                         let call = Schedule {
@@ -1816,10 +1819,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            47u8, 156u8, 239u8, 248u8, 198u8, 13u8, 10u8, 156u8, 176u8,
-                            254u8, 247u8, 152u8, 108u8, 255u8, 224u8, 185u8, 109u8, 56u8,
-                            233u8, 5u8, 73u8, 230u8, 151u8, 97u8, 125u8, 183u8, 4u8,
-                            202u8, 163u8, 3u8, 70u8, 221u8,
+                            245u8, 110u8, 85u8, 145u8, 67u8, 243u8, 213u8, 129u8, 139u8,
+                            179u8, 79u8, 34u8, 12u8, 97u8, 235u8, 40u8, 83u8, 27u8,
+                            186u8, 215u8, 252u8, 13u8, 163u8, 195u8, 198u8, 38u8, 223u8,
+                            192u8, 25u8, 201u8, 133u8, 229u8,
                         ]
                     {
                         let call = ScheduleNamed {
@@ -1903,10 +1906,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            150u8, 70u8, 131u8, 52u8, 50u8, 73u8, 176u8, 193u8, 17u8,
-                            31u8, 218u8, 113u8, 220u8, 23u8, 160u8, 196u8, 100u8, 27u8,
-                            193u8, 79u8, 254u8, 68u8, 22u8, 216u8, 157u8, 136u8, 233u8,
-                            98u8, 46u8, 220u8, 121u8, 29u8,
+                            0u8, 223u8, 159u8, 58u8, 230u8, 216u8, 109u8, 93u8, 34u8,
+                            200u8, 153u8, 22u8, 182u8, 64u8, 231u8, 142u8, 115u8, 207u8,
+                            150u8, 179u8, 11u8, 72u8, 251u8, 51u8, 178u8, 2u8, 84u8,
+                            150u8, 101u8, 167u8, 204u8, 120u8,
                         ]
                     {
                         let call = ScheduleAfter {
@@ -1956,10 +1959,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            127u8, 121u8, 141u8, 162u8, 95u8, 211u8, 214u8, 15u8, 22u8,
-                            28u8, 23u8, 71u8, 92u8, 58u8, 249u8, 163u8, 216u8, 85u8,
-                            155u8, 88u8, 161u8, 113u8, 153u8, 200u8, 248u8, 168u8, 121u8,
-                            124u8, 131u8, 122u8, 232u8, 160u8,
+                            93u8, 123u8, 108u8, 161u8, 185u8, 23u8, 35u8, 175u8, 231u8,
+                            138u8, 4u8, 49u8, 244u8, 68u8, 152u8, 114u8, 15u8, 123u8,
+                            107u8, 125u8, 97u8, 14u8, 25u8, 27u8, 42u8, 102u8, 239u8,
+                            209u8, 159u8, 217u8, 141u8, 216u8,
                         ]
                     {
                         let call = ScheduleNamedAfter {
@@ -2076,10 +2079,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            235u8, 95u8, 118u8, 134u8, 98u8, 235u8, 250u8, 110u8, 250u8,
-                            7u8, 75u8, 190u8, 53u8, 194u8, 153u8, 51u8, 125u8, 69u8,
-                            46u8, 232u8, 63u8, 132u8, 47u8, 167u8, 210u8, 46u8, 43u8,
-                            142u8, 255u8, 252u8, 99u8, 253u8,
+                            105u8, 18u8, 151u8, 43u8, 108u8, 227u8, 68u8, 204u8, 82u8,
+                            150u8, 128u8, 140u8, 213u8, 106u8, 201u8, 4u8, 186u8, 20u8,
+                            191u8, 125u8, 72u8, 69u8, 134u8, 48u8, 194u8, 109u8, 61u8,
+                            7u8, 244u8, 52u8, 161u8, 46u8,
                         ]
                     {
                         let entry = Agenda(_0);
@@ -2106,10 +2109,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            235u8, 95u8, 118u8, 134u8, 98u8, 235u8, 250u8, 110u8, 250u8,
-                            7u8, 75u8, 190u8, 53u8, 194u8, 153u8, 51u8, 125u8, 69u8,
-                            46u8, 232u8, 63u8, 132u8, 47u8, 167u8, 210u8, 46u8, 43u8,
-                            142u8, 255u8, 252u8, 99u8, 253u8,
+                            105u8, 18u8, 151u8, 43u8, 108u8, 227u8, 68u8, 204u8, 82u8,
+                            150u8, 128u8, 140u8, 213u8, 106u8, 201u8, 4u8, 186u8, 20u8,
+                            191u8, 125u8, 72u8, 69u8, 134u8, 48u8, 194u8, 109u8, 61u8,
+                            7u8, 244u8, 52u8, 161u8, 46u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -2933,7 +2936,9 @@ pub mod api {
             impl ::subxt::StorageEntry for Initialized {
                 const PALLET: &'static str = "Babe";
                 const STORAGE: &'static str = "Initialized";
-                type Value = ::core::option::Option<[::core::primitive::u8; 32usize]>;
+                type Value = ::core::option::Option<
+                    runtime_types::sp_consensus_babe::digests::PreDigest,
+                >;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Plain
                 }
@@ -3325,7 +3330,9 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
                     ::core::option::Option<
-                        ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                        ::core::option::Option<
+                            runtime_types::sp_consensus_babe::digests::PreDigest,
+                        >,
                     >,
                     ::subxt::BasicError,
                 > {
@@ -3336,10 +3343,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            48u8, 206u8, 111u8, 118u8, 149u8, 175u8, 148u8, 53u8, 233u8,
-                            82u8, 220u8, 57u8, 22u8, 164u8, 116u8, 228u8, 134u8, 237u8,
-                            129u8, 195u8, 60u8, 169u8, 1u8, 164u8, 74u8, 177u8, 145u8,
-                            112u8, 66u8, 198u8, 53u8, 157u8,
+                            174u8, 23u8, 254u8, 52u8, 114u8, 235u8, 65u8, 46u8, 39u8,
+                            97u8, 238u8, 243u8, 237u8, 138u8, 142u8, 85u8, 114u8, 69u8,
+                            58u8, 172u8, 7u8, 238u8, 110u8, 153u8, 22u8, 122u8, 117u8,
+                            149u8, 113u8, 221u8, 127u8, 225u8,
                         ]
                     {
                         let entry = Initialized;
@@ -3351,7 +3358,7 @@ pub mod api {
                 #[doc = " This field should always be populated during block processing unless"]
                 #[doc = " secondary plain slots are enabled (which don't contain a VRF output)."]
                 #[doc = ""]
-                #[doc = " It is set in `on_initialize`, before it will contain the value from the last block."]
+                #[doc = " It is set in `on_finalize`, before it will contain the value from the last block."]
                 pub async fn author_vrf_randomness(
                     &self,
                     block_hash: ::core::option::Option<T::Hash>,
@@ -5372,31 +5379,6 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
-                #[doc = " The fee to be paid for making a transaction; the per-byte portion."]
-                pub fn transaction_byte_fee(
-                    &self,
-                ) -> ::core::result::Result<::core::primitive::u128, ::subxt::BasicError>
-                {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    if metadata
-                        .constant_hash("TransactionPayment", "TransactionByteFee")?
-                        == [
-                            11u8, 116u8, 163u8, 230u8, 115u8, 191u8, 171u8, 134u8, 67u8,
-                            204u8, 192u8, 56u8, 0u8, 127u8, 48u8, 184u8, 38u8, 207u8,
-                            167u8, 252u8, 43u8, 152u8, 15u8, 29u8, 171u8, 202u8, 103u8,
-                            163u8, 14u8, 13u8, 177u8, 134u8,
-                        ]
-                    {
-                        let pallet = metadata.pallet("TransactionPayment")?;
-                        let constant = pallet.constant("TransactionByteFee")?;
-                        let value =
-                            ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                        Ok(value)
-                    } else {
-                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                    }
-                }
                 #[doc = " A fee mulitplier for `Operational` extrinsics to compute \"virtual tip\" to boost their"]
                 #[doc = " `priority`"]
                 #[doc = ""]
@@ -5457,14 +5439,44 @@ pub mod api {
                     let metadata = locked_metadata.read();
                     if metadata.constant_hash("TransactionPayment", "WeightToFee")?
                         == [
-                            194u8, 136u8, 54u8, 114u8, 5u8, 242u8, 3u8, 197u8, 151u8,
-                            113u8, 78u8, 143u8, 235u8, 147u8, 73u8, 236u8, 218u8, 115u8,
-                            53u8, 211u8, 62u8, 158u8, 185u8, 222u8, 129u8, 142u8, 100u8,
-                            191u8, 33u8, 240u8, 219u8, 34u8,
+                            147u8, 78u8, 51u8, 196u8, 214u8, 20u8, 36u8, 114u8, 64u8,
+                            95u8, 181u8, 140u8, 80u8, 115u8, 253u8, 71u8, 214u8, 21u8,
+                            118u8, 115u8, 108u8, 124u8, 192u8, 122u8, 26u8, 130u8, 143u8,
+                            240u8, 250u8, 230u8, 205u8, 200u8,
                         ]
                     {
                         let pallet = metadata.pallet("TransactionPayment")?;
                         let constant = pallet.constant("WeightToFee")?;
+                        let value =
+                            ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                        Ok(value)
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
+                }
+                #[doc = " The polynomial that is applied in order to derive fee from length."]
+                pub fn length_to_fee(
+                    &self,
+                ) -> ::core::result::Result<
+                    ::std::vec::Vec<
+                        runtime_types::frame_support::weights::WeightToFeeCoefficient<
+                            ::core::primitive::u128,
+                        >,
+                    >,
+                    ::subxt::BasicError,
+                > {
+                    let locked_metadata = self.client.metadata();
+                    let metadata = locked_metadata.read();
+                    if metadata.constant_hash("TransactionPayment", "LengthToFee")?
+                        == [
+                            120u8, 219u8, 85u8, 57u8, 31u8, 128u8, 113u8, 179u8, 51u8,
+                            81u8, 69u8, 222u8, 206u8, 137u8, 222u8, 104u8, 59u8, 233u8,
+                            72u8, 51u8, 54u8, 187u8, 182u8, 249u8, 27u8, 17u8, 34u8,
+                            44u8, 215u8, 77u8, 39u8, 166u8,
+                        ]
+                    {
+                        let pallet = metadata.pallet("TransactionPayment")?;
+                        let constant = pallet.constant("LengthToFee")?;
                         let value =
                             ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                         Ok(value)
@@ -6358,7 +6370,7 @@ pub mod api {
                 }
                 #[doc = "(Re-)set the payment target for a controller."]
                 #[doc = ""]
-                #[doc = "Effects will be felt at the beginning of the next era."]
+                #[doc = "Effects will be felt instantly (as soon as this function is completed successfully)."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
                 #[doc = ""]
@@ -6409,7 +6421,7 @@ pub mod api {
                 }
                 #[doc = "(Re-)set the controller of a stash."]
                 #[doc = ""]
-                #[doc = "Effects will be felt at the beginning of the next era."]
+                #[doc = "Effects will be felt instantly (as soon as this function is completed successfully)."]
                 #[doc = ""]
                 #[doc = "The dispatch origin for this call must be _Signed_ by the stash, not the controller."]
                 #[doc = ""]
@@ -7373,6 +7385,16 @@ pub mod api {
                 const PALLET: &'static str = "Staking";
                 const EVENT: &'static str = "PayoutStarted";
             }
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            #[doc = "A validator has set their preferences."]
+            pub struct ValidatorPrefsSet(
+                pub ::subxt::sp_core::crypto::AccountId32,
+                pub runtime_types::pallet_staking::ValidatorPrefs,
+            );
+            impl ::subxt::Event for ValidatorPrefsSet {
+                const PALLET: &'static str = "Staking";
+                const EVENT: &'static str = "ValidatorPrefsSet";
+            }
         }
         pub mod storage {
             use super::runtime_types;
@@ -7455,10 +7477,7 @@ pub mod api {
             impl ::subxt::StorageEntry for Ledger<'_> {
                 const PALLET: &'static str = "Staking";
                 const STORAGE: &'static str = "Ledger";
-                type Value = runtime_types::pallet_staking::StakingLedger<
-                    ::subxt::sp_core::crypto::AccountId32,
-                    ::core::primitive::u128,
-                >;
+                type Value = runtime_types::pallet_staking::StakingLedger;
                 fn key(&self) -> ::subxt::StorageEntryKey {
                     ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
                         &self.0,
@@ -8128,12 +8147,7 @@ pub mod api {
                     _0: &::subxt::sp_core::crypto::AccountId32,
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> ::core::result::Result<
-                    ::core::option::Option<
-                        runtime_types::pallet_staking::StakingLedger<
-                            ::subxt::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
-                        >,
-                    >,
+                    ::core::option::Option<runtime_types::pallet_staking::StakingLedger>,
                     ::subxt::BasicError,
                 > {
                     let runtime_storage_hash = {
@@ -8143,10 +8157,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            91u8, 46u8, 130u8, 228u8, 126u8, 95u8, 46u8, 57u8, 222u8,
-                            98u8, 250u8, 145u8, 83u8, 135u8, 240u8, 153u8, 57u8, 21u8,
-                            232u8, 254u8, 217u8, 22u8, 62u8, 76u8, 128u8, 159u8, 137u8,
-                            149u8, 112u8, 251u8, 142u8, 35u8,
+                            54u8, 158u8, 148u8, 211u8, 91u8, 48u8, 159u8, 56u8, 149u8,
+                            116u8, 43u8, 31u8, 45u8, 102u8, 252u8, 12u8, 1u8, 176u8,
+                            189u8, 68u8, 97u8, 88u8, 13u8, 204u8, 148u8, 12u8, 34u8, 0u8,
+                            180u8, 162u8, 202u8, 8u8,
                         ]
                     {
                         let entry = Ledger(_0);
@@ -8170,10 +8184,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            91u8, 46u8, 130u8, 228u8, 126u8, 95u8, 46u8, 57u8, 222u8,
-                            98u8, 250u8, 145u8, 83u8, 135u8, 240u8, 153u8, 57u8, 21u8,
-                            232u8, 254u8, 217u8, 22u8, 62u8, 76u8, 128u8, 159u8, 137u8,
-                            149u8, 112u8, 251u8, 142u8, 35u8,
+                            54u8, 158u8, 148u8, 211u8, 91u8, 48u8, 159u8, 56u8, 149u8,
+                            116u8, 43u8, 31u8, 45u8, 102u8, 252u8, 12u8, 1u8, 176u8,
+                            189u8, 68u8, 97u8, 88u8, 13u8, 204u8, 148u8, 12u8, 34u8, 0u8,
+                            180u8, 162u8, 202u8, 8u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -14328,10 +14342,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            170u8, 77u8, 65u8, 3u8, 95u8, 88u8, 81u8, 103u8, 220u8, 72u8,
-                            237u8, 80u8, 181u8, 46u8, 196u8, 106u8, 142u8, 55u8, 244u8,
-                            204u8, 219u8, 152u8, 219u8, 17u8, 80u8, 55u8, 178u8, 56u8,
-                            161u8, 169u8, 50u8, 37u8,
+                            171u8, 45u8, 34u8, 122u8, 218u8, 231u8, 219u8, 99u8, 254u8,
+                            22u8, 172u8, 193u8, 202u8, 243u8, 33u8, 150u8, 251u8, 138u8,
+                            193u8, 130u8, 211u8, 68u8, 68u8, 22u8, 166u8, 19u8, 217u8,
+                            21u8, 131u8, 227u8, 144u8, 28u8,
                         ]
                     {
                         let call = Execute {
@@ -14393,10 +14407,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            180u8, 170u8, 72u8, 21u8, 96u8, 25u8, 177u8, 147u8, 98u8,
-                            143u8, 186u8, 112u8, 99u8, 197u8, 146u8, 170u8, 35u8, 195u8,
-                            154u8, 87u8, 119u8, 190u8, 148u8, 82u8, 134u8, 3u8, 163u8,
-                            182u8, 132u8, 130u8, 2u8, 48u8,
+                            167u8, 222u8, 69u8, 157u8, 53u8, 100u8, 78u8, 219u8, 182u8,
+                            33u8, 10u8, 169u8, 21u8, 151u8, 230u8, 160u8, 206u8, 56u8,
+                            247u8, 138u8, 253u8, 150u8, 25u8, 225u8, 242u8, 161u8, 75u8,
+                            205u8, 175u8, 209u8, 169u8, 176u8,
                         ]
                     {
                         let call = Propose {
@@ -14790,10 +14804,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
-                            26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
-                            124u8, 107u8, 33u8, 214u8, 101u8, 215u8, 174u8, 149u8, 162u8,
-                            189u8, 198u8, 68u8, 189u8, 218u8,
+                            166u8, 196u8, 81u8, 86u8, 135u8, 5u8, 173u8, 163u8, 163u8,
+                            41u8, 218u8, 32u8, 33u8, 124u8, 49u8, 172u8, 135u8, 84u8,
+                            228u8, 53u8, 28u8, 27u8, 208u8, 110u8, 244u8, 194u8, 128u8,
+                            53u8, 73u8, 111u8, 103u8, 49u8,
                         ]
                     {
                         let entry = ProposalOf(_0);
@@ -14817,10 +14831,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
-                            26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
-                            124u8, 107u8, 33u8, 214u8, 101u8, 215u8, 174u8, 149u8, 162u8,
-                            189u8, 198u8, 68u8, 189u8, 218u8,
+                            166u8, 196u8, 81u8, 86u8, 135u8, 5u8, 173u8, 163u8, 163u8,
+                            41u8, 218u8, 32u8, 33u8, 124u8, 49u8, 172u8, 135u8, 84u8,
+                            228u8, 53u8, 28u8, 27u8, 208u8, 110u8, 244u8, 194u8, 128u8,
+                            53u8, 73u8, 111u8, 103u8, 49u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -15170,10 +15184,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            170u8, 77u8, 65u8, 3u8, 95u8, 88u8, 81u8, 103u8, 220u8, 72u8,
-                            237u8, 80u8, 181u8, 46u8, 196u8, 106u8, 142u8, 55u8, 244u8,
-                            204u8, 219u8, 152u8, 219u8, 17u8, 80u8, 55u8, 178u8, 56u8,
-                            161u8, 169u8, 50u8, 37u8,
+                            171u8, 45u8, 34u8, 122u8, 218u8, 231u8, 219u8, 99u8, 254u8,
+                            22u8, 172u8, 193u8, 202u8, 243u8, 33u8, 150u8, 251u8, 138u8,
+                            193u8, 130u8, 211u8, 68u8, 68u8, 22u8, 166u8, 19u8, 217u8,
+                            21u8, 131u8, 227u8, 144u8, 28u8,
                         ]
                     {
                         let call = Execute {
@@ -15235,10 +15249,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            180u8, 170u8, 72u8, 21u8, 96u8, 25u8, 177u8, 147u8, 98u8,
-                            143u8, 186u8, 112u8, 99u8, 197u8, 146u8, 170u8, 35u8, 195u8,
-                            154u8, 87u8, 119u8, 190u8, 148u8, 82u8, 134u8, 3u8, 163u8,
-                            182u8, 132u8, 130u8, 2u8, 48u8,
+                            167u8, 222u8, 69u8, 157u8, 53u8, 100u8, 78u8, 219u8, 182u8,
+                            33u8, 10u8, 169u8, 21u8, 151u8, 230u8, 160u8, 206u8, 56u8,
+                            247u8, 138u8, 253u8, 150u8, 25u8, 225u8, 242u8, 161u8, 75u8,
+                            205u8, 175u8, 209u8, 169u8, 176u8,
                         ]
                     {
                         let call = Propose {
@@ -15632,10 +15646,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
-                            26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
-                            124u8, 107u8, 33u8, 214u8, 101u8, 215u8, 174u8, 149u8, 162u8,
-                            189u8, 198u8, 68u8, 189u8, 218u8,
+                            166u8, 196u8, 81u8, 86u8, 135u8, 5u8, 173u8, 163u8, 163u8,
+                            41u8, 218u8, 32u8, 33u8, 124u8, 49u8, 172u8, 135u8, 84u8,
+                            228u8, 53u8, 28u8, 27u8, 208u8, 110u8, 244u8, 194u8, 128u8,
+                            53u8, 73u8, 111u8, 103u8, 49u8,
                         ]
                     {
                         let entry = ProposalOf(_0);
@@ -15659,10 +15673,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            75u8, 36u8, 235u8, 242u8, 206u8, 251u8, 227u8, 94u8, 96u8,
-                            26u8, 160u8, 127u8, 226u8, 27u8, 55u8, 177u8, 75u8, 102u8,
-                            124u8, 107u8, 33u8, 214u8, 101u8, 215u8, 174u8, 149u8, 162u8,
-                            189u8, 198u8, 68u8, 189u8, 218u8,
+                            166u8, 196u8, 81u8, 86u8, 135u8, 5u8, 173u8, 163u8, 163u8,
+                            41u8, 218u8, 32u8, 33u8, 124u8, 49u8, 172u8, 135u8, 84u8,
+                            228u8, 53u8, 28u8, 27u8, 208u8, 110u8, 244u8, 194u8, 128u8,
+                            53u8, 73u8, 111u8, 103u8, 49u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -17252,6 +17266,15 @@ pub mod api {
                 const PALLET: &'static str = "Treasury";
                 const FUNCTION: &'static str = "approve_proposal";
             }
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            pub struct RemoveApproval {
+                #[codec(compact)]
+                pub proposal_id: ::core::primitive::u32,
+            }
+            impl ::subxt::Call for RemoveApproval {
+                const PALLET: &'static str = "Treasury";
+                const FUNCTION: &'static str = "remove_approval";
+            }
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
                 marker: ::core::marker::PhantomData<X>,
@@ -17393,6 +17416,54 @@ pub mod api {
                         ]
                     {
                         let call = ApproveProposal { proposal_id };
+                        Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
+                }
+                #[doc = "Force a previously approved proposal to be removed from the approval queue."]
+                #[doc = "The original deposit will no longer be returned."]
+                #[doc = ""]
+                #[doc = "May only be called from `T::RejectOrigin`."]
+                #[doc = "- `proposal_id`: The index of a proposal"]
+                #[doc = ""]
+                #[doc = "# <weight>"]
+                #[doc = "- Complexity: O(A) where `A` is the number of approvals"]
+                #[doc = "- Db reads and writes: `Approvals`"]
+                #[doc = "# </weight>"]
+                #[doc = ""]
+                #[doc = "Errors:"]
+                #[doc = "- `ProposalNotApproved`: The `proposal_id` supplied was not found in the approval queue,"]
+                #[doc = "i.e., the proposal has not been approved. This could also mean the proposal does not"]
+                #[doc = "exist altogether, thus there is no way it would have been approved in the first place."]
+                pub fn remove_approval(
+                    &self,
+                    proposal_id: ::core::primitive::u32,
+                ) -> Result<
+                    ::subxt::SubmittableExtrinsic<
+                        'a,
+                        T,
+                        X,
+                        RemoveApproval,
+                        DispatchError,
+                        root_mod::Event,
+                    >,
+                    ::subxt::BasicError,
+                > {
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<RemoveApproval>()?
+                    };
+                    if runtime_call_hash
+                        == [
+                            235u8, 199u8, 214u8, 142u8, 168u8, 99u8, 226u8, 70u8, 161u8,
+                            36u8, 122u8, 95u8, 242u8, 2u8, 191u8, 163u8, 192u8, 26u8,
+                            185u8, 75u8, 47u8, 155u8, 80u8, 175u8, 88u8, 85u8, 83u8, 8u8,
+                            138u8, 130u8, 12u8, 228u8,
+                        ]
+                    {
+                        let call = RemoveApproval { proposal_id };
                         Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
                     } else {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
@@ -19228,6 +19299,14 @@ pub mod api {
                 const PALLET: &'static str = "Utility";
                 const FUNCTION: &'static str = "dispatch_as";
             }
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            pub struct ForceBatch {
+                pub calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
+            }
+            impl ::subxt::Call for ForceBatch {
+                const PALLET: &'static str = "Utility";
+                const FUNCTION: &'static str = "force_batch";
+            }
             pub struct TransactionApi<'a, T: ::subxt::Config, X> {
                 client: &'a ::subxt::Client<T>,
                 marker: ::core::marker::PhantomData<X>,
@@ -19283,10 +19362,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            102u8, 106u8, 179u8, 188u8, 99u8, 111u8, 210u8, 69u8, 179u8,
-                            206u8, 207u8, 163u8, 116u8, 184u8, 55u8, 228u8, 157u8, 241u8,
-                            23u8, 78u8, 112u8, 158u8, 56u8, 192u8, 79u8, 222u8, 0u8,
-                            104u8, 21u8, 13u8, 54u8, 184u8,
+                            102u8, 182u8, 19u8, 61u8, 101u8, 149u8, 136u8, 249u8, 229u8,
+                            72u8, 227u8, 201u8, 225u8, 82u8, 94u8, 255u8, 233u8, 138u8,
+                            199u8, 139u8, 18u8, 244u8, 111u8, 116u8, 34u8, 85u8, 75u8,
+                            148u8, 188u8, 25u8, 47u8, 156u8,
                         ]
                     {
                         let call = Batch { calls };
@@ -19330,10 +19409,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            195u8, 145u8, 176u8, 37u8, 226u8, 104u8, 213u8, 93u8, 246u8,
-                            7u8, 117u8, 101u8, 123u8, 125u8, 244u8, 74u8, 67u8, 118u8,
-                            106u8, 181u8, 172u8, 83u8, 17u8, 60u8, 133u8, 136u8, 219u8,
-                            67u8, 43u8, 93u8, 38u8, 89u8,
+                            180u8, 175u8, 190u8, 210u8, 241u8, 66u8, 254u8, 62u8, 255u8,
+                            164u8, 179u8, 239u8, 196u8, 208u8, 14u8, 15u8, 134u8, 124u8,
+                            168u8, 249u8, 156u8, 6u8, 8u8, 100u8, 179u8, 233u8, 28u8,
+                            43u8, 154u8, 143u8, 174u8, 32u8,
                         ]
                     {
                         let call = AsDerivative {
@@ -19380,10 +19459,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            199u8, 220u8, 25u8, 148u8, 69u8, 105u8, 234u8, 113u8, 221u8,
-                            220u8, 186u8, 34u8, 184u8, 101u8, 41u8, 87u8, 134u8, 92u8,
-                            134u8, 241u8, 44u8, 116u8, 95u8, 81u8, 174u8, 253u8, 214u8,
-                            191u8, 88u8, 24u8, 211u8, 135u8,
+                            101u8, 225u8, 46u8, 143u8, 133u8, 157u8, 113u8, 67u8, 254u8,
+                            105u8, 73u8, 88u8, 197u8, 194u8, 197u8, 125u8, 125u8, 24u8,
+                            177u8, 161u8, 27u8, 179u8, 183u8, 96u8, 102u8, 77u8, 248u8,
+                            190u8, 254u8, 188u8, 87u8, 39u8,
                         ]
                     {
                         let call = BatchAll { calls };
@@ -19424,16 +19503,63 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            188u8, 19u8, 178u8, 56u8, 121u8, 41u8, 46u8, 232u8, 118u8,
-                            56u8, 66u8, 6u8, 174u8, 184u8, 92u8, 66u8, 178u8, 213u8,
-                            220u8, 88u8, 109u8, 223u8, 186u8, 2u8, 68u8, 152u8, 137u8,
-                            131u8, 191u8, 194u8, 221u8, 254u8,
+                            9u8, 107u8, 249u8, 74u8, 149u8, 140u8, 51u8, 68u8, 42u8,
+                            188u8, 182u8, 99u8, 172u8, 144u8, 227u8, 66u8, 84u8, 206u8,
+                            56u8, 28u8, 74u8, 52u8, 110u8, 88u8, 47u8, 213u8, 89u8,
+                            218u8, 159u8, 70u8, 117u8, 87u8,
                         ]
                     {
                         let call = DispatchAs {
                             as_origin: ::std::boxed::Box::new(as_origin),
                             call: ::std::boxed::Box::new(call),
                         };
+                        Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
+                }
+                #[doc = "Send a batch of dispatch calls."]
+                #[doc = "Unlike `batch`, it allows errors and won't interrupt."]
+                #[doc = ""]
+                #[doc = "May be called from any origin."]
+                #[doc = ""]
+                #[doc = "- `calls`: The calls to be dispatched from the same origin. The number of call must not"]
+                #[doc = "  exceed the constant: `batched_calls_limit` (available in constant metadata)."]
+                #[doc = ""]
+                #[doc = "If origin is root then call are dispatch without checking origin filter. (This includes"]
+                #[doc = "bypassing `frame_system::Config::BaseCallFilter`)."]
+                #[doc = ""]
+                #[doc = "# <weight>"]
+                #[doc = "- Complexity: O(C) where C is the number of calls to be batched."]
+                #[doc = "# </weight>"]
+                pub fn force_batch(
+                    &self,
+                    calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
+                ) -> Result<
+                    ::subxt::SubmittableExtrinsic<
+                        'a,
+                        T,
+                        X,
+                        ForceBatch,
+                        DispatchError,
+                        root_mod::Event,
+                    >,
+                    ::subxt::BasicError,
+                > {
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<ForceBatch>()?
+                    };
+                    if runtime_call_hash
+                        == [
+                            137u8, 246u8, 71u8, 168u8, 206u8, 218u8, 138u8, 237u8, 91u8,
+                            235u8, 21u8, 26u8, 216u8, 98u8, 195u8, 42u8, 217u8, 58u8,
+                            71u8, 40u8, 16u8, 83u8, 136u8, 228u8, 169u8, 208u8, 234u8,
+                            55u8, 71u8, 182u8, 163u8, 169u8,
+                        ]
+                    {
+                        let call = ForceBatch { calls };
                         Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
                     } else {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
@@ -19463,11 +19589,27 @@ pub mod api {
                 const EVENT: &'static str = "BatchCompleted";
             }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            #[doc = "Batch of dispatches completed but has errors."]
+            pub struct BatchCompletedWithErrors;
+            impl ::subxt::Event for BatchCompletedWithErrors {
+                const PALLET: &'static str = "Utility";
+                const EVENT: &'static str = "BatchCompletedWithErrors";
+            }
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
             #[doc = "A single item within a Batch of dispatches has completed with no error."]
             pub struct ItemCompleted;
             impl ::subxt::Event for ItemCompleted {
                 const PALLET: &'static str = "Utility";
                 const EVENT: &'static str = "ItemCompleted";
+            }
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            #[doc = "A single item within a Batch of dispatches has completed with error."]
+            pub struct ItemFailed {
+                pub error: runtime_types::sp_runtime::DispatchError,
+            }
+            impl ::subxt::Event for ItemFailed {
+                const PALLET: &'static str = "Utility";
+                const EVENT: &'static str = "ItemFailed";
             }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
             #[doc = "A call was dispatched."]
@@ -21191,10 +21333,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            182u8, 110u8, 37u8, 47u8, 200u8, 93u8, 71u8, 195u8, 61u8,
-                            58u8, 197u8, 39u8, 17u8, 203u8, 192u8, 222u8, 55u8, 103u8,
-                            91u8, 226u8, 255u8, 253u8, 20u8, 71u8, 59u8, 53u8, 11u8,
-                            193u8, 239u8, 216u8, 100u8, 47u8,
+                            217u8, 71u8, 31u8, 35u8, 254u8, 72u8, 185u8, 233u8, 245u8,
+                            87u8, 156u8, 71u8, 75u8, 206u8, 64u8, 128u8, 244u8, 37u8,
+                            111u8, 9u8, 17u8, 189u8, 187u8, 48u8, 192u8, 169u8, 54u8,
+                            162u8, 237u8, 90u8, 109u8, 220u8,
                         ]
                     {
                         let call = Proxy {
@@ -21677,10 +21819,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            4u8, 205u8, 80u8, 128u8, 70u8, 110u8, 11u8, 69u8, 145u8,
-                            61u8, 218u8, 229u8, 208u8, 105u8, 190u8, 234u8, 189u8, 169u8,
-                            188u8, 10u8, 142u8, 144u8, 23u8, 200u8, 215u8, 180u8, 128u8,
-                            37u8, 95u8, 163u8, 205u8, 87u8,
+                            136u8, 192u8, 144u8, 78u8, 240u8, 243u8, 69u8, 182u8, 56u8,
+                            201u8, 133u8, 193u8, 81u8, 108u8, 41u8, 237u8, 6u8, 231u8,
+                            232u8, 29u8, 134u8, 207u8, 175u8, 225u8, 24u8, 154u8, 105u8,
+                            161u8, 167u8, 163u8, 37u8, 100u8,
                         ]
                     {
                         let call = ProxyAnnounced {
@@ -22235,10 +22377,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            95u8, 132u8, 202u8, 110u8, 113u8, 89u8, 78u8, 7u8, 190u8,
-                            143u8, 107u8, 158u8, 56u8, 3u8, 41u8, 167u8, 115u8, 34u8,
-                            214u8, 63u8, 135u8, 154u8, 60u8, 181u8, 71u8, 157u8, 189u8,
-                            37u8, 215u8, 212u8, 66u8, 186u8,
+                            114u8, 239u8, 71u8, 201u8, 120u8, 147u8, 150u8, 0u8, 252u8,
+                            254u8, 208u8, 228u8, 74u8, 136u8, 189u8, 191u8, 104u8, 193u8,
+                            207u8, 50u8, 153u8, 70u8, 132u8, 58u8, 36u8, 31u8, 151u8,
+                            123u8, 139u8, 102u8, 245u8, 152u8,
                         ]
                     {
                         let call = AsMultiThreshold1 {
@@ -22327,10 +22469,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            248u8, 250u8, 144u8, 85u8, 79u8, 224u8, 92u8, 55u8, 76u8,
-                            55u8, 171u8, 48u8, 122u8, 6u8, 62u8, 155u8, 69u8, 41u8,
-                            121u8, 233u8, 40u8, 29u8, 224u8, 61u8, 245u8, 80u8, 50u8,
-                            30u8, 185u8, 92u8, 250u8, 160u8,
+                            158u8, 219u8, 179u8, 104u8, 155u8, 199u8, 218u8, 219u8,
+                            186u8, 39u8, 10u8, 67u8, 214u8, 34u8, 239u8, 193u8, 18u8,
+                            155u8, 108u8, 245u8, 245u8, 133u8, 125u8, 73u8, 150u8, 203u8,
+                            99u8, 191u8, 222u8, 28u8, 22u8, 17u8,
                         ]
                     {
                         let call = AsMulti {
@@ -22687,10 +22829,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            51u8, 122u8, 79u8, 127u8, 1u8, 182u8, 39u8, 88u8, 57u8,
-                            227u8, 141u8, 253u8, 217u8, 23u8, 89u8, 94u8, 37u8, 244u8,
-                            136u8, 246u8, 87u8, 146u8, 97u8, 23u8, 135u8, 13u8, 32u8,
-                            14u8, 191u8, 15u8, 2u8, 51u8,
+                            76u8, 214u8, 15u8, 136u8, 99u8, 62u8, 40u8, 193u8, 7u8,
+                            250u8, 114u8, 39u8, 166u8, 30u8, 110u8, 65u8, 41u8, 97u8,
+                            220u8, 9u8, 47u8, 175u8, 44u8, 174u8, 169u8, 50u8, 29u8,
+                            180u8, 232u8, 87u8, 179u8, 49u8,
                         ]
                     {
                         let entry = Calls(_0);
@@ -22713,10 +22855,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            51u8, 122u8, 79u8, 127u8, 1u8, 182u8, 39u8, 88u8, 57u8,
-                            227u8, 141u8, 253u8, 217u8, 23u8, 89u8, 94u8, 37u8, 244u8,
-                            136u8, 246u8, 87u8, 146u8, 97u8, 23u8, 135u8, 13u8, 32u8,
-                            14u8, 191u8, 15u8, 2u8, 51u8,
+                            76u8, 214u8, 15u8, 136u8, 99u8, 62u8, 40u8, 193u8, 7u8,
+                            250u8, 114u8, 39u8, 166u8, 30u8, 110u8, 65u8, 41u8, 97u8,
+                            220u8, 9u8, 47u8, 175u8, 44u8, 174u8, 169u8, 50u8, 29u8,
+                            180u8, 232u8, 87u8, 179u8, 49u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -24040,7 +24182,7 @@ pub mod api {
                 #[doc = "parent bounty to child-bounty account, if parent bounty has enough"]
                 #[doc = "funds, else the call fails."]
                 #[doc = ""]
-                #[doc = "Upper bound to maximum number of active  child-bounties that can be"]
+                #[doc = "Upper bound to maximum number of active  child bounties that can be"]
                 #[doc = "added are managed via runtime trait config"]
                 #[doc = "[`Config::MaxActiveChildBountyCount`]."]
                 #[doc = ""]
@@ -24210,12 +24352,12 @@ pub mod api {
                 #[doc = "the curator of the parent bounty, or any signed origin."]
                 #[doc = ""]
                 #[doc = "For the origin other than T::RejectOrigin and the child-bounty"]
-                #[doc = "curator, parent-bounty must be in active state, for this call to"]
+                #[doc = "curator, parent bounty must be in active state, for this call to"]
                 #[doc = "work. We allow child-bounty curator and T::RejectOrigin to execute"]
-                #[doc = "this call irrespective of the parent-bounty state."]
+                #[doc = "this call irrespective of the parent bounty state."]
                 #[doc = ""]
                 #[doc = "If this function is called by the `RejectOrigin` or the"]
-                #[doc = "parent-bounty curator, we assume that the child-bounty curator is"]
+                #[doc = "parent bounty curator, we assume that the child-bounty curator is"]
                 #[doc = "malicious or inactive. As a result, child-bounty curator deposit is"]
                 #[doc = "slashed."]
                 #[doc = ""]
@@ -24279,7 +24421,7 @@ pub mod api {
                 #[doc = ""]
                 #[doc = "The beneficiary will be able to claim the funds after a delay."]
                 #[doc = ""]
-                #[doc = "The dispatch origin for this call must be the master curator or"]
+                #[doc = "The dispatch origin for this call must be the parent curator or"]
                 #[doc = "curator of this child-bounty."]
                 #[doc = ""]
                 #[doc = "Parent bounty must be in active state, for this child-bounty call to"]
@@ -24605,7 +24747,7 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                #[doc = " Number of child-bounties per parent bounty."]
+                #[doc = " Number of child bounties per parent bounty."]
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub async fn parent_child_bounties(
                     &self,
@@ -24635,7 +24777,7 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                #[doc = " Number of child-bounties per parent bounty."]
+                #[doc = " Number of child bounties per parent bounty."]
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub async fn parent_child_bounties_iter(
                     &self,
@@ -24662,7 +24804,7 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                #[doc = " Child-bounties that have been added."]
+                #[doc = " Child bounties that have been added."]
                 pub async fn child_bounties(
                     &self,
                     _0: &::core::primitive::u32,
@@ -24697,7 +24839,7 @@ pub mod api {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
                 }
-                #[doc = " Child-bounties that have been added."]
+                #[doc = " Child bounties that have been added."]
                 pub async fn child_bounties_iter(
                     &self,
                     block_hash: ::core::option::Option<T::Hash>,
@@ -24847,7 +24989,7 @@ pub mod api {
                 pub fn new(client: &'a ::subxt::Client<T>) -> Self {
                     Self { client }
                 }
-                #[doc = " Maximum number of child-bounties that can be added to a parent bounty."]
+                #[doc = " Maximum number of child bounties that can be added to a parent bounty."]
                 pub fn max_active_child_bounty_count(
                     &self,
                 ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
@@ -26375,10 +26517,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            94u8, 51u8, 117u8, 215u8, 100u8, 250u8, 9u8, 70u8, 131u8,
-                            21u8, 2u8, 142u8, 177u8, 117u8, 21u8, 190u8, 10u8, 15u8,
-                            183u8, 214u8, 6u8, 169u8, 141u8, 169u8, 23u8, 136u8, 231u8,
-                            130u8, 48u8, 126u8, 198u8, 173u8,
+                            75u8, 2u8, 76u8, 74u8, 73u8, 167u8, 243u8, 1u8, 31u8, 26u8,
+                            48u8, 196u8, 177u8, 21u8, 233u8, 66u8, 251u8, 11u8, 11u8,
+                            252u8, 63u8, 206u8, 115u8, 116u8, 73u8, 232u8, 241u8, 179u8,
+                            249u8, 34u8, 61u8, 171u8,
                         ]
                     {
                         let entry = SignedSubmissionsMap(_0);
@@ -26408,10 +26550,10 @@ pub mod api {
                     };
                     if runtime_storage_hash
                         == [
-                            94u8, 51u8, 117u8, 215u8, 100u8, 250u8, 9u8, 70u8, 131u8,
-                            21u8, 2u8, 142u8, 177u8, 117u8, 21u8, 190u8, 10u8, 15u8,
-                            183u8, 214u8, 6u8, 169u8, 141u8, 169u8, 23u8, 136u8, 231u8,
-                            130u8, 48u8, 126u8, 198u8, 173u8,
+                            75u8, 2u8, 76u8, 74u8, 73u8, 167u8, 243u8, 1u8, 31u8, 26u8,
+                            48u8, 196u8, 177u8, 21u8, 233u8, 66u8, 251u8, 11u8, 11u8,
+                            252u8, 63u8, 206u8, 115u8, 116u8, 73u8, 232u8, 241u8, 179u8,
+                            249u8, 34u8, 61u8, 171u8,
                         ]
                     {
                         self.client.storage().iter(block_hash).await
@@ -26513,8 +26655,8 @@ pub mod api {
                     }
                 }
                 #[doc = " The minimum amount of improvement to the solution score that defines a solution as"]
-                #[doc = " \"better\" (in any phase)."]
-                pub fn solution_improvement_threshold(
+                #[doc = " \"better\" in the Signed phase."]
+                pub fn better_signed_threshold(
                     &self,
                 ) -> ::core::result::Result<
                     runtime_types::sp_arithmetic::per_things::Perbill,
@@ -26524,15 +26666,43 @@ pub mod api {
                     let metadata = locked_metadata.read();
                     if metadata.constant_hash(
                         "ElectionProviderMultiPhase",
-                        "SolutionImprovementThreshold",
+                        "BetterSignedThreshold",
                     )? == [
-                        134u8, 67u8, 182u8, 225u8, 210u8, 61u8, 10u8, 251u8, 7u8, 107u8,
-                        38u8, 91u8, 186u8, 153u8, 206u8, 250u8, 147u8, 230u8, 24u8, 4u8,
-                        194u8, 111u8, 79u8, 64u8, 234u8, 72u8, 58u8, 107u8, 252u8, 37u8,
-                        70u8, 184u8,
+                        77u8, 124u8, 224u8, 100u8, 113u8, 25u8, 159u8, 166u8, 136u8,
+                        195u8, 84u8, 168u8, 142u8, 209u8, 89u8, 249u8, 7u8, 218u8, 51u8,
+                        240u8, 211u8, 135u8, 183u8, 192u8, 194u8, 195u8, 107u8, 37u8,
+                        23u8, 191u8, 254u8, 185u8,
                     ] {
                         let pallet = metadata.pallet("ElectionProviderMultiPhase")?;
-                        let constant = pallet.constant("SolutionImprovementThreshold")?;
+                        let constant = pallet.constant("BetterSignedThreshold")?;
+                        let value =
+                            ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                        Ok(value)
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
+                }
+                #[doc = " The minimum amount of improvement to the solution score that defines a solution as"]
+                #[doc = " \"better\" in the Unsigned phase."]
+                pub fn better_unsigned_threshold(
+                    &self,
+                ) -> ::core::result::Result<
+                    runtime_types::sp_arithmetic::per_things::Perbill,
+                    ::subxt::BasicError,
+                > {
+                    let locked_metadata = self.client.metadata();
+                    let metadata = locked_metadata.read();
+                    if metadata.constant_hash(
+                        "ElectionProviderMultiPhase",
+                        "BetterUnsignedThreshold",
+                    )? == [
+                        38u8, 62u8, 189u8, 136u8, 151u8, 166u8, 34u8, 147u8, 119u8, 70u8,
+                        126u8, 29u8, 200u8, 206u8, 195u8, 24u8, 14u8, 80u8, 151u8, 132u8,
+                        83u8, 135u8, 206u8, 68u8, 169u8, 75u8, 1u8, 40u8, 186u8, 203u8,
+                        226u8, 118u8,
+                    ] {
+                        let pallet = metadata.pallet("ElectionProviderMultiPhase")?;
+                        let constant = pallet.constant("BetterUnsignedThreshold")?;
                         let value =
                             ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                         Ok(value)
@@ -26606,10 +26776,10 @@ pub mod api {
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "MinerMaxWeight")?
                         == [
-                            225u8, 83u8, 120u8, 180u8, 14u8, 13u8, 33u8, 51u8, 90u8,
-                            218u8, 212u8, 203u8, 3u8, 184u8, 197u8, 120u8, 36u8, 87u8,
-                            192u8, 216u8, 241u8, 41u8, 232u8, 91u8, 27u8, 90u8, 156u8,
-                            216u8, 184u8, 133u8, 229u8, 92u8,
+                            34u8, 141u8, 148u8, 109u8, 219u8, 244u8, 253u8, 179u8, 243u8,
+                            51u8, 21u8, 185u8, 160u8, 239u8, 17u8, 32u8, 203u8, 213u8,
+                            77u8, 66u8, 102u8, 9u8, 95u8, 165u8, 197u8, 46u8, 186u8,
+                            122u8, 140u8, 250u8, 60u8, 37u8,
                         ]
                     {
                         let pallet = metadata.pallet("ElectionProviderMultiPhase")?;
@@ -26664,14 +26834,39 @@ pub mod api {
                     if metadata
                         .constant_hash("ElectionProviderMultiPhase", "SignedMaxWeight")?
                         == [
-                            245u8, 227u8, 58u8, 211u8, 17u8, 86u8, 80u8, 95u8, 176u8,
-                            24u8, 119u8, 219u8, 116u8, 177u8, 55u8, 204u8, 65u8, 122u8,
-                            19u8, 7u8, 3u8, 216u8, 70u8, 159u8, 97u8, 145u8, 23u8, 49u8,
-                            128u8, 2u8, 180u8, 99u8,
+                            54u8, 61u8, 214u8, 10u8, 196u8, 175u8, 140u8, 223u8, 25u8,
+                            241u8, 182u8, 169u8, 215u8, 230u8, 227u8, 148u8, 174u8,
+                            248u8, 158u8, 157u8, 148u8, 248u8, 241u8, 97u8, 191u8, 229u8,
+                            49u8, 147u8, 180u8, 125u8, 109u8, 26u8,
                         ]
                     {
                         let pallet = metadata.pallet("ElectionProviderMultiPhase")?;
                         let constant = pallet.constant("SignedMaxWeight")?;
+                        let value =
+                            ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
+                        Ok(value)
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
+                }
+                #[doc = " The maximum amount of unchecked solutions to refund the call fee for."]
+                pub fn signed_max_refunds(
+                    &self,
+                ) -> ::core::result::Result<::core::primitive::u32, ::subxt::BasicError>
+                {
+                    let locked_metadata = self.client.metadata();
+                    let metadata = locked_metadata.read();
+                    if metadata
+                        .constant_hash("ElectionProviderMultiPhase", "SignedMaxRefunds")?
+                        == [
+                            86u8, 134u8, 190u8, 26u8, 28u8, 169u8, 156u8, 24u8, 50u8,
+                            139u8, 26u8, 80u8, 81u8, 111u8, 60u8, 175u8, 250u8, 7u8,
+                            92u8, 177u8, 191u8, 226u8, 198u8, 12u8, 179u8, 243u8, 38u8,
+                            21u8, 212u8, 121u8, 52u8, 148u8,
+                        ]
+                    {
+                        let pallet = metadata.pallet("ElectionProviderMultiPhase")?;
+                        let constant = pallet.constant("SignedMaxRefunds")?;
                         let value =
                             ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
                         Ok(value)
@@ -29421,18 +29616,6 @@ pub mod api {
                     ::subxt::StorageEntryKey::Plain
                 }
             }
-            pub struct PendingConfig<'a>(pub &'a ::core::primitive::u32);
-            impl ::subxt::StorageEntry for PendingConfig<'_> {
-                const PALLET: &'static str = "Configuration";
-                const STORAGE: &'static str = "PendingConfig";
-                type Value = runtime_types :: polkadot_runtime_parachains :: configuration :: migration :: v1 :: HostConfiguration < :: core :: primitive :: u32 > ;
-                fn key(&self) -> ::subxt::StorageEntryKey {
-                    ::subxt::StorageEntryKey::Map(vec![::subxt::StorageMapKey::new(
-                        &self.0,
-                        ::subxt::StorageHasher::Twox64Concat,
-                    )])
-                }
-            }
             pub struct PendingConfigs;
             impl ::subxt::StorageEntry for PendingConfigs {
                 const PALLET: &'static str = "Configuration";
@@ -29477,56 +29660,6 @@ pub mod api {
                             .storage()
                             .fetch_or_default(&entry, block_hash)
                             .await
-                    } else {
-                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                    }
-                }
-                #[doc = " Pending configuration (if any) for the next session."]
-                #[doc = ""]
-                #[doc = " DEPRECATED: This is no longer used, and will be removed in the future."]                pub async fn pending_config (& self , _0 : & :: core :: primitive :: u32 , block_hash : :: core :: option :: Option < T :: Hash > ,) -> :: core :: result :: Result < :: core :: option :: Option < runtime_types :: polkadot_runtime_parachains :: configuration :: migration :: v1 :: HostConfiguration < :: core :: primitive :: u32 > > , :: subxt :: BasicError >{
-                    let runtime_storage_hash = {
-                        let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
-                        metadata.storage_hash::<PendingConfig>()?
-                    };
-                    if runtime_storage_hash
-                        == [
-                            152u8, 192u8, 135u8, 74u8, 174u8, 47u8, 192u8, 95u8, 147u8,
-                            137u8, 41u8, 219u8, 149u8, 198u8, 186u8, 16u8, 158u8, 160u8,
-                            51u8, 31u8, 187u8, 244u8, 112u8, 238u8, 194u8, 85u8, 198u8,
-                            73u8, 148u8, 62u8, 74u8, 6u8,
-                        ]
-                    {
-                        let entry = PendingConfig(_0);
-                        self.client.storage().fetch(&entry, block_hash).await
-                    } else {
-                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                    }
-                }
-                #[doc = " Pending configuration (if any) for the next session."]
-                #[doc = ""]
-                #[doc = " DEPRECATED: This is no longer used, and will be removed in the future."]
-                pub async fn pending_config_iter(
-                    &self,
-                    block_hash: ::core::option::Option<T::Hash>,
-                ) -> ::core::result::Result<
-                    ::subxt::KeyIter<'a, T, PendingConfig<'a>>,
-                    ::subxt::BasicError,
-                > {
-                    let runtime_storage_hash = {
-                        let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
-                        metadata.storage_hash::<PendingConfig>()?
-                    };
-                    if runtime_storage_hash
-                        == [
-                            152u8, 192u8, 135u8, 74u8, 174u8, 47u8, 192u8, 95u8, 147u8,
-                            137u8, 41u8, 219u8, 149u8, 198u8, 186u8, 16u8, 158u8, 160u8,
-                            51u8, 31u8, 187u8, 244u8, 112u8, 238u8, 194u8, 85u8, 198u8,
-                            73u8, 148u8, 62u8, 74u8, 6u8,
-                        ]
-                    {
-                        self.client.storage().iter(block_hash).await
                     } else {
                         Err(::subxt::MetadataError::IncompatibleMetadata.into())
                     }
@@ -39646,6 +39779,9 @@ pub mod api {
                     #[codec(index = 2)]
                     #[doc = "A given equivocation report is valid but already previously reported."]
                     DuplicateOffenceReport,
+                    #[codec(index = 3)]
+                    #[doc = "Submitted configuration is invalid."]
+                    InvalidConfiguration,
                 }
             }
         }
@@ -39661,6 +39797,19 @@ pub mod api {
                         ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
                     pub tail:
                         ::core::option::Option<::subxt::sp_core::crypto::AccountId32>,
+                }
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                pub enum ListError {
+                    #[codec(index = 0)]
+                    Duplicate,
+                    #[codec(index = 1)]
+                    NotHeavier,
+                    #[codec(index = 2)]
+                    NotInSameBag,
+                    #[codec(index = 3)]
+                    NodeNotFound,
                 }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
@@ -39710,14 +39859,8 @@ pub mod api {
                 )]
                 pub enum Error {
                     #[codec(index = 0)]
-                    #[doc = "Attempted to place node in front of a node in another bag."]
-                    NotInSameBag,
-                    #[codec(index = 1)]
-                    #[doc = "Id not found in list."]
-                    IdNotFound,
-                    #[codec(index = 2)]
-                    #[doc = "An Id does not have a greater score than another Id."]
-                    NotHeavier,
+                    #[doc = "A error in the list interface implementation."]
+                    List(runtime_types::pallet_bags_list::list::ListError),
                 }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
@@ -40127,7 +40270,7 @@ pub mod api {
                     #[doc = "The bounties cannot be claimed/closed because it's still in the countdown period."]
                     Premature,
                     #[codec(index = 9)]
-                    #[doc = "The bounty cannot be closed because it has active child-bounties."]
+                    #[doc = "The bounty cannot be closed because it has active child bounties."]
                     HasActiveChildBounty,
                     #[codec(index = 10)]
                     #[doc = "Too many approvals are already queued."]
@@ -40217,7 +40360,7 @@ pub mod api {
                     #[doc = "parent bounty to child-bounty account, if parent bounty has enough"]
                     #[doc = "funds, else the call fails."]
                     #[doc = ""]
-                    #[doc = "Upper bound to maximum number of active  child-bounties that can be"]
+                    #[doc = "Upper bound to maximum number of active  child bounties that can be"]
                     #[doc = "added are managed via runtime trait config"]
                     #[doc = "[`Config::MaxActiveChildBountyCount`]."]
                     #[doc = ""]
@@ -40295,12 +40438,12 @@ pub mod api {
                     #[doc = "the curator of the parent bounty, or any signed origin."]
                     #[doc = ""]
                     #[doc = "For the origin other than T::RejectOrigin and the child-bounty"]
-                    #[doc = "curator, parent-bounty must be in active state, for this call to"]
+                    #[doc = "curator, parent bounty must be in active state, for this call to"]
                     #[doc = "work. We allow child-bounty curator and T::RejectOrigin to execute"]
-                    #[doc = "this call irrespective of the parent-bounty state."]
+                    #[doc = "this call irrespective of the parent bounty state."]
                     #[doc = ""]
                     #[doc = "If this function is called by the `RejectOrigin` or the"]
-                    #[doc = "parent-bounty curator, we assume that the child-bounty curator is"]
+                    #[doc = "parent bounty curator, we assume that the child-bounty curator is"]
                     #[doc = "malicious or inactive. As a result, child-bounty curator deposit is"]
                     #[doc = "slashed."]
                     #[doc = ""]
@@ -40334,7 +40477,7 @@ pub mod api {
                     #[doc = ""]
                     #[doc = "The beneficiary will be able to claim the funds after a delay."]
                     #[doc = ""]
-                    #[doc = "The dispatch origin for this call must be the master curator or"]
+                    #[doc = "The dispatch origin for this call must be the parent curator or"]
                     #[doc = "curator of this child-bounty."]
                     #[doc = ""]
                     #[doc = "Parent bounty must be in active state, for this child-bounty call to"]
@@ -40421,7 +40564,7 @@ pub mod api {
                     #[doc = "The bounty balance is not enough to add new child-bounty."]
                     InsufficientBountyBalance,
                     #[codec(index = 2)]
-                    #[doc = "Number of child-bounties exceeds limit `MaxActiveChildBountyCount`."]
+                    #[doc = "Number of child bounties exceeds limit `MaxActiveChildBountyCount`."]
                     TooManyChildBounties,
                 }
                 #[derive(
@@ -41472,7 +41615,7 @@ pub mod api {
                         runtime_types::pallet_election_provider_multi_phase::RawSolution<
                             _2,
                         >,
-                    pub reward: _1,
+                    pub call_fee: _1,
                 }
             }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
@@ -43937,7 +44080,7 @@ pub mod api {
                         #[codec(index = 7)]
                         #[doc = "(Re-)set the payment target for a controller."]
                         #[doc = ""]
-                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = "Effects will be felt instantly (as soon as this function is completed successfully)."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must be _Signed_ by the controller, not the stash."]
                         #[doc = ""]
@@ -43959,7 +44102,7 @@ pub mod api {
                         #[codec(index = 8)]
                         #[doc = "(Re-)set the controller of a stash."]
                         #[doc = ""]
-                        #[doc = "Effects will be felt at the beginning of the next era."]
+                        #[doc = "Effects will be felt instantly (as soon as this function is completed successfully)."]
                         #[doc = ""]
                         #[doc = "The dispatch origin for this call must be _Signed_ by the stash, not the controller."]
                         #[doc = ""]
@@ -44441,6 +44584,12 @@ pub mod api {
                             ::core::primitive::u32,
                             ::subxt::sp_core::crypto::AccountId32,
                         ),
+                        #[codec(index = 12)]
+                        #[doc = "A validator has set their preferences."]
+                        ValidatorPrefsSet(
+                            ::subxt::sp_core::crypto::AccountId32,
+                            runtime_types::pallet_staking::ValidatorPrefs,
+                        ),
                     }
                 }
             }
@@ -44544,15 +44693,17 @@ pub mod api {
                 None,
             }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
-            pub struct StakingLedger<_0, _1> {
-                pub stash: _0,
+            pub struct StakingLedger {
+                pub stash: ::subxt::sp_core::crypto::AccountId32,
                 #[codec(compact)]
-                pub total: _1,
+                pub total: ::core::primitive::u128,
                 #[codec(compact)]
-                pub active: _1,
+                pub active: ::core::primitive::u128,
                 pub unlocking:
                     runtime_types::frame_support::storage::bounded_vec::BoundedVec<
-                        runtime_types::pallet_staking::UnlockChunk<_1>,
+                        runtime_types::pallet_staking::UnlockChunk<
+                            ::core::primitive::u128,
+                        >,
                     >,
                 pub claimed_rewards: ::std::vec::Vec<::core::primitive::u32>,
             }
@@ -44887,6 +45038,26 @@ pub mod api {
                         #[codec(compact)]
                         proposal_id: ::core::primitive::u32,
                     },
+                    #[codec(index = 3)]
+                    #[doc = "Force a previously approved proposal to be removed from the approval queue."]
+                    #[doc = "The original deposit will no longer be returned."]
+                    #[doc = ""]
+                    #[doc = "May only be called from `T::RejectOrigin`."]
+                    #[doc = "- `proposal_id`: The index of a proposal"]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(A) where `A` is the number of approvals"]
+                    #[doc = "- Db reads and writes: `Approvals`"]
+                    #[doc = "# </weight>"]
+                    #[doc = ""]
+                    #[doc = "Errors:"]
+                    #[doc = "- `ProposalNotApproved`: The `proposal_id` supplied was not found in the approval queue,"]
+                    #[doc = "i.e., the proposal has not been approved. This could also mean the proposal does not"]
+                    #[doc = "exist altogether, thus there is no way it would have been approved in the first place."]
+                    remove_approval {
+                        #[codec(compact)]
+                        proposal_id: ::core::primitive::u32,
+                    },
                 }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
@@ -44901,6 +45072,9 @@ pub mod api {
                     #[codec(index = 2)]
                     #[doc = "Too many approvals in the queue."]
                     TooManyApprovals,
+                    #[codec(index = 3)]
+                    #[doc = "Proposal has not been approved."]
+                    ProposalNotApproved,
                 }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
@@ -45036,6 +45210,24 @@ pub mod api {
                         >,
                         call: ::std::boxed::Box<runtime_types::polkadot_runtime::Call>,
                     },
+                    #[codec(index = 4)]
+                    #[doc = "Send a batch of dispatch calls."]
+                    #[doc = "Unlike `batch`, it allows errors and won't interrupt."]
+                    #[doc = ""]
+                    #[doc = "May be called from any origin."]
+                    #[doc = ""]
+                    #[doc = "- `calls`: The calls to be dispatched from the same origin. The number of call must not"]
+                    #[doc = "  exceed the constant: `batched_calls_limit` (available in constant metadata)."]
+                    #[doc = ""]
+                    #[doc = "If origin is root then call are dispatch without checking origin filter. (This includes"]
+                    #[doc = "bypassing `frame_system::Config::BaseCallFilter`)."]
+                    #[doc = ""]
+                    #[doc = "# <weight>"]
+                    #[doc = "- Complexity: O(C) where C is the number of calls to be batched."]
+                    #[doc = "# </weight>"]
+                    force_batch {
+                        calls: ::std::vec::Vec<runtime_types::polkadot_runtime::Call>,
+                    },
                 }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
@@ -45060,9 +45252,17 @@ pub mod api {
                     #[doc = "Batch of dispatches completed fully with no error."]
                     BatchCompleted,
                     #[codec(index = 2)]
+                    #[doc = "Batch of dispatches completed but has errors."]
+                    BatchCompletedWithErrors,
+                    #[codec(index = 3)]
                     #[doc = "A single item within a Batch of dispatches has completed with no error."]
                     ItemCompleted,
-                    #[codec(index = 3)]
+                    #[codec(index = 4)]
+                    #[doc = "A single item within a Batch of dispatches has completed with error."]
+                    ItemFailed {
+                        error: runtime_types::sp_runtime::DispatchError,
+                    },
+                    #[codec(index = 5)]
                     #[doc = "A call was dispatched."]
                     DispatchedAs {
                         result: ::core::result::Result<
@@ -46910,59 +47110,6 @@ pub mod api {
             use super::runtime_types;
             pub mod configuration {
                 use super::runtime_types;
-                pub mod migration {
-                    use super::runtime_types;
-                    pub mod v1 {
-                        use super::runtime_types;
-                        #[derive(
-                            :: subxt :: codec :: Decode,
-                            :: subxt :: codec :: Encode,
-                            Debug,
-                        )]
-                        pub struct HostConfiguration<_0> {
-                            pub max_code_size: _0,
-                            pub max_head_data_size: _0,
-                            pub max_upward_queue_count: _0,
-                            pub max_upward_queue_size: _0,
-                            pub max_upward_message_size: _0,
-                            pub max_upward_message_num_per_candidate: _0,
-                            pub hrmp_max_message_num_per_candidate: _0,
-                            pub validation_upgrade_frequency: _0,
-                            pub validation_upgrade_delay: _0,
-                            pub max_pov_size: _0,
-                            pub max_downward_message_size: _0,
-                            pub ump_service_total_weight: ::core::primitive::u64,
-                            pub hrmp_max_parachain_outbound_channels: _0,
-                            pub hrmp_max_parathread_outbound_channels: _0,
-                            pub hrmp_sender_deposit: ::core::primitive::u128,
-                            pub hrmp_recipient_deposit: ::core::primitive::u128,
-                            pub hrmp_channel_max_capacity: _0,
-                            pub hrmp_channel_max_total_size: _0,
-                            pub hrmp_max_parachain_inbound_channels: _0,
-                            pub hrmp_max_parathread_inbound_channels: _0,
-                            pub hrmp_channel_max_message_size: _0,
-                            pub code_retention_period: _0,
-                            pub parathread_cores: _0,
-                            pub parathread_retries: _0,
-                            pub group_rotation_frequency: _0,
-                            pub chain_availability_period: _0,
-                            pub thread_availability_period: _0,
-                            pub scheduling_lookahead: _0,
-                            pub max_validators_per_core: ::core::option::Option<_0>,
-                            pub max_validators: ::core::option::Option<_0>,
-                            pub dispute_period: _0,
-                            pub dispute_post_conclusion_acceptance_period: _0,
-                            pub dispute_max_spam_slots: _0,
-                            pub dispute_conclusion_by_time_out_period: _0,
-                            pub no_show_slots: _0,
-                            pub n_delay_tranches: _0,
-                            pub zeroth_delay_tranche_width: _0,
-                            pub needed_approvals: _0,
-                            pub relay_vrf_modulo_samples: _0,
-                            pub ump_max_individual_weight: ::core::primitive::u64,
-                        }
-                    }
-                }
                 pub mod pallet {
                     use super::runtime_types;
                     #[derive(
@@ -47993,6 +48140,36 @@ pub mod api {
                         c: (::core::primitive::u64, ::core::primitive::u64),
                         allowed_slots: runtime_types::sp_consensus_babe::AllowedSlots,
                     },
+                }
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                pub enum PreDigest {
+                    # [codec (index = 1)] Primary (runtime_types :: sp_consensus_babe :: digests :: PrimaryPreDigest ,) , # [codec (index = 2)] SecondaryPlain (runtime_types :: sp_consensus_babe :: digests :: SecondaryPlainPreDigest ,) , # [codec (index = 3)] SecondaryVRF (runtime_types :: sp_consensus_babe :: digests :: SecondaryVRFPreDigest ,) , }
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                pub struct PrimaryPreDigest {
+                    pub authority_index: ::core::primitive::u32,
+                    pub slot: runtime_types::sp_consensus_slots::Slot,
+                    pub vrf_output: [::core::primitive::u8; 32usize],
+                    pub vrf_proof: [::core::primitive::u8; 64usize],
+                }
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                pub struct SecondaryPlainPreDigest {
+                    pub authority_index: ::core::primitive::u32,
+                    pub slot: runtime_types::sp_consensus_slots::Slot,
+                }
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                pub struct SecondaryVRFPreDigest {
+                    pub authority_index: ::core::primitive::u32,
+                    pub slot: runtime_types::sp_consensus_slots::Slot,
+                    pub vrf_output: [::core::primitive::u8; 32usize],
+                    pub vrf_proof: [::core::primitive::u8; 64usize],
                 }
             }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
@@ -49967,14 +50144,17 @@ pub mod api {
         X: ::subxt::extrinsic::ExtrinsicParams<T>,
     {
         pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
-            let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
-            if metadata.metadata_hash(&PALLETS)
+            let runtime_metadata_hash = {
+                let locked_metadata = self.client.metadata();
+                let metadata = locked_metadata.read();
+                metadata.metadata_hash(&PALLETS)
+            };
+            if runtime_metadata_hash
                 != [
-                    222u8, 70u8, 96u8, 67u8, 220u8, 49u8, 147u8, 114u8, 199u8, 254u8,
-                    88u8, 102u8, 188u8, 14u8, 180u8, 163u8, 55u8, 109u8, 43u8, 71u8,
-                    135u8, 161u8, 80u8, 151u8, 66u8, 252u8, 126u8, 104u8, 59u8, 80u8,
-                    140u8, 193u8,
+                    210u8, 45u8, 31u8, 79u8, 151u8, 149u8, 38u8, 156u8, 209u8, 36u8,
+                    248u8, 47u8, 243u8, 234u8, 251u8, 113u8, 31u8, 72u8, 9u8, 97u8,
+                    118u8, 172u8, 164u8, 60u8, 56u8, 158u8, 219u8, 77u8, 169u8, 230u8,
+                    148u8, 51u8,
                 ]
             {
                 Err(::subxt::MetadataError::IncompatibleMetadata)
