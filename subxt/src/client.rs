@@ -330,6 +330,11 @@ where
             other_params,
         );
 
+        tracing::debug!(
+            "additional_and_extra_params: {:?}",
+            additional_and_extra_params
+        );
+
         // 4. Construct signature. This is compatible with the Encode impl
         //    for SignedPayload (which is this payload of bytes that we'd like)
         //    to sign. See:
