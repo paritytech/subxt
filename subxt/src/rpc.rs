@@ -28,7 +28,6 @@ use std::{
 
 use crate::{
     error::BasicError,
-    storage::StorageKeyPrefix,
     Config,
     Metadata,
     PhantomDataSendSync,
@@ -277,13 +276,12 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKeyPrefix>,
+        key: Option<StorageKey>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = prefix.map(|p| p.to_storage_key());
-        let params = rpc_params![prefix, count, start_key, hash];
+        let params = rpc_params![key, count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }

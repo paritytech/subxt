@@ -235,10 +235,10 @@ impl<'a, T: Config> StorageClient<'a, T> {
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = StorageKeyPrefix::new::<F>();
+        let key = StorageKeyPrefix::new::<F>().to_storage_key();
         let keys = self
             .rpc
-            .storage_keys_paged(Some(prefix), count, start_key, hash)
+            .storage_keys_paged(Some(key), count, start_key, hash)
             .await?;
         Ok(keys)
     }
