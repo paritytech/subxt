@@ -52,7 +52,7 @@ type AccountId = <DefaultConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        let _ = tracing_subscriber::fmt::try_init();
+        tracing_subscriber::fmt::try_init().ok();
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 

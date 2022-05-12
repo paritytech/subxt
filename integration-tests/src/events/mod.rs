@@ -28,7 +28,7 @@ use sp_keyring::AccountKeyring;
 // Check that we can subscribe to non-finalized block events.
 #[tokio::test]
 async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
 
     let mut event_sub = ctx.api.events().subscribe().await?;
@@ -46,7 +46,7 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // Check that we can subscribe to finalized block events.
 #[tokio::test]
 async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
 
     let mut event_sub = ctx.api.events().subscribe_finalized().await?;
@@ -66,7 +66,7 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // a few blocks.
 #[tokio::test]
 async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
 
     let mut event_sub = ctx.api.events().subscribe().await?;
@@ -95,7 +95,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 // it's Stream impl, and ultimately see the event we expect.
 #[tokio::test]
 async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
 
     // Subscribe to balance transfer events, ignoring all else.
