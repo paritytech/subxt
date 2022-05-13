@@ -291,10 +291,15 @@ impl RuntimeGenerator {
                 // Impl HasModuleError on DispatchError so we can pluck out module error details.
                 #has_module_error_impl
 
-                #[derive(Clone)]
                 pub struct RuntimeApi<T: ::subxt::Config, X> {
                     pub client: ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<X>,
+                }
+
+                impl<T: ::subxt::Config, X> Clone for RuntimeApi<T, X> {
+                    fn clone(&self) -> Self {
+                        Self { client: self.client.clone(), marker: ::core::marker::PhantomData }
+                    }
                 }
 
                 impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>

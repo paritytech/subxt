@@ -95,7 +95,7 @@ impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
 // create an instance of it.
-#[derive(Debug, Clone)]
+#[derive(Debug)]
 pub enum DefaultConfig {}
 
 impl Config for DefaultConfig {
