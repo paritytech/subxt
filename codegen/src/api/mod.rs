@@ -277,9 +277,6 @@ impl RuntimeGenerator {
         quote! {
             #[allow(dead_code, unused_imports, non_camel_case_types)]
             pub mod #mod_ident {
-                // Ensure the `RuntimeApi` can be cloned without implying bounds over
-                // generic parameters.
-                use ::subxt::Derivative;
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
                 // Identify the pallets composing the static metadata by name.
@@ -294,8 +291,7 @@ impl RuntimeGenerator {
                 // Impl HasModuleError on DispatchError so we can pluck out module error details.
                 #has_module_error_impl
 
-                #[derive(Derivative)]
-                #[derivative(Clone(bound = ""))]
+                #[derive(Clone)]
                 pub struct RuntimeApi<T: ::subxt::Config, X> {
                     pub client: ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<X>,

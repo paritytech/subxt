@@ -85,7 +85,7 @@ pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Plain
 /// If your node differs in the "signed extra" and "additional" parameters expected
 /// to be sent/signed with a transaction, then you can define your own type which
 /// implements the [`ExtrinsicParams`] trait.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
     era: Era,
     nonce: T::Index,

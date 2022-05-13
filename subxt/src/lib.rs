@@ -54,7 +54,7 @@ use codec::{
     Encode,
 };
 use core::fmt::Debug;
-pub use derivative::Derivative;
+use derivative::Derivative;
 
 mod client;
 mod config;
