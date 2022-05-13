@@ -199,17 +199,12 @@ impl RuntimeGenerator {
 
             let event = events::generate_events(&type_gen, pallet, types_mod_ident);
 
-            let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(
-                    &self.metadata,
-                    &type_gen,
-                    pallet,
-                    storage,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let storage_mod = storage::generate_storage(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
             let constants_mod = constants::generate_constants(
                 &self.metadata,

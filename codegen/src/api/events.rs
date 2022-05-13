@@ -38,15 +38,15 @@ use scale_info::form::PortableForm;
 /// pub struct EventName {
 ///      pub event_param: type,
 /// }
-/// impl ::subxt::Event for FillBlock {
+/// impl ::subxt::Event for EventName {
 /// ...
 /// }
 /// ```
 ///
 /// # Arguments
 ///
-/// - `type_gen` - The type generator containing all types defined by metadata
-/// - `pallet` - Pallet metadata from which the calls are generated.
+/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `pallet` - Pallet metadata from which the events are generated.
 /// - `types_mod_ident` - The indent of the module.
 pub fn generate_events(
     type_gen: &TypeGenerator,

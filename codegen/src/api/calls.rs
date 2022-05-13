@@ -52,7 +52,7 @@ use scale_info::form::PortableForm;
 /// pub struct CallName {
 ///      pub call_param: type,
 /// }
-/// impl ::subxt::Call for FillBlock {
+/// impl ::subxt::Call for CallName {
 /// ...
 /// }
 /// ```
