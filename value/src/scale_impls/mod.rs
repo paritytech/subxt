@@ -30,11 +30,11 @@ type ScaleTypeDef = scale_info::TypeDef<scale_info::form::PortableForm>;
 
 pub use decode::{
     decode_value_as_type,
-    DecodeValueError
+    DecodeError
 };
 pub use encode::{
     encode_value_as_type,
-    EncodeValueError,
+    EncodeError,
 };
 pub use bit_sequence::{
     BitSequenceError

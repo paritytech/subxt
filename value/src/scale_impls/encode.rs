@@ -28,7 +28,7 @@ use super::bit_sequence::{
 };
 
 #[derive(Debug, Clone, thiserror::Error, PartialEq)]
-pub enum EncodeValueError<T> {
+pub enum EncodeError<T> {
     #[error("Composite type is the wrong length; expected length is {expected}, but got {actual}")]
     CompositeIsWrongLength { actual: usize, expected: usize },
     #[error("Variant type has the wrong number of fields; expected {expected} fields, but got {actual}")]
@@ -52,9 +52,9 @@ pub fn encode_value_as_type<T, Id: Into<TypeId>>(
 	ty_id: Id,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
 	let ty_id = ty_id.into();
-	let ty = types.resolve(ty_id.id()).ok_or_else(|| EncodeValueError::TypeIdNotFound(ty_id))?;
+	let ty = types.resolve(ty_id.id()).ok_or_else(|| EncodeError::TypeIdNotFound(ty_id))?;
 
 	match ty.type_def() {
 		TypeDef::Composite(inner) => encode_composite_value(value, ty_id, inner, types, bytes),
@@ -76,11 +76,11 @@ fn encode_composite_value<T>(
 	ty: &TypeDefComposite<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     match value.value {
         ValueDef::Composite(composite) => {
             if composite.len() != ty.fields().len() {
-                return Err(EncodeValueError::CompositeIsWrongLength {
+                return Err(EncodeError::CompositeIsWrongLength {
                     actual: composite.len(),
                     expected: ty.fields().len()
                 })
@@ -98,7 +98,7 @@ fn encode_composite_value<T>(
                 // A 1-field composite type? try encoding inner content then.
                 encode_value_as_type(value, ty.fields()[0].ty(), types, bytes)
             } else {
-                Err(EncodeValueError::WrongType {
+                Err(EncodeError::WrongType {
                     actual: value,
                     expected: type_id,
                 })
@@ -113,13 +113,13 @@ fn encode_sequence_value<T>(
 	ty: &TypeDefSequence<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     let composite = match value.value {
         ValueDef::Composite(composite) => {
             composite
         },
         _ => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 actual: value,
                 expected: type_id,
             })
@@ -144,13 +144,13 @@ fn encode_array_value<T>(
 	ty: &TypeDefArray<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     let composite = match value.value {
         ValueDef::Composite(composite) => {
             composite
         },
         _ => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 actual: value,
                 expected: type_id,
             })
@@ -159,7 +159,7 @@ fn encode_array_value<T>(
 
     let arr_len = ty.len() as usize;
     if composite.len() != arr_len {
-        return Err(EncodeValueError::CompositeIsWrongLength {
+        return Err(EncodeError::CompositeIsWrongLength {
             actual: composite.len(),
             expected: arr_len,
         })
@@ -179,11 +179,11 @@ fn encode_tuple_value<T>(
 	ty: &TypeDefTuple<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     match value.value {
         ValueDef::Composite(composite) => {
             if composite.len() != ty.fields().len() {
-                return Err(EncodeValueError::CompositeIsWrongLength {
+                return Err(EncodeError::CompositeIsWrongLength {
                     actual: composite.len(),
                     expected: ty.fields().len()
                 })
@@ -201,7 +201,7 @@ fn encode_tuple_value<T>(
                 // A 1-field tuple? try encoding inner content then.
                 encode_value_as_type(value, ty.fields()[0], types, bytes)
             } else {
-                Err(EncodeValueError::WrongType {
+                Err(EncodeError::WrongType {
                     actual: value,
                     expected: type_id,
                 })
@@ -216,13 +216,13 @@ fn encode_variant_value<T>(
 	ty: &TypeDefVariant<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     let variant = match value.value {
         ValueDef::Variant(variant) => {
             variant
         },
         _ => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 actual: value,
                 expected: type_id,
             })
@@ -235,12 +235,12 @@ fn encode_variant_value<T>(
         .find(|v| v.name() == &variant.name);
 
     let variant_type = match variant_type {
-        None => return Err(EncodeValueError::VariantNotFound(variant.name)),
+        None => return Err(EncodeError::VariantNotFound(variant.name)),
         Some(v) => v
     };
 
     if variant_type.fields().len() != variant.values.len() {
-        return Err(EncodeValueError::VariantFieldLengthMismatch {
+        return Err(EncodeError::VariantFieldLengthMismatch {
             actual: variant.values.len(),
             expected: variant_type.fields().len(),
         });
@@ -262,7 +262,7 @@ macro_rules! primitive_to_integer {
     ($id:ident, $prim:ident, $context:expr => $ty:ident) => {{
         macro_rules! err {
             () => {
-                EncodeValueError::WrongType {
+                EncodeError::WrongType {
                     actual: Value { context: $context, value: ValueDef::Primitive($prim) },
                     expected: $id,
                 }
@@ -290,13 +290,13 @@ fn encode_primitive_value<T>(
     type_id: TypeId,
 	ty: &TypeDefPrimitive,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     let primitive = match value.value {
         ValueDef::Primitive(primitive) => {
             primitive
         },
         _ => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 actual: value,
                 expected: type_id,
             })
@@ -352,7 +352,7 @@ fn encode_primitive_value<T>(
             primitive_to_integer!(type_id, primitive, value.context => i128)?.encode_to(bytes);
         },
         (_, primitive) => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 // Reconstruct a Value to give back:
                 actual: Value { context: value.context, value: ValueDef::Primitive(primitive) },
                 expected: type_id
@@ -368,7 +368,7 @@ fn encode_compact_value<T>(
 	ty: &TypeDefCompact<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     // Types that are compact encodable:
     enum CompactTy {
         U8,
@@ -384,7 +384,7 @@ fn encode_compact_value<T>(
     let inner_ty = loop {
         let inner_ty = types
             .resolve(inner_ty_id)
-            .ok_or(EncodeValueError::TypeIdNotFound(inner_ty_id.into()))?
+            .ok_or(EncodeError::TypeIdNotFound(inner_ty_id.into()))?
             .type_def();
 
         match inner_ty {
@@ -392,14 +392,14 @@ fn encode_compact_value<T>(
                 if c.fields().len() == 1 {
                     inner_ty_id = c.fields()[0].ty().id();
                 } else {
-                    return Err(EncodeValueError::CannotCompactEncode(inner_ty_id.into()));
+                    return Err(EncodeError::CannotCompactEncode(inner_ty_id.into()));
                 }
             },
             TypeDef::Tuple(t) => {
                 if t.fields().len() == 1 {
                     inner_ty_id = t.fields()[0].id();
                 } else {
-                    return Err(EncodeValueError::CannotCompactEncode(inner_ty_id.into()));
+                    return Err(EncodeError::CannotCompactEncode(inner_ty_id.into()));
                 }
             },
             TypeDef::Primitive(primitive) => {
@@ -411,7 +411,7 @@ fn encode_compact_value<T>(
                     TypeDefPrimitive::U64 => CompactTy::U64,
                     TypeDefPrimitive::U128 => CompactTy::U128,
                     _ => {
-                        return Err(EncodeValueError::CannotCompactEncode(inner_ty_id.into()));
+                        return Err(EncodeError::CannotCompactEncode(inner_ty_id.into()));
                     }
                 }
             },
@@ -420,7 +420,7 @@ fn encode_compact_value<T>(
             TypeDef::Array(_) |
             TypeDef::Compact(_) |
             TypeDef::BitSequence(_) => {
-                return Err(EncodeValueError::CannotCompactEncode(inner_ty_id.into()));
+                return Err(EncodeError::CannotCompactEncode(inner_ty_id.into()));
             },
         }
     };
@@ -438,7 +438,7 @@ fn encode_compact_value<T>(
                             .next()
                             .expect("length of 1; value should exist");
                     } else {
-                        return Err(EncodeValueError::WrongType {
+                        return Err(EncodeError::WrongType {
                             actual: Value { context: value.context, value: ValueDef::Composite(c) },
                             expected: inner_ty_id.into(),
                         })
@@ -448,7 +448,7 @@ fn encode_compact_value<T>(
                     break primitive
                 },
                 ValueDef::Variant(_) | ValueDef::BitSequence(_)  => {
-                    return Err(EncodeValueError::WrongType {
+                    return Err(EncodeError::WrongType {
                         actual: value,
                         expected: inner_ty_id.into(),
                     })
@@ -490,7 +490,7 @@ fn encode_bitsequence_value<T>(
 	ty: &TypeDefBitSequence<PortableForm>,
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
-) -> Result<(), EncodeValueError<T>> {
+) -> Result<(), EncodeError<T>> {
     // First, try to convert whatever we have into a vec of bools:
     let bools: Vec<bool> = match value.value {
         ValueDef::BitSequence(bits) => {
@@ -504,7 +504,7 @@ fn encode_bitsequence_value<T>(
                         bools.push(b)
                     },
                     _ => {
-                        return Err(EncodeValueError::WrongType {
+                        return Err(EncodeError::WrongType {
                             actual: val,
                             expected: type_id,
                         })
@@ -514,7 +514,7 @@ fn encode_bitsequence_value<T>(
             bools
         },
         _ => {
-            return Err(EncodeValueError::WrongType {
+            return Err(EncodeError::WrongType {
                 actual: value,
                 expected: type_id,
             })
@@ -522,7 +522,7 @@ fn encode_bitsequence_value<T>(
     };
 
     // next, turn those bools into a bit sequence of the expected shape.
-    match get_bitsequence_details(ty, types).map_err(EncodeValueError::BitSequenceError)? {
+    match get_bitsequence_details(ty, types).map_err(EncodeError::BitSequenceError)? {
         (BitOrderTy::U8, BitStoreTy::Lsb0) => {
             bools.into_iter().collect::<BitVec::<u8, Lsb0>>().encode_to(bytes);
         },

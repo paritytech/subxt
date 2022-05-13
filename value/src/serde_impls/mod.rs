@@ -21,8 +21,3 @@ mod serialize;
 
 /// An opaque error that is returned if we cannot deserialize the [`Value`] type.
 pub use deserializer::Error as DeserializeError;
-
-/// Attempt to deserialize a [`Value`] into some type that has [`serde::Deserialize`] implemented on it.
-pub fn deserialize_from_value<'de, Ctx, T: serde::Deserialize<'de>>(value: crate::Value<Ctx>) -> Result<T, DeserializeError> {
-	T::deserialize(value)
-}

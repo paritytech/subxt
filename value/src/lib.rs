@@ -21,11 +21,9 @@ of JSON data).
 */
 
 mod value_type;
-mod scale;
+mod scale_impls;
 #[cfg(feature = "serde")]
 mod serde_impls;
-#[cfg(feature = "serde")]
-pub use serde_impls::{ DeserializeError, deserialize_from_value };
 
 pub use value_type::{
     BitSequence,
@@ -36,47 +34,53 @@ pub use value_type::{
     Variant,
 };
 
-/// Items related to decoding SCALE bytes into a [`crate::Value`].
-pub mod decode {
-    pub use crate::scale::{
-        DecodeValueError,
+/// Serializing and deserializing a [`crate::Value`] into/from other types via serde.
+#[cfg(feature = "serde")]
+pub mod serde {
+    pub use crate::serde_impls::DeserializeError;
+
+    /// Attempt to deserialize a [`crate::Value`] into another type.
+    pub fn from_value<'de, Ctx, T: serde::Deserialize<'de>>(value: crate::Value<Ctx>) -> Result<T, DeserializeError> {
+        T::deserialize(value)
+    }
+
+    // TODO: Implement Serializer on Value so that we can convert from some type into a Value:
+    // /// Attempt to deserialize a [`crate::Value`] into another type.
+    // pub fn to_value<'de, Ctx, T: serde::Serialize>(ty: T) -> Result<crate::Value<()>, SerializeError> {
+    //     ty.serialize(serializer)
+    // }
+}
+
+/// Encoding and decoding SCALE bytes into a [`crate::Value`].
+pub mod scale {
+    pub use crate::scale_impls::{
+        EncodeError,
+        DecodeError,
         TypeId,
         BitSequenceError,
     };
     pub use scale_info::PortableRegistry;
-}
 
-/// Items related to SCALE encoding a [`crate::Value`].
-pub mod encode {
-    pub use crate::scale::{
-        EncodeValueError,
-        TypeId,
-        BitSequenceError,
-    };
-    pub use scale_info::PortableRegistry;
-}
-
-impl Value<scale::TypeId> {
     /// Attempt to decode some SCALE encoded bytes into a value, by providing a pointer
     /// to the bytes (which will be moved forwards as bytes are used in the decoding),
     /// a type ID, and a type registry from which we'll look up the relevant type information.
-    pub fn decode_as_type<Id: Into<decode::TypeId>>(
+    pub fn decode_as_type<Id: Into<TypeId>>(
         data: &mut &[u8],
         ty_id: Id,
-        types: &decode::PortableRegistry,
-    ) -> Result<Value<decode::TypeId>, decode::DecodeValueError> {
-        scale::decode_value_as_type(data, ty_id, types)
+        types: &PortableRegistry,
+    ) -> Result<crate::Value<TypeId>, DecodeError> {
+        crate::scale_impls::decode_value_as_type(data, ty_id, types)
     }
 
     /// Attempt to encode some [`Value<T>`] into SCALE bytes, by providing a pointer to the
     /// type ID that we'd like to encode it as, a type registry from which we'll look
     /// up the relevant type information, and a buffer to encode the bytes to.
-    pub fn encode_as_type<T, Id: Into<encode::TypeId>>(
-        value: Value<T>,
+    pub fn encode_as_type<T, Id: Into<TypeId>>(
+        value: crate::Value<T>,
         ty_id: Id,
-        types: &encode::PortableRegistry,
+        types: &PortableRegistry,
         buf: &mut Vec<u8>
-    ) -> Result<(), encode::EncodeValueError<T>> {
-        scale::encode_value_as_type(value, ty_id, types, buf)
+    ) -> Result<(), EncodeError<T>> {
+        crate::scale_impls::encode_value_as_type(value, ty_id, types, buf)
     }
 }
