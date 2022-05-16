@@ -50126,6 +50126,14 @@ pub mod api {
         pub client: ::subxt::Client<T>,
         marker: ::core::marker::PhantomData<X>,
     }
+    impl<T: ::subxt::Config, X> Clone for RuntimeApi<T, X> {
+        fn clone(&self) -> Self {
+            Self {
+                client: self.client.clone(),
+                marker: ::core::marker::PhantomData,
+            }
+        }
+    }
     impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
     where
         T: ::subxt::Config,
