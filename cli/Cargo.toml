@@ -26,7 +26,7 @@ structopt = "0.3.25"
 # make the request to a substrate node to get the metadata
 ureq = { version = "2.2.0", features = ["json"] }
 # colourful error reports
-color-eyre = "0.5.11"
+color-eyre = "0.6.1"
 # serialize the metadata
 serde = { version = "1.0.130", features = ["derive"] }
 # serialize as json
