@@ -25,15 +25,7 @@ use crate::{
     storage::StorageClient,
     transaction::TransactionProgress,
     updates::UpdateClient,
-    Call,
-    Config,
-    Encoded,
-    Metadata,
-};
-use codec::{
-    Compact,
-    Decode,
-    Encode,
+    Call, Config, Encoded, Metadata,
 };
 use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
@@ -401,7 +393,9 @@ where
     pub fn create_unsigned(&self) -> Result<Encoded, BasicError> {
         let call_data = {
             let mut bytes = Vec::new();
-            let pallet = self.client.metadata().pallet(C::PALLET)?;
+            let locked_metadata = self.client.metadata();
+            let metadata = locked_metadata.read();
+            let pallet = metadata.pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
             self.call.encode_to(&mut bytes);
