@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::value_type::{Composite, Primitive, Value, ValueDef};
+use crate::value_type::{Composite, Primitive, Variant, Value, ValueDef};
 use bitvec::{ vec::BitVec, order::{ Lsb0, Msb0 } };
 use codec::{Compact, Encode};
 use super::{ScaleTypeDef as TypeDef};
@@ -29,16 +29,16 @@ use super::bit_sequence::{
 
 #[derive(Debug, Clone, thiserror::Error, PartialEq)]
 pub enum EncodeError<T> {
-    #[error("Composite type is the wrong length; expected length is {expected}, but got {actual}")]
-    CompositeIsWrongLength { actual: usize, expected: usize },
-    #[error("Variant type has the wrong number of fields; expected {expected} fields, but got {actual}")]
-    VariantFieldLengthMismatch { actual: usize, expected: usize },
+    #[error("Composite type is the wrong length; expected length is {expected_len}, but got {}", actual.len())]
+    CompositeIsWrongLength { actual: Composite<T>, expected: TypeId, expected_len: usize },
+    #[error("Variant type has the wrong number of fields; expected {expected_len} fields, but got {}", actual.values.len())]
+    VariantFieldLengthMismatch { actual: Variant<T>, expected_len: usize },
 	#[error("Cannot find type with ID {0}")]
 	TypeIdNotFound(TypeId),
 	#[error("Value type is wrong; expected type ID {expected}, but got value {actual:?}, which could not be coerced into it")]
     WrongType { actual: Value<T>, expected: TypeId },
-	#[error("Variant {0} was not found")]
-    VariantNotFound(String),
+	#[error("Variant {} was not found", actual.name)]
+    VariantNotFound { actual: Variant<T>, expected: TypeId },
 	#[error("Cannot encode bit sequence: {0}")]
     BitSequenceError(BitSequenceError),
 	#[error("The type {0} cannot be compact encoded")]
@@ -81,8 +81,9 @@ fn encode_composite_value<T>(
         ValueDef::Composite(composite) => {
             if composite.len() != ty.fields().len() {
                 return Err(EncodeError::CompositeIsWrongLength {
-                    actual: composite.len(),
-                    expected: ty.fields().len()
+                    actual: composite,
+                    expected: type_id,
+                    expected_len: ty.fields().len()
                 })
             }
             // We don't care whether the fields are named or unnamed
@@ -145,9 +146,44 @@ fn encode_array_value<T>(
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
 ) -> Result<(), EncodeError<T>> {
-    let composite = match value.value {
-        ValueDef::Composite(composite) => {
-            composite
+    match value.value {
+        // Let's see whether our composite type is the right length,
+        // and try to encode each inner value into what the array wants.
+        ValueDef::Composite(c) => {
+            let arr_len = ty.len() as usize;
+            if c.len() != arr_len {
+                return Err(EncodeError::CompositeIsWrongLength {
+                    actual: c,
+                    expected: type_id,
+                    expected_len: arr_len,
+                })
+            }
+
+            let ty = ty.type_param();
+            for value in c.into_values() {
+                encode_value_as_type(value, ty, types, bytes)?;
+            }
+        },
+        // As a special case, primitive U256/I256s are arrays, and may be compatible
+        // with the array type being asked for, too.
+        ValueDef::Primitive(Primitive::I256(a) | Primitive::U256(a)) => {
+            let arr_len = ty.len() as usize;
+            if a.len() != arr_len {
+                return Err(EncodeError::WrongType {
+                    actual: value,
+                    expected: type_id,
+                })
+            }
+
+            let ty = ty.type_param();
+            for val in a {
+                if let Err(_) = encode_value_as_type(Value::u8(val), ty, types, bytes) {
+                    return Err(EncodeError::WrongType {
+                        actual: value,
+                        expected: type_id,
+                    })
+                }
+            }
         },
         _ => {
             return Err(EncodeError::WrongType {
@@ -156,20 +192,6 @@ fn encode_array_value<T>(
             })
         }
     };
-
-    let arr_len = ty.len() as usize;
-    if composite.len() != arr_len {
-        return Err(EncodeError::CompositeIsWrongLength {
-            actual: composite.len(),
-            expected: arr_len,
-        })
-    }
-    // We ignore names or not, and just expect each value to be
-    // able to encode into the array type provided.
-    let ty = ty.type_param();
-    for value in composite.into_values() {
-        encode_value_as_type(value, ty, types, bytes)?;
-    }
     Ok(())
 }
 
@@ -184,8 +206,9 @@ fn encode_tuple_value<T>(
         ValueDef::Composite(composite) => {
             if composite.len() != ty.fields().len() {
                 return Err(EncodeError::CompositeIsWrongLength {
-                    actual: composite.len(),
-                    expected: ty.fields().len()
+                    actual: composite,
+                    expected: type_id,
+                    expected_len: ty.fields().len(),
                 })
             }
             // We don't care whether the fields are named or unnamed
@@ -235,14 +258,14 @@ fn encode_variant_value<T>(
         .find(|v| v.name() == &variant.name);
 
     let variant_type = match variant_type {
-        None => return Err(EncodeError::VariantNotFound(variant.name)),
+        None => return Err(EncodeError::VariantNotFound { actual: variant, expected: type_id }),
         Some(v) => v
     };
 
     if variant_type.fields().len() != variant.values.len() {
         return Err(EncodeError::VariantFieldLengthMismatch {
-            actual: variant.values.len(),
-            expected: variant_type.fields().len(),
+            actual: variant,
+            expected_len: variant_type.fields().len(),
         });
     }
 
@@ -279,6 +302,8 @@ macro_rules! primitive_to_integer {
             Primitive::I32(v) => v.try_into().map_err(|_| err!()),
             Primitive::I64(v) => v.try_into().map_err(|_| err!()),
             Primitive::I128(v) => v.try_into().map_err(|_| err!()),
+            // Treat chars as u32s to mirror what we do for decoding:
+            Primitive::Char(v) => (v as u32).try_into().map_err(|_| err!()),
             _ => Err(err!()),
         };
         out
@@ -312,7 +337,7 @@ fn encode_primitive_value<T>(
             // Treat chars as u32's
             (c as u32).encode_to(bytes);
         },
-        (TypeDefPrimitive::Str, Primitive::Str(s)) => {
+        (TypeDefPrimitive::Str, Primitive::String(s)) => {
             s.encode_to(bytes);
         },
         (TypeDefPrimitive::I256, Primitive::I256(a)) => {
@@ -552,3 +577,64 @@ fn encode_bitsequence_value<T>(
     Ok(())
 }
 
+#[cfg(test)]
+mod test {
+    use super::*;
+
+	/// Given a type definition, return the PortableType and PortableRegistry
+	/// that our decode functions expect.
+	fn make_type<T: scale_info::TypeInfo + 'static>() -> (TypeId, PortableRegistry) {
+		let m = scale_info::MetaType::new::<T>();
+		let mut types = scale_info::Registry::new();
+		let id = types.register_type(&m);
+		let portable_registry: PortableRegistry = types.into();
+
+		(id.into(), portable_registry)
+	}
+
+    // Attempt to SCALE encode a Value and expect it to match the standard Encode impl for the second param given.
+    fn assert_can_encode_to_type<Ctx: std::fmt::Debug, T: Encode + scale_info::TypeInfo + 'static>(value: Value<Ctx>, ty: T) {
+        let expected = ty.encode();
+        let mut buf = Vec::new();
+
+        let (ty_id, types) = make_type::<T>();
+        encode_value_as_type(value, ty_id, &types, &mut buf).expect("error encoding value as type");
+        assert_eq!(expected, buf);
+    }
+
+    #[test]
+    fn can_encode_basic_primitive_values() {
+        assert_can_encode_to_type(Value::i8(123), 123i8);
+        assert_can_encode_to_type(Value::i16(123), 123i16);
+        assert_can_encode_to_type(Value::i32(123), 123i32);
+        assert_can_encode_to_type(Value::i64(123), 123i64);
+        assert_can_encode_to_type(Value::i128(123), 123i128);
+
+        assert_can_encode_to_type(Value::u8(123), 123u8);
+        assert_can_encode_to_type(Value::u16(123), 123u16);
+        assert_can_encode_to_type(Value::u32(123), 123u32);
+        assert_can_encode_to_type(Value::u64(123), 123u64);
+        assert_can_encode_to_type(Value::u128(123), 123u128);
+
+        assert_can_encode_to_type(Value::bool(true), true);
+        assert_can_encode_to_type(Value::bool(false), false);
+
+        assert_can_encode_to_type(Value::string("Hello"), "Hello");
+        assert_can_encode_to_type(Value::string("Hello"), "Hello".to_string());
+    }
+
+    #[test]
+    fn chars_encoded_like_numbers() {
+        assert_can_encode_to_type(Value::char('j'), 'j' as u32);
+        assert_can_encode_to_type(Value::char('j'), 'j' as u8);
+    }
+
+    #[test]
+    fn can_encode_primitive_arrs_to_array() {
+        use crate::Primitive;
+
+        assert_can_encode_to_type(Value::primitive(Primitive::U256([12u8; 32])), [12u8; 32]);
+        assert_can_encode_to_type(Value::primitive(Primitive::I256([12u8; 32])), [12u8; 32]);
+    }
+
+}

@@ -163,7 +163,7 @@ fn decode_primitive_value(data: &mut &[u8], ty: &TypeDefPrimitive) -> Result<Pri
 			let val = u32::decode(data)?;
 			Primitive::Char(char::from_u32(val).ok_or(DecodeError::InvalidChar(val))?)
 		}
-		TypeDefPrimitive::Str => Primitive::Str(String::decode(data)?),
+		TypeDefPrimitive::Str => Primitive::String(String::decode(data)?),
 		TypeDefPrimitive::U8 => Primitive::U8(u8::decode(data)?),
 		TypeDefPrimitive::U16 => Primitive::U16(u16::decode(data)?),
 		TypeDefPrimitive::U32 => Primitive::U32(u32::decode(data)?),
@@ -321,10 +321,10 @@ mod test {
 		encode_decode_check(true, Value::bool(true));
 		encode_decode_check(false, Value::bool(false));
 		encode_decode_check_explicit_info::<char, _>('a' as u32, Value::char('a'));
-		encode_decode_check("hello", Value::str("hello".into()));
+		encode_decode_check("hello", Value::string("hello"));
 		encode_decode_check(
 			"hello".to_string(), // String or &str (above) decode OK
-			Value::str("hello".into()),
+			Value::string("hello"),
 		);
 		encode_decode_check(123u8, Value::u8(123));
 		encode_decode_check(123u16, Value::u16(123));
@@ -446,7 +446,7 @@ mod test {
 			Value::variant(
 				"Bar".to_string(),
 				Composite::Named(vec![
-					("hi".to_string(), Value::str("hello".to_string())),
+					("hi".to_string(), Value::string("hello".to_string())),
 					("other".to_string(), Value::u128(123)),
 				]),
 			),
@@ -469,7 +469,7 @@ mod test {
 			Unnamed(true, "James".into(), vec![1, 2, 3]),
 			Value::unnamed_composite(vec![
 				Value::bool(true),
-				Value::str("James".to_string()),
+				Value::string("James".to_string()),
 				Value::unnamed_composite(vec![Value::u8(1), Value::u8(2), Value::u8(3)]),
 			]),
 		);
@@ -477,7 +477,7 @@ mod test {
 			Named { is_valid: true, name: "James".into(), bytes: vec![1, 2, 3] },
 			Value::named_composite(vec![
 				("is_valid".into(), Value::bool(true)),
-				("name".into(), Value::str("James".to_string())),
+				("name".into(), Value::string("James".to_string())),
 				("bytes".into(), Value::unnamed_composite(vec![Value::u8(1), Value::u8(2), Value::u8(3)])),
 			]),
 		);

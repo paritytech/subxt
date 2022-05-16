@@ -85,7 +85,7 @@ impl Serialize for Primitive {
 		match self {
 			Primitive::Bool(v) => v.serialize(serializer),
 			Primitive::Char(v) => v.serialize(serializer),
-			Primitive::Str(v) => v.serialize(serializer),
+			Primitive::String(v) => v.serialize(serializer),
 			Primitive::U8(v) => v.serialize(serializer),
 			Primitive::U16(v) => v.serialize(serializer),
 			Primitive::U32(v) => v.serialize(serializer),
@@ -145,7 +145,7 @@ mod test {
 		assert_value(
 			Value::named_composite(vec![
 				("a".into(), Value::bool(true)),
-				("b".into(), Value::str("hello".into())),
+				("b".into(), Value::string("hello")),
 				("c".into(), Value::char('c')),
 			]),
 			json!({
@@ -155,7 +155,7 @@ mod test {
 			}),
 		);
 		assert_value(
-			Value::unnamed_composite(vec![Value::bool(true), Value::str("hello".into()), Value::char('c')]),
+			Value::unnamed_composite(vec![Value::bool(true), Value::string("hello"), Value::char('c')]),
 			json!([true, "hello", 'c']),
 		)
 	}
@@ -167,7 +167,7 @@ mod test {
 				"Foo".into(),
 				Composite::Named(vec![
 					("a".into(), Value::bool(true)),
-					("b".into(), Value::str("hello".into())),
+					("b".into(), Value::string("hello")),
 					("c".into(), Value::char('c')),
 				]),
 			),
@@ -183,7 +183,7 @@ mod test {
 		assert_value(
 			Value::variant(
 				"Bar".into(),
-				Composite::Unnamed(vec![Value::bool(true), Value::str("hello".into()), Value::char('c')]),
+				Composite::Unnamed(vec![Value::bool(true), Value::string("hello"), Value::char('c')]),
 			),
 			json!({
 				"name": "Bar",

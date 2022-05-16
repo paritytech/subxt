@@ -631,7 +631,7 @@ impl<'de> Deserializer<'de> for Primitive {
 		match self {
 			Primitive::Bool(v) => visitor.visit_bool(v),
 			Primitive::Char(v) => visitor.visit_char(v),
-			Primitive::Str(v) => visitor.visit_string(v),
+			Primitive::String(v) => visitor.visit_string(v),
 			Primitive::U8(v) => visitor.visit_u8(v),
 			Primitive::U16(v) => visitor.visit_u16(v),
 			Primitive::U32(v) => visitor.visit_u32(v),
@@ -715,7 +715,7 @@ mod test {
 		let val = ValueDef::Composite(Composite::Unnamed(vec![
 			Value::u8(123),
 			Value::bool(true),
-			Value::str("hello".into()),
+			Value::string("hello"),
 		]));
 
 		assert_eq!(Foo::deserialize(val), Ok(Foo(123, true, "hello".into())))
@@ -726,7 +726,7 @@ mod test {
 		#[derive(Deserialize, Debug, PartialEq)]
 		struct Foo(u8, bool, String);
 
-		let val = Composite::Unnamed(vec![Value::u8(123), Value::bool(true), Value::str("hello".into())]);
+		let val = Composite::Unnamed(vec![Value::u8(123), Value::bool(true), Value::string("hello")]);
 
 		assert_eq!(Foo::deserialize(val), Ok(Foo(123, true, "hello".into())))
 	}
@@ -735,9 +735,9 @@ mod test {
 	fn de_into_newtype_struct() {
 		#[derive(Deserialize, Debug, PartialEq)]
 		struct FooStr(String);
-		let val = ValueDef::<()>::Primitive(Primitive::Str("hello".into()));
+		let val = ValueDef::<()>::Primitive(Primitive::String("hello".into()));
 		assert_eq!(FooStr::deserialize(val), Ok(FooStr("hello".into())));
-		let val = Value::str("hello".into());
+		let val = Value::string("hello");
 		assert_eq!(FooStr::deserialize(val), Ok(FooStr("hello".into())));
 
 		#[derive(Deserialize, Debug, PartialEq)]
@@ -762,7 +762,7 @@ mod test {
 	fn de_unwrapped_into_newtype_struct() {
 		#[derive(Deserialize, Debug, PartialEq)]
 		struct FooStr(String);
-		let val = Primitive::Str("hello".into());
+		let val = Primitive::String("hello".into());
 		assert_eq!(FooStr::deserialize(val), Ok(FooStr("hello".into())));
 
 		#[derive(Deserialize, Debug, PartialEq)]
@@ -787,9 +787,9 @@ mod test {
 		assert_eq!(<Vec<u8>>::deserialize(val), Ok(vec![1, 2, 3]));
 
 		let val = ValueDef::Composite(Composite::Unnamed(vec![
-			Value::str("a".into()),
-			Value::str("b".into()),
-			Value::str("c".into()),
+			Value::string("a"),
+			Value::string("b"),
+			Value::string("c"),
 		]));
 		assert_eq!(<Vec<String>>::deserialize(val), Ok(vec!["a".into(), "b".into(), "c".into()]));
 	}
@@ -803,7 +803,7 @@ mod test {
 			Composite::Named(vec![("a".into(), Value::u8(1)), ("b".into(), Value::u8(2)), ("c".into(), Value::u8(3))]);
 		assert_eq!(<Vec<u8>>::deserialize(val), Ok(vec![1, 2, 3]));
 
-		let val = Composite::Unnamed(vec![Value::str("a".into()), Value::str("b".into()), Value::str("c".into())]);
+		let val = Composite::Unnamed(vec![Value::string("a"), Value::string("b"), Value::string("c")]);
 		assert_eq!(<Vec<String>>::deserialize(val), Ok(vec!["a".into(), "b".into(), "c".into()]));
 	}
 
@@ -827,12 +827,12 @@ mod test {
 
 	#[test]
 	fn de_into_tuple() {
-		let val = ValueDef::Composite(Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true)]));
+		let val = ValueDef::Composite(Composite::Unnamed(vec![Value::string("hello"), Value::bool(true)]));
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
 
 		// names will just be ignored:
 		let val = ValueDef::Composite(Composite::Named(vec![
-			("a".into(), Value::str("hello".into())),
+			("a".into(), Value::string("hello")),
 			("b".into(), Value::bool(true)),
 		]));
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
@@ -840,20 +840,20 @@ mod test {
 		// Enum variants are allowed! The variant name will be ignored:
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
-			values: Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true)]),
+			values: Composite::Unnamed(vec![Value::string("hello"), Value::bool(true)]),
 		});
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
 
 		// Enum variants with names values are allowed! The variant name will be ignored:
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
-			values: Composite::Named(vec![("a".into(), Value::str("hello".into())), ("b".into(), Value::bool(true))]),
+			values: Composite::Named(vec![("a".into(), Value::string("hello")), ("b".into(), Value::bool(true))]),
 		});
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
 
 		// Wrong number of values should fail:
 		let val = ValueDef::Composite(Composite::Unnamed(vec![
-			Value::str("hello".into()),
+			Value::string("hello"),
 			Value::bool(true),
 			Value::u8(123),
 		]));
@@ -862,15 +862,15 @@ mod test {
 
 	#[test]
 	fn de_unwrapped_into_tuple() {
-		let val = Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true)]);
+		let val = Composite::Unnamed(vec![Value::string("hello"), Value::bool(true)]);
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
 
 		// names will just be ignored:
-		let val = Composite::Named(vec![("a".into(), Value::str("hello".into())), ("b".into(), Value::bool(true))]);
+		let val = Composite::Named(vec![("a".into(), Value::string("hello")), ("b".into(), Value::bool(true))]);
 		assert_eq!(<(String, bool)>::deserialize(val), Ok(("hello".into(), true)));
 
 		// Wrong number of values should fail:
-		let val = Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true), Value::u8(123)]);
+		let val = Composite::Unnamed(vec![Value::string("hello"), Value::bool(true), Value::u8(123)]);
 		<(String, bool)>::deserialize(val).expect_err("Wrong length, should err");
 	}
 
@@ -897,7 +897,7 @@ mod test {
 
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
-			values: Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true), Value::u8(123)]),
+			values: Composite::Unnamed(vec![Value::string("hello"), Value::bool(true), Value::u8(123)]),
 		});
 		assert_eq!(MyEnum::deserialize(val), Ok(MyEnum::Foo("hello".into(), true, 123)));
 
@@ -905,7 +905,7 @@ mod test {
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
 			values: Composite::Named(vec![
-				("a".into(), Value::str("hello".into())),
+				("a".into(), Value::string("hello")),
 				("b".into(), Value::bool(true)),
 				("c".into(), Value::u8(123)),
 			]),
@@ -922,7 +922,7 @@ mod test {
 
 		let val = Variant {
 			name: "Foo".into(),
-			values: Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true), Value::u8(123)]),
+			values: Composite::Unnamed(vec![Value::string("hello"), Value::bool(true), Value::u8(123)]),
 		};
 		assert_eq!(MyEnum::deserialize(val), Ok(MyEnum::Foo("hello".into(), true, 123)));
 
@@ -930,7 +930,7 @@ mod test {
 		let val = Variant {
 			name: "Foo".into(),
 			values: Composite::Named(vec![
-				("a".into(), Value::str("hello".into())),
+				("a".into(), Value::string("hello")),
 				("b".into(), Value::bool(true)),
 				("c".into(), Value::u8(123)),
 			]),
@@ -952,7 +952,7 @@ mod test {
 				// Deliberately out of order: names should ensure alignment:
 				("b".into(), Value::u8(123)),
 				("a".into(), Value::bool(true)),
-				("hi".into(), Value::str("hello".into())),
+				("hi".into(), Value::string("hello")),
 			]),
 		});
 		assert_eq!(MyEnum::deserialize(val), Ok(MyEnum::Foo { hi: "hello".into(), a: true, b: 123 }));
@@ -960,14 +960,14 @@ mod test {
 		// No names needed if order is OK:
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
-			values: Composite::Unnamed(vec![Value::str("hello".into()), Value::bool(true), Value::u8(123)]),
+			values: Composite::Unnamed(vec![Value::string("hello"), Value::bool(true), Value::u8(123)]),
 		});
 		assert_eq!(MyEnum::deserialize(val), Ok(MyEnum::Foo { hi: "hello".into(), a: true, b: 123 }));
 
 		// Wrong order won't work if no names:
 		let val = ValueDef::Variant(Variant {
 			name: "Foo".into(),
-			values: Composite::Unnamed(vec![Value::bool(true), Value::u8(123), Value::str("hello".into())]),
+			values: Composite::Unnamed(vec![Value::bool(true), Value::u8(123), Value::string("hello")]),
 		});
 		MyEnum::deserialize(val).expect_err("Wrong order shouldn't work");
 
@@ -978,7 +978,7 @@ mod test {
 				("b".into(), Value::u8(123)),
 				// Whoops; wrong name:
 				("c".into(), Value::bool(true)),
-				("hi".into(), Value::str("hello".into())),
+				("hi".into(), Value::string("hello")),
 			]),
 		});
 		MyEnum::deserialize(val).expect_err("Wrong names shouldn't work");
@@ -991,7 +991,7 @@ mod test {
 				("b".into(), Value::u8(123)),
 				("a".into(), Value::bool(true)),
 				("bar".into(), Value::bool(false)),
-				("hi".into(), Value::str("hello".into())),
+				("hi".into(), Value::string("hello")),
 			]),
 		});
 		assert_eq!(MyEnum::deserialize(val), Ok(MyEnum::Foo { hi: "hello".into(), a: true, b: 123 }));

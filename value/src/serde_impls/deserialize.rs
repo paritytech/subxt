@@ -122,14 +122,14 @@ impl<'de> Visitor<'de> for PrimitiveVisitor {
 	where
 		E: serde::de::Error,
 	{
-		Ok(Primitive::Str(v.into()))
+		Ok(Primitive::String(v.into()))
 	}
 
 	fn visit_string<E>(self, v: String) -> Result<Self::Value, E>
 	where
 		E: serde::de::Error,
 	{
-		Ok(Primitive::Str(v))
+		Ok(Primitive::String(v))
 	}
 
 	fn visit_bytes<E>(self, v: &[u8]) -> Result<Self::Value, E>
@@ -375,7 +375,7 @@ impl<'de> Visitor<'de> for ValueDefVisitor {
 mod test {
 
 	use super::*;
-	use crate::DeserializeError;
+	use super::super::DeserializeError;
 
 	/// Does a value deserialize to itself?
 	fn assert_value_isomorphic<'de, V: Deserializer<'de> + Deserialize<'de> + PartialEq + std::fmt::Debug + Clone>(
@@ -408,7 +408,7 @@ mod test {
 		assert_value_isomorphic(Value::i128(123));
 		assert_value_isomorphic(Value::bool(true));
 		assert_value_isomorphic(Value::char('a'));
-		assert_value_isomorphic(Value::str("Hello!".into()));
+		assert_value_isomorphic(Value::string("Hello!"));
 
 		// Alas, I256 and U256 are both a sequence of bytes, which could equally be represented
 		// by a composite sequence (as other sequences-of-things are). We could have a special case where
@@ -444,7 +444,7 @@ mod test {
 		assert_value_isomorphic(Primitive::I128(123));
 		assert_value_isomorphic(Primitive::Bool(true));
 		assert_value_isomorphic(Primitive::Char('a'));
-		assert_value_isomorphic(Primitive::Str("Hello!".into()));
+		assert_value_isomorphic(Primitive::String("Hello!".into()));
 		assert_value_to_value(Primitive::I256([1; 32]), Primitive::U256([1; 32]));
 
 		// We can also go from wrapped to unwrapped:
@@ -474,7 +474,7 @@ mod test {
 			("a".into(), Value::u64(123)),
 			(
 				"b".into(),
-				Value::named_composite(vec![("c".into(), Value::u128(123)), ("d".into(), Value::str("hello".into()))]),
+				Value::named_composite(vec![("c".into(), Value::u128(123)), ("d".into(), Value::string("hello"))]),
 			),
 		]));
 
@@ -487,7 +487,7 @@ mod test {
 			("a".into(), Value::u64(123)),
 			(
 				"b".into(),
-				Value::named_composite(vec![("c".into(), Value::u128(123)), ("d".into(), Value::str("hello".into()))]),
+				Value::named_composite(vec![("c".into(), Value::u128(123)), ("d".into(), Value::string("hello"))]),
 			),
 		]));
 	}
@@ -573,7 +573,7 @@ mod test {
 				"b".into(),
 				Value::named_composite(vec![
 					("c".into(), Value::u128(123)),
-					("d".into(), Value::str("hello".into())),
+					("d".into(), Value::string("hello")),
 					("e".into(), Value::named_composite(vec![])),
 				]),
 			),
@@ -592,7 +592,7 @@ mod test {
 			e: Value<()>,
 		}
 
-		let partial: Partial = crate::deserialize_from_value(value).expect("should work");
+		let partial = Partial::deserialize(value).expect("should work");
 
 		assert_eq!(
 			partial,

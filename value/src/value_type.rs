@@ -64,8 +64,8 @@ impl Value<()> {
 		Value { value: ValueDef::Primitive(primitive), context: () }
 	}
 	/// Create a new string value without additional context.
-	pub fn str(val: String) -> Value<()> {
-		Value { value: ValueDef::Primitive(Primitive::Str(val)), context: () }
+	pub fn string<S: Into<String>>(val: S) -> Value<()> {
+		Value { value: ValueDef::Primitive(Primitive::String(val.into())), context: () }
 	}
 
 	value_prim_method!(bool Bool);
@@ -322,7 +322,7 @@ impl<T> From<Variant<T>> for ValueDef<T> {
 pub enum Primitive {
 	Bool(bool),
 	Char(char),
-	Str(String),
+	String(String),
 	U8(u8),
 	U16(u16),
 	U32(u32),
@@ -368,7 +368,7 @@ macro_rules! impl_primitive_type {
 impl_primitive_type!(
 	Bool(bool),
 	Char(char),
-	Str(String),
+	String(String),
 	U8(u8),
 	U16(u16),
 	U32(u32),
