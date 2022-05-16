@@ -25,6 +25,7 @@ use frame_metadata::{
     StorageEntryMetadata,
     META_RESERVED,
 };
+use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
     Type,
@@ -33,10 +34,7 @@ use scale_info::{
 use std::{
     collections::HashMap,
     convert::TryFrom,
-    sync::{
-        Arc,
-        RwLock,
-    },
+    sync::Arc,
 };
 
 /// Metadata error.
@@ -83,12 +81,6 @@ pub enum MetadataError {
     IncompatibleMetadata,
 }
 
-/// Runtime metadata.
-#[derive(Clone, Debug)]
-pub struct Metadata {
-    inner: Arc<MetadataInner>,
-}
-
 // We hide the innards behind an Arc so that it's easy to clone and share.
 #[derive(Debug)]
 struct MetadataInner {
@@ -103,6 +95,12 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
+}
+
+/// Runtime metadata.
+#[derive(Clone, Debug)]
+pub struct Metadata {
+    inner: Arc<MetadataInner>,
 }
 
 impl Metadata {
@@ -217,7 +215,7 @@ impl Metadata {
 
     /// Obtain the unique hash for this metadata.
     pub fn metadata_hash<T: AsRef<str>>(&self, pallets: &[T]) -> [u8; 32] {
-        if let Some(hash) = *self.inner.cached_metadata_hash.read().unwrap() {
+        if let Some(hash) = *self.inner.cached_metadata_hash.read() {
             return hash
         }
 
@@ -225,7 +223,7 @@ impl Metadata {
             self.runtime_metadata(),
             pallets,
         );
-        *self.inner.cached_metadata_hash.write().unwrap() = Some(hash);
+        *self.inner.cached_metadata_hash.write() = Some(hash);
 
         hash
     }
@@ -547,10 +545,7 @@ mod tests {
 
         let hash = metadata.metadata_hash(&["System"]);
         // Check inner caching.
-        assert_eq!(
-            metadata.inner.cached_metadata_hash.read().unwrap().unwrap(),
-            hash
-        );
+        assert_eq!(metadata.inner.cached_metadata_hash.read().unwrap(), hash);
 
         // The cache `metadata.inner.cached_metadata_hash` is already populated from
         // the previous call. Therefore, changing the pallets argument must not

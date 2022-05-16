@@ -52,6 +52,7 @@ type AccountId = <DefaultConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
+        tracing_subscriber::fmt::try_init().ok();
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 
@@ -69,7 +70,7 @@ impl ContractsTestContext {
     async fn instantiate_with_code(
         &self,
     ) -> Result<(Hash, AccountId), Error<DispatchError>> {
-        log::info!("instantiate_with_code:");
+        tracing::info!("instantiate_with_code:");
         const CONTRACT: &str = r#"
                 (module
                     (func (export "call"))
@@ -108,9 +109,9 @@ impl ContractsTestContext {
                 Error::Other("Failed to find a ExtrinsicSuccess event".into())
             })?;
 
-        log::info!("  Block hash: {:?}", events.block_hash());
-        log::info!("  Code hash: {:?}", code_stored.code_hash);
-        log::info!("  Contract address: {:?}", instantiated.contract);
+        tracing::info!("  Block hash: {:?}", events.block_hash());
+        tracing::info!("  Code hash: {:?}", code_stored.code_hash);
+        tracing::info!("  Contract address: {:?}", instantiated.contract);
         Ok((code_stored.code_hash, instantiated.contract))
     }
 
@@ -136,7 +137,7 @@ impl ContractsTestContext {
             .wait_for_finalized_success()
             .await?;
 
-        log::info!("Instantiate result: {:?}", result);
+        tracing::info!("Instantiate result: {:?}", result);
         let instantiated = result
             .find_first::<events::Instantiated>()?
             .ok_or_else(|| Error::Other("Failed to find a Instantiated event".into()))?;
@@ -152,7 +153,7 @@ impl ContractsTestContext {
         TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
         Error<DispatchError>,
     > {
-        log::info!("call: {:?}", contract);
+        tracing::info!("call: {:?}", contract);
         let result = self
             .contracts_tx()
             .call(
@@ -165,7 +166,7 @@ impl ContractsTestContext {
             .sign_and_submit_then_watch_default(&self.signer)
             .await?;
 
-        log::info!("Call result: {:?}", result);
+        tracing::info!("Call result: {:?}", result);
         Ok(result)
     }
 }
