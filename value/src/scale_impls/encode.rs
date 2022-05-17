@@ -20,7 +20,7 @@ use codec::{Compact, Encode};
 use super::{ScaleTypeDef as TypeDef};
 use scale_info::{
 	form::PortableForm, PortableRegistry, TypeDefArray, TypeDefBitSequence, TypeDefCompact, TypeDefComposite,
-	TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant,
+	TypeDefPrimitive, TypeDefSequence, TypeDefTuple, TypeDefVariant, Field,
 };
 use super::type_id::TypeId;
 use super::bit_sequence::{
@@ -31,6 +31,8 @@ use super::bit_sequence::{
 pub enum EncodeError<T> {
     #[error("Composite type is the wrong length; expected length is {expected_len}, but got {}", actual.len())]
     CompositeIsWrongLength { actual: Composite<T>, expected: TypeId, expected_len: usize },
+    #[error("The composite {actual:?} is not the same shape as the type we're trying to encode to ({expected})")]
+    CompositeIsWrongShape { actual: Composite<T>, expected: TypeId },
     #[error("Variant type has the wrong number of fields; expected {expected_len} fields, but got {}", actual.values.len())]
     VariantFieldLengthMismatch { actual: Variant<T>, expected_len: usize },
 	#[error("Cannot find type with ID {0}")]
@@ -39,8 +41,6 @@ pub enum EncodeError<T> {
     WrongType { actual: Value<T>, expected: TypeId },
 	#[error("Variant {} was not found", actual.name)]
     VariantNotFound { actual: Variant<T>, expected: TypeId },
-    #[error("The variant {actual:?} is not the same shape as the type we're trying to encode to")]
-    VariantIsWrongShape { actual: Variant<T>, expected: TypeId },
     #[error("The variant field {missing_field_name} is present on the type we're trying to encode to but hasn't been provided")]
     VariantFieldIsMissing { missing_field_name: String, expected: TypeId },
 	#[error("Cannot encode bit sequence: {0}")]
@@ -83,20 +83,7 @@ fn encode_composite_value<T>(
 ) -> Result<(), EncodeError<T>> {
     match value.value {
         ValueDef::Composite(composite) => {
-            if composite.len() != ty.fields().len() {
-                return Err(EncodeError::CompositeIsWrongLength {
-                    actual: composite,
-                    expected: type_id,
-                    expected_len: ty.fields().len()
-                })
-            }
-            // We don't care whether the fields are named or unnamed
-            // as long as we have the number of them that we expect..
-            let field_value_pairs = ty.fields().iter().zip(composite.into_values());
-            for (field, value) in field_value_pairs {
-                encode_value_as_type(value, field.ty(), types, bytes)?;
-            }
-            Ok(())
+            encode_composite_fields(composite, ty.fields(), type_id, types, bytes)
         },
         _ => {
             if ty.fields().len() == 1 {
@@ -278,27 +265,36 @@ fn encode_variant_value<T>(
         Some(v) => v
     };
 
-    if variant_type.fields().len() != variant.values.len() {
-        return Err(EncodeError::VariantIsWrongShape {
-            actual: variant,
+    variant_type.index().encode_to(bytes);
+    encode_composite_fields(variant.values, variant_type.fields(), type_id, types, bytes)
+}
+
+fn encode_composite_fields<T>(
+    composite: Composite<T>,
+    fields: &[Field<PortableForm>],
+    type_id: TypeId,
+	types: &PortableRegistry,
+    bytes: &mut Vec<u8>,
+) -> Result<(), EncodeError<T>> {
+    if fields.len() != composite.len() {
+        return Err(EncodeError::CompositeIsWrongShape {
+            actual: composite,
             expected: type_id,
         });
     }
 
-    variant_type.index().encode_to(bytes);
-
     // 0 length? Nothing more to do!
-    if variant.values.len() == 0 {
+    if composite.len() == 0 {
         return Ok(())
     }
 
     // Does the type we're encoding to have named fields or not?
-    let is_named = variant_type.fields()[0].name().is_some();
+    let is_named = fields[0].name().is_some();
 
-    match (variant.values, is_named) {
+    match (composite, is_named) {
         (Composite::Named(mut values), true) => {
             // Match up named values with those of the type we're encoding to.
-            for field in variant_type.fields().into_iter() {
+            for field in fields.into_iter() {
                 let field_name = field.name().expect("field should be named; checked above");
                 let value = values
                     .iter()
@@ -322,16 +318,15 @@ fn encode_variant_value<T>(
         },
         (Composite::Unnamed(values), false) => {
             // Expect values in correct order only and encode.
-            for (field, value) in variant_type.fields().into_iter().zip(values) {
+            for (field, value) in fields.into_iter().zip(values) {
                 encode_value_as_type(value, field.ty(), types, bytes)?;
             }
             Ok(())
         },
         (values, _) => {
             // We expect named/unnamed fields and need the opposite.
-            Err(EncodeError::VariantIsWrongShape {
-                // Reconstruct variant for error.
-                actual: Variant { name: variant.name, values },
+            Err(EncodeError::CompositeIsWrongShape {
+                actual: values,
                 expected: type_id,
             })
         }
@@ -705,6 +700,17 @@ mod test {
     }
 
     #[test]
+    fn can_encode_arrays() {
+        let value = Value::unnamed_composite(vec![
+            Value::u16(1),
+            Value::u16(2),
+            Value::u16(3),
+            Value::u16(4),
+        ]);
+        assert_can_encode_to_type(value, [1u16, 2, 3, 4]);
+    }
+
+    #[test]
     fn can_encode_variants() {
         #[derive(Encode, scale_info::TypeInfo)]
         enum Foo {
@@ -734,6 +740,40 @@ mod test {
             ])
         );
         assert_can_encode_to_type(unnamed_value, Foo::Unnamed(123, vec![true, false, true]));
+    }
+
+    #[test]
+    fn can_encode_structs() {
+        #[derive(Encode, scale_info::TypeInfo)]
+        struct Foo {
+            hello: String,
+            foo: bool
+        }
+
+        let named_value = Value::named_composite(vec![
+            // Deliverately a different order; order shouldn't matter:
+            ("foo".into(), Value::bool(true)),
+            ("hello".into(), Value::string("world")),
+        ]);
+        assert_can_encode_to_type(named_value, Foo { hello: "world".into(), foo: true });
+    }
+
+    #[test]
+    fn can_encode_tuples_from_named_composite() {
+        let named_value = Value::named_composite(vec![
+            ("hello".into(), Value::string("world")),
+            ("foo".into(), Value::bool(true)),
+        ]);
+        assert_can_encode_to_type(named_value, ("world", true));
+    }
+
+    #[test]
+    fn can_encode_tuples_from_unnamed_composite() {
+        let unnamed_value = Value::unnamed_composite(vec![
+            Value::string("world"),
+            Value::bool(true),
+        ]);
+        assert_can_encode_to_type(unnamed_value, ("world", true));
     }
 
 }
