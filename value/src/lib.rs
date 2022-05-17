@@ -44,8 +44,9 @@ pub mod serde {
         T::deserialize(value)
     }
 
-    // TODO: Implement Serializer on Value so that we can convert from some type into a Value:
-    // /// Attempt to deserialize a [`crate::Value`] into another type.
+    // TODO: Eventually let's implement Serializer on Value so that we can convert from some type into a Value:
+    //
+    // /// Attempt to serialize some type into a [`crate::Value`].
     // pub fn to_value<'de, Ctx, T: serde::Serialize>(ty: T) -> Result<crate::Value<()>, SerializeError> {
     //     ty.serialize(serializer)
     // }
