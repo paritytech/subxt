@@ -14,8 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! A library to **sub**mit e**xt**rinsics to a
-//! [substrate](https://github.com/paritytech/substrate) node via RPC.
+#![doc = include_str!("../../LIB_DOC.md")]
 
 #![deny(
     bad_style,

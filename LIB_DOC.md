@@ -200,3 +200,5 @@ while let Some(transfer_event) = transfer_events.next().await {
 ### Static Metadata Validation
 - TODO
 
+### Runtime Updates
+- TODO
