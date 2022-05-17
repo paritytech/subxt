@@ -39,6 +39,10 @@ pub enum EncodeError<T> {
     WrongType { actual: Value<T>, expected: TypeId },
 	#[error("Variant {} was not found", actual.name)]
     VariantNotFound { actual: Variant<T>, expected: TypeId },
+    #[error("The variant {actual:?} is not the same shape as the type we're trying to encode to")]
+    VariantIsWrongShape { actual: Variant<T>, expected: TypeId },
+    #[error("The variant field {missing_field_name} is present on the type we're trying to encode to but hasn't been provided")]
+    VariantFieldIsMissing { missing_field_name: String, expected: TypeId },
 	#[error("Cannot encode bit sequence: {0}")]
     BitSequenceError(BitSequenceError),
 	#[error("The type {0} cannot be compact encoded")]
@@ -115,9 +119,31 @@ fn encode_sequence_value<T>(
 	types: &PortableRegistry,
     bytes: &mut Vec<u8>,
 ) -> Result<(), EncodeError<T>> {
-    let composite = match value.value {
-        ValueDef::Composite(composite) => {
-            composite
+    match value.value {
+        // Let's see whether our composite type is the right length,
+        // and try to encode each inner value into what the sequence wants.
+        ValueDef::Composite(c) => {
+            // Compact encoded length comes first
+            Compact(c.len() as u64).encode_to(bytes);
+            let ty = ty.type_param();
+            for value in c.into_values() {
+                encode_value_as_type(value, ty, types, bytes)?;
+            }
+        },
+        // As a special case, primitive U256/I256s are arrays, and may be compatible
+        // with the sequence type being asked for, too.
+        ValueDef::Primitive(Primitive::I256(a) | Primitive::U256(a)) => {
+            // Compact encoded length comes first
+            Compact(a.len() as u64).encode_to(bytes);
+            let ty = ty.type_param();
+            for val in a {
+                if let Err(_) = encode_value_as_type(Value::u8(val), ty, types, bytes) {
+                    return Err(EncodeError::WrongType {
+                        actual: value,
+                        expected: type_id,
+                    })
+                }
+            }
         },
         _ => {
             return Err(EncodeError::WrongType {
@@ -126,16 +152,6 @@ fn encode_sequence_value<T>(
             })
         }
     };
-
-    // Encode the sequence length first:
-    Compact(composite.len() as u64).encode_to(bytes);
-
-    // We ignore names or not, and just expect each value to be
-    // able to encode into the sequence type provided.
-    let ty = ty.type_param();
-    for value in composite.into_values() {
-        encode_value_as_type(value, ty, types, bytes)?;
-    }
     Ok(())
 }
 
@@ -263,20 +279,63 @@ fn encode_variant_value<T>(
     };
 
     if variant_type.fields().len() != variant.values.len() {
-        return Err(EncodeError::VariantFieldLengthMismatch {
+        return Err(EncodeError::VariantIsWrongShape {
             actual: variant,
-            expected_len: variant_type.fields().len(),
+            expected: type_id,
         });
     }
 
-    // Encode the variant index into our bytes, followed by the fields.
     variant_type.index().encode_to(bytes);
-    let field_value_pairs = variant_type.fields().iter().zip(variant.values.into_values());
-    for (field, value) in field_value_pairs {
-        encode_value_as_type(value, field.ty(), types, bytes)?;
+
+    // 0 length? Nothing more to do!
+    if variant.values.len() == 0 {
+        return Ok(())
     }
 
-    Ok(())
+    // Does the type we're encoding to have named fields or not?
+    let is_named = variant_type.fields()[0].name().is_some();
+
+    match (variant.values, is_named) {
+        (Composite::Named(mut values), true) => {
+            // Match up named values with those of the type we're encoding to.
+            for field in variant_type.fields().into_iter() {
+                let field_name = field.name().expect("field should be named; checked above");
+                let value = values
+                    .iter()
+                    .position(|(n,_)| field_name == n)
+                    .map(|idx| values.swap_remove(idx).1);
+
+                match value {
+                    Some(value) => {
+                        encode_value_as_type(value, field.ty(), types, bytes)?;
+                    },
+                    None => {
+                        return Err(EncodeError::VariantFieldIsMissing {
+                            expected: type_id,
+                            missing_field_name: field_name.clone()
+                        })
+                    }
+                }
+            }
+
+            Ok(())
+        },
+        (Composite::Unnamed(values), false) => {
+            // Expect values in correct order only and encode.
+            for (field, value) in variant_type.fields().into_iter().zip(values) {
+                encode_value_as_type(value, field.ty(), types, bytes)?;
+            }
+            Ok(())
+        },
+        (values, _) => {
+            // We expect named/unnamed fields and need the opposite.
+            Err(EncodeError::VariantIsWrongShape {
+                // Reconstruct variant for error.
+                actual: Variant { name: variant.name, values },
+                expected: type_id,
+            })
+        }
+    }
 }
 
 // Attempt to convert a given primitive value into the integer type
@@ -635,6 +694,46 @@ mod test {
 
         assert_can_encode_to_type(Value::primitive(Primitive::U256([12u8; 32])), [12u8; 32]);
         assert_can_encode_to_type(Value::primitive(Primitive::I256([12u8; 32])), [12u8; 32]);
+    }
+
+    #[test]
+    fn can_encode_primitive_arrs_to_vecs() {
+        use crate::Primitive;
+
+        assert_can_encode_to_type(Value::primitive(Primitive::U256([12u8; 32])), vec![12u8; 32]);
+        assert_can_encode_to_type(Value::primitive(Primitive::I256([12u8; 32])), vec![12u8; 32]);
+    }
+
+    #[test]
+    fn can_encode_variants() {
+        #[derive(Encode, scale_info::TypeInfo)]
+        enum Foo {
+            Named { hello: String, foo: bool },
+            Unnamed(u64, Vec<bool>)
+        }
+
+        let named_value = Value::variant(
+            "Named".into(),
+            Composite::Named(vec![
+                // Deliverately a different order; order shouldn't matter:
+                ("foo".into(), Value::bool(true)),
+                ("hello".into(), Value::string("world")),
+            ])
+        );
+        assert_can_encode_to_type(named_value, Foo::Named { hello: "world".into(), foo: true });
+
+        let unnamed_value = Value::variant(
+            "Unnamed".into(),
+            Composite::Unnamed(vec![
+                Value::u64(123),
+                Value::unnamed_composite(vec![
+                    Value::bool(true),
+                    Value::bool(false),
+                    Value::bool(true),
+                ]),
+            ])
+        );
+        assert_can_encode_to_type(unnamed_value, Foo::Unnamed(123, vec![true, false, true]));
     }
 
 }
