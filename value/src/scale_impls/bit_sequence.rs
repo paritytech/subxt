@@ -65,9 +65,9 @@ pub fn get_bitsequence_details(
         TypeDef::Primitive(TypeDefPrimitive::U64) => Some(BitOrderTy::U64),
         _ => None,
     }
-    .ok_or(BitSequenceError::OrderTypeNotSupported(format!(
-        "{bit_store_def:?}"
-    )))?;
+    .ok_or_else(|| {
+        BitSequenceError::OrderTypeNotSupported(format!("{bit_store_def:?}"))
+    })?;
 
     let bit_store_out = match &*bit_order_def {
         "Lsb0" => Some(BitStoreTy::Lsb0),

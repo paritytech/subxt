@@ -105,7 +105,7 @@ pub fn encode_value_as_type<T, Id: Into<TypeId>>(
     let ty_id = ty_id.into();
     let ty = types
         .resolve(ty_id.id())
-        .ok_or_else(|| EncodeError::TypeIdNotFound(ty_id))?;
+        .ok_or(EncodeError::TypeIdNotFound(ty_id))?;
 
     match ty.type_def() {
         TypeDef::Composite(inner) => {
@@ -181,7 +181,7 @@ fn encode_sequence_value<T>(
             Compact(a.len() as u64).encode_to(bytes);
             let ty = ty.type_param();
             for val in a {
-                if let Err(_) = encode_value_as_type(Value::u8(val), ty, types, bytes) {
+                if encode_value_as_type(Value::u8(val), ty, types, bytes).is_err() {
                     return Err(EncodeError::WrongType {
                         actual: value,
                         expected: type_id,
@@ -237,7 +237,7 @@ fn encode_array_value<T>(
 
             let ty = ty.type_param();
             for val in a {
-                if let Err(_) = encode_value_as_type(Value::u8(val), ty, types, bytes) {
+                if encode_value_as_type(Value::u8(val), ty, types, bytes).is_err() {
                     return Err(EncodeError::WrongType {
                         actual: value,
                         expected: type_id,
@@ -341,7 +341,7 @@ fn encode_composite_fields<T>(
     }
 
     // 0 length? Nothing more to do!
-    if composite.len() == 0 {
+    if composite.is_empty() {
         return Ok(())
     }
 
@@ -351,7 +351,7 @@ fn encode_composite_fields<T>(
     match (composite, is_named) {
         (Composite::Named(mut values), true) => {
             // Match up named values with those of the type we're encoding to.
-            for field in fields.into_iter() {
+            for field in fields.iter() {
                 let field_name =
                     field.name().expect("field should be named; checked above");
                 let value = values
@@ -376,7 +376,7 @@ fn encode_composite_fields<T>(
         }
         (Composite::Unnamed(values), false) => {
             // Expect values in correct order only and encode.
-            for (field, value) in fields.into_iter().zip(values) {
+            for (field, value) in fields.iter().zip(values) {
                 encode_value_as_type(value, field.ty(), types, bytes)?;
             }
             Ok(())
@@ -535,7 +535,7 @@ fn encode_compact_value<T>(
     let inner_ty = loop {
         let inner_ty = types
             .resolve(inner_ty_id)
-            .ok_or(EncodeError::TypeIdNotFound(inner_ty_id.into()))?
+            .ok_or_else(|| EncodeError::TypeIdNotFound(inner_ty_id.into()))?
             .type_def();
 
         match inner_ty {
@@ -561,9 +561,7 @@ fn encode_compact_value<T>(
                     TypeDefPrimitive::U32 => CompactTy::U32,
                     TypeDefPrimitive::U64 => CompactTy::U64,
                     TypeDefPrimitive::U128 => CompactTy::U128,
-                    _ => {
-                        return Err(EncodeError::CannotCompactEncode(inner_ty_id.into()))
-                    }
+                    _ => return Err(EncodeError::CannotCompactEncode(inner_ty_id.into())),
                 }
             }
             TypeDef::Variant(_)
