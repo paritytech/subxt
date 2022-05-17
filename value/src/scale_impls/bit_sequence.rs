@@ -14,10 +14,12 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::{ScaleTypeDef as TypeDef};
+use super::ScaleTypeDef as TypeDef;
 use scale_info::{
-	form::PortableForm, PortableRegistry, TypeDefBitSequence,
-	TypeDefPrimitive,
+    form::PortableForm,
+    PortableRegistry,
+    TypeDefBitSequence,
+    TypeDefPrimitive,
 };
 
 #[derive(Debug, Clone, thiserror::Error, PartialEq)]
@@ -31,13 +33,13 @@ pub enum BitSequenceError {
     #[error("Bit store type {0} is not supported")]
     StoreTypeNotSupported(String),
     #[error("Bit order type {0} is not supported")]
-    OrderTypeNotSupported(String)
+    OrderTypeNotSupported(String),
 }
 
 /// Obtain details about a bit sequence.
 pub fn get_bitsequence_details(
-	ty: &TypeDefBitSequence<PortableForm>,
-	types: &PortableRegistry,
+    ty: &TypeDefBitSequence<PortableForm>,
+    types: &PortableRegistry,
 ) -> Result<(BitOrderTy, BitStoreTy), BitSequenceError> {
     let bit_store_ty = ty.bit_store_type().id();
     let bit_order_ty = ty.bit_order_type().id();
@@ -61,14 +63,18 @@ pub fn get_bitsequence_details(
         TypeDef::Primitive(TypeDefPrimitive::U16) => Some(BitOrderTy::U16),
         TypeDef::Primitive(TypeDefPrimitive::U32) => Some(BitOrderTy::U32),
         TypeDef::Primitive(TypeDefPrimitive::U64) => Some(BitOrderTy::U64),
-        _ => None
-    }.ok_or(BitSequenceError::OrderTypeNotSupported(format!("{bit_store_def:?}")))?;
+        _ => None,
+    }
+    .ok_or(BitSequenceError::OrderTypeNotSupported(format!(
+        "{bit_store_def:?}"
+    )))?;
 
     let bit_store_out = match &*bit_order_def {
         "Lsb0" => Some(BitStoreTy::Lsb0),
         "Msb0" => Some(BitStoreTy::Msb0),
-        _ => None
-    }.ok_or(BitSequenceError::StoreTypeNotSupported(bit_order_def))?;
+        _ => None,
+    }
+    .ok_or(BitSequenceError::StoreTypeNotSupported(bit_order_def))?;
 
     Ok((bit_order_out, bit_store_out))
 }
@@ -84,5 +90,5 @@ pub enum BitOrderTy {
     U8,
     U16,
     U32,
-    U64
+    U64,
 }

@@ -15,9 +15,9 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 mod bit_sequence;
-mod type_id;
 mod decode;
 mod encode;
+mod type_id;
 
 /// The portable version of [`scale_info::Type`]
 type ScaleType = scale_info::Type<scale_info::form::PortableForm>;
@@ -28,16 +28,14 @@ type ScaleTypeId = scale_info::interner::UntrackedSymbol<std::any::TypeId>; // e
 /// The portable version of [`scale_info::TypeDef`]
 type ScaleTypeDef = scale_info::TypeDef<scale_info::form::PortableForm>;
 
+pub use bit_sequence::BitSequenceError;
 pub use decode::{
     decode_value_as_type,
-    DecodeError
+    DecodeError,
 };
 pub use encode::{
     encode_value_as_type,
     EncodeError,
-};
-pub use bit_sequence::{
-    BitSequenceError
 };
 
 pub use type_id::TypeId;

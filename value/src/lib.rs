@@ -14,16 +14,14 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-/*!
-This crate exposes the [`Value`] type and related subtypes, which are used as the runtime
-representations of SCALE encoded data (much like `serde_json::Value` is a runtime representation
-of JSON data).
-*/
+//! This crate exposes the [`Value`] type and related subtypes, which are used as the runtime
+//! representations of SCALE encoded data (much like `serde_json::Value` is a runtime representation
+//! of JSON data).
 
-mod value_type;
 mod scale_impls;
 #[cfg(feature = "serde")]
 mod serde_impls;
+mod value_type;
 
 pub use value_type::{
     BitSequence,
@@ -40,7 +38,9 @@ pub mod serde {
     pub use crate::serde_impls::DeserializeError;
 
     /// Attempt to deserialize a [`crate::Value`] into another type.
-    pub fn from_value<'de, Ctx, T: serde::Deserialize<'de>>(value: crate::Value<Ctx>) -> Result<T, DeserializeError> {
+    pub fn from_value<'de, Ctx, T: serde::Deserialize<'de>>(
+        value: crate::Value<Ctx>,
+    ) -> Result<T, DeserializeError> {
         T::deserialize(value)
     }
 
@@ -55,10 +55,10 @@ pub mod serde {
 /// Encoding and decoding SCALE bytes into a [`crate::Value`].
 pub mod scale {
     pub use crate::scale_impls::{
-        EncodeError,
-        DecodeError,
-        TypeId,
         BitSequenceError,
+        DecodeError,
+        EncodeError,
+        TypeId,
     };
     pub use scale_info::PortableRegistry;
 
@@ -80,7 +80,7 @@ pub mod scale {
         value: crate::Value<T>,
         ty_id: Id,
         types: &PortableRegistry,
-        buf: &mut Vec<u8>
+        buf: &mut Vec<u8>,
     ) -> Result<(), EncodeError<T>> {
         crate::scale_impls::encode_value_as_type(value, ty_id, types, buf)
     }
