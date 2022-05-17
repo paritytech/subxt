@@ -296,6 +296,12 @@ impl RuntimeGenerator {
                     marker: ::core::marker::PhantomData<X>,
                 }
 
+                impl<T: ::subxt::Config, X> Clone for RuntimeApi<T, X> {
+                    fn clone(&self) -> Self {
+                        Self { client: self.client.clone(), marker: ::core::marker::PhantomData }
+                    }
+                }
+
                 impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
                 where
                     T: ::subxt::Config,
@@ -312,7 +318,12 @@ impl RuntimeGenerator {
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
                     pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
-                        if self.client.metadata().metadata_hash(&PALLETS) != [ #(#metadata_hash,)* ] {
+                        let runtime_metadata_hash = {
+                            let locked_metadata = self.client.metadata();
+                            let metadata = locked_metadata.read();
+                            metadata.metadata_hash(&PALLETS)
+                        };
+                        if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
                             Err(::subxt::MetadataError::IncompatibleMetadata)
                         } else {
                             Ok(())
@@ -341,7 +352,7 @@ impl RuntimeGenerator {
                 }
 
                 impl <'a, T: ::subxt::Config> EventsApi<'a, T> {
-                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<'a, T, Event>, ::subxt::BasicError> {
+                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<T, Event>, ::subxt::BasicError> {
                         ::subxt::events::at::<T, Event>(self.client, block_hash).await
                     }
 

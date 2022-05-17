@@ -189,7 +189,7 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
 
 #[tokio::test]
 async fn transfer_error() {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
@@ -230,7 +230,7 @@ async fn transfer_error() {
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {
-    env_logger::try_init().ok();
+    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
@@ -265,7 +265,9 @@ async fn transfer_implicit_subscription() {
 #[tokio::test]
 async fn constant_existential_deposit() {
     let cxt = test_context().await;
-    let balances_metadata = cxt.client().metadata().pallet("Balances").unwrap();
+    let locked_metadata = cxt.client().metadata();
+    let metadata = locked_metadata.read();
+    let balances_metadata = metadata.pallet("Balances").unwrap();
     let constant_metadata = balances_metadata.constant("ExistentialDeposit").unwrap();
     let existential_deposit = u128::decode(&mut &constant_metadata.value[..]).unwrap();
     assert_eq!(existential_deposit, 100_000_000_000_000);
