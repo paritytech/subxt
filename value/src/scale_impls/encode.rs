@@ -647,11 +647,12 @@ mod test {
 	}
 
     // Attempt to SCALE encode a Value and expect it to match the standard Encode impl for the second param given.
-    fn assert_can_encode_to_type<Ctx: std::fmt::Debug, T: Encode + scale_info::TypeInfo + 'static>(value: Value<Ctx>, ty: T) {
+    fn assert_can_encode_to_type<T: Encode + scale_info::TypeInfo + 'static>(value: Value<()>, ty: T) {
         let expected = ty.encode();
         let mut buf = Vec::new();
 
         let (ty_id, types) = make_type::<T>();
+
         encode_value_as_type(value, ty_id, &types, &mut buf).expect("error encoding value as type");
         assert_eq!(expected, buf);
     }
@@ -774,6 +775,48 @@ mod test {
             Value::bool(true),
         ]);
         assert_can_encode_to_type(unnamed_value, ("world", true));
+    }
+
+    #[test]
+    fn can_encode_bitvecs() {
+        use bitvec::{ bitvec, order::{ Lsb0, Msb0 }};
+
+        let bits = bitvec![u8, Lsb0; 0, 1, 1, 0, 0, 1];
+        let value = Value::bit_sequence(bits);
+
+        // Support encoding our Value to the different underlying formats that bitvec can have:
+
+        assert_can_encode_to_type(value.clone(), bitvec![u8, Lsb0; 0, 1, 1, 0, 0, 1]);
+        assert_can_encode_to_type(value.clone(), bitvec![u8, Msb0; 0, 1, 1, 0, 0, 1]);
+
+        assert_can_encode_to_type(value.clone(), bitvec![u16, Lsb0; 0, 1, 1, 0, 0, 1]);
+        assert_can_encode_to_type(value.clone(), bitvec![u16, Msb0; 0, 1, 1, 0, 0, 1]);
+
+        assert_can_encode_to_type(value.clone(), bitvec![u32, Lsb0; 0, 1, 1, 0, 0, 1]);
+        assert_can_encode_to_type(value.clone(), bitvec![u32, Msb0; 0, 1, 1, 0, 0, 1]);
+
+        assert_can_encode_to_type(value.clone(), bitvec![u64, Lsb0; 0, 1, 1, 0, 0, 1]);
+        assert_can_encode_to_type(value.clone(), bitvec![u64, Msb0; 0, 1, 1, 0, 0, 1]);
+    }
+
+    #[test]
+    fn can_encode_to_compact_types() {
+        assert_can_encode_to_type(Value::u8(123), Compact(123u64));
+        assert_can_encode_to_type(Value::u16(123), Compact(123u64));
+        assert_can_encode_to_type(Value::u32(123), Compact(123u64));
+        assert_can_encode_to_type(Value::u64(123), Compact(123u64));
+
+        // As a special case, as long as ultimately we have a primitive value, we can compact encode it:
+        assert_can_encode_to_type(
+            Value::unnamed_composite(vec![ Value::u64(123) ]),
+            Compact(123u64)
+        );
+        assert_can_encode_to_type(
+            Value::unnamed_composite(vec![
+                Value::named_composite(vec![ ("foo".to_string(), Value::u64(123)) ]),
+            ]),
+            Compact(123u64)
+        );
     }
 
 }
