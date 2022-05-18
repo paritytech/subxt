@@ -14,7 +14,26 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! For performing runtime updates.
+//! Perform runtime updates in the background using [UpdateClient].
+//!
+//! There are cases when the node would perform a runtime update. As a result, the subxt's metadata
+//! would be out of sync and the API would not be able to submit valid extrinsics.
+//! This API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
+//!
+//! The runtime update is recommended for long-running clients, or for cases where manually
+//! restarting subxt would not be feasible.
+//!
+//! ## Note
+//!
+//! It is within the customer's control to select an appropriate async runtime.
+//!
+//! ```rust
+//! let update_client = client.updates();
+//! tokio::spawn(async move {
+//!     let result = update_client.perform_runtime_updates().await;
+//!     println!("Runtime update finished with result={:?}", result);
+//! });
+//! ```
 
 use crate::{
     rpc::{

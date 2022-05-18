@@ -14,7 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! For querying runtime storage.
+//! Query the runtime storage using [StorageClient].
+//!
+//! This module is the core of performing runtime storage queries.
+//!
+//! The exposed API is performing RPC calls to `state_getStorage` and `state_getKeysPaged`.
+//!
+//! A runtime storage entry can be of type:
+//! - [StorageEntryKey::Plain] for keys constructed just from the prefix
+//!   `twox_128(pallet) ++ twox_128(storage_item)`
+//! - [StorageEntryKey::StorageMapKey] for mapped keys constructed from the prefix,
+//!   plus other arguments `twox_128(pallet) ++ twox_128(storage_item) ++ hash(arg1) ++ arg1`
+//!
 
 use codec::{
     Decode,
