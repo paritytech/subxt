@@ -29,12 +29,12 @@ For more details regarding utilizing subxt, please visit the [documentation](LIB
 ## Integration Testing
 
 Most tests require a running substrate node to communicate with. This is done by spawning an instance of the
-substrate node per test. It requires an executable binary `substrate` at [`polkadot-v0.9.10`](https://github.com/paritytech/substrate/releases/tag/polkadot-v0.9.10) on your path.
+substrate node per test. It requires an executable binary `substrate` at the latest `polkadot` version on your path.
 
 This can be installed from source via cargo:
 
 ```bash
-cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.10 --force
+cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.18 --force
 ```
 
 ## Real world usage
