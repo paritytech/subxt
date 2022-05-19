@@ -42,7 +42,7 @@
 //! }
 //! ```
 //!
-//! ## Iterate over Strorage
+//! ## Iterate over Storage
 //! ```rust
 //! // Iterate over keys and values.
 //! let mut iter = storage
