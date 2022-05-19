@@ -198,7 +198,37 @@ while let Some(transfer_event) = transfer_events.next().await {
 ```
 
 ### Static Metadata Validation
-- TODO
+
+There are two types of metadata that the subxt is aware of:
+- static metadata: Metadata used for generating the API.
+- runtime metadata: Metadata downloaded from the target node when a subxt client is created.
+
+There are cases when the static metadata is different from the runtime metadata of a node.
+Such is the case when the node performs a runtime update.
+
+To ensure that subxt can properly communicate with the target node the static metadata is validated
+against the runtime metadata of the node.
+
+This validation is performed at Call, Constant, Storage levels, as well for the entire metadata.
+The level of granularity ensures that the customers can still submit a given call, even if another
+call suffered changes.
+
+Full metadata validation:
+```rust
+// To make sure that all of our statically generated pallets are compatible with the
+// runtime node, we can run this check:
+api.validate_metadata()?;
+```
+
+Call level validation:
+```rust
+let extrinsic = api
+    .tx()
+    .balances()
+    // Constructing an extrinsic will fail if the metadata
+    // is not in sync with the generated API.
+    .transfer(dest, 123_456_789_012_345)?;
+```
 
 ### Runtime Updates
 - TODO
