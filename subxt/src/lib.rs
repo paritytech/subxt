@@ -15,7 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 #![doc = include_str!("../../LIB_DOC.md")]
-
 #![deny(
     bad_style,
     const_err,

@@ -23,9 +23,36 @@
 //! A runtime storage entry can be of type:
 //! - [StorageEntryKey::Plain] for keys constructed just from the prefix
 //!   `twox_128(pallet) ++ twox_128(storage_item)`
-//! - [StorageEntryKey::StorageMapKey] for mapped keys constructed from the prefix,
+//! - [StorageEntryKey::Map] for mapped keys constructed from the prefix,
 //!   plus other arguments `twox_128(pallet) ++ twox_128(storage_item) ++ hash(arg1) ++ arg1`
 //!
+//! # Examples
+//!
+//! **Note:** Prefer using the Subxt generated API.
+//!
+//! ## Fetch Storage Keys
+//! ```rust
+//! // Fetch just the keys, returning up to 10 keys.
+//! let keys = storage
+//!     .fetch_keys::<node_runtime::xcm_pallet::storage::VersionNotifiers>(10, None, None)
+//!     .await?;
+//! // Iterate over each key
+//! for key in keys.iter() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//! }
+//! ```
+//!
+//! ## Iterate over Strorage
+//! ```rust
+//! // Iterate over keys and values.
+//! let mut iter = storage
+//!     .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
+//!     .await?;
+//! while let Some((key, value)) = iter.next().await? {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//!     println!("Value: {}", value);
+//! }
+//! ```
 
 use codec::{
     Decode,
