@@ -231,4 +231,16 @@ let extrinsic = api
 ```
 
 ### Runtime Updates
-- TODO
+
+There are cases when the node would perform a runtime update, and the runtime node's metadata would be
+out of sync with the subxt's metadata.
+
+The `UpdateClient` API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
+
+```rust
+let update_client = api.client.updates();
+tokio::spawn(async move {
+    let result = update_client.perform_runtime_updates().await;
+    println!("Runtime update finished with result={:?}", result);
+});
+```
