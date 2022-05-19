@@ -22,7 +22,9 @@ subxt metadata -f bytes > metadata.scale
 This defaults to querying the metadata of a locally running node on the default `http://localhost:9933/`. If querying
 a different node then the `metadata` command accepts a `--url` argument.
 
-include[my-file.md](LIB_DOC.md)
+## Subxt Documentation
+
+For more details regarding utilizing subxt, please visit the [documentation](LIB_DOC.md).
 
 ## Integration Testing
 
