@@ -27,7 +27,7 @@
 //! Configures most of the "signed extra" and "additional" parameters as needed for
 //! Polkadot and Substrate nodes. Only the shape of the tip payments differs, leading to
 //! [SubstrateExtrinsicParams] and [PolkadotExtrinsicParams] structs which pick an
-//! appropriate shape for Substrtae/Polkadot chains respectively.
+//! appropriate shape for Substrate/Polkadot chains respectively.
 //!
 //! For this implementation:
 //! - "signed extra" contains:

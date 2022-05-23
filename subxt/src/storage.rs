@@ -28,9 +28,8 @@
 //!
 //! # Examples
 //!
-//! **Note:** Prefer using the Subxt generated API.
-//!
 //! ## Fetch Storage Keys
+//!
 //! ```rust
 //! // Fetch just the keys, returning up to 10 keys.
 //! let keys = storage
@@ -43,6 +42,7 @@
 //! ```
 //!
 //! ## Iterate over Storage
+//!
 //! ```rust
 //! // Iterate over keys and values.
 //! let mut iter = storage

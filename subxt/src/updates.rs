@@ -25,7 +25,7 @@
 //!
 //! ## Note
 //!
-//! It is within the customer's control to select an appropriate async runtime.
+//! Here we use tokio to check for updates in the background, but any runtime can be used.
 //!
 //! ```rust
 //! let update_client = client.updates();

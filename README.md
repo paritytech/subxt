@@ -24,17 +24,17 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ## Subxt Documentation
 
-For more details regarding utilizing subxt, please visit the [documentation](LIB_DOC.md).
+For more details regarding utilizing subxt, please visit the [documentation](docs/subxt.md).
 
 ## Integration Testing
 
 Most tests require a running substrate node to communicate with. This is done by spawning an instance of the
-substrate node per test. It requires an executable binary `substrate` at the latest `polkadot` version on your path.
+substrate node per test. It requires an up-to-date `substrate` executable on your path.
 
 This can be installed from source via cargo:
 
 ```bash
-cargo install --git https://github.com/paritytech/substrate node-cli --tag=polkadot-v0.9.18 --force
+cargo install --git https://github.com/paritytech/substrate node-cli --force
 ```
 
 ## Real world usage

@@ -22,6 +22,7 @@
 //! # Examples
 //!
 //! ## Fetch Storage
+//!
 //! ```rust
 //! use subxt::rpc::Rpc;
 //! use subxt::storage::StorageKeyPrefix;
@@ -40,6 +41,7 @@
 //! ```
 //!
 //! ## Fetch Keys
+//!
 //! ```rust
 //! use subxt::rpc::Rpc;
 //! use subxt::storage::StorageKeyPrefix;
