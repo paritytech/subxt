@@ -47,7 +47,7 @@ use scale_info::form::PortableForm;
 ///
 /// - `type_gen` - The type generator containing all types defined by metadata.
 /// - `pallet` - Pallet metadata from which the events are generated.
-/// - `types_mod_ident` - The indent of the module.
+/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_events(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,

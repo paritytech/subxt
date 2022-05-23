@@ -88,8 +88,6 @@ where
 }
 
 /// Create the API for interacting with a Substrate runtime.
-///
-/// **Note:** Prefer using [generate_runtime_api] for static metadata use-cases.
 pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV14,
 }
