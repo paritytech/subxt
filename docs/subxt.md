@@ -21,6 +21,7 @@ pub mod node_runtime { }
 ```
 
 The `node_runtime` has the following hierarchy
+
 ```rust
 pub mod node_runtime {
     pub mod PalletName {
@@ -85,6 +86,7 @@ let tx_hash = extrinsic
 ```
 
 An ergonomic approach to the previous example:
+
 ```rust
 use sp_keyring::AccountKeyring;
 use subxt::PairSigner;
@@ -151,6 +153,7 @@ To subscribe to events use the generated `RuntimeApi::events()` method which exp
 - `at()` - Obtain events at a given block hash.
 
 Subscribe to events emitted from blocks:
+
 ```rust
 // Subscribe to all events emitted from blocks.
 let mut events = api
@@ -176,6 +179,7 @@ while let Some(ev) = events.next().await {
 ```
 
 Filter events to by `Balances::Transfer`
+
 ```rust
 
 // Subscribe just to the `Transfer` event generated from the `Balances` pallet.
@@ -214,6 +218,7 @@ The level of granularity ensures that the customers can still submit a given cal
 call suffered changes.
 
 Full metadata validation:
+
 ```rust
 // To make sure that all of our statically generated pallets are compatible with the
 // runtime node, we can run this check:
@@ -221,6 +226,7 @@ api.validate_metadata()?;
 ```
 
 Call level validation:
+
 ```rust
 let extrinsic = api
     .tx()
