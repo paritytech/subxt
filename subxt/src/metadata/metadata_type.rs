@@ -97,10 +97,7 @@ struct MetadataInner {
     cached_storage_hashes: HashCache,
 }
 
-/// Internal metadata representation over the runtime metadata.
-///
-/// This structure holds the ability to easily translate strings and indexes to
-/// underlying metadata types.
+/// A representation of the runtime metadata received from a node.
 #[derive(Clone, Debug)]
 pub struct Metadata {
     inner: Arc<MetadataInner>,
