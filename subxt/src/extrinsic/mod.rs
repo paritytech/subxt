@@ -19,12 +19,16 @@
 //! This modules exposes the extrinsic's parameters and the ability to sign an extrinsic.
 //!
 //!
-//! An extrinsic can be submitted with an "signed extra" and "additional" parameters for
-//! further customization. The trait [ExtrinsicParams] is at the core of an extrinsic parameter.
+//! An extrinsic is submitted with an "signed extra" and "additional" parameters, which can be
+//! different for each chain. The trait [ExtrinsicParams] is at the core of an extrinsic parameter.
 //!
 //!
-//! The structure [BaseExtrinsicParams] is a default implementation of the trait for the
-//! Polkadot/Substrate chains.
+//! The structure [BaseExtrinsicParams] is a base implementation of the trait which
+//! Configures most of the "signed extra" and "additional" parameters as needed for
+//! Polkadot and Substrate nodes. Only the shape of the tip payments differs, leading to
+//! [SubstrateExtrinsicParams] and [PolkadotExtrinsicParams] structs which pick an
+//! appropriate shape for Substrtae/Polkadot chains respectively.
+//!
 //! For this implementation:
 //! - "signed extra" contains:
 //!     - sp_runtime::Era: This is utilized to determine the longevity of a transaction.

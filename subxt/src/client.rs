@@ -99,6 +99,8 @@ impl ClientBuilder {
 
     /// Creates a new Client.
     ///
+    /// # Example
+    ///
     /// ```rust
     /// use subxt::{ClientBuilder, DefaultConfig};
     ///
@@ -205,6 +207,8 @@ impl<T: Config> Client<T> {
     /// The update client is intended to be used in the background for
     /// performing runtime updates, while the API is still in use.
     /// Without performing runtime updates the submitted extrinsics may fail.
+    ///
+    /// # Example
     ///
     /// ```rust
     /// let update_client = client.updates();

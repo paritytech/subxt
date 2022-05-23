@@ -16,7 +16,19 @@
 
 //! Library to generate an API for a Substrate runtime from its metadata.
 //!
-//! ## Usage Example
+//! ## Generated Structure
+//!
+//! The API generator logic:
+//! - At the root there is the `item_mod` provided (ie `pub mod api {}`)
+//! - Pallet are represented by a child module (ie `pub mod PalletName {}`) of the root
+//! - Each pallet exposes as child modules (if applicable):
+//!   - Calls (`pub mod calls {}`)
+//!   - Events (`pub mod events {}`)
+//!   - Storage (`pub mod storage {}`)
+//!   - Constants (`pub mod constants {}`)
+//!
+//! ## Example
+//!
 //! ```rust
 //! use codec::Decode;
 //! use frame_metadata::RuntimeMetadataPrefixed;
@@ -35,17 +47,6 @@
 //! let runtime_api = generator.generate_runtime(item_mod, derives);
 //! println!("{}", runtime_api);
 //! ```
-//!
-//! ## Generated Structure
-//!
-//! The API generator logic:
-//! - At the root there is the `item_mod` provided (ie `pub mod api {}`)
-//! - Pallet are represented by a child module (ie `pub mod PalletName {}`) of the root
-//! - Each pallet exposes as child modules (if applicable):
-//!   - Calls (`pub mod calls {}`)
-//!   - Events (`pub mod events {}`)
-//!   - Storage (`pub mod storage {}`)
-//!   - Constants (`pub mod constants {}`)
 
 mod api;
 mod ir;
