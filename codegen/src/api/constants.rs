@@ -43,7 +43,7 @@ use scale_info::form::PortableForm;
 ///
 /// Although the constants are defined in the provided static metadata, the API
 /// ensures that the constants are returned from the runtime metadata of the node.
-/// This design choice was made to ease the contracts work.
+/// This ensures that if node constants change value, we'll always see the latest values.
 ///
 /// # Arguments
 ///
