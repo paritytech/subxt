@@ -38,6 +38,7 @@ use scale_info::{
 /// Generate storage from the provided pallet metadata.
 ///
 /// The function creates a new module named `storage` under the pallet's module.
+///
 /// ```ignore
 /// pub mod PalletName {
 ///     pub mod storage {

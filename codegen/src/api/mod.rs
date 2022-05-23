@@ -94,6 +94,9 @@ pub struct RuntimeGenerator {
 
 impl RuntimeGenerator {
     /// Create a new runtime generator from the provided metadata.
+    ///
+    /// **Note:** If you have a path to the metadata, Prefer to use [generate_runtime_api]
+    /// for generating the runtime API.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
             RuntimeMetadata::V14(v14) => Self { metadata: v14 },
