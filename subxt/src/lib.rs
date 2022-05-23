@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-#![doc = include_str!("../../LIB_DOC.md")]
+#![doc = include_str!("../../docs/subxt.md")]
 #![deny(
     bad_style,
     const_err,
