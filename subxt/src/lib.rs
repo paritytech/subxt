@@ -125,11 +125,11 @@ pub use crate::{
 
 /// Trait to uniquely identify the call (extrinsic)'s identity from the runtime metadata.
 ///
-/// Generated API structures that represent a call implement this trait.
+/// Generated API structures that represent each of the different possible
+/// calls to a node each implement this trait.
 ///
-/// Part of creating an extrinsic requires to SCALE encode call data to bytes:
-/// (pallet u8, call u8, call params). The indexes are obtained via translating the
-/// string names from the runtime metadata.
+/// When encoding an extrinsic, we use this information to know how to map
+/// the call to the specific pallet and call index needed by a particular node.
 pub trait Call: Encode {
     /// Pallet name.
     const PALLET: &'static str;
