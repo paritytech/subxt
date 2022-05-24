@@ -74,17 +74,8 @@ then the `storage_item_name()`.
 
 Query `Balances::TotalIssuance`:
 
-```rust
-let total_issuance = api
-    // This is the storage query.
-    .storage()
-    // Storage from the `Balances` pallet (pallet_name).
-    .balances()
-    // Storage name (storage_item_name).
-    .total_issuance(None)
-    .await?
-```
 
+Please visit the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example for more details.
 
 ### Query Constants
 
@@ -96,18 +87,7 @@ the client, *not* the one provided for API generation).
 To query constants use the generated `RuntimeApi::constants()` method, followed by the `pallet_name()` and then the
 `constant_item_name()`.
 
-Query `Balances::ExistentialDeposit`:
-
-```rust
-let existential_deposit = api
-    // This is the constants query.
-    .constants()
-    // Constant from the `Balances` pallet (pallet_name).
-    .balances()
-    // Constant name (constant_item_name).
-    .existential_deposit(None)?
-```
-
+Please visit the [fetch_constants](../examples/examples/fetch_constants.rs) example for more details.
 
 ### Subscribe to Events
 
