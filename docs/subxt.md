@@ -72,9 +72,6 @@ Please visit the [balance_transfer](../examples/examples/balance_transfer.rs) ex
 The runtime storage is queried via the generated `RuntimeApi::storage()` method, followed by the `pallet_name()` and
 then the `storage_item_name()`.
 
-Query `Balances::TotalIssuance`:
-
-
 Please visit the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example for more details.
 
 ### Query Constants
@@ -96,54 +93,11 @@ To subscribe to events use the generated `RuntimeApi::events()` method which exp
 - `subscribe_finalized()` - Subscribe to events from finalized blocks.
 - `at()` - Obtain events at a given block hash.
 
-Subscribe to events emitted from blocks:
 
-```rust
-// Subscribe to all events emitted from blocks.
-let mut events = api
-    // Obtain the events API.
-    .events()
-    // Please use `subscribe_finalized()` if interested only in finalized blocks,
-    // or `at()` if interested in a specific block.
-    .subscribe()
-    .await?;
-
-// Our subscription will see all of the events emitted:
-while let Some(ev) = events.next().await {
-    // Obtain all events from this block.
-    let ev: subxt::Events<_, _> = ev?;
-    // Print block hash.
-    println!("Event at block hash {:?}", ev.block_hash());
-    // Iterate over all events.
-    let mut iter = ev.iter();
-    while let Some(event_details) = iter.next() {
-        println!("Event details {:?}", event_details);
-    }
-}
-```
-
-Filter events to by `Balances::Transfer`
-
-```rust
-
-// Subscribe just to the `Transfer` event generated from the `Balances` pallet.
-let mut transfer_events = api
-    // Obtain the events API.
-    .events()
-    // Please use `subscribe_finalized()` if interested only in finalized blocks,
-    // or `at()` if interested in a specific block.
-    .subscribe()
-    .await?
-    // Note that the `filter_events` takes a tuple to filter out and return events (1-tuple provided)
-    // If we ask for more than one event, we'll be given a corresponding tuple of `Option`'s,
-    // with exactly one variant populated each time.
-    .filter_events::<(polkadot::balances::events::Transfer,)>();
-
-// Our subscription will see all of the transfer events emitted as a result of this:
-while let Some(transfer_event) = transfer_events.next().await {
-    println!("Balance transfer event: {transfer_event:?}");
-}
-```
+*Examples*
+- [subscribe_all_events](../examples/examples/subscribe_all_events.rs): Subscribe to events emitted from blocks.
+- [subscribe_one_event](../examples/examples/subscribe_one_event.rs): Subscribe and filter by one event.
+- [subscribe_some_events](../examples/examples/subscribe_some_events.rs): Subscribe and filter event.
 
 ### Static Metadata Validation
 
@@ -187,10 +141,5 @@ out of sync with the subxt's metadata.
 
 The `UpdateClient` API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
 
-```rust
-let update_client = api.client.updates();
-tokio::spawn(async move {
-    let result = update_client.perform_runtime_updates().await;
-    println!("Runtime update finished with result={:?}", result);
-});
-```
+
+Please visit the [subscribe_runtime_updates](../examples/examples/subscribe_runtime_updates.rs) example for more details.
