@@ -38,20 +38,44 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
-    let dest = AccountKeyring::Bob.to_account_id().into();
 
     let api = ClientBuilder::new()
         .build()
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-    let hash = api
-        .tx()
-        .balances()
-        .transfer(dest, 123_456_789_012_345)?
-        .sign_and_submit_default(&signer)
-        .await?;
 
-    println!("Balance transfer extrinsic submitted: {}", hash);
+    // Submit the `transfer` extrinsic from Alice's account to Bob's.
+    {
+        let dest = AccountKeyring::Bob.to_account_id().into();
+
+        // Obtain an extrinsic.
+        let extrinsic = api
+            // This is an extrinsic.
+            .tx()
+            // Extrinsic from the `Balances` pallet (pallet_name).
+            .balances()
+            // Extrinsic (call_item_name) name with parameters.
+            .transfer(dest, 123_456_789_012_345)?;
+
+        // Sign and submit the extrinsic.
+        let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
+
+        println!("Balance transfer extrinsic submitted: {}", tx_hash);
+    }
+
+    // An ergonomic approach that achieves the same result.
+    {
+        let dest = AccountKeyring::Bob.to_account_id().into();
+
+        let tx_hash = api
+            .tx()
+            .balances()
+            .transfer(dest, 123_456_789_012_345)?
+            .sign_and_submit_default(&signer)
+            .await?;
+
+        println!("Balance transfer extrinsic submitted: {}", tx_hash);
+    }
 
     Ok(())
 }

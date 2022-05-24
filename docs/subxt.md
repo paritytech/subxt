@@ -64,43 +64,7 @@ Extrinsics are obtained using the API's `RuntimeApi::tx()` method, followed by `
 
 Submit an extrinsic, returning success once the transaction is validated and accepted into the pool:
 
-```rust
-use sp_keyring::AccountKeyring;
-use subxt::PairSigner;
-
-let signer = PairSigner::new(AccountKeyring::Alice.pair());
-let dest = AccountKeyring::Bob.to_account_id().into();
-
-let extrinsic = api
-    // This is an extrinsic.
-    .tx()
-    // Extrinsic from the `Balances` pallet (pallet_name).
-    .balances()
-    // Extrinsic (call_item_name) name with parameters.
-    .transfer(dest, 123_456_789_012_345)?;
-
-let tx_hash = extrinsic
-    // Sign and submit the extrinsic.
-    .sign_and_submit_default(&signer)
-    .await?;
-```
-
-An ergonomic approach to the previous example:
-
-```rust
-use sp_keyring::AccountKeyring;
-use subxt::PairSigner;
-
-let signer = PairSigner::new(AccountKeyring::Alice.pair());
-let dest = AccountKeyring::Bob.to_account_id().into();
-
-let tx_hash = api
-    .tx()
-    .balances()
-    .transfer(dest, 123_456_789_012_345)?
-    .sign_and_submit_default(&signer)
-    .await?;
-```
+Please visit the [balance_transfer](../examples/examples/balance_transfer.rs) example for more details.
 
 
 ### Querying Storage
