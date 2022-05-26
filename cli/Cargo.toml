@@ -19,8 +19,6 @@ path = "src/main.rs"
 subxt-codegen = { version = "0.21.0", path = "../codegen" }
 # perform node compatibility
 subxt-metadata = { version = "0.21.0", path = "../metadata" }
-# information of portable registry
-scale-info = "2.0.0"
 # parse command line args
 structopt = "0.3.25"
 # make the request to a substrate node to get the metadata
