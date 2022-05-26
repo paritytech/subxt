@@ -16,6 +16,8 @@
 
 //! Library to generate an API for a Substrate runtime from its metadata.
 
+#![deny(unused_crate_dependencies)]
+
 mod api;
 mod ir;
 mod types;
