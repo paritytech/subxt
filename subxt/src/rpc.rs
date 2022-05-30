@@ -21,62 +21,36 @@
 // Related: https://github.com/paritytech/subxt/issues/66
 #![allow(irrefutable_let_patterns)]
 
-use std::{
-    collections::HashMap,
-    sync::Arc,
-};
+use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    error::BasicError,
-    storage::StorageKeyPrefix,
-    Config,
-    Metadata,
-    PhantomDataSendSync,
+    client::SignedSubmittableExtrinsic, error::BasicError, extrinsic::ExtrinsicParams,
+    storage::StorageKeyPrefix, Config, HasModuleError, Metadata, PhantomDataSendSync,
 };
-use codec::{
-    Decode,
-    Encode,
-};
+use codec::{Decode, Encode};
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
-        InvalidUri,
-        Receiver as WsReceiver,
-        Sender as WsSender,
-        Uri,
+        InvalidUri, Receiver as WsReceiver, Sender as WsSender, Uri,
         WsTransportClientBuilder,
     },
     core::{
         client::{
-            Client as RpcClient,
-            ClientBuilder as RpcClientBuilder,
-            ClientT,
-            Subscription,
-            SubscriptionClientT,
+            Client as RpcClient, ClientBuilder as RpcClientBuilder, ClientT,
+            Subscription, SubscriptionClientT,
         },
-        to_json_value,
-        DeserializeOwned,
-        Error as RpcError,
-        JsonValue,
+        to_json_value, DeserializeOwned, Error as RpcError, JsonValue,
     },
     rpc_params,
 };
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::{Deserialize, Serialize};
 use sp_core::{
-    storage::{
-        StorageChangeSet,
-        StorageData,
-        StorageKey,
-    },
-    Bytes,
-    U256,
+    storage::{StorageChangeSet, StorageData, StorageKey},
+    Bytes, U256,
 };
-use sp_runtime::generic::{
-    Block,
-    SignedBlock,
+use sp_runtime::{
+    generic::{Block, SignedBlock},
+    ApplyExtrinsicResult,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -571,6 +545,30 @@ impl<T: Config> Rpc<T> {
     ) -> Result<bool, BasicError> {
         let params = rpc_params![public_key, key_type];
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+
+    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    ///
+    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
+    pub async fn dry_run<'client, Y, X, E, Evs>(
+        &self,
+        signed_submittable_extrinsic: &SignedSubmittableExtrinsic<'client, Y, X, E, Evs>,
+        at: Option<T::Hash>,
+    ) -> Result<ApplyExtrinsicResult, BasicError>
+    where
+        Y: Config,
+        X: ExtrinsicParams<Y>,
+        E: Decode + HasModuleError,
+        Evs: Decode,
+    {
+        let params = rpc_params![
+            Bytes::from(signed_submittable_extrinsic.encoded().0.clone()),
+            at
+        ];
+        let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
+        let data: ApplyExtrinsicResult =
+            codec::Decode::decode(&mut result_bytes.0.as_slice())?;
+        Ok(data)
     }
 }
 

@@ -15,45 +15,19 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use jsonrpsee::{
-    core::client::ClientT,
-    rpc_params,
-};
-use sp_core::Bytes;
 pub use sp_runtime::traits::SignedExtension;
-use sp_runtime::{
-    traits::Hash,
-    ApplyExtrinsicResult,
-};
+use sp_runtime::traits::Hash;
 
 use crate::{
-    error::{
-        BasicError,
-        HasModuleError,
-    },
-    extrinsic::{
-        ExtrinsicParams,
-        Signer,
-    },
-    rpc::{
-        Rpc,
-        RpcClient,
-        RuntimeVersion,
-        SystemProperties,
-    },
+    error::{BasicError, HasModuleError},
+    extrinsic::{ExtrinsicParams, Signer},
+    rpc::{Rpc, RpcClient, RuntimeVersion, SystemProperties},
     storage::StorageClient,
     transaction::TransactionProgress,
     updates::UpdateClient,
-    Call,
-    Config,
-    Encoded,
-    Metadata,
+    Call, Config, Encoded, Metadata,
 };
-use codec::{
-    Compact,
-    Decode,
-    Encode,
-};
+use codec::{Compact, Decode, Encode};
 use derivative::Derivative;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -455,19 +429,7 @@ where
         self.client.rpc().submit_extrinsic(&self.encoded).await
     }
 
-    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
-    ///
-    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
-    pub async fn dry_run(&self) -> Result<ApplyExtrinsicResult, BasicError> {
-        let params = rpc_params![Bytes::from(self.encoded.0.clone())];
-        let result_bytes: Bytes = self
-            .client
-            .rpc()
-            .client
-            .request("system_dryRun", params)
-            .await?;
-        let data: ApplyExtrinsicResult =
-            codec::Decode::decode(&mut result_bytes.0.as_slice())?;
-        Ok(data)
+    pub fn encoded(&self) -> Encoded {
+        self.encoded.clone()
     }
 }
