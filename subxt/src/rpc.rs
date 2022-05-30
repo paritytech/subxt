@@ -24,10 +24,18 @@
 use std::{collections::HashMap, sync::Arc};
 
 use crate::{
-    client::SignedSubmittableExtrinsic, error::BasicError, extrinsic::ExtrinsicParams,
-    storage::StorageKeyPrefix, Config, HasModuleError, Metadata, PhantomDataSendSync,
+    error::BasicError,
+    client::SignedSubmittableExtrinsic,
+    extrinsic::ExtrinsicParams,
+    Config,
+    Metadata,
+    PhantomDataSendSync,
+    HasModuleError
 };
-use codec::{Decode, Encode};
+use codec::{
+    Decode,
+    Encode,
+};
 use frame_metadata::RuntimeMetadataPrefixed;
 pub use jsonrpsee::{
     client_transport::ws::{
@@ -251,13 +259,12 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKeyPrefix>,
+        key: Option<StorageKey>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = prefix.map(|p| p.to_storage_key());
-        let params = rpc_params![prefix, count, start_key, hash];
+        let params = rpc_params![key, count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -562,7 +569,7 @@ impl<T: Config> Rpc<T> {
         Evs: Decode,
     {
         let params = rpc_params![
-            Bytes::from(signed_submittable_extrinsic.encoded().0.clone()),
+            Bytes::from(signed_submittable_extrinsic.encoded().0),
             at
         ];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;

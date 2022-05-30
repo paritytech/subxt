@@ -16,7 +16,6 @@ default = ["subxt/integration-tests"]
 
 [dev-dependencies]
 assert_matches = "1.5.0"
-async-trait = "0.1.49"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 frame-metadata = "15.0.0"
 futures = "0.3.13"
