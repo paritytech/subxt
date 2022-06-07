@@ -257,7 +257,7 @@ fn generate_storage_entry_fns(
 
     let anon_lifetime = match should_ref {
         true => quote!(<'_>),
-        false => quote!()
+        false => quote!(),
     };
     let storage_entry_type = quote! {
         #entry_struct
