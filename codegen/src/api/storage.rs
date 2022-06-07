@@ -240,10 +240,10 @@ fn generate_storage_entry_fns(
         }
     };
 
-    let (lifetime_param, reference, anon_lifetime) = if should_ref {
-        (quote!(<'a>), quote!(&), quote!(<'_>))
+    let (lifetime_param, reference) = if should_ref {
+        (quote!(<'a>), quote!(&'a))
     } else {
-        (quote!(), quote!(), quote!())
+        (quote!(), quote!())
     };
 
     let storage_entry_impl = quote! (
@@ -255,6 +255,10 @@ fn generate_storage_entry_fns(
         }
     );
 
+    let anon_lifetime = match should_ref {
+        true => quote!(<'_>),
+        false => quote!()
+    };
     let storage_entry_type = quote! {
         #entry_struct
         impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
@@ -267,19 +271,30 @@ fn generate_storage_entry_fns(
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
             #docs_token
-            pub async fn #fn_name_iter(
+            pub fn #fn_name_iter(
                 &self,
                 block_hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
-                let runtime_storage_hash = {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    metadata.storage_hash::<#entry_struct_ident>()?
-                };
-                if runtime_storage_hash == [#(#storage_hash,)*] {
-                    self.client.storage().iter(block_hash).await
-                } else {
-                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+            ) -> impl ::core::future::Future<
+                Output = ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError>
+            > + 'a {
+                // instead of an async fn which borrows all of self,
+                // we make sure that the returned future only borrows
+                // client, which allows you to chain calls a little better.
+                let client = self.client;
+                async move {
+                    let runtime_storage_hash = {
+                        let locked_metadata = client.metadata();
+                        let metadata = locked_metadata.read();
+                        match metadata.storage_hash::<#entry_struct_ident>() {
+                            Ok(hash) => hash,
+                            Err(e) => return Err(e.into())
+                        }
+                    };
+                    if runtime_storage_hash == [#(#storage_hash,)*] {
+                        client.storage().iter(block_hash).await
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
                 }
             }
         )
@@ -300,21 +315,32 @@ fn generate_storage_entry_fns(
 
     let client_fns = quote! {
         #docs_token
-        pub async fn #fn_name(
+        pub fn #fn_name(
             &self,
             #( #key_args, )*
             block_hash: ::core::option::Option<T::Hash>,
-        ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-            let runtime_storage_hash = {
-                let locked_metadata = self.client.metadata();
-                let metadata = locked_metadata.read();
-                metadata.storage_hash::<#entry_struct_ident>()?
-            };
-            if runtime_storage_hash == [#(#storage_hash,)*] {
-                let entry = #constructor;
-                self.client.storage().#fetch(&entry, block_hash).await
-            } else {
-                Err(::subxt::MetadataError::IncompatibleMetadata.into())
+        ) -> impl ::core::future::Future<
+            Output = ::core::result::Result<#return_ty, ::subxt::BasicError>
+        > + 'a {
+            // instead of an async fn which borrows all of self,
+            // we make sure that the returned future only borrows
+            // client, which allows you to chain calls a little better.
+            let client = self.client;
+            async move {
+                let runtime_storage_hash = {
+                    let locked_metadata = client.metadata();
+                    let metadata = locked_metadata.read();
+                    match metadata.storage_hash::<#entry_struct_ident>() {
+                        Ok(hash) => hash,
+                        Err(e) => return Err(e.into())
+                    }
+                };
+                if runtime_storage_hash == [#(#storage_hash,)*] {
+                    let entry = #constructor;
+                    client.storage().#fetch(&entry, block_hash).await
+                } else {
+                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                }
             }
         }
 
