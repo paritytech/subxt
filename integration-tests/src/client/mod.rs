@@ -15,15 +15,13 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    test_node_process,
-    test_node_process_with,
+    test_node_process, test_node_process_with,
     utils::{node_runtime::system, pair_signer, test_context},
 };
 
-use sp_core::{storage::{
-    well_known_keys,
-    StorageKey,
-}, sr25519::Pair,
+use sp_core::{
+    sr25519::Pair,
+    storage::{well_known_keys, StorageKey},
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
@@ -150,20 +148,26 @@ async fn dry_run_passes() {
     let signed_extrinsic = api
         .tx()
         .balances()
-        .transfer(bob_address, 10_000).unwrap()
+        .transfer(bob_address, 10_000)
+        .unwrap()
         .create_signed(&alice, Default::default())
-        .await.unwrap();
+        .await
+        .unwrap();
 
-    client.rpc().dry_run(&signed_extrinsic, None)
+    client
+        .rpc()
+        .dry_run(&signed_extrinsic, None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrunning to be successful")
         .unwrap();
     signed_extrinsic
         .submit_and_watch()
-        .await.unwrap()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
-        .await.unwrap();
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
@@ -172,43 +176,40 @@ async fn dry_run_fails() {
     let client = node_process.client();
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
     let cxt = test_context().await;
     let api = &cxt.api;
 
-    api.tx()
-        .balances()
-        .transfer(hans_address, 100_000_000_000_000_000).unwrap()
-        .sign_and_submit_then_watch_default(&alice)
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await
-        .unwrap();
-
     let signed_extrinsic = api
         .tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000).unwrap()
-        .create_signed(&hans, Default::default())
-        .await.unwrap();
+        .transfer(
+            hans_address,
+            100_000_000_000_000_000_000_000_000_000_000_000,
+        )
+        .unwrap()
+        .create_signed(&alice, Default::default())
+        .await
+        .unwrap();
 
-    let dry_run_res: DispatchOutcome = client.rpc().dry_run(&signed_extrinsic, None)
+    let dry_run_res: DispatchOutcome = client
+        .rpc()
+        .dry_run(&signed_extrinsic, None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrun transaction to be valid");
-        if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
+    if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
         assert_eq!(module_error.index, 6);
         assert_eq!(module_error.error, 2);
     } else {
-        panic!("expected a module module error when dryrunning");
+        panic!("expected a module error when dryrunning");
     }
 
     let res = signed_extrinsic
         .submit_and_watch()
-        .await.unwrap()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
         .await;
 
