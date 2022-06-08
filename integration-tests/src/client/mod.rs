@@ -15,13 +15,21 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    test_node_process, test_node_process_with,
-    utils::{node_runtime::system, pair_signer, test_context},
+    test_node_process,
+    test_node_process_with,
+    utils::{
+        node_runtime::system,
+        pair_signer,
+        test_context,
+    },
 };
 
 use sp_core::{
     sr25519::Pair,
-    storage::{well_known_keys, StorageKey},
+    storage::{
+        well_known_keys,
+        StorageKey,
+    },
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
