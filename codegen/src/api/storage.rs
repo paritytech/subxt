@@ -276,7 +276,7 @@ fn generate_storage_entry_fns(
             ) -> impl ::core::future::Future<
                 Output = ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError>
             > + 'a {
-                // instead of an async fn which borrows all of self,
+                // Instead of an async fn which borrows all of self,
                 // we make sure that the returned future only borrows
                 // client, which allows you to chain calls a little better.
                 let client = self.client;
@@ -325,7 +325,7 @@ fn generate_storage_entry_fns(
         ) -> impl ::core::future::Future<
             Output = ::core::result::Result<#return_ty, ::subxt::BasicError>
         > + 'a {
-            // instead of an async fn which borrows all of self,
+            // Instead of an async fn which borrows all of self,
             // we make sure that the returned future only borrows
             // client, which allows you to chain calls a little better.
             let client = self.client;
