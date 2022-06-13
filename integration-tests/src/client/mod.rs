@@ -17,13 +17,19 @@
 use crate::{
     test_node_process,
     test_node_process_with,
-    utils::{node_runtime::system, pair_signer, test_context},
+    utils::{
+        node_runtime::system,
+        pair_signer,
+        test_context,
+    },
 };
 
-use sp_core::{storage::{
-    well_known_keys,
-    StorageKey,
-}, sr25519::Pair,
+use sp_core::{
+    sr25519::Pair,
+    storage::{
+        well_known_keys,
+        StorageKey,
+    },
     Pair as _,
 };
 use sp_keyring::AccountKeyring;
@@ -150,20 +156,26 @@ async fn dry_run_passes() {
     let signed_extrinsic = api
         .tx()
         .balances()
-        .transfer(bob_address, 10_000).unwrap()
+        .transfer(bob_address, 10_000)
+        .unwrap()
         .create_signed(&alice, Default::default())
-        .await.unwrap();
+        .await
+        .unwrap();
 
-    client.rpc().dry_run(signed_extrinsic.encoded(), None)
+    client
+        .rpc()
+        .dry_run(signed_extrinsic.encoded(), None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrunning to be successful")
         .unwrap();
     signed_extrinsic
         .submit_and_watch()
-        .await.unwrap()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
-        .await.unwrap();
+        .await
+        .unwrap();
 }
 
 #[tokio::test]
@@ -180,7 +192,8 @@ async fn dry_run_fails() {
 
     api.tx()
         .balances()
-        .transfer(hans_address, 100_000_000_000_000_000).unwrap()
+        .transfer(hans_address, 100_000_000_000_000_000)
+        .unwrap()
         .sign_and_submit_then_watch_default(&alice)
         .await
         .unwrap()
@@ -191,15 +204,19 @@ async fn dry_run_fails() {
     let signed_extrinsic = api
         .tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000).unwrap()
+        .transfer(alice_addr, 100_000_000_000_000_000)
+        .unwrap()
         .create_signed(&hans, Default::default())
-        .await.unwrap();
+        .await
+        .unwrap();
 
-    let dry_run_res: DispatchOutcome = client.rpc().dry_run(signed_extrinsic.encoded(), None)
+    let dry_run_res: DispatchOutcome = client
+        .rpc()
+        .dry_run(signed_extrinsic.encoded(), None)
         .await
         .expect("dryrunning failed")
         .expect("expected dryrun transaction to be valid");
-        if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
+    if let Err(sp_runtime::DispatchError::Module(module_error)) = dry_run_res {
         assert_eq!(module_error.index, 6);
         assert_eq!(module_error.error, 2);
     } else {
@@ -208,7 +225,8 @@ async fn dry_run_fails() {
 
     let res = signed_extrinsic
         .submit_and_watch()
-        .await.unwrap()
+        .await
+        .unwrap()
         .wait_for_finalized_success()
         .await;
 
