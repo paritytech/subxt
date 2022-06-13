@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await?
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
-    let addr = AccountKeyring::Bob.to_account_id().into();
+    let addr = AccountKeyring::Bob.to_account_id();
 
     // For storage requests, we can join futures together to
     // await multiple futures concurrently:

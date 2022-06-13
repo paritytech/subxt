@@ -265,7 +265,7 @@ fn generate_storage_entry_fns(
 
     let lifetime_param = match should_ref {
         true => quote!(<'a>),
-        false => quote!()
+        false => quote!(),
     };
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
@@ -303,7 +303,7 @@ fn generate_storage_entry_fns(
 
     let key_args_ref = match should_ref {
         true => quote!(&'a),
-        false => quote!()
+        false => quote!(),
     };
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
