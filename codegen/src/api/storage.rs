@@ -240,12 +240,6 @@ fn generate_storage_entry_fns(
         }
     };
 
-    let (lifetime_param, reference) = if should_ref {
-        (quote!(<'a>), quote!(&'a))
-    } else {
-        (quote!(), quote!())
-    };
-
     let storage_entry_impl = quote! (
         const PALLET: &'static str = #pallet_name;
         const STORAGE: &'static str = #storage_name;
@@ -268,6 +262,11 @@ fn generate_storage_entry_fns(
 
     let docs = &storage_entry.docs;
     let docs_token = quote! { #( #[doc = #docs ] )* };
+
+    let lifetime_param = match should_ref {
+        true => quote!(<'a>),
+        false => quote!()
+    };
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
             #docs_token
@@ -302,6 +301,10 @@ fn generate_storage_entry_fns(
         quote!()
     };
 
+    let key_args_ref = match should_ref {
+        true => quote!(&'a),
+        false => quote!()
+    };
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
         // interface should generate a reference. In such cases, the vector ultimately is
@@ -310,7 +313,7 @@ fn generate_storage_entry_fns(
             Some(ty) if should_ref => quote!([#ty]),
             _ => quote!(#field_type),
         };
-        quote!( #field_name: #reference #field_ty )
+        quote!( #field_name: #key_args_ref #field_ty )
     });
 
     let client_fns = quote! {
