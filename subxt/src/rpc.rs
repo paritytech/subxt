@@ -16,8 +16,8 @@
 
 //! RPC types and client for interacting with a substrate node.
 //!
-//! The subxt generated interface utilizes this module to submit RPC
-//! request to the target node.
+//! This is used behind the scenes by various `subxt` APIs, but can 
+//! also be used directly.
 //!
 //! # Examples
 //!
