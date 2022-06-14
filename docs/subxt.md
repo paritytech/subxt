@@ -76,7 +76,7 @@ Please visit the [fetch_staking_details](../examples/examples/fetch_staking_deta
 
 ### Query Constants
 
-Constants are embedded into node's metadata.
+Constants are embedded into the node's metadata.
 
 The subxt offers the ability to query constants from the runtime metadata (metadata downloaded when constructing
 the client, *not* the one provided for API generation).
