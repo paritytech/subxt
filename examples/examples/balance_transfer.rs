@@ -49,10 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Obtain an extrinsic, calling the "transfer" function in
     // the "balances" pallet.
-    let extrinsic = api
-        .tx()
-        .balances()
-        .transfer(dest, 123_456_789_012_345)?;
+    let extrinsic = api.tx().balances().transfer(dest, 123_456_789_012_345)?;
 
     // Sign and submit the extrinsic, returning its hash.
     let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
