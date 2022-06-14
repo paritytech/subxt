@@ -48,6 +48,8 @@
 //! println!("{}", runtime_api);
 //! ```
 
+#![deny(unused_crate_dependencies)]
+
 mod api;
 mod ir;
 mod types;

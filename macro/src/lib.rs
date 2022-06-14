@@ -87,6 +87,8 @@
 //! pub mod polkadot {}
 //! ```
 
+#![deny(unused_crate_dependencies)]
+
 extern crate proc_macro;
 
 use darling::FromMeta;
