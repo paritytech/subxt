@@ -18,7 +18,6 @@ use crate::types::TypeGenerator;
 use frame_metadata::{
     v14::RuntimeMetadataV14,
     PalletMetadata,
-    PalletStorageMetadata,
     StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,
@@ -36,13 +35,51 @@ use scale_info::{
     TypeDef,
 };
 
+/// Generate storage from the provided pallet's metadata.
+///
+/// The function creates a new module named `storage` under the pallet's module.
+///
+/// ```ignore
+/// pub mod PalletName {
+///     pub mod storage {
+///     ...
+///     }
+/// }
+/// ```
+///
+/// The function generates the storage as rust structs that implement the `subxt::StorageEntry`
+/// trait to uniquely identify the storage's identity when creating the extrinsic.
+///
+/// ```ignore
+/// pub struct StorageName {
+///      pub storage_param: type,
+/// }
+/// impl ::subxt::StorageEntry for StorageName {
+/// ...
+/// }
+/// ```
+///
+/// Storages are extracted from the API and wrapped into the generated `StorageApi` of
+/// each module.
+///
+/// # Arguments
+///
+/// - `metadata` - Runtime metadata from which the storages are generated.
+/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `pallet` - Pallet metadata from which the storages are generated.
+/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_storage(
     metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
-    storage: &PalletStorageMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
+    let storage = if let Some(ref storage) = pallet.storage {
+        storage
+    } else {
+        return quote!()
+    };
+
     let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
         .entries
         .iter()
@@ -240,12 +277,6 @@ fn generate_storage_entry_fns(
         }
     };
 
-    let (lifetime_param, reference, anon_lifetime) = if should_ref {
-        (quote!(<'a>), quote!(&), quote!(<'_>))
-    } else {
-        (quote!(), quote!(), quote!())
-    };
-
     let storage_entry_impl = quote! (
         const PALLET: &'static str = #pallet_name;
         const STORAGE: &'static str = #storage_name;
@@ -255,6 +286,10 @@ fn generate_storage_entry_fns(
         }
     );
 
+    let anon_lifetime = match should_ref {
+        true => quote!(<'_>),
+        false => quote!(),
+    };
     let storage_entry_type = quote! {
         #entry_struct
         impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
@@ -264,22 +299,38 @@ fn generate_storage_entry_fns(
 
     let docs = &storage_entry.docs;
     let docs_token = quote! { #( #[doc = #docs ] )* };
+
+    let lifetime_param = match should_ref {
+        true => quote!(<'a>),
+        false => quote!(),
+    };
     let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
         quote! (
             #docs_token
-            pub async fn #fn_name_iter(
+            pub fn #fn_name_iter(
                 &self,
                 block_hash: ::core::option::Option<T::Hash>,
-            ) -> ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError> {
-                let runtime_storage_hash = {
-                    let locked_metadata = self.client.metadata();
-                    let metadata = locked_metadata.read();
-                    metadata.storage_hash::<#entry_struct_ident>()?
-                };
-                if runtime_storage_hash == [#(#storage_hash,)*] {
-                    self.client.storage().iter(block_hash).await
-                } else {
-                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+            ) -> impl ::core::future::Future<
+                Output = ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError>
+            > + 'a {
+                // Instead of an async fn which borrows all of self,
+                // we make sure that the returned future only borrows
+                // client, which allows you to chain calls a little better.
+                let client = self.client;
+                async move {
+                    let runtime_storage_hash = {
+                        let locked_metadata = client.metadata();
+                        let metadata = locked_metadata.read();
+                        match metadata.storage_hash::<#entry_struct_ident>() {
+                            Ok(hash) => hash,
+                            Err(e) => return Err(e.into())
+                        }
+                    };
+                    if runtime_storage_hash == [#(#storage_hash,)*] {
+                        client.storage().iter(block_hash).await
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
                 }
             }
         )
@@ -287,6 +338,10 @@ fn generate_storage_entry_fns(
         quote!()
     };
 
+    let key_args_ref = match should_ref {
+        true => quote!(&'a),
+        false => quote!(),
+    };
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
         // interface should generate a reference. In such cases, the vector ultimately is
@@ -295,26 +350,37 @@ fn generate_storage_entry_fns(
             Some(ty) if should_ref => quote!([#ty]),
             _ => quote!(#field_type),
         };
-        quote!( #field_name: #reference #field_ty )
+        quote!( #field_name: #key_args_ref #field_ty )
     });
 
     let client_fns = quote! {
         #docs_token
-        pub async fn #fn_name(
+        pub fn #fn_name(
             &self,
             #( #key_args, )*
             block_hash: ::core::option::Option<T::Hash>,
-        ) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-            let runtime_storage_hash = {
-                let locked_metadata = self.client.metadata();
-                let metadata = locked_metadata.read();
-                metadata.storage_hash::<#entry_struct_ident>()?
-            };
-            if runtime_storage_hash == [#(#storage_hash,)*] {
-                let entry = #constructor;
-                self.client.storage().#fetch(&entry, block_hash).await
-            } else {
-                Err(::subxt::MetadataError::IncompatibleMetadata.into())
+        ) -> impl ::core::future::Future<
+            Output = ::core::result::Result<#return_ty, ::subxt::BasicError>
+        > + 'a {
+            // Instead of an async fn which borrows all of self,
+            // we make sure that the returned future only borrows
+            // client, which allows you to chain calls a little better.
+            let client = self.client;
+            async move {
+                let runtime_storage_hash = {
+                    let locked_metadata = client.metadata();
+                    let metadata = locked_metadata.read();
+                    match metadata.storage_hash::<#entry_struct_ident>() {
+                        Ok(hash) => hash,
+                        Err(e) => return Err(e.into())
+                    }
+                };
+                if runtime_storage_hash == [#(#storage_hash,)*] {
+                    let entry = #constructor;
+                    client.storage().#fetch(&entry, block_hash).await
+                } else {
+                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                }
             }
         }
 

@@ -14,9 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! A library to **sub**mit e**xt**rinsics to a
-//! [substrate](https://github.com/paritytech/substrate) node via RPC.
-
+#![doc = include_str!("../../docs/subxt.md")]
 #![deny(
     bad_style,
     const_err,
@@ -35,6 +33,7 @@
     while_true,
     trivial_casts,
     trivial_numeric_casts,
+    unused_crate_dependencies,
     unused_extern_crates,
     clippy::all
 )]
@@ -125,7 +124,13 @@ pub use crate::{
     },
 };
 
-/// Call trait.
+/// Trait to uniquely identify the call (extrinsic)'s identity from the runtime metadata.
+///
+/// Generated API structures that represent each of the different possible
+/// calls to a node each implement this trait.
+///
+/// When encoding an extrinsic, we use this information to know how to map
+/// the call to the specific pallet and call index needed by a particular node.
 pub trait Call: Encode {
     /// Pallet name.
     const PALLET: &'static str;
@@ -138,7 +143,12 @@ pub trait Call: Encode {
     }
 }
 
-/// Event trait.
+/// Trait to uniquely identify the events's identity from the runtime metadata.
+///
+/// Generated API structures that represent an event implement this trait.
+///
+/// The trait is utilized to decode emitted events from a block, via obtaining the
+/// form of the `Event` from the metadata.
 pub trait Event: Decode {
     /// Pallet name.
     const PALLET: &'static str;

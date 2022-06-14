@@ -14,7 +14,47 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! For querying runtime storage.
+//! Query the runtime storage using [StorageClient].
+//!
+//! This module is the core of performing runtime storage queries. While you can
+//! work with it directly, it's prefer to use the generated `storage()` interface where
+//! possible.
+//!
+//! The exposed API is performing RPC calls to `state_getStorage` and `state_getKeysPaged`.
+//!
+//! A runtime storage entry can be of type:
+//! - [StorageEntryKey::Plain] for keys constructed just from the prefix
+//!   `twox_128(pallet) ++ twox_128(storage_item)`
+//! - [StorageEntryKey::Map] for mapped keys constructed from the prefix,
+//!   plus other arguments `twox_128(pallet) ++ twox_128(storage_item) ++ hash(arg1) ++ arg1`
+//!
+//! # Examples
+//!
+//! ## Fetch Storage Keys
+//!
+//! ```rust
+//! // Fetch just the keys, returning up to 10 keys.
+//! let keys = storage
+//!     .fetch_keys::<node_runtime::xcm_pallet::storage::VersionNotifiers>(10, None, None)
+//!     .await?;
+//! // Iterate over each key
+//! for key in keys.iter() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//! }
+//! ```
+//!
+//! ## Iterate over Storage
+//!
+//! ```rust
+//! // Iterate over keys and values.
+//! let mut iter = storage
+//!     .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
+//!     .await?;
+//! while let Some((key, value)) = iter.next().await? {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//!     println!("Value: {}", value);
+//! }
+//! ```
 
 use codec::{
     Decode,
@@ -235,10 +275,10 @@ impl<'a, T: Config> StorageClient<'a, T> {
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = StorageKeyPrefix::new::<F>();
+        let key = StorageKeyPrefix::new::<F>().to_storage_key();
         let keys = self
             .rpc
-            .storage_keys_paged(Some(prefix), count, start_key, hash)
+            .storage_keys_paged(Some(key), count, start_key, hash)
             .await?;
         Ok(keys)
     }

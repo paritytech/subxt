@@ -37,7 +37,7 @@ use std::{
     sync::Arc,
 };
 
-/// Metadata error.
+/// Metadata error originated from inspecting the internal representation of the runtime metadata.
 #[derive(Debug, thiserror::Error, PartialEq)]
 pub enum MetadataError {
     /// Module is not in metadata.
@@ -97,7 +97,7 @@ struct MetadataInner {
     cached_storage_hashes: HashCache,
 }
 
-/// Runtime metadata.
+/// A representation of the runtime metadata received from a node.
 #[derive(Clone, Debug)]
 pub struct Metadata {
     inner: Arc<MetadataInner>,
@@ -307,7 +307,10 @@ impl EventMetadata {
     }
 }
 
-/// Metadata for specific errors.
+/// Metadata for specific errors obtained from the pallet's `PalletErrorMetadata`.
+///
+/// This holds in memory information regarding the Pallet's name, Error's name, and the underlying
+/// metadata representation.
 #[derive(Clone, Debug)]
 pub struct ErrorMetadata {
     pallet: String,
@@ -332,6 +335,10 @@ impl ErrorMetadata {
     }
 }
 
+/// Error originated from converting a runtime metadata [RuntimeMetadataPrefixed] to
+/// the internal [Metadata] representation.
+///
+/// The runtime metadata is converted when building the [crate::client::Client].
 #[derive(Debug, thiserror::Error)]
 pub enum InvalidMetadataError {
     #[error("Invalid prefix")]

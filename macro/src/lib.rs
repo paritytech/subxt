@@ -21,7 +21,7 @@
 //! Download metadata from a running Substrate node using `subxt-cli`:
 //!
 //! ```bash
-//! subxt metadata -f bytes > polkadot_metadata.scale
+//! subxt metadata > polkadot_metadata.scale
 //! ```
 //!
 //! Annotate a Rust module with the `subxt` attribute referencing the aforementioned metadata file.
@@ -86,6 +86,8 @@
 //! )]
 //! pub mod polkadot {}
 //! ```
+
+#![deny(unused_crate_dependencies)]
 
 extern crate proc_macro;
 
