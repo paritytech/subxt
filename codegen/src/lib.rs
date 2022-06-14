@@ -20,7 +20,7 @@
 //!
 //! The API generator logic:
 //! - At the root there is the `item_mod` provided (ie `pub mod api {}`)
-//! - Pallet are represented by a child module (ie `pub mod PalletName {}`) of the root
+//! - Pallets are represented by a child module (ie `pub mod PalletName {}`) of the root
 //! - Each pallet exposes as child modules (if applicable):
 //!   - Calls (`pub mod calls {}`)
 //!   - Events (`pub mod events {}`)
