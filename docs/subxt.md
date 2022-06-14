@@ -20,7 +20,7 @@ metadata.
 pub mod node_runtime { }
 ```
 
-The `node_runtime` has the following hierarchy
+The `node_runtime` has the following hierarchy:
 
 ```rust
 pub mod node_runtime {
