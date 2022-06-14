@@ -21,7 +21,8 @@
 //! This API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
 //!
 //! The runtime update is recommended for long-running clients, or for cases where manually
-//! restarting subxt would not be feasible.
+//! restarting subxt would not be feasible. Even with this, extrinsics submitted during a node
+//! runtime update are at risk or failing, as it will take `subxt` a moment to catch up.
 //!
 //! ## Note
 //!
