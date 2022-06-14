@@ -34,7 +34,7 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
-/// Generate calls from the provided pallet metadata.
+/// Generate calls from the provided pallet's metadata.
 ///
 /// The function creates a new module named `calls` under the pallet's module.
 /// ```ignore
