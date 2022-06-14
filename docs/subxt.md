@@ -88,7 +88,7 @@ Please visit the [fetch_constants](../examples/examples/fetch_constants.rs) exam
 
 ### Subscribe to Events
 
-To subscribe to events use the generated `RuntimeApi::events()` method which exposes:
+To subscribe to events, use the generated `RuntimeApi::events()` method which exposes:
 - `subscribe()` - Subscribe to events emitted from blocks. These blocks haven't necessarily been finalised.
 - `subscribe_finalized()` - Subscribe to events from finalized blocks.
 - `at()` - Obtain events at a given block hash.
