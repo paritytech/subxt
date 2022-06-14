@@ -20,7 +20,6 @@ use crate::types::{
 };
 use frame_metadata::{
     v14::RuntimeMetadataV14,
-    PalletCallMetadata,
     PalletMetadata,
 };
 use heck::{
@@ -35,13 +34,51 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
+/// Generate calls from the provided pallet's metadata.
+///
+/// The function creates a new module named `calls` under the pallet's module.
+/// ```ignore
+/// pub mod PalletName {
+///     pub mod calls {
+///     ...
+///     }
+/// }
+/// ```
+///
+/// The function generates the calls as rust structs that implement the `subxt::Call` trait
+/// to uniquely identify the call's identity when creating the extrinsic.
+///
+/// ```ignore
+/// pub struct CallName {
+///      pub call_param: type,
+/// }
+/// impl ::subxt::Call for CallName {
+/// ...
+/// }
+/// ```
+///
+/// Calls are extracted from the API and wrapped into the generated `TransactionApi` of
+/// each module.
+///
+/// # Arguments
+///
+/// - `metadata` - Runtime metadata from which the calls are generated.
+/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `pallet` - Pallet metadata from which the calls are generated.
+/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
     metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
-    call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
+    // Early return if the pallet has no calls.
+    let call = if let Some(ref calls) = pallet.calls {
+        calls
+    } else {
+        return quote!()
+    };
+
     let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),

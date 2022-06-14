@@ -98,6 +98,17 @@ impl ClientBuilder {
     }
 
     /// Creates a new Client.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// use subxt::{ClientBuilder, DefaultConfig};
+    ///
+    /// let client = ClientBuilder::new()
+    ///     .set_url("wss://rpc.polkadot.io:443")
+    ///     .build::<DefaultConfig>()
+    ///     .await?;
+    /// ```
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
             client
@@ -190,6 +201,22 @@ impl<T: Config> Client<T> {
     }
 
     /// Create a wrapper for performing runtime updates on this client.
+    ///
+    /// # Note
+    ///
+    /// The update client is intended to be used in the background for
+    /// performing runtime updates, while the API is still in use.
+    /// Without performing runtime updates the submitted extrinsics may fail.
+    ///
+    /// # Example
+    ///
+    /// ```rust
+    /// let update_client = client.updates();
+    /// tokio::spawn(async move {
+    ///     let result = update_client.perform_runtime_updates().await;
+    ///     println!("Runtime update finished with result={:?}", result);
+    /// });
+    /// ```
     pub fn updates(&self) -> UpdateClient<T> {
         UpdateClient::new(
             self.rpc.clone(),
