@@ -63,7 +63,7 @@ use scale_info::form::PortableForm;
 /// # Arguments
 ///
 /// - `metadata` - Runtime metadata from which the calls are generated.
-/// - `type_gen` - The type generator containing all types defined by metadata
+/// - `type_gen` - The type generator containing all types defined by metadata.
 /// - `pallet` - Pallet metadata from which the calls are generated.
 /// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
