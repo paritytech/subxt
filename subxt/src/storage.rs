@@ -17,7 +17,7 @@
 //! Query the runtime storage using [StorageClient].
 //!
 //! This module is the core of performing runtime storage queries. While you can
-//! work with it directly, prefer to use the generated `storage()` interface where
+//! work with it directly, it's prefer to use the generated `storage()` interface where
 //! possible.
 //!
 //! The exposed API is performing RPC calls to `state_getStorage` and `state_getKeysPaged`.
