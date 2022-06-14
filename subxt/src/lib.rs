@@ -109,6 +109,7 @@ pub use crate::{
         ReadProof,
         RpcClient,
         SystemProperties,
+        SignedCommitment,
     },
     storage::{
         KeyIter,
