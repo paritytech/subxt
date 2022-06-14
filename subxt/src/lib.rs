@@ -108,8 +108,8 @@ pub use crate::{
         BlockNumber,
         ReadProof,
         RpcClient,
-        SystemProperties,
         SignedCommitment,
+        SystemProperties,
     },
     storage::{
         KeyIter,
