@@ -59,7 +59,7 @@ use scale_info::{
 /// }
 /// ```
 ///
-/// Storages are extracted from the API as wrapped into the generated `StorageApi` of
+/// Storages are extracted from the API and wrapped into the generated `StorageApi` of
 /// each module.
 ///
 /// # Arguments
