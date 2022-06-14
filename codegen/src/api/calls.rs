@@ -57,7 +57,7 @@ use scale_info::form::PortableForm;
 /// }
 /// ```
 ///
-/// Calls are extracted from the API as wrapped into the generated `TransactionApi` of
+/// Calls are extracted from the API and wrapped into the generated `TransactionApi` of
 /// each module.
 ///
 /// # Arguments
