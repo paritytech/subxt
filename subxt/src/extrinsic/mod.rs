@@ -24,7 +24,7 @@
 //!
 //!
 //! The structure [BaseExtrinsicParams] is a base implementation of the trait which
-//! Configures most of the "signed extra" and "additional" parameters as needed for
+//! configures most of the "signed extra" and "additional" parameters as needed for
 //! Polkadot and Substrate nodes. Only the shape of the tip payments differs, leading to
 //! [SubstrateExtrinsicParams] and [PolkadotExtrinsicParams] structs which pick an
 //! appropriate shape for Substrate/Polkadot chains respectively.
