@@ -111,7 +111,7 @@ Such is the case when the node performs a runtime update.
 To ensure that subxt can properly communicate with the target node the static metadata is validated
 against the runtime metadata of the node.
 
-This validation is performed at Call, Constant, Storage levels, as well for the entire metadata.
+This validation is performed at the Call, Constant, and Storage levels, as well for the entire metadata.
 The level of granularity ensures that the customers can still submit a given call, even if another
 call suffered changes.
 
