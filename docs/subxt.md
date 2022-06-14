@@ -9,7 +9,7 @@ The generated Subxt API exposes the ability to:
 
 ### Generate the runtime API
 
-Subxt generates a runtime API from a static downloaded metadata. The metadata can be downloaded using the
+Subxt generates a runtime API from downloaded static metadata. The metadata can be downloaded using the
 [subxt-cli](https://crates.io/crates/subxt-cli) tool.
 
 To generate the runtime API, use the `subxt` attribute which points at a static downloaded
