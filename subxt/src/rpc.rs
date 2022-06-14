@@ -545,7 +545,7 @@ impl<T: Config> Rpc<T> {
     /// Subscribe to beefy justifications.
     pub async fn subscribe_beefy_justifications(
         &self,
-    ) -> Result<Subscription<SignedCommitment>, Error> {
+    ) -> Result<Subscription<SignedCommitment>, BasicError> {
         let subscription = self
             .client
             .subscribe(
