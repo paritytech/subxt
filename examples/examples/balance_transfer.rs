@@ -45,35 +45,19 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 
     // Submit the `transfer` extrinsic from Alice's account to Bob's.
-    {
-        let dest = AccountKeyring::Bob.to_account_id().into();
+    let dest = AccountKeyring::Bob.to_account_id().into();
 
-        // Obtain an extrinsic, calling the "transfer" function in 
-        // the "balances" pallet.
-        let extrinsic = api
-            .tx()
-            .balances()
-            .transfer(dest, 123_456_789_012_345)?;
+    // Obtain an extrinsic, calling the "transfer" function in
+    // the "balances" pallet.
+    let extrinsic = api
+        .tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345)?;
 
-        // Sign and submit the extrinsic, returning its hash.
-        let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
+    // Sign and submit the extrinsic, returning its hash.
+    let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
 
-        println!("Balance transfer extrinsic submitted: {}", tx_hash);
-    }
-
-    // An ergonomic approach that achieves the same result.
-    {
-        let dest = AccountKeyring::Bob.to_account_id().into();
-
-        let tx_hash = api
-            .tx()
-            .balances()
-            .transfer(dest, 123_456_789_012_345)?
-            .sign_and_submit_default(&signer)
-            .await?;
-
-        println!("Balance transfer extrinsic submitted: {}", tx_hash);
-    }
+    println!("Balance transfer extrinsic submitted: {}", tx_hash);
 
     Ok(())
 }
