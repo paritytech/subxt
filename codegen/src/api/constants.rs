@@ -28,7 +28,7 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
-/// Generate constants from the provided pallet metadata.
+/// Generate constants from the provided pallet's metadata.
 ///
 /// The function creates a new module named `constants` under the pallet's module.
 /// ```ignore
