@@ -35,7 +35,7 @@ use scale_info::{
     TypeDef,
 };
 
-/// Generate storage from the provided pallet metadata.
+/// Generate storage from the provided pallet's metadata.
 ///
 /// The function creates a new module named `storage` under the pallet's module.
 ///
