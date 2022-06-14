@@ -28,19 +28,6 @@
 //! Polkadot and Substrate nodes. Only the shape of the tip payments differs, leading to
 //! [SubstrateExtrinsicParams] and [PolkadotExtrinsicParams] structs which pick an
 //! appropriate shape for Substrate/Polkadot chains respectively.
-//!
-//! For this implementation:
-//! - "signed extra" contains:
-//!     - sp_runtime::Era: This is utilized to determine the longevity of a transaction.
-//!     - nonce: Account index (aka nonce) that stores the number of previous transactions
-//!         associated with a sender account. This is utilized to avoid replay attacks.
-//!     - tip: A tip payment for including the transaction in the block.
-//! - "additional" contains:
-//!     - spec_version: The version of the runtime specification of the node.
-//!     - transaction_version: The version of the extrinsic interface. This allows hardware
-//!         wallets to know which transactions can be safely signed.
-//!     - genesis_hash: The hash of the Genesis block.
-//!     - mortality_checkpoint: The block hash after which the transaction becomes valid.
 
 mod params;
 mod signer;
