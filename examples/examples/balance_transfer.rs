@@ -48,16 +48,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let dest = AccountKeyring::Bob.to_account_id().into();
 
-        // Obtain an extrinsic.
+        // Obtain an extrinsic, calling the "transfer" function in 
+        // the "balances" pallet.
         let extrinsic = api
-            // This is an extrinsic.
             .tx()
-            // Extrinsic from the `Balances` pallet (pallet_name).
             .balances()
-            // Extrinsic (call_item_name) name with parameters.
             .transfer(dest, 123_456_789_012_345)?;
 
-        // Sign and submit the extrinsic.
+        // Sign and submit the extrinsic, returning its hash.
         let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
 
         println!("Balance transfer extrinsic submitted: {}", tx_hash);

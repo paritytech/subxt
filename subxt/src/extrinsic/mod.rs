@@ -20,7 +20,8 @@
 //!
 //!
 //! An extrinsic is submitted with an "signed extra" and "additional" parameters, which can be
-//! different for each chain. The trait [ExtrinsicParams] is at the core of an extrinsic parameter.
+//! different for each chain. The trait [ExtrinsicParams] determines exactly which 
+//! additional and signed extra parameters are used when constructing an extrinsic.
 //!
 //!
 //! The structure [BaseExtrinsicParams] is a base implementation of the trait which
