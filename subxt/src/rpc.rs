@@ -278,6 +278,12 @@ pub struct Health {
     pub should_have_peers: bool,
 }
 
+/// An encoded signed commitment proving that the given header has been finalized.
+/// The given bytes should be the SCALE-encoded representation of a
+/// `beefy_primitives::SignedCommitment`.
+#[derive(Debug, Clone, PartialEq, Deserialize, Serialize)]
+pub struct SignedCommitment(pub sp_core::Bytes);
+
 /// Client for substrate rpc interfaces
 pub struct Rpc<T: Config> {
     /// Rpc client for sending requests.
@@ -531,6 +537,21 @@ impl<T: Config> Rpc<T> {
                 "state_subscribeRuntimeVersion",
                 rpc_params![],
                 "state_unsubscribeRuntimeVersion",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
+    /// Subscribe to beefy justifications.
+    pub async fn subscribe_beefy_justifications(
+        &self,
+    ) -> Result<Subscription<SignedCommitment>, Error> {
+        let subscription = self
+            .client
+            .subscribe(
+                "beefy_subscribeJustifications",
+                rpc_params![],
+                "beefy_unsubscribeJustifications",
             )
             .await?;
         Ok(subscription)
