@@ -15,18 +15,11 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
 
+mod dispatch_errors;
 mod storage;
 mod utils;
 
-use crate::utils::{
-    dispatch_error::{
-        ArrayDispatchError,
-        LegacyDispatchError,
-        NamedFieldDispatchError,
-    },
-    generate_metadata_from_pallets_custom_dispatch_error,
-    MetadataTestRunner,
-};
+use crate::utils::MetadataTestRunner;
 
 // Each of these tests leads to some rust code being compiled and
 // executed to test that compilation is successful (or errors in the
@@ -41,18 +34,12 @@ fn ui_tests() {
 
     // Test that the codegen can handle the different types of DispatchError.
     t.pass(&m.path_to_ui_test_for_metadata(
-        generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(
-            vec![],
-        ),
+        dispatch_errors::metadata_named_field_dispatch_error(),
     ));
     t.pass(&m.path_to_ui_test_for_metadata(
-        generate_metadata_from_pallets_custom_dispatch_error::<LegacyDispatchError>(
-            vec![],
-        ),
+        dispatch_errors::metadata_legacy_dispatch_error()
     ));
-    t.pass(&m.path_to_ui_test_for_metadata(
-        generate_metadata_from_pallets_custom_dispatch_error::<NamedFieldDispatchError>(
-            vec![],
-        ),
-    ));
+    t.pass(
+        &m.path_to_ui_test_for_metadata(dispatch_errors::metadata_array_dispatch_error()),
+    );
 }
