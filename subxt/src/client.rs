@@ -97,17 +97,23 @@ impl ClientBuilder {
         self
     }
 
-    /// Creates a new Client.
+    /// Builder for [Client].
     ///
-    /// # Example
+    /// # Examples
     ///
-    /// ```rust
+    /// ```no_run
     /// use subxt::{ClientBuilder, DefaultConfig};
     ///
-    /// let client = ClientBuilder::new()
-    ///     .set_url("wss://rpc.polkadot.io:443")
-    ///     .build::<DefaultConfig>()
-    ///     .await?;
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     // Build the client.
+    ///     let client = ClientBuilder::new()
+    ///          .set_url("wss://rpc.polkadot.io:443")
+    ///          .build::<DefaultConfig>()
+    ///          .await
+    ///          .unwrap();
+    ///     // Use the client...
+    /// }
     /// ```
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
@@ -208,14 +214,26 @@ impl<T: Config> Client<T> {
     /// performing runtime updates, while the API is still in use.
     /// Without performing runtime updates the submitted extrinsics may fail.
     ///
-    /// # Example
+    /// # Examples
     ///
-    /// ```rust
+    /// ```no_run
+    /// # use subxt::{ClientBuilder, DefaultConfig};
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// #    let client = ClientBuilder::new()
+    /// #         .set_url("wss://rpc.polkadot.io:443")
+    /// #         .build::<DefaultConfig>()
+    /// #         .await
+    /// #         .unwrap();
+    /// #
     /// let update_client = client.updates();
+    /// // Spawn a new background task to handle runtime updates.
     /// tokio::spawn(async move {
     ///     let result = update_client.perform_runtime_updates().await;
     ///     println!("Runtime update finished with result={:?}", result);
     /// });
+    /// # }
     /// ```
     pub fn updates(&self) -> UpdateClient<T> {
         UpdateClient::new(
