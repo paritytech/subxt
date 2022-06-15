@@ -4,12 +4,12 @@ version = "0.21.0"
 edition = "2021"
 
 [dependencies]
-subxt = { path = "../subxt" }
+subxt = { path = "../../subxt" }
 sp-runtime = "6.0.0"
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
 
 [build-dependencies]
-subxt = { path = "../subxt" }
+subxt = { path = "../../subxt" }
 sp-core = "6.0.0"
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
