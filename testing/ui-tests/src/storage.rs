@@ -22,15 +22,12 @@ use frame_metadata::{
 };
 use scale_info::meta_type;
 
-use crate::utils::{
-    generate_metadata_from_storage_entries,
-    MetadataTestRunner,
-};
+use crate::utils::generate_metadata_from_storage_entries;
 
 /// Generate metadata which contains a `Map` storage entry with no hashers/values.
 /// This is a bit of an odd case, but it was raised in https://github.com/paritytech/subxt/issues/552,
 /// and this test will fail before the fix and should pass once the fix is applied.
-fn metadata_storage_map_no_keys() -> RuntimeMetadataPrefixed {
+pub fn metadata_storage_map_no_keys() -> RuntimeMetadataPrefixed {
     generate_metadata_from_storage_entries(vec![StorageEntryMetadata {
         name: "MapWithNoKeys",
         modifier: StorageEntryModifier::Optional,
@@ -42,12 +39,4 @@ fn metadata_storage_map_no_keys() -> RuntimeMetadataPrefixed {
         default: vec![0],
         docs: vec![],
     }])
-}
-
-#[test]
-fn ui_tests() {
-    let mut m = MetadataTestRunner::default();
-    let t = trybuild::TestCases::new();
-
-    t.pass(&m.path_to_ui_test_for_metadata(metadata_storage_map_no_keys()));
 }

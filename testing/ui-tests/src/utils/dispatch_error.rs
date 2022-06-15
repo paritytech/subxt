@@ -14,27 +14,107 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-/// This type has TypeInfo compatible with the (old version of) the DispatchError
-/// type (or at least, is defined enough to allow the subxt macro to generate
-/// proper code if this exists in the metadata type registry).
-pub enum DispatchError {}
-impl scale_info::TypeInfo for DispatchError {
+use scale_info::{
+    build::{
+        FieldsBuilder,
+        NamedFields,
+        UnnamedFields,
+        Variants,
+    },
+    Path,
+    Type,
+    TypeInfo,
+};
+
+/// See the `ModuleErrorType` in `subxt_codegen` for more info on the different DispatchError
+/// types that we've encountered. We need the path to match `sp_runtime::DispatchError`, otherwise
+/// we could just implement roughly the correct types and derive TypeInfo on them.
+
+/// This type has TypeInfo compatible with the `NamedField` version of the DispatchError.
+/// This is the oldest version that subxt supports:
+/// `DispatchError::Module { index: u8, error: u8 }`
+pub enum NamedFieldDispatchError {}
+impl TypeInfo for NamedFieldDispatchError {
     type Identity = Self;
-    fn type_info() -> scale_info::Type {
-        scale_info::Type::builder()
-            .path(scale_info::Path::new("DispatchError", "sp_runtime"))
-            .variant(
-                scale_info::build::Variants::new().variant("Module", |builder| {
-                    builder
-                        .fields(
-                            scale_info::build::FieldsBuilder::<
-                                scale_info::build::NamedFields,
-                            >::default()
+    fn type_info() -> Type {
+        Type::builder()
+            .path(Path::new("DispatchError", "sp_runtime"))
+            .variant(Variants::new().variant("Module", |builder| {
+                builder
+                    .fields(
+                        FieldsBuilder::<NamedFields>::default()
                             .field(|b| b.name("error").ty::<u8>())
                             .field(|b| b.name("index").ty::<u8>()),
-                        )
-                        .index(0)
-                }),
-            )
+                    )
+                    .index(0)
+            }))
+    }
+}
+
+/// This type has TypeInfo compatible with the `LegacyError` version of the DispatchError.
+/// This is the version wasn't around for long:
+/// `DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: u8 } )`
+pub enum LegacyDispatchError {}
+impl TypeInfo for LegacyDispatchError {
+    type Identity = Self;
+    fn type_info() -> Type {
+        struct ModuleError;
+        impl TypeInfo for ModuleError {
+            type Identity = Self;
+            fn type_info() -> Type {
+                Type::builder()
+                    .path(Path::new("ModuleError", "sp_runtime"))
+                    .composite(
+                        FieldsBuilder::<NamedFields>::default()
+                            .field(|b| b.name("index").ty::<u8>())
+                            .field(|b| b.name("error").ty::<u8>()),
+                    )
+            }
+        }
+
+        Type::builder()
+            .path(Path::new("DispatchError", "sp_runtime"))
+            .variant(Variants::new().variant("Module", |builder| {
+                builder
+                    .fields(
+                        FieldsBuilder::<UnnamedFields>::default()
+                            .field(|b| b.ty::<ModuleError>()),
+                    )
+                    .index(0)
+            }))
+    }
+}
+
+/// This type has TypeInfo compatible with the `ArrayError` version of the DispatchError.
+/// This is the current version:
+/// `DispatchError::Module ( sp_runtime::ModuleError { index: u8, error: [u8; 4] } )`
+pub enum ArrayDispatchError {}
+impl TypeInfo for ArrayDispatchError {
+    type Identity = Self;
+    fn type_info() -> Type {
+        struct ModuleError;
+        impl TypeInfo for ModuleError {
+            type Identity = Self;
+            fn type_info() -> Type {
+                Type::builder()
+                    .path(Path::new("ModuleError", "sp_runtime"))
+                    .composite(
+                        FieldsBuilder::<NamedFields>::default()
+                            .field(|b| b.name("index").ty::<u8>())
+                            .field(|b| b.name("error").ty::<[u8; 4]>()),
+                    )
+            }
+        }
+
+        Type::builder()
+            .path(Path::new("DispatchError", "sp_runtime"))
+            .variant(Variants::new().variant("Module", |builder| {
+                builder
+                    .fields(
+                        FieldsBuilder::<UnnamedFields>::default()
+                            .field(|b| b.ty::<ModuleError>()),
+                    )
+                    .index(0)
+            }))
     }
 }

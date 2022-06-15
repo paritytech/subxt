@@ -17,3 +17,42 @@
 
 mod storage;
 mod utils;
+
+use crate::utils::{
+    dispatch_error::{
+        ArrayDispatchError,
+        LegacyDispatchError,
+        NamedFieldDispatchError,
+    },
+    generate_metadata_from_pallets_custom_dispatch_error,
+    MetadataTestRunner,
+};
+
+// Each of these tests leads to some rust code being compiled and
+// executed to test that compilation is successful (or errors in the
+// way that we'd expect).
+#[test]
+fn ui_tests() {
+    let mut m = MetadataTestRunner::default();
+    let t = trybuild::TestCases::new();
+
+    // Check that storage maps with no keys are handled properly.
+    t.pass(&m.path_to_ui_test_for_metadata(storage::metadata_storage_map_no_keys()));
+
+    // Test that the codegen can handle the different types of DispatchError.
+    t.pass(&m.path_to_ui_test_for_metadata(
+        generate_metadata_from_pallets_custom_dispatch_error::<ArrayDispatchError>(
+            vec![],
+        ),
+    ));
+    t.pass(&m.path_to_ui_test_for_metadata(
+        generate_metadata_from_pallets_custom_dispatch_error::<LegacyDispatchError>(
+            vec![],
+        ),
+    ));
+    t.pass(&m.path_to_ui_test_for_metadata(
+        generate_metadata_from_pallets_custom_dispatch_error::<NamedFieldDispatchError>(
+            vec![],
+        ),
+    ));
+}
