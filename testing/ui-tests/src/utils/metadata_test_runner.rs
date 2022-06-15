@@ -27,8 +27,11 @@ pub struct MetadataTestRunner {
 impl MetadataTestRunner {
     pub fn path_to_ui_test_for_metadata(
         &mut self,
+        name: impl AsRef<str>,
         metadata: RuntimeMetadataPrefixed,
     ) -> String {
+        let test_name = name.as_ref();
+
         // increment test index to avoid overlaps.
         let index = self.index;
         self.index += 1;
@@ -43,7 +46,7 @@ impl MetadataTestRunner {
         };
         let tmp_rust_path = {
             let mut t = tmp_dir.clone();
-            t.push("code.rs");
+            t.push(format!("{test_name}.rs"));
             t.to_string_lossy().into_owned()
         };
 
