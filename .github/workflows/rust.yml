@@ -99,6 +99,12 @@ jobs:
       - name: Check internal documentation links
         run: RUSTDOCFLAGS="--deny rustdoc::broken_intra_doc_links" cargo doc -vv --workspace --no-deps --document-private-items
 
+      - name: Run cargo test on documentatin
+        uses: actions-rs/cargo@v1.0.3
+        with:
+            command: test
+            args: --doc
+
   tests:
     name: Cargo test
     runs-on: ubuntu-latest
