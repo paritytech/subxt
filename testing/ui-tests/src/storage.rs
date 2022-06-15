@@ -34,9 +34,9 @@ use crate::utils::{
 /// and this test will fail before the fix and should pass once the fix is applied.
 fn metadata_storage_item_no_values() -> RuntimeMetadataPrefixed {
     let storage = PalletStorageMetadata {
-        prefix: "System".into(),
+        prefix: "System",
         entries: vec![StorageEntryMetadata {
-            name: "Map".into(),
+            name: "Map",
             modifier: StorageEntryModifier::Optional,
             ty: StorageEntryType::Map {
                 hashers: vec![],
@@ -50,7 +50,7 @@ fn metadata_storage_item_no_values() -> RuntimeMetadataPrefixed {
 
     let pallet = PalletMetadata {
         index: 0,
-        name: "System".into(),
+        name: "System",
         storage: Some(storage),
         constants: vec![],
         calls: None,
