@@ -15,5 +15,5 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
 
-mod utils;
 mod storage;
+mod utils;

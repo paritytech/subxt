@@ -17,26 +17,26 @@
 mod dispatch_error;
 mod metadata_test_runner;
 
+use dispatch_error::DispatchError;
 use frame_metadata::{
-    RuntimeMetadataPrefixed,
-    v14::RuntimeMetadataV14
-};
-use frame_metadata::{
+    v14::RuntimeMetadataV14,
     ExtrinsicMetadata,
     PalletMetadata,
+    RuntimeMetadataPrefixed,
 };
 use scale_info::{
     meta_type,
     IntoPortable,
 };
-use dispatch_error::DispatchError;
 
 pub use metadata_test_runner::MetadataTestRunner;
 
 /// Given some pallet metadata, generate a [`RuntimeMetadataPrefixed`] struct.
 /// We default to a duff extrinsic type, and register a fake `DispatchError` type
 /// so that codegen is happy with the metadata generated.
-pub fn generate_metadata_from_pallets(pallets: Vec<PalletMetadata>) -> RuntimeMetadataPrefixed {
+pub fn generate_metadata_from_pallets(
+    pallets: Vec<PalletMetadata>,
+) -> RuntimeMetadataPrefixed {
     // We don't care about the extrinsic type.
     let extrinsic = ExtrinsicMetadata {
         ty: meta_type::<()>(),

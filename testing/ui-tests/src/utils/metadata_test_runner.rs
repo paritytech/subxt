@@ -14,22 +14,21 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use frame_metadata::{
-    RuntimeMetadataPrefixed,
-};
-use codec::{
-    Encode,
-};
+use codec::Encode;
+use frame_metadata::RuntimeMetadataPrefixed;
 
 static TEST_DIR_PREFIX: &str = "subxt_generated_ui_tests_";
 
 #[derive(Default)]
 pub struct MetadataTestRunner {
-    index: usize
+    index: usize,
 }
 
 impl MetadataTestRunner {
-    pub fn path_to_ui_test_for_metadata(&mut self, metadata: RuntimeMetadataPrefixed) -> String {
+    pub fn path_to_ui_test_for_metadata(
+        &mut self,
+        metadata: RuntimeMetadataPrefixed,
+    ) -> String {
         // increment test index to avoid overlaps.
         let index = self.index;
         self.index += 1;
@@ -49,14 +48,16 @@ impl MetadataTestRunner {
         };
 
         let encoded_metadata = metadata.encode();
-        let rust_file = format!(r#"
+        let rust_file = format!(
+            r#"
             use subxt;
 
             #[subxt::subxt(runtime_metadata_path = "{tmp_metadata_path}")]
             pub mod polkadot {{}}
 
             fn main() {{}}
-        "#);
+        "#
+        );
 
         std::fs::create_dir_all(&tmp_dir).expect("could not create tmp ui test dir");
         // Write metadata to tmp folder:

@@ -15,22 +15,18 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_metadata::{
-    RuntimeMetadataPrefixed,
-};
-use frame_metadata::{
+    PalletMetadata,
     PalletStorageMetadata,
+    RuntimeMetadataPrefixed,
+    StorageEntryMetadata,
     StorageEntryModifier,
     StorageEntryType,
-    PalletMetadata,
-    StorageEntryMetadata,
 };
-use scale_info::{
-    meta_type,
-};
+use scale_info::meta_type;
 
 use crate::utils::{
+    generate_metadata_from_pallets,
     MetadataTestRunner,
-    generate_metadata_from_pallets
 };
 
 /// Generate metadata which contains a `Map` storage entry with no hashers/values.
@@ -39,19 +35,17 @@ use crate::utils::{
 fn metadata_storage_item_no_values() -> RuntimeMetadataPrefixed {
     let storage = PalletStorageMetadata {
         prefix: "System".into(),
-        entries: vec![
-            StorageEntryMetadata {
-                name: "Map".into(),
-                modifier: StorageEntryModifier::Optional,
-                ty: StorageEntryType::Map {
-                    hashers: vec![],
-                    key: meta_type::<()>(),
-                    value: meta_type::<u32>()
-                },
-                default: vec![0],
-                docs: vec![],
-            }
-        ],
+        entries: vec![StorageEntryMetadata {
+            name: "Map".into(),
+            modifier: StorageEntryModifier::Optional,
+            ty: StorageEntryType::Map {
+                hashers: vec![],
+                key: meta_type::<()>(),
+                value: meta_type::<u32>(),
+            },
+            default: vec![0],
+            docs: vec![],
+        }],
     };
 
     let pallet = PalletMetadata {
@@ -72,7 +66,5 @@ fn ui_tests() {
     let mut m = MetadataTestRunner::default();
     let t = trybuild::TestCases::new();
 
-    t.pass(&m.path_to_ui_test_for_metadata(
-        metadata_storage_item_no_values()
-    ));
+    t.pass(&m.path_to_ui_test_for_metadata(metadata_storage_item_no_values()));
 }

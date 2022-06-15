@@ -23,19 +23,18 @@ impl scale_info::TypeInfo for DispatchError {
     fn type_info() -> scale_info::Type {
         scale_info::Type::builder()
             .path(scale_info::Path::new("DispatchError", "sp_runtime"))
-            .variant(scale_info::build::Variants::new()
-                .variant("Module", |builder| {
+            .variant(
+                scale_info::build::Variants::new().variant("Module", |builder| {
                     builder
                         .fields(
-                            scale_info::build::FieldsBuilder::<scale_info::build::NamedFields>::default()
-                                .field(|b| {
-                                    b.name("error").ty::<u8>()
-                                })
-                                .field(|b| {
-                                    b.name("index").ty::<u8>()
-                                })
+                            scale_info::build::FieldsBuilder::<
+                                scale_info::build::NamedFields,
+                            >::default()
+                            .field(|b| b.name("error").ty::<u8>())
+                            .field(|b| b.name("index").ty::<u8>()),
                         )
                         .index(0)
-                }))
+                }),
+            )
     }
 }
