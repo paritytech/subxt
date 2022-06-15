@@ -22,7 +22,9 @@ use frame_metadata::{
     v14::RuntimeMetadataV14,
     ExtrinsicMetadata,
     PalletMetadata,
+    PalletStorageMetadata,
     RuntimeMetadataPrefixed,
+    StorageEntryMetadata,
 };
 use scale_info::{
     meta_type,
@@ -62,4 +64,28 @@ pub fn generate_metadata_from_pallets(
     };
 
     RuntimeMetadataPrefixed::from(metadata)
+}
+
+/// Given some storage entries, generate a [`RuntimeMetadataPrefixed`] struct.
+/// We default to a duff extrinsic type, mock a pallet out, and register a
+/// fake `DispatchError` type so that codegen is happy with the metadata generated.
+pub fn generate_metadata_from_storage_entries(
+    storage_entries: Vec<StorageEntryMetadata>,
+) -> RuntimeMetadataPrefixed {
+    let storage = PalletStorageMetadata {
+        prefix: "System",
+        entries: storage_entries,
+    };
+
+    let pallet = PalletMetadata {
+        index: 0,
+        name: "System",
+        storage: Some(storage),
+        constants: vec![],
+        calls: None,
+        event: None,
+        error: None,
+    };
+
+    generate_metadata_from_pallets(vec![pallet])
 }

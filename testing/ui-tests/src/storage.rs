@@ -15,8 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use frame_metadata::{
-    PalletMetadata,
-    PalletStorageMetadata,
     RuntimeMetadataPrefixed,
     StorageEntryMetadata,
     StorageEntryModifier,
@@ -25,40 +23,25 @@ use frame_metadata::{
 use scale_info::meta_type;
 
 use crate::utils::{
-    generate_metadata_from_pallets,
+    generate_metadata_from_storage_entries,
     MetadataTestRunner,
 };
 
 /// Generate metadata which contains a `Map` storage entry with no hashers/values.
 /// This is a bit of an odd case, but it was raised in https://github.com/paritytech/subxt/issues/552,
 /// and this test will fail before the fix and should pass once the fix is applied.
-fn metadata_storage_item_no_values() -> RuntimeMetadataPrefixed {
-    let storage = PalletStorageMetadata {
-        prefix: "System",
-        entries: vec![StorageEntryMetadata {
-            name: "Map",
-            modifier: StorageEntryModifier::Optional,
-            ty: StorageEntryType::Map {
-                hashers: vec![],
-                key: meta_type::<()>(),
-                value: meta_type::<u32>(),
-            },
-            default: vec![0],
-            docs: vec![],
-        }],
-    };
-
-    let pallet = PalletMetadata {
-        index: 0,
-        name: "System",
-        storage: Some(storage),
-        constants: vec![],
-        calls: None,
-        event: None,
-        error: None,
-    };
-
-    generate_metadata_from_pallets(vec![pallet])
+fn metadata_storage_map_no_keys() -> RuntimeMetadataPrefixed {
+    generate_metadata_from_storage_entries(vec![StorageEntryMetadata {
+        name: "MapWithNoKeys",
+        modifier: StorageEntryModifier::Optional,
+        ty: StorageEntryType::Map {
+            hashers: vec![],
+            key: meta_type::<()>(),
+            value: meta_type::<u32>(),
+        },
+        default: vec![0],
+        docs: vec![],
+    }])
 }
 
 #[test]
@@ -66,5 +49,5 @@ fn ui_tests() {
     let mut m = MetadataTestRunner::default();
     let t = trybuild::TestCases::new();
 
-    t.pass(&m.path_to_ui_test_for_metadata(metadata_storage_item_no_values()));
+    t.pass(&m.path_to_ui_test_for_metadata(metadata_storage_map_no_keys()));
 }
