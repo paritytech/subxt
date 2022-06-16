@@ -152,7 +152,6 @@ async fn dry_run_passes() {
     let bob_address = bob.account_id().clone().into();
     let cxt = test_context().await;
     let api = &cxt.api;
-
     let signed_extrinsic = api
         .tx()
         .balances()
@@ -184,29 +183,19 @@ async fn dry_run_fails() {
     let client = node_process.client();
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
-    let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
     let hans_address = hans.account_id().clone().into();
     let cxt = test_context().await;
     let api = &cxt.api;
-
-    api.tx()
-        .balances()
-        .transfer(hans_address, 100_000_000_000_000_000)
-        .unwrap()
-        .sign_and_submit_then_watch_default(&alice)
-        .await
-        .unwrap()
-        .wait_for_finalized_success()
-        .await
-        .unwrap();
-
     let signed_extrinsic = api
         .tx()
         .balances()
-        .transfer(alice_addr, 100_000_000_000_000_000)
+        .transfer(
+            hans_address,
+            100_000_000_000_000_000_000_000_000_000_000_000,
+        )
         .unwrap()
-        .create_signed(&hans, Default::default())
+        .create_signed(&alice, Default::default())
         .await
         .unwrap();
 
@@ -220,16 +209,14 @@ async fn dry_run_fails() {
         assert_eq!(module_error.index, 6);
         assert_eq!(module_error.error, 2);
     } else {
-        panic!("expected a module module error when dryrunning");
+        panic!("expected a module error when dryrunning");
     }
-
     let res = signed_extrinsic
         .submit_and_watch()
         .await
         .unwrap()
         .wait_for_finalized_success()
         .await;
-
     if let Err(Error::Module(err)) = res {
         assert_eq!(err.pallet, "Balances");
         assert_eq!(err.error, "InsufficientBalance");

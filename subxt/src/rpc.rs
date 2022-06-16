@@ -582,7 +582,10 @@ impl<T: Config> Rpc<T> {
         encoded_signed: &[u8],
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, BasicError> {
-        let params = rpc_params![hex::encode(encoded_signed), at];
+        let params = rpc_params![
+            format!("0x{}", hex::encode(encoded_signed)),    
+            at
+        ];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;
