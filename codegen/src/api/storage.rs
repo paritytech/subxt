@@ -166,13 +166,21 @@ fn generate_storage_entry_fns(
                             None => quote!(#t),
                         }
                     });
-
-                    let entry_struct = quote! {
-                        pub struct #entry_struct_ident <'a>( #( pub &'a #field_types ),* );
-
+                    // There cannot be a reference without a parameter.
+                    let should_ref = !fields.is_empty();
+                    let (entry_struct, constructor) = if should_ref {
+                        (
+                            quote! {
+                                pub struct #entry_struct_ident <'a>( #( pub &'a #field_types ),* );
+                            },
+                            quote!( #entry_struct_ident( #( #field_names ),* ) ),
+                        )
+                    } else {
+                        (
+                            quote!( pub struct #entry_struct_ident; ),
+                            quote!( #entry_struct_ident ),
+                        )
                     };
-                    let constructor =
-                        quote!( #entry_struct_ident( #( #field_names ),* ) );
 
                     let key_impl = if hashers.len() == fields.len() {
                         // If the number of hashers matches the number of fields, we're dealing with
@@ -214,7 +222,7 @@ fn generate_storage_entry_fns(
                         )
                     };
 
-                    (fields, entry_struct, constructor, key_impl, true)
+                    (fields, entry_struct, constructor, key_impl, should_ref)
                 }
                 _ => {
                     let (lifetime_param, lifetime_ref) = (quote!(<'a>), quote!(&'a));

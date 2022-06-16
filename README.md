@@ -24,7 +24,7 @@ a different node then the `metadata` command accepts a `--url` argument.
 
 ## Subxt Documentation
 
-For more details regarding utilizing subxt, please visit the [documentation](docs/subxt.md).
+For more details regarding utilizing subxt, please visit the [documentation](https://docs.rs/subxt/latest/subxt/).
 
 ## Integration Testing
 
