@@ -23,7 +23,7 @@
 //! - [Subscribe to events](https://docs.substrate.io/v3/runtime/events-and-errors/) (Events)
 //!
 //!
-//! ### Generate the runtime API
+//! # Generate the runtime API
 //!
 //! Subxt generates a runtime API from downloaded static metadata. The metadata can be downloaded using the
 //! [subxt-cli](https://crates.io/crates/subxt-cli) tool.
@@ -52,7 +52,7 @@
 //! [subxt-codegen](https://docs.rs/subxt-codegen/latest/subxt_codegen/) documentation.
 //!
 //!
-//! ### Initializing the API client
+//! # Initializing the API client
 //!
 //! ```no_run
 //! use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
@@ -79,7 +79,7 @@
 //! runtime metadata of the node is downloaded. If the URL is not specified (`set_url`), the local host is used instead.
 //!
 //!
-//! ### Submit Extrinsics
+//! # Submit Extrinsics
 //!
 //! Extrinsics are obtained using the API's `RuntimeApi::tx()` method, followed by `pallet_name()` and then the
 //! `call_item_name()`.
@@ -89,14 +89,14 @@
 //! Please visit the [balance_transfer](../examples/examples/balance_transfer.rs) example for more details.
 //!
 //!
-//! ### Querying Storage
+//! # Querying Storage
 //!
 //! The runtime storage is queried via the generated `RuntimeApi::storage()` method, followed by the `pallet_name()` and
 //! then the `storage_item_name()`.
 //!
 //! Please visit the [fetch_staking_details](../examples/examples/fetch_staking_details.rs) example for more details.
 //!
-//! ### Query Constants
+//! # Query Constants
 //!
 //! Constants are embedded into the node's metadata.
 //!
@@ -108,7 +108,7 @@
 //!
 //! Please visit the [fetch_constants](../examples/examples/fetch_constants.rs) example for more details.
 //!
-//! ### Subscribe to Events
+//! # Subscribe to Events
 //!
 //! To subscribe to events, use the generated `RuntimeApi::events()` method which exposes:
 //! - `subscribe()` - Subscribe to events emitted from blocks. These blocks haven't necessarily been finalised.
@@ -121,7 +121,7 @@
 //! - [subscribe_one_event](../examples/examples/subscribe_one_event.rs): Subscribe and filter by one event.
 //! - [subscribe_some_events](../examples/examples/subscribe_some_events.rs): Subscribe and filter event.
 //!
-//! ### Static Metadata Validation
+//! # Static Metadata Validation
 //!
 //! There are two types of metadata that the subxt is aware of:
 //! - static metadata: Metadata used for generating the API.
@@ -183,7 +183,7 @@
 //! # }
 //! ```
 //!
-//! ### Runtime Updates
+//! # Runtime Updates
 //!
 //! There are cases when the node would perform a runtime update, and the runtime node's metadata would be
 //! out of sync with the subxt's metadata.
