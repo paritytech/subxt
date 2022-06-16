@@ -32,28 +32,62 @@
 //!
 //! ## Fetch Storage Keys
 //!
-//! ```rust
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageClient;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! # // Obtain the storage client wrapper from the API.
+//! # let storage: StorageClient<_> = api.client.storage();
 //! // Fetch just the keys, returning up to 10 keys.
 //! let keys = storage
-//!     .fetch_keys::<node_runtime::xcm_pallet::storage::VersionNotifiers>(10, None, None)
-//!     .await?;
+//!     .fetch_keys::<polkadot::xcm_pallet::storage::VersionNotifiers>(10, None, None)
+//!     .await
+//!     .unwrap();
 //! // Iterate over each key
 //! for key in keys.iter() {
 //!     println!("Key: 0x{}", hex::encode(&key));
 //! }
+//! # }
 //! ```
 //!
 //! ## Iterate over Storage
 //!
-//! ```rust
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageClient;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! # // Obtain the storage client wrapper from the API.
+//! # let storage: StorageClient<_> = api.client.storage();
 //! // Iterate over keys and values.
 //! let mut iter = storage
 //!     .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
-//!     .await?;
-//! while let Some((key, value)) = iter.next().await? {
+//!     .await
+//!     .unwrap();
+//! while let Some((key, value)) = iter.next().await.unwrap() {
 //!     println!("Key: 0x{}", hex::encode(&key));
 //!     println!("Value: {}", value);
 //! }
+//! # }
 //! ```
 
 use codec::{

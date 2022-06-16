@@ -21,7 +21,7 @@
 //!
 //! This module is wrapped by the generated API in `RuntimeAPI::EventsApi`.
 //!
-//! # Example
+//! # Examples
 //!
 //! ## Subscribe to all events
 //!
@@ -31,12 +31,23 @@
 //!
 //! To obtain the events from a given block use `at()`.
 //!
-//! ```rust
-//! let mut events = api.events().subscribe().await?;
+//! ```no_run
+//! # use futures::StreamExt;
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! # pub mod polkadot {}
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! let mut events = api.events().subscribe().await.unwrap();
 //!
 //! while let Some(ev) = events.next().await {
 //!     // Obtain all events from this block.
-//!     let ev: subxt::Events<_, _> = ev?;
+//!     let ev: subxt::Events<_, _> = ev.unwrap();
 //!     // Print block hash.
 //!     println!("Event at block hash {:?}", ev.block_hash());
 //!     // Iterate over all events.
@@ -45,6 +56,7 @@
 //!         println!("Event details {:?}", event_details);
 //!     }
 //! }
+//! # }
 //! ```
 //!
 //! ## Filter events
@@ -55,16 +67,32 @@
 //! returned directly. Otherwise, we'll be given a corresponding tuple of `Option`'s, with exactly
 //! one variant populated each time.
 //!
-//! ```rust
-//! let mut events = api
+//! ```no_run
+//! # use futures::StreamExt;
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//!
+//! let mut transfer_events = api
 //!     .events()
 //!     .subscribe()
-//!     .await?
+//!     .await
+//!     .unwrap()
 //!     .filter_events::<(polkadot::balances::events::Transfer,)>();
 //!
 //! while let Some(transfer_event) = transfer_events.next().await {
 //!     println!("Balance transfer event: {transfer_event:?}");
 //! }
+//! # }
 //! ```
 
 mod decoding;
