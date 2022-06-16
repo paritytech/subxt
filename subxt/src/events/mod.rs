@@ -34,10 +34,8 @@
 //! ```no_run
 //! # use futures::StreamExt;
 //! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-//! pub mod polkadot {}
-//!
+//! # #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! # pub mod polkadot {}
 //! # #[tokio::main]
 //! # async fn main() {
 //! # let api = ClientBuilder::new()
