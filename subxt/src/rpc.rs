@@ -23,12 +23,23 @@
 //!
 //! ## Fetch Storage
 //!
-//! ```rust
-//! use subxt::rpc::Rpc;
-//! use subxt::storage::StorageKeyPrefix;
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
 //!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
 //! // Storage prefix is `twox_128("System") ++ twox_128("ExtrinsicCount")`.
-//! let key = StorageKeyPrefix::new::<node_runtime::system::storage::ExtrinsicCount>()
+//! let key = StorageKeyPrefix::new::<polkadot::system::storage::ExtrinsicCount>()
 //!     .to_storage_key();
 //!
 //! // Obtain the RPC from a generated API
@@ -36,27 +47,46 @@
 //!     .client
 //!     .rpc();
 //!
-//! let result = rpc.storage(&key, None)?;
+//! let result = rpc.storage(&key, None).await.unwrap();
 //! println!("Storage result: {:?}", result);
+//! # }
 //! ```
 //!
 //! ## Fetch Keys
 //!
-//! ```rust
-//! use subxt::rpc::Rpc;
-//! use subxt::storage::StorageKeyPrefix;
-//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>();
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>()
+//!     .to_storage_key();
 //!
 //! // Obtain the RPC from a generated API
 //! let rpc: &Rpc<_> = api
 //!     .client
 //!     .rpc();
+//!
 //! // Fetch up to 10 keys.
 //! let keys = rpc
-//!     .storage_keys_paged(Some(key), 10, None, None);
+//!     .storage_keys_paged(Some(key), 10, None, None)
+//!     .await
+//!     .unwrap();
+//!
 //! for key in keys.iter() {
 //!     println!("Key: 0x{}", hex::encode(&key));
 //! }
+//! # }
 //! ```
 
 // jsonrpsee subscriptions are interminable.
