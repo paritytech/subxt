@@ -33,7 +33,7 @@ use subxt::{
     PolkadotExtrinsicParams,
 };
 
-#[subxt::subxt(runtime_metadata_path = "examples/polkadot_metadata.scale")]
+#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 pub mod polkadot {}
 
 #[tokio::main]
@@ -53,7 +53,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Some(Ok(block)) = blocks.next().await {
         println!(
             "block number: {} hash:{} parent:{} state root:{} extrinsics root:{}",
-            block.number, block.hash(), block.parent_hash, block.state_root, block.extrinsics_root
+            block.number,
+            block.hash(),
+            block.parent_hash,
+            block.state_root,
+            block.extrinsics_root
         );
     }
 
