@@ -165,7 +165,7 @@ pub struct EventSubscription<'a, Sub, T: Config, Evs: 'static> {
     #[derivative(Debug = "ignore")]
     at: Option<
         std::pin::Pin<
-            Box<dyn Future<Output = Result<Events<'a, T, Evs>, BasicError>> + Send + 'a>,
+            Box<dyn Future<Output = Result<Events<T, Evs>, BasicError>> + Send + 'a>,
         >,
     >,
     _event_type: std::marker::PhantomData<Evs>,
@@ -222,7 +222,7 @@ where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
     E: Into<BasicError>,
 {
-    type Item = Result<Events<'a, T, Evs>, BasicError>;
+    type Item = Result<Events<T, Evs>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,

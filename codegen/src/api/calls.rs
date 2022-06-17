@@ -19,7 +19,7 @@ use crate::types::{
     TypeGenerator,
 };
 use frame_metadata::{
-    PalletCallMetadata,
+    v14::RuntimeMetadataV14,
     PalletMetadata,
 };
 use heck::{
@@ -34,12 +34,51 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
+/// Generate calls from the provided pallet's metadata.
+///
+/// The function creates a new module named `calls` under the pallet's module.
+/// ```ignore
+/// pub mod PalletName {
+///     pub mod calls {
+///     ...
+///     }
+/// }
+/// ```
+///
+/// The function generates the calls as rust structs that implement the `subxt::Call` trait
+/// to uniquely identify the call's identity when creating the extrinsic.
+///
+/// ```ignore
+/// pub struct CallName {
+///      pub call_param: type,
+/// }
+/// impl ::subxt::Call for CallName {
+/// ...
+/// }
+/// ```
+///
+/// Calls are extracted from the API and wrapped into the generated `TransactionApi` of
+/// each module.
+///
+/// # Arguments
+///
+/// - `metadata` - Runtime metadata from which the calls are generated.
+/// - `type_gen` - The type generator containing all types defined by metadata.
+/// - `pallet` - Pallet metadata from which the calls are generated.
+/// - `types_mod_ident` - The ident of the base module that we can use to access the generated types from.
 pub fn generate_calls(
+    metadata: &RuntimeMetadataV14,
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
-    call: &PalletCallMetadata<PortableForm>,
     types_mod_ident: &syn::Ident,
 ) -> TokenStream2 {
+    // Early return if the pallet has no calls.
+    let call = if let Some(ref calls) = pallet.calls {
+        calls
+    } else {
+        return quote!()
+    };
+
     let mut struct_defs = super::generate_structs_from_variants(
         type_gen,
         call.ty.id(),
@@ -48,7 +87,7 @@ pub fn generate_calls(
     );
     let (call_structs, call_fns): (Vec<_>, Vec<_>) = struct_defs
         .iter_mut()
-        .map(|struct_def| {
+        .map(|(variant_name, struct_def)| {
             let (call_fn_args, call_args): (Vec<_>, Vec<_>) =
                 match struct_def.fields {
                     CompositeDefFields::Named(ref named_fields) => {
@@ -74,10 +113,12 @@ pub fn generate_calls(
                 };
 
             let pallet_name = &pallet.name;
-            let call_struct_name = &struct_def.name;
-            let function_name = struct_def.name.to_string().to_snake_case();
-            let fn_name = format_ident!("{}", function_name);
+            let call_name = &variant_name;
+            let struct_name = &struct_def.name;
+            let call_hash = subxt_metadata::get_call_hash(metadata, pallet_name, call_name)
+                .unwrap_or_else(|_| abort_call_site!("Metadata information for the call {}_{} could not be found", pallet_name, call_name));
 
+            let fn_name = format_ident!("{}", variant_name.to_snake_case());
             // Propagate the documentation just to `TransactionApi` methods, while
             // draining the documentation of inner call structures.
             let docs = struct_def.docs.take();
@@ -85,9 +126,9 @@ pub fn generate_calls(
             let call_struct = quote! {
                 #struct_def
 
-                impl ::subxt::Call for #call_struct_name {
+                impl ::subxt::Call for #struct_name {
                     const PALLET: &'static str = #pallet_name;
-                    const FUNCTION: &'static str = #function_name;
+                    const FUNCTION: &'static str = #call_name;
                 }
             };
             let client_fn = quote! {
@@ -95,9 +136,18 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, #call_struct_name, DispatchError, root_mod::Event> {
-                    let call = #call_struct_name { #( #call_args, )* };
-                    ::subxt::SubmittableExtrinsic::new(self.client, call)
+                ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
+                    let runtime_call_hash = {
+                        let locked_metadata = self.client.metadata();
+                        let metadata = locked_metadata.read();
+                        metadata.call_hash::<#struct_name>()?
+                    };
+                    if runtime_call_hash == [#(#call_hash,)*] {
+                        let call = #struct_name { #( #call_args, )* };
+                        Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
+                    } else {
+                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
+                    }
                 }
             };
             (call_struct, client_fn)

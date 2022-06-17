@@ -15,6 +15,79 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! RPC types and client for interacting with a substrate node.
+//!
+//! This is used behind the scenes by various `subxt` APIs, but can
+//! also be used directly.
+//!
+//! # Examples
+//!
+//! ## Fetch Storage
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! // Storage prefix is `twox_128("System") ++ twox_128("ExtrinsicCount")`.
+//! let key = StorageKeyPrefix::new::<polkadot::system::storage::ExtrinsicCount>()
+//!     .to_storage_key();
+//!
+//! // Obtain the RPC from a generated API
+//! let rpc: &Rpc<_> = api
+//!     .client
+//!     .rpc();
+//!
+//! let result = rpc.storage(&key, None).await.unwrap();
+//! println!("Storage result: {:?}", result);
+//! # }
+//! ```
+//!
+//! ## Fetch Keys
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>()
+//!     .to_storage_key();
+//!
+//! // Obtain the RPC from a generated API
+//! let rpc: &Rpc<_> = api
+//!     .client
+//!     .rpc();
+//!
+//! // Fetch up to 10 keys.
+//! let keys = rpc
+//!     .storage_keys_paged(Some(key), 10, None, None)
+//!     .await
+//!     .unwrap();
+//!
+//! for key in keys.iter() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//! }
+//! # }
+//! ```
 
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
@@ -28,7 +101,6 @@ use std::{
 
 use crate::{
     error::BasicError,
-    storage::StorageKeyPrefix,
     Config,
     Metadata,
     PhantomDataSendSync,
@@ -277,13 +349,12 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKeyPrefix>,
+        key: Option<StorageKey>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = prefix.map(|p| p.to_storage_key());
-        let params = rpc_params![prefix, count, start_key, hash];
+        let params = rpc_params![key, count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -480,6 +551,21 @@ impl<T: Config> Rpc<T> {
         Ok(subscription)
     }
 
+    /// Subscribe to runtime version updates that produce changes in the metadata.
+    pub async fn subscribe_runtime_version(
+        &self,
+    ) -> Result<Subscription<RuntimeVersion>, BasicError> {
+        let subscription = self
+            .client
+            .subscribe(
+                "state_subscribeRuntimeVersion",
+                rpc_params![],
+                "state_unsubscribeRuntimeVersion",
+            )
+            .await?;
+        Ok(subscription)
+    }
+
     /// Create and submit an extrinsic and return corresponding Hash if successful
     pub async fn submit_extrinsic<X: Encode>(
         &self,
@@ -564,7 +650,7 @@ pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
     let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
-        .build(sender, receiver))
+        .build_with_tokio(sender, receiver))
 }
 
 async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {

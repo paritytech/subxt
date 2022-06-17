@@ -15,21 +15,6 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! Generate code for submitting extrinsics and query storage of a Substrate runtime.
-//!
-//! ## Note
-//!
-//! By default the codegen will search for the `System` pallet's `Account` storage item, which is
-//! the conventional location where an account's index (aka nonce) is stored.
-//!
-//! If this `System::Account` storage item is discovered, then it is assumed that:
-//!
-//!   1. The type of the storage item is a `struct` (aka a composite type)
-//!   2. There exists a field called `nonce` which contains the account index.
-//!
-//! These assumptions are based on the fact that the `frame_system::AccountInfo` type is the default
-//! configured type, and that the vast majority of chain configurations will use this.
-//!
-//! If either of these conditions are not satisfied, the codegen will fail.
 
 mod calls;
 mod constants;
@@ -37,7 +22,9 @@ mod errors;
 mod events;
 mod storage;
 
-use super::GeneratedTypeDerives;
+use subxt_metadata::get_metadata_per_pallet_hash;
+
+use super::DerivesRegistry;
 use crate::{
     ir,
     types::{
@@ -66,15 +53,21 @@ use std::{
     path,
     string::ToString,
 };
-use syn::{
-    parse_quote,
-    punctuated::Punctuated,
-};
+use syn::parse_quote;
 
+/// Generates the API for interacting with a Substrate runtime.
+///
+/// # Arguments
+///
+/// * `item_mod` - The module declaration for which the API is implemented.
+/// * `path` - The path to the scale encoded metadata of the runtime node.
+/// * `derives` - Provide custom derives for the generated types.
+///
+/// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
-    generated_type_derives: Option<Punctuated<syn::Path, syn::Token![,]>>,
+    derives: DerivesRegistry,
 ) -> TokenStream2
 where
     P: AsRef<path::Path>,
@@ -90,20 +83,20 @@ where
     let metadata = frame_metadata::RuntimeMetadataPrefixed::decode(&mut &bytes[..])
         .unwrap_or_else(|e| abort_call_site!("Failed to decode metadata: {}", e));
 
-    let mut derives = GeneratedTypeDerives::default();
-    if let Some(user_derives) = generated_type_derives {
-        derives.append(user_derives.iter().cloned())
-    }
-
     let generator = RuntimeGenerator::new(metadata);
     generator.generate_runtime(item_mod, derives)
 }
 
+/// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV14,
 }
 
 impl RuntimeGenerator {
+    /// Create a new runtime generator from the provided metadata.
+    ///
+    /// **Note:** If you have a path to the metadata, prefer to use [generate_runtime_api]
+    /// for generating the runtime API.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
             RuntimeMetadata::V14(v14) => Self { metadata: v14 },
@@ -111,14 +104,21 @@ impl RuntimeGenerator {
         }
     }
 
+    /// Generate the API for interacting with a Substrate runtime.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_mod` - The module declaration for which the API is implemented.
+    /// * `derives` - Provide custom derives for the generated types.
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
-        derives: GeneratedTypeDerives,
+        derives: DerivesRegistry,
     ) -> TokenStream2 {
         let item_mod_ir = ir::ItemMod::from(item_mod);
+        let default_derives = derives.default_derives();
 
-        // some hardcoded default type substitutes, can be overridden by user
+        // Some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
             (
                 "bitvec::order::Lsb0",
@@ -181,35 +181,38 @@ impl RuntimeGenerator {
             })
             .collect::<Vec<_>>();
 
+        // Pallet names and their length are used to create PALLETS array.
+        // The array is used to identify the pallets composing the metadata for
+        // validation of just those pallets.
+        let pallet_names: Vec<_> = self
+            .metadata
+            .pallets
+            .iter()
+            .map(|pallet| &pallet.name)
+            .collect();
+        let pallet_names_len = pallet_names.len();
+
+        let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
+
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let calls = if let Some(ref calls) = pallet.calls {
-                calls::generate_calls(&type_gen, pallet, calls, types_mod_ident)
-            } else {
-                quote!()
-            };
+            let calls =
+                calls::generate_calls(&self.metadata, &type_gen, pallet, types_mod_ident);
 
-            let event = if let Some(ref event) = pallet.event {
-                events::generate_events(&type_gen, pallet, event, types_mod_ident)
-            } else {
-                quote!()
-            };
+            let event = events::generate_events(&type_gen, pallet, types_mod_ident);
 
-            let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(&type_gen, pallet, storage, types_mod_ident)
-            } else {
-                quote!()
-            };
+            let storage_mod = storage::generate_storage(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
-            let constants_mod = if !pallet.constants.is_empty() {
-                constants::generate_constants(
-                    &type_gen,
-                    pallet,
-                    &pallet.constants,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let constants_mod = constants::generate_constants(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
             quote! {
                 pub mod #mod_name {
@@ -237,31 +240,33 @@ impl RuntimeGenerator {
         });
 
         let outer_event = quote! {
-            #derives
+            #default_derives
             pub enum Event {
                 #( #outer_event_variants )*
             }
         };
 
         let mod_ident = item_mod_ir.ident;
-        let pallets_with_constants =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    (!pallet.constants.is_empty()).then(|| pallet_mod_name)
-                });
-        let pallets_with_storage =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.storage.as_ref().map(|_| pallet_mod_name)
-                });
-        let pallets_with_calls =
-            pallets_with_mod_names
-                .iter()
-                .filter_map(|(pallet, pallet_mod_name)| {
-                    pallet.calls.as_ref().map(|_| pallet_mod_name)
-                });
+        let pallets_with_constants: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                (!pallet.constants.is_empty()).then(|| pallet_mod_name)
+            })
+            .collect();
+
+        let pallets_with_storage: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.storage.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
+
+        let pallets_with_calls: Vec<_> = pallets_with_mod_names
+            .iter()
+            .filter_map(|(pallet, pallet_mod_name)| {
+                pallet.calls.as_ref().map(|_| pallet_mod_name)
+            })
+            .collect();
 
         let has_module_error_impl =
             errors::generate_has_module_error_impl(&self.metadata, types_mod_ident);
@@ -271,6 +276,8 @@ impl RuntimeGenerator {
             pub mod #mod_ident {
                 // Make it easy to access the root via `root_mod` at different levels:
                 use super::#mod_ident as root_mod;
+                // Identify the pallets composing the static metadata by name.
+                pub static PALLETS: [&str; #pallet_names_len] = [ #(#pallet_names,)* ];
 
                 #outer_event
                 #( #modules )*
@@ -284,6 +291,12 @@ impl RuntimeGenerator {
                 pub struct RuntimeApi<T: ::subxt::Config, X> {
                     pub client: ::subxt::Client<T>,
                     marker: ::core::marker::PhantomData<X>,
+                }
+
+                impl<T: ::subxt::Config, X> Clone for RuntimeApi<T, X> {
+                    fn clone(&self) -> Self {
+                        Self { client: self.client.clone(), marker: ::core::marker::PhantomData }
+                    }
                 }
 
                 impl<T, X> ::core::convert::From<::subxt::Client<T>> for RuntimeApi<T, X>
@@ -301,6 +314,19 @@ impl RuntimeGenerator {
                     T: ::subxt::Config,
                     X: ::subxt::extrinsic::ExtrinsicParams<T>,
                 {
+                    pub fn validate_metadata(&'a self) -> Result<(), ::subxt::MetadataError> {
+                        let runtime_metadata_hash = {
+                            let locked_metadata = self.client.metadata();
+                            let metadata = locked_metadata.read();
+                            metadata.metadata_hash(&PALLETS)
+                        };
+                        if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
+                            Err(::subxt::MetadataError::IncompatibleMetadata)
+                        } else {
+                            Ok(())
+                        }
+                    }
+
                     pub fn constants(&'a self) -> ConstantsApi<'a, T> {
                         ConstantsApi { client: &self.client }
                     }
@@ -323,7 +349,7 @@ impl RuntimeGenerator {
                 }
 
                 impl <'a, T: ::subxt::Config> EventsApi<'a, T> {
-                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<'a, T, Event>, ::subxt::BasicError> {
+                    pub async fn at(&self, block_hash: T::Hash) -> Result<::subxt::events::Events<T, Event>, ::subxt::BasicError> {
                         ::subxt::events::at::<T, Event>(self.client, block_hash).await
                     }
 
@@ -384,12 +410,13 @@ impl RuntimeGenerator {
     }
 }
 
+/// Return a vector of tuples of variant names and corresponding struct definitions.
 pub fn generate_structs_from_variants<'a, F>(
     type_gen: &'a TypeGenerator,
     type_id: u32,
     variant_to_struct_name: F,
     error_message_type_name: &str,
-) -> Vec<CompositeDef>
+) -> Vec<(String, CompositeDef)>
 where
     F: Fn(&str) -> std::borrow::Cow<str>,
 {
@@ -406,14 +433,16 @@ where
                     &[],
                     type_gen,
                 );
-                CompositeDef::struct_def(
+                let struct_def = CompositeDef::struct_def(
+                    &ty,
                     struct_name.as_ref(),
                     Default::default(),
                     fields,
                     Some(parse_quote!(pub)),
                     type_gen,
                     var.docs(),
-                )
+                );
+                (var.name().to_string(), struct_def)
             })
             .collect()
     } else {

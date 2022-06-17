@@ -14,19 +14,97 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! For querying runtime storage.
+//! Query the runtime storage using [StorageClient].
+//!
+//! This module is the core of performing runtime storage queries. While you can
+//! work with it directly, it's prefer to use the generated `storage()` interface where
+//! possible.
+//!
+//! The exposed API is performing RPC calls to `state_getStorage` and `state_getKeysPaged`.
+//!
+//! A runtime storage entry can be of type:
+//! - [StorageEntryKey::Plain] for keys constructed just from the prefix
+//!   `twox_128(pallet) ++ twox_128(storage_item)`
+//! - [StorageEntryKey::Map] for mapped keys constructed from the prefix,
+//!   plus other arguments `twox_128(pallet) ++ twox_128(storage_item) ++ hash(arg1) ++ arg1`
+//!
+//! # Examples
+//!
+//! ## Fetch Storage Keys
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageClient;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! # // Obtain the storage client wrapper from the API.
+//! # let storage: StorageClient<_> = api.client.storage();
+//! // Fetch just the keys, returning up to 10 keys.
+//! let keys = storage
+//!     .fetch_keys::<polkadot::xcm_pallet::storage::VersionNotifiers>(10, None, None)
+//!     .await
+//!     .unwrap();
+//! // Iterate over each key
+//! for key in keys.iter() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//! }
+//! # }
+//! ```
+//!
+//! ## Iterate over Storage
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageClient;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! # // Obtain the storage client wrapper from the API.
+//! # let storage: StorageClient<_> = api.client.storage();
+//! // Iterate over keys and values.
+//! let mut iter = storage
+//!     .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
+//!     .await
+//!     .unwrap();
+//! while let Some((key, value)) = iter.next().await.unwrap() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//!     println!("Value: {}", value);
+//! }
+//! # }
+//! ```
 
 use codec::{
     Decode,
     Encode,
 };
+use parking_lot::RwLock;
 use sp_core::storage::{
     StorageChangeSet,
     StorageData,
     StorageKey,
 };
 pub use sp_runtime::traits::SignedExtension;
-use std::marker::PhantomData;
+use std::{
+    marker::PhantomData,
+    sync::Arc,
+};
 
 use crate::{
     error::BasicError,
@@ -133,7 +211,7 @@ impl StorageMapKey {
 /// Client for querying runtime storage.
 pub struct StorageClient<'a, T: Config> {
     rpc: &'a Rpc<T>,
-    metadata: &'a Metadata,
+    metadata: Arc<RwLock<Metadata>>,
     iter_page_size: u32,
 }
 
@@ -141,7 +219,7 @@ impl<'a, T: Config> Clone for StorageClient<'a, T> {
     fn clone(&self) -> Self {
         Self {
             rpc: self.rpc,
-            metadata: self.metadata,
+            metadata: Arc::clone(&self.metadata),
             iter_page_size: self.iter_page_size,
         }
     }
@@ -149,7 +227,11 @@ impl<'a, T: Config> Clone for StorageClient<'a, T> {
 
 impl<'a, T: Config> StorageClient<'a, T> {
     /// Create a new [`StorageClient`]
-    pub fn new(rpc: &'a Rpc<T>, metadata: &'a Metadata, iter_page_size: u32) -> Self {
+    pub fn new(
+        rpc: &'a Rpc<T>,
+        metadata: Arc<RwLock<Metadata>>,
+        iter_page_size: u32,
+    ) -> Self {
         Self {
             rpc,
             metadata,
@@ -199,7 +281,8 @@ impl<'a, T: Config> StorageClient<'a, T> {
         if let Some(data) = self.fetch(store, hash).await? {
             Ok(data)
         } else {
-            let pallet_metadata = self.metadata.pallet(F::PALLET)?;
+            let metadata = self.metadata.read();
+            let pallet_metadata = metadata.pallet(F::PALLET)?;
             let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
             let default = Decode::decode(&mut &storage_metadata.default[..])
                 .map_err(MetadataError::DefaultError)?;
@@ -226,10 +309,10 @@ impl<'a, T: Config> StorageClient<'a, T> {
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = StorageKeyPrefix::new::<F>();
+        let key = StorageKeyPrefix::new::<F>().to_storage_key();
         let keys = self
             .rpc
-            .storage_keys_paged(Some(prefix), count, start_key, hash)
+            .storage_keys_paged(Some(key), count, start_key, hash)
             .await?;
         Ok(keys)
     }

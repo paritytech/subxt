@@ -26,7 +26,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
 
     If there are minor issues with the documentation, they can be fixed in the release branch.
 
-4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `test-runtime`.
+4.  Bump the crate version in `Cargo.toml` to whatever was decided in step 2 for `subxt-metadata`, `subxt-cli`, `subxt-codegen`, `subxt-examples`, `subxt-macro` ,`subxt`, `test-runtime`.
 
 5.  Update `CHANGELOG.md` to reflect the difference between this release and the last. If you're unsure of
     what to add, check with the Tools team. See the `CHANGELOG.md` file for details of the format it follows.
@@ -41,7 +41,7 @@ We also assume that ongoing work done is being merged directly to the `master` b
     ```
 
     Ensure that the script picked the latest published release tag (e.g. if releasing `v0.17.0`, the script should
-    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Added" and "Changed" sections, and make any
+    provide `[+] Latest release tag: v0.16.0` ). Then group the PRs into "Fixed", "Added" and "Changed" sections, and make any
     other adjustments that you feel are necessary for clarity.
 
 6.  Commit any of the above changes to the release branch and open a PR in GitHub with a base of `master`.
@@ -67,7 +67,8 @@ We also assume that ongoing work done is being merged directly to the `master` b
         a little time in between each to let crates.io catch up with what we've published).
 
         ```
-        (cd codegen && cargo publish) && \
+        (cd metadata && cargo publish) && \
+            (cd codegen && cargo publish) && \
             sleep 10 && \
             (cd macro && cargo publish) && \
             sleep 10 && \

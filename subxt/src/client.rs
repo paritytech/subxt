@@ -35,6 +35,7 @@ use crate::{
     },
     storage::StorageClient,
     transaction::TransactionProgress,
+    updates::UpdateClient,
     Call,
     Config,
     Encoded,
@@ -46,6 +47,7 @@ use codec::{
     Encode,
 };
 use derivative::Derivative;
+use parking_lot::RwLock;
 use std::sync::Arc;
 
 /// ClientBuilder for constructing a Client.
@@ -53,6 +55,7 @@ use std::sync::Arc;
 pub struct ClientBuilder {
     url: Option<String>,
     client: Option<RpcClient>,
+    metadata: Option<Metadata>,
     page_size: Option<u32>,
 }
 
@@ -62,6 +65,7 @@ impl ClientBuilder {
         Self {
             url: None,
             client: None,
+            metadata: None,
             page_size: None,
         }
     }
@@ -84,7 +88,33 @@ impl ClientBuilder {
         self
     }
 
-    /// Creates a new Client.
+    /// Set the metadata.
+    ///
+    /// *Note:* Metadata will no longer be downloaded from the runtime node.
+    #[cfg(feature = "integration-tests")]
+    pub fn set_metadata(mut self, metadata: Metadata) -> Self {
+        self.metadata = Some(metadata);
+        self
+    }
+
+    /// Builder for [Client].
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use subxt::{ClientBuilder, DefaultConfig};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     // Build the client.
+    ///     let client = ClientBuilder::new()
+    ///          .set_url("wss://rpc.polkadot.io:443")
+    ///          .build::<DefaultConfig>()
+    ///          .await
+    ///          .unwrap();
+    ///     // Use the client...
+    /// }
+    /// ```
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
             client
@@ -93,21 +123,25 @@ impl ClientBuilder {
             crate::rpc::ws_client(url).await?
         };
         let rpc = Rpc::new(client);
-        let (metadata, genesis_hash, runtime_version, properties) = future::join4(
-            rpc.metadata(),
+        let (genesis_hash, runtime_version, properties) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
             rpc.system_properties(),
         )
         .await;
-        let metadata = metadata?;
+
+        let metadata = if let Some(metadata) = self.metadata {
+            metadata
+        } else {
+            rpc.metadata().await?
+        };
 
         Ok(Client {
             rpc,
             genesis_hash: genesis_hash?,
-            metadata: Arc::new(metadata),
+            metadata: Arc::new(RwLock::new(metadata)),
             properties: properties.unwrap_or_else(|_| Default::default()),
-            runtime_version: runtime_version?,
+            runtime_version: Arc::new(RwLock::new(runtime_version?)),
             iter_page_size: self.page_size.unwrap_or(10),
         })
     }
@@ -119,9 +153,9 @@ impl ClientBuilder {
 pub struct Client<T: Config> {
     rpc: Rpc<T>,
     genesis_hash: T::Hash,
-    metadata: Arc<Metadata>,
+    metadata: Arc<RwLock<Metadata>>,
     properties: SystemProperties,
-    runtime_version: RuntimeVersion,
+    runtime_version: Arc<RwLock<RuntimeVersion>>,
     iter_page_size: u32,
 }
 
@@ -146,8 +180,8 @@ impl<T: Config> Client<T> {
     }
 
     /// Returns the chain metadata.
-    pub fn metadata(&self) -> &Metadata {
-        &self.metadata
+    pub fn metadata(&self) -> Arc<RwLock<Metadata>> {
+        Arc::clone(&self.metadata)
     }
 
     /// Returns the properties defined in the chain spec as a JSON object.
@@ -169,7 +203,44 @@ impl<T: Config> Client<T> {
 
     /// Create a client for accessing runtime storage
     pub fn storage(&self) -> StorageClient<T> {
-        StorageClient::new(&self.rpc, &self.metadata, self.iter_page_size)
+        StorageClient::new(&self.rpc, self.metadata(), self.iter_page_size)
+    }
+
+    /// Create a wrapper for performing runtime updates on this client.
+    ///
+    /// # Note
+    ///
+    /// The update client is intended to be used in the background for
+    /// performing runtime updates, while the API is still in use.
+    /// Without performing runtime updates the submitted extrinsics may fail.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use subxt::{ClientBuilder, DefaultConfig};
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// #    let client = ClientBuilder::new()
+    /// #         .set_url("wss://rpc.polkadot.io:443")
+    /// #         .build::<DefaultConfig>()
+    /// #         .await
+    /// #         .unwrap();
+    /// #
+    /// let update_client = client.updates();
+    /// // Spawn a new background task to handle runtime updates.
+    /// tokio::spawn(async move {
+    ///     let result = update_client.perform_runtime_updates().await;
+    ///     println!("Runtime update finished with result={:?}", result);
+    /// });
+    /// # }
+    /// ```
+    pub fn updates(&self) -> UpdateClient<T> {
+        UpdateClient::new(
+            self.rpc.clone(),
+            self.metadata(),
+            self.runtime_version.clone(),
+        )
     }
 
     /// Convert the client to a runtime api wrapper for custom runtime access.
@@ -178,6 +249,11 @@ impl<T: Config> Client<T> {
     /// to the target runtime.
     pub fn to_runtime_api<R: From<Self>>(self) -> R {
         self.into()
+    }
+
+    /// Returns the client's Runtime Version.
+    pub fn runtime_version(&self) -> Arc<RwLock<RuntimeVersion>> {
+        Arc::clone(&self.runtime_version)
     }
 }
 
@@ -235,6 +311,8 @@ where
 
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&extrinsic);
+
+        tracing::info!("xt hash: {}", hex::encode(ext_hash.encode()));
 
         // Submit and watch for transaction progress.
         let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
@@ -298,7 +376,9 @@ where
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = {
             let mut bytes = Vec::new();
-            let pallet = self.client.metadata().pallet(C::PALLET)?;
+            let locked_metadata = self.client.metadata();
+            let metadata = locked_metadata.read();
+            let pallet = metadata.pallet(C::PALLET)?;
             bytes.push(pallet.index());
             bytes.push(pallet.call_index::<C>()?);
             self.call.encode_to(&mut bytes);
@@ -306,12 +386,22 @@ where
         };
 
         // 3. Construct our custom additional/extra params.
-        let additional_and_extra_params = X::new(
-            self.client.runtime_version.spec_version,
-            self.client.runtime_version.transaction_version,
-            account_nonce,
-            self.client.genesis_hash,
-            other_params,
+        let additional_and_extra_params = {
+            // Obtain spec version and transaction version from the runtime version of the client.
+            let locked_runtime = self.client.runtime_version();
+            let runtime = locked_runtime.read();
+            X::new(
+                runtime.spec_version,
+                runtime.transaction_version,
+                account_nonce,
+                self.client.genesis_hash,
+                other_params,
+            )
+        };
+
+        tracing::debug!(
+            "additional_and_extra_params: {:?}",
+            additional_and_extra_params
         );
 
         // 4. Construct signature. This is compatible with the Encode impl
@@ -329,6 +419,8 @@ where
                 signer.sign(&bytes)
             }
         };
+
+        tracing::info!("xt signature: {}", hex::encode(signature.encode()));
 
         // 5. Encode extrinsic, now that we have the parts we need. This is compatible
         //    with the Encode impl for UncheckedExtrinsic (protocol version 4).

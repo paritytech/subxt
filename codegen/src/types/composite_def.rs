@@ -15,8 +15,8 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use super::{
+    Derives,
     Field,
-    GeneratedTypeDerives,
     TypeDefParameters,
     TypeGenerator,
     TypeParameter,
@@ -29,6 +29,8 @@ use quote::{
     quote,
 };
 use scale_info::{
+    form::PortableForm,
+    Type,
     TypeDef,
     TypeDefPrimitive,
 };
@@ -52,6 +54,7 @@ pub struct CompositeDef {
 impl CompositeDef {
     /// Construct a definition which will generate code for a standalone `struct`.
     pub fn struct_def(
+        ty: &Type<PortableForm>,
         ident: &str,
         type_params: TypeDefParameters,
         fields_def: CompositeDefFields,
@@ -59,7 +62,7 @@ impl CompositeDef {
         type_gen: &TypeGenerator,
         docs: &[String],
     ) -> Self {
-        let mut derives = type_gen.derives().clone();
+        let mut derives = type_gen.type_derives(ty);
         let fields: Vec<_> = fields_def.field_types().collect();
 
         if fields.len() == 1 {
@@ -82,7 +85,7 @@ impl CompositeDef {
                             | TypeDefPrimitive::U128
                     )
                 ) {
-                    derives.push_codec_compact_as()
+                    derives.insert_codec_compact_as()
                 }
             }
         }
@@ -165,7 +168,7 @@ impl quote::ToTokens for CompositeDef {
 pub enum CompositeDefKind {
     /// Composite type comprising a Rust `struct`.
     Struct {
-        derives: GeneratedTypeDerives,
+        derives: Derives,
         type_params: TypeDefParameters,
         field_visibility: Option<syn::Visibility>,
     },

@@ -1,6 +1,6 @@
 [package]
 name = "subxt"
-version = "0.20.0"
+version = "0.21.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -12,21 +12,27 @@ homepage = "https://www.parity.io/"
 description = "Submit extrinsics (transactions) to a substrate node via RPC"
 keywords = ["parity", "substrate", "blockchain"]
 
+[features]
+# Activate this to expose functionality only used for integration testing.
+# The exposed functionality is subject to breaking changes at any point,
+# and should not be relied upon.
+integration-tests = []
+
 [dependencies]
-async-trait = "0.1.49"
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
 codec = { package = "parity-scale-codec", version = "3.0.0", default-features = false, features = ["derive", "full", "bit-vec"] }
-chameleon = "0.1.0"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.10.1", features = ["async-client", "client-ws-transport"] }
-log = "0.4.14"
+jsonrpsee = { version = "0.14.0", features = ["async-client", "client-ws-transport"] }
 serde = { version = "1.0.124", features = ["derive"] }
 serde_json = "1.0.64"
 thiserror = "1.0.24"
+tracing = "0.1.34"
+parking_lot = "0.12.0"
 
-subxt-macro = { version = "0.20.0", path = "../macro" }
+subxt-macro = { version = "0.21.0", path = "../macro" }
+subxt-metadata = { version = "0.21.0", path = "../metadata" }
 
 sp-core = { version = "6.0.0", default-features = false  }
 sp-runtime = "6.0.0"
@@ -35,12 +41,5 @@ frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
 [dev-dependencies]
-sp-arithmetic = { version = "5.0.0", default-features = false }
 assert_matches = "1.5.0"
 tokio = { version = "1.8", features = ["macros", "time"] }
-env_logger = "0.9.0"
-tempdir = "0.3.7"
-wabt = "0.10.0"
-which = "4.0.2"
-test-runtime = { path = "../test-runtime" }
-sp-keyring = "6.0.0"
