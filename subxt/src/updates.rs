@@ -28,12 +28,24 @@
 //!
 //! Here we use tokio to check for updates in the background, but any runtime can be used.
 //!
-//! ```rust
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig};
+//! #
+//! # #[tokio::main]
+//! # async fn main() {
+//! #    let client = ClientBuilder::new()
+//! #         .set_url("wss://rpc.polkadot.io:443")
+//! #         .build::<DefaultConfig>()
+//! #         .await
+//! #         .unwrap();
+//! #
 //! let update_client = client.updates();
+//! // Spawn a new background task to handle runtime updates.
 //! tokio::spawn(async move {
 //!     let result = update_client.perform_runtime_updates().await;
 //!     println!("Runtime update finished with result={:?}", result);
 //! });
+//! # }
 //! ```
 
 use crate::{
