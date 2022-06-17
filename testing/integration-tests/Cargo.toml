@@ -1,5 +1,5 @@
 [package]
-name = "subxt-integration"
+name = "integration-tests"
 version = "0.21.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"

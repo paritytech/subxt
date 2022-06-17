@@ -34,7 +34,7 @@ use scale_info::{
 pub use metadata_test_runner::MetadataTestRunner;
 
 /// Given some pallet metadata, generate a [`RuntimeMetadataPrefixed`] struct.
-/// We default to a useless extrinsic type, and register a fake `DispatchError` 
+/// We default to a useless extrinsic type, and register a fake `DispatchError`
 /// type matching the generic type param provided.
 pub fn generate_metadata_from_pallets_custom_dispatch_error<
     DispatchError: TypeInfo + 'static,
@@ -69,7 +69,7 @@ pub fn generate_metadata_from_pallets_custom_dispatch_error<
 }
 
 /// Given some pallet metadata, generate a [`RuntimeMetadataPrefixed`] struct.
-/// We default to a useless extrinsic type, and register a fake `DispatchError` 
+/// We default to a useless extrinsic type, and register a fake `DispatchError`
 /// type so that codegen is happy with the metadata generated.
 pub fn generate_metadata_from_pallets(
     pallets: Vec<PalletMetadata>,
