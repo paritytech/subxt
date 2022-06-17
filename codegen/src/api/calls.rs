@@ -154,7 +154,11 @@ pub fn generate_calls(
         })
         .unzip();
 
+    let call_ty = type_gen.resolve_type(call.ty.id());
+    let docs = call_ty.docs();
+
     quote! {
+        #( #[doc = #docs ] )*
         pub mod calls {
             use super::root_mod;
             use super::#types_mod_ident;

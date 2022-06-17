@@ -66,6 +66,8 @@ pub mod api {
         Indices(indices::Event),
         #[codec(index = 5)]
         Balances(balances::Event),
+        #[codec(index = 32)]
+        TransactionPayment(transaction_payment::Event),
         #[codec(index = 7)]
         Staking(staking::Event),
         #[codec(index = 8)]
@@ -136,6 +138,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -576,6 +579,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "Event for the System pallet."]
         pub type Event = runtime_types::frame_system::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -1270,10 +1274,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                120u8, 189u8, 235u8, 243u8, 226u8, 205u8, 111u8, 30u8,
-                                124u8, 59u8, 193u8, 123u8, 21u8, 73u8, 39u8, 125u8,
-                                211u8, 241u8, 154u8, 164u8, 25u8, 0u8, 110u8, 11u8,
-                                151u8, 242u8, 32u8, 215u8, 41u8, 208u8, 184u8, 212u8,
+                                70u8, 6u8, 210u8, 172u8, 48u8, 188u8, 175u8, 84u8, 44u8,
+                                231u8, 130u8, 201u8, 97u8, 122u8, 141u8, 35u8, 115u8,
+                                91u8, 218u8, 225u8, 220u8, 39u8, 221u8, 100u8, 65u8,
+                                38u8, 52u8, 119u8, 209u8, 44u8, 39u8, 175u8,
                             ]
                         {
                             let entry = Events;
@@ -1724,6 +1728,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -1871,10 +1876,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            156u8, 212u8, 20u8, 163u8, 76u8, 226u8, 49u8, 220u8, 138u8,
-                            67u8, 19u8, 21u8, 102u8, 182u8, 151u8, 114u8, 157u8, 164u8,
-                            38u8, 49u8, 232u8, 36u8, 44u8, 41u8, 134u8, 38u8, 121u8,
-                            148u8, 229u8, 188u8, 151u8, 42u8,
+                            65u8, 105u8, 62u8, 249u8, 104u8, 239u8, 42u8, 123u8, 8u8,
+                            42u8, 72u8, 186u8, 237u8, 57u8, 116u8, 132u8, 131u8, 41u8,
+                            47u8, 128u8, 153u8, 21u8, 69u8, 45u8, 250u8, 130u8, 154u8,
+                            237u8, 172u8, 227u8, 203u8, 95u8,
                         ]
                     {
                         let call = Schedule {
@@ -1955,10 +1960,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            127u8, 59u8, 221u8, 48u8, 39u8, 116u8, 104u8, 186u8, 77u8,
-                            136u8, 160u8, 62u8, 148u8, 34u8, 111u8, 173u8, 50u8, 120u8,
-                            153u8, 16u8, 27u8, 153u8, 171u8, 226u8, 160u8, 94u8, 116u8,
-                            115u8, 102u8, 56u8, 200u8, 24u8,
+                            39u8, 220u8, 199u8, 201u8, 59u8, 156u8, 51u8, 244u8, 243u8,
+                            29u8, 6u8, 18u8, 158u8, 9u8, 251u8, 26u8, 207u8, 180u8,
+                            158u8, 198u8, 116u8, 0u8, 18u8, 186u8, 220u8, 253u8, 45u8,
+                            158u8, 247u8, 206u8, 234u8, 86u8,
                         ]
                     {
                         let call = ScheduleNamed {
@@ -2042,10 +2047,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            141u8, 209u8, 161u8, 212u8, 18u8, 210u8, 72u8, 154u8, 86u8,
-                            244u8, 234u8, 202u8, 68u8, 230u8, 164u8, 66u8, 6u8, 10u8,
-                            12u8, 234u8, 5u8, 240u8, 80u8, 70u8, 155u8, 166u8, 184u8,
-                            68u8, 162u8, 156u8, 152u8, 106u8,
+                            115u8, 139u8, 93u8, 218u8, 175u8, 210u8, 114u8, 59u8, 180u8,
+                            36u8, 5u8, 193u8, 86u8, 250u8, 222u8, 35u8, 35u8, 94u8, 25u8,
+                            130u8, 192u8, 166u8, 0u8, 31u8, 127u8, 114u8, 95u8, 24u8,
+                            64u8, 91u8, 135u8, 114u8,
                         ]
                     {
                         let call = ScheduleAfter {
@@ -2095,10 +2100,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            76u8, 92u8, 127u8, 193u8, 231u8, 99u8, 118u8, 121u8, 12u8,
-                            25u8, 115u8, 146u8, 174u8, 237u8, 215u8, 165u8, 151u8, 248u8,
-                            47u8, 225u8, 36u8, 218u8, 63u8, 177u8, 190u8, 69u8, 105u8,
-                            118u8, 157u8, 37u8, 150u8, 107u8,
+                            245u8, 76u8, 86u8, 31u8, 17u8, 228u8, 176u8, 203u8, 22u8,
+                            130u8, 202u8, 237u8, 206u8, 248u8, 58u8, 252u8, 164u8, 72u8,
+                            116u8, 93u8, 183u8, 28u8, 244u8, 16u8, 32u8, 131u8, 58u8,
+                            95u8, 195u8, 88u8, 243u8, 183u8,
                         ]
                     {
                         let call = ScheduleNamedAfter {
@@ -2115,6 +2120,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "Events type."]
         pub type Event = runtime_types::pallet_scheduler::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -2220,10 +2226,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                172u8, 202u8, 10u8, 25u8, 181u8, 221u8, 119u8, 121u8,
-                                3u8, 125u8, 85u8, 243u8, 145u8, 97u8, 12u8, 238u8, 35u8,
-                                211u8, 33u8, 153u8, 189u8, 95u8, 180u8, 28u8, 180u8,
-                                107u8, 119u8, 177u8, 48u8, 240u8, 123u8, 128u8,
+                                75u8, 4u8, 32u8, 14u8, 49u8, 69u8, 183u8, 81u8, 195u8,
+                                51u8, 83u8, 183u8, 41u8, 69u8, 255u8, 112u8, 131u8,
+                                132u8, 72u8, 115u8, 249u8, 142u8, 23u8, 219u8, 172u8,
+                                84u8, 11u8, 245u8, 139u8, 70u8, 181u8, 86u8,
                             ]
                         {
                             let entry = Agenda(_0);
@@ -2255,10 +2261,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                172u8, 202u8, 10u8, 25u8, 181u8, 221u8, 119u8, 121u8,
-                                3u8, 125u8, 85u8, 243u8, 145u8, 97u8, 12u8, 238u8, 35u8,
-                                211u8, 33u8, 153u8, 189u8, 95u8, 180u8, 28u8, 180u8,
-                                107u8, 119u8, 177u8, 48u8, 240u8, 123u8, 128u8,
+                                75u8, 4u8, 32u8, 14u8, 49u8, 69u8, 183u8, 81u8, 195u8,
+                                51u8, 83u8, 183u8, 41u8, 69u8, 255u8, 112u8, 131u8,
+                                132u8, 72u8, 115u8, 249u8, 142u8, 23u8, 219u8, 172u8,
+                                84u8, 11u8, 245u8, 139u8, 70u8, 181u8, 86u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -2409,6 +2415,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -2608,6 +2615,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_preimage::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -2834,6 +2842,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -3907,6 +3916,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -4131,6 +4141,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -4475,6 +4486,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_indices::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -4655,6 +4667,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -5060,6 +5073,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_balances::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -5664,6 +5678,23 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
+        pub type Event = runtime_types::pallet_transaction_payment::pallet::Event;
+        pub mod events {
+            use super::runtime_types;
+            #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
+            #[doc = "A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,"]
+            #[doc = "has been paid by `who`."]
+            pub struct TransactionFeePaid {
+                pub who: ::subxt::sp_core::crypto::AccountId32,
+                pub actual_fee: ::core::primitive::u128,
+                pub tip: ::core::primitive::u128,
+            }
+            impl ::subxt::Event for TransactionFeePaid {
+                const PALLET: &'static str = "TransactionPayment";
+                const EVENT: &'static str = "TransactionFeePaid";
+            }
+        }
         pub mod storage {
             use super::runtime_types;
             pub struct NextFeeMultiplier;
@@ -5823,6 +5854,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -5904,7 +5936,7 @@ pub mod api {
             impl ::subxt::StorageEntry for Uncles {
                 const PALLET: &'static str = "Authorship";
                 const STORAGE: &'static str = "Uncles";
-                type Value = ::std::vec::Vec<
+                type Value = runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                     runtime_types::pallet_authorship::UncleEntryItem<
                         ::core::primitive::u32,
                         ::subxt::sp_core::H256,
@@ -5946,7 +5978,7 @@ pub mod api {
                     block_hash: ::core::option::Option<T::Hash>,
                 ) -> impl ::core::future::Future<
                     Output = ::core::result::Result<
-                        ::std::vec::Vec<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             runtime_types::pallet_authorship::UncleEntryItem<
                                 ::core::primitive::u32,
                                 ::subxt::sp_core::H256,
@@ -5968,10 +6000,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                71u8, 135u8, 85u8, 172u8, 221u8, 165u8, 212u8, 2u8,
-                                208u8, 50u8, 9u8, 92u8, 251u8, 25u8, 194u8, 123u8, 210u8,
-                                4u8, 148u8, 30u8, 20u8, 146u8, 21u8, 210u8, 138u8, 128u8,
-                                144u8, 152u8, 97u8, 57u8, 205u8, 231u8,
+                                104u8, 166u8, 142u8, 139u8, 46u8, 63u8, 163u8, 183u8,
+                                45u8, 77u8, 156u8, 44u8, 228u8, 57u8, 253u8, 230u8,
+                                103u8, 119u8, 145u8, 135u8, 251u8, 182u8, 144u8, 165u8,
+                                127u8, 150u8, 127u8, 185u8, 146u8, 228u8, 91u8, 163u8,
                             ]
                         {
                             let entry = Uncles;
@@ -6096,6 +6128,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -7610,6 +7643,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_staking::pallet::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -10526,6 +10560,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Events type."]
         pub type Event = runtime_types::pallet_offences::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -10851,6 +10886,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -10985,6 +11021,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_session::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -11423,6 +11460,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -11623,6 +11661,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_grandpa::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -12026,6 +12065,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -12108,6 +12148,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_im_online::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -12476,6 +12517,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -13844,6 +13886,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_democracy::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -15241,6 +15284,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -15431,10 +15475,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            228u8, 63u8, 11u8, 200u8, 199u8, 85u8, 129u8, 158u8, 119u8,
-                            237u8, 53u8, 152u8, 73u8, 177u8, 14u8, 253u8, 234u8, 248u8,
-                            145u8, 223u8, 179u8, 78u8, 175u8, 196u8, 239u8, 58u8, 216u8,
-                            15u8, 183u8, 140u8, 2u8, 219u8,
+                            220u8, 252u8, 255u8, 167u8, 88u8, 242u8, 119u8, 7u8, 5u8,
+                            239u8, 103u8, 220u8, 50u8, 118u8, 103u8, 53u8, 98u8, 181u8,
+                            118u8, 56u8, 74u8, 223u8, 192u8, 15u8, 175u8, 108u8, 76u8,
+                            19u8, 109u8, 11u8, 253u8, 48u8,
                         ]
                     {
                         let call = Execute {
@@ -15496,10 +15540,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            19u8, 224u8, 172u8, 137u8, 131u8, 122u8, 127u8, 14u8, 172u8,
-                            168u8, 48u8, 212u8, 68u8, 113u8, 3u8, 15u8, 44u8, 199u8,
-                            42u8, 90u8, 254u8, 69u8, 81u8, 133u8, 221u8, 42u8, 200u8,
-                            163u8, 239u8, 120u8, 168u8, 132u8,
+                            129u8, 211u8, 11u8, 197u8, 105u8, 143u8, 4u8, 133u8, 237u8,
+                            211u8, 117u8, 57u8, 39u8, 139u8, 57u8, 198u8, 75u8, 63u8,
+                            158u8, 17u8, 239u8, 76u8, 189u8, 142u8, 253u8, 137u8, 236u8,
+                            214u8, 151u8, 121u8, 186u8, 26u8,
                         ]
                     {
                         let call = Propose {
@@ -15688,6 +15732,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_collective::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -15904,10 +15949,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                170u8, 243u8, 110u8, 152u8, 90u8, 28u8, 173u8, 125u8,
-                                252u8, 111u8, 229u8, 1u8, 241u8, 200u8, 110u8, 114u8,
-                                89u8, 163u8, 133u8, 249u8, 195u8, 194u8, 81u8, 23u8,
-                                236u8, 196u8, 71u8, 8u8, 47u8, 211u8, 243u8, 175u8,
+                                161u8, 189u8, 214u8, 228u8, 141u8, 241u8, 207u8, 45u8,
+                                15u8, 55u8, 4u8, 183u8, 17u8, 169u8, 209u8, 157u8, 51u8,
+                                244u8, 241u8, 34u8, 139u8, 219u8, 155u8, 41u8, 116u8,
+                                117u8, 171u8, 156u8, 247u8, 44u8, 203u8, 214u8,
                             ]
                         {
                             let entry = ProposalOf(_0);
@@ -15939,10 +15984,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                170u8, 243u8, 110u8, 152u8, 90u8, 28u8, 173u8, 125u8,
-                                252u8, 111u8, 229u8, 1u8, 241u8, 200u8, 110u8, 114u8,
-                                89u8, 163u8, 133u8, 249u8, 195u8, 194u8, 81u8, 23u8,
-                                236u8, 196u8, 71u8, 8u8, 47u8, 211u8, 243u8, 175u8,
+                                161u8, 189u8, 214u8, 228u8, 141u8, 241u8, 207u8, 45u8,
+                                15u8, 55u8, 4u8, 183u8, 17u8, 169u8, 209u8, 157u8, 51u8,
+                                244u8, 241u8, 34u8, 139u8, 219u8, 155u8, 41u8, 116u8,
+                                117u8, 171u8, 156u8, 247u8, 44u8, 203u8, 214u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -16139,6 +16184,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -16329,10 +16375,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            228u8, 63u8, 11u8, 200u8, 199u8, 85u8, 129u8, 158u8, 119u8,
-                            237u8, 53u8, 152u8, 73u8, 177u8, 14u8, 253u8, 234u8, 248u8,
-                            145u8, 223u8, 179u8, 78u8, 175u8, 196u8, 239u8, 58u8, 216u8,
-                            15u8, 183u8, 140u8, 2u8, 219u8,
+                            220u8, 252u8, 255u8, 167u8, 88u8, 242u8, 119u8, 7u8, 5u8,
+                            239u8, 103u8, 220u8, 50u8, 118u8, 103u8, 53u8, 98u8, 181u8,
+                            118u8, 56u8, 74u8, 223u8, 192u8, 15u8, 175u8, 108u8, 76u8,
+                            19u8, 109u8, 11u8, 253u8, 48u8,
                         ]
                     {
                         let call = Execute {
@@ -16394,10 +16440,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            19u8, 224u8, 172u8, 137u8, 131u8, 122u8, 127u8, 14u8, 172u8,
-                            168u8, 48u8, 212u8, 68u8, 113u8, 3u8, 15u8, 44u8, 199u8,
-                            42u8, 90u8, 254u8, 69u8, 81u8, 133u8, 221u8, 42u8, 200u8,
-                            163u8, 239u8, 120u8, 168u8, 132u8,
+                            129u8, 211u8, 11u8, 197u8, 105u8, 143u8, 4u8, 133u8, 237u8,
+                            211u8, 117u8, 57u8, 39u8, 139u8, 57u8, 198u8, 75u8, 63u8,
+                            158u8, 17u8, 239u8, 76u8, 189u8, 142u8, 253u8, 137u8, 236u8,
+                            214u8, 151u8, 121u8, 186u8, 26u8,
                         ]
                     {
                         let call = Propose {
@@ -16586,6 +16632,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_collective::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -16802,10 +16849,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                170u8, 243u8, 110u8, 152u8, 90u8, 28u8, 173u8, 125u8,
-                                252u8, 111u8, 229u8, 1u8, 241u8, 200u8, 110u8, 114u8,
-                                89u8, 163u8, 133u8, 249u8, 195u8, 194u8, 81u8, 23u8,
-                                236u8, 196u8, 71u8, 8u8, 47u8, 211u8, 243u8, 175u8,
+                                161u8, 189u8, 214u8, 228u8, 141u8, 241u8, 207u8, 45u8,
+                                15u8, 55u8, 4u8, 183u8, 17u8, 169u8, 209u8, 157u8, 51u8,
+                                244u8, 241u8, 34u8, 139u8, 219u8, 155u8, 41u8, 116u8,
+                                117u8, 171u8, 156u8, 247u8, 44u8, 203u8, 214u8,
                             ]
                         {
                             let entry = ProposalOf(_0);
@@ -16837,10 +16884,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                170u8, 243u8, 110u8, 152u8, 90u8, 28u8, 173u8, 125u8,
-                                252u8, 111u8, 229u8, 1u8, 241u8, 200u8, 110u8, 114u8,
-                                89u8, 163u8, 133u8, 249u8, 195u8, 194u8, 81u8, 23u8,
-                                236u8, 196u8, 71u8, 8u8, 47u8, 211u8, 243u8, 175u8,
+                                161u8, 189u8, 214u8, 228u8, 141u8, 241u8, 207u8, 45u8,
+                                15u8, 55u8, 4u8, 183u8, 17u8, 169u8, 209u8, 157u8, 51u8,
+                                244u8, 241u8, 34u8, 139u8, 219u8, 155u8, 41u8, 116u8,
+                                117u8, 171u8, 156u8, 247u8, 44u8, 203u8, 214u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -17037,6 +17084,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -17408,6 +17456,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_elections_phragmen::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -17992,6 +18041,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -18327,6 +18377,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_membership::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -18482,6 +18533,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -18785,6 +18837,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_treasury::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -19280,6 +19333,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -19639,6 +19693,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::claims::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -20091,6 +20146,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -20451,6 +20507,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_vesting::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -20690,6 +20747,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -20794,10 +20852,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            57u8, 191u8, 30u8, 46u8, 195u8, 203u8, 15u8, 79u8, 207u8,
-                            124u8, 18u8, 168u8, 235u8, 182u8, 100u8, 31u8, 69u8, 130u8,
-                            134u8, 7u8, 165u8, 108u8, 140u8, 54u8, 253u8, 17u8, 180u8,
-                            150u8, 148u8, 24u8, 117u8, 137u8,
+                            118u8, 153u8, 248u8, 10u8, 95u8, 87u8, 241u8, 183u8, 110u8,
+                            81u8, 134u8, 246u8, 127u8, 18u8, 37u8, 94u8, 97u8, 157u8,
+                            203u8, 100u8, 55u8, 106u8, 200u8, 152u8, 69u8, 250u8, 231u8,
+                            196u8, 214u8, 62u8, 154u8, 59u8,
                         ]
                     {
                         let call = Batch { calls };
@@ -20841,10 +20899,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            73u8, 246u8, 144u8, 155u8, 36u8, 41u8, 208u8, 143u8, 191u8,
-                            252u8, 184u8, 149u8, 177u8, 106u8, 252u8, 79u8, 237u8, 123u8,
-                            219u8, 157u8, 147u8, 157u8, 81u8, 41u8, 78u8, 198u8, 140u8,
-                            78u8, 243u8, 234u8, 172u8, 101u8,
+                            57u8, 222u8, 171u8, 71u8, 110u8, 45u8, 232u8, 229u8, 107u8,
+                            186u8, 96u8, 126u8, 103u8, 175u8, 43u8, 13u8, 231u8, 179u8,
+                            224u8, 41u8, 123u8, 129u8, 107u8, 126u8, 201u8, 243u8, 126u8,
+                            203u8, 165u8, 104u8, 124u8, 137u8,
                         ]
                     {
                         let call = AsDerivative {
@@ -20891,10 +20949,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            0u8, 112u8, 122u8, 176u8, 137u8, 247u8, 182u8, 123u8, 196u8,
-                            17u8, 116u8, 228u8, 102u8, 231u8, 74u8, 153u8, 104u8, 131u8,
-                            130u8, 145u8, 152u8, 77u8, 221u8, 212u8, 16u8, 248u8, 99u8,
-                            74u8, 41u8, 138u8, 135u8, 99u8,
+                            5u8, 244u8, 150u8, 6u8, 141u8, 240u8, 33u8, 249u8, 11u8,
+                            131u8, 248u8, 156u8, 131u8, 121u8, 245u8, 181u8, 218u8,
+                            132u8, 79u8, 111u8, 188u8, 232u8, 148u8, 209u8, 193u8, 51u8,
+                            54u8, 231u8, 62u8, 219u8, 129u8, 198u8,
                         ]
                     {
                         let call = BatchAll { calls };
@@ -20935,10 +20993,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            38u8, 3u8, 146u8, 44u8, 81u8, 233u8, 48u8, 20u8, 192u8,
-                            219u8, 175u8, 111u8, 200u8, 254u8, 97u8, 180u8, 192u8, 252u8,
-                            62u8, 250u8, 211u8, 41u8, 152u8, 203u8, 22u8, 143u8, 125u8,
-                            113u8, 139u8, 239u8, 82u8, 243u8,
+                            151u8, 231u8, 206u8, 220u8, 213u8, 118u8, 138u8, 198u8,
+                            252u8, 44u8, 211u8, 231u8, 205u8, 96u8, 86u8, 253u8, 190u8,
+                            136u8, 200u8, 223u8, 152u8, 183u8, 123u8, 48u8, 168u8, 56u8,
+                            24u8, 165u8, 79u8, 190u8, 13u8, 230u8,
                         ]
                     {
                         let call = DispatchAs {
@@ -20985,10 +21043,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            26u8, 11u8, 212u8, 172u8, 143u8, 128u8, 134u8, 164u8, 72u8,
-                            32u8, 192u8, 34u8, 66u8, 114u8, 252u8, 246u8, 56u8, 112u8,
-                            80u8, 231u8, 250u8, 24u8, 27u8, 175u8, 197u8, 227u8, 67u8,
-                            71u8, 113u8, 186u8, 150u8, 242u8,
+                            82u8, 204u8, 241u8, 136u8, 126u8, 230u8, 50u8, 149u8, 95u8,
+                            70u8, 61u8, 138u8, 29u8, 63u8, 217u8, 169u8, 1u8, 200u8,
+                            60u8, 157u8, 190u8, 200u8, 111u8, 171u8, 83u8, 168u8, 81u8,
+                            225u8, 182u8, 113u8, 24u8, 97u8,
                         ]
                     {
                         let call = ForceBatch { calls };
@@ -20999,6 +21057,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_utility::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -21095,6 +21154,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Identity pallet declaration."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -22023,6 +22083,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_identity::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -22653,6 +22714,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -22814,10 +22876,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            20u8, 236u8, 188u8, 116u8, 43u8, 132u8, 187u8, 83u8, 187u8,
-                            110u8, 248u8, 196u8, 112u8, 234u8, 74u8, 18u8, 77u8, 199u8,
-                            146u8, 70u8, 19u8, 74u8, 75u8, 177u8, 31u8, 234u8, 189u8,
-                            142u8, 127u8, 85u8, 250u8, 218u8,
+                            51u8, 175u8, 21u8, 83u8, 132u8, 88u8, 162u8, 49u8, 52u8,
+                            139u8, 241u8, 197u8, 48u8, 252u8, 27u8, 221u8, 166u8, 226u8,
+                            61u8, 236u8, 249u8, 207u8, 22u8, 213u8, 23u8, 229u8, 200u8,
+                            224u8, 125u8, 208u8, 115u8, 138u8,
                         ]
                     {
                         let call = Proxy {
@@ -23300,10 +23362,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            47u8, 30u8, 34u8, 216u8, 180u8, 74u8, 243u8, 234u8, 203u8,
-                            71u8, 186u8, 242u8, 208u8, 61u8, 99u8, 58u8, 233u8, 23u8,
-                            245u8, 144u8, 84u8, 169u8, 190u8, 124u8, 192u8, 146u8, 119u8,
-                            197u8, 36u8, 248u8, 39u8, 25u8,
+                            134u8, 43u8, 27u8, 202u8, 142u8, 8u8, 253u8, 43u8, 76u8,
+                            95u8, 152u8, 92u8, 151u8, 137u8, 74u8, 39u8, 185u8, 144u8,
+                            200u8, 115u8, 62u8, 250u8, 186u8, 59u8, 203u8, 244u8, 181u8,
+                            59u8, 47u8, 128u8, 33u8, 223u8,
                         ]
                     {
                         let call = ProxyAnnounced {
@@ -23319,6 +23381,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_proxy::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -23768,6 +23831,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -23884,10 +23948,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            89u8, 30u8, 112u8, 57u8, 30u8, 251u8, 160u8, 54u8, 158u8,
-                            207u8, 101u8, 2u8, 39u8, 41u8, 10u8, 46u8, 127u8, 177u8,
-                            47u8, 243u8, 121u8, 200u8, 130u8, 96u8, 164u8, 204u8, 20u8,
-                            31u8, 146u8, 202u8, 219u8, 154u8,
+                            111u8, 92u8, 188u8, 136u8, 71u8, 227u8, 141u8, 53u8, 135u8,
+                            53u8, 106u8, 156u8, 255u8, 15u8, 103u8, 116u8, 159u8, 14u8,
+                            183u8, 102u8, 237u8, 18u8, 87u8, 181u8, 140u8, 29u8, 74u8,
+                            195u8, 146u8, 58u8, 102u8, 220u8,
                         ]
                     {
                         let call = AsMultiThreshold1 {
@@ -23976,10 +24040,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            121u8, 223u8, 171u8, 215u8, 162u8, 134u8, 116u8, 181u8,
-                            150u8, 7u8, 189u8, 238u8, 186u8, 107u8, 217u8, 124u8, 146u8,
-                            176u8, 16u8, 165u8, 182u8, 111u8, 189u8, 15u8, 198u8, 30u8,
-                            195u8, 247u8, 134u8, 245u8, 184u8, 190u8,
+                            172u8, 58u8, 168u8, 231u8, 103u8, 158u8, 131u8, 110u8, 93u8,
+                            90u8, 82u8, 97u8, 67u8, 237u8, 138u8, 225u8, 158u8, 111u8,
+                            178u8, 16u8, 254u8, 252u8, 97u8, 21u8, 110u8, 152u8, 46u8,
+                            61u8, 238u8, 69u8, 100u8, 158u8,
                         ]
                     {
                         let call = AsMulti {
@@ -24150,6 +24214,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_multisig::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -24361,10 +24426,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                44u8, 13u8, 135u8, 249u8, 55u8, 222u8, 0u8, 158u8, 197u8,
-                                20u8, 245u8, 254u8, 194u8, 69u8, 82u8, 167u8, 65u8, 1u8,
-                                142u8, 52u8, 59u8, 240u8, 193u8, 194u8, 234u8, 116u8,
-                                159u8, 111u8, 11u8, 5u8, 24u8, 172u8,
+                                22u8, 215u8, 30u8, 84u8, 216u8, 201u8, 91u8, 161u8, 0u8,
+                                194u8, 216u8, 43u8, 91u8, 65u8, 231u8, 38u8, 35u8, 197u8,
+                                230u8, 146u8, 206u8, 251u8, 122u8, 50u8, 90u8, 60u8,
+                                177u8, 226u8, 90u8, 181u8, 95u8, 62u8,
                             ]
                         {
                             let entry = Calls(_0);
@@ -24395,10 +24460,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                44u8, 13u8, 135u8, 249u8, 55u8, 222u8, 0u8, 158u8, 197u8,
-                                20u8, 245u8, 254u8, 194u8, 69u8, 82u8, 167u8, 65u8, 1u8,
-                                142u8, 52u8, 59u8, 240u8, 193u8, 194u8, 234u8, 116u8,
-                                159u8, 111u8, 11u8, 5u8, 24u8, 172u8,
+                                22u8, 215u8, 30u8, 84u8, 216u8, 201u8, 91u8, 161u8, 0u8,
+                                194u8, 216u8, 43u8, 91u8, 65u8, 231u8, 38u8, 35u8, 197u8,
+                                230u8, 146u8, 206u8, 251u8, 122u8, 50u8, 90u8, 60u8,
+                                177u8, 226u8, 90u8, 181u8, 95u8, 62u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -24505,6 +24570,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -25029,6 +25095,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_bounties::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -25647,6 +25714,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -26173,6 +26241,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_child_bounties::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -26698,6 +26767,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -27093,6 +27163,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_tips::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -27480,6 +27551,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -27775,6 +27847,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::pallet_election_provider_multi_phase::pallet::Event;
         pub mod events {
@@ -28761,6 +28834,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -28884,6 +28958,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_bags_list::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -29231,6 +29306,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -31497,6 +31573,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -31679,6 +31756,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -31702,6 +31780,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_parachains::inclusion::pallet::Event;
         pub mod events {
@@ -32007,6 +32086,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -32510,6 +32590,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -32911,6 +32992,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::paras::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -34488,6 +34570,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -34669,6 +34752,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -34883,6 +34967,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -34964,6 +35049,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::ump::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -35502,6 +35588,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -35889,6 +35976,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_parachains::hrmp::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -37252,6 +37340,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -37313,6 +37402,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_parachains::disputes::pallet::Event;
         pub mod events {
@@ -37755,6 +37845,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -38099,6 +38190,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event =
             runtime_types::polkadot_runtime_common::paras_registrar::pallet::Event;
         pub mod events {
@@ -38421,6 +38513,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -38595,6 +38688,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::slots::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -38829,6 +38923,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -39022,6 +39117,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::auctions::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -39512,6 +39608,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -40020,6 +40117,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::polkadot_runtime_common::crowdloan::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -40458,6 +40556,7 @@ pub mod api {
             root_mod,
             runtime_types,
         };
+        #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
         pub mod calls {
             use super::{
                 root_mod,
@@ -40606,10 +40705,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            232u8, 188u8, 205u8, 27u8, 92u8, 141u8, 251u8, 24u8, 90u8,
-                            155u8, 20u8, 139u8, 7u8, 160u8, 39u8, 85u8, 205u8, 11u8,
-                            111u8, 1u8, 250u8, 168u8, 134u8, 61u8, 19u8, 216u8, 239u8,
-                            127u8, 137u8, 136u8, 48u8, 19u8,
+                            54u8, 36u8, 195u8, 69u8, 232u8, 104u8, 16u8, 255u8, 209u8,
+                            151u8, 189u8, 229u8, 222u8, 59u8, 61u8, 23u8, 59u8, 75u8,
+                            110u8, 215u8, 20u8, 147u8, 2u8, 154u8, 64u8, 12u8, 22u8,
+                            30u8, 81u8, 3u8, 116u8, 21u8,
                         ]
                     {
                         let call = Send {
@@ -40660,10 +40759,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            55u8, 192u8, 217u8, 186u8, 230u8, 234u8, 26u8, 194u8, 243u8,
-                            199u8, 16u8, 227u8, 225u8, 88u8, 130u8, 219u8, 228u8, 110u8,
-                            20u8, 255u8, 233u8, 147u8, 121u8, 173u8, 126u8, 248u8, 192u8,
-                            243u8, 211u8, 91u8, 115u8, 148u8,
+                            137u8, 5u8, 131u8, 103u8, 172u8, 184u8, 160u8, 75u8, 59u8,
+                            219u8, 132u8, 196u8, 182u8, 130u8, 131u8, 6u8, 60u8, 89u8,
+                            168u8, 251u8, 2u8, 105u8, 128u8, 182u8, 99u8, 214u8, 245u8,
+                            130u8, 135u8, 115u8, 67u8, 42u8,
                         ]
                     {
                         let call = TeleportAssets {
@@ -40717,10 +40816,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            134u8, 229u8, 104u8, 209u8, 160u8, 7u8, 99u8, 175u8, 128u8,
-                            110u8, 189u8, 225u8, 141u8, 1u8, 10u8, 17u8, 247u8, 233u8,
-                            146u8, 19u8, 31u8, 145u8, 217u8, 144u8, 85u8, 223u8, 197u8,
-                            249u8, 1u8, 222u8, 98u8, 13u8,
+                            253u8, 39u8, 212u8, 206u8, 89u8, 22u8, 69u8, 211u8, 159u8,
+                            124u8, 160u8, 233u8, 242u8, 106u8, 68u8, 163u8, 152u8, 3u8,
+                            142u8, 112u8, 68u8, 70u8, 99u8, 37u8, 209u8, 79u8, 85u8,
+                            161u8, 112u8, 216u8, 191u8, 42u8,
                         ]
                     {
                         let call = ReserveTransferAssets {
@@ -40767,10 +40866,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            95u8, 48u8, 201u8, 232u8, 83u8, 23u8, 20u8, 126u8, 116u8,
-                            116u8, 176u8, 206u8, 145u8, 9u8, 155u8, 109u8, 141u8, 226u8,
-                            253u8, 196u8, 37u8, 230u8, 243u8, 68u8, 39u8, 133u8, 233u8,
-                            108u8, 226u8, 87u8, 5u8, 247u8,
+                            81u8, 205u8, 245u8, 196u8, 78u8, 82u8, 247u8, 53u8, 52u8,
+                            16u8, 28u8, 226u8, 213u8, 143u8, 94u8, 174u8, 25u8, 120u8,
+                            170u8, 194u8, 249u8, 96u8, 38u8, 169u8, 74u8, 142u8, 175u8,
+                            3u8, 118u8, 55u8, 251u8, 109u8,
                         ]
                     {
                         let call = Execute {
@@ -40810,10 +40909,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            32u8, 219u8, 213u8, 152u8, 203u8, 73u8, 121u8, 64u8, 78u8,
-                            53u8, 110u8, 23u8, 87u8, 93u8, 34u8, 166u8, 205u8, 189u8,
-                            25u8, 160u8, 172u8, 178u8, 125u8, 182u8, 37u8, 254u8, 220u8,
-                            179u8, 70u8, 252u8, 63u8, 94u8,
+                            201u8, 56u8, 53u8, 67u8, 99u8, 195u8, 192u8, 69u8, 123u8,
+                            66u8, 102u8, 94u8, 122u8, 160u8, 219u8, 128u8, 21u8, 105u8,
+                            71u8, 254u8, 10u8, 66u8, 60u8, 186u8, 104u8, 46u8, 96u8,
+                            168u8, 3u8, 141u8, 124u8, 51u8,
                         ]
                     {
                         let call = ForceXcmVersion {
@@ -40888,10 +40987,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            41u8, 248u8, 187u8, 195u8, 146u8, 143u8, 0u8, 246u8, 248u8,
-                            38u8, 128u8, 200u8, 143u8, 149u8, 127u8, 73u8, 3u8, 247u8,
-                            106u8, 6u8, 56u8, 50u8, 207u8, 234u8, 137u8, 201u8, 16u8,
-                            21u8, 226u8, 148u8, 181u8, 44u8,
+                            10u8, 43u8, 242u8, 36u8, 241u8, 223u8, 208u8, 103u8, 190u8,
+                            204u8, 185u8, 151u8, 153u8, 191u8, 174u8, 57u8, 49u8, 90u8,
+                            1u8, 113u8, 219u8, 243u8, 210u8, 152u8, 184u8, 42u8, 219u8,
+                            237u8, 175u8, 58u8, 136u8, 167u8,
                         ]
                     {
                         let call = ForceSubscribeVersionNotify {
@@ -40929,10 +41028,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            150u8, 202u8, 148u8, 13u8, 187u8, 169u8, 5u8, 60u8, 25u8,
-                            144u8, 43u8, 196u8, 35u8, 215u8, 184u8, 72u8, 143u8, 220u8,
-                            176u8, 27u8, 100u8, 245u8, 31u8, 243u8, 0u8, 83u8, 165u8,
-                            7u8, 102u8, 172u8, 218u8, 133u8,
+                            214u8, 24u8, 33u8, 141u8, 239u8, 87u8, 177u8, 28u8, 187u8,
+                            103u8, 149u8, 206u8, 20u8, 68u8, 62u8, 87u8, 166u8, 68u8,
+                            70u8, 110u8, 76u8, 113u8, 145u8, 197u8, 168u8, 193u8, 107u8,
+                            118u8, 30u8, 81u8, 45u8, 177u8,
                         ]
                     {
                         let call = ForceUnsubscribeVersionNotify {
@@ -40986,10 +41085,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            242u8, 206u8, 126u8, 164u8, 44u8, 116u8, 181u8, 90u8, 121u8,
-                            124u8, 120u8, 240u8, 129u8, 217u8, 131u8, 100u8, 248u8,
-                            149u8, 56u8, 154u8, 35u8, 91u8, 210u8, 118u8, 207u8, 110u8,
-                            42u8, 249u8, 160u8, 155u8, 251u8, 68u8,
+                            243u8, 50u8, 32u8, 26u8, 100u8, 20u8, 223u8, 168u8, 200u8,
+                            123u8, 188u8, 218u8, 29u8, 244u8, 163u8, 167u8, 207u8, 99u8,
+                            137u8, 93u8, 117u8, 43u8, 15u8, 210u8, 242u8, 70u8, 178u8,
+                            220u8, 33u8, 81u8, 113u8, 3u8,
                         ]
                     {
                         let call = LimitedReserveTransferAssets {
@@ -41046,10 +41145,10 @@ pub mod api {
                     };
                     if runtime_call_hash
                         == [
-                            189u8, 233u8, 43u8, 16u8, 158u8, 114u8, 154u8, 233u8, 179u8,
-                            144u8, 81u8, 179u8, 169u8, 38u8, 4u8, 130u8, 95u8, 237u8,
-                            172u8, 167u8, 2u8, 169u8, 53u8, 252u8, 159u8, 42u8, 143u8,
-                            216u8, 112u8, 155u8, 48u8, 129u8,
+                            36u8, 151u8, 127u8, 249u8, 71u8, 203u8, 161u8, 159u8, 186u8,
+                            144u8, 116u8, 118u8, 216u8, 42u8, 69u8, 255u8, 208u8, 231u8,
+                            58u8, 26u8, 37u8, 87u8, 184u8, 244u8, 114u8, 7u8, 200u8,
+                            29u8, 42u8, 20u8, 93u8, 125u8,
                         ]
                     {
                         let call = LimitedTeleportAssets {
@@ -41066,6 +41165,7 @@ pub mod api {
                 }
             }
         }
+        #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
         pub type Event = runtime_types::pallet_xcm::pallet::Event;
         pub mod events {
             use super::runtime_types;
@@ -41497,10 +41597,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                47u8, 241u8, 126u8, 71u8, 203u8, 121u8, 171u8, 226u8,
-                                89u8, 17u8, 61u8, 198u8, 123u8, 73u8, 20u8, 197u8, 6u8,
-                                23u8, 34u8, 127u8, 89u8, 35u8, 49u8, 101u8, 110u8, 15u8,
-                                206u8, 203u8, 155u8, 93u8, 0u8, 97u8,
+                                157u8, 143u8, 122u8, 154u8, 219u8, 84u8, 81u8, 28u8,
+                                55u8, 250u8, 47u8, 198u8, 98u8, 80u8, 195u8, 4u8, 242u8,
+                                170u8, 58u8, 51u8, 55u8, 134u8, 206u8, 79u8, 200u8,
+                                204u8, 188u8, 213u8, 155u8, 252u8, 64u8, 147u8,
                             ]
                         {
                             let entry = Queries(_0);
@@ -41532,10 +41632,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                47u8, 241u8, 126u8, 71u8, 203u8, 121u8, 171u8, 226u8,
-                                89u8, 17u8, 61u8, 198u8, 123u8, 73u8, 20u8, 197u8, 6u8,
-                                23u8, 34u8, 127u8, 89u8, 35u8, 49u8, 101u8, 110u8, 15u8,
-                                206u8, 203u8, 155u8, 93u8, 0u8, 97u8,
+                                157u8, 143u8, 122u8, 154u8, 219u8, 84u8, 81u8, 28u8,
+                                55u8, 250u8, 47u8, 198u8, 98u8, 80u8, 195u8, 4u8, 242u8,
+                                170u8, 58u8, 51u8, 55u8, 134u8, 206u8, 79u8, 200u8,
+                                204u8, 188u8, 213u8, 155u8, 252u8, 64u8, 147u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -41680,10 +41780,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                231u8, 202u8, 129u8, 82u8, 121u8, 63u8, 67u8, 57u8,
-                                191u8, 190u8, 25u8, 27u8, 219u8, 42u8, 180u8, 142u8,
-                                71u8, 119u8, 212u8, 211u8, 21u8, 11u8, 8u8, 7u8, 9u8,
-                                243u8, 11u8, 117u8, 66u8, 47u8, 246u8, 85u8,
+                                183u8, 179u8, 209u8, 179u8, 132u8, 48u8, 235u8, 28u8,
+                                229u8, 231u8, 14u8, 144u8, 233u8, 9u8, 65u8, 225u8,
+                                218u8, 173u8, 164u8, 47u8, 196u8, 253u8, 228u8, 218u8,
+                                104u8, 59u8, 176u8, 206u8, 76u8, 168u8, 195u8, 43u8,
                             ]
                         {
                             let entry = SupportedVersion(_0, _1);
@@ -41715,10 +41815,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                231u8, 202u8, 129u8, 82u8, 121u8, 63u8, 67u8, 57u8,
-                                191u8, 190u8, 25u8, 27u8, 219u8, 42u8, 180u8, 142u8,
-                                71u8, 119u8, 212u8, 211u8, 21u8, 11u8, 8u8, 7u8, 9u8,
-                                243u8, 11u8, 117u8, 66u8, 47u8, 246u8, 85u8,
+                                183u8, 179u8, 209u8, 179u8, 132u8, 48u8, 235u8, 28u8,
+                                229u8, 231u8, 14u8, 144u8, 233u8, 9u8, 65u8, 225u8,
+                                218u8, 173u8, 164u8, 47u8, 196u8, 253u8, 228u8, 218u8,
+                                104u8, 59u8, 176u8, 206u8, 76u8, 168u8, 195u8, 43u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -41751,10 +41851,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                126u8, 49u8, 13u8, 135u8, 137u8, 68u8, 248u8, 211u8,
-                                160u8, 160u8, 93u8, 128u8, 157u8, 230u8, 62u8, 119u8,
-                                191u8, 51u8, 147u8, 149u8, 60u8, 227u8, 154u8, 97u8,
-                                244u8, 249u8, 0u8, 220u8, 189u8, 92u8, 178u8, 149u8,
+                                46u8, 72u8, 93u8, 102u8, 116u8, 75u8, 80u8, 246u8, 250u8,
+                                249u8, 74u8, 11u8, 175u8, 197u8, 203u8, 24u8, 34u8,
+                                233u8, 227u8, 105u8, 237u8, 21u8, 118u8, 188u8, 149u8,
+                                49u8, 187u8, 103u8, 179u8, 219u8, 135u8, 235u8,
                             ]
                         {
                             let entry = VersionNotifiers(_0, _1);
@@ -41786,10 +41886,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                126u8, 49u8, 13u8, 135u8, 137u8, 68u8, 248u8, 211u8,
-                                160u8, 160u8, 93u8, 128u8, 157u8, 230u8, 62u8, 119u8,
-                                191u8, 51u8, 147u8, 149u8, 60u8, 227u8, 154u8, 97u8,
-                                244u8, 249u8, 0u8, 220u8, 189u8, 92u8, 178u8, 149u8,
+                                46u8, 72u8, 93u8, 102u8, 116u8, 75u8, 80u8, 246u8, 250u8,
+                                249u8, 74u8, 11u8, 175u8, 197u8, 203u8, 24u8, 34u8,
+                                233u8, 227u8, 105u8, 237u8, 21u8, 118u8, 188u8, 149u8,
+                                49u8, 187u8, 103u8, 179u8, 219u8, 135u8, 235u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -41827,10 +41927,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                251u8, 128u8, 243u8, 94u8, 162u8, 11u8, 206u8, 101u8,
-                                33u8, 24u8, 163u8, 157u8, 112u8, 50u8, 91u8, 155u8,
-                                241u8, 73u8, 77u8, 185u8, 231u8, 3u8, 220u8, 161u8, 36u8,
-                                208u8, 116u8, 183u8, 80u8, 38u8, 56u8, 104u8,
+                                171u8, 249u8, 163u8, 191u8, 95u8, 4u8, 102u8, 64u8,
+                                123u8, 65u8, 180u8, 22u8, 66u8, 17u8, 174u8, 244u8,
+                                108u8, 147u8, 61u8, 69u8, 54u8, 245u8, 48u8, 124u8, 69u8,
+                                24u8, 207u8, 12u8, 94u8, 161u8, 13u8, 22u8,
                             ]
                         {
                             let entry = VersionNotifyTargets(_0, _1);
@@ -41863,10 +41963,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                251u8, 128u8, 243u8, 94u8, 162u8, 11u8, 206u8, 101u8,
-                                33u8, 24u8, 163u8, 157u8, 112u8, 50u8, 91u8, 155u8,
-                                241u8, 73u8, 77u8, 185u8, 231u8, 3u8, 220u8, 161u8, 36u8,
-                                208u8, 116u8, 183u8, 80u8, 38u8, 56u8, 104u8,
+                                171u8, 249u8, 163u8, 191u8, 95u8, 4u8, 102u8, 64u8,
+                                123u8, 65u8, 180u8, 22u8, 66u8, 17u8, 174u8, 244u8,
+                                108u8, 147u8, 61u8, 69u8, 54u8, 245u8, 48u8, 124u8, 69u8,
+                                24u8, 207u8, 12u8, 94u8, 161u8, 13u8, 22u8,
                             ]
                         {
                             client.storage().iter(block_hash).await
@@ -41902,10 +42002,10 @@ pub mod api {
                         };
                         if runtime_storage_hash
                             == [
-                                45u8, 28u8, 29u8, 233u8, 239u8, 65u8, 24u8, 214u8, 153u8,
-                                189u8, 132u8, 235u8, 62u8, 197u8, 252u8, 56u8, 38u8,
-                                97u8, 13u8, 16u8, 149u8, 25u8, 252u8, 181u8, 206u8, 54u8,
-                                250u8, 133u8, 133u8, 74u8, 186u8, 22u8,
+                                225u8, 172u8, 89u8, 78u8, 70u8, 88u8, 171u8, 197u8, 81u8,
+                                64u8, 6u8, 59u8, 62u8, 41u8, 174u8, 180u8, 172u8, 129u8,
+                                120u8, 253u8, 71u8, 149u8, 124u8, 252u8, 6u8, 136u8,
+                                25u8, 24u8, 57u8, 15u8, 123u8, 66u8,
                             ]
                         {
                             let entry = VersionDiscoveryQueue;
@@ -42202,6 +42302,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "A dispatch that will fill the block weight up to the given ratio."]
@@ -42280,6 +42381,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Error for the System pallet"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The name of specification does not match between the current runtime"]
@@ -42307,6 +42409,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Event for the System pallet."]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "An extrinsic completed successfully."]
@@ -42379,6 +42482,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Provide a set of uncles."]
@@ -42394,6 +42498,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The uncle parent not in the chain."]
@@ -42433,11 +42538,13 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     # [codec (index = 0)] # [doc = "Report authority equivocation/misbehavior. This method will verify"] # [doc = "the equivocation proof and validate the given key ownership proof"] # [doc = "against the extracted offender. If both are valid, the offence will"] # [doc = "be reported."] report_equivocation { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 1)] # [doc = "Report authority equivocation/misbehavior. This method will verify"] # [doc = "the equivocation proof and validate the given key ownership proof"] # [doc = "against the extracted offender. If both are valid, the offence will"] # [doc = "be reported."] # [doc = "This extrinsic must be called unsigned and it is expected that only"] # [doc = "block authors will call it (validated in `ValidateUnsigned`), as such"] # [doc = "if the block author is defined it will be defined as the equivocation"] # [doc = "reporter."] report_equivocation_unsigned { equivocation_proof : :: std :: boxed :: Box < runtime_types :: sp_consensus_slots :: EquivocationProof < runtime_types :: sp_runtime :: generic :: header :: Header < :: core :: primitive :: u32 , runtime_types :: sp_runtime :: traits :: BlakeTwo256 > , runtime_types :: sp_consensus_babe :: app :: Public > > , key_owner_proof : runtime_types :: sp_session :: MembershipProof , } , # [codec (index = 2)] # [doc = "Plan an epoch config change. The epoch config change is recorded and will be enacted on"] # [doc = "the next call to `enact_epoch_change`. The config will be activated one epoch after."] # [doc = "Multiple calls to this method will replace any existing planned config change that had"] # [doc = "not been enacted yet."] plan_config_change { config : runtime_types :: sp_consensus_babe :: digests :: NextConfigDescriptor , } , }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "An equivocation proof provided as part of an equivocation report is invalid."]
@@ -42498,6 +42605,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Declare that some `dislocated` account has, through rewards or penalties, sufficiently"]
@@ -42529,6 +42637,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "A error in the list interface implementation."]
@@ -42537,6 +42646,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "Moved an account from one bag to another."]
@@ -42561,6 +42671,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Transfer some liquid free balance to another account."]
@@ -42689,6 +42800,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Vesting balance too high to send value"]
@@ -42718,6 +42830,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     # [codec (index = 0)] # [doc = "An account was created with some free balance."] Endowed { account : :: subxt :: sp_core :: crypto :: AccountId32 , free_balance : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "An account was removed whose balance was non-zero but below ExistentialDeposit,"] # [doc = "resulting in an outright loss."] DustLost { account : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 2)] # [doc = "Transfer succeeded."] Transfer { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "A balance was set by root."] BalanceSet { who : :: subxt :: sp_core :: crypto :: AccountId32 , free : :: core :: primitive :: u128 , reserved : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "Some balance was reserved (moved from free to reserved)."] Reserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 5)] # [doc = "Some balance was unreserved (moved from reserved to free)."] Unreserved { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 6)] # [doc = "Some balance was moved from the reserve of the first account to the second account."] # [doc = "Final argument indicates the destination balance type."] ReserveRepatriated { from : :: subxt :: sp_core :: crypto :: AccountId32 , to : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , destination_status : runtime_types :: frame_support :: traits :: tokens :: misc :: BalanceStatus , } , # [codec (index = 7)] # [doc = "Some amount was deposited (e.g. for transaction fees)."] Deposit { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 8)] # [doc = "Some amount was withdrawn from the account (e.g. for transaction fees)."] Withdraw { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , # [codec (index = 9)] # [doc = "Some amount was removed from the account (e.g. for misbehavior)."] Slashed { who : :: subxt :: sp_core :: crypto :: AccountId32 , amount : :: core :: primitive :: u128 , } , }
             }
@@ -42763,6 +42876,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Propose a new bounty."]
@@ -42918,6 +43032,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Proposer's balance is too low."]
@@ -42957,6 +43072,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "New bounty proposal."]
@@ -43027,6 +43143,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Add a new child-bounty."]
@@ -43234,6 +43351,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The parent bounty is not in active state."]
@@ -43248,6 +43366,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A child-bounty is added."]
@@ -43310,6 +43429,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Set the collective's membership."]
@@ -43491,6 +43611,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Account is not a member"]
@@ -43526,6 +43647,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A motion (given hash) has been proposed (by given account) with a threshold (given"]
@@ -43630,6 +43752,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Propose a sensitive action to be taken."]
@@ -44001,6 +44124,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Value too low"]
@@ -44091,6 +44215,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     # [codec (index = 0)] # [doc = "A motion has been proposed by a public account."] Proposed { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 1)] # [doc = "A public proposal has been tabled for referendum vote."] Tabled { proposal_index : :: core :: primitive :: u32 , deposit : :: core :: primitive :: u128 , depositors : :: std :: vec :: Vec < :: subxt :: sp_core :: crypto :: AccountId32 > , } , # [codec (index = 2)] # [doc = "An external proposal has been tabled."] ExternalTabled , # [codec (index = 3)] # [doc = "A referendum has begun."] Started { ref_index : :: core :: primitive :: u32 , threshold : runtime_types :: pallet_democracy :: vote_threshold :: VoteThreshold , } , # [codec (index = 4)] # [doc = "A proposal has been approved by referendum."] Passed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "A proposal has been rejected by referendum."] NotPassed { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "A referendum has been cancelled."] Cancelled { ref_index : :: core :: primitive :: u32 , } , # [codec (index = 7)] # [doc = "A proposal has been enacted."] Executed { ref_index : :: core :: primitive :: u32 , result : :: core :: result :: Result < () , runtime_types :: sp_runtime :: DispatchError > , } , # [codec (index = 8)] # [doc = "An account has delegated their vote to another account."] Delegated { who : :: subxt :: sp_core :: crypto :: AccountId32 , target : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 9)] # [doc = "An account has cancelled a previous delegation operation."] Undelegated { account : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 10)] # [doc = "An external proposal has been vetoed."] Vetoed { who : :: subxt :: sp_core :: crypto :: AccountId32 , proposal_hash : :: subxt :: sp_core :: H256 , until : :: core :: primitive :: u32 , } , # [codec (index = 11)] # [doc = "A proposal's preimage was noted, and the deposit taken."] PreimageNoted { proposal_hash : :: subxt :: sp_core :: H256 , who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 12)] # [doc = "A proposal preimage was removed and used (the deposit was returned)."] PreimageUsed { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , } , # [codec (index = 13)] # [doc = "A proposal could not be executed because its preimage was invalid."] PreimageInvalid { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 14)] # [doc = "A proposal could not be executed because its preimage was missing."] PreimageMissing { proposal_hash : :: subxt :: sp_core :: H256 , ref_index : :: core :: primitive :: u32 , } , # [codec (index = 15)] # [doc = "A registered preimage was removed and the deposit collected by the reaper."] PreimageReaped { proposal_hash : :: subxt :: sp_core :: H256 , provider : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , reaper : :: subxt :: sp_core :: crypto :: AccountId32 , } , # [codec (index = 16)] # [doc = "A proposal_hash has been blacklisted permanently."] Blacklisted { proposal_hash : :: subxt :: sp_core :: H256 , } , # [codec (index = 17)] # [doc = "An account has voted in a referendum"] Voted { voter : :: subxt :: sp_core :: crypto :: AccountId32 , ref_index : :: core :: primitive :: u32 , vote : runtime_types :: pallet_democracy :: vote :: AccountVote < :: core :: primitive :: u128 > , } , # [codec (index = 18)] # [doc = "An account has secconded a proposal"] Seconded { seconder : :: subxt :: sp_core :: crypto :: AccountId32 , prop_index : :: core :: primitive :: u32 , } , # [codec (index = 19)] # [doc = "A proposal got canceled."] ProposalCanceled { prop_index : :: core :: primitive :: u32 , } , }
             }
@@ -44232,11 +44357,13 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     # [codec (index = 0)] # [doc = "Submit a solution for the unsigned phase."] # [doc = ""] # [doc = "The dispatch origin fo this call must be __none__."] # [doc = ""] # [doc = "This submission is checked on the fly. Moreover, this unsigned solution is only"] # [doc = "validated when submitted to the pool from the **local** node. Effectively, this means"] # [doc = "that only active validators can submit this transaction when authoring a block (similar"] # [doc = "to an inherent)."] # [doc = ""] # [doc = "To prevent any incorrect solution (and thus wasted time/weight), this transaction will"] # [doc = "panic if the solution submitted by the validator is invalid in any way, effectively"] # [doc = "putting their authoring reward at risk."] # [doc = ""] # [doc = "No deposit or reward is associated with this submission."] submit_unsigned { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , witness : runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , } , # [codec (index = 1)] # [doc = "Set a new value for `MinimumUntrustedScore`."] # [doc = ""] # [doc = "Dispatch origin must be aligned with `T::ForceOrigin`."] # [doc = ""] # [doc = "This check can be turned off by setting the value to `None`."] set_minimum_untrusted_score { maybe_next_score : :: core :: option :: Option < runtime_types :: sp_npos_elections :: ElectionScore > , } , # [codec (index = 2)] # [doc = "Set a solution in the queue, to be handed out to the client of this pallet in the next"] # [doc = "call to `ElectionProvider::elect`."] # [doc = ""] # [doc = "This can only be set by `T::ForceOrigin`, and only when the phase is `Emergency`."] # [doc = ""] # [doc = "The solution is not checked for any feasibility and is assumed to be trustworthy, as any"] # [doc = "feasibility check itself can in principle cause the election process to fail (due to"] # [doc = "memory/weight constrains)."] set_emergency_election_result { supports : :: std :: vec :: Vec < (:: subxt :: sp_core :: crypto :: AccountId32 , runtime_types :: sp_npos_elections :: Support < :: subxt :: sp_core :: crypto :: AccountId32 > ,) > , } , # [codec (index = 3)] # [doc = "Submit a solution for the signed phase."] # [doc = ""] # [doc = "The dispatch origin fo this call must be __signed__."] # [doc = ""] # [doc = "The solution is potentially queued, based on the claimed score and processed at the end"] # [doc = "of the signed phase."] # [doc = ""] # [doc = "A deposit is reserved and recorded for the solution. Based on the outcome, the solution"] # [doc = "might be rewarded, slashed, or get all or a part of the deposit back."] submit { raw_solution : :: std :: boxed :: Box < runtime_types :: pallet_election_provider_multi_phase :: RawSolution < runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , } , # [codec (index = 4)] # [doc = "Trigger the governance fallback."] # [doc = ""] # [doc = "This can only be called when [`Phase::Emergency`] is enabled, as an alternative to"] # [doc = "calling [`Call::set_emergency_election_result`]."] governance_fallback { maybe_max_voters : :: core :: option :: Option < :: core :: primitive :: u32 > , maybe_max_targets : :: core :: option :: Option < :: core :: primitive :: u32 > , } , }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Error of the pallet that can be returned in response to dispatches."]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Submission was too early."]
@@ -44278,6 +44405,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     # [codec (index = 0)] # [doc = "A solution was stored with the given compute."] # [doc = ""] # [doc = "If the solution is signed, this means that it hasn't yet been processed. If the"] # [doc = "solution is unsigned, this means that it has also been processed."] # [doc = ""] # [doc = "The `bool` is `true` when a previous solution was ejected to make room for this one."] SolutionStored { election_compute : runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute , prev_ejected : :: core :: primitive :: bool , } , # [codec (index = 1)] # [doc = "The election has been finalized, with `Some` of the given computation, or else if the"] # [doc = "election failed, `None`."] ElectionFinalized { election_compute : :: core :: option :: Option < runtime_types :: pallet_election_provider_multi_phase :: ElectionCompute > , } , # [codec (index = 2)] # [doc = "An account has been rewarded for their signed submission being finalized."] Rewarded { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 3)] # [doc = "An account has been slashed for submitting an invalid signed submission."] Slashed { account : :: subxt :: sp_core :: crypto :: AccountId32 , value : :: core :: primitive :: u128 , } , # [codec (index = 4)] # [doc = "The signed phase of the given round has started."] SignedPhaseStarted { round : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "The unsigned phase of the given round has started."] UnsignedPhaseStarted { round : :: core :: primitive :: u32 , } , }
             }
@@ -44360,6 +44488,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Vote for a set of candidates for the upcoming round of election. This can be called to"]
@@ -44480,6 +44609,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Cannot vote when no candidates or members exist."]
@@ -44536,6 +44666,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A new term with new_members. This indicates that enough candidates existed to run"]
@@ -44613,6 +44744,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Report voter equivocation/misbehavior. This method will verify the"]
@@ -44668,6 +44800,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Attempt to signal GRANDPA pause when the authority set isn't live"]
@@ -44696,6 +44829,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "New authority set has been applied."]
@@ -44745,6 +44879,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Identity pallet declaration."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Add a registrar to the system."]
@@ -45059,6 +45194,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Too many subs-accounts."]
@@ -45112,6 +45248,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A name was set or reset (which will remove all judgements)."]
@@ -45360,11 +45497,13 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     # [codec (index = 0)] # [doc = "# <weight>"] # [doc = "- Complexity: `O(K + E)` where K is length of `Keys` (heartbeat.validators_len) and E is"] # [doc = "  length of `heartbeat.network_state.external_address`"] # [doc = "  - `O(K)`: decoding of length `K`"] # [doc = "  - `O(E)`: decoding/encoding of length `E`"] # [doc = "- DbReads: pallet_session `Validators`, pallet_session `CurrentIndex`, `Keys`,"] # [doc = "  `ReceivedHeartbeats`"] # [doc = "- DbWrites: `ReceivedHeartbeats`"] # [doc = "# </weight>"] heartbeat { heartbeat : runtime_types :: pallet_im_online :: Heartbeat < :: core :: primitive :: u32 > , signature : runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Signature , } , }
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Non existent public key."]
@@ -45376,6 +45515,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A new heartbeat was received from `AuthorityId`."]
@@ -45431,6 +45571,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Assign an previously unassigned index."]
@@ -45548,6 +45689,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The index was not already assigned."]
@@ -45568,6 +45710,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A account index was assigned."]
@@ -45594,6 +45737,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Add a member `who` to the set."]
@@ -45652,6 +45796,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Already a member."]
@@ -45666,6 +45811,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "The given member was added; see the transaction for who."]
@@ -45695,6 +45841,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Immediately dispatch a multi-signature call using a single approval from the caller."]
@@ -45867,6 +46014,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Threshold must be 2 or greater."]
@@ -45914,6 +46062,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A new multisig operation has begun."]
@@ -45978,6 +46127,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Events type."]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "There is an offence reported of the given `kind` happened at the `session_index` and"]
@@ -45997,6 +46147,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Register a preimage on-chain."]
@@ -46024,6 +46175,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Preimage is too large to store on-chain."]
@@ -46047,6 +46199,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A preimage has been noted."]
@@ -46074,6 +46227,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Dispatch the given `call` from an account that the sender is authorised for through"]
@@ -46303,6 +46457,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "There are too many proxies registered or too many announcements pending."]
@@ -46332,6 +46487,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A proxy was executed correctly, with the given."]
@@ -46395,6 +46551,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Anonymously schedule a task."]
@@ -46485,6 +46642,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Failed to schedule a call"]
@@ -46502,6 +46660,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Events type."]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "Scheduled some task."]
@@ -46558,6 +46717,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Sets the session key(s) of the function caller to `keys`."]
@@ -46600,6 +46760,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Error for the session pallet."]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Invalid ownership proof."]
@@ -46620,6 +46781,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "New session has happened. Note that the argument is the session index, not the"]
@@ -46639,6 +46801,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Take the origin account as a stash and lock up `value` of its balance. `controller` will"]
@@ -47129,6 +47292,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Not a controller account."]
@@ -47210,6 +47374,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "The era payout has been set; the first balance is the validator-payout; the second is"]
@@ -47432,6 +47597,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Set the current time."]
@@ -47464,6 +47630,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Report something `reason` that deserves a tip and claim any eventual the finder's fee."]
@@ -47605,6 +47772,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The reason given is just too big."]
@@ -47628,6 +47796,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "A new tip suggestion has been opened."]
@@ -47667,6 +47836,23 @@ pub mod api {
         }
         pub mod pallet_transaction_payment {
             use super::runtime_types;
+            pub mod pallet {
+                use super::runtime_types;
+                #[derive(
+                    :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
+                )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
+                pub enum Event {
+                    #[codec(index = 0)]
+                    #[doc = "A transaction fee `actual_fee`, of which `tip` was added to the minimum inclusion fee,"]
+                    #[doc = "has been paid by `who`."]
+                    TransactionFeePaid {
+                        who: ::subxt::sp_core::crypto::AccountId32,
+                        actual_fee: ::core::primitive::u128,
+                        tip: ::core::primitive::u128,
+                    },
+                }
+            }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
             pub struct ChargeTransactionPayment(
                 #[codec(compact)] pub ::core::primitive::u128,
@@ -47686,6 +47872,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Put forward a suggestion for spending. A deposit proportional to the value"]
@@ -47775,6 +47962,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Error for the treasury pallet."]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Proposer's balance is too low."]
@@ -47796,6 +47984,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "New proposal."]
@@ -47857,6 +48046,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Send a batch of dispatch calls."]
@@ -47956,6 +48146,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "Too many calls batched."]
@@ -47964,6 +48155,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "Batch of dispatches did not complete fully. Index of first failing dispatch given, as"]
@@ -48004,6 +48196,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     #[doc = "Unlock any vested funds of the sender account."]
@@ -48135,6 +48328,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Error for the vesting pallet."]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The account given is not vesting."]
@@ -48156,6 +48350,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "The amount vested has been updated. This could indicate a change in funds available."]
@@ -48197,6 +48392,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                 pub enum Call {
                     #[codec(index = 0)]
                     send {
@@ -48374,6 +48570,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                 pub enum Error {
                     #[codec(index = 0)]
                     #[doc = "The desired destination was unreachable, generally because there is a no way of routing"]
@@ -48421,6 +48618,7 @@ pub mod api {
                 #[derive(
                     :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                 )]
+                #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                 pub enum Event {
                     #[codec(index = 0)]
                     #[doc = "Execution of an XCM message was attempted."]
@@ -49011,7 +49209,7 @@ pub mod api {
                 # [codec (index = 0)] System (runtime_types :: frame_system :: pallet :: Call ,) , # [codec (index = 1)] Scheduler (runtime_types :: pallet_scheduler :: pallet :: Call ,) , # [codec (index = 10)] Preimage (runtime_types :: pallet_preimage :: pallet :: Call ,) , # [codec (index = 2)] Babe (runtime_types :: pallet_babe :: pallet :: Call ,) , # [codec (index = 3)] Timestamp (runtime_types :: pallet_timestamp :: pallet :: Call ,) , # [codec (index = 4)] Indices (runtime_types :: pallet_indices :: pallet :: Call ,) , # [codec (index = 5)] Balances (runtime_types :: pallet_balances :: pallet :: Call ,) , # [codec (index = 6)] Authorship (runtime_types :: pallet_authorship :: pallet :: Call ,) , # [codec (index = 7)] Staking (runtime_types :: pallet_staking :: pallet :: pallet :: Call ,) , # [codec (index = 9)] Session (runtime_types :: pallet_session :: pallet :: Call ,) , # [codec (index = 11)] Grandpa (runtime_types :: pallet_grandpa :: pallet :: Call ,) , # [codec (index = 12)] ImOnline (runtime_types :: pallet_im_online :: pallet :: Call ,) , # [codec (index = 14)] Democracy (runtime_types :: pallet_democracy :: pallet :: Call ,) , # [codec (index = 15)] Council (runtime_types :: pallet_collective :: pallet :: Call ,) , # [codec (index = 16)] TechnicalCommittee (runtime_types :: pallet_collective :: pallet :: Call ,) , # [codec (index = 17)] PhragmenElection (runtime_types :: pallet_elections_phragmen :: pallet :: Call ,) , # [codec (index = 18)] TechnicalMembership (runtime_types :: pallet_membership :: pallet :: Call ,) , # [codec (index = 19)] Treasury (runtime_types :: pallet_treasury :: pallet :: Call ,) , # [codec (index = 24)] Claims (runtime_types :: polkadot_runtime_common :: claims :: pallet :: Call ,) , # [codec (index = 25)] Vesting (runtime_types :: pallet_vesting :: pallet :: Call ,) , # [codec (index = 26)] Utility (runtime_types :: pallet_utility :: pallet :: Call ,) , # [codec (index = 28)] Identity (runtime_types :: pallet_identity :: pallet :: Call ,) , # [codec (index = 29)] Proxy (runtime_types :: pallet_proxy :: pallet :: Call ,) , # [codec (index = 30)] Multisig (runtime_types :: pallet_multisig :: pallet :: Call ,) , # [codec (index = 34)] Bounties (runtime_types :: pallet_bounties :: pallet :: Call ,) , # [codec (index = 38)] ChildBounties (runtime_types :: pallet_child_bounties :: pallet :: Call ,) , # [codec (index = 35)] Tips (runtime_types :: pallet_tips :: pallet :: Call ,) , # [codec (index = 36)] ElectionProviderMultiPhase (runtime_types :: pallet_election_provider_multi_phase :: pallet :: Call ,) , # [codec (index = 37)] VoterList (runtime_types :: pallet_bags_list :: pallet :: Call ,) , # [codec (index = 51)] Configuration (runtime_types :: polkadot_runtime_parachains :: configuration :: pallet :: Call ,) , # [codec (index = 52)] ParasShared (runtime_types :: polkadot_runtime_parachains :: shared :: pallet :: Call ,) , # [codec (index = 53)] ParaInclusion (runtime_types :: polkadot_runtime_parachains :: inclusion :: pallet :: Call ,) , # [codec (index = 54)] ParaInherent (runtime_types :: polkadot_runtime_parachains :: paras_inherent :: pallet :: Call ,) , # [codec (index = 56)] Paras (runtime_types :: polkadot_runtime_parachains :: paras :: pallet :: Call ,) , # [codec (index = 57)] Initializer (runtime_types :: polkadot_runtime_parachains :: initializer :: pallet :: Call ,) , # [codec (index = 58)] Dmp (runtime_types :: polkadot_runtime_parachains :: dmp :: pallet :: Call ,) , # [codec (index = 59)] Ump (runtime_types :: polkadot_runtime_parachains :: ump :: pallet :: Call ,) , # [codec (index = 60)] Hrmp (runtime_types :: polkadot_runtime_parachains :: hrmp :: pallet :: Call ,) , # [codec (index = 62)] ParasDisputes (runtime_types :: polkadot_runtime_parachains :: disputes :: pallet :: Call ,) , # [codec (index = 70)] Registrar (runtime_types :: polkadot_runtime_common :: paras_registrar :: pallet :: Call ,) , # [codec (index = 71)] Slots (runtime_types :: polkadot_runtime_common :: slots :: pallet :: Call ,) , # [codec (index = 72)] Auctions (runtime_types :: polkadot_runtime_common :: auctions :: pallet :: Call ,) , # [codec (index = 73)] Crowdloan (runtime_types :: polkadot_runtime_common :: crowdloan :: pallet :: Call ,) , # [codec (index = 99)] XcmPallet (runtime_types :: pallet_xcm :: pallet :: Call ,) , }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
             pub enum Event {
-                # [codec (index = 0)] System (runtime_types :: frame_system :: pallet :: Event ,) , # [codec (index = 1)] Scheduler (runtime_types :: pallet_scheduler :: pallet :: Event ,) , # [codec (index = 10)] Preimage (runtime_types :: pallet_preimage :: pallet :: Event ,) , # [codec (index = 4)] Indices (runtime_types :: pallet_indices :: pallet :: Event ,) , # [codec (index = 5)] Balances (runtime_types :: pallet_balances :: pallet :: Event ,) , # [codec (index = 7)] Staking (runtime_types :: pallet_staking :: pallet :: pallet :: Event ,) , # [codec (index = 8)] Offences (runtime_types :: pallet_offences :: pallet :: Event ,) , # [codec (index = 9)] Session (runtime_types :: pallet_session :: pallet :: Event ,) , # [codec (index = 11)] Grandpa (runtime_types :: pallet_grandpa :: pallet :: Event ,) , # [codec (index = 12)] ImOnline (runtime_types :: pallet_im_online :: pallet :: Event ,) , # [codec (index = 14)] Democracy (runtime_types :: pallet_democracy :: pallet :: Event ,) , # [codec (index = 15)] Council (runtime_types :: pallet_collective :: pallet :: Event ,) , # [codec (index = 16)] TechnicalCommittee (runtime_types :: pallet_collective :: pallet :: Event ,) , # [codec (index = 17)] PhragmenElection (runtime_types :: pallet_elections_phragmen :: pallet :: Event ,) , # [codec (index = 18)] TechnicalMembership (runtime_types :: pallet_membership :: pallet :: Event ,) , # [codec (index = 19)] Treasury (runtime_types :: pallet_treasury :: pallet :: Event ,) , # [codec (index = 24)] Claims (runtime_types :: polkadot_runtime_common :: claims :: pallet :: Event ,) , # [codec (index = 25)] Vesting (runtime_types :: pallet_vesting :: pallet :: Event ,) , # [codec (index = 26)] Utility (runtime_types :: pallet_utility :: pallet :: Event ,) , # [codec (index = 28)] Identity (runtime_types :: pallet_identity :: pallet :: Event ,) , # [codec (index = 29)] Proxy (runtime_types :: pallet_proxy :: pallet :: Event ,) , # [codec (index = 30)] Multisig (runtime_types :: pallet_multisig :: pallet :: Event ,) , # [codec (index = 34)] Bounties (runtime_types :: pallet_bounties :: pallet :: Event ,) , # [codec (index = 38)] ChildBounties (runtime_types :: pallet_child_bounties :: pallet :: Event ,) , # [codec (index = 35)] Tips (runtime_types :: pallet_tips :: pallet :: Event ,) , # [codec (index = 36)] ElectionProviderMultiPhase (runtime_types :: pallet_election_provider_multi_phase :: pallet :: Event ,) , # [codec (index = 37)] VoterList (runtime_types :: pallet_bags_list :: pallet :: Event ,) , # [codec (index = 53)] ParaInclusion (runtime_types :: polkadot_runtime_parachains :: inclusion :: pallet :: Event ,) , # [codec (index = 56)] Paras (runtime_types :: polkadot_runtime_parachains :: paras :: pallet :: Event ,) , # [codec (index = 59)] Ump (runtime_types :: polkadot_runtime_parachains :: ump :: pallet :: Event ,) , # [codec (index = 60)] Hrmp (runtime_types :: polkadot_runtime_parachains :: hrmp :: pallet :: Event ,) , # [codec (index = 62)] ParasDisputes (runtime_types :: polkadot_runtime_parachains :: disputes :: pallet :: Event ,) , # [codec (index = 70)] Registrar (runtime_types :: polkadot_runtime_common :: paras_registrar :: pallet :: Event ,) , # [codec (index = 71)] Slots (runtime_types :: polkadot_runtime_common :: slots :: pallet :: Event ,) , # [codec (index = 72)] Auctions (runtime_types :: polkadot_runtime_common :: auctions :: pallet :: Event ,) , # [codec (index = 73)] Crowdloan (runtime_types :: polkadot_runtime_common :: crowdloan :: pallet :: Event ,) , # [codec (index = 99)] XcmPallet (runtime_types :: pallet_xcm :: pallet :: Event ,) , }
+                # [codec (index = 0)] System (runtime_types :: frame_system :: pallet :: Event ,) , # [codec (index = 1)] Scheduler (runtime_types :: pallet_scheduler :: pallet :: Event ,) , # [codec (index = 10)] Preimage (runtime_types :: pallet_preimage :: pallet :: Event ,) , # [codec (index = 4)] Indices (runtime_types :: pallet_indices :: pallet :: Event ,) , # [codec (index = 5)] Balances (runtime_types :: pallet_balances :: pallet :: Event ,) , # [codec (index = 32)] TransactionPayment (runtime_types :: pallet_transaction_payment :: pallet :: Event ,) , # [codec (index = 7)] Staking (runtime_types :: pallet_staking :: pallet :: pallet :: Event ,) , # [codec (index = 8)] Offences (runtime_types :: pallet_offences :: pallet :: Event ,) , # [codec (index = 9)] Session (runtime_types :: pallet_session :: pallet :: Event ,) , # [codec (index = 11)] Grandpa (runtime_types :: pallet_grandpa :: pallet :: Event ,) , # [codec (index = 12)] ImOnline (runtime_types :: pallet_im_online :: pallet :: Event ,) , # [codec (index = 14)] Democracy (runtime_types :: pallet_democracy :: pallet :: Event ,) , # [codec (index = 15)] Council (runtime_types :: pallet_collective :: pallet :: Event ,) , # [codec (index = 16)] TechnicalCommittee (runtime_types :: pallet_collective :: pallet :: Event ,) , # [codec (index = 17)] PhragmenElection (runtime_types :: pallet_elections_phragmen :: pallet :: Event ,) , # [codec (index = 18)] TechnicalMembership (runtime_types :: pallet_membership :: pallet :: Event ,) , # [codec (index = 19)] Treasury (runtime_types :: pallet_treasury :: pallet :: Event ,) , # [codec (index = 24)] Claims (runtime_types :: polkadot_runtime_common :: claims :: pallet :: Event ,) , # [codec (index = 25)] Vesting (runtime_types :: pallet_vesting :: pallet :: Event ,) , # [codec (index = 26)] Utility (runtime_types :: pallet_utility :: pallet :: Event ,) , # [codec (index = 28)] Identity (runtime_types :: pallet_identity :: pallet :: Event ,) , # [codec (index = 29)] Proxy (runtime_types :: pallet_proxy :: pallet :: Event ,) , # [codec (index = 30)] Multisig (runtime_types :: pallet_multisig :: pallet :: Event ,) , # [codec (index = 34)] Bounties (runtime_types :: pallet_bounties :: pallet :: Event ,) , # [codec (index = 38)] ChildBounties (runtime_types :: pallet_child_bounties :: pallet :: Event ,) , # [codec (index = 35)] Tips (runtime_types :: pallet_tips :: pallet :: Event ,) , # [codec (index = 36)] ElectionProviderMultiPhase (runtime_types :: pallet_election_provider_multi_phase :: pallet :: Event ,) , # [codec (index = 37)] VoterList (runtime_types :: pallet_bags_list :: pallet :: Event ,) , # [codec (index = 53)] ParaInclusion (runtime_types :: polkadot_runtime_parachains :: inclusion :: pallet :: Event ,) , # [codec (index = 56)] Paras (runtime_types :: polkadot_runtime_parachains :: paras :: pallet :: Event ,) , # [codec (index = 59)] Ump (runtime_types :: polkadot_runtime_parachains :: ump :: pallet :: Event ,) , # [codec (index = 60)] Hrmp (runtime_types :: polkadot_runtime_parachains :: hrmp :: pallet :: Event ,) , # [codec (index = 62)] ParasDisputes (runtime_types :: polkadot_runtime_parachains :: disputes :: pallet :: Event ,) , # [codec (index = 70)] Registrar (runtime_types :: polkadot_runtime_common :: paras_registrar :: pallet :: Event ,) , # [codec (index = 71)] Slots (runtime_types :: polkadot_runtime_common :: slots :: pallet :: Event ,) , # [codec (index = 72)] Auctions (runtime_types :: polkadot_runtime_common :: auctions :: pallet :: Event ,) , # [codec (index = 73)] Crowdloan (runtime_types :: polkadot_runtime_common :: crowdloan :: pallet :: Event ,) , # [codec (index = 99)] XcmPallet (runtime_types :: pallet_xcm :: pallet :: Event ,) , }
             #[derive(:: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug)]
             pub struct NposCompactSolution16 {
                 pub votes1:
@@ -49208,6 +49406,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Create a new auction."]
@@ -49259,6 +49458,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "This auction is already in progress."]
@@ -49285,6 +49485,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "An auction started. Provides its index and the block number where it will begin to"]
@@ -49346,11 +49547,13 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         # [codec (index = 0)] # [doc = "Make a claim to collect your DOTs."] # [doc = ""] # [doc = "The dispatch origin for this call must be _None_."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to claim is deemed valid if the signature provided matches"] # [doc = "the expected signed message of:"] # [doc = ""] # [doc = "> Ethereum Signed Message:"] # [doc = "> (configured prefix string)(address)"] # [doc = ""] # [doc = "and `address` matches the `dest` account."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `dest`: The destination account to payout the claim."] # [doc = "- `ethereum_signature`: The signature of an ethereum signed message"] # [doc = "   matching the format described above."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to validate unsigned `claim` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] claim { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , } , # [codec (index = 1)] # [doc = "Mint a new claim to collect DOTs."] # [doc = ""] # [doc = "The dispatch origin for this call must be _Root_."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `who`: The Ethereum address allowed to collect this claim."] # [doc = "- `value`: The number of DOTs that will be claimed."] # [doc = "- `vesting_schedule`: An optional vesting schedule for these DOTs."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "We assume worst case that both vesting and statement is being inserted."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] mint_claim { who : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , value : :: core :: primitive :: u128 , vesting_schedule : :: core :: option :: Option < (:: core :: primitive :: u128 , :: core :: primitive :: u128 , :: core :: primitive :: u32 ,) > , statement : :: core :: option :: Option < runtime_types :: polkadot_runtime_common :: claims :: StatementKind > , } , # [codec (index = 2)] # [doc = "Make a claim to collect your DOTs by signing a statement."] # [doc = ""] # [doc = "The dispatch origin for this call must be _None_."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to `claim_attest` is deemed valid if the signature provided matches"] # [doc = "the expected signed message of:"] # [doc = ""] # [doc = "> Ethereum Signed Message:"] # [doc = "> (configured prefix string)(address)(statement)"] # [doc = ""] # [doc = "and `address` matches the `dest` account; the `statement` must match that which is"] # [doc = "expected according to your purchase arrangement."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `dest`: The destination account to payout the claim."] # [doc = "- `ethereum_signature`: The signature of an ethereum signed message"] # [doc = "   matching the format described above."] # [doc = "- `statement`: The identity of the statement which is being attested to in the signature."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to validate unsigned `claim_attest` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] claim_attest { dest : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_signature : runtime_types :: polkadot_runtime_common :: claims :: EcdsaSignature , statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 3)] # [doc = "Attest to a statement, needed to finalize the claims process."] # [doc = ""] # [doc = "WARNING: Insecure unless your chain includes `PrevalidateAttests` as a `SignedExtension`."] # [doc = ""] # [doc = "Unsigned Validation:"] # [doc = "A call to attest is deemed valid if the sender has a `Preclaim` registered"] # [doc = "and provides a `statement` which is expected for the account."] # [doc = ""] # [doc = "Parameters:"] # [doc = "- `statement`: The identity of the statement which is being attested to in the signature."] # [doc = ""] # [doc = "<weight>"] # [doc = "The weight of this call is invariant over the input parameters."] # [doc = "Weight includes logic to do pre-validation on `attest` call."] # [doc = ""] # [doc = "Total Complexity: O(1)"] # [doc = "</weight>"] attest { statement : :: std :: vec :: Vec < :: core :: primitive :: u8 > , } , # [codec (index = 4)] move_claim { old : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , new : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , maybe_preclaim : :: core :: option :: Option < :: subxt :: sp_core :: crypto :: AccountId32 > , } , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Invalid Ethereum signature."]
@@ -49375,6 +49578,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         # [codec (index = 0)] # [doc = "Someone claimed some DOTs."] Claimed { who : :: subxt :: sp_core :: crypto :: AccountId32 , ethereum_address : runtime_types :: polkadot_runtime_common :: claims :: EthereumAddress , amount : :: core :: primitive :: u128 , } , }
                 }
@@ -49407,6 +49611,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Create a new crowdloaning campaign for a parachain slot with the given lease period range."]
@@ -49527,6 +49732,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The current lease period is more than the first lease period."]
@@ -49601,6 +49807,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "Create a new crowdloaning campaign."]
@@ -49688,11 +49895,13 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         # [codec (index = 0)] # [doc = "Register head data and validation code for a reserved Para Id."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin."] # [doc = "- `id`: The para ID. Must be owned/managed by the `origin` signing account."] # [doc = "- `genesis_head`: The genesis head data of the parachain/thread."] # [doc = "- `validation_code`: The initial validation code of the parachain/thread."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin signed account must reserve a corresponding deposit for the registration. Anything already"] # [doc = "reserved previously for this para ID is accounted for."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Registered` event is emitted in case of success."] register { id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Force the registration of a Para Id on the relay chain."] # [doc = ""] # [doc = "This function must be called by a Root origin."] # [doc = ""] # [doc = "The deposit taken can be specified for this registration. Any `ParaId`"] # [doc = "can be registered, including sub-1000 IDs which are System Parachains."] force_register { who : :: subxt :: sp_core :: crypto :: AccountId32 , deposit : :: core :: primitive :: u128 , id : runtime_types :: polkadot_parachain :: primitives :: Id , genesis_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 2)] # [doc = "Deregister a Para Id, freeing all data and returning any deposit."] # [doc = ""] # [doc = "The caller must be Root, the `para` owner, or the `para` itself. The para must be a parathread."] deregister { id : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 3)] # [doc = "Swap a parachain with another parachain or parathread."] # [doc = ""] # [doc = "The origin must be Root, the `para` owner, or the `para` itself."] # [doc = ""] # [doc = "The swap will happen only if there is already an opposite swap pending. If there is not,"] # [doc = "the swap will be stored in the pending swaps map, ready for a later confirmatory swap."] # [doc = ""] # [doc = "The `ParaId`s remain mapped to the same head data and code so external code can rely on"] # [doc = "`ParaId` to be a long-term identifier of a notional \"parachain\". However, their"] # [doc = "scheduling info (i.e. whether they're a parathread or parachain), auction information"] # [doc = "and the auction deposit are switched."] swap { id : runtime_types :: polkadot_parachain :: primitives :: Id , other : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 4)] # [doc = "Remove a manager lock from a para. This will allow the manager of a"] # [doc = "previously locked para to deregister or swap a para without using governance."] # [doc = ""] # [doc = "Can only be called by the Root origin."] force_remove_lock { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Reserve a Para Id on the relay chain."] # [doc = ""] # [doc = "This function will reserve a new Para Id to be owned/managed by the origin account."] # [doc = "The origin account is able to register head data and validation code using `register` to create"] # [doc = "a parathread. Using the Slots pallet, a parathread can then be upgraded to get a parachain slot."] # [doc = ""] # [doc = "## Arguments"] # [doc = "- `origin`: Must be called by a `Signed` origin. Becomes the manager/owner of the new para ID."] # [doc = ""] # [doc = "## Deposits/Fees"] # [doc = "The origin must reserve a deposit of `ParaDeposit` for the registration."] # [doc = ""] # [doc = "## Events"] # [doc = "The `Reserved` event is emitted in case of success, which provides the ID reserved for use."] reserve , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The ID is not registered."]
@@ -49741,6 +49950,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         Registered {
@@ -49774,6 +49984,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Just a connect into the `lease_out` call, in case Root wants to force some lease to happen"]
@@ -49809,6 +50020,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The parachain ID is not onboarding."]
@@ -49820,6 +50032,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "A new `[lease_period]` is beginning."]
@@ -49851,6 +50064,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Set the validation upgrade cooldown."]
@@ -50019,6 +50233,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The new value for a configuration parameter is invalid."]
@@ -50081,6 +50296,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         force_unfreeze,
@@ -50088,6 +50304,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Duplicate dispute statement sets provided."]
@@ -50114,6 +50331,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         # [codec (index = 0)] # [doc = "A dispute has been initiated. \\[candidate hash, dispute location\\]"] DisputeInitiated (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeLocation ,) , # [codec (index = 1)] # [doc = "A dispute has concluded for or against a candidate."] # [doc = "`\\[para id, candidate hash, dispute result\\]`"] DisputeConcluded (runtime_types :: polkadot_core_primitives :: CandidateHash , runtime_types :: polkadot_runtime_parachains :: disputes :: DisputeResult ,) , # [codec (index = 2)] # [doc = "A dispute has timed out due to insufficient participation."] # [doc = "`\\[para id, candidate hash\\]`"] DisputeTimedOut (runtime_types :: polkadot_core_primitives :: CandidateHash ,) , # [codec (index = 3)] # [doc = "A dispute has concluded with supermajority against a candidate."] # [doc = "Block authors should no longer build on top of this head and should"] # [doc = "instead revert the block at the given height. This should be the"] # [doc = "number of the child of the last known valid block in the chain."] Revert (:: core :: primitive :: u32 ,) , }
                 }
@@ -50143,6 +50361,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {}
                 }
             }
@@ -50153,11 +50372,13 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         # [codec (index = 0)] # [doc = "Initiate opening a channel from a parachain to a given recipient with given channel"] # [doc = "parameters."] # [doc = ""] # [doc = "- `proposed_max_capacity` - specifies how many messages can be in the channel at once."] # [doc = "- `proposed_max_message_size` - specifies the maximum size of the messages."] # [doc = ""] # [doc = "These numbers are a subject to the relay-chain configuration limits."] # [doc = ""] # [doc = "The channel can be opened only after the recipient confirms it and only on a session"] # [doc = "change."] hrmp_init_open_channel { recipient : runtime_types :: polkadot_parachain :: primitives :: Id , proposed_max_capacity : :: core :: primitive :: u32 , proposed_max_message_size : :: core :: primitive :: u32 , } , # [codec (index = 1)] # [doc = "Accept a pending open channel request from the given sender."] # [doc = ""] # [doc = "The channel will be opened only on the next session boundary."] hrmp_accept_open_channel { sender : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 2)] # [doc = "Initiate unilateral closing of a channel. The origin must be either the sender or the"] # [doc = "recipient in the channel being closed."] # [doc = ""] # [doc = "The closure can only happen on a session change."] hrmp_close_channel { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , } , # [codec (index = 3)] # [doc = "This extrinsic triggers the cleanup of all the HRMP storage items that"] # [doc = "a para may have. Normally this happens once per session, but this allows"] # [doc = "you to trigger the cleanup immediately for a specific parachain."] # [doc = ""] # [doc = "Origin must be Root."] # [doc = ""] # [doc = "Number of inbound and outbound channels for `para` must be provided as witness data of weighing."] force_clean_hrmp { para : runtime_types :: polkadot_parachain :: primitives :: Id , inbound : :: core :: primitive :: u32 , outbound : :: core :: primitive :: u32 , } , # [codec (index = 4)] # [doc = "Force process HRMP open channel requests."] # [doc = ""] # [doc = "If there are pending HRMP open channel requests, you can use this"] # [doc = "function process all of those requests immediately."] # [doc = ""] # [doc = "Total number of opening channels must be provided as witness data of weighing."] force_process_hrmp_open { channels : :: core :: primitive :: u32 , } , # [codec (index = 5)] # [doc = "Force process HRMP close channel requests."] # [doc = ""] # [doc = "If there are pending HRMP close channel requests, you can use this"] # [doc = "function process all of those requests immediately."] # [doc = ""] # [doc = "Total number of closing channels must be provided as witness data of weighing."] force_process_hrmp_close { channels : :: core :: primitive :: u32 , } , # [codec (index = 6)] # [doc = "This cancels a pending open channel request. It can be canceled by either of the sender"] # [doc = "or the recipient for that request. The origin must be either of those."] # [doc = ""] # [doc = "The cancellation happens immediately. It is not possible to cancel the request if it is"] # [doc = "already accepted."] # [doc = ""] # [doc = "Total number of open requests (i.e. `HrmpOpenChannelRequestsList`) must be provided as"] # [doc = "witness data."] hrmp_cancel_open_request { channel_id : runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId , open_requests : :: core :: primitive :: u32 , } , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The sender tried to open a channel to themselves."]
@@ -50220,6 +50441,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "Open HRMP channel requested."]
@@ -50283,10 +50505,12 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {}
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Validator indices are out of order or contains duplicates."]
@@ -50382,6 +50606,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "A candidate was backed. `[candidate, head_data]`"]
@@ -50450,6 +50675,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Issue a signal to the consensus engine to forcibly act as though all parachain"]
@@ -50491,11 +50717,13 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         # [codec (index = 0)] # [doc = "Set the storage for the parachain validation code immediately."] force_set_current_code { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 1)] # [doc = "Set the storage for the current parachain head data immediately."] force_set_current_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 2)] # [doc = "Schedule an upgrade as if it was scheduled in the given relay parent block."] force_schedule_code_upgrade { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , relay_parent_number : :: core :: primitive :: u32 , } , # [codec (index = 3)] # [doc = "Note a new block head for para within the context of the current block."] force_note_new_head { para : runtime_types :: polkadot_parachain :: primitives :: Id , new_head : runtime_types :: polkadot_parachain :: primitives :: HeadData , } , # [codec (index = 4)] # [doc = "Put a parachain directly into the next session's action queue."] # [doc = "We can't queue it any sooner than this without going into the"] # [doc = "initializer..."] force_queue_action { para : runtime_types :: polkadot_parachain :: primitives :: Id , } , # [codec (index = 5)] # [doc = "Adds the validation code to the storage."] # [doc = ""] # [doc = "The code will not be added if it is already present. Additionally, if PVF pre-checking"] # [doc = "is running for that code, it will be instantly accepted."] # [doc = ""] # [doc = "Otherwise, the code will be added into the storage. Note that the code will be added"] # [doc = "into storage with reference count 0. This is to account the fact that there are no users"] # [doc = "for this code yet. The caller will have to make sure that this code eventually gets"] # [doc = "used by some parachain or removed from the storage to avoid storage leaks. For the latter"] # [doc = "prefer to use the `poke_unused_validation_code` dispatchable to raw storage manipulation."] # [doc = ""] # [doc = "This function is mainly meant to be used for upgrading parachains that do not follow"] # [doc = "the go-ahead signal while the PVF pre-checking feature is enabled."] add_trusted_validation_code { validation_code : runtime_types :: polkadot_parachain :: primitives :: ValidationCode , } , # [codec (index = 6)] # [doc = "Remove the validation code from the storage iff the reference count is 0."] # [doc = ""] # [doc = "This is better than removing the storage directly, because it will not remove the code"] # [doc = "that was suddenly got used by some parachain while this dispatchable was pending"] # [doc = "dispatching."] poke_unused_validation_code { validation_code_hash : runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , } , # [codec (index = 7)] # [doc = "Includes a statement for a PVF pre-checking vote. Potentially, finalizes the vote and"] # [doc = "enacts the results if that was the last vote before achieving the supermajority."] include_pvf_check_statement { stmt : runtime_types :: polkadot_primitives :: v2 :: PvfCheckStatement , signature : runtime_types :: polkadot_primitives :: v2 :: validator_app :: Signature , } , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Para is not registered in our system."]
@@ -50538,6 +50766,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         # [codec (index = 0)] # [doc = "Current code has been updated for a Para. `para_id`"] CurrentCodeUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 1)] # [doc = "Current head has been updated for a Para. `para_id`"] CurrentHeadUpdated (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 2)] # [doc = "A code upgrade has been scheduled for a Para. `para_id`"] CodeUpgradeScheduled (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 3)] # [doc = "A new head has been noted for a Para. `para_id`"] NewHeadNoted (runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 4)] # [doc = "A para has been queued to execute pending actions. `para_id`"] ActionQueued (runtime_types :: polkadot_parachain :: primitives :: Id , :: core :: primitive :: u32 ,) , # [codec (index = 5)] # [doc = "The given para either initiated or subscribed to a PVF check for the given validation"] # [doc = "code. `code_hash` `para_id`"] PvfCheckStarted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 6)] # [doc = "The given validation code was accepted by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckAccepted (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , # [codec (index = 7)] # [doc = "The given validation code was rejected by the PVF pre-checking vote."] # [doc = "`code_hash` `para_id`"] PvfCheckRejected (runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash , runtime_types :: polkadot_parachain :: primitives :: Id ,) , }
                 }
@@ -50621,6 +50850,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Enter the paras inherent. This will process bitfields and backed candidates."]
@@ -50636,6 +50866,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "Inclusion inherent called more than once per block."]
@@ -50696,6 +50927,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {}
                 }
             }
@@ -50706,6 +50938,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "Contains one variant per dispatchable that can be called by an extrinsic."]
                     pub enum Call {
                         #[codec(index = 0)]
                         #[doc = "Service a single overweight upward message."]
@@ -50728,6 +50961,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tCustom [dispatch errors](https://docs.substrate.io/v3/runtime/events-and-errors)\n\t\t\tof this pallet.\n\t\t\t"]
                     pub enum Error {
                         #[codec(index = 0)]
                         #[doc = "The message index given is unknown."]
@@ -50739,6 +50973,7 @@ pub mod api {
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
+                    #[doc = "\n\t\t\tThe [event](https://docs.substrate.io/v3/runtime/events-and-errors) emitted\n\t\t\tby this pallet.\n\t\t\t"]
                     pub enum Event {
                         #[codec(index = 0)]
                         #[doc = "Upward message is invalid XCM."]
@@ -51833,21 +52068,7 @@ pub mod api {
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
                     pub enum BodyId {
-                        #[codec(index = 0)]
-                        Unit,
-                        #[codec(index = 1)]
-                        Named(::std::vec::Vec<::core::primitive::u8>),
-                        #[codec(index = 2)]
-                        Index(#[codec(compact)] ::core::primitive::u32),
-                        #[codec(index = 3)]
-                        Executive,
-                        #[codec(index = 4)]
-                        Technical,
-                        #[codec(index = 5)]
-                        Legislative,
-                        #[codec(index = 6)]
-                        Judicial,
-                    }
+                        # [codec (index = 0)] Unit , # [codec (index = 1)] Named (runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < :: core :: primitive :: u8 > ,) , # [codec (index = 2)] Index (# [codec (compact)] :: core :: primitive :: u32 ,) , # [codec (index = 3)] Executive , # [codec (index = 4)] Technical , # [codec (index = 5)] Legislative , # [codec (index = 6)] Judicial , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
@@ -51885,53 +52106,12 @@ pub mod api {
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
                     pub enum Junction {
-                        #[codec(index = 0)]
-                        Parent,
-                        #[codec(index = 1)]
-                        Parachain(#[codec(compact)] ::core::primitive::u32),
-                        #[codec(index = 2)]
-                        AccountId32 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            id: [::core::primitive::u8; 32usize],
-                        },
-                        #[codec(index = 3)]
-                        AccountIndex64 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            #[codec(compact)]
-                            index: ::core::primitive::u64,
-                        },
-                        #[codec(index = 4)]
-                        AccountKey20 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            key: [::core::primitive::u8; 20usize],
-                        },
-                        #[codec(index = 5)]
-                        PalletInstance(::core::primitive::u8),
-                        #[codec(index = 6)]
-                        GeneralIndex(#[codec(compact)] ::core::primitive::u128),
-                        #[codec(index = 7)]
-                        GeneralKey(::std::vec::Vec<::core::primitive::u8>),
-                        #[codec(index = 8)]
-                        OnlyChild,
-                        #[codec(index = 9)]
-                        Plurality {
-                            id: runtime_types::xcm::v0::junction::BodyId,
-                            part: runtime_types::xcm::v0::junction::BodyPart,
-                        },
-                    }
+                        # [codec (index = 0)] Parent , # [codec (index = 1)] Parachain (# [codec (compact)] :: core :: primitive :: u32 ,) , # [codec (index = 2)] AccountId32 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , id : [:: core :: primitive :: u8 ; 32usize] , } , # [codec (index = 3)] AccountIndex64 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , # [codec (compact)] index : :: core :: primitive :: u64 , } , # [codec (index = 4)] AccountKey20 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , key : [:: core :: primitive :: u8 ; 20usize] , } , # [codec (index = 5)] PalletInstance (:: core :: primitive :: u8 ,) , # [codec (index = 6)] GeneralIndex (# [codec (compact)] :: core :: primitive :: u128 ,) , # [codec (index = 7)] GeneralKey (runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < :: core :: primitive :: u8 > ,) , # [codec (index = 8)] OnlyChild , # [codec (index = 9)] Plurality { id : runtime_types :: xcm :: v0 :: junction :: BodyId , part : runtime_types :: xcm :: v0 :: junction :: BodyPart , } , }
                     #[derive(
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
                     pub enum NetworkId {
-                        #[codec(index = 0)]
-                        Any,
-                        #[codec(index = 1)]
-                        Named(::std::vec::Vec<::core::primitive::u8>),
-                        #[codec(index = 2)]
-                        Polkadot,
-                        #[codec(index = 3)]
-                        Kusama,
-                    }
+                        # [codec (index = 0)] Any , # [codec (index = 1)] Named (runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < :: core :: primitive :: u8 > ,) , # [codec (index = 2)] Polkadot , # [codec (index = 3)] Kusama , }
                 }
                 pub mod multi_asset {
                     use super::runtime_types;
@@ -52238,38 +52418,7 @@ pub mod api {
                         :: subxt :: codec :: Decode, :: subxt :: codec :: Encode, Debug,
                     )]
                     pub enum Junction {
-                        #[codec(index = 0)]
-                        Parachain(#[codec(compact)] ::core::primitive::u32),
-                        #[codec(index = 1)]
-                        AccountId32 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            id: [::core::primitive::u8; 32usize],
-                        },
-                        #[codec(index = 2)]
-                        AccountIndex64 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            #[codec(compact)]
-                            index: ::core::primitive::u64,
-                        },
-                        #[codec(index = 3)]
-                        AccountKey20 {
-                            network: runtime_types::xcm::v0::junction::NetworkId,
-                            key: [::core::primitive::u8; 20usize],
-                        },
-                        #[codec(index = 4)]
-                        PalletInstance(::core::primitive::u8),
-                        #[codec(index = 5)]
-                        GeneralIndex(#[codec(compact)] ::core::primitive::u128),
-                        #[codec(index = 6)]
-                        GeneralKey(::std::vec::Vec<::core::primitive::u8>),
-                        #[codec(index = 7)]
-                        OnlyChild,
-                        #[codec(index = 8)]
-                        Plurality {
-                            id: runtime_types::xcm::v0::junction::BodyId,
-                            part: runtime_types::xcm::v0::junction::BodyPart,
-                        },
-                    }
+                        # [codec (index = 0)] Parachain (# [codec (compact)] :: core :: primitive :: u32 ,) , # [codec (index = 1)] AccountId32 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , id : [:: core :: primitive :: u8 ; 32usize] , } , # [codec (index = 2)] AccountIndex64 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , # [codec (compact)] index : :: core :: primitive :: u64 , } , # [codec (index = 3)] AccountKey20 { network : runtime_types :: xcm :: v0 :: junction :: NetworkId , key : [:: core :: primitive :: u8 ; 20usize] , } , # [codec (index = 4)] PalletInstance (:: core :: primitive :: u8 ,) , # [codec (index = 5)] GeneralIndex (# [codec (compact)] :: core :: primitive :: u128 ,) , # [codec (index = 6)] GeneralKey (runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < :: core :: primitive :: u8 > ,) , # [codec (index = 7)] OnlyChild , # [codec (index = 8)] Plurality { id : runtime_types :: xcm :: v0 :: junction :: BodyId , part : runtime_types :: xcm :: v0 :: junction :: BodyPart , } , }
                 }
                 pub mod multiasset {
                     use super::runtime_types;
@@ -52919,10 +53068,10 @@ pub mod api {
             };
             if runtime_metadata_hash
                 != [
-                    147u8, 4u8, 219u8, 235u8, 30u8, 170u8, 31u8, 204u8, 122u8, 215u8,
-                    247u8, 77u8, 5u8, 195u8, 148u8, 219u8, 244u8, 41u8, 173u8, 234u8,
-                    240u8, 76u8, 16u8, 83u8, 27u8, 97u8, 105u8, 134u8, 156u8, 239u8,
-                    228u8, 53u8,
+                    14u8, 118u8, 204u8, 231u8, 221u8, 216u8, 141u8, 158u8, 101u8, 64u8,
+                    90u8, 209u8, 109u8, 181u8, 197u8, 130u8, 199u8, 182u8, 107u8, 141u8,
+                    198u8, 255u8, 217u8, 71u8, 178u8, 75u8, 222u8, 13u8, 27u8, 141u8,
+                    199u8, 236u8,
                 ]
             {
                 Err(::subxt::MetadataError::IncompatibleMetadata)

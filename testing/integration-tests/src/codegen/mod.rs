@@ -24,3 +24,5 @@
 #[rustfmt::skip]
 #[allow(clippy::all)]
 mod polkadot;
+
+mod codegen_documentation;

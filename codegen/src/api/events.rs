@@ -81,8 +81,11 @@ pub fn generate_events(
         }
     });
     let event_type = type_gen.resolve_type_path(event.ty.id(), &[]);
+    let event_ty = type_gen.resolve_type(event.ty.id());
+    let docs = event_ty.docs();
 
     quote! {
+        #( #[doc = #docs ] )*
         pub type Event = #event_type;
         pub mod events {
             use super::#types_mod_ident;
