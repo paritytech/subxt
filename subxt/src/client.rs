@@ -15,8 +15,11 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use sp_runtime::{traits::Hash, ApplyExtrinsicResult};
 pub use sp_runtime::traits::SignedExtension;
+use sp_runtime::{
+    traits::Hash,
+    ApplyExtrinsicResult,
+};
 
 use crate::{
     error::{
@@ -450,7 +453,10 @@ where
     /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
     ///
     /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
-    pub async fn dry_run(&self, at: Option<T::Hash>) -> Result<ApplyExtrinsicResult, BasicError> {
+    pub async fn dry_run(
+        &self,
+        at: Option<T::Hash>,
+    ) -> Result<ApplyExtrinsicResult, BasicError> {
         self.client.rpc().dry_run(self.encoded(), at).await
     }
 
