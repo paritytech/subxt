@@ -355,9 +355,7 @@ where
     }
 
     /// Return the SCALE encoded bytes representing the call data of the transaction.
-    pub fn call_data(
-        &self
-    ) -> Result<Vec<u8>, BasicError> {
+    pub fn call_data(&self) -> Result<Vec<u8>, BasicError> {
         let mut bytes = Vec::new();
         let locked_metadata = self.client.metadata();
         let metadata = locked_metadata.read();
