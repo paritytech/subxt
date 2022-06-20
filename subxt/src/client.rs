@@ -354,6 +354,20 @@ where
             .await
     }
 
+    /// Return the SCALE encoded bytes representing the call data of the transaction.
+    pub fn call_data(
+        &self
+    ) -> Result<Vec<u8>, BasicError> {
+        let mut bytes = Vec::new();
+        let locked_metadata = self.client.metadata();
+        let metadata = locked_metadata.read();
+        let pallet = metadata.pallet(C::PALLET)?;
+        bytes.push(pallet.index());
+        bytes.push(pallet.call_index::<C>()?);
+        self.call.encode_to(&mut bytes);
+        Ok(bytes)
+    }
+
     /// Creates a returns a raw signed extrinsic, without submitting it.
     pub async fn create_signed(
         &self,
@@ -371,16 +385,7 @@ where
         };
 
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-        let call_data = {
-            let mut bytes = Vec::new();
-            let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
-            let pallet = metadata.pallet(C::PALLET)?;
-            bytes.push(pallet.index());
-            bytes.push(pallet.call_index::<C>()?);
-            self.call.encode_to(&mut bytes);
-            Encoded(bytes)
-        };
+        let call_data = Encoded(self.call_data()?);
 
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = {
