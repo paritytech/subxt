@@ -1,6 +1,6 @@
 [package]
 name = "subxt-codegen"
-version = "0.21.0"
+version = "0.22.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -20,7 +20,7 @@ proc-macro-error = "1.0.4"
 quote = "1.0.8"
 syn = "1.0.58"
 scale-info = { version = "2.0.0", features = ["bit-vec"] }
-subxt-metadata = { version = "0.21.0", path = "../metadata" }
+subxt-metadata = { version = "0.22.0", path = "../metadata" }
 
 [dev-dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }

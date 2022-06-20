@@ -4,6 +4,44 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.22.0] - 2022-06-20
+
+With this release, subxt can subscribe to the node's runtime upgrades to ensure that the metadata is updated and
+extrinsics are properly constructed.
+
+We have also made some slight API improvements to make in the area of storage keys, and thanks to an external contribution we now support dry running transactions before submitting them.
+
+This release also improves the documentation, adds UI tests, and defaults the `subxt-cli` to return metadata
+bytes instead of the JSON format.
+
+### Fixed
+
+- Handle `StorageEntry` empty keys ([#565](https://github.com/paritytech/subxt/pull/565))
+- Fix documentation examples ([#568](https://github.com/paritytech/subxt/pull/568))
+- Fix cargo clippy ([#548](https://github.com/paritytech/subxt/pull/548))
+- fix: Find substrate port on different log lines ([#536](https://github.com/paritytech/subxt/pull/536))
+
+### Added
+
+- Followup test for checking propagated documentation ([#514](https://github.com/paritytech/subxt/pull/514))
+- feat: refactor signing in order to more easily be able to dryrun ([#547](https://github.com/paritytech/subxt/pull/547))
+- Add subxt documentation ([#546](https://github.com/paritytech/subxt/pull/546))
+- Add ability to iterate over N map storage keys ([#537](https://github.com/paritytech/subxt/pull/537))
+- Subscribe to Runtime upgrades for proper extrinsic construction ([#513](https://github.com/paritytech/subxt/pull/513))
+
+### Changed
+- Move test crates into a "testing" folder and add a ui (trybuild) test and ui-test helpers ([#567](https://github.com/paritytech/subxt/pull/567))
+- Update jsonrpsee requirement from 0.13.0 to 0.14.0 ([#566](https://github.com/paritytech/subxt/pull/566))
+- Make storage futures only borrow client, not self, for better ergonomics ([#561](https://github.com/paritytech/subxt/pull/561))
+- Bump actions/checkout from 2 to 3 ([#557](https://github.com/paritytech/subxt/pull/557))
+- Deny unused crate dependencies ([#549](https://github.com/paritytech/subxt/pull/549))
+- Implement `Clone` for the generated `RuntimeApi` ([#544](https://github.com/paritytech/subxt/pull/544))
+- Update color-eyre requirement from 0.5.11 to 0.6.1 ([#540](https://github.com/paritytech/subxt/pull/540))
+- Update jsonrpsee requirement from 0.12.0 to 0.13.0 ([#541](https://github.com/paritytech/subxt/pull/541))
+- Update artifacts and polkadot.rs and change CLI to default bytes ([#533](https://github.com/paritytech/subxt/pull/533))
+- Replace `log` with `tracing` and record extrinsic info ([#535](https://github.com/paritytech/subxt/pull/535))
+- Bump jsonrpsee ([#528](https://github.com/paritytech/subxt/pull/528))
+
 ## [0.21.0] - 2022-05-02
 
 This release adds static metadata validation, via comparing the statically generated API with the target node's runtime
