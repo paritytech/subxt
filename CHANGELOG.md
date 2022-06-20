@@ -6,14 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.22.0] - 2022-06-20
 
-With this release, subxt can perform runtime upgrades to ensure that extrinsics are properly constructed for the
-target node. The dependabot is added to the repository to keep the crate dependencies updated.
+With this release, subxt can subscribe to the node's runtime upgrades to ensure that the metadata is updated and
+extrinsics are properly constructed. The dependabot is added to the repository to keep the crate dependencies updated.
 
 The API's ergonomics are improved for iterating over N-map storage keys, allowing the API to be cloned between
 runtime tasks, running multiple storage queries without borrowing the client, and dry run extrinsics for
 validation purposes.
 
-This release also improves the subxt's documentation, adds UI testing, and defaults the `subxt-cli` to return metadata
+This release also improves the documentation, adds UI tests, and defaults the `subxt-cli` to return metadata
 bytes instead of the JSON format.
 
 ### Fixed
@@ -27,11 +27,8 @@ bytes instead of the JSON format.
 
 - Followup test for checking propagated documentation ([#514](https://github.com/paritytech/subxt/pull/514))
 - feat: refactor signing in order to more easily be able to dryrun ([#547](https://github.com/paritytech/subxt/pull/547))
-- added subscribe blocks example ([#521](https://github.com/paritytech/subxt/pull/521))
 - Add subxt documentation ([#546](https://github.com/paritytech/subxt/pull/546))
-- Add GitHub Actions to Dependabot and CODEOWNERS ([#555](https://github.com/paritytech/subxt/pull/555))
 - Add ability to iterate over N map storage keys ([#537](https://github.com/paritytech/subxt/pull/537))
-- Dependabot ([#538](https://github.com/paritytech/subxt/pull/538))
 - Subscribe to Runtime upgrades for proper extrinsic construction ([#513](https://github.com/paritytech/subxt/pull/513))
 
 ### Changed
@@ -39,7 +36,6 @@ bytes instead of the JSON format.
 - Update jsonrpsee requirement from 0.13.0 to 0.14.0 ([#566](https://github.com/paritytech/subxt/pull/566))
 - Make storage futures only borrow client, not self, for better ergonomics ([#561](https://github.com/paritytech/subxt/pull/561))
 - Bump actions/checkout from 2 to 3 ([#557](https://github.com/paritytech/subxt/pull/557))
-- Bump Swatinem/rust-cache from 1.3.0 to 1.4.0 ([#556](https://github.com/paritytech/subxt/pull/556))
 - Deny unused crate dependencies ([#549](https://github.com/paritytech/subxt/pull/549))
 - Implement `Clone` for the generated `RuntimeApi` ([#544](https://github.com/paritytech/subxt/pull/544))
 - Update color-eyre requirement from 0.5.11 to 0.6.1 ([#540](https://github.com/paritytech/subxt/pull/540))
