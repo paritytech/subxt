@@ -9,9 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 With this release, subxt can subscribe to the node's runtime upgrades to ensure that the metadata is updated and
 extrinsics are properly constructed.
 
-The API's ergonomics are improved for iterating over N-map storage keys, allowing the API to be cloned between
-runtime tasks, running multiple storage queries without borrowing the client, and dry run extrinsics for
-validation purposes.
+We have also made some slight API improvements to make in the area of storage keys, and thanks to an external contribution we now support dry running transactions before submitting them.
 
 This release also improves the documentation, adds UI tests, and defaults the `subxt-cli` to return metadata
 bytes instead of the JSON format.
