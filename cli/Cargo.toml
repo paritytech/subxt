@@ -4,7 +4,7 @@ version = "0.22.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
-license = "GPL-3.0"
+license = "MIT"
 repository = "https://github.com/paritytech/subxt"
 documentation = "https://docs.rs/subxt-cli"
 homepage = "https://www.parity.io/"
