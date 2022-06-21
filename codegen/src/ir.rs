@@ -23,7 +23,6 @@ use syn::{
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ItemMod {
-    // attrs: Vec<syn::Attribute>,
     vis: syn::Visibility,
     mod_token: token::Mod,
     pub ident: syn::Ident,
