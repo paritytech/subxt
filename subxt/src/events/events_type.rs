@@ -401,7 +401,7 @@ fn decode_raw_event_details<T: Config>(
         pallet: event_metadata.pallet().to_string(),
         variant_index,
         variant: event_metadata.event().to_string(),
-        bytes: event_bytes.into(),
+        bytes: event_bytes,
         fields: event_fields,
     })
 }
@@ -512,6 +512,28 @@ pub(crate) mod test_utils {
             _event_type: std::marker::PhantomData,
         }
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        test_utils::{
+            event_record,
+            events,
+            events_raw,
+            AllEvents,
+        },
+        *,
+    };
+    use crate::Phase;
+    use codec::Encode;
+    use scale_info::TypeInfo;
+    use scale_value::Value;
+
+    /// Build a fake wrapped metadata.
+    fn metadata<E: TypeInfo + 'static>() -> Arc<RwLock<Metadata>> {
+        Arc::new(RwLock::new(test_utils::metadata::<E>()))
+    }
 
     /// [`RawEventDetails`] can be annoying to test, because it contains
     /// type info in the decoded field Values. Strip that here so that
@@ -527,12 +549,16 @@ pub(crate) mod test_utils {
         pub fields: Vec<scale_value::Value>,
     }
 
-    /// Compare some actual [`RawEventDetails`] with a hand-constructed (probably) [`TestRawEventDetails`].
+    /// Compare some actual [`RawEventDetails`] with a hand-constructed
+    /// (probably) [`TestRawEventDetails`].
     pub fn assert_raw_events_match(
-        metadata: &Metadata,
+        // Just for convenience, pass in the metadata type constructed
+        // by the `metadata` function above to simplify caller code.
+        metadata: &Arc<RwLock<Metadata>>,
         actual: RawEventDetails,
         expected: TestRawEventDetails,
     ) {
+        let metadata = metadata.read();
         let types = &metadata.runtime_metadata().types;
 
         // Make sure that the bytes handed back line up with the fields handed back;
@@ -563,30 +589,6 @@ pub(crate) mod test_utils {
         assert_eq!(actual.variant, expected.variant);
         assert_eq!(actual.variant_index, expected.variant_index);
         assert_eq!(actual_fields_no_context, expected.fields);
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{
-        test_utils::{
-            assert_raw_events_match,
-            event_record,
-            events,
-            events_raw,
-            AllEvents,
-            TestRawEventDetails,
-        },
-        *,
-    };
-    use crate::Phase;
-    use codec::Encode;
-    use scale_info::TypeInfo;
-    use scale_value::Value;
-
-    /// Build a fake wrapped metadata.
-    fn metadata<E: TypeInfo + 'static>() -> Arc<RwLock<Metadata>> {
-        Arc::new(RwLock::new(test_utils::metadata::<E>()))
     }
 
     #[test]
@@ -736,7 +738,7 @@ mod tests {
 
         let mut event_details = events.iter_raw();
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 phase: Phase::ApplyExtrinsic(123),
@@ -784,7 +786,7 @@ mod tests {
         let mut event_details = events.iter_raw();
 
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -797,7 +799,7 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 1,
@@ -810,7 +812,7 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 2,
@@ -855,7 +857,7 @@ mod tests {
 
         let mut events_iter = events.iter_raw();
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             events_iter.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -868,7 +870,7 @@ mod tests {
             },
         );
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             events_iter.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 1,
@@ -920,7 +922,7 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter_raw();
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -973,7 +975,7 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter_raw();
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
@@ -1027,7 +1029,7 @@ mod tests {
         // Dynamically decode:
         let mut event_details = events.iter_raw();
         assert_raw_events_match(
-            &metadata.read(),
+            &metadata,
             event_details.next().unwrap().unwrap(),
             TestRawEventDetails {
                 index: 0,
