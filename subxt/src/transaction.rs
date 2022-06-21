@@ -386,7 +386,7 @@ impl<'client, T: Config, E: Decode + HasModuleError, Evs: Decode>
         for ev in events.iter_raw() {
             let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
-                let dispatch_error = E::decode(&mut &*ev.data)?;
+                let dispatch_error = E::decode(&mut &*ev.bytes)?;
                 if let Some(error_data) = dispatch_error.module_error_data() {
                     // Error index is utilized as the first byte from the error array.
                     let locked_metadata = self.client.metadata();

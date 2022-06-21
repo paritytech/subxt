@@ -14,15 +14,13 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use crate::{
-    events::EventsDecodingError,
-    metadata::{
-        InvalidMetadataError,
-        MetadataError,
-    },
+use crate::metadata::{
+    InvalidMetadataError,
+    MetadataError,
 };
 use core::fmt::Debug;
 use jsonrpsee::core::error::Error as RequestError;
+use scale_value::scale::DecodeError;
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 
@@ -66,7 +64,7 @@ pub enum GenericError<E> {
     Runtime(E),
     /// Events decoding error.
     #[error("Events decoding error: {0}")]
-    EventsDecoding(#[from] EventsDecodingError),
+    EventsDecoding(#[from] DecodeError),
     /// Transaction progress error.
     #[error("Transaction error: {0}")]
     Transaction(#[from] TransactionError),
