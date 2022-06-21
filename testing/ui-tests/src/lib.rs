@@ -15,6 +15,14 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 #![cfg(test)]
 
+//! UI test set uses [`trybuild`](https://docs.rs/trybuild/latest/trybuild/index.html) to
+//! check whether expected valid examples of code compile correctly, and for incorrect ones
+//! errors are helpful and valid (e.g. have correct spans).
+//!
+//!
+//! Use with `TRYBUILD=overwrite` after updating codebase (see `trybuild` docs for more details on that)
+//! to automatically regenerate `stderr` files, but don't forget to check that new files make sense.
+
 mod dispatch_errors;
 mod storage;
 mod utils;
@@ -48,4 +56,10 @@ fn ui_tests() {
         "array_dispatch_error",
         dispatch_errors::metadata_array_dispatch_error(),
     ));
+}
+
+#[test]
+fn ui_fail() {
+    let t = trybuild::TestCases::new();
+    t.compile_fail("src/incorrect/*.rs");
 }
