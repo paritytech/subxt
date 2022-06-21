@@ -109,10 +109,10 @@ pub use event_subscription::{
 };
 pub use events_type::{
     at,
+    DecodedValue,
     EventDetails,
     Events,
     RawEventDetails,
-    DecodedValue,
 };
 pub use filter_events::{
     EventFilter,
