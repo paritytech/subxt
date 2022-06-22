@@ -27,10 +27,7 @@ use frame_metadata::{
     META_RESERVED,
 };
 use jsonrpsee::{
-    async_client::{
-        Client,
-        ClientBuilder,
-    },
+    async_client::ClientBuilder,
     client_transport::ws::{
         Uri,
         WsTransportClientBuilder,
@@ -278,22 +275,48 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
     }
 }
 
-/// Build WS RPC client from URL
-pub async fn ws_client(url: &Uri) -> Result<Client, Error> {
+async fn fetch_metadata_ws(url: &Uri) -> color_eyre::Result<String> {
     let (sender, receiver) = WsTransportClientBuilder::default()
         .build(url.to_string().parse::<Uri>().unwrap())
         .await
         .map_err(|e| Error::Transport(e.into()))?;
 
-    Ok(ClientBuilder::default()
+    let client = ClientBuilder::default()
         .max_notifs_per_subscription(4096)
-        .build_with_tokio(sender, receiver))
+        .build_with_tokio(sender, receiver);
+
+    Ok(client.request("state_getMetadata", rpc_params![]).await?)
+}
+
+fn fetch_metadata_http(url: &Uri) -> color_eyre::Result<String> {
+    let resp = ureq::post(&url.to_string())
+        .set("Content-Type", "application/json")
+        .send_json(ureq::json!({
+            "jsonrpc": "2.0",
+            "method": "state_getMetadata",
+            "id": 1
+        }))
+        .context("error fetching metadata from the substrate node")?;
+    let json: serde_json::Value = resp.into_json()?;
+
+    Ok(json["result"]
+        .as_str()
+        .map(ToString::to_string)
+        .ok_or_else(|| eyre::eyre!("metadata result field should be a string"))?)
 }
 
 async fn fetch_metadata(url: &Uri) -> color_eyre::Result<(String, Vec<u8>)> {
-    let client = ws_client(url).await?;
-
-    let hex_data: String = client.request("state_getMetadata", rpc_params![]).await?;
+    let hex_data = match url.scheme_str() {
+        Some("http") => fetch_metadata_http(url),
+        Some("ws") | Some("wss") => fetch_metadata_ws(url).await,
+        invalid_scheme => {
+            let scheme = invalid_scheme.unwrap_or("no scheme");
+            Err(eyre::eyre!(format!(
+                "`{}` not supported, expects 'http', 'ws', or 'wss'",
+                scheme
+            )))
+        }
+    }?;
 
     let bytes = hex::decode(hex_data.trim_start_matches("0x"))?;
 

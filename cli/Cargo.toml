@@ -21,6 +21,8 @@ subxt-codegen = { version = "0.22.0", path = "../codegen" }
 subxt-metadata = { version = "0.22.0", path = "../metadata" }
 # parse command line args
 structopt = "0.3.25"
+# make the request to a substrate node to get the metadata
+ureq = { version = "2.2.0", features = ["json"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
