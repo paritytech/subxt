@@ -16,10 +16,7 @@
 
 use futures::future;
 pub use sp_runtime::traits::SignedExtension;
-use sp_runtime::{
-    traits::Hash,
-    ApplyExtrinsicResult,
-};
+use sp_runtime::{traits::Hash, ApplyExtrinsicResult};
 
 use crate::{
     error::{BasicError, HasModuleError},
@@ -493,21 +490,5 @@ where
     /// Returns the SCALE encoded extrinsic bytes.
     pub fn encoded(&self) -> &[u8] {
         &self.encoded.0
-    }
-
-    /// Creates a unsigned extrinsic.
-    pub fn create_unsigned(&self) -> Result<Encoded, BasicError> {
-        let call_data = {
-            let mut bytes = Vec::new();
-            let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
-            let pallet = metadata.pallet(C::PALLET)?;
-            bytes.push(pallet.index());
-            bytes.push(pallet.call_index::<C>()?);
-            self.call.encode_to(&mut bytes);
-            Encoded(bytes)
-        };
-
-        Ok(call_data)
     }
 }
