@@ -10,6 +10,6 @@ codec = { package = "parity-scale-codec", version = "3.0.0", default-features = 
 
 [build-dependencies]
 subxt = { path = "../../subxt" }
-sp-core = "6.0.0"
+sp-core = { git = "https://github.com/tidelabs/substrate", branch = "tidechain" }
 tokio = { version = "1.8", features = ["macros", "rt-multi-thread"] }
 which = "4.2.2"
