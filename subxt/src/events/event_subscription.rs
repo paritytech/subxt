@@ -16,20 +16,37 @@
 
 //! Subscribing to events.
 
-use crate::{error::BasicError, Client, Config};
+use crate::{
+    error::BasicError,
+    Client,
+    Config,
+};
 use codec::Decode;
 use derivative::Derivative;
 use futures::{
     future::Either,
-    stream::{self, BoxStream},
-    Future, FutureExt, Stream, StreamExt,
+    stream::{
+        self,
+        BoxStream,
+    },
+    Future,
+    FutureExt,
+    Stream,
+    StreamExt,
 };
 use jsonrpsee::core::client::Subscription;
 use sp_runtime::traits::Header;
-use std::{marker::Unpin, task::Poll};
+use std::{
+    marker::Unpin,
+    task::Poll,
+};
 
 pub use super::{
-    at, EventDetails, EventFilter, Events, EventsDecodingError, FilterEvents,
+    at,
+    EventDetails,
+    EventFilter,
+    Events,
+    FilterEvents,
     RawEventDetails,
 };
 
@@ -110,10 +127,12 @@ where
         // Iterate over all of the previous blocks we need headers for, ignoring the current block
         // (which we already have the header info for):
         let previous_headers = stream::iter(start_block_num..end_block_num)
-            .then(move |n| async move {
-                let hash = client.rpc().block_hash(Some(n.into())).await?;
-                let header = client.rpc().header(hash).await?;
-                Ok::<_, BasicError>(header)
+            .then(move |n| {
+                async move {
+                    let hash = client.rpc().block_hash(Some(n.into())).await?;
+                    let header = client.rpc().header(hash).await?;
+                    Ok::<_, BasicError>(header)
+                }
             })
             .filter_map(|h| async { h.transpose() });
 
@@ -210,7 +229,7 @@ where
     ) -> std::task::Poll<Option<Self::Item>> {
         // We are finished; return None.
         if self.finished {
-            return Poll::Ready(None);
+            return Poll::Ready(None)
         }
 
         // If there isn't an `at` function yet that's busy resolving a block hash into
@@ -219,11 +238,11 @@ where
             match futures::ready!(self.block_header_subscription.poll_next_unpin(cx)) {
                 None => {
                     self.finished = true;
-                    return Poll::Ready(None);
+                    return Poll::Ready(None)
                 }
                 Some(Err(e)) => {
                     self.finished = true;
-                    return Poll::Ready(Some(Err(e.into())));
+                    return Poll::Ready(Some(Err(e.into())))
                 }
                 Some(Ok(block_header)) => {
                     // Note [jsdw]: We may be able to get rid of the per-item allocation

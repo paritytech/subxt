@@ -1,0 +1,5 @@
+error: The substitute path must be a global absolute path; try prefixing with `::` or `crate`
+ --> src/incorrect/substitute_path_not_absolute.rs:4:9
+  |
+4 |     use sp_runtime::Perbill;
+  |         ^^^^^^^^^^

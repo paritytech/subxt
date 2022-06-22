@@ -14,6 +14,8 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
+#![deny(unused_crate_dependencies)]
+
 use color_eyre::eyre::{
     self,
     WrapErr,
@@ -61,7 +63,7 @@ enum Command {
     /// Download metadata from a substrate node, for use with `subxt` codegen.
     #[structopt(name = "metadata")]
     Metadata {
-        /// the url of the substrate node to query for metadata
+        /// The url of the substrate node to query for metadata.
         #[structopt(
             name = "url",
             long,
@@ -69,7 +71,7 @@ enum Command {
             default_value = "http://localhost:9933"
         )]
         url: url::Url,
-        /// the format of the metadata to display: `json`, `hex` or `bytes`
+        /// The format of the metadata to display: `json`, `hex` or `bytes`.
         #[structopt(long, short, default_value = "bytes")]
         format: String,
     },
@@ -79,10 +81,10 @@ enum Command {
     ///
     /// `subxt codegen | rustfmt --edition=2018 --emit=stdout`
     Codegen {
-        /// the url of the substrate node to query for metadata for codegen.
+        /// The url of the substrate node to query for metadata for codegen.
         #[structopt(name = "url", long, parse(try_from_str))]
         url: Option<url::Url>,
-        /// the path to the encoded metadata file.
+        /// The path to the encoded metadata file.
         #[structopt(short, long, parse(from_os_str))]
         file: Option<PathBuf>,
         /// Additional derives

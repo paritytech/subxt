@@ -15,8 +15,11 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use futures::future;
-use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
+use sp_runtime::{
+    traits::Hash,
+    ApplyExtrinsicResult,
+};
 
 use crate::{
     error::{BasicError, HasModuleError},
@@ -79,7 +82,24 @@ impl ClientBuilder {
         self
     }
 
-    /// Creates a new Client.
+    /// Builder for [Client].
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// use subxt::{ClientBuilder, DefaultConfig};
+    ///
+    /// #[tokio::main]
+    /// async fn main() {
+    ///     // Build the client.
+    ///     let client = ClientBuilder::new()
+    ///          .set_url("wss://rpc.polkadot.io:443")
+    ///          .build::<DefaultConfig>()
+    ///          .await
+    ///          .unwrap();
+    ///     // Use the client...
+    /// }
+    /// ```
     pub async fn build<T: Config>(self) -> Result<Client<T>, BasicError> {
         let client = if let Some(client) = self.client {
             client
@@ -172,6 +192,34 @@ impl<T: Config> Client<T> {
     }
 
     /// Create a wrapper for performing runtime updates on this client.
+    ///
+    /// # Note
+    ///
+    /// The update client is intended to be used in the background for
+    /// performing runtime updates, while the API is still in use.
+    /// Without performing runtime updates the submitted extrinsics may fail.
+    ///
+    /// # Examples
+    ///
+    /// ```no_run
+    /// # use subxt::{ClientBuilder, DefaultConfig};
+    /// #
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// #    let client = ClientBuilder::new()
+    /// #         .set_url("wss://rpc.polkadot.io:443")
+    /// #         .build::<DefaultConfig>()
+    /// #         .await
+    /// #         .unwrap();
+    /// #
+    /// let update_client = client.updates();
+    /// // Spawn a new background task to handle runtime updates.
+    /// tokio::spawn(async move {
+    ///     let result = update_client.perform_runtime_updates().await;
+    ///     println!("Runtime update finished with result={:?}", result);
+    /// });
+    /// # }
+    /// ```
     pub fn updates(&self) -> UpdateClient<T> {
         UpdateClient::new(
             self.rpc.clone(),
@@ -224,7 +272,7 @@ where
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch_default(
-        self,
+        &self,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError>
     where
@@ -239,22 +287,14 @@ where
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
     pub async fn sign_and_submit_then_watch(
-        self,
+        &self,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
     ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError> {
-        // Sign the call data to create our extrinsic.
-        let extrinsic = self.create_signed(signer, other_params).await?;
-
-        // Get a hash of the extrinsic (we'll need this later).
-        let ext_hash = T::Hashing::hash_of(&extrinsic);
-
-        tracing::info!("xt hash: {}", hex::encode(ext_hash.encode()));
-
-        // Submit and watch for transaction progress.
-        let sub = self.client.rpc().watch_extrinsic(extrinsic).await?;
-
-        Ok(TransactionProgress::new(sub, self.client, ext_hash))
+        self.create_signed(signer, other_params)
+            .await?
+            .submit_and_watch()
+            .await
     }
 
     /// Creates and signs an extrinsic and submits to the chain for block inclusion. Passes
@@ -268,7 +308,7 @@ where
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit_default(
-        self,
+        &self,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, BasicError>
     where
@@ -286,12 +326,26 @@ where
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
     pub async fn sign_and_submit(
-        self,
+        &self,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
     ) -> Result<T::Hash, BasicError> {
-        let extrinsic = self.create_signed(signer, other_params).await?;
-        self.client.rpc().submit_extrinsic(extrinsic).await
+        self.create_signed(signer, other_params)
+            .await?
+            .submit()
+            .await
+    }
+
+    /// Return the SCALE encoded bytes representing the call data of the transaction.
+    pub fn call_data(&self) -> Result<Vec<u8>, BasicError> {
+        let mut bytes = Vec::new();
+        let locked_metadata = self.client.metadata();
+        let metadata = locked_metadata.read();
+        let pallet = metadata.pallet(C::PALLET)?;
+        bytes.push(pallet.index());
+        bytes.push(pallet.call_index::<C>()?);
+        self.call.encode_to(&mut bytes);
+        Ok(bytes)
     }
 
     /// Creates a returns a raw signed extrinsic, without submitting it.
@@ -299,7 +353,7 @@ where
         &self,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: X::OtherParams,
-    ) -> Result<Encoded, BasicError> {
+    ) -> Result<SignedSubmittableExtrinsic<'client, T, X, E, Evs>, BasicError> {
         // 1. Get nonce
         let account_nonce = if let Some(nonce) = signer.nonce() {
             nonce
@@ -311,16 +365,7 @@ where
         };
 
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
-        let call_data = {
-            let mut bytes = Vec::new();
-            let locked_metadata = self.client.metadata();
-            let metadata = locked_metadata.read();
-            let pallet = metadata.pallet(C::PALLET)?;
-            bytes.push(pallet.index());
-            bytes.push(pallet.call_index::<C>()?);
-            self.call.encode_to(&mut bytes);
-            Encoded(bytes)
-        };
+        let call_data = Encoded(self.call_data()?);
 
         // 3. Construct our custom additional/extra params.
         let additional_and_extra_params = {
@@ -386,7 +431,68 @@ where
 
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         // maybe we can just return the raw bytes..
-        Ok(Encoded(extrinsic))
+        Ok(SignedSubmittableExtrinsic {
+            client: self.client,
+            encoded: Encoded(extrinsic),
+            marker: self.marker,
+        })
+    }
+}
+
+pub struct SignedSubmittableExtrinsic<'client, T: Config, X, E: Decode, Evs: Decode> {
+    client: &'client Client<T>,
+    encoded: Encoded,
+    marker: std::marker::PhantomData<(X, E, Evs)>,
+}
+
+impl<'client, T, X, E, Evs> SignedSubmittableExtrinsic<'client, T, X, E, Evs>
+where
+    T: Config,
+    X: ExtrinsicParams<T>,
+    E: Decode + HasModuleError,
+    Evs: Decode,
+{
+    /// Submits the extrinsic to the chain.
+    ///
+    /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
+    /// and obtain details about it, once it has made it into a block.
+    pub async fn submit_and_watch(
+        &self,
+    ) -> Result<TransactionProgress<'client, T, E, Evs>, BasicError> {
+        // Get a hash of the extrinsic (we'll need this later).
+        let ext_hash = T::Hashing::hash_of(&self.encoded);
+
+        // Submit and watch for transaction progress.
+        let sub = self.client.rpc().watch_extrinsic(&self.encoded).await?;
+
+        Ok(TransactionProgress::new(sub, self.client, ext_hash))
+    }
+
+    /// Submits the extrinsic to the chain for block inclusion.
+    ///
+    /// Returns `Ok` with the extrinsic hash if it is valid extrinsic.
+    ///
+    /// # Note
+    ///
+    /// Success does not mean the extrinsic has been included in the block, just that it is valid
+    /// and has been included in the transaction pool.
+    pub async fn submit(&self) -> Result<T::Hash, BasicError> {
+        self.client.rpc().submit_extrinsic(&self.encoded).await
+    }
+
+    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    ///
+    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
+    pub async fn dry_run(
+        &self,
+        at: Option<T::Hash>,
+    ) -> Result<ApplyExtrinsicResult, BasicError> {
+        self.client.rpc().dry_run(self.encoded(), at).await
+    }
+
+    /// Returns the SCALE encoded extrinsic bytes.
+    pub fn encoded(&self) -> &[u8] {
+        &self.encoded.0
     }
 
     /// Creates a unsigned extrinsic.

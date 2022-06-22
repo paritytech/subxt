@@ -55,6 +55,15 @@ use std::{
 };
 use syn::parse_quote;
 
+/// Generates the API for interacting with a Substrate runtime.
+///
+/// # Arguments
+///
+/// * `item_mod` - The module declaration for which the API is implemented.
+/// * `path` - The path to the scale encoded metadata of the runtime node.
+/// * `derives` - Provide custom derives for the generated types.
+///
+/// **Note:** This is a wrapper over [RuntimeGenerator] for static metadata use-cases.
 pub fn generate_runtime_api<P>(
     item_mod: syn::ItemMod,
     path: P,
@@ -78,11 +87,16 @@ where
     generator.generate_runtime(item_mod, derives)
 }
 
+/// Create the API for interacting with a Substrate runtime.
 pub struct RuntimeGenerator {
     metadata: RuntimeMetadataV14,
 }
 
 impl RuntimeGenerator {
+    /// Create a new runtime generator from the provided metadata.
+    ///
+    /// **Note:** If you have a path to the metadata, prefer to use [generate_runtime_api]
+    /// for generating the runtime API.
     pub fn new(metadata: RuntimeMetadataPrefixed) -> Self {
         match metadata.1 {
             RuntimeMetadata::V14(v14) => Self { metadata: v14 },
@@ -90,6 +104,12 @@ impl RuntimeGenerator {
         }
     }
 
+    /// Generate the API for interacting with a Substrate runtime.
+    ///
+    /// # Arguments
+    ///
+    /// * `item_mod` - The module declaration for which the API is implemented.
+    /// * `derives` - Provide custom derives for the generated types.
     pub fn generate_runtime(
         &self,
         item_mod: syn::ItemMod,
@@ -98,7 +118,7 @@ impl RuntimeGenerator {
         let item_mod_ir = ir::ItemMod::from(item_mod);
         let default_derives = derives.default_derives();
 
-        // some hardcoded default type substitutes, can be overridden by user
+        // Some hardcoded default type substitutes, can be overridden by user
         let mut type_substitutes = [
             (
                 "bitvec::order::Lsb0",
@@ -175,47 +195,24 @@ impl RuntimeGenerator {
         let metadata_hash = get_metadata_per_pallet_hash(&self.metadata, &pallet_names);
 
         let modules = pallets_with_mod_names.iter().map(|(pallet, mod_name)| {
-            let calls = if let Some(ref calls) = pallet.calls {
-                calls::generate_calls(
-                    &self.metadata,
-                    &type_gen,
-                    pallet,
-                    calls,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let calls =
+                calls::generate_calls(&self.metadata, &type_gen, pallet, types_mod_ident);
 
-            let event = if let Some(ref event) = pallet.event {
-                events::generate_events(&type_gen, pallet, event, types_mod_ident)
-            } else {
-                quote!()
-            };
+            let event = events::generate_events(&type_gen, pallet, types_mod_ident);
 
-            let storage_mod = if let Some(ref storage) = pallet.storage {
-                storage::generate_storage(
-                    &self.metadata,
-                    &type_gen,
-                    pallet,
-                    storage,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let storage_mod = storage::generate_storage(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
-            let constants_mod = if !pallet.constants.is_empty() {
-                constants::generate_constants(
-                    &self.metadata,
-                    &type_gen,
-                    pallet,
-                    &pallet.constants,
-                    types_mod_ident,
-                )
-            } else {
-                quote!()
-            };
+            let constants_mod = constants::generate_constants(
+                &self.metadata,
+                &type_gen,
+                pallet,
+                types_mod_ident,
+            );
 
             quote! {
                 pub mod #mod_name {

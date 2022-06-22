@@ -1,6 +1,6 @@
 [package]
 name = "subxt-cli"
-version = "0.21.0"
+version = "0.22.0"
 authors = ["Parity Technologies <admin@parity.io>"]
 edition = "2021"
 
@@ -16,11 +16,9 @@ path = "src/main.rs"
 
 [dependencies]
 # perform subxt codegen
-subxt-codegen = { version = "0.21.0", path = "../codegen" }
+subxt-codegen = { version = "0.22.0", path = "../codegen" }
 # perform node compatibility
-subxt-metadata = { version = "0.21.0", path = "../metadata" }
-# information of portable registry
-scale-info = "2.0.0"
+subxt-metadata = { version = "0.22.0", path = "../metadata" }
 # parse command line args
 structopt = "0.3.25"
 # make the request to a substrate node to get the metadata

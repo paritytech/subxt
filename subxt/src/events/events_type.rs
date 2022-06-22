@@ -16,7 +16,6 @@
 
 //! A representation of a block of events.
 
-use super::decoding;
 use crate::{
     error::BasicError,
     Client,
@@ -36,7 +35,6 @@ use parking_lot::RwLock;
 use sp_core::{
     storage::StorageKey,
     twox_128,
-    Bytes,
 };
 use std::sync::Arc;
 
@@ -310,6 +308,9 @@ pub struct EventDetails<Evs> {
     pub event: Evs,
 }
 
+/// A Value which has been decoded from some raw bytes.
+pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
+
 /// The raw bytes for an event with associated details about
 /// where and when it was emitted.
 #[derive(Debug, Clone, PartialEq)]
@@ -326,15 +327,17 @@ pub struct RawEventDetails {
     pub variant: String,
     /// The index of the pallet Event variant.
     pub variant_index: u8,
-    /// The raw Event data
-    pub data: Bytes,
+    /// The bytes representing the fields contained within the event.
+    pub bytes: Vec<u8>,
+    /// Generic values representing each field of the event.
+    pub fields: Vec<DecodedValue>,
 }
 
 impl RawEventDetails {
     /// Attempt to decode this [`RawEventDetails`] into a specific event.
     pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
-            Ok(Some(E::decode(&mut &self.data[..])?))
+            Ok(Some(E::decode(&mut &self.bytes[..])?))
         } else {
             Ok(None)
         }
@@ -369,15 +372,17 @@ fn decode_raw_event_details<T: Config>(
 
     // Use metadata to figure out which bytes belong to this event:
     let mut event_bytes = Vec::new();
+    let mut event_fields = Vec::new();
     for arg in event_metadata.variant().fields() {
         let type_id = arg.ty().id();
         let all_bytes = *input;
-        // consume some bytes, moving the cursor forward:
-        decoding::decode_and_consume_type(
+        // consume some bytes for each event field, moving the cursor forward:
+        let value = scale_value::scale::decode_as_type(
+            input,
             type_id,
             &metadata.runtime_metadata().types,
-            input,
         )?;
+        event_fields.push(value);
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
@@ -396,7 +401,8 @@ fn decode_raw_event_details<T: Config>(
         pallet: event_metadata.pallet().to_string(),
         variant_index,
         variant: event_metadata.event().to_string(),
-        data: event_bytes.into(),
+        bytes: event_bytes,
+        fields: event_fields,
     })
 }
 
@@ -522,10 +528,67 @@ mod tests {
     use crate::Phase;
     use codec::Encode;
     use scale_info::TypeInfo;
+    use scale_value::Value;
 
     /// Build a fake wrapped metadata.
     fn metadata<E: TypeInfo + 'static>() -> Arc<RwLock<Metadata>> {
         Arc::new(RwLock::new(test_utils::metadata::<E>()))
+    }
+
+    /// [`RawEventDetails`] can be annoying to test, because it contains
+    /// type info in the decoded field Values. Strip that here so that
+    /// we can compare fields more easily.
+    #[derive(Debug, PartialEq, Clone)]
+    pub struct TestRawEventDetails {
+        pub phase: Phase,
+        pub index: u32,
+        pub pallet: String,
+        pub pallet_index: u8,
+        pub variant: String,
+        pub variant_index: u8,
+        pub fields: Vec<scale_value::Value>,
+    }
+
+    /// Compare some actual [`RawEventDetails`] with a hand-constructed
+    /// (probably) [`TestRawEventDetails`].
+    pub fn assert_raw_events_match(
+        // Just for convenience, pass in the metadata type constructed
+        // by the `metadata` function above to simplify caller code.
+        metadata: &Arc<RwLock<Metadata>>,
+        actual: RawEventDetails,
+        expected: TestRawEventDetails,
+    ) {
+        let metadata = metadata.read();
+        let types = &metadata.runtime_metadata().types;
+
+        // Make sure that the bytes handed back line up with the fields handed back;
+        // encode the fields back into bytes and they should be equal.
+        let mut actual_bytes = vec![];
+        for field in &actual.fields {
+            scale_value::scale::encode_as_type(
+                field.clone(),
+                field.context,
+                types,
+                &mut actual_bytes,
+            )
+            .expect("should be able to encode properly");
+        }
+        assert_eq!(actual_bytes, actual.bytes);
+
+        let actual_fields_no_context: Vec<_> = actual
+            .fields
+            .into_iter()
+            .map(|f| f.remove_context())
+            .collect();
+
+        // Check each of the other fields:
+        assert_eq!(actual.phase, expected.phase);
+        assert_eq!(actual.index, expected.index);
+        assert_eq!(actual.pallet, expected.pallet);
+        assert_eq!(actual.pallet_index, expected.pallet_index);
+        assert_eq!(actual.variant, expected.variant);
+        assert_eq!(actual.variant_index, expected.variant_index);
+        assert_eq!(actual_fields_no_context, expected.fields);
     }
 
     #[test]
@@ -657,9 +720,9 @@ mod tests {
 
     #[test]
     fn dynamically_decode_single_event() {
-        #[derive(Clone, Copy, Debug, PartialEq, Decode, Encode, TypeInfo)]
+        #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
         enum Event {
-            A(u8),
+            A(u8, bool, Vec<String>),
         }
 
         // Create fake metadata that knows about our single event, above:
@@ -667,33 +730,31 @@ mod tests {
 
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
-        let event = Event::A(1);
+        let event = Event::A(1, true, vec!["Hi".into()]);
         let events = events::<Event>(
-            metadata,
+            metadata.clone(),
             vec![event_record(Phase::ApplyExtrinsic(123), event)],
         );
 
-        let event_details: Vec<RawEventDetails> =
-            events.iter_raw().collect::<Result<_, _>>().unwrap();
-        let expected_event_data = {
-            let mut bytes = event.encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes
-        };
-
-        assert_eq!(
-            event_details,
-            vec![RawEventDetails {
-                index: 0,
+        let mut event_details = events.iter_raw();
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
                 phase: Phase::ApplyExtrinsic(123),
+                index: 0,
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                data: expected_event_data.into()
-            }]
+                fields: vec![
+                    Value::uint(1u8),
+                    Value::bool(true),
+                    Value::unnamed_composite(vec![Value::string("Hi")]),
+                ],
+            },
         );
+        assert!(event_details.next().is_none());
     }
 
     #[test]
@@ -714,7 +775,7 @@ mod tests {
         let event3 = Event::A(234);
 
         let events = events::<Event>(
-            metadata,
+            metadata.clone(),
             vec![
                 event_record(Phase::Initialization, event1),
                 event_record(Phase::ApplyExtrinsic(123), event2),
@@ -722,47 +783,48 @@ mod tests {
             ],
         );
 
-        let event_details: Vec<RawEventDetails> =
-            events.iter_raw().collect::<Result<_, _>>().unwrap();
-        let event_bytes = |ev: Event| {
-            let mut bytes = ev.encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes.into()
-        };
+        let mut event_details = events.iter_raw();
 
-        assert_eq!(
-            event_details,
-            vec![
-                RawEventDetails {
-                    index: 0,
-                    phase: Phase::Initialization,
-                    pallet: "Test".to_string(),
-                    pallet_index: 0,
-                    variant: "A".to_string(),
-                    variant_index: 0,
-                    data: event_bytes(event1)
-                },
-                RawEventDetails {
-                    index: 1,
-                    phase: Phase::ApplyExtrinsic(123),
-                    pallet: "Test".to_string(),
-                    pallet_index: 0,
-                    variant: "B".to_string(),
-                    variant_index: 1,
-                    data: event_bytes(event2)
-                },
-                RawEventDetails {
-                    index: 2,
-                    phase: Phase::Finalization,
-                    pallet: "Test".to_string(),
-                    pallet_index: 0,
-                    variant: "A".to_string(),
-                    variant_index: 0,
-                    data: event_bytes(event3)
-                },
-            ]
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
+                index: 0,
+                phase: Phase::Initialization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                fields: vec![Value::uint(1u8)],
+            },
         );
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
+                index: 1,
+                phase: Phase::ApplyExtrinsic(123),
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "B".to_string(),
+                variant_index: 1,
+                fields: vec![Value::bool(true)],
+            },
+        );
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
+                index: 2,
+                phase: Phase::Finalization,
+                pallet: "Test".to_string(),
+                pallet_index: 0,
+                variant: "A".to_string(),
+                variant_index: 0,
+                fields: vec![Value::uint(234u8)],
+            },
+        );
+        assert!(event_details.next().is_none());
     }
 
     #[test]
@@ -788,42 +850,37 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events_raw::<Event>(
-            metadata,
+            metadata.clone(),
             event_bytes,
             3, // 2 "good" events, and then it'll hit the naff bytes.
         );
 
-        let event_bytes = |ev: Event| {
-            let mut bytes = ev.encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes.into()
-        };
-
         let mut events_iter = events.iter_raw();
-        assert_eq!(
+        assert_raw_events_match(
+            &metadata,
             events_iter.next().unwrap().unwrap(),
-            RawEventDetails {
+            TestRawEventDetails {
                 index: 0,
                 phase: Phase::Initialization,
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                data: event_bytes(Event::A(1))
-            }
+                fields: vec![Value::uint(1u8)],
+            },
         );
-        assert_eq!(
+        assert_raw_events_match(
+            &metadata,
             events_iter.next().unwrap().unwrap(),
-            RawEventDetails {
+            TestRawEventDetails {
                 index: 1,
                 phase: Phase::ApplyExtrinsic(123),
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "B".to_string(),
                 variant_index: 1,
-                data: event_bytes(Event::B(true))
-            }
+                fields: vec![Value::bool(true)],
+            },
         );
 
         // We'll hit an error trying to decode the third event:
@@ -846,7 +903,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construst an Events object to iterate them:
         let events = events::<Event>(
-            metadata,
+            metadata.clone(),
             vec![event_record(Phase::Finalization, Event::A(1))],
         );
 
@@ -863,26 +920,21 @@ mod tests {
         );
 
         // Dynamically decode:
-        let event_details: Vec<RawEventDetails> =
-            events.iter_raw().collect::<Result<_, _>>().unwrap();
-        let expected_event_data = {
-            let mut bytes = Event::A(1).encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes
-        };
-        assert_eq!(
-            event_details,
-            vec![RawEventDetails {
+        let mut event_details = events.iter_raw();
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
                 index: 0,
                 phase: Phase::Finalization,
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                data: expected_event_data.into()
-            }]
+                fields: vec![Value::uint(1u8)],
+            },
         );
+        assert!(event_details.next().is_none());
     }
 
     #[test]
@@ -901,7 +953,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata,
+            metadata.clone(),
             vec![event_record(
                 Phase::Finalization,
                 Event::A(CompactWrapper(1)),
@@ -921,26 +973,21 @@ mod tests {
         );
 
         // Dynamically decode:
-        let event_details: Vec<RawEventDetails> =
-            events.iter_raw().collect::<Result<_, _>>().unwrap();
-        let expected_event_data = {
-            let mut bytes = Event::A(CompactWrapper(1)).encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes
-        };
-        assert_eq!(
-            event_details,
-            vec![RawEventDetails {
+        let mut event_details = events.iter_raw();
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
                 index: 0,
                 phase: Phase::Finalization,
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                data: expected_event_data.into()
-            }]
+                fields: vec![Value::unnamed_composite(vec![Value::uint(1u8)])],
+            },
         );
+        assert!(event_details.next().is_none());
     }
 
     #[test]
@@ -963,7 +1010,7 @@ mod tests {
         // Encode our events in the format we expect back from a node, and
         // construct an Events object to iterate them:
         let events = events::<Event>(
-            metadata,
+            metadata.clone(),
             vec![event_record(Phase::Finalization, Event::A(MyType::B))],
         );
 
@@ -980,25 +1027,20 @@ mod tests {
         );
 
         // Dynamically decode:
-        let event_details: Vec<RawEventDetails> =
-            events.iter_raw().collect::<Result<_, _>>().unwrap();
-        let expected_event_data = {
-            let mut bytes = Event::A(MyType::B).encode();
-            // Strip variant tag off event bytes:
-            bytes.drain(0..1);
-            bytes
-        };
-        assert_eq!(
-            event_details,
-            vec![RawEventDetails {
+        let mut event_details = events.iter_raw();
+        assert_raw_events_match(
+            &metadata,
+            event_details.next().unwrap().unwrap(),
+            TestRawEventDetails {
                 index: 0,
                 phase: Phase::Finalization,
                 pallet: "Test".to_string(),
                 pallet_index: 0,
                 variant: "A".to_string(),
                 variant_index: 0,
-                data: expected_event_data.into()
-            }]
+                fields: vec![Value::unnamed_variant("B", vec![])],
+            },
         );
+        assert!(event_details.next().is_none());
     }
 }

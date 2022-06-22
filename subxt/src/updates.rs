@@ -14,7 +14,39 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! For performing runtime updates.
+//! Perform runtime updates in the background using [UpdateClient].
+//!
+//! There are cases when the node would perform a runtime update. As a result, the subxt's metadata
+//! would be out of sync and the API would not be able to submit valid extrinsics.
+//! This API keeps the `RuntimeVersion` and `Metadata` of the client synced with the target node.
+//!
+//! The runtime update is recommended for long-running clients, or for cases where manually
+//! restarting subxt would not be feasible. Even with this, extrinsics submitted during a node
+//! runtime update are at risk or failing, as it will take `subxt` a moment to catch up.
+//!
+//! ## Note
+//!
+//! Here we use tokio to check for updates in the background, but any runtime can be used.
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig};
+//! #
+//! # #[tokio::main]
+//! # async fn main() {
+//! #    let client = ClientBuilder::new()
+//! #         .set_url("wss://rpc.polkadot.io:443")
+//! #         .build::<DefaultConfig>()
+//! #         .await
+//! #         .unwrap();
+//! #
+//! let update_client = client.updates();
+//! // Spawn a new background task to handle runtime updates.
+//! tokio::spawn(async move {
+//!     let result = update_client.perform_runtime_updates().await;
+//!     println!("Runtime update finished with result={:?}", result);
+//! });
+//! # }
+//! ```
 
 use crate::{
     rpc::{

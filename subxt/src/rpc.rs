@@ -15,6 +15,79 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 //! RPC types and client for interacting with a substrate node.
+//!
+//! This is used behind the scenes by various `subxt` APIs, but can
+//! also be used directly.
+//!
+//! # Examples
+//!
+//! ## Fetch Storage
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! // Storage prefix is `twox_128("System") ++ twox_128("ExtrinsicCount")`.
+//! let key = StorageKeyPrefix::new::<polkadot::system::storage::ExtrinsicCount>()
+//!     .to_storage_key();
+//!
+//! // Obtain the RPC from a generated API
+//! let rpc: &Rpc<_> = api
+//!     .client
+//!     .rpc();
+//!
+//! let result = rpc.storage(&key, None).await.unwrap();
+//! println!("Storage result: {:?}", result);
+//! # }
+//! ```
+//!
+//! ## Fetch Keys
+//!
+//! ```no_run
+//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
+//! # use subxt::storage::StorageKeyPrefix;
+//! # use subxt::rpc::Rpc;
+//!
+//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+//! pub mod polkadot {}
+//!
+//! # #[tokio::main]
+//! # async fn main() {
+//! # let api = ClientBuilder::new()
+//! #     .build()
+//! #     .await
+//! #     .unwrap()
+//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>()
+//!     .to_storage_key();
+//!
+//! // Obtain the RPC from a generated API
+//! let rpc: &Rpc<_> = api
+//!     .client
+//!     .rpc();
+//!
+//! // Fetch up to 10 keys.
+//! let keys = rpc
+//!     .storage_keys_paged(Some(key), 10, None, None)
+//!     .await
+//!     .unwrap();
+//!
+//! for key in keys.iter() {
+//!     println!("Key: 0x{}", hex::encode(&key));
+//! }
+//! # }
+//! ```
 
 // jsonrpsee subscriptions are interminable.
 // Allows `while let status = subscription.next().await {}`
@@ -28,7 +101,6 @@ use std::{
 
 use crate::{
     error::BasicError,
-    storage::StorageKeyPrefix,
     Config,
     Metadata,
     PhantomDataSendSync,
@@ -74,9 +146,12 @@ use sp_core::{
     Bytes,
     U256,
 };
-use sp_runtime::generic::{
-    Block,
-    SignedBlock,
+use sp_runtime::{
+    generic::{
+        Block,
+        SignedBlock,
+    },
+    ApplyExtrinsicResult,
 };
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -277,13 +352,12 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        prefix: Option<StorageKeyPrefix>,
+        key: Option<StorageKey>,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let prefix = prefix.map(|p| p.to_storage_key());
-        let params = rpc_params![prefix, count, start_key, hash];
+        let params = rpc_params![key, count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -571,6 +645,21 @@ impl<T: Config> Rpc<T> {
     ) -> Result<bool, BasicError> {
         let params = rpc_params![public_key, key_type];
         Ok(self.client.request("author_hasKey", params).await?)
+    }
+
+    /// Submits the extrinsic to the dry_run RPC, to test if it would succeed.
+    ///
+    /// Returns `Ok` with an [`ApplyExtrinsicResult`], which is the result of applying of an extrinsic.
+    pub async fn dry_run(
+        &self,
+        encoded_signed: &[u8],
+        at: Option<T::Hash>,
+    ) -> Result<ApplyExtrinsicResult, BasicError> {
+        let params = rpc_params![format!("0x{}", hex::encode(encoded_signed)), at];
+        let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
+        let data: ApplyExtrinsicResult =
+            codec::Decode::decode(&mut result_bytes.0.as_slice())?;
+        Ok(data)
     }
 }
 
