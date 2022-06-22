@@ -95,12 +95,10 @@
 //! # }
 //! ```
 
-mod decoding;
 mod event_subscription;
 mod events_type;
 mod filter_events;
 
-pub use decoding::EventsDecodingError;
 pub use event_subscription::{
     subscribe,
     subscribe_finalized,
@@ -111,6 +109,7 @@ pub use event_subscription::{
 };
 pub use events_type::{
     at,
+    DecodedValue,
     EventDetails,
     Events,
     RawEventDetails,

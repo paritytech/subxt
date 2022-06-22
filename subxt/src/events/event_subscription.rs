@@ -46,7 +46,6 @@ pub use super::{
     EventDetails,
     EventFilter,
     Events,
-    EventsDecodingError,
     FilterEvents,
     RawEventDetails,
 };
