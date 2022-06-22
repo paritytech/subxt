@@ -108,7 +108,7 @@ async fn run() {
         )]
         pub mod node_runtime {{
             #[subxt(substitute_type = "sp_arithmetic::per_things::Perbill")]
-            use sp_runtime::Perbill;
+            use ::sp_runtime::Perbill;
         }}
     "#,
         metadata_path

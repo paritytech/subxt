@@ -23,7 +23,6 @@ use syn::{
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ItemMod {
-    // attrs: Vec<syn::Attribute>,
     vis: syn::Visibility,
     mod_token: token::Mod,
     pub ident: syn::Ident,
@@ -103,6 +102,26 @@ impl From<syn::Item> for Item {
             if let Some(attr) = substitute_attrs.get(0) {
                 let use_path = &use_.tree;
                 let substitute_with: syn::TypePath = syn::parse_quote!( #use_path );
+
+                let is_crate = substitute_with
+                    .path
+                    .segments
+                    .first()
+                    .map(|segment| segment.ident == "crate")
+                    .unwrap_or(false);
+
+                // Check if the substitute path is a global absolute path, meaning it
+                // is prefixed with `::` or `crate`.
+                //
+                // Note: the leading colon is lost when parsing to `syn::TypePath` via
+                // `syn::parse_quote!`. Therefore, inspect `use_`'s leading colon.
+                if use_.leading_colon.is_none() && !is_crate {
+                    abort!(
+                        use_path.span(),
+                        "The substitute path must be a global absolute path; try prefixing with `::` or `crate`"
+                    )
+                }
+
                 let type_substitute = SubxtItem::TypeSubstitute {
                     generated_type_path: attr.substitute_type(),
                     substitute_with,
