@@ -36,6 +36,7 @@ use jsonrpsee::{
         client::ClientT,
         Error,
     },
+    http_client::HttpClientBuilder,
     rpc_params,
 };
 use scale::{
@@ -288,26 +289,15 @@ async fn fetch_metadata_ws(url: &Uri) -> color_eyre::Result<String> {
     Ok(client.request("state_getMetadata", rpc_params![]).await?)
 }
 
-fn fetch_metadata_http(url: &Uri) -> color_eyre::Result<String> {
-    let resp = ureq::post(&url.to_string())
-        .set("Content-Type", "application/json")
-        .send_json(ureq::json!({
-            "jsonrpc": "2.0",
-            "method": "state_getMetadata",
-            "id": 1
-        }))
-        .context("error fetching metadata from the substrate node")?;
-    let json: serde_json::Value = resp.into_json()?;
+async fn fetch_metadata_http(url: &Uri) -> color_eyre::Result<String> {
+    let client = HttpClientBuilder::default().build(url.to_string())?;
 
-    Ok(json["result"]
-        .as_str()
-        .map(ToString::to_string)
-        .ok_or_else(|| eyre::eyre!("metadata result field should be a string"))?)
+    Ok(client.request::<String>("state_getMetadata", None).await?)
 }
 
 async fn fetch_metadata(url: &Uri) -> color_eyre::Result<(String, Vec<u8>)> {
     let hex_data = match url.scheme_str() {
-        Some("http") => fetch_metadata_http(url),
+        Some("http") => fetch_metadata_http(url).await,
         Some("ws") | Some("wss") => fetch_metadata_ws(url).await,
         invalid_scheme => {
             let scheme = invalid_scheme.unwrap_or("no scheme");
