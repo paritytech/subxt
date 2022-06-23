@@ -197,11 +197,7 @@ async fn handle_pallet_metadata(nodes: &[Uri], name: &str) -> color_eyre::Result
             Some(pallet_metadata) => {
                 let hash = get_pallet_hash(&metadata.types, pallet_metadata);
                 let hex_hash = hex::encode(hash);
-                println!(
-                    "Node {:?} has pallet metadata hash {:?}",
-                    node.to_string(),
-                    hex_hash
-                );
+                println!("Node {:?} has pallet metadata hash {:?}", node, hex_hash);
 
                 compatibility
                     .pallet_present
@@ -230,11 +226,7 @@ async fn handle_full_metadata(nodes: &[Uri]) -> color_eyre::Result<()> {
         let metadata = fetch_runtime_metadata(node).await?;
         let hash = get_metadata_hash(&metadata);
         let hex_hash = hex::encode(hash);
-        println!(
-            "Node {:?} has metadata hash {:?}",
-            node.to_string(),
-            hex_hash,
-        );
+        println!("Node {:?} has metadata hash {:?}", node, hex_hash,);
 
         compatibility_map
             .entry(hex_hash)
@@ -258,7 +250,7 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
     if metadata.0 != META_RESERVED {
         return Err(eyre::eyre!(
             "Node {:?} has invalid metadata prefix: {:?} expected prefix: {:?}",
-            url.to_string(),
+            url,
             metadata.0,
             META_RESERVED
         ))
@@ -269,7 +261,7 @@ async fn fetch_runtime_metadata(url: &Uri) -> color_eyre::Result<RuntimeMetadata
         _ => {
             Err(eyre::eyre!(
                 "Node {:?} with unsupported metadata version: {:?}",
-                url.to_string(),
+                url,
                 metadata.1
             ))
         }
