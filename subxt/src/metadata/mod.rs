@@ -21,6 +21,7 @@ mod metadata_type;
 mod util;
 
 pub use decoder::{
+    CallData,
     Decoder,
     DecoderBuilder,
     Extrinsic,

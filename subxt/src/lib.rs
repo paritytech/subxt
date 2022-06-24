@@ -277,6 +277,7 @@ pub use crate::{
         SubstrateExtrinsicParamsBuilder,
     },
     metadata::{
+        CallData,
         Decoder,
         DecoderBuilder,
         ErrorMetadata,
