@@ -13,32 +13,29 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
-#[cfg(feature = "decoder")]
-mod decoder;
-#[cfg(feature = "decoder")]
-mod env_types;
-mod hash_cache;
-mod metadata_type;
-#[cfg(feature = "decoder")]
-mod util;
 
-#[cfg(feature = "decoder")]
-pub use decoder::{
-    CallData,
-    Decoder,
-    DecoderBuilder,
-    Extrinsic,
+use serde::{
+    Deserialize,
+    Serialize,
 };
-pub use metadata_type::{
-    ErrorMetadata,
-    EventMetadata,
-    InvalidMetadataError,
-    Metadata,
-    MetadataError,
+use sp_runtime::{
+    AccountId32,
+    MultiAddress as SubstrateMultiAddress,
 };
-#[cfg(feature = "decoder")]
-pub use metadata_type::{
-    MetadataPalletCalls,
-    PalletMetadata,
-    PathKey,
-};
+
+pub type MultiAddress = SubstrateMultiAddress<AccountId32, u32>;
+
+#[derive(Serialize, Deserialize)]
+#[serde(remote = "MultiAddress")]
+pub enum RemoteAddress {
+    /// It's an account ID (pubkey).
+    Id(AccountId32),
+    /// It's an account index.
+    Index(u32),
+    /// It's some arbitrary raw bytes.
+    Raw(Vec<u8>),
+    /// It's a 32 byte representation.
+    Address32([u8; 32]),
+    /// It's a 20 byte representation.
+    Address20([u8; 20]),
+}

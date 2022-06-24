@@ -15,8 +15,12 @@
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
 use crate::{
-    node_runtime::{balances, system},
-    pair_signer, test_context,
+    node_runtime::{
+        balances,
+        system,
+    },
+    pair_signer,
+    test_context,
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;

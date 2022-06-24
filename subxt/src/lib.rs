@@ -241,6 +241,8 @@ mod metadata;
 pub mod rpc;
 pub mod storage;
 mod transaction;
+#[cfg(feature = "decoder")]
+mod u8_map;
 pub mod updates;
 
 pub use crate::{
@@ -279,7 +281,6 @@ pub use crate::{
         ErrorMetadata,
         Metadata,
         MetadataError,
-        PalletMetadata,
     },
     rpc::{
         BlockNumber,
@@ -301,6 +302,15 @@ pub use crate::{
     },
 };
 
+#[cfg(feature = "decoder")]
+pub use crate::metadata::{
+    CallData,
+    Decoder,
+    DecoderBuilder,
+    Extrinsic,
+    PalletMetadata,
+    PathKey,
+};
 /// Trait to uniquely identify the call (extrinsic)'s identity from the runtime metadata.
 ///
 /// Generated API structures that represent each of the different possible
