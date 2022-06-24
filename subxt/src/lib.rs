@@ -277,10 +277,14 @@ pub use crate::{
         SubstrateExtrinsicParamsBuilder,
     },
     metadata::{
+        Decoder,
+        DecoderBuilder,
         ErrorMetadata,
+        Extrinsic,
         Metadata,
         MetadataError,
         PalletMetadata,
+        PathKey,
     },
     rpc::{
         BlockNumber,

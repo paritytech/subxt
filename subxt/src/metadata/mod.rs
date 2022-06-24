@@ -23,6 +23,7 @@ mod util;
 pub use decoder::{
     Decoder,
     DecoderBuilder,
+    Extrinsic,
 };
 pub use metadata_type::{
     ErrorMetadata,
