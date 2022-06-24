@@ -50,6 +50,7 @@ use std::{
 pub struct PathKey(Vec<String>);
 
 impl PathKey {
+    /// From path key
     pub fn from_type<T>() -> Self
     where
         T: scale_info::TypeInfo,
