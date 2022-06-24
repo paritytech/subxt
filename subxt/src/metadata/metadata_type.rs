@@ -45,6 +45,7 @@ use std::{
     sync::Arc,
 };
 
+/// PAth key
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PathKey(Vec<String>);
 

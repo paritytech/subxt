@@ -352,6 +352,7 @@ impl Decoder {
             .collect()
     }
 
+    /// Decode
     pub fn decode(
         &self,
         type_id: u32,
