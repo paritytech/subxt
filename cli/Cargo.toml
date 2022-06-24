@@ -21,8 +21,6 @@ subxt-codegen = { version = "0.22.0", path = "../codegen" }
 subxt-metadata = { version = "0.22.0", path = "../metadata" }
 # parse command line args
 structopt = "0.3.25"
-# make the request to a substrate node to get the metadata
-ureq = { version = "2.2.0", features = ["json"] }
 # colourful error reports
 color-eyre = "0.6.1"
 # serialize the metadata
@@ -35,7 +33,9 @@ hex = "0.4.3"
 frame-metadata = { version = "15.0.0", features = ["v14", "std"] }
 # decode bytes into the metadata types
 scale = { package = "parity-scale-codec", version = "3.0.0", default-features = false }
-# handle urls to communicate with substrate nodes
-url = { version = "2.2.2", features = ["serde"] }
 # generate the item mod for codegen
 syn = "1.0.80"
+# communicate with the substrate nodes
+jsonrpsee = { version = "0.14.0", features = ["async-client", "client-ws-transport", "http-client"] }
+# async runtime
+tokio = { version = "1.8", features = ["rt-multi-thread", "macros", "time"] }
