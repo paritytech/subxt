@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-//! Custom decoder
+//! Extrinsic decoder
 
 use crate::{
     metadata::{
@@ -34,28 +34,20 @@ use codec::{
     Decode,
 };
 use frame_metadata::SignedExtensionMetadata;
-use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
-    IntoPortable,
-    Path,
     TypeInfo,
 };
 use scale_value::Value;
-use serde::{
-    Deserialize,
-    Serialize,
-};
+use serde::Serialize;
 use sp_runtime::{
     AccountId32,
     MultiAddress,
     MultiSignature,
 };
 use std::{
-    borrow::Cow,
     collections::HashMap,
     fmt::Debug,
-    sync::Arc,
 };
 // use metadata::Metadata;
 
@@ -95,10 +87,11 @@ pub struct ExtrinsicSignature {
 pub struct DecoderBuilder {
     /// Pallet name
     registry: scale_value::scale::PortableRegistry,
-    /// Pallet name
+    /// Decoders
     decoders: HashMap<u32, Box<dyn CustomTypeDecoder + Send + Sync>>,
-    /// Pallet name
+    /// Pallet calls by index
     pallet_calls_by_index: U8Map<MetadataPalletCalls>,
+    /// Signed extensions
     signed_extensions: Vec<SignedExtensionMetadata<PortableForm>>,
 }
 
@@ -117,7 +110,7 @@ impl DecoderBuilder {
         }
     }
 
-    /// New decoder
+    /// Register default custom types decoder
     pub fn with_default_custom_type_decodes(self) -> Self {
         self.register_custom_type_decoder::<tidefi_primitives::AccountId, _>(
             env_types::AccountId,
@@ -128,7 +121,7 @@ impl DecoderBuilder {
         )
     }
 
-    /// New decoder
+    /// Register custom type decoder
     pub fn register_custom_type_decoder<T, U>(mut self, encoder: U) -> Self
     where
         T: TypeInfo + 'static,
@@ -164,7 +157,7 @@ impl DecoderBuilder {
         self
     }
 
-    /// New decoder
+    /// Build decoder
     pub fn build(self) -> Result<Decoder, BasicError> {
         let env_types_transcoder = EnvTypesTranscoder::new(self.decoders);
         Ok(Decoder::new(
@@ -176,16 +169,16 @@ impl DecoderBuilder {
     }
 }
 
-/// Pallet name
+/// Decoder
 #[derive(Debug)]
 pub struct Decoder {
-    /// Pallet name
+    /// Registry
     registry: scale_value::scale::PortableRegistry,
-    /// Pallet name
+    /// Custom decoder
     env_types: EnvTypesTranscoder,
-    /// Pallet name
+    /// Pallet calls by index
     pallet_calls_by_index: U8Map<MetadataPalletCalls>,
-    /// Pallet name
+    /// Signed extensions
     signed_extensions: Vec<SignedExtensionMetadata<PortableForm>>,
 }
 
@@ -205,7 +198,7 @@ impl Decoder {
         }
     }
 
-    /// New decoder
+    /// Decode extrinsic
     pub fn decode_extrinsic(&self, data: &mut &[u8]) -> Result<Extrinsic, BasicError> {
         if data.is_empty() {
             return Err(BasicError::Other(
@@ -352,7 +345,7 @@ impl Decoder {
             .collect()
     }
 
-    /// Decode
+    /// Decode type id to scale value
     pub fn decode(
         &self,
         type_id: u32,

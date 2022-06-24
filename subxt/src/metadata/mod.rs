@@ -13,13 +13,16 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
-
+#[cfg(feature = "decoder")]
 mod decoder;
+#[cfg(feature = "decoder")]
 mod env_types;
 mod hash_cache;
 mod metadata_type;
+#[cfg(feature = "decoder")]
 mod util;
 
+#[cfg(feature = "decoder")]
 pub use decoder::{
     CallData,
     Decoder,
@@ -32,6 +35,9 @@ pub use metadata_type::{
     InvalidMetadataError,
     Metadata,
     MetadataError,
+};
+#[cfg(feature = "decoder")]
+pub use metadata_type::{
     MetadataPalletCalls,
     PalletMetadata,
     PathKey,

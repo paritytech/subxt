@@ -17,6 +17,7 @@ keywords = ["parity", "substrate", "blockchain"]
 # The exposed functionality is subject to breaking changes at any point,
 # and should not be relied upon.
 integration-tests = []
+decoder = ["tidefi-primitives"]
 
 [dependencies]
 bitvec = { version = "1.0.0", default-features = false, features = ["alloc"] }
@@ -41,7 +42,7 @@ sp-runtime = { package = "sp-runtime", git = "https://github.com/tidelabs/substr
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
-tidefi-primitives = { git = "https://github.com/tidelabs/primitives", branch = "dev" }
+tidefi-primitives = { git = "https://github.com/tidelabs/primitives", branch = "dev", optional = true }
 
 [dev-dependencies]
 tokio = { version = "1.8", features = ["macros", "time"] }

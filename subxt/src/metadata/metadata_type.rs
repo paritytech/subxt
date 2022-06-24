@@ -14,15 +14,18 @@
 // You should have received a copy of the GNU General Public License
 // along with subxt.  If not, see <http://www.gnu.org/licenses/>.
 
-use super::{
-    decoder::DecoderBuilder,
-    hash_cache::HashCache,
-};
+use super::hash_cache::HashCache;
+
+#[cfg(feature = "decoder")]
+use super::decoder::DecoderBuilder;
+
+#[cfg(feature = "decoder")]
 use crate::{
     u8_map::U8Map,
     BasicError,
-    Call,
 };
+
+use crate::Call;
 use codec::Error as CodecError;
 use frame_metadata::{
     PalletConstantMetadata,
@@ -35,7 +38,6 @@ use frame_metadata::{
 use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
-    IntoPortable,
     Type,
     Variant,
 };
@@ -45,10 +47,15 @@ use std::{
     sync::Arc,
 };
 
-/// PAth key
+#[cfg(feature = "decoder")]
+use scale_info::IntoPortable;
+
+/// Path key
+#[cfg(feature = "decoder")]
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct PathKey(Vec<String>);
 
+#[cfg(feature = "decoder")]
 impl PathKey {
     /// From path key
     pub fn from_type<T>() -> Self
@@ -64,6 +71,7 @@ impl PathKey {
     }
 }
 
+#[cfg(feature = "decoder")]
 impl From<&scale_info::Path<PortableForm>> for PathKey {
     fn from(path: &scale_info::Path<PortableForm>) -> Self {
         PathKey(path.segments().to_vec())
@@ -128,9 +136,11 @@ struct MetadataInner {
     cached_call_hashes: HashCache,
     cached_constant_hashes: HashCache,
     cached_storage_hashes: HashCache,
+    #[cfg(feature = "decoder")]
     decoder: super::Decoder,
 }
 
+#[cfg(feature = "decoder")]
 #[derive(Debug)]
 pub struct MetadataPalletCalls {
     /// The pallet name.
@@ -140,6 +150,7 @@ pub struct MetadataPalletCalls {
     pub calls: Option<MetadataCalls>,
 }
 
+#[cfg(feature = "decoder")]
 #[derive(Debug)]
 pub struct MetadataCalls {
     /// This allows us to find the type information corresponding to
@@ -200,6 +211,7 @@ impl Metadata {
     }
 
     /// Decode extrinsic
+    #[cfg(feature = "decoder")]
     pub fn decode_extrinsic(
         &self,
         data: &mut &[u8],
@@ -208,6 +220,7 @@ impl Metadata {
     }
 
     /// Decode extrinsic
+    #[cfg(feature = "decoder")]
     pub fn decode_as_type(
         &self,
         type_id: u32,
@@ -422,7 +435,7 @@ pub enum InvalidMetadataError {
     TypeDefNotVariant(u32),
     #[error("{0}")]
     Other(String),
-    /// Unable to initialize decoder
+    #[cfg(feature = "decoder")]
     #[error("Unable to initialize decoder")]
     InvalidDecoderBuilder,
 }
@@ -540,8 +553,10 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             })
             .collect();
 
+        #[cfg(feature = "decoder")]
         let mut pallet_calls_by_index = U8Map::new();
         // Gather information about the calls/storage in use:
+        #[cfg(feature = "decoder")]
         for pallet in &metadata.pallets {
             // capture the call information in this pallet:
             let calls = pallet
@@ -597,6 +612,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             );
         }
 
+        #[cfg(feature = "decoder")]
         let decoder = DecoderBuilder::new(
             metadata.types.clone(),
             pallet_calls_by_index,
@@ -616,6 +632,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 cached_call_hashes: Default::default(),
                 cached_constant_hashes: Default::default(),
                 cached_storage_hashes: Default::default(),
+                #[cfg(feature = "decoder")]
                 decoder,
             }),
         })

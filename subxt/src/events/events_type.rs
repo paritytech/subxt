@@ -378,7 +378,16 @@ fn decode_raw_event_details<T: Config>(
         let all_bytes = *input;
         // consume some bytes for each event field, moving the cursor forward:
 
+        #[cfg(feature = "decoder")]
         let value = metadata.decode_as_type(type_id, input)?;
+
+        #[cfg(not(feature = "decoder"))]
+        let value = scale_value::scale::decode_as_type(
+            input,
+            type_id,
+            &metadata.runtime_metadata().types,
+        )?;
+
         event_fields.push(value);
 
         // count how many bytes were consumed based on remaining length:
