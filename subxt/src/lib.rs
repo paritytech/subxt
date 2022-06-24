@@ -241,6 +241,7 @@ mod metadata;
 pub mod rpc;
 pub mod storage;
 mod transaction;
+mod u8_map;
 pub mod updates;
 
 pub use crate::{

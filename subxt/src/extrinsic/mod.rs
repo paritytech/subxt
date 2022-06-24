@@ -35,9 +35,19 @@ mod signer;
 
 pub use self::{
     params::{
-        AssetTip, BaseExtrinsicParams, BaseExtrinsicParamsBuilder, Era, ExtrinsicParams,
-        PlainTip, PolkadotExtrinsicParams, PolkadotExtrinsicParamsBuilder,
-        SubstrateExtrinsicParams, SubstrateExtrinsicParamsBuilder,
+        AssetTip,
+        BaseExtrinsicParams,
+        BaseExtrinsicParamsBuilder,
+        Era,
+        ExtrinsicParams,
+        PlainTip,
+        PolkadotExtrinsicParams,
+        PolkadotExtrinsicParamsBuilder,
+        SubstrateExtrinsicParams,
+        SubstrateExtrinsicParamsBuilder,
     },
-    signer::{PairSigner, Signer},
+    signer::{
+        PairSigner,
+        Signer,
+    },
 };

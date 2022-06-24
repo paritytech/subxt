@@ -41,5 +41,7 @@ sp-runtime = { package = "sp-runtime", git = "https://github.com/tidelabs/substr
 frame-metadata = "15.0.0"
 derivative = "2.2.0"
 
+tidefi-primitives = { git = "https://github.com/tidelabs/primitives", branch = "dev" }
+
 [dev-dependencies]
 tokio = { version = "1.8", features = ["macros", "time"] }

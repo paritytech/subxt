@@ -16,18 +16,39 @@
 
 use futures::future;
 pub use sp_runtime::traits::SignedExtension;
-use sp_runtime::{traits::Hash, ApplyExtrinsicResult};
+use sp_runtime::{
+    traits::Hash,
+    ApplyExtrinsicResult,
+};
 
 use crate::{
-    error::{BasicError, HasModuleError},
-    extrinsic::{ExtrinsicParams, Signer},
-    rpc::{Rpc, RpcClient, RuntimeVersion, SystemProperties},
+    error::{
+        BasicError,
+        HasModuleError,
+    },
+    extrinsic::{
+        ExtrinsicParams,
+        Signer,
+    },
+    rpc::{
+        Rpc,
+        RpcClient,
+        RuntimeVersion,
+        SystemProperties,
+    },
     storage::StorageClient,
     transaction::TransactionProgress,
     updates::UpdateClient,
-    Call, Config, Encoded, Metadata,
+    Call,
+    Config,
+    Encoded,
+    Metadata,
 };
-use codec::{Compact, Decode, Encode};
+use codec::{
+    Compact,
+    Decode,
+    Encode,
+};
 use derivative::Derivative;
 use parking_lot::RwLock;
 use std::sync::Arc;

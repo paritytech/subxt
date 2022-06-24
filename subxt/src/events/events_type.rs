@@ -377,12 +377,10 @@ fn decode_raw_event_details<T: Config>(
         let type_id = arg.ty().id();
         let all_bytes = *input;
         // consume some bytes for each event field, moving the cursor forward:
-        let value = scale_value::scale::decode_as_type(
-            input,
-            type_id,
-            &metadata.runtime_metadata().types,
-        )?;
+
+        let value = metadata.decode_as_type(type_id, input)?;
         event_fields.push(value);
+
         // count how many bytes were consumed based on remaining length:
         let consumed_len = all_bytes.len() - input.len();
         // move those consumed bytes to the output vec unaltered:
