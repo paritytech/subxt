@@ -124,11 +124,7 @@ async fn constant_values_are_not_validated() {
     let new_api = metadata_to_api(metadata, &cxt).await;
 
     assert!(new_api.validate_metadata().is_ok());
-    assert!(new_api
-        .constants()
-        .balances()
-        .existential_deposit()
-        .is_ok());
+    assert!(new_api.constants().balances().existential_deposit().is_ok());
 
     // Other constant validation should not be impacted.
     assert!(new_api.constants().balances().max_locks().is_ok());
