@@ -94,7 +94,7 @@ async fn full_metadata_check() {
 }
 
 #[tokio::test]
-async fn constants_check() {
+async fn constant_values_are_not_validated() {
     let cxt = test_context().await;
     let api = &cxt.api;
 
@@ -117,16 +117,14 @@ async fn constants_check() {
         .iter_mut()
         .find(|constant| constant.name == "ExistentialDeposit")
         .expect("ExistentialDeposit constant must be present");
+
+    // Modifying a constant value should not lead to an error:
     existential.value = vec![0u8; 32];
 
     let new_api = metadata_to_api(metadata, &cxt).await;
 
-    assert!(new_api.validate_metadata().is_err());
-    assert!(new_api
-        .constants()
-        .balances()
-        .existential_deposit()
-        .is_err());
+    assert!(new_api.validate_metadata().is_ok());
+    assert!(new_api.constants().balances().existential_deposit().is_ok());
 
     // Other constant validation should not be impacted.
     assert!(new_api.constants().balances().max_locks().is_ok());
