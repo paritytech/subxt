@@ -302,10 +302,8 @@ pub fn get_constant_hash(
         .find(|c| c.name == constant_name)
         .ok_or(NotFound::Item)?;
 
-    let mut bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
-    bytes = xor(bytes, hash(constant.name.as_bytes()));
-    bytes = xor(bytes, hash(&constant.value));
-
+    // We only need to check that the type of the constant asked for matches.
+    let bytes = get_type_hash(&metadata.types, constant.ty.id(), &mut HashSet::new());
     Ok(bytes)
 }
 
@@ -363,7 +361,6 @@ pub fn get_pallet_hash(
     }
     for constant in pallet.constants.iter() {
         bytes = xor(bytes, hash(constant.name.as_bytes()));
-        bytes = xor(bytes, hash(&constant.value));
         bytes = xor(
             bytes,
             get_type_hash(registry, constant.ty.id(), &mut visited_ids),
