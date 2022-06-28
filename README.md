@@ -54,8 +54,6 @@ Please add your project to this list via a PR.
 
 #### License
 
-<sup>
-The entire code within this repository is licensed under the <a href="LICENSE">GPLv3</a>.
-Please <a href="https://www.parity.io/contact/">contact us</a> if you have questions about the licensing of our
- products.
-</sup>
+The entire code within this repository is dual licensed under the _GPL-3.0_ or _Apache-2.0_ licenses. See [the LICENSE](./LICENSE) file for more details.
+
+Please <a href="https://www.parity.io/contact/">contact us</a> if you have questions about the licensing of our products.
