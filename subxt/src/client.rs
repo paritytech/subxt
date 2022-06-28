@@ -94,17 +94,10 @@ impl ClientBuilder {
         };
         let rpc = Rpc::new(client);
         let (metadata_bytes, genesis_hash, runtime_version, properties) = future::join4(
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::metadata(rpc.inner()),
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::genesis_hash(
-                rpc.inner(),
-            ),
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::runtime_version(
-                rpc.inner(),
-                None,
-            ),
-            SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::system_properties(
-                rpc.inner(),
-            ),
+            SubxtRpcApiClient::<T>::metadata(rpc.inner()),
+            SubxtRpcApiClient::<T>::genesis_hash(rpc.inner()),
+            SubxtRpcApiClient::<T>::runtime_version(rpc.inner(), None),
+            SubxtRpcApiClient::<T>::system_properties(rpc.inner()),
         )
         .await;
         let metadata_bytes = metadata_bytes?;
@@ -247,11 +240,9 @@ where
         let bytes = extrinsic.encode().into();
 
         // Submit and watch for transaction progress.
-        let sub = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::watch_extrinsic(
-            self.client.rpc().inner(),
-            bytes,
-        )
-        .await?;
+        let sub =
+            SubxtRpcApiClient::<T>::watch_extrinsic(self.client.rpc().inner(), bytes)
+                .await?;
 
         Ok(TransactionProgress::new(sub, self.client, ext_hash))
     }
@@ -280,12 +271,9 @@ where
             .encode()
             .into();
 
-        SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::submit_extrinsic(
-            self.client.rpc().inner(),
-            bytes,
-        )
-        .await
-        .map_err(Into::into)
+        SubxtRpcApiClient::<T>::submit_extrinsic(self.client.rpc().inner(), bytes)
+            .await
+            .map_err(Into::into)
     }
 
     /// Creates a signed extrinsic.

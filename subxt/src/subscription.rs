@@ -248,7 +248,7 @@ impl<T: Config> FinalizedEventStorageSubscription<T> {
                 read_subscription_response("HeaderSubscription", &mut self.subscription)
                     .await?;
             self.storage_changes.extend(
-                SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::query_storage_at(
+                SubxtRpcApiClient::<T>::query_storage_at(
                     &*self.rpc.client,
                     &[self.storage_key.clone()],
                     Some(header.hash()),

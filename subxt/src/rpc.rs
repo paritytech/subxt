@@ -79,14 +79,18 @@ use sp_runtime::generic::{
 };
 
 /// subxt RPC API.
-#[rpc(client)]
-pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
+#[rpc(
+    client,
+    client_bounds(
+        C::Hash: DeserializeOwned + Serialize, C::Header: Serialize, C::Extrinsic: Serialize)
+)]
+pub trait SubxtRpcApi<C: Config> {
     /// Fetch a storage key
     #[method(name = "state_getStorage")]
     async fn storage(
         &self,
         key: &StorageKey,
-        hash: Option<Hash>,
+        hash: Option<C::Hash>,
     ) -> RpcResult<Option<StorageData>>;
 
     /// Returns the keys with prefix with pagination support.
@@ -98,7 +102,7 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
         prefix: Option<StorageKey>,
         count: u32,
         start_key: Option<StorageKey>,
-        hash: Option<Hash>,
+        hash: Option<C::Hash>,
     ) -> RpcResult<Vec<StorageKey>>;
 
     /// Query historical storage entries
@@ -106,21 +110,21 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
     async fn query_storage(
         &self,
         keys: Vec<StorageKey>,
-        from: Hash,
-        to: Option<Hash>,
-    ) -> RpcResult<Vec<StorageChangeSet<Hash>>>;
+        from: C::Hash,
+        to: Option<C::Hash>,
+    ) -> RpcResult<Vec<StorageChangeSet<C::Hash>>>;
 
     /// Query historical storage entries
     #[method(name = "state_queryStorageAt")]
     async fn query_storage_at(
         &self,
         keys: &[StorageKey],
-        at: Option<Hash>,
-    ) -> RpcResult<Vec<StorageChangeSet<Hash>>>;
+        at: Option<C::Hash>,
+    ) -> RpcResult<Vec<StorageChangeSet<C::Hash>>>;
 
     /// Fetch the genesis hash
     #[method(name = "chain_getBlockHash")]
-    async fn genesis_hash(&self) -> RpcResult<Hash>;
+    async fn genesis_hash(&self) -> RpcResult<C::Hash>;
 
     /// Fetch the metadata as bytes.
     #[method(name = "state_getMetadata")]
@@ -144,37 +148,37 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
 
     /// Fetch the runtime version
     #[method(name = "state_getRuntimeVersion")]
-    async fn runtime_version(&self, at: Option<Hash>) -> RpcResult<RuntimeVersion>;
+    async fn runtime_version(&self, at: Option<C::Hash>) -> RpcResult<RuntimeVersion>;
 
     /// Get a header
     #[method(name = "state_getRuntimeVersion")]
-    async fn header(&self, hash: Option<Hash>) -> RpcResult<Option<Header>>;
+    async fn header(&self, hash: Option<C::Hash>) -> RpcResult<Option<C::Header>>;
 
     /// Get a block hash, returns hash of latest block by default
     #[method(name = "chain_getBlockHash")]
     async fn block_hash(
         &self,
         block_number: Option<BlockNumber>,
-    ) -> RpcResult<Option<Hash>>;
+    ) -> RpcResult<Option<C::Hash>>;
 
     /// Get a block hash of the latest finalized block
     #[method(name = "chain_getFinalizedHead")]
-    async fn finalized_head(&self) -> RpcResult<Hash>;
+    async fn finalized_head(&self) -> RpcResult<C::Hash>;
 
     /// Get proof of storage entries at a specific block's state.
     #[method(name = "state_getReadProof")]
     async fn read_proof(
         &self,
         keys: Vec<StorageKey>,
-        hash: Option<Hash>,
-    ) -> RpcResult<ReadProof<Hash>>;
+        hash: Option<C::Hash>,
+    ) -> RpcResult<ReadProof<C::Hash>>;
 
     /// Get a Block
     #[method(name = "chain_getBlock")]
     async fn block(
         &self,
-        hash: Option<Hash>,
-    ) -> RpcResult<Option<SignedBlock<Block<Header, Xt>>>>;
+        hash: Option<C::Hash>,
+    ) -> RpcResult<Option<SignedBlock<Block<C::Header, C::Extrinsic>>>>;
 
     /// Insert a key into the keystore.
     #[method(name = "author_insertKey")]
@@ -205,30 +209,41 @@ pub trait SubxtRpcApi<Hash, Header, Xt: Serialize> {
 
     /// Create and submit an extrinsic and return corresponding Hash if successful
     #[method(name = "author_submitExtrinsic")]
-    async fn submit_extrinsic(&self, extrinsic: Bytes) -> RpcResult<Hash>;
+    async fn submit_extrinsic(&self, extrinsic: Bytes) -> RpcResult<C::Hash>;
 
     /// Subscribe to System Events that are imported into blocks.
     ///
     /// *WARNING* these may not be included in the finalized chain, use
     /// `subscribe_finalized_events` to ensure events are finalized.
-    #[subscription(name = "state_subscribeStorage", item = StorageChangeSet<Hash>)]
-    fn subscribe_events(&self) -> RpcResult<()>;
+    #[subscription(
+        name = "state_subscribeStorage", 
+        unsubscribe = "state_unsubscribeStorage",
+        item = StorageChangeSet<C::Hash>
+    )]
+    fn subscribe_events(&self);
 
     /// Subscribe to blocks.
-    #[subscription(name = "chain_subscribeNewHeads", item = Header)]
-    fn subscribe_blocks(&self) -> RpcResult<()>;
+    #[subscription(
+        name = "chain_subscribeNewHeads", 
+        unsubscribe = "chain_unsubscribeNewHeads",
+        item = C::Header)]
+    fn subscribe_blocks(&self);
 
     /// Subscribe to finalized blocks.
-    #[subscription(name = "chain_subscribeFinalizedHeads", item = Header)]
-    fn subscribe_finalized_blocks(&self) -> RpcResult<()>;
+    #[subscription(
+        name = "chain_subscribeFinalizedHeads", 
+        unsubscribe = "chain_unsubscribeFinalizedHeads",
+        item = C::Header
+    )]
+    fn subscribe_finalized_blocks(&self);
 
     /// Create and submit an extrinsic and return a subscription to the events triggered.
     #[subscription(
         name = "author_submitAndWatchExtrinsic",
-        unsubscribe_aliases = ["author_unwatchExtrinsic"],
-        item = SubstrateTransactionStatus<Hash, Hash>
+        unsubscribe = "author_unwatchExtrinsic",
+        item = SubstrateTransactionStatus<C::Hash, C::Hash>
     )]
-    fn watch_extrinsic<X: Encode>(&self, xt: Bytes) -> RpcResult<()>;
+    fn watch_extrinsic<X: Encode>(&self, xt: Bytes);
 }
 
 /// A number type that can be serialized both as a number or a string that encodes a number in a
@@ -393,7 +408,7 @@ impl<T: Config> Rpc<T> {
         Ok(EventStorageSubscription::Finalized(
             FinalizedEventStorageSubscription::new(
                 self.clone(),
-                SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::subscribe_finalized_blocks(&*self.client).await?,
+                SubxtRpcApiClient::<T>::subscribe_finalized_blocks(&*self.client).await?,
             ),
         ))
     }
@@ -404,7 +419,7 @@ pub async fn ws_client(url: &str) -> Result<RpcClient, RpcError> {
     let (sender, receiver) = ws_transport(url).await?;
     Ok(RpcClientBuilder::default()
         .max_notifs_per_subscription(4096)
-        .build(sender, receiver))
+        .build_with_tokio(sender, receiver))
 }
 
 async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {

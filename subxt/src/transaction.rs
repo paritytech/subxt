@@ -392,7 +392,7 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
     pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
-        let block = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::block(
+        let block = SubxtRpcApiClient::<T>::block(
             &*self.client.rpc().client,
             Some(self.block_hash),
         )
@@ -409,7 +409,7 @@ impl<'client, T: Config, E: Decode> TransactionInBlock<'client, T, E> {
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let raw_events = SubxtRpcApiClient::<T::Hash, T::Header, T::Extrinsic>::storage(
+        let raw_events = SubxtRpcApiClient::<T>::storage(
             &*self.client.rpc().client,
             &StorageKey::from(SystemEvents::new()),
             Some(self.block_hash),

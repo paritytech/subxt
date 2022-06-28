@@ -20,7 +20,7 @@ chameleon = "0.1.0"
 scale-info = { version = "1.0.0", features = ["bit-vec"] }
 futures = "0.3.13"
 hex = "0.4.3"
-jsonrpsee = { version = "0.8.0", features = ["macros", "async-client", "client-ws-transport"] }
+jsonrpsee = { git = "https://github.com/paritytech/jsonrpsee", branch = "696_trait_bounds", features = ["macros", "async-client", "client-ws-transport"] }
 log = "0.4.14"
 num-traits = { version = "0.2.14", default-features = false }
 serde = { version = "1.0.124", features = ["derive"] }
