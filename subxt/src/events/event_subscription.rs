@@ -6,7 +6,7 @@
 
 use crate::{
     error::BasicError,
-    Client,
+    OnlineClient,
     Config,
 };
 use codec::Decode;
@@ -47,9 +47,15 @@ pub use super::{
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
-    client: &'a Client<T>,
-) -> Result<EventSubscription<'a, EventSub<T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe<Client, T, Evs>(
+    client: Client,
+) -> Result<EventSubscription<EventSub<T::Header>, T, Evs>, BasicError>
+where
+    Client: Into<OnlineClient<T>>,
+    T: Config,
+    Evs: Decode + 'static
+{
+    let client = client.into();
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -60,9 +66,16 @@ pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
-    client: &'a Client<T>,
-) -> Result<EventSubscription<'a, FinalizedEventSub<'a, T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe_finalized<Client, T, Evs>(
+    client: Client,
+) -> Result<EventSubscription<FinalizedEventSub<T::Header>, T, Evs>, BasicError>
+where
+    Client: Into<OnlineClient<T>>,
+    T: Config,
+    Evs: Decode + 'static
+{
+    let client = client.into();
+
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.
     let last_finalized_block_hash = client.rpc().finalized_head().await?;
@@ -72,11 +85,13 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
         .await?
         .map(|h| (*h.number()).into());
 
+    let sub = client.rpc().subscribe_finalized_blocks().await?;
+
     // Fill in any gaps between the block above and the finalized blocks reported.
     let block_subscription = subscribe_to_block_headers_filling_in_gaps(
-        client,
+        client.clone(),
         last_finalized_block_number,
-        client.rpc().subscribe_finalized_blocks().await?,
+        sub,
     );
 
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
@@ -89,16 +104,21 @@ pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
 /// **Note:** This is exposed so that we can run integration tests on it, but otherwise
 /// should not be used directly and may break between minor releases.
 #[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<'a, S, E, T: Config>(
-    client: &'a Client<T>,
+pub fn subscribe_to_block_headers_filling_in_gaps<Client, S, E, T>(
+    client: Client,
     mut last_block_num: Option<u64>,
     sub: S,
-) -> impl Stream<Item = Result<T::Header, BasicError>> + Send + 'a
+) -> impl Stream<Item = Result<T::Header, BasicError>> + Send
 where
-    S: Stream<Item = Result<T::Header, E>> + Send + 'a,
+    Client: Into<OnlineClient<T>>,
+    S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<BasicError> + Send + 'static,
+    T: Config,
 {
+    let client = client.into();
     sub.flat_map(move |s| {
+        let client = client.clone();
+
         // Get the header, or return a stream containing just the error. Our EventSubscription
         // stream will return `None` as soon as it hits an error like this.
         let header = match s {
@@ -116,6 +136,7 @@ where
         // (which we already have the header info for):
         let previous_headers = stream::iter(start_block_num..end_block_num)
             .then(move |n| {
+                let client = client.clone();
                 async move {
                     let hash = client.rpc().block_hash(Some(n.into())).await?;
                     let header = client.rpc().header(hash).await?;
@@ -135,7 +156,7 @@ where
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe_finalized`, and is exposed to be used in codegen.
 #[doc(hidden)]
-pub type FinalizedEventSub<'a, Header> = BoxStream<'a, Result<Header, BasicError>>;
+pub type FinalizedEventSub<Header> = BoxStream<'static, Result<Header, BasicError>>;
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe`, and is exposed to be used in codegen.
@@ -145,28 +166,28 @@ pub type EventSub<Item> = Subscription<Item>;
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "Sub: std::fmt::Debug"))]
-pub struct EventSubscription<'a, Sub, T: Config, Evs: 'static> {
+pub struct EventSubscription<Sub, T: Config, Evs: 'static> {
     finished: bool,
-    client: &'a Client<T>,
+    client: OnlineClient<T>,
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
         std::pin::Pin<
-            Box<dyn Future<Output = Result<Events<T, Evs>, BasicError>> + Send + 'a>,
+            Box<dyn Future<Output = Result<Events<T, Evs>, BasicError>> + Send>,
         >,
     >,
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<'a, Sub, T: Config, Evs: Decode, E: Into<BasicError>>
-    EventSubscription<'a, Sub, T, Evs>
+impl<Sub, T: Config, Evs: Decode, E: Into<BasicError>>
+    EventSubscription<Sub, T, Evs>
 where
-    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
+    Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
-    fn new(client: &'a Client<T>, block_header_subscription: Sub) -> Self {
+    fn new(client: impl Into<OnlineClient<T>>, block_header_subscription: Sub) -> Self {
         EventSubscription {
             finished: false,
-            client,
+            client: client.into(),
             block_header_subscription,
             at: None,
             _event_type: std::marker::PhantomData,
@@ -175,13 +196,13 @@ where
 
     /// Return only specific events matching the tuple of 1 or more event
     /// types that has been provided as the `Filter` type parameter.
-    pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'a, Self, T, Filter> {
+    pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'static, Self, T, Filter> {
         FilterEvents::new(self)
     }
 }
 
 impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin
-    for EventSubscription<'a, Sub, T, Evs>
+    for EventSubscription<Sub, T, Evs>
 {
 }
 
@@ -202,11 +223,11 @@ impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<'a, Sub, T, Evs, E> Stream for EventSubscription<'a, Sub, T, Evs>
+impl<Sub, T, Evs, E> Stream for EventSubscription<Sub, T, Evs>
 where
     T: Config,
     Evs: Decode,
-    Sub: Stream<Item = Result<T::Header, E>> + Unpin + 'a,
+    Sub: Stream<Item = Result<T::Header, E>> + Unpin,
     E: Into<BasicError>,
 {
     type Item = Result<Events<T, Evs>, BasicError>;

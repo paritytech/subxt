@@ -74,6 +74,9 @@ pub trait Config: Debug + 'static {
 
     /// Extrinsic type within blocks.
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
+
+    /// This type defines the extrinsic extra and additional parameters.
+    type ExtrinsicParams: crate::extrinsic::ExtrinsicParams<Self>;
 }
 
 /// Parameter trait copied from `substrate::frame_support`
@@ -97,4 +100,5 @@ impl Config for DefaultConfig {
         sp_runtime::generic::Header<Self::BlockNumber, sp_runtime::traits::BlakeTwo256>;
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
+    type ExtrinsicParams = crate::extrinsic::SubstrateExtrinsicParams<Self>;
 }

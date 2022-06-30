@@ -6,7 +6,7 @@
 
 use crate::{
     error::BasicError,
-    Client,
+    OnlineClient,
     Config,
     Event,
     Metadata,
@@ -35,10 +35,17 @@ use std::sync::Arc;
 /// and is exposed only to be called via the codegen. Thus, prefer to use
 /// `api.events().at(block_hash)` over calling this directly.
 #[doc(hidden)]
-pub async fn at<T: Config, Evs: Decode>(
-    client: &'_ Client<T>,
+pub async fn at<Client, T: Config, Evs: Decode>(
+    client: Client,
     block_hash: T::Hash,
-) -> Result<Events<T, Evs>, BasicError> {
+) -> Result<Events<T, Evs>, BasicError>
+where
+    Client: Into<OnlineClient<T>>,
+    T: Config,
+    Evs: Decode,
+{
+    let client = client.into();
+
     let mut event_bytes = client
         .rpc()
         .storage(&system_events_key(), Some(block_hash))

@@ -263,24 +263,24 @@ mod test {
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventA(u8);
     impl crate::Event for EventA {
-        const PALLET: &'static str = "Test";
-        const EVENT: &'static str = "A";
+        fn pallet(&self) -> &str { "Test" }
+        fn event(&self) -> &str { "A" }
     }
 
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventB(bool);
     impl crate::Event for EventB {
-        const PALLET: &'static str = "Test";
-        const EVENT: &'static str = "B";
+        fn pallet(&self) -> &str { "Test" }
+        fn event(&self) -> &str { "B" }
     }
 
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventC(u8, bool);
     impl crate::Event for EventC {
-        const PALLET: &'static str = "Test";
-        const EVENT: &'static str = "C";
+        fn pallet(&self) -> &str { "Test" }
+        fn event(&self) -> &str { "C" }
     }
 
     // A stream of fake events for us to try filtering on.

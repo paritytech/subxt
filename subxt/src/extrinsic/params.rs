@@ -20,7 +20,7 @@ pub use sp_runtime::generic::Era;
 /// "additional" parameters that are signed and used in transactions.
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
-pub trait ExtrinsicParams<T: Config>: Debug {
+pub trait ExtrinsicParams<T: Config + ?Sized>: Debug {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.

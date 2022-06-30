@@ -3,7 +3,6 @@
 // see LICENSE for license details.
 
 use super::hash_cache::HashCache;
-use crate::Call;
 use codec::Error as CodecError;
 use frame_metadata::{
     PalletConstantMetadata,
@@ -139,16 +138,18 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for a specific storage entry.
-    pub fn storage_hash<S: crate::StorageEntry>(
+    pub fn storage_hash(
         &self,
+        pallet: &str,
+        storage: &str,
     ) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_storage_hashes
-            .get_or_insert(S::PALLET, S::STORAGE, || {
+            .get_or_insert(pallet, storage, || {
                 subxt_metadata::get_storage_hash(
                     &self.inner.metadata,
-                    S::PALLET,
-                    S::STORAGE,
+                    pallet,
+                    storage,
                 )
                 .map_err(|e| {
                     match e {
@@ -183,14 +184,18 @@ impl Metadata {
     }
 
     /// Obtain the unique hash for a call.
-    pub fn call_hash<C: crate::Call>(&self) -> Result<[u8; 32], MetadataError> {
+    pub fn call_hash(
+        &self,
+        pallet: &str,
+        function: &str,
+    ) -> Result<[u8; 32], MetadataError> {
         self.inner
             .cached_call_hashes
-            .get_or_insert(C::PALLET, C::FUNCTION, || {
+            .get_or_insert(pallet, function, || {
                 subxt_metadata::get_call_hash(
                     &self.inner.metadata,
-                    C::PALLET,
-                    C::FUNCTION,
+                    pallet,
+                    function,
                 )
                 .map_err(|e| {
                     match e {
@@ -240,13 +245,11 @@ impl PalletMetadata {
 
     /// Attempt to resolve a call into an index in this pallet, failing
     /// if the call is not found in this pallet.
-    pub fn call_index<C>(&self) -> Result<u8, MetadataError>
-    where
-        C: Call,
+    pub fn call_index(&self, function: &str) -> Result<u8, MetadataError>
     {
         let fn_index = *self
             .calls
-            .get(C::FUNCTION)
+            .get(function)
             .ok_or(MetadataError::CallNotFound)?;
         Ok(fn_index)
     }
@@ -553,14 +556,7 @@ mod tests {
     fn metadata_call_inner_cache() {
         let metadata = load_metadata();
 
-        #[derive(codec::Encode)]
-        struct ValidCall;
-        impl crate::Call for ValidCall {
-            const PALLET: &'static str = "System";
-            const FUNCTION: &'static str = "fill_block";
-        }
-
-        let hash = metadata.call_hash::<ValidCall>();
+        let hash = metadata.call_hash("System", "fill_block");
 
         let mut call_number = 0;
         let hash_cached = metadata.inner.cached_call_hashes.get_or_insert(
@@ -614,7 +610,7 @@ mod tests {
             }
         }
 
-        let hash = metadata.storage_hash::<ValidStorage>();
+        let hash = metadata.storage_hash("System", "Account");
 
         let mut call_number = 0;
         let hash_cached = metadata.inner.cached_storage_hashes.get_or_insert(
