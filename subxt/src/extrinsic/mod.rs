@@ -21,6 +21,7 @@
 mod params;
 mod signer;
 mod submittable;
+mod transaction;
 
 pub use self::{
     params::{
@@ -42,5 +43,11 @@ pub use self::{
     submittable::{
         SubmittableExtrinsic,
         SignedSubmittableExtrinsic,
+    },
+    transaction::{
+        TransactionEvents,
+        TransactionInBlock,
+        TransactionProgress,
+        TransactionStatus,
     }
 };

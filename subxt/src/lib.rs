@@ -228,7 +228,6 @@ pub mod extrinsic;
 pub mod metadata;
 pub mod rpc;
 pub mod storage;
-pub mod transaction;
 pub mod updates;
 
 pub use crate::{
@@ -261,6 +260,10 @@ pub use crate::{
         PolkadotExtrinsicParamsBuilder,
         SubstrateExtrinsicParams,
         SubstrateExtrinsicParamsBuilder,
+        TransactionEvents,
+        TransactionInBlock,
+        TransactionProgress,
+        TransactionStatus,
     },
     metadata::{
         ErrorMetadata,
@@ -279,12 +282,6 @@ pub use crate::{
         StorageEntry,
         StorageEntryKey,
         StorageMapKey,
-    },
-    transaction::{
-        TransactionEvents,
-        TransactionInBlock,
-        TransactionProgress,
-        TransactionStatus,
     },
 };
 

@@ -23,10 +23,10 @@ use crate::{
     metadata::{
         EncodeWithMetadata,
     },
-    transaction::TransactionProgress,
     Config,
     Encoded,
 };
+use super::TransactionProgress;
 use codec::{
     Compact,
     Decode,
