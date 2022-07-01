@@ -6,7 +6,7 @@ use futures::join;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PolkadotExtrinsicParams,
 };
 
@@ -18,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     let addr = AccountKeyring::Bob.to_account_id();
 

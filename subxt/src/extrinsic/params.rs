@@ -7,11 +7,11 @@ use codec::{
     Encode,
 };
 use core::fmt::Debug;
-
 use crate::{
     Config,
     Encoded,
 };
+use derivative::Derivative;
 
 // We require Era as a param below, so make it available from here.
 pub use sp_runtime::generic::Era;
@@ -20,7 +20,7 @@ pub use sp_runtime::generic::Era;
 /// "additional" parameters that are signed and used in transactions.
 /// see [`BaseExtrinsicParams`] for an implementation that is compatible with
 /// a Polkadot node.
-pub trait ExtrinsicParams<T: Config + ?Sized>: Debug {
+pub trait ExtrinsicParams<Index, Hash>: Debug + 'static {
     /// These parameters can be provided to the constructor along with
     /// some default parameters that `subxt` understands, in order to
     /// help construct your [`ExtrinsicParams`] object.
@@ -30,8 +30,8 @@ pub trait ExtrinsicParams<T: Config + ?Sized>: Debug {
     fn new(
         spec_version: u32,
         tx_version: u32,
-        nonce: T::Index,
-        genesis_hash: T::Hash,
+        nonce: Index,
+        genesis_hash: Hash,
         other_params: Self::OtherParams,
     ) -> Self;
 
@@ -73,7 +73,8 @@ pub type PolkadotExtrinsicParamsBuilder<T> = BaseExtrinsicParamsBuilder<T, Plain
 /// If your node differs in the "signed extra" and "additional" parameters expected
 /// to be sent/signed with a transaction, then you can define your own type which
 /// implements the [`ExtrinsicParams`] trait.
-#[derive(Debug)]
+#[derive(Derivative)]
+#[derivative(Debug(bound = "Tip: Debug"))]
 pub struct BaseExtrinsicParams<T: Config, Tip: Debug> {
     era: Era,
     nonce: T::Index,
@@ -132,7 +133,7 @@ impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl<T: Config, Tip: Debug + Encode> ExtrinsicParams<T> for BaseExtrinsicParams<T, Tip> {
+impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash> for BaseExtrinsicParams<T, Tip> {
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(

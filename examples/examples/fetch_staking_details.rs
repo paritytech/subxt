@@ -18,7 +18,7 @@ use subxt::{
     },
     sp_runtime::AccountId32,
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PolkadotExtrinsicParams,
 };
 
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     let era = api.storage().staking().active_era(None).await?.unwrap();
     println!(

@@ -66,7 +66,7 @@ where
     ) -> Result<TransactionProgress<T, Err, Evs>, BasicError>
     where
         Client: Into<OnlineClient<T>>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
         T: Config,
     {
         self.sign_and_submit_then_watch(client, signer, Default::default())
@@ -81,7 +81,7 @@ where
         &self,
         client: Client,
         signer: &(dyn Signer<T> + Send + Sync),
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<TransactionProgress<T, Err, Evs>, BasicError>
     where
         Client: Into<OnlineClient<T>>,
@@ -110,7 +110,7 @@ where
     ) -> Result<T::Hash, BasicError>
     where
         Client: Into<OnlineClient<T>>,
-        <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams: Default,
+        <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
         T: Config,
     {
         self.sign_and_submit(client, signer, Default::default()).await
@@ -128,7 +128,7 @@ where
         &self,
         client: Client,
         signer: &(dyn Signer<T> + Send + Sync),
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<T::Hash, BasicError>
     where
         Client: Into<OnlineClient<T>>,
@@ -157,7 +157,7 @@ where
         &self,
         client: Client,
         signer: &(dyn Signer<T> + Send + Sync),
-        other_params: <T::ExtrinsicParams as ExtrinsicParams<T>>::OtherParams,
+        other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SignedSubmittableExtrinsic<T, Err, Evs>, BasicError>
     where
         Client: Into<OnlineClient<T>>,
@@ -182,7 +182,7 @@ where
         let additional_and_extra_params = {
             // Obtain spec version and transaction version from the runtime version of the client.
             let runtime = client.runtime_version();
-            <T::ExtrinsicParams as ExtrinsicParams<T>>::new(
+            <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::new(
                 runtime.spec_version,
                 runtime.transaction_version,
                 account_nonce,

@@ -29,7 +29,7 @@ use scale_info::{
 };
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     Metadata,
     SubstrateExtrinsicParams,
 };
@@ -37,7 +37,7 @@ use subxt::{
 use crate::utils::node_runtime;
 
 type RuntimeApi =
-    node_runtime::RuntimeApi<DefaultConfig, SubstrateExtrinsicParams<DefaultConfig>>;
+    node_runtime::RuntimeApi<SubstrateConfig, SubstrateExtrinsicParams<SubstrateConfig>>;
 
 async fn metadata_to_api(metadata: RuntimeMetadataV14, cxt: &TestContext) -> RuntimeApi {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
@@ -50,8 +50,8 @@ async fn metadata_to_api(metadata: RuntimeMetadataV14, cxt: &TestContext) -> Run
             .await
             .unwrap()
             .to_runtime_api::<node_runtime::RuntimeApi<
-                DefaultConfig,
-                SubstrateExtrinsicParams<DefaultConfig>,
+                SubstrateConfig,
+                SubstrateExtrinsicParams<SubstrateConfig>,
             >>()
 }
 

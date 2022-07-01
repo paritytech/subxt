@@ -14,7 +14,7 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
     Config,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
 };
@@ -33,14 +33,14 @@ impl Config for MyConfig {
     // polkadot runtime used, so some operations will fail. Normally when using a custom `Config`
     // impl types MUST match exactly those used in the actual runtime.
     type Index = u64;
-    type BlockNumber = <DefaultConfig as Config>::BlockNumber;
-    type Hash = <DefaultConfig as Config>::Hash;
-    type Hashing = <DefaultConfig as Config>::Hashing;
-    type AccountId = <DefaultConfig as Config>::AccountId;
-    type Address = <DefaultConfig as Config>::Address;
-    type Header = <DefaultConfig as Config>::Header;
-    type Signature = <DefaultConfig as Config>::Signature;
-    type Extrinsic = <DefaultConfig as Config>::Extrinsic;
+    type BlockNumber = <SubstrateConfig as Config>::BlockNumber;
+    type Hash = <SubstrateConfig as Config>::Hash;
+    type Hashing = <SubstrateConfig as Config>::Hashing;
+    type AccountId = <SubstrateConfig as Config>::AccountId;
+    type Address = <SubstrateConfig as Config>::Address;
+    type Header = <SubstrateConfig as Config>::Header;
+    type Signature = <SubstrateConfig as Config>::Signature;
+    type Extrinsic = <SubstrateConfig as Config>::Extrinsic;
 }
 
 #[tokio::main]

@@ -17,7 +17,7 @@ use subxt::{
         PlainTip,
     },
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
     PolkadotExtrinsicParamsBuilder as Params,
@@ -36,7 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Configure the transaction tip and era:
     let tx_params = Params::new()

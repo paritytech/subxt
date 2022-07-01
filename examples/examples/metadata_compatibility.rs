@@ -12,7 +12,7 @@
 
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PolkadotExtrinsicParams,
 };
 
@@ -26,7 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Full metadata validation is not enabled by default; instead, the individual calls,
     // storage requests and constant accesses are runtime type checked against the node

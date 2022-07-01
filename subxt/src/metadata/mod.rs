@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! Types representing the metadata obtained from a node.
+
 mod encode_decode;
 mod hash_cache;
 mod metadata_type;
@@ -17,5 +19,6 @@ pub use metadata_type::{
 
 pub use encode_decode::{
     EncodeStaticCall,
+    EncodeDynamicCall,
     EncodeWithMetadata,
 };

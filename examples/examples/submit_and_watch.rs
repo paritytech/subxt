@@ -14,7 +14,7 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
 };
@@ -43,7 +43,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
 
     let balance_transfer = api
         .tx()
@@ -75,7 +75,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
 
     let balance_transfer = api
         .tx()
@@ -126,7 +126,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<_>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
 
     let mut balance_transfer_progress = api
         .tx()

@@ -12,7 +12,7 @@
 
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PolkadotExtrinsicParams,
 };
 
@@ -27,7 +27,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .set_url("wss://rpc.polkadot.io:443")
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     let block_number = 1u32;
 

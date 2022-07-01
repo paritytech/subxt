@@ -2,6 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! Types representing extrinsics/transactions that have been submitted to a node.
+
 use std::task::Poll;
 
 use crate::PhantomDataSendSync;

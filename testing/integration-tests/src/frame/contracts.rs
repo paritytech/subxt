@@ -24,7 +24,7 @@ use sp_runtime::MultiAddress;
 use subxt::{
     Client,
     Config,
-    DefaultConfig,
+    SubstrateConfig,
     Error,
     PairSigner,
     TransactionProgress,
@@ -32,11 +32,11 @@ use subxt::{
 
 struct ContractsTestContext {
     cxt: TestContext,
-    signer: PairSigner<DefaultConfig, Pair>,
+    signer: PairSigner<SubstrateConfig, Pair>,
 }
 
-type Hash = <DefaultConfig as Config>::Hash;
-type AccountId = <DefaultConfig as Config>::AccountId;
+type Hash = <SubstrateConfig as Config>::Hash;
+type AccountId = <SubstrateConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
@@ -47,11 +47,11 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<DefaultConfig> {
+    fn client(&self) -> &Client<SubstrateConfig> {
         self.cxt.client()
     }
 
-    fn contracts_tx(&self) -> TransactionApi<DefaultConfig, NodeRuntimeParams> {
+    fn contracts_tx(&self) -> TransactionApi<SubstrateConfig, NodeRuntimeParams> {
         self.cxt.api.tx().contracts()
     }
 
@@ -138,7 +138,7 @@ impl ContractsTestContext {
         contract: AccountId,
         input_data: Vec<u8>,
     ) -> Result<
-        TransactionProgress<'_, DefaultConfig, DispatchError, node_runtime::Event>,
+        TransactionProgress<'_, SubstrateConfig, DispatchError, node_runtime::Event>,
         Error<DispatchError>,
     > {
         tracing::info!("call: {:?}", contract);

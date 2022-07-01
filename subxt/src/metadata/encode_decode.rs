@@ -12,7 +12,9 @@ use crate::{
 use codec::{
     Encode,
 };
+use std::borrow::Cow;
 
+/// This trait represents any type that can be encoded to bytes with the support of [`Metadata`].
 pub trait EncodeWithMetadata {
     /// Given some metadata, attempt to SCALE encode `Self` to the provided bytes.
     fn encode_to_with_metadata(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), BasicError>;
@@ -27,8 +29,11 @@ pub trait EncodeWithMetadata {
 
 /// A wrapper which implements [`EncodeWithMetadata`] if the data provided implements [`Encode`].
 pub struct EncodeStaticCall<T> {
+    /// The pallet name
     pub pallet: &'static str,
+    /// The call/fucntion name within the pallet
     pub call: &'static str,
+    /// Data representing the arguments to pass to the call.
     pub data: T,
 }
 
@@ -46,15 +51,30 @@ impl <T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
 }
 
 /// A wrapper which allows dynamic Value types to be SCALE encoded via [`EncodeWithMetadata`].
-pub struct EncodeDynamicCall {
-    pub pallet: &'static str,
-    pub call: &'static str,
-    pub data: Vec<scale_value::Value>,
+pub struct EncodeDynamicCall<'a> {
+    pallet: Cow<'a, str>,
+    call: Cow<'a, str>,
+    data: Vec<scale_value::Value>,
 }
 
-impl EncodeWithMetadata for EncodeDynamicCall {
+impl <'a> EncodeDynamicCall<'a> {
+    /// Construct a new [`EncodeDynamicCall`], which can be SCALE encoded to call data.
+    pub fn new(
+        pallet: impl Into<Cow<'a, str>>,
+        call: impl Into<Cow<'a, str>>,
+        data: Vec<scale_value::Value>
+    ) -> Self {
+        Self {
+            pallet: pallet.into(),
+            call: call.into(),
+            data
+        }
+    }
+}
+
+impl <'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
     fn encode_to_with_metadata(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
-        let pallet = metadata.pallet(self.pallet)?;
+        let pallet = metadata.pallet(&self.pallet)?;
         let pallet_index = pallet.index();
         let call_ty = pallet
             .call_ty_id()
@@ -64,7 +84,7 @@ impl EncodeWithMetadata for EncodeDynamicCall {
         // (we could do this ourselves a little more efficiently but it's easier
         // reusing scale_value logic).
         let composite = scale_value::Composite::Unnamed(self.data.clone());
-        let variant = scale_value::Value::variant(self.call, composite);
+        let variant = scale_value::Value::variant(self.call.to_owned(), composite);
 
         // Encode the pallet index and call variant+data:
         pallet_index.encode_to(out);

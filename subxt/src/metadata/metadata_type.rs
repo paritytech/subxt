@@ -345,12 +345,16 @@ impl ErrorMetadata {
 /// The runtime metadata is converted when building the [crate::client::Client].
 #[derive(Debug, thiserror::Error)]
 pub enum InvalidMetadataError {
+    /// Invalid prefix
     #[error("Invalid prefix")]
     InvalidPrefix,
+    /// Invalid version
     #[error("Invalid version")]
     InvalidVersion,
+    /// Type missing from type registry
     #[error("Type {0} missing from type registry")]
     MissingType(u32),
+    /// Type was not a variant/enum type
     #[error("Type {0} was not a variant/enum type")]
     TypeDefNotVariant(u32),
 }

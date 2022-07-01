@@ -238,7 +238,7 @@ mod test {
     };
     use crate::{
         Config,
-        DefaultConfig,
+        SubstrateConfig,
         Metadata,
     };
     use codec::Encode;
@@ -284,7 +284,7 @@ mod test {
     // A stream of fake events for us to try filtering on.
     fn events_stream(
         metadata: Metadata,
-    ) -> impl Stream<Item = Result<Events<DefaultConfig, AllEvents<PalletEvents>>, BasicError>>
+    ) -> impl Stream<Item = Result<Events<SubstrateConfig, AllEvents<PalletEvents>>, BasicError>>
     {
         stream::iter(vec![
             events::<PalletEvents>(
@@ -319,7 +319,7 @@ mod test {
 
         // Filter out fake event stream to select events matching `EventA` only.
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventA,)>::new(events_stream(metadata))
+            FilterEvents::<_, SubstrateConfig, (EventA,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;
@@ -327,17 +327,17 @@ mod test {
         let expected = vec![
             FilteredEventDetails {
                 phase: Phase::Initialization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(1),
             },
             FilteredEventDetails {
                 phase: Phase::Finalization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(2),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(3),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: EventA(3),
             },
         ];
@@ -350,7 +350,7 @@ mod test {
         let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventA` or `EventB`.
-        let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
+        let actual: Vec<_> = FilterEvents::<_, SubstrateConfig, (EventA, EventB)>::new(
             events_stream(metadata),
         )
         .map(|e| e.unwrap())
@@ -360,32 +360,32 @@ mod test {
         let expected = vec![
             FilteredEventDetails {
                 phase: Phase::Initialization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(1)), None),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(0),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(true))),
             },
             FilteredEventDetails {
                 phase: Phase::Finalization,
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(2)), None),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(1),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(false))),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(2),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (None, Some(EventB(true))),
             },
             FilteredEventDetails {
                 phase: Phase::ApplyExtrinsic(3),
-                block_hash: <DefaultConfig as Config>::Hash::default(),
+                block_hash: <SubstrateConfig as Config>::Hash::default(),
                 event: (Some(EventA(3)), None),
             },
         ];
@@ -399,7 +399,7 @@ mod test {
 
         // Filter out fake event stream to select events matching `EventC` (none exist).
         let actual: Vec<_> =
-            FilterEvents::<_, DefaultConfig, (EventC,)>::new(events_stream(metadata))
+            FilterEvents::<_, SubstrateConfig, (EventC,)>::new(events_stream(metadata))
                 .map(|e| e.unwrap())
                 .collect()
                 .await;

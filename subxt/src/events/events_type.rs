@@ -397,7 +397,7 @@ pub(crate) mod test_utils {
     use super::*;
     use crate::{
         Config,
-        DefaultConfig,
+        SubstrateConfig,
         Phase,
     };
     use codec::Encode;
@@ -428,7 +428,7 @@ pub(crate) mod test_utils {
     pub struct EventRecord<E: Encode> {
         phase: Phase,
         event: AllEvents<E>,
-        topics: Vec<<DefaultConfig as Config>::Hash>,
+        topics: Vec<<SubstrateConfig as Config>::Hash>,
     }
 
     /// Build an EventRecord, which encoded events in the format expected
@@ -473,7 +473,7 @@ pub(crate) mod test_utils {
     pub fn events<E: Decode + Encode>(
         metadata: Metadata,
         event_records: Vec<EventRecord<E>>,
-    ) -> Events<DefaultConfig, AllEvents<E>> {
+    ) -> Events<SubstrateConfig, AllEvents<E>> {
         let num_events = event_records.len() as u32;
         let mut event_bytes = Vec::new();
         for ev in event_records {
@@ -488,9 +488,9 @@ pub(crate) mod test_utils {
         metadata: Metadata,
         event_bytes: Vec<u8>,
         num_events: u32,
-    ) -> Events<DefaultConfig, AllEvents<E>> {
+    ) -> Events<SubstrateConfig, AllEvents<E>> {
         Events {
-            block_hash: <DefaultConfig as Config>::Hash::default(),
+            block_hash: <SubstrateConfig as Config>::Hash::default(),
             event_bytes,
             metadata,
             num_events,

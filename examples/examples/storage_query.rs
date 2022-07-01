@@ -18,7 +18,7 @@ use subxt::{
         StorageKeyPrefix,
     },
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PolkadotExtrinsicParams,
     StorageEntryKey,
     StorageMapKey,
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Obtain the storage client wrapper from the API.
     let storage: StorageClient<_> = api.client.storage();

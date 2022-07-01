@@ -11,7 +11,7 @@ use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
     Client,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     SubstrateExtrinsicParams,
 };
@@ -19,11 +19,11 @@ use subxt::{
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub type NodeRuntimeParams = SubstrateExtrinsicParams<DefaultConfig>;
+pub type NodeRuntimeParams = SubstrateExtrinsicParams<SubstrateConfig>;
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
-) -> TestNodeProcess<DefaultConfig> {
+) -> TestNodeProcess<SubstrateConfig> {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
@@ -32,24 +32,24 @@ pub async fn test_node_process_with(
         SUBSTRATE_NODE_PATH.to_string()
     });
 
-    let proc = TestNodeProcess::<DefaultConfig>::build(path.as_str())
+    let proc = TestNodeProcess::<SubstrateConfig>::build(path.as_str())
         .with_authority(key)
-        .spawn::<DefaultConfig>()
+        .spawn::<SubstrateConfig>()
         .await;
     proc.unwrap()
 }
 
-pub async fn test_node_process() -> TestNodeProcess<DefaultConfig> {
+pub async fn test_node_process() -> TestNodeProcess<SubstrateConfig> {
     test_node_process_with(AccountKeyring::Alice).await
 }
 
 pub struct TestContext {
-    pub node_proc: TestNodeProcess<DefaultConfig>,
-    pub api: node_runtime::RuntimeApi<DefaultConfig, NodeRuntimeParams>,
+    pub node_proc: TestNodeProcess<SubstrateConfig>,
+    pub api: node_runtime::RuntimeApi<SubstrateConfig, NodeRuntimeParams>,
 }
 
 impl TestContext {
-    pub fn client(&self) -> &Client<DefaultConfig> {
+    pub fn client(&self) -> &Client<SubstrateConfig> {
         &self.api.client
     }
 }
@@ -61,6 +61,6 @@ pub async fn test_context() -> TestContext {
     TestContext { node_proc, api }
 }
 
-pub fn pair_signer(pair: Pair) -> PairSigner<DefaultConfig, Pair> {
+pub fn pair_signer(pair: Pair) -> PairSigner<SubstrateConfig, Pair> {
     PairSigner::new(pair)
 }

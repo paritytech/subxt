@@ -15,7 +15,7 @@ use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
 };
@@ -33,7 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Subscribe to several balance related events. If we ask for more than one event,
     // we'll be given a correpsonding tuple of `Option`'s, with exactly one
@@ -53,8 +53,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .unwrap()
                 .to_runtime_api::<polkadot::RuntimeApi<
-                    DefaultConfig,
-                    PolkadotExtrinsicParams<DefaultConfig>,
+                    SubstrateConfig,
+                    PolkadotExtrinsicParams<SubstrateConfig>,
                 >>();
 
         // Make small balance transfers from Alice to Bob in a loop:

@@ -13,7 +13,7 @@
 use sp_keyring::AccountKeyring;
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
 };
@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Submit the `transfer` extrinsic from Alice's account to Bob's.
     let dest = AccountKeyring::Bob.to_account_id().into();

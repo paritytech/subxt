@@ -220,15 +220,15 @@ use codec::{
 use core::fmt::Debug;
 use derivative::Derivative;
 
-mod client;
-mod config;
-mod error;
+pub mod client;
+pub mod config;
+pub mod error;
 pub mod events;
 pub mod extrinsic;
-mod metadata;
+pub mod metadata;
 pub mod rpc;
 pub mod storage;
-mod transaction;
+pub mod transaction;
 pub mod updates;
 
 pub use crate::{
@@ -238,7 +238,7 @@ pub use crate::{
     },
     config::{
         Config,
-        DefaultConfig,
+        SubstrateConfig,
     },
     error::{
         BasicError,

@@ -15,7 +15,7 @@ use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
     ClientBuilder,
-    DefaultConfig,
+    SubstrateConfig,
     PairSigner,
     PolkadotExtrinsicParams,
 };
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = ClientBuilder::new()
         .build()
         .await?
-        .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
+        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
 
     // Subscribe to any events that occur:
     let mut event_sub = api.events().subscribe().await?;
@@ -46,8 +46,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .await
                 .unwrap()
                 .to_runtime_api::<polkadot::RuntimeApi<
-                    DefaultConfig,
-                    PolkadotExtrinsicParams<DefaultConfig>,
+                    SubstrateConfig,
+                    PolkadotExtrinsicParams<SubstrateConfig>,
                 >>();
 
         let mut transfer_amount = 1_000_000_000;

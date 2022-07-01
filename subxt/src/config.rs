@@ -2,6 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+//! This module provides a [`Config`] type, which is used to define various
+//! types that are important in order to speak to a particular chain.
+//! [`DefaultConfig`] provides a default set of these types suitable for the
+//! default Substrate node implementation.
+
 use codec::{
     Codec,
     Encode,
@@ -22,7 +27,7 @@ use sp_runtime::traits::{
 // Note: the 'static bound isn't strictly required, but currently deriving TypeInfo
 // automatically applies a 'static bound to all generic types (including this one),
 // and so until that is resolved, we'll keep the (easy to satisfy) constraint here.
-pub trait Config: Debug + 'static {
+pub trait Config: 'static {
     /// Account index (aka nonce) type. This stores the number of previous
     /// transactions associated with a sender account.
     type Index: Parameter
@@ -76,7 +81,7 @@ pub trait Config: Debug + 'static {
     type Extrinsic: Parameter + Extrinsic + Debug + MaybeSerializeDeserialize;
 
     /// This type defines the extrinsic extra and additional parameters.
-    type ExtrinsicParams: crate::extrinsic::ExtrinsicParams<Self>;
+    type ExtrinsicParams: crate::extrinsic::ExtrinsicParams<Self::Index, Self::Hash>;
 }
 
 /// Parameter trait copied from `substrate::frame_support`
@@ -86,10 +91,9 @@ impl<T> Parameter for T where T: Codec + EncodeLike + Clone + Eq + Debug {}
 /// Default set of commonly used types by Substrate runtimes.
 // Note: We only use this at the type level, so it should be impossible to
 // create an instance of it.
-#[derive(Debug)]
-pub enum DefaultConfig {}
+pub enum SubstrateConfig {}
 
-impl Config for DefaultConfig {
+impl Config for SubstrateConfig {
     type Index = u32;
     type BlockNumber = u32;
     type Hash = sp_core::H256;
@@ -101,4 +105,37 @@ impl Config for DefaultConfig {
     type Signature = sp_runtime::MultiSignature;
     type Extrinsic = sp_runtime::OpaqueExtrinsic;
     type ExtrinsicParams = crate::extrinsic::SubstrateExtrinsicParams<Self>;
+}
+
+/// Default set of commonly used types by Polkadot nodes.
+pub type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, crate::extrinsic::PolkadotExtrinsicParams<SubstrateConfig>>;
+
+/// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
+/// additional and extra parameters to pass to an extrinsic (see [`crate::extrinsic::ExtrinsicParams`]),
+/// and returns a type implementing [`Config`] with those new `ExtrinsicParams`.
+///
+/// # Example
+///
+/// ```
+/// use subxt::config::{ SubstrateConfig, WithExtrinsicParams };
+/// use subxt::extrinsic::PolkadotExtrinsicParams;
+///
+/// // This is how PolkadotConfig is implemented:
+/// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
+/// ```
+pub struct WithExtrinsicParams<T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> {
+    _marker: std::marker::PhantomData<(T, E)>
+}
+
+impl <T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> Config for WithExtrinsicParams<T, E> {
+    type Index = T::Index;
+    type BlockNumber = T::BlockNumber;
+    type Hash = T::Hash;
+    type Hashing = T::Hashing;
+    type AccountId = T::AccountId;
+    type Address = T::Address;
+    type Header = T::Header;
+    type Signature = T::Signature;
+    type Extrinsic = T::Extrinsic;
+    type ExtrinsicParams = E;
 }

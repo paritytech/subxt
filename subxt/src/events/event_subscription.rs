@@ -284,15 +284,15 @@ mod test {
         fn assert_send<T: Send>() {}
         assert_send::<
             EventSubscription<
-                EventSub<<crate::DefaultConfig as Config>::Header>,
-                crate::DefaultConfig,
+                EventSub<<crate::SubstrateConfig as Config>::Header>,
+                crate::SubstrateConfig,
                 (),
             >,
         >();
         assert_send::<
             EventSubscription<
-                FinalizedEventSub<<crate::DefaultConfig as Config>::Header>,
-                crate::DefaultConfig,
+                FinalizedEventSub<<crate::SubstrateConfig as Config>::Header>,
+                crate::SubstrateConfig,
                 (),
             >,
         >();
