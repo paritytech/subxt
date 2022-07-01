@@ -228,7 +228,6 @@ pub mod extrinsic;
 pub mod metadata;
 pub mod rpc;
 pub mod storage;
-pub mod updates;
 
 pub use crate::{
     client::{

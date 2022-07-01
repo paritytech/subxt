@@ -22,13 +22,20 @@ use crate::{
 };
 use derivative::Derivative;
 
-/// A client capable of perfomring offline or online operations. This
-/// builds on [`OfflineClient`] to provide connectivity to a node.
+/// A client capable of perfomring offline or online operations.
 #[derive(Derivative)]
 #[derivative(Clone(bound = ""))]
 pub struct OnlineClient<T: Config> {
-    inner: Arc<RwLock<OfflineClient<T>>>,
+    inner: Arc<RwLock<Inner<T>>>,
     rpc: Rpc<T>,
+}
+
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""))]
+struct Inner<T: Config> {
+    genesis_hash: T::Hash,
+    runtime_version: RuntimeVersion,
+    metadata: Metadata,
 }
 
 impl<T: Config> std::fmt::Debug for OnlineClient<T> {
@@ -67,11 +74,11 @@ impl <T: Config> OnlineClient<T> {
         .await;
 
         Ok(OnlineClient {
-            inner: Arc::new(RwLock::new(OfflineClient::new(
-                genesis_hash?,
-                runtime_version?,
-                metadata?,
-            ))),
+            inner: Arc::new(RwLock::new(Inner {
+                genesis_hash: genesis_hash?,
+                runtime_version: runtime_version?,
+                metadata: metadata?,
+            })),
             rpc
         })
     }
@@ -80,30 +87,56 @@ impl <T: Config> OnlineClient<T> {
     pub fn offline(&self) -> OfflineClient<T> {
         let inner = self.inner.read();
         // This is fairly cheap:
-        (*inner).clone()
+        OfflineClient::new(
+            inner.genesis_hash,
+            inner.runtime_version.clone(),
+            inner.metadata.clone()
+        )
     }
 
     /// Return the [`Metadata`] used in this client.
     pub fn metadata(&self) -> Metadata {
         let inner = self.inner.read();
-        inner.metadata().clone()
+        inner.metadata.clone()
     }
 
     /// Return the genesis hash.
     pub fn genesis_hash(&self) -> T::Hash {
         let inner = self.inner.read();
-        *inner.genesis_hash()
+        inner.genesis_hash
     }
 
     /// Return the runtime version.
     pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read();
-        inner.runtime_version().clone()
+        inner.runtime_version.clone()
     }
 
     /// Return the RPC interface.
     pub fn rpc(&self) -> &Rpc<T> {
         &self.rpc
+    }
+
+    /// Create an object which can be used to keep the runtime uptodate
+    /// in a separate thread.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # #[tokio::main]
+    /// # fn main() {
+    /// use subxt::client::OnlineClient;
+    ///
+    /// let client = OnlineClient::new().await.unwrap();
+    ///
+    /// let update_task = client.subscribe_to_updates();
+    /// tokio::spawn(async move {
+    ///     update_task.await;
+    /// })
+    /// # }
+    /// ```
+    pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
+        ClientRuntimeUpdater(self.clone())
     }
 }
 
@@ -123,5 +156,46 @@ impl <'a, T: Config> From<&'a OnlineClient<T>> for OfflineClient<T> {
 impl <'a, T: Config> From<&'a OnlineClient<T>> for OnlineClient<T> {
     fn from(client: &'a OnlineClient<T>) -> Self {
         client.clone()
+    }
+}
+
+
+/// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
+/// for example usage.
+pub struct ClientRuntimeUpdater<T: Config>(OnlineClient<T>);
+
+impl<T: Config> ClientRuntimeUpdater<T> {
+    fn is_runtime_version_different(&self, new: &RuntimeVersion) -> bool {
+        let curr = self.0.inner.read();
+        &curr.runtime_version != new
+    }
+
+    /// Performs runtime updates indefinitely unless encountering an error.
+    ///
+    /// *Note:* This will run indefinitely until it errors, so the typical usage
+    /// would be to run it in a separate background task.
+    pub async fn perform_runtime_updates(&self) -> Result<(), BasicError> {
+        // Obtain an update subscription to further detect changes in the runtime version of the node.
+        let mut update_subscription = self.0.rpc.subscribe_runtime_version().await?;
+
+        while let Some(new_runtime_version) = update_subscription.next().await {
+            // The Runtime Version obtained via subscription.
+            let new_runtime_version = new_runtime_version?;
+
+            // Ignore this update if there is no difference.
+            if !self.is_runtime_version_different(&new_runtime_version) {
+                continue;
+            }
+
+            // Fetch new metadata.
+            let new_metadata = self.0.rpc.metadata().await?;
+
+            // Do the update.
+            let mut writable = self.0.inner.write();
+            writable.metadata = new_metadata;
+            writable.runtime_version = new_runtime_version;
+        }
+
+        Ok(())
     }
 }
