@@ -256,7 +256,7 @@ where
                 Some(Ok(block_header)) => {
                     // Note [jsdw]: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
-                    self.at = Some(Box::pin(at(self.client, block_header.hash())));
+                    self.at = Some(Box::pin(at(self.client.clone(), block_header.hash())));
                     // Continue, so that we poll this function future we've just created.
                 }
             }

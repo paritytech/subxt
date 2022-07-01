@@ -22,6 +22,9 @@ use crate::{
         ExtrinsicParams,
         Signer,
     },
+    metadata::{
+        EncodeWithMetadata,
+    },
     rpc::{
         Rpc,
         RpcClient,
@@ -41,6 +44,7 @@ use codec::{
     Decode,
     Encode,
 };
+use std::borrow::Cow;
 use derivative::Derivative;
 use parking_lot::RwLock;
 use std::sync::Arc;
@@ -53,12 +57,13 @@ pub struct SubmittableExtrinsic<C, Err = (), Evs = ()> {
 
 impl<C, Err, Evs> SubmittableExtrinsic<C, Err, Evs>
 where
-    C: Call + Encode,
+    C: EncodeWithMetadata,
     Evs: Decode,
     Err: Decode + HasModuleError,
 {
-    /// Create a new [`SubmittableExtrinsic`].
-    pub fn new<EvsN, ErrN>(call: C) -> SubmittableExtrinsic<C, ErrN, EvsN> {
+    /// Create a new [`SubmittableExtrinsic`], given some call data that can be SCALE
+    /// encoded with the help of our [`Metadata`].
+    pub fn new(call: C) -> Self {
         SubmittableExtrinsic {
             call,
             marker: Default::default(),
@@ -157,12 +162,9 @@ where
         Client: Into<OfflineClient<T>>,
         T: Config,
     {
-        let mut bytes = Vec::new();
-        let metadata = client.into().metadata();
-        let pallet = metadata.pallet(self.call.pallet())?;
-        bytes.push(pallet.index());
-        bytes.push(pallet.call_index(self.call.function())?);
-        self.call.encode_to(&mut bytes);
+        let client = client.into();
+        let metadata = client.metadata();
+        let bytes = self.call.encode_with_metadata(metadata)?;
         Ok(bytes)
     }
 
@@ -256,7 +258,7 @@ where
         // Wrap in Encoded to ensure that any more "encode" calls leave it in the right state.
         // maybe we can just return the raw bytes..
         Ok(SignedSubmittableExtrinsic {
-            client: self.client.clone(),
+            client,
             encoded: Encoded(extrinsic),
             marker: self.marker,
         })

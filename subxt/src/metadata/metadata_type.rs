@@ -17,6 +17,7 @@ use scale_info::{
     form::PortableForm,
     Type,
     Variant,
+    PortableRegistry,
 };
 use std::{
     collections::HashMap,
@@ -92,7 +93,7 @@ pub struct Metadata {
 
 impl Metadata {
     /// Returns a reference to [`PalletMetadata`].
-    pub fn pallet(&self, name: &'static str) -> Result<&PalletMetadata, MetadataError> {
+    pub fn pallet(&self, name: &str) -> Result<&PalletMetadata, MetadataError> {
         self.inner
             .pallets
             .get(name)
@@ -125,6 +126,11 @@ impl Metadata {
             .get(&(pallet_index, error_index))
             .ok_or(MetadataError::ErrorNotFound(pallet_index, error_index))?;
         Ok(error)
+    }
+
+    /// Return the type registry embedded within the metadata.
+    pub fn types(&self) -> &PortableRegistry {
+        &self.inner.metadata.types
     }
 
     /// Resolve a type definition.
@@ -227,7 +233,8 @@ impl Metadata {
 pub struct PalletMetadata {
     index: u8,
     name: String,
-    calls: HashMap<String, u8>,
+    call_indexes: HashMap<String, u8>,
+    call_ty_id: Option<u32>,
     storage: HashMap<String, StorageEntryMetadata<PortableForm>>,
     constants: HashMap<String, PalletConstantMetadata<PortableForm>>,
 }
@@ -243,12 +250,18 @@ impl PalletMetadata {
         self.index
     }
 
+    /// If calls exist for this pallet, this returns the type ID of the variant
+    /// representing the different possible calls.
+    pub fn call_ty_id(&self) -> Option<u32> {
+        self.call_ty_id
+    }
+
     /// Attempt to resolve a call into an index in this pallet, failing
     /// if the call is not found in this pallet.
     pub fn call_index(&self, function: &str) -> Result<u8, MetadataError>
     {
         let fn_index = *self
-            .calls
+            .call_indexes
             .get(function)
             .ok_or(MetadataError::CallNotFound)?;
         Ok(fn_index)
@@ -369,14 +382,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .pallets
             .iter()
             .map(|pallet| {
-                let calls = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
+                let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
+
+                let call_indexes = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
                     let type_def_variant = get_type_def_variant(call.ty.id())?;
-                    let calls = type_def_variant
+                    let call_indexes = type_def_variant
                         .variants()
                         .iter()
                         .map(|v| (v.name().clone(), v.index()))
                         .collect();
-                    Ok(calls)
+                    Ok(call_indexes)
                 })?;
 
                 let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
@@ -396,7 +411,8 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
                 let pallet_metadata = PalletMetadata {
                     index: pallet.index,
                     name: pallet.name.to_string(),
-                    calls,
+                    call_indexes,
+                    call_ty_id,
                     storage,
                     constants,
                 };

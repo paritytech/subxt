@@ -8,7 +8,12 @@ use crate::metadata::{
 };
 use core::fmt::Debug;
 use jsonrpsee::core::error::Error as RequestError;
-use scale_value::scale::DecodeError;
+use scale_value::{
+    scale::{
+        DecodeError,
+        EncodeError,
+    }
+};
 use sp_core::crypto::SecretStringError;
 use sp_runtime::transaction_validity::TransactionValidityError;
 

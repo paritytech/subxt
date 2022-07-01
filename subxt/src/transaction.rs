@@ -4,7 +4,7 @@
 
 use std::task::Poll;
 
-use crate::{PhantomDataSendSync, extrinsic::ExtrinsicParams};
+use crate::PhantomDataSendSync;
 use codec::Decode;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
@@ -188,7 +188,7 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode> Stream
                         TransactionStatus::InBlock(TransactionInBlock::new(
                             hash,
                             self.ext_hash,
-                            self.client,
+                            self.client.clone(),
                         ))
                     }
                     SubstrateTransactionStatus::Retracted(hash) => {
@@ -217,7 +217,7 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode> Stream
                         TransactionStatus::Finalized(TransactionInBlock::new(
                             hash,
                             self.ext_hash,
-                            self.client,
+                            self.client.clone(),
                         ))
                     }
                 }

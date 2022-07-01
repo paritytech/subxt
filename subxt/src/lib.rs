@@ -295,11 +295,16 @@ pub use crate::{
 ///
 /// When encoding an extrinsic, we use this information to know how to map
 /// the call to the specific pallet and call index needed by a particular node.
-pub trait Call {
+pub trait Call: Encode {
     /// Pallet name.
-    fn pallet(&self) -> &str;
-    /// Function/call name.
-    fn function(&self) -> &str;
+    const PALLET: &'static str;
+    /// Function name.
+    const FUNCTION: &'static str;
+
+    /// Returns true if the given pallet and function names match this call.
+    fn is_call(pallet: &str, function: &str) -> bool {
+        Self::PALLET == pallet && Self::FUNCTION == function
+    }
 }
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
@@ -308,11 +313,16 @@ pub trait Call {
 ///
 /// The trait is utilized to decode emitted events from a block, via obtaining the
 /// form of the `Event` from the metadata.
-pub trait Event {
+pub trait Event: Decode {
     /// Pallet name.
-    fn pallet(&self) -> &str;
-    /// Function/call name.
-    fn event(&self) -> &str;
+    const PALLET: &'static str;
+    /// Event name.
+    const EVENT: &'static str;
+
+    /// Returns true if the given pallet and event names match this event.
+    fn is_event(pallet: &str, event: &str) -> bool {
+        Self::PALLET == pallet && Self::EVENT == event
+    }
 }
 
 /// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of

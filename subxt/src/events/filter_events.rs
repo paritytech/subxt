@@ -263,29 +263,29 @@ mod test {
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventA(u8);
     impl crate::Event for EventA {
-        fn pallet(&self) -> &str { "Test" }
-        fn event(&self) -> &str { "A" }
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "A";
     }
 
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventB(bool);
     impl crate::Event for EventB {
-        fn pallet(&self) -> &str { "Test" }
-        fn event(&self) -> &str { "B" }
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "B";
     }
 
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventC(u8, bool);
     impl crate::Event for EventC {
-        fn pallet(&self) -> &str { "Test" }
-        fn event(&self) -> &str { "C" }
+        const PALLET: &'static str = "Test";
+        const EVENT: &'static str = "C";
     }
 
     // A stream of fake events for us to try filtering on.
     fn events_stream(
-        metadata: Arc<RwLock<Metadata>>,
+        metadata: Metadata,
     ) -> impl Stream<Item = Result<Events<DefaultConfig, AllEvents<PalletEvents>>, BasicError>>
     {
         stream::iter(vec![
@@ -317,7 +317,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_one_event_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventA` only.
         let actual: Vec<_> =
@@ -349,7 +349,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_some_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventA` or `EventB`.
         let actual: Vec<_> = FilterEvents::<_, DefaultConfig, (EventA, EventB)>::new(
@@ -397,7 +397,7 @@ mod test {
 
     #[tokio::test]
     async fn filter_no_events_from_stream() {
-        let metadata = Arc::new(RwLock::new(metadata::<PalletEvents>()));
+        let metadata = metadata::<PalletEvents>();
 
         // Filter out fake event stream to select events matching `EventC` (none exist).
         let actual: Vec<_> =

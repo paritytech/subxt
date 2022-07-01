@@ -14,3 +14,8 @@ pub use metadata_type::{
     MetadataError,
     PalletMetadata,
 };
+
+pub use encode_decode::{
+    EncodeStaticCall,
+    EncodeWithMetadata,
+};
