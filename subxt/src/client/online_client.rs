@@ -10,8 +10,6 @@ use super::{
 use futures::future;
 use crate::{
     Config,
-    Call,
-    Encoded,
     rpc::{
         Rpc,
         RpcClient,
@@ -20,15 +18,7 @@ use crate::{
     error::{
         BasicError,
     },
-    extrinsic::{
-        Signer,
-        ExtrinsicParams,
-    },
     Metadata,
-};
-use codec::{
-    Compact,
-    Encode,
 };
 use derivative::Derivative;
 

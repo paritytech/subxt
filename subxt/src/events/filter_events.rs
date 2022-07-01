@@ -247,9 +247,7 @@ mod test {
         Stream,
         StreamExt,
     };
-    use parking_lot::RwLock;
     use scale_info::TypeInfo;
-    use std::sync::Arc;
 
     // Some pretend events in a pallet
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]

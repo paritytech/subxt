@@ -39,4 +39,8 @@ pub use self::{
         PairSigner,
         Signer,
     },
+    submittable::{
+        SubmittableExtrinsic,
+        SignedSubmittableExtrinsic,
+    }
 };

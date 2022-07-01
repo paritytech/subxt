@@ -11,7 +11,6 @@ use jsonrpsee::core::error::Error as RequestError;
 use scale_value::{
     scale::{
         DecodeError,
-        EncodeError,
     }
 };
 use sp_core::crypto::SecretStringError;

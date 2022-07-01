@@ -19,12 +19,10 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
-use parking_lot::RwLock;
 use sp_core::{
     storage::StorageKey,
     twox_128,
 };
-use std::sync::Arc;
 
 /// Obtain events at some block hash. The generic parameter is what we
 /// will attempt to decode each event into if using [`Events::iter()`],

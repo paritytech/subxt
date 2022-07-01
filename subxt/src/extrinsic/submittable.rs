@@ -2,8 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use futures::future;
-pub use sp_runtime::traits::SignedExtension;
 use sp_runtime::{
     traits::Hash,
     ApplyExtrinsicResult,
@@ -25,29 +23,15 @@ use crate::{
     metadata::{
         EncodeWithMetadata,
     },
-    rpc::{
-        Rpc,
-        RpcClient,
-        RuntimeVersion,
-        SystemProperties,
-    },
-    storage::StorageClient,
     transaction::TransactionProgress,
-    updates::UpdateClient,
-    Call,
     Config,
     Encoded,
-    Metadata,
 };
 use codec::{
     Compact,
     Decode,
     Encode,
 };
-use std::borrow::Cow;
-use derivative::Derivative;
-use parking_lot::RwLock;
-use std::sync::Arc;
 
 /// A constructed call ready to be signed and submitted.
 pub struct SubmittableExtrinsic<C, Err = (), Evs = ()> {
@@ -265,16 +249,17 @@ where
     }
 }
 
+/// This represents an extrinsic that has been signed and is ready to submit.
 pub struct SignedSubmittableExtrinsic<T: Config, Err: Decode, Evs: Decode> {
     client: OnlineClient<T>,
     encoded: Encoded,
     marker: std::marker::PhantomData<(Err, Evs)>,
 }
 
-impl<'client, T, E, Evs> SignedSubmittableExtrinsic<T, E, Evs>
+impl<'client, T, Err, Evs> SignedSubmittableExtrinsic<T, Err, Evs>
 where
     T: Config,
-    E: Decode + HasModuleError,
+    Err: Decode + HasModuleError,
     Evs: Decode,
 {
     /// Submits the extrinsic to the chain.
@@ -283,7 +268,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(
         &self,
-    ) -> Result<TransactionProgress<T, E, Evs>, BasicError> {
+    ) -> Result<TransactionProgress<T, Err, Evs>, BasicError> {
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&self.encoded);
 
