@@ -86,7 +86,7 @@ fn system_events_key() -> StorageKey {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
 pub struct Events<T: Config, Evs> {
-    metadata: Arc<RwLock<Metadata>>,
+    metadata: Metadata,
     block_hash: T::Hash,
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. We should have stripped that off
@@ -178,11 +178,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
         let event_bytes = &self.event_bytes;
 
-        let metadata = {
-            let metadata = self.metadata.read();
-            metadata.clone()
-        };
-
+        let metadata = self.metadata.clone();
         let mut pos = 0;
         let mut index = 0;
         std::iter::from_fn(move || {
@@ -228,11 +224,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + 'a {
         let mut pos = 0;
         let mut index = 0;
-        let metadata = {
-            let metadata = self.metadata.read();
-            metadata.clone()
-        };
-
+        let metadata = self.metadata.clone();
         std::iter::from_fn(move || {
             let cursor = &mut &self.event_bytes[pos..];
             let start_len = cursor.len();
@@ -481,7 +473,7 @@ pub(crate) mod test_utils {
     /// Build an `Events` object for test purposes, based on the details provided,
     /// and with a default block hash.
     pub fn events<E: Decode + Encode>(
-        metadata: Arc<RwLock<Metadata>>,
+        metadata: Metadata,
         event_records: Vec<EventRecord<E>>,
     ) -> Events<DefaultConfig, AllEvents<E>> {
         let num_events = event_records.len() as u32;
@@ -495,7 +487,7 @@ pub(crate) mod test_utils {
     /// Much like [`events`], but takes pre-encoded events and event count, so that we can
     /// mess with the bytes in tests if we need to.
     pub fn events_raw<E: Decode + Encode>(
-        metadata: Arc<RwLock<Metadata>>,
+        metadata: Metadata,
         event_bytes: Vec<u8>,
         num_events: u32,
     ) -> Events<DefaultConfig, AllEvents<E>> {
@@ -526,8 +518,8 @@ mod tests {
     use scale_value::Value;
 
     /// Build a fake wrapped metadata.
-    fn metadata<E: TypeInfo + 'static>() -> Arc<RwLock<Metadata>> {
-        Arc::new(RwLock::new(test_utils::metadata::<E>()))
+    fn metadata<E: TypeInfo + 'static>() -> Metadata {
+        test_utils::metadata::<E>()
     }
 
     /// [`RawEventDetails`] can be annoying to test, because it contains
@@ -549,11 +541,10 @@ mod tests {
     pub fn assert_raw_events_match(
         // Just for convenience, pass in the metadata type constructed
         // by the `metadata` function above to simplify caller code.
-        metadata: &Arc<RwLock<Metadata>>,
+        metadata: &Metadata,
         actual: RawEventDetails,
         expected: TestRawEventDetails,
     ) {
-        let metadata = metadata.read();
         let types = &metadata.runtime_metadata().types;
 
         // Make sure that the bytes handed back line up with the fields handed back;

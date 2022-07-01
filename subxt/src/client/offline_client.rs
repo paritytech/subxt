@@ -18,6 +18,8 @@ pub struct OfflineClient<T: Config> {
     inner: Arc<Inner<T>>
 }
 
+#[derive(Derivative)]
+#[derivative(Debug(bound = ""), Clone(bound = ""))]
 struct Inner<T: Config> {
     genesis_hash: T::Hash,
     runtime_version: RuntimeVersion,

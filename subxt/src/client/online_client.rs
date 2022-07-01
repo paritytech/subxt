@@ -41,6 +41,15 @@ pub struct OnlineClient<T: Config> {
     rpc: Rpc<T>,
 }
 
+impl<T: Config> std::fmt::Debug for OnlineClient<T> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("Client")
+            .field("rpc", &"<Rpc>")
+            .field("inner", &self.inner)
+            .finish()
+    }
+}
+
 impl <T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
