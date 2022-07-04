@@ -7,13 +7,14 @@ use crate::{
     Metadata,
     rpc::RuntimeVersion,
     extrinsic::TxClient,
+    events::EventsClient,
 };
 use std::sync::Arc;
 use derivative::Derivative;
 
 /// A trait representing a client that can perform
 /// offline-only actions.
-pub trait OfflineClientT<T: Config>: Clone {
+pub trait OfflineClientT<T: Config>: Clone + Send + Sync + Clone + 'static {
     /// Return the provided [`Metadata`].
     fn metadata(&self) -> Metadata;
     /// Return the provided genesis hash.
@@ -24,6 +25,11 @@ pub trait OfflineClientT<T: Config>: Clone {
     /// Work with transactions.
     fn tx(&self) -> TxClient<T, Self> {
         TxClient::new(self.clone())
+    }
+
+    /// Work with events.
+    fn events(&self) -> EventsClient<T, Self> {
+        EventsClient::new(self.clone())
     }
 }
 

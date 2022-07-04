@@ -10,9 +10,6 @@ use crate::{
     Event,
     Metadata,
     Phase,
-    client::{
-        OnlineClientT,
-    },
 };
 use codec::{
     Compact,
@@ -21,63 +18,6 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
-use sp_core::{
-    storage::StorageKey,
-    twox_128,
-};
-
-/// Obtain events at some block hash. The generic parameter is what we
-/// will attempt to decode each event into if using [`Events::iter()`],
-/// and is expected to be the outermost event enum that contains all of
-/// the possible events across all pallets.
-///
-/// **Note:** This function is hidden from the documentation
-/// and is exposed only to be called via the codegen. Thus, prefer to use
-/// `api.events().at(block_hash)` over calling this directly.
-#[doc(hidden)]
-pub async fn at<Client, T, Evs>(
-    client: Client,
-    block_hash: T::Hash,
-) -> Result<Events<T, Evs>, BasicError>
-where
-    Client: OnlineClientT<T>,
-    T: Config,
-    Evs: Decode,
-{
-    let mut event_bytes = client
-        .rpc()
-        .storage(&system_events_key(), Some(block_hash))
-        .await?
-        .map(|s| s.0)
-        .unwrap_or_else(Vec::new);
-
-    // event_bytes is a SCALE encoded vector of events. So, pluck the
-    // compact encoded length from the front, leaving the remaining bytes
-    // for our iterating to decode.
-    //
-    // Note: if we get no bytes back, avoid an error reading vec length
-    // and default to 0 events.
-    let cursor = &mut &*event_bytes;
-    let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
-    let event_bytes_len = event_bytes.len();
-    let remaining_len = cursor.len();
-    event_bytes.drain(0..event_bytes_len - remaining_len);
-
-    Ok(Events {
-        metadata: client.metadata(),
-        block_hash,
-        event_bytes,
-        num_events,
-        _event_type: std::marker::PhantomData,
-    })
-}
-
-// The storage key needed to access events.
-fn system_events_key() -> StorageKey {
-    let mut storage_key = twox_128(b"System").to_vec();
-    storage_key.extend(twox_128(b"Events").to_vec());
-    StorageKey(storage_key)
-}
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -95,6 +35,32 @@ pub struct Events<T: Config, Evs> {
 }
 
 impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
+    pub (crate) fn new(
+        metadata: Metadata,
+        block_hash: T::Hash,
+        mut event_bytes: Vec<u8>
+    ) -> Self {
+        // event_bytes is a SCALE encoded vector of events. So, pluck the
+        // compact encoded length from the front, leaving the remaining bytes
+        // for our iterating to decode.
+        //
+        // Note: if we get no bytes back, avoid an error reading vec length
+        // and default to 0 events.
+        let cursor = &mut &*event_bytes;
+        let num_events = <Compact<u32>>::decode(cursor).unwrap_or(Compact(0)).0;
+        let event_bytes_len = event_bytes.len();
+        let remaining_len = cursor.len();
+        event_bytes.drain(0..event_bytes_len - remaining_len);
+
+        Self {
+            metadata,
+            block_hash,
+            event_bytes,
+            num_events,
+            _event_type: std::marker::PhantomData
+        }
+    }
+
     /// The number of events.
     pub fn len(&self) -> u32 {
         self.num_events

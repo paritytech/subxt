@@ -14,11 +14,7 @@ use crate::{
 use codec::Decode;
 use derivative::Derivative;
 use futures::{
-    future::Either,
-    stream::{
-        self,
-        BoxStream,
-    },
+    stream::BoxStream,
     Future,
     FutureExt,
     Stream,
@@ -32,124 +28,13 @@ use std::{
 };
 
 pub use super::{
-    at,
+    EventsClient,
     EventDetails,
     EventFilter,
     Events,
     FilterEvents,
     RawEventDetails,
 };
-
-/// Subscribe to events from blocks.
-///
-/// **Note:** these blocks haven't necessarily been finalised yet; prefer
-/// [`Events::subscribe_finalized()`] if that is important.
-///
-/// **Note:** This function is hidden from the documentation
-/// and is exposed only to be called via the codegen. It may
-/// break between minor releases.
-#[doc(hidden)]
-pub async fn subscribe<T, Client, Evs>(
-    client: Client,
-) -> Result<EventSubscription<T, Client, EventSub<T::Header>, Evs>, BasicError>
-where
-    T: Config,
-    Client: OnlineClientT<T>,
-    Evs: Decode + 'static
-{
-    let block_subscription = client.rpc().subscribe_blocks().await?;
-    Ok(EventSubscription::new(client, block_subscription))
-}
-
-/// Subscribe to events from finalized blocks.
-///
-/// **Note:** This function is hidden from the documentation
-/// and is exposed only to be called via the codegen. It may
-/// break between minor releases.
-#[doc(hidden)]
-pub async fn subscribe_finalized<T, Client, Evs>(
-    client: Client,
-) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>, Evs>, BasicError>
-where
-    T: Config,
-    Client: OnlineClientT<T> + Send + Sync + 'static,
-    Evs: Decode + 'static
-{
-    // fetch the last finalised block details immediately, so that we'll get
-    // events for each block after this one.
-    let last_finalized_block_hash = client.rpc().finalized_head().await?;
-    let last_finalized_block_number = client
-        .rpc()
-        .header(Some(last_finalized_block_hash))
-        .await?
-        .map(|h| (*h.number()).into());
-
-    let sub = client.rpc().subscribe_finalized_blocks().await?;
-
-    // Fill in any gaps between the block above and the finalized blocks reported.
-    let block_subscription = subscribe_to_block_headers_filling_in_gaps(
-        client.clone(),
-        last_finalized_block_number,
-        sub,
-    );
-
-    Ok(EventSubscription::new(client, Box::pin(block_subscription)))
-}
-
-/// Take a subscription that returns block headers, and if any block numbers are missed out
-/// betweem the block number provided and what's returned from the subscription, we fill in
-/// the gaps and get hold of all intermediate block headers.
-///
-/// **Note:** This is exposed so that we can run integration tests on it, but otherwise
-/// should not be used directly and may break between minor releases.
-#[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
-    client: Client,
-    mut last_block_num: Option<u64>,
-    sub: S,
-) -> impl Stream<Item = Result<T::Header, BasicError>> + Send
-where
-    T: Config,
-    Client: OnlineClientT<T> + Send + Sync,
-    S: Stream<Item = Result<T::Header, E>> + Send,
-    E: Into<BasicError> + Send + 'static,
-{
-    sub.flat_map(move |s| {
-        let client = client.clone();
-
-        // Get the header, or return a stream containing just the error. Our EventSubscription
-        // stream will return `None` as soon as it hits an error like this.
-        let header = match s {
-            Ok(header) => header,
-            Err(e) => return Either::Left(stream::once(async { Err(e.into()) })),
-        };
-
-        // We want all previous details up to, but not including this current block num.
-        let end_block_num = (*header.number()).into();
-
-        // This is one after the last block we returned details for last time.
-        let start_block_num = last_block_num.map(|n| n + 1).unwrap_or(end_block_num);
-
-        // Iterate over all of the previous blocks we need headers for, ignoring the current block
-        // (which we already have the header info for):
-        let previous_headers = stream::iter(start_block_num..end_block_num)
-            .then(move |n| {
-                let client = client.clone();
-                async move {
-                    let hash = client.rpc().block_hash(Some(n.into())).await?;
-                    let header = client.rpc().header(hash).await?;
-                    Ok::<_, BasicError>(header)
-                }
-            })
-            .filter_map(|h| async { h.transpose() });
-
-        // On the next iteration, we'll get details starting just after this end block.
-        last_block_num = Some(end_block_num);
-
-        // Return a combination of any previous headers plus the new header.
-        Either::Right(previous_headers.chain(stream::once(async { Ok(header) })))
-    })
-}
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
 /// in codegen from `subscribe_finalized`, and is exposed to be used in codegen.
@@ -163,10 +48,10 @@ pub type EventSub<Item> = Subscription<Item>;
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "Sub: std::fmt::Debug, C: std::fmt::Debug"))]
-pub struct EventSubscription<T: Config, C, Sub, Evs: 'static> {
+#[derivative(Debug(bound = "Sub: std::fmt::Debug, Client: std::fmt::Debug"))]
+pub struct EventSubscription<T: Config, Client, Sub, Evs: 'static> {
     finished: bool,
-    client: C,
+    client: Client,
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
@@ -177,12 +62,14 @@ pub struct EventSubscription<T: Config, C, Sub, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<Sub, T: Config, C, Evs: Decode, E: Into<BasicError>>
-    EventSubscription<T, C, Sub, Evs>
+impl<T: Config, Client, Sub, Evs: Decode, E: Into<BasicError>>
+    EventSubscription<T, Client, Sub, Evs>
 where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
-    fn new(client: C, block_header_subscription: Sub) -> Self {
+    /// Create a new [`EventSubscription`] from a client and a subscription
+    /// which returns block headers.
+    pub fn new(client: Client, block_header_subscription: Sub) -> Self {
         EventSubscription {
             finished: false,
             client: client,
@@ -199,8 +86,8 @@ where
     }
 }
 
-impl<'a, T: Config, C, Sub: Unpin, Evs: Decode> Unpin
-    for EventSubscription<T, C, Sub, Evs>
+impl<'a, T: Config, Client, Sub: Unpin, Evs: Decode> Unpin
+    for EventSubscription<T, Client, Sub, Evs>
 {
 }
 
@@ -221,12 +108,12 @@ impl<'a, T: Config, C, Sub: Unpin, Evs: Decode> Unpin
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<Sub, T, C, Evs, E> Stream for EventSubscription<T, C, Sub, Evs>
+impl<T, Client, Sub, Evs, E> Stream for EventSubscription<T, Client, Sub, Evs>
 where
     T: Config,
-    C: OnlineClientT<T> + Send + Sync + 'static,
-    Evs: Decode,
+    Client: OnlineClientT<T>,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
+    Evs: Decode,
     E: Into<BasicError>,
 {
     type Item = Result<Events<T, Evs>, BasicError>;
@@ -255,7 +142,8 @@ where
                 Some(Ok(block_header)) => {
                     // Note [jsdw]: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
-                    self.at = Some(Box::pin(at(self.client.clone(), block_header.hash())));
+                    let at = EventsClient::new(self.client.clone()).at(block_header.hash());
+                    self.at = Some(Box::pin(at));
                     // Continue, so that we poll this function future we've just created.
                 }
             }

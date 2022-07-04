@@ -24,6 +24,7 @@ use crate::{
     },
     events::{
         self,
+        EventsClient,
         EventDetails,
         Events,
         RawEventDetails,
@@ -423,7 +424,9 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
             // extrinsic, the extrinsic should be in there somewhere..
             .ok_or(BasicError::Transaction(TransactionError::BlockHashNotFound))?;
 
-        let events = events::at::<_, T, Evs>(self.client.clone(), self.block_hash).await?;
+        let events = EventsClient::new(self.client.clone())
+            .at(self.block_hash)
+            .await?;
 
         Ok(TransactionEvents {
             ext_hash: self.ext_hash,

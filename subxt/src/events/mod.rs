@@ -86,17 +86,17 @@
 mod event_subscription;
 mod events_type;
 mod filter_events;
+mod events_client;
 
+pub use events_client::{
+    EventsClient,
+};
 pub use event_subscription::{
-    subscribe,
-    subscribe_finalized,
-    subscribe_to_block_headers_filling_in_gaps,
     EventSub,
     EventSubscription,
     FinalizedEventSub,
 };
 pub use events_type::{
-    at,
     DecodedValue,
     EventDetails,
     Events,

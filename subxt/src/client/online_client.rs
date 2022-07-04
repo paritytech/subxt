@@ -24,7 +24,7 @@ use derivative::Derivative;
 
 /// A trait representing a client that can perform
 /// online actions.
-pub trait OnlineClientT<T: Config>: OfflineClientT<T> + Clone {
+pub trait OnlineClientT<T: Config>: OfflineClientT<T> {
     /// Return an RPC client that can be used to communicate with a node.
     fn rpc(&self) -> &Rpc<T>;
 }
