@@ -6,11 +6,13 @@
 
 use crate::{
     error::BasicError,
-    OnlineClient,
     Config,
     Event,
     Metadata,
     Phase,
+    client::{
+        OnlineClientT,
+    },
 };
 use codec::{
     Compact,
@@ -33,17 +35,15 @@ use sp_core::{
 /// and is exposed only to be called via the codegen. Thus, prefer to use
 /// `api.events().at(block_hash)` over calling this directly.
 #[doc(hidden)]
-pub async fn at<Client, T: Config, Evs: Decode>(
+pub async fn at<Client, T, Evs>(
     client: Client,
     block_hash: T::Hash,
 ) -> Result<Events<T, Evs>, BasicError>
 where
-    Client: Into<OnlineClient<T>>,
+    Client: OnlineClientT<T>,
     T: Config,
     Evs: Decode,
 {
-    let client = client.into();
-
     let mut event_bytes = client
         .rpc()
         .storage(&system_events_key(), Some(block_hash))

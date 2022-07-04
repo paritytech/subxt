@@ -6,14 +6,13 @@
 
 use std::task::Poll;
 
-use crate::PhantomDataSendSync;
 use codec::Decode;
 use sp_runtime::traits::Hash;
 pub use sp_runtime::traits::SignedExtension;
 
 use crate::{
     client::{
-        OnlineClient,
+        OnlineClientT,
     },
     error::{
         BasicError,
@@ -30,6 +29,7 @@ use crate::{
         RawEventDetails,
     },
     rpc::SubstrateTransactionStatus,
+    PhantomDataSendSync,
     Config,
     Phase,
 };
@@ -46,31 +46,31 @@ use jsonrpsee::core::{
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-pub struct TransactionProgress<T: Config, Err, Evs> {
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+pub struct TransactionProgress<T: Config, C, Err, Evs> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
-    client: OnlineClient<T>,
+    client: C,
     _error: PhantomDataSendSync<(Err, Evs)>,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<T: Config, Err, Evs> Unpin for TransactionProgress<T, Err, Evs> {}
+impl<T: Config, C, Err, Evs> Unpin for TransactionProgress<T, C, Err, Evs> {}
 
-impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
-    TransactionProgress<T, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
+    TransactionProgress<T, C, Err, Evs>
 {
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
         sub: RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>,
-        client: impl Into<OnlineClient<T>>,
+        client: C,
         ext_hash: T::Hash,
     ) -> Self {
         Self {
             sub: Some(sub),
-            client: client.into(),
+            client,
             ext_hash,
             _error: PhantomDataSendSync::new(),
         }
@@ -81,7 +81,7 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
     /// avoid importing that trait if you don't otherwise need it.
     pub async fn next_item(
         &mut self,
-    ) -> Option<Result<TransactionStatus<T, Err, Evs>, BasicError>> {
+    ) -> Option<Result<TransactionStatus<T, C, Err, Evs>, BasicError>> {
         self.next().await
     }
 
@@ -98,7 +98,7 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
-    ) -> Result<TransactionInBlock<T, Err, Evs>, BasicError> {
+    ) -> Result<TransactionInBlock<T, C, Err, Evs>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
@@ -128,7 +128,7 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
-    ) -> Result<TransactionInBlock<T, Err, Evs>, BasicError> {
+    ) -> Result<TransactionInBlock<T, C, Err, Evs>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized! Return.
@@ -163,10 +163,10 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
     }
 }
 
-impl<T: Config, Err: Decode + HasModuleError, Evs: Decode> Stream
-    for TransactionProgress<T, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode> Stream
+    for TransactionProgress<T, C, Err, Evs>
 {
-    type Item = Result<TransactionStatus<T, Err, Evs>, BasicError>;
+    type Item = Result<TransactionStatus<T, C, Err, Evs>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -274,8 +274,8 @@ impl<T: Config, Err: Decode + HasModuleError, Evs: Decode> Stream
 /// within 512 blocks. This either indicates that finality is not available for your chain,
 /// or that finality gadget is lagging behind.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-pub enum TransactionStatus<T: Config, Err: Decode, Evs: Decode> {
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+pub enum TransactionStatus<T: Config, C, Err, Evs> {
     /// The transaction is part of the "future" queue.
     Future,
     /// The transaction is part of the "ready" queue.
@@ -283,7 +283,7 @@ pub enum TransactionStatus<T: Config, Err: Decode, Evs: Decode> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// The transaction has been included in a block with given hash.
-    InBlock(TransactionInBlock<T, Err, Evs>),
+    InBlock(TransactionInBlock<T, C, Err, Evs>),
     /// The block this transaction was included in has been retracted,
     /// probably because it did not make it onto the blocks which were
     /// finalized.
@@ -292,7 +292,7 @@ pub enum TransactionStatus<T: Config, Err: Decode, Evs: Decode> {
     /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
     /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TransactionInBlock<T, Err, Evs>),
+    Finalized(TransactionInBlock<T, C, Err, Evs>),
     /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
@@ -302,10 +302,10 @@ pub enum TransactionStatus<T: Config, Err: Decode, Evs: Decode> {
     Invalid,
 }
 
-impl<T: Config, Err: Decode, Evs: Decode> TransactionStatus<T, Err, Evs> {
+impl<T: Config, C, Err: Decode, Evs: Decode> TransactionStatus<T, C, Err, Evs> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, Err, Evs>> {
+    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, C, Err, Evs>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None,
@@ -314,7 +314,7 @@ impl<T: Config, Err: Decode, Evs: Decode> TransactionStatus<T, Err, Evs> {
 
     /// A convenience method to return the `InBlock` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::InBlock`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, Err, Evs>> {
+    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, C, Err, Evs>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None,
@@ -324,21 +324,21 @@ impl<T: Config, Err: Decode, Evs: Decode> TransactionStatus<T, Err, Evs> {
 
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = ""))]
-pub struct TransactionInBlock<T: Config, E: Decode, Evs: Decode> {
+#[derivative(Debug(bound = "C: std::fmt::Debug"))]
+pub struct TransactionInBlock<T: Config, C, Err, Evs> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
-    client: OnlineClient<T>,
-    _error: PhantomDataSendSync<(E, Evs)>,
+    client: C,
+    _error: PhantomDataSendSync<(Err, Evs)>,
 }
 
-impl<T: Config, Err: Decode + HasModuleError, Evs: Decode>
-    TransactionInBlock<T, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
+    TransactionInBlock<T, C, Err, Evs>
 {
     pub(crate) fn new(
         block_hash: T::Hash,
         ext_hash: T::Hash,
-        client: OnlineClient<T>,
+        client: C,
     ) -> Self {
         Self {
             block_hash,

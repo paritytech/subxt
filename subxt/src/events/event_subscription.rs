@@ -6,8 +6,10 @@
 
 use crate::{
     error::BasicError,
-    OnlineClient,
     Config,
+    client::{
+        OnlineClientT,
+    }
 };
 use codec::Decode;
 use derivative::Derivative;
@@ -47,15 +49,14 @@ pub use super::{
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe<Client, T, Evs>(
+pub async fn subscribe<T, Client, Evs>(
     client: Client,
-) -> Result<EventSubscription<EventSub<T::Header>, T, Evs>, BasicError>
+) -> Result<EventSubscription<T, Client, EventSub<T::Header>, Evs>, BasicError>
 where
-    Client: Into<OnlineClient<T>>,
     T: Config,
+    Client: OnlineClientT<T>,
     Evs: Decode + 'static
 {
-    let client = client.into();
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -66,16 +67,14 @@ where
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe_finalized<Client, T, Evs>(
+pub async fn subscribe_finalized<T, Client, Evs>(
     client: Client,
-) -> Result<EventSubscription<FinalizedEventSub<T::Header>, T, Evs>, BasicError>
+) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>, Evs>, BasicError>
 where
-    Client: Into<OnlineClient<T>>,
     T: Config,
+    Client: OnlineClientT<T> + Send + Sync + 'static,
     Evs: Decode + 'static
 {
-    let client = client.into();
-
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.
     let last_finalized_block_hash = client.rpc().finalized_head().await?;
@@ -104,18 +103,17 @@ where
 /// **Note:** This is exposed so that we can run integration tests on it, but otherwise
 /// should not be used directly and may break between minor releases.
 #[doc(hidden)]
-pub fn subscribe_to_block_headers_filling_in_gaps<Client, S, E, T>(
+pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
     client: Client,
     mut last_block_num: Option<u64>,
     sub: S,
 ) -> impl Stream<Item = Result<T::Header, BasicError>> + Send
 where
-    Client: Into<OnlineClient<T>>,
+    T: Config,
+    Client: OnlineClientT<T> + Send + Sync,
     S: Stream<Item = Result<T::Header, E>> + Send,
     E: Into<BasicError> + Send + 'static,
-    T: Config,
 {
-    let client = client.into();
     sub.flat_map(move |s| {
         let client = client.clone();
 
@@ -165,10 +163,10 @@ pub type EventSub<Item> = Subscription<Item>;
 
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
-#[derivative(Debug(bound = "Sub: std::fmt::Debug"))]
-pub struct EventSubscription<Sub, T: Config, Evs: 'static> {
+#[derivative(Debug(bound = "Sub: std::fmt::Debug, C: std::fmt::Debug"))]
+pub struct EventSubscription<T: Config, C, Sub, Evs: 'static> {
     finished: bool,
-    client: OnlineClient<T>,
+    client: C,
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
@@ -179,15 +177,15 @@ pub struct EventSubscription<Sub, T: Config, Evs: 'static> {
     _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<Sub, T: Config, Evs: Decode, E: Into<BasicError>>
-    EventSubscription<Sub, T, Evs>
+impl<Sub, T: Config, C, Evs: Decode, E: Into<BasicError>>
+    EventSubscription<T, C, Sub, Evs>
 where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
-    fn new(client: impl Into<OnlineClient<T>>, block_header_subscription: Sub) -> Self {
+    fn new(client: C, block_header_subscription: Sub) -> Self {
         EventSubscription {
             finished: false,
-            client: client.into(),
+            client: client,
             block_header_subscription,
             at: None,
             _event_type: std::marker::PhantomData,
@@ -201,8 +199,8 @@ where
     }
 }
 
-impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin
-    for EventSubscription<Sub, T, Evs>
+impl<'a, T: Config, C, Sub: Unpin, Evs: Decode> Unpin
+    for EventSubscription<T, C, Sub, Evs>
 {
 }
 
@@ -223,9 +221,10 @@ impl<'a, T: Config, Sub: Unpin, Evs: Decode> Unpin
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<Sub, T, Evs, E> Stream for EventSubscription<Sub, T, Evs>
+impl<Sub, T, C, Evs, E> Stream for EventSubscription<T, C, Sub, Evs>
 where
     T: Config,
+    C: OnlineClientT<T> + Send + Sync + 'static,
     Evs: Decode,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
     E: Into<BasicError>,
@@ -284,15 +283,17 @@ mod test {
         fn assert_send<T: Send>() {}
         assert_send::<
             EventSubscription<
-                EventSub<<crate::SubstrateConfig as Config>::Header>,
                 crate::SubstrateConfig,
+                (),
+                EventSub<<crate::SubstrateConfig as Config>::Header>,
                 (),
             >,
         >();
         assert_send::<
             EventSubscription<
-                FinalizedEventSub<<crate::SubstrateConfig as Config>::Header>,
                 crate::SubstrateConfig,
+                (),
+                FinalizedEventSub<<crate::SubstrateConfig as Config>::Header>,
                 (),
             >,
         >();

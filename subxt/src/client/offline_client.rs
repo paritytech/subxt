@@ -6,9 +6,26 @@ use crate::{
     Config,
     Metadata,
     rpc::RuntimeVersion,
+    extrinsic::TxClient,
 };
 use std::sync::Arc;
 use derivative::Derivative;
+
+/// A trait representing a client that can perform
+/// offline-only actions.
+pub trait OfflineClientT<T: Config>: Clone {
+    /// Return the provided [`Metadata`].
+    fn metadata(&self) -> Metadata;
+    /// Return the provided genesis hash.
+    fn genesis_hash(&self) -> T::Hash;
+    /// Return the provided [`RuntimeVersion`].
+    fn runtime_version(&self) -> RuntimeVersion;
+
+    /// Work with transactions.
+    fn tx(&self) -> TxClient<T, Self> {
+        TxClient::new(self.clone())
+    }
+}
 
 /// A client that is capable of performing offline-only operations.
 /// Can be constructed as long as you can populate the required fields.
@@ -42,21 +59,23 @@ impl <T: Config> OfflineClient<T> {
             })
         }
     }
+}
 
-    /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> &T::Hash {
-        &self.inner.genesis_hash
-    }
+impl <T: Config> OfflineClientT<T> for OfflineClient<T> {
+        /// Return the genesis hash.
+        fn genesis_hash(&self) -> T::Hash {
+            self.inner.genesis_hash
+        }
 
-    /// Return the runtime version.
-    pub fn runtime_version(&self) -> &RuntimeVersion {
-        &self.inner.runtime_version
-    }
+        /// Return the runtime version.
+        fn runtime_version(&self) -> RuntimeVersion {
+            self.inner.runtime_version.clone()
+        }
 
-    /// Return the [`Metadata`] used in this client.
-    pub fn metadata(&self) -> &Metadata {
-        &self.inner.metadata
-    }
+        /// Return the [`Metadata`] used in this client.
+        fn metadata(&self) -> Metadata {
+            self.inner.metadata.clone()
+        }
 }
 
 // For ergonomics; cloning a client is deliberately fairly cheap (via Arc),

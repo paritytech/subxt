@@ -12,8 +12,10 @@ mod offline_client;
 mod online_client;
 
 pub use offline_client::{
-    OfflineClient
+    OfflineClient,
+    OfflineClientT,
 };
 pub use online_client::{
-    OnlineClient
+    OnlineClient,
+    OnlineClientT,
 };

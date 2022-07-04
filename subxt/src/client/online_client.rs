@@ -5,7 +5,7 @@
 use std::sync::Arc;
 use parking_lot::RwLock;
 use super::{
-    OfflineClient,
+    OfflineClientT,
 };
 use futures::future;
 use crate::{
@@ -21,6 +21,13 @@ use crate::{
     Metadata,
 };
 use derivative::Derivative;
+
+/// A trait representing a client that can perform
+/// online actions.
+pub trait OnlineClientT<T: Config>: OfflineClientT<T> + Clone {
+    /// Return an RPC client that can be used to communicate with a node.
+    fn rpc(&self) -> &Rpc<T>;
+}
 
 /// A client capable of perfomring offline or online operations.
 #[derive(Derivative)]
@@ -83,40 +90,6 @@ impl <T: Config> OnlineClient<T> {
         })
     }
 
-    /// Return an [`OfflineClient`] to use.
-    pub fn offline(&self) -> OfflineClient<T> {
-        let inner = self.inner.read();
-        // This is fairly cheap:
-        OfflineClient::new(
-            inner.genesis_hash,
-            inner.runtime_version.clone(),
-            inner.metadata.clone()
-        )
-    }
-
-    /// Return the [`Metadata`] used in this client.
-    pub fn metadata(&self) -> Metadata {
-        let inner = self.inner.read();
-        inner.metadata.clone()
-    }
-
-    /// Return the genesis hash.
-    pub fn genesis_hash(&self) -> T::Hash {
-        let inner = self.inner.read();
-        inner.genesis_hash
-    }
-
-    /// Return the runtime version.
-    pub fn runtime_version(&self) -> RuntimeVersion {
-        let inner = self.inner.read();
-        inner.runtime_version.clone()
-    }
-
-    /// Return the RPC interface.
-    pub fn rpc(&self) -> &Rpc<T> {
-        &self.rpc
-    }
-
     /// Create an object which can be used to keep the runtime uptodate
     /// in a separate thread.
     ///
@@ -140,25 +113,28 @@ impl <T: Config> OnlineClient<T> {
     }
 }
 
-// These allow implementations to take in something like
-// `impl Into<OfflineClient>` and have either an online or
-// offline client (or references to) "just work", for ergonomics.
-impl <T: Config> From<OnlineClient<T>> for OfflineClient<T> {
-    fn from(client: OnlineClient<T>) -> Self {
-        client.offline()
+impl <T: Config> OfflineClientT<T> for OnlineClient<T> {
+    fn metadata(&self) -> Metadata {
+        let inner = self.inner.read();
+        inner.metadata.clone()
     }
-}
-impl <'a, T: Config> From<&'a OnlineClient<T>> for OfflineClient<T> {
-    fn from(client: &'a OnlineClient<T>) -> Self {
-        client.offline()
+
+    fn genesis_hash(&self) -> T::Hash {
+        let inner = self.inner.read();
+        inner.genesis_hash
     }
-}
-impl <'a, T: Config> From<&'a OnlineClient<T>> for OnlineClient<T> {
-    fn from(client: &'a OnlineClient<T>) -> Self {
-        client.clone()
+
+    fn runtime_version(&self) -> RuntimeVersion {
+        let inner = self.inner.read();
+        inner.runtime_version.clone()
     }
 }
 
+impl <T: Config> OnlineClientT<T> for OnlineClient<T> {
+    fn rpc(&self) -> &Rpc<T> {
+        &self.rpc
+    }
+}
 
 /// Client wrapper for performing runtime updates. See [`OnlineClient::subscribe_to_updates()`]
 /// for example usage.

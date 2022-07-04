@@ -20,10 +20,13 @@
 
 mod params;
 mod signer;
-mod submittable;
 mod transaction;
+mod tx_client;
 
 pub use self::{
+    tx_client::{
+        TxClient,
+    },
     params::{
         AssetTip,
         BaseExtrinsicParams,
@@ -39,10 +42,6 @@ pub use self::{
     signer::{
         PairSigner,
         Signer,
-    },
-    submittable::{
-        SubmittableExtrinsic,
-        SignedSubmittableExtrinsic,
     },
     transaction::{
         TransactionEvents,
