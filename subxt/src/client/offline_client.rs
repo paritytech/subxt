@@ -14,7 +14,7 @@ use derivative::Derivative;
 
 /// A trait representing a client that can perform
 /// offline-only actions.
-pub trait OfflineClientT<T: Config>: Clone + Send + Sync + Clone + 'static {
+pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Return the provided [`Metadata`].
     fn metadata(&self) -> Metadata;
     /// Return the provided genesis hash.
