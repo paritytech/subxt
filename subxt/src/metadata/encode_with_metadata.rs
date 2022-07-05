@@ -5,6 +5,7 @@
 use super::{
     Metadata,
     MetadataError,
+    MetadataLocation,
 };
 use crate::{
     error::BasicError,
@@ -50,6 +51,15 @@ impl <T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
     }
 }
 
+impl <T> MetadataLocation for EncodeStaticCall<T> {
+    fn pallet(&self) -> &str {
+        self.pallet
+    }
+    fn item(&self) -> &str {
+        self.call
+    }
+}
+
 /// A wrapper which allows dynamic Value types to be SCALE encoded via [`EncodeWithMetadata`].
 pub struct EncodeDynamicCall<'a> {
     pallet: Cow<'a, str>,
@@ -69,6 +79,15 @@ impl <'a> EncodeDynamicCall<'a> {
             call: call.into(),
             data
         }
+    }
+}
+
+impl <'a> MetadataLocation for EncodeDynamicCall<'a> {
+    fn pallet(&self) -> &str {
+        self.pallet.as_ref()
+    }
+    fn item(&self) -> &str {
+        self.call.as_ref()
     }
 }
 
@@ -93,16 +112,3 @@ impl <'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
         Ok(())
     }
 }
-
-// pub trait DecodeWithMetadata: Sized {
-//     type Target;
-//     /// Given some metadata and a type ID, attempt to SCALE decode the provided bytes into `Self`.
-//     fn decode_with_metadata(bytes: &[u8], type_id: u32, metadata: &Metadata) -> Result<Self::Target, BasicError>;
-// }
-//
-// impl <T: Decode> DecodeWithMetadata for EncodeDecodeStaticCall<T> {
-//     type Target = T;
-//     fn decode_with_metadata(mut bytes: &[u8], _type_id: u32, _metadata: &Metadata) -> Result<Self::Target, BasicError> {
-//         T::decode(&mut bytes)
-//     }
-// }

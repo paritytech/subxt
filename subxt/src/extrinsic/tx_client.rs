@@ -23,6 +23,7 @@ use crate::{
     },
     metadata::{
         EncodeWithMetadata,
+        MetadataLocation,
     },
     Encoded,
 };
@@ -73,8 +74,18 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SignedSubmittableExtrinsic<T, C, Err, Evs>, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
     {
+        // 1. Validate this call against the current node metadata if the call comes
+        // with a hash allowing us to do so.
+        if let Some(actual_hash) = call.call_hash {
+            let metadata = self.client.metadata();
+            let expected_hash = metadata.call_hash(call.call_data.pallet(), call.call_data.item())?;
+            if actual_hash != expected_hash {
+                return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
+            }
+        }
+
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = Encoded(self.call_data(call)?);
 
@@ -159,7 +170,7 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<SignedSubmittableExtrinsic<T, C, Err, Evs>, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
         Evs: Decode,
     {
@@ -187,7 +198,7 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<TransactionProgress<T, C, Err, Evs>, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
         Evs: Decode,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
@@ -207,7 +218,7 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<TransactionProgress<T, C, Err, Evs>, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
         Evs: Decode,
     {
@@ -233,7 +244,7 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
         Evs: Decode,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
@@ -256,7 +267,7 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<T::Hash, BasicError>
     where
-        Call: EncodeWithMetadata,
+        Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
         Evs: Decode,
     {
@@ -272,19 +283,51 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
 /// [`crate::Metadata`]), this contains type information which can help us decode the
 /// resulting events or error.
 pub struct SubmittableExtrinsic<Call, Err, Evs> {
-    call: Call,
+    call_data: Call,
+    // static calls come with a hash that allows us to validate them
+    // against metadata. Dynamic calls have no such info, but instead can be
+    // validated more comprehensively at runtime when we attempt to encode them.
+    call_hash: Option<[u8; 32]>,
     marker: std::marker::PhantomData<(Err, Evs)>,
 }
 
 impl <Call, Err, Evs> SubmittableExtrinsic<Call, Err, Evs> {
-    pub fn new(call: Call) -> Self {
-        Self { call, marker: std::marker::PhantomData }
+    /// Create a new [`SubmittableExtrinsic`] that will not be validated
+    /// against node metadata.
+    pub fn new_unvalidated(
+        call_data: Call
+    ) -> Self {
+        Self {
+            call_data,
+            call_hash: None,
+            marker: std::marker::PhantomData
+        }
+    }
+    /// Create a new [`SubmittableExtrinsic`] that will be validated
+    /// against node metadata.
+    pub fn new_with_validation(
+        call_data: Call,
+        hash: [u8; 32]
+    ) -> Self {
+        Self {
+            call_data,
+            call_hash: Some(hash),
+            marker: std::marker::PhantomData
+        }
+    }
+    /// Do not validate this call prior to submitting it.
+    pub fn unvalidated(self) -> Self {
+        Self {
+            call_data: self.call_data,
+            call_hash: None,
+            marker: self.marker
+        }
     }
 }
 
 impl <Call: EncodeWithMetadata, Err, Evs> EncodeWithMetadata for SubmittableExtrinsic<Call, Err, Evs> {
     fn encode_to_with_metadata(&self, metadata: &crate::Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
-        self.call.encode_to_with_metadata(metadata, out)
+        self.call_data.encode_to_with_metadata(metadata, out)
     }
 }
 

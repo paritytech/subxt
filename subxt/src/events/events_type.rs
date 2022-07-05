@@ -243,7 +243,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+    pub fn has<Ev: Event>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }

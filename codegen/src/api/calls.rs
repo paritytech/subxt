@@ -124,18 +124,15 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> Result<::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event>, ::subxt::BasicError> {
-                    let runtime_call_hash = {
-                        let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
-                        metadata.call_hash::<#struct_name>()?
-                    };
-                    if runtime_call_hash == [#(#call_hash,)*] {
-                        let call = #struct_name { #( #call_args, )* };
-                        Ok(::subxt::SubmittableExtrinsic::new(self.client, call))
-                    } else {
-                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                    }
+                ) -> ::subxt::SubmittableExtrinsic<'a, T, X, #struct_name, DispatchError, root_mod::Event> {
+                    ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
+                        ::subxt::metadata::EncodeStaticCall {
+                            pallet: #pallet_name,
+                            call: #call_name,
+                            data: #struct_name { #( #call_args, )* }
+                        },
+                        [#(#call_hash,)*]
+                    )
                 }
             };
             (call_struct, client_fn)
@@ -155,20 +152,9 @@ pub fn generate_calls(
 
             #( #call_structs )*
 
-            pub struct TransactionApi<'a, T: ::subxt::Config, X> {
-                client: &'a ::subxt::Client<T>,
-                marker: ::core::marker::PhantomData<X>,
-            }
+            pub struct TransactionApi
 
-            impl<'a, T, X> TransactionApi<'a, T, X>
-            where
-                T: ::subxt::Config,
-                X: ::subxt::extrinsic::ExtrinsicParams<T>,
-            {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client, marker: ::core::marker::PhantomData }
-                }
-
+            impl TransactionApi {
                 #( #call_fns )*
             }
         }
