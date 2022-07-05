@@ -63,17 +63,12 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> ::core::result::Result<#return_ty, ::subxt::BasicError> {
-                let locked_metadata = self.client.metadata();
-                let metadata = locked_metadata.read();
-                if metadata.constant_hash(#pallet_name, #constant_name)? == [#(#constant_hash,)*] {
-                    let pallet = metadata.pallet(#pallet_name)?;
-                    let constant = pallet.constant(#constant_name)?;
-                    let value = ::subxt::codec::Decode::decode(&mut &constant.value[..])?;
-                    Ok(value)
-                } else {
-                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                }
+            pub fn #fn_name(&self) -> ::subxt::client::constants::ConstantAddress<'static, #return_ty> {
+                ::subxt::client::constants::StaticAddress::new_with_validation(
+                    #pallet_name,
+                    #constant_name,
+                    [#(#constant_hash,)*]
+                )
             }
         }
     });
@@ -82,15 +77,9 @@ pub fn generate_constants(
         pub mod constants {
             use super::#types_mod_ident;
 
-            pub struct ConstantsApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
+            pub struct ConstantsApi;
 
-            impl<'a, T: ::subxt::Config> ConstantsApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
-
+            impl ConstantsApi {
                 #(#constant_fns)*
             }
         }

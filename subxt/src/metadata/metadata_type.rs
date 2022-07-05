@@ -493,7 +493,7 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::StorageEntryKey;
+    use crate::client::storage::StorageEntryKey;
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletStorageMetadata,
@@ -620,7 +620,7 @@ mod tests {
 
         #[derive(codec::Encode)]
         struct ValidStorage;
-        impl crate::StorageEntry for ValidStorage {
+        impl crate::client::storage::StorageEntry for ValidStorage {
             const PALLET: &'static str = "System";
             const STORAGE: &'static str = "Account";
             type Value = ();

@@ -13,6 +13,7 @@ pub use sp_runtime::traits::SignedExtension;
 use crate::{
     client::{
         OnlineClientT,
+        events::EventsClient,
     },
     error::{
         BasicError,
@@ -24,7 +25,6 @@ use crate::{
     },
     events::{
         self,
-        EventsClient,
         EventDetails,
         Events,
         RawEventDetails,

@@ -86,11 +86,7 @@
 mod event_subscription;
 mod events_type;
 mod filter_events;
-mod events_client;
 
-pub use events_client::{
-    EventsClient,
-};
 pub use event_subscription::{
     EventSub,
     EventSubscription,

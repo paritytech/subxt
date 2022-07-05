@@ -32,10 +32,8 @@ use codec::{
     Decode,
     Encode,
 };
-use super::{
-    transaction::{
-        TransactionProgress,
-    },
+use crate::extrinsic::{
+    TransactionProgress,
 };
 
 /// A client for working with transactions.

@@ -10,6 +10,10 @@
 
 mod offline_client;
 mod online_client;
+mod events_client;
+mod tx_client;
+mod storage_client;
+mod constants_client;
 
 pub use offline_client::{
     OfflineClient,
@@ -19,3 +23,23 @@ pub use online_client::{
     OnlineClient,
     OnlineClientT,
 };
+
+/// This module contains a client for working with events.
+pub mod events {
+    pub use super::events_client::*;
+}
+
+/// This module contains a client for working with transactions.
+pub mod tx {
+    pub use super::tx_client::*;
+}
+
+/// This module contains a client for working with storage.
+pub mod storage {
+    pub use super::storage_client::*;
+}
+
+/// This module contains a client for working with constants.
+pub mod constants {
+    pub use super::constants_client::*;
+}

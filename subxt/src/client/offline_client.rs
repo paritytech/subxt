@@ -6,9 +6,12 @@ use crate::{
     Config,
     Metadata,
     rpc::RuntimeVersion,
-    extrinsic::TxClient,
+};
+use super::{
+    tx::TxClient,
     events::EventsClient,
     storage::StorageClient,
+    constants::ConstantsClient,
 };
 use std::sync::Arc;
 use derivative::Derivative;
@@ -36,6 +39,11 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Work with storage.
     fn storage(&self) -> StorageClient<T, Self> {
         StorageClient::new(self.clone())
+    }
+
+    /// Access constants.
+    fn constants(&self) -> ConstantsClient<T, Self> {
+        ConstantsClient::new(self.clone())
     }
 }
 

@@ -21,12 +21,8 @@
 mod params;
 mod signer;
 mod transaction;
-mod tx_client;
 
 pub use self::{
-    tx_client::{
-        TxClient,
-    },
     params::{
         AssetTip,
         BaseExtrinsicParams,

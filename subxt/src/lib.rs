@@ -227,7 +227,6 @@ pub mod events;
 pub mod extrinsic;
 pub mod metadata;
 pub mod rpc;
-pub mod storage;
 
 pub use crate::{
     client::{
@@ -276,12 +275,6 @@ pub use crate::{
         RpcClient,
         SystemProperties,
     },
-    storage::{
-        KeyIter,
-        StorageEntry,
-        StorageEntryKey,
-        StorageMapKey,
-    },
 };
 
 /// Trait to uniquely identify the call (extrinsic)'s identity from the runtime metadata.
@@ -291,17 +284,17 @@ pub use crate::{
 ///
 /// When encoding an extrinsic, we use this information to know how to map
 /// the call to the specific pallet and call index needed by a particular node.
-// pub trait Call: Encode {
-//     /// Pallet name.
-//     const PALLET: &'static str;
-//     /// Function name.
-//     const FUNCTION: &'static str;
+pub trait Call: Encode {
+    /// Pallet name.
+    const PALLET: &'static str;
+    /// Function name.
+    const FUNCTION: &'static str;
 
-//     /// Returns true if the given pallet and function names match this call.
-//     fn is_call(pallet: &str, function: &str) -> bool {
-//         Self::PALLET == pallet && Self::FUNCTION == function
-//     }
-// }
+    /// Returns true if the given pallet and function names match this call.
+    fn is_call(pallet: &str, function: &str) -> bool {
+        Self::PALLET == pallet && Self::FUNCTION == function
+    }
+}
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///

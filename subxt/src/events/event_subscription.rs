@@ -9,6 +9,7 @@ use crate::{
     Config,
     client::{
         OnlineClientT,
+        events::EventsClient,
     }
 };
 use codec::Decode;
@@ -28,7 +29,6 @@ use std::{
 };
 
 pub use super::{
-    EventsClient,
     EventDetails,
     EventFilter,
     Events,

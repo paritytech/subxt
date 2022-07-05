@@ -24,7 +24,7 @@ use crate::{
     },
     Config,
 };
-use super::{
+use crate::events::{
     EventSubscription,
     Events,
     EventSub,
