@@ -8,6 +8,7 @@ use crate::{
     rpc::RuntimeVersion,
     extrinsic::TxClient,
     events::EventsClient,
+    storage::StorageClient,
 };
 use std::sync::Arc;
 use derivative::Derivative;
@@ -30,6 +31,11 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
     /// Work with events.
     fn events(&self) -> EventsClient<T, Self> {
         EventsClient::new(self.clone())
+    }
+
+    /// Work with storage.
+    fn storage(&self) -> StorageClient<T, Self> {
+        StorageClient::new(self.clone())
     }
 }
 
