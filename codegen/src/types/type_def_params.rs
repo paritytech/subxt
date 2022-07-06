@@ -65,7 +65,7 @@ impl TypeDefParameters {
     }
 }
 
-impl<'a> quote::ToTokens for TypeDefParameters {
+impl quote::ToTokens for TypeDefParameters {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         if !self.params.is_empty() {
             let params = &self.params;
