@@ -493,7 +493,6 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::client::storage::StorageEntryKey;
     use frame_metadata::{
         ExtrinsicMetadata,
         PalletStorageMetadata,
@@ -617,19 +616,6 @@ mod tests {
     #[test]
     fn metadata_storage_inner_cache() {
         let metadata = load_metadata();
-
-        #[derive(codec::Encode)]
-        struct ValidStorage;
-        impl crate::client::storage::StorageEntry for ValidStorage {
-            const PALLET: &'static str = "System";
-            const STORAGE: &'static str = "Account";
-            type Value = ();
-
-            fn key(&self) -> StorageEntryKey {
-                unreachable!("Should not be called");
-            }
-        }
-
         let hash = metadata.storage_hash("System", "Account");
 
         let mut call_number = 0;
