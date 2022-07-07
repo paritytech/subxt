@@ -80,15 +80,9 @@ pub fn generate_storage(
 
             #( #storage_structs )*
 
-            pub struct StorageApi<'a, T: ::subxt::Config> {
-                client: &'a ::subxt::Client<T>,
-            }
+            pub struct StorageApi;
 
-            impl<'a, T: ::subxt::Config> StorageApi<'a, T> {
-                pub fn new(client: &'a ::subxt::Client<T>) -> Self {
-                    Self { client }
-                }
-
+            impl StorageApi {
                 #( #storage_fns )*
             }
         }

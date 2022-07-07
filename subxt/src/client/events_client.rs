@@ -133,7 +133,6 @@ where
         .rpc()
         .storage(&system_events_key(), Some(block_hash))
         .await?
-        .map(|s| s.0)
         .unwrap_or_else(Vec::new);
 
     Ok(Events::new(

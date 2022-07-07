@@ -133,81 +133,73 @@ where
     T: Config,
     Client: OnlineClientT<T>,
 {
-    /// Fetch the value under an unhashed storage key
-    pub async fn fetch_unhashed<V: Decode>(
+    /// Fetch the raw encoded value under the raw storage key given.
+    pub async fn fetch_raw_key(
         &self,
-        key: StorageKey,
+        key: &StorageKey,
         hash: Option<T::Hash>,
-    ) -> Result<Option<V>, BasicError> {
-        if let Some(data) = self.client.rpc().storage(&key, hash).await? {
-            Ok(Some(Decode::decode(&mut &data.0[..])?))
+    ) -> Result<Option<Vec<u8>>, BasicError> {
+        let data = self.client.rpc().storage(&key, hash).await?;
+        Ok(data.map(|d| d.0))
+    }
+
+    /// Fetch the raw encoded value at the address given.
+    pub async fn fetch_raw<K: Into<StorageKey>>(
+        &self,
+        key: K,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<Vec<u8>>, BasicError> {
+        let key = key.into();
+        self.fetch_raw_key(&key, hash).await
+    }
+
+    /// Fetch a decoded value from storage at a given address and optional block hash.
+    pub async fn fetch<ReturnTy: Decode>(
+        &self,
+        address: StorageAddress<'_, ReturnTy>,
+        hash: Option<T::Hash>,
+    ) -> Result<Option<ReturnTy>, BasicError> {
+        if let Some(data) = self.fetch_raw(&address, hash).await? {
+            Ok(Some(Decode::decode(&mut &*data)?))
         } else {
             Ok(None)
         }
     }
 
-    /// Fetch the raw encoded value under the raw storage key.
-    pub async fn fetch_raw(
-        &self,
-        key: StorageKey,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<StorageData>, BasicError> {
-        self.client.rpc().storage(&key, hash).await
-    }
-
-    /// Fetch a StorageKey with an optional block hash.
-    pub async fn fetch<F: StorageEntry>(
-        &self,
-        store: &F,
-        hash: Option<T::Hash>,
-    ) -> Result<Option<F::Value>, BasicError> {
-        let prefix = StorageKeyPrefix::new::<F>();
-        let key = store.key().final_key(prefix);
-        self.fetch_unhashed::<F::Value>(key, hash).await
-    }
-
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub async fn fetch_or_default<F: StorageEntry>(
+    pub async fn fetch_or_default<ReturnTy: Decode>(
         &self,
-        store: &F,
+        address: StorageAddress<'_, ReturnTy>,
         hash: Option<T::Hash>,
-    ) -> Result<F::Value, BasicError> {
-        if let Some(data) = self.fetch(store, hash).await? {
+    ) -> Result<ReturnTy, BasicError> {
+        let pallet_name = address.pallet_name;
+        let storage_name = address.storage_name;
+        if let Some(data) = self.fetch(address, hash).await? {
             Ok(data)
         } else {
             let metadata = self.client.metadata();
-            let pallet_metadata = metadata.pallet(F::PALLET)?;
-            let storage_metadata = pallet_metadata.storage(F::STORAGE)?;
+            let pallet_metadata = metadata.pallet(pallet_name)?;
+            let storage_metadata = pallet_metadata.storage(storage_name)?;
             let default = Decode::decode(&mut &storage_metadata.default[..])
                 .map_err(MetadataError::DefaultError)?;
             Ok(default)
         }
     }
 
-    /// Query historical storage entries
-    pub async fn query_storage(
-        &self,
-        keys: Vec<StorageKey>,
-        from: T::Hash,
-        to: Option<T::Hash>,
-    ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
-        self.client.rpc().query_storage(keys, from, to).await
-    }
-
     /// Fetch up to `count` keys for a storage map in lexicographic order.
     ///
     /// Supports pagination by passing a value to `start_key`.
-    pub async fn fetch_keys<F: StorageEntry>(
+    pub async fn fetch_keys<K: Into<StorageKey>>(
         &self,
+        key: StorageKey,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let key = StorageKeyPrefix::new::<F>().to_storage_key();
         let keys = self
             .client
             .rpc()
-            .storage_keys_paged(Some(key), count, start_key, hash)
+            .storage_keys_paged(key.into(), count, start_key, hash)
             .await?;
         Ok(keys)
     }
@@ -237,6 +229,118 @@ where
         })
     }
 }
+
+
+/// WHAT DO WE ACTUALLY NEED?
+///
+/// - Iterate entries
+/// - Access specific entry
+///   - Return raw bytes, Value, or decoded type.
+///
+/// Accessing a single entry:
+/// - PALLET NAME
+/// - STORAGE ENTRY NAME
+/// - for a "plain" key, that's it. For a "map" key, we need
+///   a list of 1 or more values + hashers, which we'll append to the
+///   hashed key to access the specific item.
+///
+/// Iterating entries:
+/// - how many entries per page to obtain?
+/// - PALLET NAME
+/// - STORAGE ENTRY name
+/// - Key to start from (allows pagination)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/// This is returned from storage accesses in the statically generated
+/// code, and contains the information needed to find, validate and decode
+/// the storage entry.
+pub struct StorageAddress <'a, ReturnTy> {
+    pallet_name: &'a str,
+    storage_name: &'a str,
+    // How to access the specific value at that storage address.
+    storage_entry_key: StorageEntryKey,
+    // Hash provided from static code for validation.
+    storage_hash: Option<[u8; 32]>,
+    _marker: std::marker::PhantomData<ReturnTy>
+}
+
+impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
+    /// Create a new [`StorageAddress`] that will be validated
+    /// against node metadata using the hash given.
+    pub fn new_with_validation(
+        pallet_name: &'a str,
+        storage_name: &'a str,
+        storage_entry_key: StorageEntryKey,
+        hash: [u8; 32]
+    ) -> Self {
+        Self {
+            pallet_name,
+            storage_name,
+            storage_entry_key,
+            storage_hash: Some(hash),
+            _marker: std::marker::PhantomData
+        }
+    }
+
+    /// Do not validate this storage prior to accessing it.
+    pub fn unvalidated(self) -> Self {
+        Self {
+            pallet_name: self.pallet_name,
+            storage_name: self.storage_name,
+            storage_entry_key: self.storage_entry_key,
+            storage_hash: None,
+            _marker: self._marker
+        }
+    }
+
+    // Convert this address into bytes that we can pass to a node to look up
+    // the associated value at this address.
+    pub fn to_bytes(&self) -> Vec<u8> {
+        // First encode the pallet/name part:
+        let mut bytes = sp_core::twox_128(self.pallet_name.as_bytes()).to_vec();
+        bytes.extend(&sp_core::twox_128(self.storage_name.as_bytes())[..]);
+
+        // Then, if we need to further dig into this entry, we do so,
+        // hashing additional fields as specified:
+        if let StorageEntryKey::Map(map) = &self.storage_entry_key {
+            for entry in map {
+                entry.to_bytes(&mut bytes);
+            }
+        }
+
+        bytes
+    }
+}
+
+impl <'a, R> From<&StorageAddress<'a, R>> for StorageKey {
+    fn from(address: &StorageAddress<'a, R>) -> Self {
+        StorageKey(address.to_bytes())
+    }
+}
+
+
+
+
+
+
+
+
 
 /// Storage entry trait.
 pub trait StorageEntry {
@@ -325,6 +429,32 @@ impl StorageMapKey {
         Self {
             value: value.encode(),
             hasher,
+        }
+    }
+
+    /// Convert this [`StorageMapKey`] into bytes and append it to some existing bytes.
+    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
+        match &self.hasher {
+            StorageHasher::Identity => bytes.extend(&self.value),
+            StorageHasher::Blake2_128 => bytes.extend(sp_core::blake2_128(bytes)),
+            StorageHasher::Blake2_128Concat => {
+                // adapted from substrate Blake2_128Concat::hash since StorageHasher is not public
+                let v = sp_core::blake2_128(&self.value)
+                    .iter()
+                    .chain(&self.value)
+                    .cloned();
+                bytes.extend(v);
+            }
+            StorageHasher::Blake2_256 => bytes.extend(sp_core::blake2_256(&self.value)),
+            StorageHasher::Twox128 => bytes.extend(sp_core::twox_128(&self.value)),
+            StorageHasher::Twox256 => bytes.extend(sp_core::twox_256(&self.value)),
+            StorageHasher::Twox64Concat => {
+                let v = sp_core::twox_64(&self.value)
+                    .iter()
+                    .chain(&self.value)
+                    .cloned();
+                bytes.extend(v);
+            }
         }
     }
 }

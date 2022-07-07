@@ -324,7 +324,7 @@ impl<T: Config> Rpc<T> {
         }
     }
 
-    /// Fetch a storage key
+    /// Fetch the raw bytes for a given storage key
     pub async fn storage(
         &self,
         key: &StorageKey,
@@ -340,7 +340,7 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        key: Option<StorageKey>,
+        key: StorageKey,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
