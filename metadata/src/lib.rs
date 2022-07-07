@@ -72,9 +72,6 @@ fn get_field_hash(
     if let Some(name) = field.name() {
         bytes = xor(bytes, hash(name.as_bytes()));
     }
-    if let Some(name) = field.type_name() {
-        bytes = xor(bytes, hash(name.as_bytes()));
-    }
 
     bytes
 }

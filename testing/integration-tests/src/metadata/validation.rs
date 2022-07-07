@@ -75,8 +75,7 @@ async fn full_metadata_check() {
     assert_eq!(
         new_api
             .validate_metadata()
-            .err()
-            .expect("Validation should fail for incompatible metadata"),
+            .expect_err("Validation should fail for incompatible metadata"),
         ::subxt::MetadataError::IncompatibleMetadata
     );
 }
