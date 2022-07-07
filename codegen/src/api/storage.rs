@@ -23,32 +23,8 @@ use scale_info::{
     TypeDef,
 };
 
-/// Generate storage from the provided pallet's metadata.
-///
-/// The function creates a new module named `storage` under the pallet's module.
-///
-/// ```ignore
-/// pub mod PalletName {
-///     pub mod storage {
-///     ...
-///     }
-/// }
-/// ```
-///
-/// The function generates the storage as rust structs that implement the `subxt::StorageEntry`
-/// trait to uniquely identify the storage's identity when creating the extrinsic.
-///
-/// ```ignore
-/// pub struct StorageName {
-///      pub storage_param: type,
-/// }
-/// impl ::subxt::StorageEntry for StorageName {
-/// ...
-/// }
-/// ```
-///
-/// Storages are extracted from the API and wrapped into the generated `StorageApi` of
-/// each module.
+/// Generate functions which create storage addresses from the provided pallet's metadata.
+/// These addresses can be used to access and iterate over storage values.
 ///
 /// # Arguments
 ///
@@ -68,17 +44,15 @@ pub fn generate_storage(
         return quote!()
     };
 
-    let (storage_structs, storage_fns): (Vec<_>, Vec<_>) = storage
+    let storage_fns: Vec<_> = storage
         .entries
         .iter()
         .map(|entry| generate_storage_entry_fns(metadata, type_gen, pallet, entry))
-        .unzip();
+        .collect();
 
     quote! {
         pub mod storage {
             use super::#types_mod_ident;
-
-            #( #storage_structs )*
 
             pub struct StorageApi;
 
@@ -94,15 +68,10 @@ fn generate_storage_entry_fns(
     type_gen: &TypeGenerator,
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
-) -> (TokenStream2, TokenStream2) {
-    let entry_struct_ident = format_ident!("{}", storage_entry.name);
-    let (fields, entry_struct, constructor, key_impl, should_ref) = match storage_entry.ty
-    {
+) -> TokenStream2 {
+    let (fields, key_impl, should_ref) = match storage_entry.ty {
         StorageEntryType::Plain(_) => {
-            let entry_struct = quote!( pub struct #entry_struct_ident; );
-            let constructor = quote!( #entry_struct_ident );
-            let key_impl = quote!(::subxt::StorageEntryKey::Plain);
-            (vec![], entry_struct, constructor, key_impl, false)
+            (vec![], quote!(::subxt::client::storage::client::storage::StorageEntryKey::Plain), false)
         }
         StorageEntryType::Map {
             ref key,
@@ -139,31 +108,8 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
 
-                    let field_names = fields.iter().map(|(n, _)| n);
-                    let field_types = fields.iter().map(|(_, t)| {
-                        // If the field type is `::std::vec::Vec<T>` obtain the type parameter and
-                        // surround with slice brackets. Otherwise, utilize the field_type as is.
-                        match t.vec_type_param() {
-                            Some(ty) => quote!([#ty]),
-                            None => quote!(#t),
-                        }
-                    });
                     // There cannot be a reference without a parameter.
                     let should_ref = !fields.is_empty();
-                    let (entry_struct, constructor) = if should_ref {
-                        (
-                            quote! {
-                                pub struct #entry_struct_ident <'a>( #( pub &'a #field_types ),* );
-                            },
-                            quote!( #entry_struct_ident( #( #field_names ),* ) ),
-                        )
-                    } else {
-                        (
-                            quote!( pub struct #entry_struct_ident; ),
-                            quote!( #entry_struct_ident ),
-                        )
-                    };
-
                     let key_impl = if hashers.len() == fields.len() {
                         // If the number of hashers matches the number of fields, we're dealing with
                         // something shaped like a StorageNMap, and each field should be hashed separately
@@ -173,10 +119,10 @@ fn generate_storage_entry_fns(
                             .enumerate()
                             .map(|(field_idx, hasher)| {
                                 let index = syn::Index::from(field_idx);
-                                quote!( ::subxt::StorageMapKey::new(&self.#index, #hasher) )
+                                quote!( ::subxt::client::storage::StorageMapKey::new(&self.#index, #hasher) )
                             });
                         quote! {
-                            ::subxt::StorageEntryKey::Map(
+                            ::subxt::client::storage::StorageEntryKey::Map(
                                 vec![ #( #keys ),* ]
                             )
                         }
@@ -190,8 +136,8 @@ fn generate_storage_entry_fns(
                             quote!( &self.#index )
                         });
                         quote! {
-                            ::subxt::StorageEntryKey::Map(
-                                vec![ ::subxt::StorageMapKey::new(&(#( #items ),*), #hasher) ]
+                            ::subxt::client::storage::StorageEntryKey::Map(
+                                vec![ ::subxt::client::storage::StorageMapKey::new(&(#( #items ),*), #hasher) ]
                             )
                         }
                     } else {
@@ -204,33 +150,20 @@ fn generate_storage_entry_fns(
                         )
                     };
 
-                    (fields, entry_struct, constructor, key_impl, should_ref)
+                    (fields, key_impl, should_ref)
                 }
                 _ => {
-                    let (lifetime_param, lifetime_ref) = (quote!(<'a>), quote!(&'a));
-
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
                     let fields = vec![(format_ident!("_0"), ty_path.clone())];
-
-                    // `ty_path` can be `std::vec::Vec<T>`. In such cases, the entry struct
-                    // should contain a slice reference.
-                    let ty_slice = match ty_path.vec_type_param() {
-                        Some(ty) => quote!([#ty]),
-                        None => quote!(#ty_path),
-                    };
-                    let entry_struct = quote! {
-                        pub struct #entry_struct_ident #lifetime_param( pub #lifetime_ref #ty_slice );
-                    };
-                    let constructor = quote!( #entry_struct_ident(_0) );
                     let hasher = hashers.get(0).unwrap_or_else(|| {
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                        ::subxt::StorageEntryKey::Map(
-                            vec![ ::subxt::StorageMapKey::new(&self.0, #hasher) ]
+                        ::subxt::client::storage::StorageEntryKey::Map(
+                            vec![ ::subxt::client::storage::StorageMapKey::new(&self.0, #hasher) ]
                         )
                     };
-                    (fields, entry_struct, constructor, key_impl, true)
+                    (fields, key_impl, true)
                 }
             }
         }
@@ -249,84 +182,22 @@ fn generate_storage_entry_fns(
             });
 
     let fn_name = format_ident!("{}", storage_entry.name.to_snake_case());
-    let fn_name_iter = format_ident!("{}_iter", fn_name);
     let storage_entry_ty = match storage_entry.ty {
         StorageEntryType::Plain(ref ty) => ty,
         StorageEntryType::Map { ref value, .. } => value,
     };
     let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
-    let (return_ty, fetch) = match storage_entry.modifier {
+    let return_ty = match storage_entry.modifier {
         StorageEntryModifier::Default => {
-            (quote!( #storage_entry_value_ty ), quote!(fetch_or_default))
+            quote!( #storage_entry_value_ty )
         }
         StorageEntryModifier::Optional => {
-            (
-                quote!( ::core::option::Option<#storage_entry_value_ty> ),
-                quote!(fetch),
-            )
-        }
-    };
-
-    let storage_entry_impl = quote! (
-        const PALLET: &'static str = #pallet_name;
-        const STORAGE: &'static str = #storage_name;
-        type Value = #storage_entry_value_ty;
-        fn key(&self) -> ::subxt::StorageEntryKey {
-            #key_impl
-        }
-    );
-
-    let anon_lifetime = match should_ref {
-        true => quote!(<'_>),
-        false => quote!(),
-    };
-    let storage_entry_type = quote! {
-        #entry_struct
-        impl ::subxt::StorageEntry for #entry_struct_ident #anon_lifetime {
-            #storage_entry_impl
+            quote!( ::core::option::Option<#storage_entry_value_ty> )
         }
     };
 
     let docs = &storage_entry.docs;
     let docs_token = quote! { #( #[doc = #docs ] )* };
-
-    let lifetime_param = match should_ref {
-        true => quote!(<'a>),
-        false => quote!(),
-    };
-    let client_iter_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
-        quote! (
-            #docs_token
-            pub fn #fn_name_iter(
-                &self,
-                block_hash: ::core::option::Option<T::Hash>,
-            ) -> impl ::core::future::Future<
-                Output = ::core::result::Result<::subxt::KeyIter<'a, T, #entry_struct_ident #lifetime_param>, ::subxt::BasicError>
-            > + 'a {
-                // Instead of an async fn which borrows all of self,
-                // we make sure that the returned future only borrows
-                // client, which allows you to chain calls a little better.
-                let client = self.client;
-                async move {
-                    let runtime_storage_hash = {
-                        let locked_metadata = client.metadata();
-                        let metadata = locked_metadata.read();
-                        match metadata.storage_hash::<#entry_struct_ident>() {
-                            Ok(hash) => hash,
-                            Err(e) => return Err(e.into())
-                        }
-                    };
-                    if runtime_storage_hash == [#(#storage_hash,)*] {
-                        client.storage().iter(block_hash).await
-                    } else {
-                        Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                    }
-                }
-            }
-        )
-    } else {
-        quote!()
-    };
 
     let key_args_ref = match should_ref {
         true => quote!(&'a),
@@ -343,39 +214,19 @@ fn generate_storage_entry_fns(
         quote!( #field_name: #key_args_ref #field_ty )
     });
 
-    let client_fns = quote! {
+    quote! {
         #docs_token
         pub fn #fn_name(
             &self,
             #( #key_args, )*
             block_hash: ::core::option::Option<T::Hash>,
-        ) -> impl ::core::future::Future<
-            Output = ::core::result::Result<#return_ty, ::subxt::BasicError>
-        > + 'a {
-            // Instead of an async fn which borrows all of self,
-            // we make sure that the returned future only borrows
-            // client, which allows you to chain calls a little better.
-            let client = self.client;
-            async move {
-                let runtime_storage_hash = {
-                    let locked_metadata = client.metadata();
-                    let metadata = locked_metadata.read();
-                    match metadata.storage_hash::<#entry_struct_ident>() {
-                        Ok(hash) => hash,
-                        Err(e) => return Err(e.into())
-                    }
-                };
-                if runtime_storage_hash == [#(#storage_hash,)*] {
-                    let entry = #constructor;
-                    client.storage().#fetch(&entry, block_hash).await
-                } else {
-                    Err(::subxt::MetadataError::IncompatibleMetadata.into())
-                }
-            }
+        ) -> ::subxt::client::storage::StorageAddress::<'static, #return_ty> {
+            ::subxt::client::storage::StorageAddress::new_with_validation(
+                #pallet_name,
+                #storage_name,
+                #key_impl,
+                [#(#storage_hash,)*]
+            )
         }
-
-        #client_iter_fn
-    };
-
-    (storage_entry_type, client_fns)
+    }
 }

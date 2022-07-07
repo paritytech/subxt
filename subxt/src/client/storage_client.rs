@@ -23,6 +23,7 @@ use crate::{
     client::{
         OnlineClientT,
     },
+    metadata::Metadata,
     Config,
     StorageHasher,
 };
@@ -150,6 +151,19 @@ where
         address: &StorageAddress<'_, ReturnTy>,
         hash: Option<T::Hash>,
     ) -> Result<Option<ReturnTy>, BasicError> {
+        // Metadata validation checks whether the static address given
+        // is likely to actually correspond to a real storage entry or not.
+        // if not, it means static codegen doesn't line up with runtime
+        // metadata.
+        if let Some(validation_hash) = address.storage_hash {
+            validate_storage(
+                &*address.pallet_name,
+                &*address.storage_name,
+                validation_hash,
+                &self.client.metadata()
+            )?;
+        }
+
         if let Some(data) = self.fetch_raw(address, hash).await? {
             Ok(Some(Decode::decode(&mut &*data)?))
         } else {
@@ -165,6 +179,7 @@ where
     ) -> Result<ReturnTy, BasicError> {
         let pallet_name = &*address.pallet_name;
         let storage_name = &*address.storage_name;
+        // Metadata validation happens via .fetch():
         if let Some(data) = self.fetch(address, hash).await? {
             Ok(data)
         } else {
@@ -202,6 +217,22 @@ where
         page_size: u32,
         hash: Option<T::Hash>,
     ) -> Result<KeyIter<T, Client, ReturnTy>, BasicError> {
+        // Metadata validation checks whether the static address given
+        // is likely to actually correspond to a real storage entry or not.
+        // if not, it means static codegen doesn't line up with runtime
+        // metadata.
+        if let Some(validation_hash) = address.storage_hash {
+            validate_storage(
+                &*address.pallet_name,
+                &*address.storage_name,
+                validation_hash,
+                &self.client.metadata()
+            )?;
+        }
+
+        // Fetch a concrete block hash to iterate over. We do this so that if new blocks
+        // are produced midway through iteration, we continue to iterate at the block
+        // we started with and not the new block.
         let hash = if let Some(hash) = hash {
             hash
         } else {
@@ -211,6 +242,7 @@ where
                 .await?
                 .expect("didn't pass a block number; qed")
         };
+
         Ok(KeyIter {
             client: self.clone(),
             address: address.to_owned(),
@@ -285,8 +317,8 @@ impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
     /// Take a storage address and return an owned storage address.
     pub fn to_owned(self) -> StorageAddress<'static, ReturnTy> {
         StorageAddress {
-            pallet_name: self.pallet_name.into_owned().into(),
-            storage_name: self.storage_name.into_owned().into(),
+            pallet_name: Cow::Owned(self.pallet_name.into_owned()),
+            storage_name: Cow::Owned(self.storage_name.into_owned()),
             storage_entry_key: Cow::Owned(self.storage_entry_key.into_owned()),
             storage_hash: self.storage_hash,
             _marker: self._marker
@@ -392,5 +424,17 @@ impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode> KeyIter<T, Clien
                 debug_assert_eq!(self.buffer.len(), keys.len());
             }
         }
+    }
+}
+
+/// Validate a storage entry against the metadata.
+fn validate_storage(pallet_name: &str, storage_name: &str, hash: [u8; 32], metadata: &Metadata) -> Result<(), BasicError> {
+    let expected_hash = match metadata.storage_hash(pallet_name, storage_name) {
+        Ok(hash) => hash,
+        Err(e) => return Err(e.into())
+    };
+    match expected_hash != hash {
+        true => Ok(()),
+        false => Err(crate::MetadataError::IncompatibleMetadata.into())
     }
 }
