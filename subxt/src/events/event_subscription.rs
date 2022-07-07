@@ -47,9 +47,9 @@ pub use super::{
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
-    client: &'a Client<T>,
-) -> Result<EventSubscription<'a, EventSub<T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe<T: Config, Evs: Decode + 'static>(
+    client: &Client<T>,
+) -> Result<EventSubscription<EventSub<T::Header>, T, Evs>, BasicError> {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
@@ -60,9 +60,9 @@ pub async fn subscribe<'a, T: Config, Evs: Decode + 'static>(
 /// and is exposed only to be called via the codegen. It may
 /// break between minor releases.
 #[doc(hidden)]
-pub async fn subscribe_finalized<'a, T: Config, Evs: Decode + 'static>(
-    client: &'a Client<T>,
-) -> Result<EventSubscription<'a, FinalizedEventSub<'a, T::Header>, T, Evs>, BasicError> {
+pub async fn subscribe_finalized<T: Config, Evs: Decode + 'static>(
+    client: &Client<T>,
+) -> Result<EventSubscription<FinalizedEventSub<T::Header>, T, Evs>, BasicError> {
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.
     let last_finalized_block_hash = client.rpc().finalized_head().await?;
