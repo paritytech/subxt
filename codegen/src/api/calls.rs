@@ -22,31 +22,8 @@ use quote::{
 };
 use scale_info::form::PortableForm;
 
-/// Generate calls from the provided pallet's metadata.
-///
-/// The function creates a new module named `calls` under the pallet's module.
-/// ```ignore
-/// pub mod PalletName {
-///     pub mod calls {
-///     ...
-///     }
-/// }
-/// ```
-///
-/// The function generates the calls as rust structs that implement the `subxt::Call` trait
-/// to uniquely identify the call's identity when creating the extrinsic.
-///
-/// ```ignore
-/// pub struct CallName {
-///      pub call_param: type,
-/// }
-/// impl ::subxt::Call for CallName {
-/// ...
-/// }
-/// ```
-///
-/// Calls are extracted from the API and wrapped into the generated `TransactionApi` of
-/// each module.
+/// Generate calls from the provided pallet's metadata. Each call returns a `SubmittableExtrinsic`
+/// that can be passed to the subxt client to submit/sign/encode.
 ///
 /// # Arguments
 ///
@@ -113,11 +90,6 @@ pub fn generate_calls(
             // The call structure's documentation was stripped above.
             let call_struct = quote! {
                 #struct_def
-
-                impl ::subxt::Call for #struct_name {
-                    const PALLET: &'static str = #pallet_name;
-                    const FUNCTION: &'static str = #call_name;
-                }
             };
             let client_fn = quote! {
                 #docs
@@ -152,7 +124,7 @@ pub fn generate_calls(
 
             #( #call_structs )*
 
-            pub struct TransactionApi
+            pub struct TransactionApi;
 
             impl TransactionApi {
                 #( #call_fns )*
