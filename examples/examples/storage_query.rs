@@ -15,13 +15,11 @@ use subxt::{
     rpc::Rpc,
     storage::{
         StorageClient,
-        StorageKeyPrefix,
+        StorageEntryKey,
+        StorageMapKey,
     },
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
-    StorageEntryKey,
-    StorageMapKey,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -31,13 +29,8 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
-
-    // Obtain the storage client wrapper from the API.
-    let storage: StorageClient<_> = api.client.storage();
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // The VersionNotifiers type of the XcmPallet is defined as:
     //
@@ -57,21 +50,24 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 1. Iterate over fetched keys manually.
     {
+        let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
+
         // Fetch at most 10 keys from below the prefix XcmPallet' VersionNotifiers.
-        let keys = storage
-            .fetch_keys::<polkadot::xcm_pallet::storage::VersionNotifiers>(10, None, None)
+        let keys = api
+            .storage()
+            .fetch_keys(&key_addr, 10, None, None)
             .await?;
 
         println!("Example 1. Obtained keys:");
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(&key));
 
-            if let Some(storage_data) = storage.fetch_raw(key.clone(), None).await? {
+            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn
                 // - metadata in json format
-                let value = u64::decode(&mut &storage_data.0[..])?;
+                let value = u64::decode(&mut &*storage_data)?;
                 println!("  Value: {}", value);
             }
         }
@@ -79,8 +75,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     // Example 2. Iterate over (keys, value) using the storage client.
     {
-        let mut iter = storage
-            .iter::<polkadot::xcm_pallet::storage::VersionNotifiers>(None)
+        let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
+
+        let mut iter = api.storage()
+            .iter(key_addr, 10, None)
             .await?;
 
         println!("\nExample 2. Obtained keys:");
@@ -90,29 +88,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         }
     }
 
-    // Example 3. Iterate over (keys, value) using the polkadot API.
-    {
-        let mut iter = api
-            .storage()
-            .xcm_pallet()
-            .version_notifiers_iter(None)
-            .await?;
-
-        println!("\nExample 3. Obtained keys:");
-        while let Some((key, value)) = iter.next().await? {
-            println!("Key: 0x{}", hex::encode(&key));
-            println!("  Value: {}", value);
-        }
-    }
-
     // Example 4. Custom iteration over double maps.
     {
         // Obtain the inner RPC from the API.
-        let rpc: &Rpc<_> = api.client.rpc();
+        let rpc = api.rpc();
+
+        let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
 
         // Obtain the prefixed `twox_128("XcmPallet") ++ twox_128("VersionNotifiers")`
-        let prefix =
-            StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>();
+        let mut query_key = key_addr.to_bytes();
+
         // From the VersionNotifiers definition above, the first key is represented by
         // ```
         // 		Twox64Concat,
@@ -120,14 +105,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // ```
         // while `XcmVersion` is `u32`.
         // Pass `2` as `XcmVersion` and concatenate the key to the prefix.
-        let entry_key = StorageEntryKey::Map(vec![StorageMapKey::new(
+        StorageEntryKey::Map(vec![StorageMapKey::new(
             &2u32,
-            ::subxt::StorageHasher::Twox64Concat,
-        )]);
+            ::subxt::storage::StorageHasher::Twox64Concat,
+        )]).to_bytes(&mut query_key);
 
         // The final query key is:
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
-        let query_key = entry_key.final_key(prefix);
         println!("\nExample 4\nQuery key: 0x{}", hex::encode(&query_key));
 
         let keys = rpc
@@ -138,7 +122,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(&key));
 
-            if let Some(storage_data) = storage.fetch_raw(key.clone(), None).await? {
+            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await? {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn

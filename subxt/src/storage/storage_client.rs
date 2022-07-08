@@ -269,11 +269,6 @@ where
     }
 }
 
-
-
-
-
-
 /// This is returned from storage accesses in the statically generated
 /// code, and contains the information needed to find, validate and decode
 /// the storage entry.
@@ -323,13 +318,8 @@ impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
         let mut bytes = sp_core::twox_128(self.pallet_name.as_bytes()).to_vec();
         bytes.extend(&sp_core::twox_128(self.storage_name.as_bytes())[..]);
 
-        // Then, if we need to further dig into this entry, we do so,
-        // hashing additional fields as specified:
-        if let StorageEntryKey::Map(map) = &*self.storage_entry_key {
-            for entry in map {
-                entry.to_bytes(&mut bytes);
-            }
-        }
+        // Then encode any additional params to dig further into the entry:
+        self.storage_entry_key.to_bytes(&mut bytes);
 
         bytes
     }
@@ -361,6 +351,17 @@ pub enum StorageEntryKey {
     Map(Vec<StorageMapKey>),
 }
 
+impl StorageEntryKey {
+    /// Convert this [`StorageEntryKey`] into bytes and append them to some existing bytes.
+    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
+        if let StorageEntryKey::Map(map) = self {
+            for entry in map {
+                entry.to_bytes(bytes);
+            }
+        }
+    }
+}
+
 impl <'a> From<StorageEntryKey> for Cow<'a, StorageEntryKey> {
     fn from(k: StorageEntryKey) -> Self {
         Cow::Owned(k)
@@ -383,7 +384,7 @@ impl StorageMapKey {
         }
     }
 
-    /// Convert this [`StorageMapKey`] into bytes and append it to some existing bytes.
+    /// Convert this [`StorageMapKey`] into bytes and append them to some existing bytes.
     pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
         match &self.hasher {
             StorageHasher::Identity => bytes.extend(&self.value),
