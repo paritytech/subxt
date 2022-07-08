@@ -4,19 +4,15 @@
 
 //! Types representing the errors that can be returned.
 
-use crate::metadata::{
-    InvalidMetadataError,
-    MetadataError,
-};
 use core::fmt::Debug;
-use jsonrpsee::core::error::Error as RequestError;
-use scale_value::{
-    scale::{
-        DecodeError,
-    }
-};
-use sp_core::crypto::SecretStringError;
-use sp_runtime::transaction_validity::TransactionValidityError;
+
+// Re-expose the errors we use from other crates here:
+pub use crate::metadata::MetadataError;
+pub use crate::metadata::InvalidMetadataError;
+pub use jsonrpsee::core::error::Error as RequestError;
+pub use scale_value::scale::DecodeError;
+pub use sp_core::crypto::SecretStringError;
+pub use sp_runtime::transaction_validity::TransactionValidityError;
 
 /// An error that may contain some runtime error `E`
 pub type Error<E> = GenericError<RuntimeError<E>>;

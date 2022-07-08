@@ -341,6 +341,12 @@ pub enum StorageEntryKey {
     Map(Vec<StorageMapKey>),
 }
 
+impl <'a> From<StorageEntryKey> for Cow<'a, StorageEntryKey> {
+    fn from(k: StorageEntryKey) -> Self {
+        Cow::Owned(k)
+    }
+}
+
 /// Storage key for a Map.
 #[derive(Clone)]
 pub struct StorageMapKey {

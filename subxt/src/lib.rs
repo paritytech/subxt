@@ -242,12 +242,6 @@ pub use crate::{
     error::{
         BasicError,
         Error,
-        GenericError,
-        HasModuleError,
-        ModuleError,
-        ModuleErrorData,
-        RuntimeError,
-        TransactionError,
     },
     events::{
         EventDetails,

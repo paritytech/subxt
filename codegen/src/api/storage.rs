@@ -69,9 +69,9 @@ fn generate_storage_entry_fns(
     pallet: &PalletMetadata<PortableForm>,
     storage_entry: &StorageEntryMetadata<PortableForm>,
 ) -> TokenStream2 {
-    let (fields, key_impl, should_ref) = match storage_entry.ty {
+    let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => {
-            (vec![], quote!(::subxt::storage::StorageEntryKey::Plain), false)
+            (vec![], quote!(::subxt::storage::StorageEntryKey::Plain))
         }
         StorageEntryType::Map {
             ref key,
@@ -108,18 +108,15 @@ fn generate_storage_entry_fns(
                         })
                         .collect::<Vec<_>>();
 
-                    // There cannot be a reference without a parameter.
-                    let should_ref = !fields.is_empty();
                     let key_impl = if hashers.len() == fields.len() {
                         // If the number of hashers matches the number of fields, we're dealing with
                         // something shaped like a StorageNMap, and each field should be hashed separately
                         // according to the corresponding hasher.
                         let keys = hashers
                             .into_iter()
-                            .enumerate()
-                            .map(|(field_idx, hasher)| {
-                                let index = syn::Index::from(field_idx);
-                                quote!( ::subxt::storage::StorageMapKey::new(&self.#index, #hasher) )
+                            .zip(&fields)
+                            .map(|(hasher, (field_name, _))| {
+                                quote!( ::subxt::storage::StorageMapKey::new(#field_name, #hasher) )
                             });
                         quote! {
                             ::subxt::storage::StorageEntryKey::Map(
@@ -131,9 +128,8 @@ fn generate_storage_entry_fns(
                         // tuple of them using the one hasher we're told about. This corresponds to a
                         // StorageMap.
                         let hasher = hashers.get(0).expect("checked for 1 hasher");
-                        let items = (0..fields.len()).map(|field_idx| {
-                            let index = syn::Index::from(field_idx);
-                            quote!( &self.#index )
+                        let items = fields.iter().map(|(field_name, _)| {
+                            quote!( #field_name )
                         });
                         quote! {
                             ::subxt::storage::StorageEntryKey::Map(
@@ -150,7 +146,7 @@ fn generate_storage_entry_fns(
                         )
                     };
 
-                    (fields, key_impl, should_ref)
+                    (fields, key_impl)
                 }
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
@@ -160,10 +156,10 @@ fn generate_storage_entry_fns(
                     });
                     let key_impl = quote! {
                         ::subxt::storage::StorageEntryKey::Map(
-                            vec![ ::subxt::storage::StorageMapKey::new(&self.0, #hasher) ]
+                            vec![ ::subxt::storage::StorageMapKey::new(_0, #hasher) ]
                         )
                     };
-                    (fields, key_impl, true)
+                    (fields, key_impl)
                 }
             }
         }
@@ -199,19 +195,15 @@ fn generate_storage_entry_fns(
     let docs = &storage_entry.docs;
     let docs_token = quote! { #( #[doc = #docs ] )* };
 
-    let key_args_ref = match should_ref {
-        true => quote!(&'a),
-        false => quote!(),
-    };
     let key_args = fields.iter().map(|(field_name, field_type)| {
         // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
         // interface should generate a reference. In such cases, the vector ultimately is
         // a slice.
         let field_ty = match field_type.vec_type_param() {
-            Some(ty) if should_ref => quote!([#ty]),
+            Some(ty) => quote!(&[#ty]),
             _ => quote!(#field_type),
         };
-        quote!( #field_name: #key_args_ref #field_ty )
+        quote!( #field_name: & #field_ty )
     });
 
     quote! {
@@ -219,7 +211,6 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-            block_hash: ::core::option::Option<T::Hash>,
         ) -> ::subxt::storage::StorageAddress::<'static, #return_ty> {
             ::subxt::storage::StorageAddress::new_with_validation(
                 #pallet_name,

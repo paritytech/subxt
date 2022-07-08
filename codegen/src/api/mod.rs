@@ -276,18 +276,19 @@ impl RuntimeGenerator {
                 // Impl HasModuleError on DispatchError so we can pluck out module error details.
                 #has_module_error_impl
 
-                pub fn constants(&'a self) -> ConstantsApi {
+                pub fn constants() -> ConstantsApi {
                     ConstantsApi
                 }
 
-                pub fn storage(&'a self) -> StorageApi {
+                pub fn storage() -> StorageApi {
                     StorageApi
                 }
 
-                pub fn tx(&'a self) -> TransactionApi {
+                pub fn tx() -> TransactionApi {
                     TransactionApi
                 }
 
+                pub struct ConstantsApi;
                 impl ConstantsApi {
                     #(
                         pub fn #pallets_with_constants(&self) -> #pallets_with_constants::constants::ConstantsApi {
@@ -296,6 +297,7 @@ impl RuntimeGenerator {
                     )*
                 }
 
+                pub struct StorageApi;
                 impl StorageApi {
                     #(
                         pub fn #pallets_with_storage(&self) -> #pallets_with_storage::storage::StorageApi {
@@ -304,6 +306,7 @@ impl RuntimeGenerator {
                     )*
                 }
 
+                pub struct TransactionApi;
                 impl TransactionApi {
                     #(
                         pub fn #pallets_with_calls(&self) -> #pallets_with_calls::calls::TransactionApi {
@@ -313,14 +316,10 @@ impl RuntimeGenerator {
                 }
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: C) -> Result<(), ::subxt::MetadataError> {
-                    let runtime_metadata_hash = {
-                        let locked_metadata = self.client.metadata();
-                        let metadata = locked_metadata.read();
-                        metadata.metadata_hash(&PALLETS)
-                    };
+                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: C) -> Result<(), ::subxt::error::MetadataError> {
+                    let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
-                        Err(::subxt::MetadataError::IncompatibleMetadata)
+                        Err(::subxt::error::MetadataError::IncompatibleMetadata)
                     } else {
                         Ok(())
                     }

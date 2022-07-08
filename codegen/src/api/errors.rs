@@ -36,7 +36,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::NamedField => {
                 quote! {
                     if let &Self::Module { index, error } = self {
-                        Some(::subxt::ModuleErrorData { pallet_index: index, error: [error, 0, 0, 0] })
+                        Some(::subxt::error::ModuleErrorData { pallet_index: index, error: [error, 0, 0, 0] })
                     } else {
                         None
                     }
@@ -45,7 +45,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::LegacyError => {
                 quote! {
                     if let Self::Module (module_error) = self {
-                        Some(::subxt::ModuleErrorData { pallet_index: module_error.index, error: [module_error.error, 0, 0, 0] })
+                        Some(::subxt::error::ModuleErrorData { pallet_index: module_error.index, error: [module_error.error, 0, 0, 0] })
                     } else {
                         None
                     }
@@ -54,7 +54,7 @@ impl quote::ToTokens for ModuleErrorType {
             ModuleErrorType::ArrayError => {
                 quote! {
                     if let Self::Module (module_error) = self {
-                        Some(::subxt::ModuleErrorData { pallet_index: module_error.index, error: module_error.error })
+                        Some(::subxt::error::ModuleErrorData { pallet_index: module_error.index, error: module_error.error })
                     } else {
                         None
                     }
@@ -141,7 +141,7 @@ fn module_error_type(
     }
 }
 
-/// The aim of this is to implement the `::subxt::HasModuleError` trait for
+/// The aim of this is to implement the `::subxt::error::HasModuleError` trait for
 /// the generated `DispatchError`, so that we can obtain the module error details,
 /// if applicable, from it.
 pub fn generate_has_module_error_impl(
@@ -180,8 +180,8 @@ pub fn generate_has_module_error_impl(
     let error_type = module_error_type(module_field, metadata);
 
     quote! {
-        impl ::subxt::HasModuleError for #types_mod_ident::sp_runtime::DispatchError {
-            fn module_error_data(&self) -> Option<::subxt::ModuleErrorData> {
+        impl ::subxt::error::HasModuleError for #types_mod_ident::sp_runtime::DispatchError {
+            fn module_error_data(&self) -> Option<::subxt::error::ModuleErrorData> {
                 #error_type
             }
         }
