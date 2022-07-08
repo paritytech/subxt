@@ -11,9 +11,8 @@
 //! ```
 
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -23,18 +22,15 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Full metadata validation is not enabled by default; instead, the individual calls,
-    // storage requests and constant accesses are runtime type checked against the node
-    // metadata to ensure that they are compatible with the generated code.
-    //
-    // To make sure that all of our statically generated pallets are compatible with the
-    // runtime node, we can run this check:
-    api.validate_metadata()?;
+    // Each individual request will be validated against the static code that was
+    // used to construct it, if possible. We can also validate the entirety of the
+    // statically generated code against some client at a given point in time using
+    // this check. If it fails, then there is some breaking change between the metadata
+    // used to generate this static code, and the runtime metadata from a node that the
+    // client is using.
+    polkadot::validate_codegen(api)?;
 
     Ok(())
 }

@@ -13,10 +13,11 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
+    extrinsic::{
+        PairSigner,
+    }
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -40,16 +41,15 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    let balance_transfer_tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 10_000);
 
     let balance_transfer = api
         .tx()
-        .balances()
-        .transfer(dest, 10_000)?
-        .sign_and_submit_then_watch_default(&signer)
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &signer)
         .await?
         .wait_for_finalized_success()
         .await?;
@@ -72,16 +72,15 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    let balance_transfer_tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 10_000);
 
     let balance_transfer = api
         .tx()
-        .balances()
-        .transfer(dest, 10_000)?
-        .sign_and_submit_then_watch_default(&signer)
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &signer)
         .await?
         .wait_for_finalized()
         .await?;
@@ -123,21 +122,20 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<_>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
+
+    let balance_transfer_tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 10_000);
 
     let mut balance_transfer_progress = api
         .tx()
-        .balances()
-        .transfer(dest, 10_000)?
-        .sign_and_submit_then_watch_default(&signer)
+        .sign_and_submit_then_watch_default(&balance_transfer_tx, &signer)
         .await?;
 
     while let Some(ev) = balance_transfer_progress.next().await {
         let ev = ev?;
-        use subxt::TransactionStatus::*;
+        use subxt::extrinsic::TransactionStatus::*;
 
         // Made it into a block, but not finalized.
         if let InBlock(details) = ev {

@@ -12,31 +12,23 @@
 
 use subxt::{
     rpc::Subscription,
-    sp_runtime::{
+    ext::sp_runtime::{
         generic::Header,
         traits::BlakeTwo256,
     },
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
-
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .set_url("wss://rpc.polkadot.io:443")
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =
-        api.client.rpc().subscribe_finalized_blocks().await?;
+        api.rpc().subscribe_finalized_blocks().await?;
 
     while let Some(Ok(block)) = blocks.next().await {
         println!(

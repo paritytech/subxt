@@ -14,10 +14,9 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    extrinsic::PairSigner,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -29,41 +28,33 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Subscribe to any events that occur:
-    let mut event_sub = api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe::<polkadot::Event>().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
-    tokio::task::spawn(async {
-        let signer = PairSigner::new(AccountKeyring::Alice.pair());
-        let api =
-            ClientBuilder::new()
-                .build()
-                .await
-                .unwrap()
-                .to_runtime_api::<polkadot::RuntimeApi<
-                    SubstrateConfig,
-                    PolkadotExtrinsicParams<SubstrateConfig>,
-                >>();
+    tokio::task::spawn({
+        let api = api.clone();
+        async move {
+            let signer = PairSigner::new(AccountKeyring::Alice.pair());
+            let mut transfer_amount = 1_000_000_000;
 
-        let mut transfer_amount = 1_000_000_000;
+            // Make small balance transfers from Alice to Bob in a loop:
+            loop {
+                let transfer_tx = polkadot::tx().balances().transfer(
+                    AccountKeyring::Bob.to_account_id().into(),
+                    transfer_amount
+                );
+                api.tx()
+                    .sign_and_submit_default(&transfer_tx, &signer)
+                    .await
+                    .unwrap();
 
-        // Make small balance transfers from Alice to Bob in a loop:
-        loop {
-            api.tx()
-                .balances()
-                .transfer(AccountKeyring::Bob.to_account_id().into(), transfer_amount)
-                .expect("compatible transfer call on runtime node")
-                .sign_and_submit_default(&signer)
-                .await
-                .unwrap();
-
-            tokio::time::sleep(Duration::from_secs(10)).await;
-            transfer_amount += 100_000_000;
+                tokio::time::sleep(Duration::from_secs(10)).await;
+                transfer_amount += 100_000_000;
+            }
         }
     });
 

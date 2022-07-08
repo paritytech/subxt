@@ -11,28 +11,19 @@
 //! ```
 
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
-
-#[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-pub mod polkadot {}
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .set_url("wss://rpc.polkadot.io:443")
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     let block_number = 1u32;
 
     let block_hash = api
-        .client
         .rpc()
         .block_hash(Some(block_number.into()))
         .await?;

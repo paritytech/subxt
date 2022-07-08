@@ -12,14 +12,17 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    sp_core::{
-        sr25519,
-        Pair,
+    ext::{
+        sp_core::{
+            sr25519,
+            Pair,
+        },
+        sp_runtime::{
+            AccountId32,
+        }
     },
-    sp_runtime::AccountId32,
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -29,12 +32,13 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let era = api.storage().staking().active_era(None).await?.unwrap();
+    let active_era_addr = polkadot::storage()
+        .staking()
+        .active_era();
+    let era = api.storage().fetch(&active_era_addr, None).await?.unwrap().unwrap();
     println!(
         "Staking active era: index: {:?}, start: {:?}",
         era.index, era.start
@@ -51,18 +55,22 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Alice//stash account id: {:?}", alice_stash_id);
 
     // Map from all locked "stash" accounts to the controller account.
+    let controller_acc_addr = polkadot::storage()
+        .staking()
+        .bonded(&alice_stash_id);
     let controller_acc = api
         .storage()
-        .staking()
-        .bonded(&alice_stash_id, None)
+        .fetch(&controller_acc_addr, None)
         .await?
         .unwrap();
     println!("    account controlled by: {:?}", controller_acc);
 
+    let era_reward_addr = polkadot::storage()
+        .staking()
+        .eras_reward_points(&era.index);
     let era_result = api
         .storage()
-        .staking()
-        .eras_reward_points(&era.index, None)
+        .fetch(&era_reward_addr, None)
         .await?;
     println!("Era reward points: {:?}", era_result);
 
