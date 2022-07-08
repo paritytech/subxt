@@ -11,8 +11,11 @@ use crate::{
     metadata::MetadataError,
 };
 use scale_value::{ Value, scale::TypeId };
+use derivative::Derivative;
 
 /// A client for accessing constants.
+#[derive(Derivative)]
+#[derivative(Clone(bound = "Client: Clone"))]
 pub struct ConstantsClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>,

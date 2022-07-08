@@ -30,8 +30,11 @@ use crate::events::{
     EventSub,
     FinalizedEventSub,
 };
+use derivative::Derivative;
 
 /// A client for working with events.
+#[derive(Derivative)]
+#[derivative(Clone(bound = "Client: Clone"))]
 pub struct EventsClient<T, Client> {
     client: Client,
     _marker: std::marker::PhantomData<T>

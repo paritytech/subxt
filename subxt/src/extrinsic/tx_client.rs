@@ -37,16 +37,19 @@ use codec::{
 use crate::extrinsic::{
     TransactionProgress,
 };
+use derivative::Derivative;
 
 /// A client for working with transactions.
-pub struct TxClient<T: Config, C> {
-    client: C,
+#[derive(Derivative)]
+#[derivative(Clone(bound = "Client: Clone"))]
+pub struct TxClient<T: Config, Client> {
+    client: Client,
     _marker: PhantomDataSendSync<T>,
 }
 
-impl <T: Config, C> TxClient<T, C> {
+impl <T: Config, Client> TxClient<T, Client> {
     /// Create a new [`TxClient`]
-    pub fn new(client: C) -> Self {
+    pub fn new(client: Client) -> Self {
         Self {
             client,
             _marker: PhantomDataSendSync::new()

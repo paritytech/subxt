@@ -14,6 +14,7 @@ pub use sp_runtime::traits::SignedExtension;
 use std::{
     marker::PhantomData,
     borrow::Cow,
+    future::Future,
 };
 use crate::{
     error::BasicError,
@@ -26,6 +27,7 @@ use crate::{
     metadata::Metadata,
     Config,
 };
+use derivative::Derivative;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
@@ -105,18 +107,11 @@ pub use frame_metadata::StorageHasher;
 /// }
 /// # }
 /// ```
+#[derive(Derivative)]
+#[derivative(Clone(bound = "Client: Clone"))]
 pub struct StorageClient<T, Client> {
     client: Client,
     _marker: PhantomData<T>
-}
-
-impl<T, Client: Clone> Clone for StorageClient<T, Client> {
-    fn clone(&self) -> Self {
-        Self {
-            client: self.client.clone(),
-            _marker: PhantomData,
-        }
-    }
 }
 
 impl<T, Client> StorageClient<T, Client>{
@@ -137,124 +132,147 @@ where
     Client: OnlineClientT<T>,
 {
     /// Fetch the raw encoded value at the address/key given.
-    pub async fn fetch_raw<K: Into<StorageKey>>(
+    pub fn fetch_raw<K: Into<StorageKey>>(
         &self,
         key: K,
         hash: Option<T::Hash>,
-    ) -> Result<Option<Vec<u8>>, BasicError> {
+    ) -> impl Future<Output = Result<Option<Vec<u8>>, BasicError>> + 'static {
+        let client = self.client.clone();
         let key = key.into();
-        let data = self.client.rpc().storage(&key, hash).await?;
-        Ok(data.map(|d| d.0))
+        // Ensure that the returned future doesn't have a lifetime tied to api.storage(),
+        // which is a temporary thing we'll be throwing away quickly:
+        async move {
+            let data = client.rpc().storage(&key, hash).await?;
+            Ok(data.map(|d| d.0))
+        }
     }
 
     /// Fetch a decoded value from storage at a given address and optional block hash.
-    pub async fn fetch<ReturnTy: Decode>(
+    pub fn fetch<'a, ReturnTy: Decode>(
         &self,
-        address: &StorageAddress<'_, ReturnTy>,
+        address: &'a StorageAddress<'_, ReturnTy>,
         hash: Option<T::Hash>,
-    ) -> Result<Option<ReturnTy>, BasicError> {
-        // Metadata validation checks whether the static address given
-        // is likely to actually correspond to a real storage entry or not.
-        // if not, it means static codegen doesn't line up with runtime
-        // metadata.
-        if let Some(validation_hash) = address.storage_hash {
-            validate_storage(
-                &*address.pallet_name,
-                &*address.storage_name,
-                validation_hash,
-                &self.client.metadata()
-            )?;
-        }
+    ) -> impl Future<Output = Result<Option<ReturnTy>, BasicError>> + 'a {
+        let client = self.client.clone();
+        async move {
+            // Metadata validation checks whether the static address given
+            // is likely to actually correspond to a real storage entry or not.
+            // if not, it means static codegen doesn't line up with runtime
+            // metadata.
+            if let Some(validation_hash) = address.storage_hash {
+                validate_storage(
+                    &*address.pallet_name,
+                    &*address.storage_name,
+                    validation_hash,
+                    &client.metadata()
+                )?;
+            }
 
-        if let Some(data) = self.fetch_raw(address, hash).await? {
-            Ok(Some(Decode::decode(&mut &*data)?))
-        } else {
-            Ok(None)
+            if let Some(data) = client.storage().fetch_raw(address, hash).await? {
+                Ok(Some(Decode::decode(&mut &*data)?))
+            } else {
+                Ok(None)
+            }
         }
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub async fn fetch_or_default<ReturnTy: Decode>(
+    pub fn fetch_or_default<'a, ReturnTy: Decode>(
         &self,
-        address: &StorageAddress<'_, ReturnTy>,
+        address: &'a StorageAddress<'_, ReturnTy>,
         hash: Option<T::Hash>,
-    ) -> Result<ReturnTy, BasicError> {
-        let pallet_name = &*address.pallet_name;
-        let storage_name = &*address.storage_name;
-        // Metadata validation happens via .fetch():
-        if let Some(data) = self.fetch(address, hash).await? {
-            Ok(data)
-        } else {
-            let metadata = self.client.metadata();
-            let pallet_metadata = metadata.pallet(pallet_name)?;
-            let storage_metadata = pallet_metadata.storage(storage_name)?;
-            let default = Decode::decode(&mut &storage_metadata.default[..])
-                .map_err(MetadataError::DefaultError)?;
-            Ok(default)
+    ) -> impl Future<Output = Result<ReturnTy, BasicError>> + 'a {
+        let client = self.client.clone();
+        async move {
+            let pallet_name = &*address.pallet_name;
+            let storage_name = &*address.storage_name;
+            // Metadata validation happens via .fetch():
+            if let Some(data) = client.storage().fetch(address, hash).await? {
+                Ok(data)
+            } else {
+                let metadata = client.metadata();
+                let pallet_metadata = metadata.pallet(pallet_name)?;
+                let storage_metadata = pallet_metadata.storage(storage_name)?;
+                let default = Decode::decode(&mut &storage_metadata.default[..])
+                    .map_err(MetadataError::DefaultError)?;
+                Ok(default)
+            }
         }
+
     }
 
     /// Fetch up to `count` keys for a storage map in lexicographic order.
     ///
     /// Supports pagination by passing a value to `start_key`.
-    pub async fn fetch_keys<K: Into<StorageKey>>(
+    pub fn fetch_keys<K: Into<StorageKey>>(
         &self,
         key: K,
         count: u32,
         start_key: Option<StorageKey>,
         hash: Option<T::Hash>,
-    ) -> Result<Vec<StorageKey>, BasicError> {
-        let keys = self
-            .client
-            .rpc()
-            .storage_keys_paged(key.into(), count, start_key, hash)
-            .await?;
-        Ok(keys)
+    ) -> impl Future<Output = Result<Vec<StorageKey>, BasicError>> + 'static {
+        let client = self.client.clone();
+        let key = key.into();
+        async move {
+            let keys = client
+                .rpc()
+                .storage_keys_paged(key, count, start_key, hash)
+                .await?;
+            Ok(keys)
+        }
     }
 
     /// Returns an iterator of key value pairs.
-    pub async fn iter<ReturnTy: Decode>(
+    pub fn iter<'a, ReturnTy: Decode + 'static>(
         &self,
-        address: StorageAddress<'_, ReturnTy>,
+        address: StorageAddress<'a, ReturnTy>,
         page_size: u32,
         hash: Option<T::Hash>,
-    ) -> Result<KeyIter<T, Client, ReturnTy>, BasicError> {
-        // Metadata validation checks whether the static address given
-        // is likely to actually correspond to a real storage entry or not.
-        // if not, it means static codegen doesn't line up with runtime
-        // metadata.
-        if let Some(validation_hash) = address.storage_hash {
-            validate_storage(
-                &*address.pallet_name,
-                &*address.storage_name,
-                validation_hash,
-                &self.client.metadata()
-            )?;
+    ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy>, BasicError>> + 'a {
+        let client = self.client.clone();
+        async move {
+            // Metadata validation checks whether the static address given
+            // is likely to actually correspond to a real storage entry or not.
+            // if not, it means static codegen doesn't line up with runtime
+            // metadata.
+            if let Some(validation_hash) = address.storage_hash {
+                validate_storage(
+                    &*address.pallet_name,
+                    &*address.storage_name,
+                    validation_hash,
+                    &client.metadata()
+                )?;
+            }
+
+            // Fetch a concrete block hash to iterate over. We do this so that if new blocks
+            // are produced midway through iteration, we continue to iterate at the block
+            // we started with and not the new block.
+            let hash = if let Some(hash) = hash {
+                hash
+            } else {
+                client
+                    .rpc()
+                    .block_hash(None)
+                    .await?
+                    .expect("didn't pass a block number; qed")
+            };
+
+            Ok(KeyIter {
+                client: client.storage(),
+                address: address.to_owned(),
+                hash,
+                count: page_size,
+                start_key: None,
+                buffer: Default::default(),
+            })
         }
-
-        // Fetch a concrete block hash to iterate over. We do this so that if new blocks
-        // are produced midway through iteration, we continue to iterate at the block
-        // we started with and not the new block.
-        let hash = if let Some(hash) = hash {
-            hash
-        } else {
-            self.client
-                .rpc()
-                .block_hash(None)
-                .await?
-                .expect("didn't pass a block number; qed")
-        };
-
-        Ok(KeyIter {
-            client: self.clone(),
-            address: address.to_owned(),
-            hash,
-            count: page_size,
-            start_key: None,
-            buffer: Default::default(),
-        })
     }
 }
+
+
+
+
+
 
 /// This is returned from storage accesses in the statically generated
 /// code, and contains the information needed to find, validate and decode
