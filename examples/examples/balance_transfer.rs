@@ -12,10 +12,9 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
+    extrinsic::PairSigner,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -26,23 +25,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
-
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
-
-    // Submit the `transfer` extrinsic from Alice's account to Bob's.
     let dest = AccountKeyring::Bob.to_account_id().into();
 
-    // Obtain an extrinsic, calling the "transfer" function in
-    // the "balances" pallet.
-    let extrinsic = api.tx().balances().transfer(dest, 123_456_789_012_345)?;
+    // Create a client to use:
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    // Sign and submit the extrinsic, returning its hash.
-    let tx_hash = extrinsic.sign_and_submit_default(&signer).await?;
+    // Create a transaction to submit:
+    let tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345);
 
-    println!("Balance transfer extrinsic submitted: {}", tx_hash);
+    // submit the transaction with default params:
+    let hash = api
+        .tx()
+        .sign_and_submit_default(&tx, &signer)
+        .await?;
+
+    println!("Balance transfer extrinsic submitted: {}", hash);
 
     Ok(())
 }
