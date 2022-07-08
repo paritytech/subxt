@@ -11,9 +11,8 @@
 //! ```
 
 use subxt::{
-    ClientBuilder,
-    SubstrateConfig,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    PolkadotConfig,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -23,12 +22,11 @@ pub mod polkadot {}
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>>();
+    let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let mut iter = api.storage().system().account_iter(None).await?;
+    let address = polkadot::storage().system().account_root();
+
+    let mut iter = api.storage().iter(address, 10, None).await?;
 
     while let Some((key, account)) = iter.next().await? {
         println!("{}: {}", hex::encode(key), account.data.free);

@@ -12,11 +12,15 @@
 
 use sp_keyring::AccountKeyring;
 use subxt::{
-    ClientBuilder,
-    Config,
-    SubstrateConfig,
-    PairSigner,
-    PolkadotExtrinsicParams,
+    OnlineClient,
+    config::{
+        Config,
+        SubstrateConfig,
+    },
+    extrinsic::{
+        PairSigner,
+        SubstrateExtrinsicParams,
+    },
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -41,23 +45,28 @@ impl Config for MyConfig {
     type Header = <SubstrateConfig as Config>::Header;
     type Signature = <SubstrateConfig as Config>::Signature;
     type Extrinsic = <SubstrateConfig as Config>::Extrinsic;
+    // ExtrinsicParams makes use of the index type, so we need to adjust them
+    // too to align with our modified index type, above:
+    type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let api = ClientBuilder::new()
-        .build()
-        .await?
-        .to_runtime_api::<polkadot::RuntimeApi<MyConfig, PolkadotExtrinsicParams<MyConfig>>>();
-
     let signer = PairSigner::new(AccountKeyring::Alice.pair());
     let dest = AccountKeyring::Bob.to_account_id().into();
 
+    // Create a client to use:
+    let api = OnlineClient::<MyConfig>::new().await?;
+
+    // Create a transaction to submit:
+    let tx = polkadot::tx()
+        .balances()
+        .transfer(dest, 123_456_789_012_345);
+
+    // submit the transaction with default params:
     let hash = api
         .tx()
-        .balances()
-        .transfer(dest, 10_000)?
-        .sign_and_submit_default(&signer)
+        .sign_and_submit_default(&tx, &signer)
         .await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);

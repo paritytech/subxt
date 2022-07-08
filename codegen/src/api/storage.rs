@@ -206,7 +206,29 @@ fn generate_storage_entry_fns(
         quote!( #field_name: & #field_ty )
     });
 
+    // If the item is a map, we want a way to access the root entry to do things like iterate over it,
+    // so expose a function to create this entry, too:
+    let root_entry_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
+        let fn_name_root = format_ident!("{}_root", fn_name);
+        quote! (
+            #docs_token
+            pub fn #fn_name_root(
+                &self,
+            ) -> ::subxt::storage::StorageAddress::<'static, #return_ty> {
+                ::subxt::storage::StorageAddress::new_with_validation(
+                    #pallet_name,
+                    #storage_name,
+                    ::subxt::storage::StorageEntryKey::Plain,
+                    [#(#storage_hash,)*]
+                )
+            }
+        )
+    } else {
+        quote!()
+    };
+
     quote! {
+        // Access a specific value from a storage entry
         #docs_token
         pub fn #fn_name(
             &self,
@@ -219,5 +241,7 @@ fn generate_storage_entry_fns(
                 [#(#storage_hash,)*]
             )
         }
+
+        #root_entry_fn
     }
 }
