@@ -6,7 +6,6 @@ use sp_runtime::{
     traits::Hash,
     ApplyExtrinsicResult,
 };
-use crate::PhantomDataSendSync;
 use crate::{
     Config,
     client::{
@@ -25,7 +24,10 @@ use crate::{
         EncodeWithMetadata,
         MetadataLocation,
     },
-    Encoded,
+    utils::{
+        Encoded,
+        PhantomDataSendSync,
+    }
 };
 use codec::{
     Compact,

@@ -204,21 +204,7 @@
 )]
 #![allow(clippy::type_complexity)]
 
-pub use frame_metadata::StorageHasher;
 pub use subxt_macro::subxt;
-
-pub use bitvec;
-pub use codec;
-pub use sp_core;
-pub use sp_runtime;
-
-use codec::{
-    Decode,
-    DecodeAll,
-    Encode,
-};
-use core::fmt::Debug;
-use derivative::Derivative;
 
 pub mod client;
 pub mod config;
@@ -229,7 +215,10 @@ pub mod constants;
 pub mod metadata;
 pub mod rpc;
 pub mod storage;
+pub mod utils;
 
+// Expose a few of the most common types at root,
+// but leave most types behind their respoctive modules.
 pub use crate::{
     client::{
         OfflineClient,
@@ -238,152 +227,23 @@ pub use crate::{
     config::{
         Config,
         SubstrateConfig,
+        PolkadotConfig,
     },
     error::{
         BasicError,
         Error,
     },
-    events::{
-        EventDetails,
-        Events,
-        RawEventDetails,
-    },
-    extrinsic::{
-        PairSigner,
-        PolkadotExtrinsicParams,
-        PolkadotExtrinsicParamsBuilder,
-        SubstrateExtrinsicParams,
-        SubstrateExtrinsicParamsBuilder,
-        TransactionEvents,
-        TransactionInBlock,
-        TransactionProgress,
-        TransactionStatus,
-    },
     metadata::{
-        ErrorMetadata,
         Metadata,
-        MetadataError,
-        PalletMetadata,
-    },
-    rpc::{
-        BlockNumber,
-        ReadProof,
-        RpcClient,
-        SystemProperties,
     },
 };
 
-/// Trait to uniquely identify the events's identity from the runtime metadata.
-///
-/// Generated API structures that represent an event implement this trait.
-///
-/// The trait is utilized to decode emitted events from a block, via obtaining the
-/// form of the `Event` from the metadata.
-pub trait Event: Decode {
-    /// Pallet name.
-    const PALLET: &'static str;
-    /// Event name.
-    const EVENT: &'static str;
-
-    /// Returns true if the given pallet and event names match this event.
-    fn is_event(pallet: &str, event: &str) -> bool {
-        Self::PALLET == pallet && Self::EVENT == event
-    }
+/// Re-export external crates that are made use of in the subxt API.
+pub mod ext {
+    pub use bitvec;
+    pub use codec;
+    pub use sp_core;
+    pub use sp_runtime;
+    pub use frame_metadata;
+    pub use scale_value;
 }
-
-/// Wraps an already encoded byte vector, prevents being encoded as a raw byte vector as part of
-/// the transaction payload
-#[derive(Clone, Debug, Eq, PartialEq)]
-pub struct Encoded(pub Vec<u8>);
-
-impl codec::Encode for Encoded {
-    fn encode(&self) -> Vec<u8> {
-        self.0.to_owned()
-    }
-}
-
-/// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
-pub enum Phase {
-    /// Applying an extrinsic.
-    ApplyExtrinsic(u32),
-    /// Finalizing the block.
-    Finalization,
-    /// Initializing the block.
-    Initialization,
-}
-
-/// A wrapper for any type `T` which implement encode/decode in a way compatible with `Vec<u8>`.
-///
-/// [`WrapperKeepOpaque`] stores the type only in its opaque format, aka as a `Vec<u8>`. To
-/// access the real type `T` [`Self::try_decode`] needs to be used.
-#[derive(Derivative, Encode, Decode)]
-#[derivative(
-    Debug(bound = ""),
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-pub struct WrapperKeepOpaque<T> {
-    data: Vec<u8>,
-    _phantom: PhantomDataSendSync<T>,
-}
-
-impl<T: Decode> WrapperKeepOpaque<T> {
-    /// Try to decode the wrapped type from the inner `data`.
-    ///
-    /// Returns `None` if the decoding failed.
-    pub fn try_decode(&self) -> Option<T> {
-        T::decode_all(&mut &self.data[..]).ok()
-    }
-
-    /// Returns the length of the encoded `T`.
-    pub fn encoded_len(&self) -> usize {
-        self.data.len()
-    }
-
-    /// Returns the encoded data.
-    pub fn encoded(&self) -> &[u8] {
-        &self.data
-    }
-
-    /// Create from the given encoded `data`.
-    pub fn from_encoded(data: Vec<u8>) -> Self {
-        Self {
-            data,
-            _phantom: PhantomDataSendSync::new(),
-        }
-    }
-}
-
-/// A version of [`std::marker::PhantomData`] that is also Send and Sync (which is fine
-/// because regardless of the generic param, it is always possible to Send + Sync this
-/// 0 size type).
-#[derive(Derivative, Encode, Decode, scale_info::TypeInfo)]
-#[derivative(
-    Clone(bound = ""),
-    PartialEq(bound = ""),
-    Debug(bound = ""),
-    Eq(bound = ""),
-    Default(bound = ""),
-    Hash(bound = "")
-)]
-#[scale_info(skip_type_params(T))]
-#[doc(hidden)]
-pub struct PhantomDataSendSync<T>(core::marker::PhantomData<T>);
-
-impl<T> PhantomDataSendSync<T> {
-    pub(crate) fn new() -> Self {
-        Self(core::marker::PhantomData)
-    }
-}
-
-unsafe impl<T> Send for PhantomDataSendSync<T> {}
-unsafe impl<T> Sync for PhantomDataSendSync<T> {}
-
-/// This represents a key-value collection and is SCALE compatible
-/// with collections like BTreeMap. This has the same type params
-/// as `BTreeMap` which allows us to easily swap the two during codegen.
-pub type KeyedVec<K, V> = Vec<(K, V)>;

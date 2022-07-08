@@ -8,8 +8,10 @@ use super::Events;
 use crate::{
     BasicError,
     Config,
-    Event,
-    Phase,
+};
+use super::{
+    StaticEvent,
+    Phase
 };
 use codec::Decode;
 use futures::{
@@ -134,8 +136,8 @@ pub(crate) mod private {
 
 // A special case impl for searching for a tuple of exactly one event (in this case, we don't
 // need to return an `(Option<Event>,)`; we can just return `Event`.
-impl<Ev: Event> private::Sealed for (Ev,) {}
-impl<Ev: Event> EventFilter for (Ev,) {
+impl<Ev: StaticEvent> private::Sealed for (Ev,) {}
+impl<Ev: StaticEvent> EventFilter for (Ev,) {
     type ReturnType = Ev;
     fn filter<'a, T: Config, Evs: Decode + 'static>(
         events: Events<T, Evs>,
@@ -176,8 +178,8 @@ impl<Ev: Event> EventFilter for (Ev,) {
 // A generalised impl for tuples of sizes greater than 1:
 macro_rules! impl_event_filter {
     ($($ty:ident $idx:tt),+) => {
-        impl <$($ty: Event),+> private::Sealed for ( $($ty,)+ ) {}
-        impl <$($ty: Event),+> EventFilter for ( $($ty,)+ ) {
+        impl <$($ty: StaticEvent),+> private::Sealed for ( $($ty,)+ ) {}
+        impl <$($ty: StaticEvent),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
             fn filter<'a, T: Config, Evs: Decode + 'static>(
                 events: Events<T, Evs>
@@ -260,7 +262,7 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventA(u8);
-    impl crate::Event for EventA {
+    impl StaticEvent for EventA {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "A";
     }
@@ -268,7 +270,7 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventB(bool);
-    impl crate::Event for EventB {
+    impl StaticEvent for EventB {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "B";
     }
@@ -276,7 +278,7 @@ mod test {
     // An event in our pallet that we can filter on.
     #[derive(Clone, Debug, PartialEq, Decode, Encode, TypeInfo)]
     struct EventC(u8, bool);
-    impl crate::Event for EventC {
+    impl StaticEvent for EventC {
         const PALLET: &'static str = "Test";
         const EVENT: &'static str = "C";
     }

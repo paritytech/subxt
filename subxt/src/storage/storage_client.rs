@@ -25,8 +25,10 @@ use crate::{
     },
     metadata::Metadata,
     Config,
-    StorageHasher,
 };
+
+// We use this type a bunch, so export it from here.
+pub use frame_metadata::StorageHasher;
 
 /// Query the runtime storage using [StorageClient].
 ///
@@ -441,6 +443,6 @@ fn validate_storage(pallet_name: &str, storage_name: &str, hash: [u8; 32], metad
     };
     match expected_hash != hash {
         true => Ok(()),
-        false => Err(crate::MetadataError::IncompatibleMetadata.into())
+        false => Err(crate::error::MetadataError::IncompatibleMetadata.into())
     }
 }

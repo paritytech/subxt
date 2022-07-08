@@ -11,6 +11,7 @@ use scale_info::form::PortableForm;
 /// Generate events from the provided pallet metadata.
 ///
 /// The function creates a new module named `events` under the pallet's module.
+///
 /// ```ignore
 /// pub mod PalletName {
 ///     pub mod events {
@@ -19,14 +20,14 @@ use scale_info::form::PortableForm;
 /// }
 /// ```
 ///
-/// The function generates the events as rust structs that implement the `subxt::Event` trait
+/// The function generates the events as rust structs that implement the `subxt::event::StaticEvent` trait
 /// to uniquely identify the event's identity when creating the extrinsic.
 ///
 /// ```ignore
 /// pub struct EventName {
 ///      pub event_param: type,
 /// }
-/// impl ::subxt::Event for EventName {
+/// impl ::subxt::events::StaticEvent for EventName {
 /// ...
 /// }
 /// ```
@@ -62,7 +63,7 @@ pub fn generate_events(
         quote! {
             #struct_def
 
-            impl ::subxt::Event for #event_struct {
+            impl ::subxt::events::StaticEvent for #event_struct {
                 const PALLET: &'static str = #pallet_name;
                 const EVENT: &'static str = #event_name;
             }

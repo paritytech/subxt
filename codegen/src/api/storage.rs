@@ -92,7 +92,7 @@ fn generate_storage_entry_fns(
                         StorageHasher::Identity => "Identity",
                     };
                     let hasher = format_ident!("{}", hasher);
-                    quote!( ::subxt::StorageHasher::#hasher )
+                    quote!( ::subxt::storage::StorageHasher::#hasher )
                 })
                 .collect::<Vec<_>>();
             match key_ty.type_def() {

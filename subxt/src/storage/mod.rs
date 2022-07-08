@@ -13,4 +13,5 @@ pub use storage_client::{
     StorageClient,
     StorageEntryKey,
     StorageMapKey,
+    StorageHasher,
 };

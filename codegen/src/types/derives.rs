@@ -69,9 +69,9 @@ impl FromIterator<syn::Path> for Derives {
 }
 
 impl Derives {
-    /// Add `::subxt::codec::CompactAs` to the derives.
+    /// Add `::subxt::ext::codec::CompactAs` to the derives.
     pub fn insert_codec_compact_as(&mut self) {
-        self.insert(parse_quote!(::subxt::codec::CompactAs));
+        self.insert(parse_quote!(::subxt::ext::codec::CompactAs));
     }
 
     pub fn append(&mut self, derives: impl Iterator<Item = syn::Path>) {
@@ -88,8 +88,8 @@ impl Derives {
 impl Default for Derives {
     fn default() -> Self {
         let mut derives = HashSet::new();
-        derives.insert(syn::parse_quote!(::subxt::codec::Encode));
-        derives.insert(syn::parse_quote!(::subxt::codec::Decode));
+        derives.insert(syn::parse_quote!(::subxt::ext::codec::Encode));
+        derives.insert(syn::parse_quote!(::subxt::ext::codec::Decode));
         derives.insert(syn::parse_quote!(Debug));
         Self { derives }
     }

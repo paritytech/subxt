@@ -7,9 +7,7 @@
 use crate::{
     error::BasicError,
     Config,
-    Event,
     Metadata,
-    Phase,
 };
 use codec::{
     Compact,
@@ -18,6 +16,10 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
+use super::{
+    Phase,
+    StaticEvent
+};
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -223,7 +225,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn find<Ev: Event>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
         self.iter_raw().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()
@@ -235,7 +237,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn find_first<Ev: Event>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 
@@ -243,7 +245,7 @@ impl<'a, T: Config, Evs: Decode> Events<T, Evs> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn has<Ev: Event>(&self) -> Result<bool, BasicError> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
@@ -286,7 +288,7 @@ pub struct RawEventDetails {
 
 impl RawEventDetails {
     /// Attempt to decode this [`RawEventDetails`] into a specific event.
-    pub fn as_event<E: Event>(&self) -> Result<Option<E>, CodecError> {
+    pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
             Ok(Some(E::decode(&mut &self.bytes[..])?))
         } else {
@@ -364,7 +366,6 @@ pub(crate) mod test_utils {
     use crate::{
         Config,
         SubstrateConfig,
-        Phase,
     };
     use codec::Encode;
     use frame_metadata::{
@@ -476,7 +477,6 @@ mod tests {
         },
         *,
     };
-    use crate::Phase;
     use codec::Encode;
     use scale_info::TypeInfo;
     use scale_value::Value;

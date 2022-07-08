@@ -9,7 +9,7 @@ use codec::{
 use core::fmt::Debug;
 use crate::{
     Config,
-    Encoded,
+    utils::Encoded,
 };
 use derivative::Derivative;
 

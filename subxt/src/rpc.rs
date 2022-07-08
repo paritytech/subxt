@@ -91,7 +91,7 @@ use crate::{
     error::BasicError,
     Config,
     Metadata,
-    PhantomDataSendSync,
+    utils::PhantomDataSendSync,
 };
 use codec::{
     Decode,

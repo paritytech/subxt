@@ -118,25 +118,25 @@ impl RuntimeGenerator {
             ),
             (
                 "sp_core::crypto::AccountId32",
-                parse_quote!(::subxt::sp_core::crypto::AccountId32),
+                parse_quote!(::subxt::ext::sp_core::crypto::AccountId32),
             ),
             (
                 "primitive_types::H256",
-                parse_quote!(::subxt::sp_core::H256),
+                parse_quote!(::subxt::ext::sp_core::H256),
             ),
             (
                 "sp_runtime::multiaddress::MultiAddress",
-                parse_quote!(::subxt::sp_runtime::MultiAddress),
+                parse_quote!(::subxt::ext::sp_runtime::MultiAddress),
             ),
             (
                 "frame_support::traits::misc::WrapperKeepOpaque",
-                parse_quote!(::subxt::WrapperKeepOpaque),
+                parse_quote!(::subxt::utils::WrapperKeepOpaque),
             ),
             // BTreeMap and BTreeSet impose an `Ord` constraint on their key types. This
             // can cause an issue with generated code that doesn't impl `Ord` by default.
             // Decoding them to Vec by default (KeyedVec is just an alias for Vec with
             // suitable type params) avoids these issues.
-            ("BTreeMap", parse_quote!(::subxt::KeyedVec)),
+            ("BTreeMap", parse_quote!(::subxt::utils::KeyedVec)),
             ("BTreeSet", parse_quote!(::std::vec::Vec)),
         ]
         .iter()

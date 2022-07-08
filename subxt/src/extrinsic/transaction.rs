@@ -28,11 +28,12 @@ use crate::{
         Events,
         RawEventDetails,
         EventsClient,
+        Phase,
+        StaticEvent,
     },
     rpc::SubstrateTransactionStatus,
-    PhantomDataSendSync,
+    utils::PhantomDataSendSync,
     Config,
-    Phase,
 };
 use derivative::Derivative;
 use futures::{
@@ -494,7 +495,7 @@ impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     ///
     /// This works in the same way that [`events::Events::find()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn find<Ev: crate::Event>(
+    pub fn find<Ev: StaticEvent>(
         &self,
     ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
         self.iter_raw().filter_map(|ev| {
@@ -508,7 +509,7 @@ impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     ///
     /// This works in the same way that [`events::Events::find_first()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn find_first<Ev: crate::Event>(&self) -> Result<Option<Ev>, BasicError> {
+    pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 
@@ -516,7 +517,7 @@ impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     ///
     /// This works in the same way that [`events::Events::has()`] does, with the
     /// exception that it ignores events not related to the submitted extrinsic.
-    pub fn has<Ev: crate::Event>(&self) -> Result<bool, BasicError> {
+    pub fn has<Ev: StaticEvent>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
 }
