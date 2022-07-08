@@ -86,6 +86,7 @@
 mod event_subscription;
 mod events_type;
 mod filter_events;
+mod events_client;
 
 pub use event_subscription::{
     EventSub,
@@ -102,4 +103,7 @@ pub use filter_events::{
     EventFilter,
     FilterEvents,
     FilteredEventDetails,
+};
+pub use events_client::{
+    EventsClient,
 };

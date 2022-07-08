@@ -21,6 +21,7 @@
 mod params;
 mod signer;
 mod transaction;
+mod tx_client;
 
 pub use self::{
     params::{
@@ -44,5 +45,10 @@ pub use self::{
         TransactionInBlock,
         TransactionProgress,
         TransactionStatus,
+    },
+    tx_client::{
+        SignedSubmittableExtrinsic,
+        SubmittableExtrinsic,
+        TxClient,
     }
 };

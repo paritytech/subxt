@@ -2,11 +2,14 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use super::OfflineClientT;
-use crate::Config;
 use codec::Decode;
-use crate::error::BasicError;
-use crate::metadata::MetadataError;
+use super::ConstantAddress;
+use crate::{
+    Config,
+    client::OfflineClientT,
+    error::BasicError,
+    metadata::MetadataError,
+};
 use scale_value::{ Value, scale::TypeId };
 
 /// A client for accessing constants.
@@ -39,51 +42,18 @@ impl <T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:
-        if let Some(actual_hash) = address.constant_hash {
-            let expected_hash = metadata.constant_hash(&address.pallet_name, &address.constant_name)?;
+        if let Some(actual_hash) = address.validation_hash() {
+            let expected_hash = metadata.constant_hash(address.pallet_name(), address.constant_name())?;
             if actual_hash != expected_hash {
                 return Err(MetadataError::IncompatibleMetadata.into());
             }
         }
 
         // 2. Attempt to decode the constant into the type given:
-        let pallet = metadata.pallet(&address.pallet_name)?;
-        let constant = pallet.constant(&address.constant_name)?;
+        let pallet = metadata.pallet(address.pallet_name())?;
+        let constant = pallet.constant(address.constant_name())?;
         let value = codec::Decode::decode(&mut &constant.value[..])?;
         Ok(value)
     }
 
-}
-
-/// This is returned from constant accesses in the statically generated
-/// code, and contains the information needed to find, validate and decode
-/// the constant.
-pub struct ConstantAddress<'a, ReturnTy> {
-    pallet_name: &'a str,
-    constant_name: &'a str,
-    constant_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<ReturnTy>
-}
-
-impl <'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
-    /// Create a new [`ConstantAddress`] that will be validated
-    /// against node metadata using the hash given.
-    pub fn new_with_validation(pallet_name: &'a str, constant_name: &'a str, hash: [u8; 32]) -> Self {
-        Self {
-            pallet_name,
-            constant_name,
-            constant_hash: Some(hash),
-            _marker: std::marker::PhantomData
-        }
-    }
-
-    /// Do not validate this constant prior to accessing it.
-    pub fn unvalidated(self) -> Self {
-        Self {
-            pallet_name: self.pallet_name,
-            constant_name: self.constant_name,
-            constant_hash: None,
-            _marker: self._marker
-        }
-    }
 }

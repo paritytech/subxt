@@ -9,8 +9,8 @@ use crate::{
     Config,
     client::{
         OnlineClientT,
-        events::EventsClient,
-    }
+    },
+    events::EventsClient,
 };
 use codec::Decode;
 use derivative::Derivative;

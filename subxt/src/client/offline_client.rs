@@ -6,12 +6,10 @@ use crate::{
     Config,
     Metadata,
     rpc::RuntimeVersion,
-};
-use super::{
-    tx::TxClient,
+    constants::ConstantsClient,
+    extrinsic::TxClient,
     events::EventsClient,
     storage::StorageClient,
-    constants::ConstantsClient,
 };
 use std::sync::Arc;
 use derivative::Derivative;

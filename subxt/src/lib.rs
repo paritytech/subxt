@@ -225,8 +225,10 @@ pub mod config;
 pub mod error;
 pub mod events;
 pub mod extrinsic;
+pub mod constants;
 pub mod metadata;
 pub mod rpc;
+pub mod storage;
 
 pub use crate::{
     client::{
