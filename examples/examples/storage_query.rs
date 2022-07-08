@@ -115,7 +115,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("\nExample 4\nQuery key: 0x{}", hex::encode(&query_key));
 
         let keys = rpc
-            .storage_keys_paged(Some(query_key), 10, None, None)
+            .storage_keys_paged(query_key, 10, None, None)
             .await?;
 
         println!("Obtained keys:");
@@ -127,7 +127,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn
                 // - metadata in json format
-                let value = u64::decode(&mut &storage_data.0[..])?;
+                let value = u64::decode(&mut &storage_data[..])?;
                 println!("  Value: {}", value);
             }
         }
