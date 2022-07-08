@@ -699,8 +699,8 @@ fn generate_bitvec() {
                 use super::root;
                 #[derive(::subxt::ext::codec::Decode, ::subxt::ext::codec::Encode, Debug)]
                 pub struct S {
-                    pub lsb: ::subxt::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
-                    pub msb: ::subxt::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
+                    pub lsb: ::subxt::ext::bitvec::vec::BitVec<::core::primitive::u8, root::bitvec::order::Lsb0>,
+                    pub msb: ::subxt::ext::bitvec::vec::BitVec<::core::primitive::u16, root::bitvec::order::Msb0>,
                 }
             }
         }

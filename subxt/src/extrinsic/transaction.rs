@@ -8,8 +8,6 @@ use std::task::Poll;
 
 use codec::Decode;
 use sp_runtime::traits::Hash;
-pub use sp_runtime::traits::SignedExtension;
-
 use crate::{
     client::{
         OnlineClientT,
@@ -44,6 +42,8 @@ use jsonrpsee::core::{
     client::Subscription as RpcSubscription,
     Error as RpcError,
 };
+
+pub use sp_runtime::traits::SignedExtension;
 
 /// This struct represents a subscription to the progress of some transaction, and is
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].

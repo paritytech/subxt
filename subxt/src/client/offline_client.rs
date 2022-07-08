@@ -77,23 +77,56 @@ impl <T: Config> OfflineClient<T> {
             })
         }
     }
+
+    /// Return the genesis hash.
+    pub fn genesis_hash(&self) -> T::Hash {
+        self.inner.genesis_hash
+    }
+
+    /// Return the runtime version.
+    pub fn runtime_version(&self) -> RuntimeVersion {
+        self.inner.runtime_version.clone()
+    }
+
+    /// Return the [`Metadata`] used in this client.
+    pub fn metadata(&self) -> Metadata {
+        self.inner.metadata.clone()
+    }
+
+    // Just a copy of the most important trait methods so that people
+    // don't need to import the trait for most things:
+
+    /// Work with transactions.
+    pub fn tx(&self) -> TxClient<T, Self> {
+        <Self as OfflineClientT<T>>::tx(self)
+    }
+
+    /// Work with events.
+    pub fn events(&self) -> EventsClient<T, Self> {
+        <Self as OfflineClientT<T>>::events(self)
+    }
+
+    /// Work with storage.
+    pub fn storage(&self) -> StorageClient<T, Self> {
+        <Self as OfflineClientT<T>>::storage(self)
+    }
+
+    /// Access constants.
+    pub fn constants(&self) -> ConstantsClient<T, Self> {
+        <Self as OfflineClientT<T>>::constants(self)
+    }
 }
 
 impl <T: Config> OfflineClientT<T> for OfflineClient<T> {
-        /// Return the genesis hash.
-        fn genesis_hash(&self) -> T::Hash {
-            self.inner.genesis_hash
-        }
-
-        /// Return the runtime version.
-        fn runtime_version(&self) -> RuntimeVersion {
-            self.inner.runtime_version.clone()
-        }
-
-        /// Return the [`Metadata`] used in this client.
-        fn metadata(&self) -> Metadata {
-            self.inner.metadata.clone()
-        }
+    fn genesis_hash(&self) -> T::Hash {
+        self.genesis_hash()
+    }
+    fn runtime_version(&self) -> RuntimeVersion {
+        self.runtime_version()
+    }
+    fn metadata(&self) -> Metadata {
+        self.metadata()
+    }
 }
 
 // For ergonomics; cloning a client is deliberately fairly cheap (via Arc),

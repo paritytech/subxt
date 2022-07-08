@@ -110,11 +110,11 @@ impl RuntimeGenerator {
         let mut type_substitutes = [
             (
                 "bitvec::order::Lsb0",
-                parse_quote!(::subxt::bitvec::order::Lsb0),
+                parse_quote!(::subxt::ext::bitvec::order::Lsb0),
             ),
             (
                 "bitvec::order::Msb0",
-                parse_quote!(::subxt::bitvec::order::Msb0),
+                parse_quote!(::subxt::ext::bitvec::order::Msb0),
             ),
             (
                 "sp_core::crypto::AccountId32",

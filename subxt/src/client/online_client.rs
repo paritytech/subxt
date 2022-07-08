@@ -19,6 +19,10 @@ use crate::{
         BasicError,
     },
     Metadata,
+    constants::ConstantsClient,
+    extrinsic::TxClient,
+    events::EventsClient,
+    storage::StorageClient,
 };
 use derivative::Derivative;
 
@@ -111,22 +115,63 @@ impl <T: Config> OnlineClient<T> {
     pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {
         ClientRuntimeUpdater(self.clone())
     }
-}
 
-impl <T: Config> OfflineClientT<T> for OnlineClient<T> {
-    fn metadata(&self) -> Metadata {
+    /// Return the [`Metadata`] used in this client.
+    pub fn metadata(&self) -> Metadata {
         let inner = self.inner.read();
         inner.metadata.clone()
     }
 
-    fn genesis_hash(&self) -> T::Hash {
+    /// Return the genesis hash.
+    pub fn genesis_hash(&self) -> T::Hash {
         let inner = self.inner.read();
         inner.genesis_hash
     }
 
-    fn runtime_version(&self) -> RuntimeVersion {
+    /// Return the runtime version.
+    pub fn runtime_version(&self) -> RuntimeVersion {
         let inner = self.inner.read();
         inner.runtime_version.clone()
+    }
+
+    /// Return an RPC client to make raw requests with.
+    pub fn rpc(&self) -> &Rpc<T> {
+        &self.rpc
+    }
+
+    // Just a copy of the most important trait methods so that people
+    // don't need to import the trait for most things:
+
+    /// Work with transactions.
+    pub fn tx(&self) -> TxClient<T, Self> {
+        <Self as OfflineClientT<T>>::tx(self)
+    }
+
+    /// Work with events.
+    pub fn events(&self) -> EventsClient<T, Self> {
+        <Self as OfflineClientT<T>>::events(self)
+    }
+
+    /// Work with storage.
+    pub fn storage(&self) -> StorageClient<T, Self> {
+        <Self as OfflineClientT<T>>::storage(self)
+    }
+
+    /// Access constants.
+    pub fn constants(&self) -> ConstantsClient<T, Self> {
+        <Self as OfflineClientT<T>>::constants(self)
+    }
+}
+
+impl <T: Config> OfflineClientT<T> for OnlineClient<T> {
+    fn metadata(&self) -> Metadata {
+        self.metadata()
+    }
+    fn genesis_hash(&self) -> T::Hash {
+        self.genesis_hash()
+    }
+    fn runtime_version(&self) -> RuntimeVersion {
+        self.runtime_version()
     }
 }
 
