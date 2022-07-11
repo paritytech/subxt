@@ -13,24 +13,23 @@ use std::{
     borrow::Cow,
 };
 
-
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
 
 /// This is returned from storage accesses in the statically generated
 /// code, and contains the information needed to find, validate and decode
 /// the storage entry.
-pub struct StorageAddress <'a, ReturnTy> {
+pub struct StorageAddress <'a, ReturnTy, Iterable, Defaultable> {
     pallet_name: Cow<'a, str>,
     entry_name: Cow<'a, str>,
     // How to access the specific value at that storage address.
     storage_entry_key: StorageEntryKey,
     // Hash provided from static code for validation.
     validation_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<ReturnTy>
+    _marker: std::marker::PhantomData<(ReturnTy, Iterable, Defaultable)>
 }
 
-impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
+impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable, Defaultable> {
     /// Create a new [`StorageAddress`] that will be validated
     /// against node metadata using the hash given.
     pub fn new_with_validation(
@@ -91,7 +90,7 @@ impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
     }
 
     /// Take a storage address and return an owned storage address.
-    pub fn to_owned(self) -> StorageAddress<'static, ReturnTy> {
+    pub fn to_owned(self) -> StorageAddress<'static, ReturnTy, Iterable, Defaultable> {
         StorageAddress {
             pallet_name: Cow::Owned(self.pallet_name.into_owned()),
             entry_name: Cow::Owned(self.entry_name.into_owned()),
@@ -117,8 +116,8 @@ impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
     }
 }
 
-impl <'a, R> From<&StorageAddress<'a, R>> for StorageKey {
-    fn from(address: &StorageAddress<'a, R>) -> Self {
+impl <'a, ReturnTy, Iterable, Defaultable> From<&StorageAddress<'a, ReturnTy, Iterable, Defaultable>> for StorageKey {
+    fn from(address: &StorageAddress<'a, ReturnTy, Iterable, Defaultable>) -> Self {
         StorageKey(address.to_bytes())
     }
 }
@@ -187,3 +186,11 @@ impl StorageMapKey {
         }
     }
 }
+
+/// If a [`StorageAddress`] is annotated with this, we can iterate over it.
+pub struct AddressIsIterable;
+
+
+/// If a [`StorageAddress`] is annotated with this, it has a default value
+/// that we can use if it's not been set.
+pub struct AddressHasDefaultValue;

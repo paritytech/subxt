@@ -21,5 +21,7 @@ pub mod address {
         StorageEntryKey,
         StorageMapKey,
         StorageHasher,
+        AddressHasDefaultValue,
+        AddressIsIterable,
     };
 }

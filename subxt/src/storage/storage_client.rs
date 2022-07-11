@@ -26,7 +26,11 @@ use crate::{
     Config,
 };
 use derivative::Derivative;
-use super::storage_address::StorageAddress;
+use super::storage_address::{
+    StorageAddress,
+    AddressHasDefaultValue,
+    AddressIsIterable,
+};
 
 /// Query the runtime storage using [StorageClient].
 ///
@@ -144,9 +148,9 @@ where
     }
 
     /// Fetch a decoded value from storage at a given address and optional block hash.
-    pub fn fetch<'a, ReturnTy: Decode>(
+    pub fn fetch<'a, ReturnTy: Decode, Iterable, Defaultable>(
         &self,
-        address: &'a StorageAddress<'_, ReturnTy>,
+        address: &'a StorageAddress<'_, ReturnTy, Iterable, Defaultable>,
         hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Option<ReturnTy>, BasicError>> + 'a {
         let client = self.client.clone();
@@ -173,9 +177,13 @@ where
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    pub fn fetch_or_default<'a, ReturnTy: Decode>(
+    ///
+    /// Note: The [`StorageAddress`] provided must be tagged with [`AddressHasDefaultValue`]
+    /// in order to use this function. Statically generated storage addresses will be
+    /// tagged appropriately.
+    pub fn fetch_or_default<'a, ReturnTy: Decode, Iterable>(
         &self,
-        address: &'a StorageAddress<'_, ReturnTy>,
+        address: &'a StorageAddress<'_, ReturnTy, Iterable, AddressHasDefaultValue>,
         hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<ReturnTy, BasicError>> + 'a {
         let client = self.client.clone();
@@ -219,12 +227,16 @@ where
     }
 
     /// Returns an iterator of key value pairs.
-    pub fn iter<'a, ReturnTy: Decode + 'static>(
+    ///
+    /// Note: The [`StorageAddress`] provided must be tagged with [`AddressIsIterable`]
+    /// in order to use this function. Statically generated storage addresses will be
+    /// tagged appropriately.
+    pub fn iter<'a, ReturnTy: Decode + 'static, Defaultable: 'static>(
         &self,
-        address: StorageAddress<'a, ReturnTy>,
+        address: StorageAddress<'a, ReturnTy, AddressIsIterable, Defaultable>,
         page_size: u32,
         hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy>, BasicError>> + 'a {
+    ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy, Defaultable>, BasicError>> + 'a {
         let client = self.client.clone();
         async move {
             // Metadata validation checks whether the static address given
@@ -273,16 +285,16 @@ where
 }
 
 /// Iterates over key value pairs in a map.
-pub struct KeyIter<T: Config, Client, ReturnTy: Decode> {
+pub struct KeyIter<T: Config, Client, ReturnTy: Decode, Defaultable> {
     client: StorageClient<T, Client>,
-    address: StorageAddress<'static, ReturnTy>,
+    address: StorageAddress<'static, ReturnTy, AddressIsIterable, Defaultable>,
     count: u32,
     block_hash: T::Hash,
     start_key: Option<StorageKey>,
     buffer: Vec<(StorageKey, StorageData)>,
 }
 
-impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode> KeyIter<T, Client, ReturnTy> {
+impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode, Defaultable> KeyIter<T, Client, ReturnTy, Defaultable> {
     /// Returns the next key value pair from a map.
     pub async fn next(&mut self) -> Result<Option<(StorageKey, ReturnTy)>, BasicError> {
         loop {

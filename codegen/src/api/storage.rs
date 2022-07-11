@@ -71,7 +71,7 @@ fn generate_storage_entry_fns(
 ) -> TokenStream2 {
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => {
-            (vec![], quote!(::subxt::storage::StorageEntryKey::Plain))
+            (vec![], quote!(::subxt::storage::address::StorageEntryKey::Plain))
         }
         StorageEntryType::Map {
             ref key,
@@ -92,7 +92,7 @@ fn generate_storage_entry_fns(
                         StorageHasher::Identity => "Identity",
                     };
                     let hasher = format_ident!("{}", hasher);
-                    quote!( ::subxt::storage::StorageHasher::#hasher )
+                    quote!( ::subxt::storage::address::StorageHasher::#hasher )
                 })
                 .collect::<Vec<_>>();
             match key_ty.type_def() {
@@ -116,10 +116,10 @@ fn generate_storage_entry_fns(
                             .into_iter()
                             .zip(&fields)
                             .map(|(hasher, (field_name, _))| {
-                                quote!( ::subxt::storage::StorageMapKey::new(#field_name, #hasher) )
+                                quote!( ::subxt::storage::address::StorageMapKey::new(#field_name, #hasher) )
                             });
                         quote! {
-                            ::subxt::storage::StorageEntryKey::Map(
+                            ::subxt::storage::address::StorageEntryKey::Map(
                                 vec![ #( #keys ),* ]
                             )
                         }
@@ -132,8 +132,8 @@ fn generate_storage_entry_fns(
                             quote!( #field_name )
                         });
                         quote! {
-                            ::subxt::storage::StorageEntryKey::Map(
-                                vec![ ::subxt::storage::StorageMapKey::new(&(#( #items ),*), #hasher) ]
+                            ::subxt::storage::address::StorageEntryKey::Map(
+                                vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items ),*), #hasher) ]
                             )
                         }
                     } else {
@@ -155,8 +155,8 @@ fn generate_storage_entry_fns(
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                        ::subxt::storage::StorageEntryKey::Map(
-                            vec![ ::subxt::storage::StorageMapKey::new(_0, #hasher) ]
+                        ::subxt::storage::address::StorageEntryKey::Map(
+                            vec![ ::subxt::storage::address::StorageMapKey::new(_0, #hasher) ]
                         )
                     };
                     (fields, key_impl)
@@ -183,14 +183,6 @@ fn generate_storage_entry_fns(
         StorageEntryType::Map { ref value, .. } => value,
     };
     let storage_entry_value_ty = type_gen.resolve_type_path(storage_entry_ty.id(), &[]);
-    let return_ty = match storage_entry.modifier {
-        StorageEntryModifier::Default => {
-            quote!( #storage_entry_value_ty )
-        }
-        StorageEntryModifier::Optional => {
-            quote!( ::core::option::Option<#storage_entry_value_ty> )
-        }
-    };
 
     let docs = &storage_entry.docs;
     let docs_token = quote! { #( #[doc = #docs ] )* };
@@ -206,19 +198,40 @@ fn generate_storage_entry_fns(
         quote!( #field_name: & #field_ty )
     });
 
+    let is_map_type = matches!(storage_entry.ty, StorageEntryType::Map { .. });
+
+    // Is the entry iterable?
+    let iterable_type = if is_map_type {
+        quote!(::subxt::storage::address::AddressIsIterable)
+    } else {
+        quote!(())
+    };
+
+    let has_default_value = match storage_entry.modifier {
+        StorageEntryModifier::Default => true,
+        StorageEntryModifier::Optional => false,
+    };
+
+    // Does the entry have a default value?
+    let defaultable_type = if has_default_value {
+        quote!(::subxt::storage::address::AddressHasDefaultValue)
+    } else {
+        quote!(())
+    };
+
     // If the item is a map, we want a way to access the root entry to do things like iterate over it,
     // so expose a function to create this entry, too:
-    let root_entry_fn = if matches!(storage_entry.ty, StorageEntryType::Map { .. }) {
+    let root_entry_fn = if is_map_type {
         let fn_name_root = format_ident!("{}_root", fn_name);
         quote! (
             #docs_token
             pub fn #fn_name_root(
                 &self,
-            ) -> ::subxt::storage::StorageAddress::<'static, #return_ty> {
-                ::subxt::storage::StorageAddress::new_with_validation(
+            ) -> ::subxt::storage::address::StorageAddress::<'static, #storage_entry_value_ty, #iterable_type, #defaultable_type> {
+                ::subxt::storage::address::StorageAddress::new_with_validation(
                     #pallet_name,
                     #storage_name,
-                    ::subxt::storage::StorageEntryKey::Plain,
+                    ::subxt::storage::address::StorageEntryKey::Plain,
                     [#(#storage_hash,)*]
                 )
             }
@@ -233,8 +246,8 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-        ) -> ::subxt::storage::StorageAddress::<'static, #return_ty> {
-            ::subxt::storage::StorageAddress::new_with_validation(
+        ) -> ::subxt::storage::address::StorageAddress::<'static, #storage_entry_value_ty, #iterable_type, #defaultable_type> {
+            ::subxt::storage::address::StorageAddress::new_with_validation(
                 #pallet_name,
                 #storage_name,
                 #key_impl,
