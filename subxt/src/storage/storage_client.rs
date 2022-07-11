@@ -4,7 +4,6 @@
 
 use codec::{
     Decode,
-    Encode,
 };
 use sp_core::storage::{
     StorageData,
@@ -13,7 +12,6 @@ use sp_core::storage::{
 pub use sp_runtime::traits::SignedExtension;
 use std::{
     marker::PhantomData,
-    borrow::Cow,
     future::Future,
 };
 use crate::{
@@ -28,9 +26,7 @@ use crate::{
     Config,
 };
 use derivative::Derivative;
-
-// We use this type a bunch, so export it from here.
-pub use frame_metadata::StorageHasher;
+use super::storage_address::StorageAddress;
 
 /// Query the runtime storage using [StorageClient].
 ///
@@ -159,10 +155,10 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            if let Some(validation_hash) = address.storage_hash {
+            if let Some(validation_hash) = address.validation_hash() {
                 validate_storage(
-                    &*address.pallet_name,
-                    &*address.storage_name,
+                    address.pallet_name(),
+                    address.entry_name(),
                     validation_hash,
                     &client.metadata()
                 )?;
@@ -184,8 +180,8 @@ where
     ) -> impl Future<Output = Result<ReturnTy, BasicError>> + 'a {
         let client = self.client.clone();
         async move {
-            let pallet_name = &*address.pallet_name;
-            let storage_name = &*address.storage_name;
+            let pallet_name = address.pallet_name();
+            let storage_name = address.entry_name();
             // Metadata validation happens via .fetch():
             if let Some(data) = client.storage().fetch(address, hash).await? {
                 Ok(data)
@@ -235,10 +231,10 @@ where
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            if let Some(validation_hash) = address.storage_hash {
+            if let Some(validation_hash) = address.validation_hash() {
                 validate_storage(
-                    &*address.pallet_name,
-                    &*address.storage_name,
+                    address.pallet_name(),
+                    address.entry_name(),
                     validation_hash,
                     &client.metadata()
                 )?;
@@ -257,152 +253,21 @@ where
                     .expect("didn't pass a block number; qed")
             };
 
+            // Strip any keys off; we want the top level entry only.
+            let root_addr = {
+                let mut a = address.to_owned();
+                a.root();
+                a
+            };
+
             Ok(KeyIter {
                 client: client.storage(),
-                address: address.to_owned(),
-                hash,
+                address: root_addr,
+                block_hash: hash,
                 count: page_size,
                 start_key: None,
                 buffer: Default::default(),
             })
-        }
-    }
-}
-
-/// This is returned from storage accesses in the statically generated
-/// code, and contains the information needed to find, validate and decode
-/// the storage entry.
-pub struct StorageAddress <'a, ReturnTy> {
-    pallet_name: Cow<'a, str>,
-    storage_name: Cow<'a, str>,
-    // How to access the specific value at that storage address.
-    storage_entry_key: Cow<'a, StorageEntryKey>,
-    // Hash provided from static code for validation.
-    storage_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<ReturnTy>
-}
-
-impl <'a, ReturnTy> StorageAddress<'a, ReturnTy> {
-    /// Create a new [`StorageAddress`] that will be validated
-    /// against node metadata using the hash given.
-    pub fn new_with_validation(
-        pallet_name: impl Into<Cow<'a, str>>,
-        storage_name: impl Into<Cow<'a, str>>,
-        storage_entry_key: impl Into<Cow<'a, StorageEntryKey>>,
-        hash: [u8; 32]
-    ) -> Self {
-        Self {
-            pallet_name: pallet_name.into(),
-            storage_name: storage_name.into(),
-            storage_entry_key: storage_entry_key.into(),
-            storage_hash: Some(hash),
-            _marker: std::marker::PhantomData
-        }
-    }
-
-    /// Do not validate this storage prior to accessing it.
-    pub fn unvalidated(self) -> Self {
-        Self {
-            pallet_name: self.pallet_name,
-            storage_name: self.storage_name,
-            storage_entry_key: self.storage_entry_key,
-            storage_hash: None,
-            _marker: self._marker
-        }
-    }
-
-    /// Convert this address into bytes that we can pass to a node to look up
-    /// the associated value at this address.
-    pub fn to_bytes(&self) -> Vec<u8> {
-        // First encode the pallet/name part:
-        let mut bytes = sp_core::twox_128(self.pallet_name.as_bytes()).to_vec();
-        bytes.extend(&sp_core::twox_128(self.storage_name.as_bytes())[..]);
-
-        // Then encode any additional params to dig further into the entry:
-        self.storage_entry_key.to_bytes(&mut bytes);
-
-        bytes
-    }
-
-    /// Take a storage address and return an owned storage address.
-    pub fn to_owned(self) -> StorageAddress<'static, ReturnTy> {
-        StorageAddress {
-            pallet_name: Cow::Owned(self.pallet_name.into_owned()),
-            storage_name: Cow::Owned(self.storage_name.into_owned()),
-            storage_entry_key: Cow::Owned(self.storage_entry_key.into_owned()),
-            storage_hash: self.storage_hash,
-            _marker: self._marker
-        }
-    }
-}
-
-impl <'a, R> From<&StorageAddress<'a, R>> for StorageKey {
-    fn from(address: &StorageAddress<'a, R>) -> Self {
-        StorageKey(address.to_bytes())
-    }
-}
-
-/// Storage key.
-#[derive(Clone)]
-pub enum StorageEntryKey {
-    /// Plain key.
-    Plain,
-    /// Map key(s).
-    Map(Vec<StorageMapKey>),
-}
-
-impl StorageEntryKey {
-    /// Convert this [`StorageEntryKey`] into bytes and append them to some existing bytes.
-    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
-        if let StorageEntryKey::Map(map) = self {
-            for entry in map {
-                entry.to_bytes(bytes);
-            }
-        }
-    }
-}
-
-impl <'a> From<StorageEntryKey> for Cow<'a, StorageEntryKey> {
-    fn from(k: StorageEntryKey) -> Self {
-        Cow::Owned(k)
-    }
-}
-
-/// Storage key for a Map.
-#[derive(Clone)]
-pub struct StorageMapKey {
-    value: Vec<u8>,
-    hasher: StorageHasher,
-}
-
-impl StorageMapKey {
-    /// Create a new [`StorageMapKey`] with the encoded data and the hasher.
-    pub fn new<T: Encode>(value: &T, hasher: StorageHasher) -> Self {
-        Self {
-            value: value.encode(),
-            hasher,
-        }
-    }
-
-    /// Convert this [`StorageMapKey`] into bytes and append them to some existing bytes.
-    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
-        match &self.hasher {
-            StorageHasher::Identity => bytes.extend(&self.value),
-            StorageHasher::Blake2_128 => bytes.extend(sp_core::blake2_128(bytes)),
-            StorageHasher::Blake2_128Concat => {
-                // adapted from substrate Blake2_128Concat::hash since StorageHasher is not public
-                let v = sp_core::blake2_128(&self.value);
-                let v = v.iter().chain(&self.value).cloned();
-                bytes.extend(v);
-            }
-            StorageHasher::Blake2_256 => bytes.extend(sp_core::blake2_256(&self.value)),
-            StorageHasher::Twox128 => bytes.extend(sp_core::twox_128(&self.value)),
-            StorageHasher::Twox256 => bytes.extend(sp_core::twox_256(&self.value)),
-            StorageHasher::Twox64Concat => {
-                let v = sp_core::twox_64(&self.value);
-                let v = v.iter().chain(&self.value).cloned();
-                bytes.extend(v);
-            }
         }
     }
 }
@@ -412,7 +277,7 @@ pub struct KeyIter<T: Config, Client, ReturnTy: Decode> {
     client: StorageClient<T, Client>,
     address: StorageAddress<'static, ReturnTy>,
     count: u32,
-    hash: T::Hash,
+    block_hash: T::Hash,
     start_key: Option<StorageKey>,
     buffer: Vec<(StorageKey, StorageData)>,
 }
@@ -426,7 +291,7 @@ impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode> KeyIter<T, Clien
             } else {
                 let keys = self
                     .client
-                    .fetch_keys(&self.address, self.count, self.start_key.take(), Some(self.hash))
+                    .fetch_keys(&self.address, self.count, self.start_key.take(), Some(self.block_hash))
                     .await?;
 
                 if keys.is_empty() {
@@ -439,7 +304,7 @@ impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode> KeyIter<T, Clien
                     .client
                     .client
                     .rpc()
-                    .query_storage_at(&keys, Some(self.hash))
+                    .query_storage_at(&keys, Some(self.block_hash))
                     .await?;
                 for change_set in change_sets {
                     for (k, v) in change_set.changes {

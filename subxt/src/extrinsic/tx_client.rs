@@ -106,7 +106,7 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
         };
 
         tracing::debug!(
-            "additional_and_extra_params: {:?}",
+            "tx additional_and_extra_params: {:?}",
             additional_and_extra_params
         );
 
@@ -126,7 +126,7 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
             }
         };
 
-        tracing::info!("xt signature: {}", hex::encode(signature.encode()));
+        tracing::debug!("tx signature: {}", hex::encode(signature.encode()));
 
         // 5. Encode extrinsic, now that we have the parts we need. This is compatible
         //    with the Encode impl for UncheckedExtrinsic (protocol version 4).

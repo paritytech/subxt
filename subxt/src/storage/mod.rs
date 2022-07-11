@@ -5,13 +5,21 @@
 //! Types associated with accessing and working with storage items.
 
 mod storage_client;
+mod storage_address;
 
 pub use storage_client::{
+    StorageClient,
     KeyIter,
     SignedExtension,
-    StorageAddress,
-    StorageClient,
-    StorageEntryKey,
-    StorageMapKey,
-    StorageHasher,
 };
+
+/// Types representing an address which describes where a storage
+/// entry lives and how to properly decode it.
+pub mod address {
+    pub use super::storage_address::{
+        StorageAddress,
+        StorageEntryKey,
+        StorageMapKey,
+        StorageHasher,
+    };
+}
