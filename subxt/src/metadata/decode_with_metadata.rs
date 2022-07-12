@@ -8,8 +8,11 @@ use super::{
 use crate::{
     error::BasicError,
 };
+use codec::Decode;
 
+/// This trait is implemented for types which can be decoded with the help of metadata.
 pub trait DecodeWithMetadata: Sized {
+    /// The type that we'll get back from decoding.
     type Target;
     /// Given some metadata and a type ID, attempt to SCALE decode the provided bytes into `Self`.
     fn decode_with_metadata(bytes: &mut &[u8], type_id: u32, metadata: &Metadata) -> Result<Self::Target, BasicError>;
@@ -24,3 +27,13 @@ impl DecodeWithMetadata for scale_value::Value<scale_value::scale::TypeId> {
     }
 }
 
+/// Any type implementing [`Decode`] can also be decoded with the help of metadata.
+pub struct DecodeStaticType<T>(std::marker::PhantomData<T>);
+
+impl <T: Decode> DecodeWithMetadata for DecodeStaticType<T> {
+    type Target = T;
+
+    fn decode_with_metadata(bytes: &mut &[u8], _type_id: u32, _metadata: &Metadata) -> Result<Self::Target, BasicError> {
+        T::decode(bytes).map_err(|e| e.into())
+    }
+}

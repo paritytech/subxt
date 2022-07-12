@@ -71,7 +71,7 @@ fn generate_storage_entry_fns(
 ) -> TokenStream2 {
     let (fields, key_impl) = match storage_entry.ty {
         StorageEntryType::Plain(_) => {
-            (vec![], quote!(::subxt::storage::address::StorageEntryKey::Plain))
+            (vec![], quote!(vec![]))
         }
         StorageEntryType::Map {
             ref key,
@@ -119,9 +119,7 @@ fn generate_storage_entry_fns(
                                 quote!( ::subxt::storage::address::StorageMapKey::new(#field_name, #hasher) )
                             });
                         quote! {
-                            ::subxt::storage::address::StorageEntryKey::Map(
-                                vec![ #( #keys ),* ]
-                            )
+                            vec![ #( #keys ),* ]
                         }
                     } else if hashers.len() == 1 {
                         // If there is one hasher, then however many fields we have, we want to hash a
@@ -132,9 +130,7 @@ fn generate_storage_entry_fns(
                             quote!( #field_name )
                         });
                         quote! {
-                            ::subxt::storage::address::StorageEntryKey::Map(
-                                vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items ),*), #hasher) ]
-                            )
+                            vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items ),*), #hasher) ]
                         }
                     } else {
                         // If we hit this condition, we don't know how to handle the number of hashes vs fields
@@ -155,9 +151,7 @@ fn generate_storage_entry_fns(
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                        ::subxt::storage::address::StorageEntryKey::Map(
-                            vec![ ::subxt::storage::address::StorageMapKey::new(_0, #hasher) ]
-                        )
+                        vec![ ::subxt::storage::address::StorageMapKey::new(_0, #hasher) ]
                     };
                     (fields, key_impl)
                 }
@@ -231,7 +225,7 @@ fn generate_storage_entry_fns(
                 ::subxt::storage::address::StorageAddress::new_with_validation(
                     #pallet_name,
                     #storage_name,
-                    ::subxt::storage::address::StorageEntryKey::Plain,
+                    Vec::new(),
                     [#(#storage_hash,)*]
                 )
             }

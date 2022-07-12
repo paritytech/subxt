@@ -337,7 +337,7 @@ fn validate_storage(pallet_name: &str, storage_name: &str, hash: [u8; 32], metad
         Ok(hash) => hash,
         Err(e) => return Err(e.into())
     };
-    match expected_hash != hash {
+    match expected_hash == hash {
         true => Ok(()),
         false => Err(crate::error::MetadataError::IncompatibleMetadata.into())
     }

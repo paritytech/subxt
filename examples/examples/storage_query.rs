@@ -2,21 +2,22 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
 use codec::Decode;
 use subxt::{
-    rpc::Rpc,
     storage::{
-        StorageClient,
-        StorageEntryKey,
-        StorageMapKey,
+        StorageKey,
+        address::{
+            StorageMapKey,
+            StorageHasher,
+        }
     },
     OnlineClient,
     PolkadotConfig,
@@ -105,17 +106,17 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // ```
         // while `XcmVersion` is `u32`.
         // Pass `2` as `XcmVersion` and concatenate the key to the prefix.
-        StorageEntryKey::Map(vec![StorageMapKey::new(
+        StorageMapKey::new(
             &2u32,
-            ::subxt::storage::StorageHasher::Twox64Concat,
-        )]).to_bytes(&mut query_key);
+            StorageHasher::Twox64Concat,
+        ).to_bytes(&mut query_key);
 
         // The final query key is:
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
         println!("\nExample 4\nQuery key: 0x{}", hex::encode(&query_key));
 
         let keys = rpc
-            .storage_keys_paged(query_key, 10, None, None)
+            .storage_keys_paged(StorageKey(query_key), 10, None, None)
             .await?;
 
         println!("Obtained keys:");

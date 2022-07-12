@@ -28,3 +28,8 @@ pub use encode_with_metadata::{
     EncodeDynamicCall,
     EncodeWithMetadata,
 };
+
+pub use decode_with_metadata::{
+    DecodeWithMetadata,
+    DecodeStaticType,
+};

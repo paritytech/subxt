@@ -23,7 +23,7 @@ pub struct StorageAddress <'a, ReturnTy, Iterable, Defaultable> {
     pallet_name: Cow<'a, str>,
     entry_name: Cow<'a, str>,
     // How to access the specific value at that storage address.
-    storage_entry_key: StorageEntryKey,
+    storage_entry_key: Vec<StorageMapKey>,
     // Hash provided from static code for validation.
     validation_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<(ReturnTy, Iterable, Defaultable)>
@@ -35,7 +35,7 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
     pub fn new_with_validation(
         pallet_name: impl Into<Cow<'a, str>>,
         storage_name: impl Into<Cow<'a, str>>,
-        storage_entry_key: StorageEntryKey,
+        storage_entry_key: Vec<StorageMapKey>,
         hash: [u8; 32]
     ) -> Self {
         Self {
@@ -61,19 +61,12 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
     /// Strip any map keys from a storage entry. If the storage entry is pointing at
     /// a plain, non-map storage value, then this will have no effect.
     pub fn root(&mut self) {
-        self.storage_entry_key = StorageEntryKey::Plain.into();
+        self.storage_entry_key.clear();
     }
 
     /// Append a map key to the existing storage address.
     pub fn append_map_key(&mut self, key: StorageMapKey) {
-        match &mut self.storage_entry_key {
-            StorageEntryKey::Plain => {
-                self.storage_entry_key = StorageEntryKey::Map(vec![key]);
-            },
-            StorageEntryKey::Map(keys) => {
-                keys.push(key);
-            }
-        }
+        self.storage_entry_key.push(key);
     }
 
     /// Convert this address into bytes that we can pass to a node to look up
@@ -84,7 +77,9 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
         bytes.extend(&sp_core::twox_128(self.entry_name.as_bytes())[..]);
 
         // Then encode any additional params to dig further into the entry:
-        self.storage_entry_key.to_bytes(&mut bytes);
+        for entry in &self.storage_entry_key {
+            entry.to_bytes(&mut bytes);
+        }
 
         bytes
     }
@@ -119,32 +114,6 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
 impl <'a, ReturnTy, Iterable, Defaultable> From<&StorageAddress<'a, ReturnTy, Iterable, Defaultable>> for StorageKey {
     fn from(address: &StorageAddress<'a, ReturnTy, Iterable, Defaultable>) -> Self {
         StorageKey(address.to_bytes())
-    }
-}
-
-/// Storage key.
-#[derive(Clone)]
-pub enum StorageEntryKey {
-    /// Plain key.
-    Plain,
-    /// Map key(s).
-    Map(Vec<StorageMapKey>),
-}
-
-impl StorageEntryKey {
-    /// Convert this [`StorageEntryKey`] into bytes and append them to some existing bytes.
-    pub fn to_bytes(&self, bytes: &mut Vec<u8>) {
-        if let StorageEntryKey::Map(map) = self {
-            for entry in map {
-                entry.to_bytes(bytes);
-            }
-        }
-    }
-}
-
-impl <'a> From<StorageEntryKey> for Cow<'a, StorageEntryKey> {
-    fn from(k: StorageEntryKey) -> Self {
-        Cow::Owned(k)
     }
 }
 

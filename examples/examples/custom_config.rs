@@ -2,13 +2,8 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
-//!
-//! E.g.
-//! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
-//! polkadot --dev --tmp
-//! ```
+//! This example should compile but should aos fail to work, since we've modified the
+//! config to not align with a Polkadot node.
 
 use sp_keyring::AccountKeyring;
 use subxt::{
@@ -45,7 +40,7 @@ impl Config for MyConfig {
     type Header = <SubstrateConfig as Config>::Header;
     type Signature = <SubstrateConfig as Config>::Signature;
     type Extrinsic = <SubstrateConfig as Config>::Extrinsic;
-    // ExtrinsicParams makes use of the index type, so we need to adjust them
+    // ExtrinsicParams makes use of the index type, so we need to adjust it
     // too to align with our modified index type, above:
     type ExtrinsicParams = SubstrateExtrinsicParams<Self>;
 }

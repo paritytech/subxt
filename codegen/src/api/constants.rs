@@ -63,7 +63,7 @@ pub fn generate_constants(
 
         quote! {
             #( #[doc = #docs ] )*
-            pub fn #fn_name(&self) -> ::subxt::constants::ConstantAddress<'static, #return_ty> {
+            pub fn #fn_name(&self) -> ::subxt::constants::ConstantAddress<'static, ::subxt::metadata::DecodeStaticType<#return_ty>> {
                 ::subxt::constants::ConstantAddress::new_with_validation(
                     #pallet_name,
                     #constant_name,

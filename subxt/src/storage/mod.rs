@@ -13,12 +13,14 @@ pub use storage_client::{
     SignedExtension,
 };
 
+// Re-export as this is used in the public API:
+pub use sp_core::storage::StorageKey;
+
 /// Types representing an address which describes where a storage
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
         StorageAddress,
-        StorageEntryKey,
         StorageMapKey,
         StorageHasher,
         AddressHasDefaultValue,
