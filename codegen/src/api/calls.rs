@@ -96,7 +96,7 @@ pub fn generate_calls(
                 pub fn #fn_name(
                     &self,
                     #( #call_fn_args, )*
-                ) -> ::subxt::extrinsic::SubmittableExtrinsic<::subxt::metadata::EncodeStaticCall<#struct_name>, DispatchError, root_mod::Event> {
+                ) -> ::subxt::extrinsic::SubmittableExtrinsic<::subxt::metadata::EncodeStaticCall<#struct_name>, DispatchError> {
                     ::subxt::extrinsic::SubmittableExtrinsic::new_with_validation(
                         ::subxt::metadata::EncodeStaticCall {
                             pallet: #pallet_name,

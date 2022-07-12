@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -32,7 +32,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
     // Subscribe to any events that occur:
-    let mut event_sub = api.events().subscribe::<polkadot::Event>().await?;
+    let mut event_sub = api.events().subscribe().await?;
 
     // While this subscription is active, balance transfers are made somewhere:
     tokio::task::spawn({
@@ -63,17 +63,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let events = events?;
         let block_hash = events.block_hash();
 
-        // We can iterate, statically decoding all events if we want:
-        println!("All events in block {block_hash:?}:");
-        println!("  Static event details:");
-        for event in events.iter() {
-            let event = event?;
-            println!("    {event:?}");
-        }
-
-        // Or we can dynamically decode events:
+        // We can dynamically decode events:
         println!("  Dynamic event details: {block_hash:?}:");
-        for event in events.iter_raw() {
+        for event in events.iter() {
             let event = event?;
             let is_balance_transfer = event
                 .as_event::<polkadot::balances::events::Transfer>()?
@@ -85,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             );
         }
 
-        // Or we can dynamically find the first transfer event, ignoring any others:
+        // Or we can find the first transfer event, ignoring any others:
         let transfer_event =
             events.find_first::<polkadot::balances::events::Transfer>()?;
 

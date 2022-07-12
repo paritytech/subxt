@@ -69,13 +69,13 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 
     /// Creates a returns a raw signed extrinsic, without submitting it.
-    pub async fn create_signed_with_nonce<Call, Err, Evs>(
+    pub async fn create_signed_with_nonce<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
         account_nonce: T::Index,
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C, Err, Evs>, BasicError>
+    ) -> Result<SignedSubmittableExtrinsic<T, C, Err>, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
     {
@@ -166,16 +166,15 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
 impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
 
     /// Creates a returns a raw signed extrinsic, without submitting it.
-    pub async fn create_signed<Call, Err, Evs>(
+    pub async fn create_signed<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<SignedSubmittableExtrinsic<T, C, Err, Evs>, BasicError>
+    ) -> Result<SignedSubmittableExtrinsic<T, C, Err>, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
-        Evs: Decode,
     {
         // Get nonce from the node.
         let account_nonce = if let Some(nonce) = signer.nonce() {
@@ -195,15 +194,14 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch_default<Call, Err, Evs>(
+    pub async fn sign_and_submit_then_watch_default<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
-    ) -> Result<TransactionProgress<T, C, Err, Evs>, BasicError>
+    ) -> Result<TransactionProgress<T, C, Err>, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
-        Evs: Decode,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit_then_watch(call, signer, Default::default())
@@ -214,16 +212,15 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
     ///
     /// Returns a [`TransactionProgress`], which can be used to track the status of the transaction
     /// and obtain details about it, once it has made it into a block.
-    pub async fn sign_and_submit_then_watch<Call, Err, Evs>(
+    pub async fn sign_and_submit_then_watch<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
-    ) -> Result<TransactionProgress<T, C, Err, Evs>, BasicError>
+    ) -> Result<TransactionProgress<T, C, Err>, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
-        Evs: Decode,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -241,15 +238,14 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit_default<Call, Err, Evs>(
+    pub async fn sign_and_submit_default<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
     ) -> Result<T::Hash, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
-        Evs: Decode,
         <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams: Default,
     {
         self.sign_and_submit(call, signer, Default::default()).await
@@ -263,16 +259,15 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
     ///
     /// Success does not mean the extrinsic has been included in the block, just that it is valid
     /// and has been included in the transaction pool.
-    pub async fn sign_and_submit<Call, Err, Evs>(
+    pub async fn sign_and_submit<Call, Err>(
         &self,
-        call: &SubmittableExtrinsic<Call, Err, Evs>,
+        call: &SubmittableExtrinsic<Call, Err>,
         signer: &(dyn Signer<T> + Send + Sync),
         other_params: <T::ExtrinsicParams as ExtrinsicParams<T::Index, T::Hash>>::OtherParams,
     ) -> Result<T::Hash, BasicError>
     where
         Call: EncodeWithMetadata + MetadataLocation,
         Err: Decode + HasModuleError,
-        Evs: Decode,
     {
         self.create_signed(call, signer, other_params)
             .await?
@@ -285,16 +280,16 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
 /// data (which ultimately is anything that can be SCALE encoded with the help of
 /// [`crate::Metadata`]), this contains type information which can help us decode the
 /// resulting events or error.
-pub struct SubmittableExtrinsic<Call, Err, Evs> {
+pub struct SubmittableExtrinsic<Call, Err> {
     call_data: Call,
     // static calls come with a hash that allows us to validate them
     // against metadata. Dynamic calls have no such info, but instead can be
     // validated more comprehensively at runtime when we attempt to encode them.
     call_hash: Option<[u8; 32]>,
-    marker: std::marker::PhantomData<(Err, Evs)>,
+    marker: std::marker::PhantomData<Err>,
 }
 
-impl <Call, Err, Evs> SubmittableExtrinsic<Call, Err, Evs> {
+impl <Call, Err> SubmittableExtrinsic<Call, Err> {
     /// Create a new [`SubmittableExtrinsic`] that will not be validated
     /// against node metadata.
     pub fn new_unvalidated(
@@ -328,25 +323,24 @@ impl <Call, Err, Evs> SubmittableExtrinsic<Call, Err, Evs> {
     }
 }
 
-impl <Call: EncodeWithMetadata, Err, Evs> EncodeWithMetadata for SubmittableExtrinsic<Call, Err, Evs> {
+impl <Call: EncodeWithMetadata, Err> EncodeWithMetadata for SubmittableExtrinsic<Call, Err> {
     fn encode_to_with_metadata(&self, metadata: &crate::Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
         self.call_data.encode_to_with_metadata(metadata, out)
     }
 }
 
 /// This represents an extrinsic that has been signed and is ready to submit.
-pub struct SignedSubmittableExtrinsic<T, C, Err, Evs> {
+pub struct SignedSubmittableExtrinsic<T, C, Err> {
     client: C,
     encoded: Encoded,
-    marker: std::marker::PhantomData<(Err, Evs, T)>,
+    marker: std::marker::PhantomData<(Err, T)>,
 }
 
-impl<T, C, Err, Evs> SignedSubmittableExtrinsic<T, C, Err, Evs>
+impl<T, C, Err> SignedSubmittableExtrinsic<T, C, Err>
 where
     T: Config,
     C: OnlineClientT<T>,
     Err: Decode + HasModuleError,
-    Evs: Decode,
 {
     /// Submits the extrinsic to the chain.
     ///
@@ -354,7 +348,7 @@ where
     /// and obtain details about it, once it has made it into a block.
     pub async fn submit_and_watch(
         &self,
-    ) -> Result<TransactionProgress<T, C, Err, Evs>, BasicError> {
+    ) -> Result<TransactionProgress<T, C, Err>, BasicError> {
         // Get a hash of the extrinsic (we'll need this later).
         let ext_hash = T::Hashing::hash_of(&self.encoded);
 

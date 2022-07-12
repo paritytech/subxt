@@ -2,7 +2,6 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use codec::Decode;
 use futures::{
     future::Either,
     stream,
@@ -55,17 +54,11 @@ where
     T: Config,
     Client: OnlineClientT<T>
 {
-    /// Obtain events at some block hash. The generic parameter is what we
-    /// will attempt to decode each event into if using [`crate::events::Events::iter()`],
-    /// and is expected to be the outermost event enum that contains all of
-    /// the possible events across all pallets.
-    pub fn at<Evs>(
+    /// Obtain events at some block hash.
+    pub fn at(
         &self,
         block_hash: T::Hash,
-    ) -> impl Future<Output = Result<Events<T, Evs>, BasicError>> + Send + 'static
-    where
-        Evs: Decode,
-    {
+    ) -> impl Future<Output = Result<Events<T>, BasicError>> + Send + 'static {
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
@@ -78,11 +71,9 @@ where
     ///
     /// **Note:** these blocks haven't necessarily been finalised yet; prefer
     /// [`Events::subscribe_finalized()`] if that is important.
-    pub fn subscribe<Evs>(
+    pub fn subscribe(
         &self
-    ) -> impl Future<Output = Result<EventSubscription<T, Client, EventSub<T::Header>, Evs>, BasicError>> + Send + 'static
-    where
-        Evs: Decode + 'static
+    ) -> impl Future<Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>> + Send + 'static
     {
         let client = self.client.clone();
         async move {
@@ -91,12 +82,11 @@ where
     }
 
     /// Subscribe to events from finalized blocks.
-    pub async fn subscribe_finalized<Evs>(
+    pub async fn subscribe_finalized(
         &self,
-    ) -> impl Future<Output = Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>, Evs>, BasicError>> + Send + 'static
+    ) -> impl Future<Output = Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, BasicError>> + Send + 'static
     where
         Client: Send + Sync + 'static,
-        Evs: Decode + 'static
     {
         let client = self.client.clone();
         async move {
@@ -123,14 +113,13 @@ where
     }
 }
 
-async fn at<T, Client, Evs>(
+async fn at<T, Client>(
     client: Client,
     block_hash: T::Hash,
-) -> Result<Events<T, Evs>, BasicError>
+) -> Result<Events<T>, BasicError>
 where
     T: Config,
     Client: OnlineClientT<T>,
-    Evs: Decode,
 {
     let event_bytes = client
         .rpc()
@@ -146,26 +135,24 @@ where
     ))
 }
 
-async fn subscribe<T, Client, Evs>(
+async fn subscribe<T, Client>(
     client: Client
-) -> Result<EventSubscription<T, Client, EventSub<T::Header>, Evs>, BasicError>
+) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>
 where
     T: Config,
     Client: OnlineClientT<T>,
-    Evs: Decode + 'static
 {
     let block_subscription = client.rpc().subscribe_blocks().await?;
     Ok(EventSubscription::new(client, block_subscription))
 }
 
 /// Subscribe to events from finalized blocks.
-async fn subscribe_finalized<T, Client, Evs>(
+async fn subscribe_finalized<T, Client>(
     client: Client,
-) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>, Evs>, BasicError>
+) -> Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, BasicError>
 where
     T: Config,
     Client: OnlineClientT<T>,
-    Evs: Decode + 'static
 {
     // fetch the last finalised block details immediately, so that we'll get
     // events for each block after this one.

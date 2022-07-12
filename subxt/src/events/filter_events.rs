@@ -13,7 +13,6 @@ use super::{
     StaticEvent,
     Phase
 };
-use codec::Decode;
 use futures::{
     Stream,
     StreamExt,
@@ -58,11 +57,10 @@ impl<'a, Sub: 'a, T: Config, Filter: EventFilter> FilterEvents<'a, Sub, T, Filte
     }
 }
 
-impl<'a, Sub, T, Evs, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
+impl<'a, Sub, T, Filter> Stream for FilterEvents<'a, Sub, T, Filter>
 where
-    Sub: Stream<Item = Result<Events<T, Evs>, BasicError>> + Unpin + 'a,
+    Sub: Stream<Item = Result<Events<T>, BasicError>> + Unpin + 'a,
     T: Config,
-    Evs: Decode + 'static,
     Filter: EventFilter,
 {
     type Item = Result<FilteredEventDetails<T::Hash, Filter::ReturnType>, BasicError>;
@@ -114,8 +112,8 @@ pub trait EventFilter: private::Sealed {
     /// The type we'll be handed back from filtering.
     type ReturnType;
     /// Filter the events based on the type implementing this trait.
-    fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<T, Evs>,
+    fn filter<'a, T: Config>(
+        events: Events<T>,
     ) -> Box<
         dyn Iterator<
                 Item = Result<
@@ -139,15 +137,15 @@ pub(crate) mod private {
 impl<Ev: StaticEvent> private::Sealed for (Ev,) {}
 impl<Ev: StaticEvent> EventFilter for (Ev,) {
     type ReturnType = Ev;
-    fn filter<'a, T: Config, Evs: Decode + 'static>(
-        events: Events<T, Evs>,
+    fn filter<'a, T: Config>(
+        events: Events<T>,
     ) -> Box<
         dyn Iterator<Item = Result<FilteredEventDetails<T::Hash, Ev>, BasicError>>
             + Send
             + 'a,
     > {
         let block_hash = events.block_hash();
-        let mut iter = events.into_iter_raw();
+        let mut iter = events.into_iter();
         Box::new(std::iter::from_fn(move || {
             for ev in iter.by_ref() {
                 // Forward any error immediately:
@@ -181,11 +179,11 @@ macro_rules! impl_event_filter {
         impl <$($ty: StaticEvent),+> private::Sealed for ( $($ty,)+ ) {}
         impl <$($ty: StaticEvent),+> EventFilter for ( $($ty,)+ ) {
             type ReturnType = ( $(Option<$ty>,)+ );
-            fn filter<'a, T: Config, Evs: Decode + 'static>(
-                events: Events<T, Evs>
+            fn filter<'a, T: Config>(
+                events: Events<T>
             ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
                 let block_hash = events.block_hash();
-                let mut iter = events.into_iter_raw();
+                let mut iter = events.into_iter();
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
                     for ev in iter.by_ref() {
@@ -234,7 +232,6 @@ mod test {
             event_record,
             events,
             metadata,
-            AllEvents,
         },
         *,
     };
@@ -243,7 +240,10 @@ mod test {
         SubstrateConfig,
         Metadata,
     };
-    use codec::Encode;
+    use codec::{
+        Decode,
+        Encode,
+    };
     use futures::{
         stream,
         Stream,
@@ -286,7 +286,7 @@ mod test {
     // A stream of fake events for us to try filtering on.
     fn events_stream(
         metadata: Metadata,
-    ) -> impl Stream<Item = Result<Events<SubstrateConfig, AllEvents<PalletEvents>>, BasicError>>
+    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, BasicError>>
     {
         stream::iter(vec![
             events::<PalletEvents>(

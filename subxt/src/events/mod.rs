@@ -95,9 +95,8 @@ pub use event_subscription::{
 };
 pub use events_type::{
     DecodedValue,
-    EventDetails,
     Events,
-    RawEventDetails,
+    EventDetails,
 };
 pub use filter_events::{
     EventFilter,

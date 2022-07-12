@@ -2,11 +2,11 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-//! To run this example, a local polkadot node should be running. Example verified against polkadot 0.9.18-4542a603cc-aarch64-macos.
+//! To run this example, a local polkadot node should be running. Example verified against polkadot polkadot 0.9.25-5174e9ae75b.
 //!
 //! E.g.
 //! ```bash
-//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.18/polkadot" --output /usr/local/bin/polkadot --location
+//! curl "https://github.com/paritytech/polkadot/releases/download/v0.9.25/polkadot" --output /usr/local/bin/polkadot --location
 //! polkadot --dev --tmp
 //! ```
 
@@ -34,7 +34,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Subscribe to several balance related events. If we ask for more than one event,
     // we'll be given a correpsonding tuple of `Option`'s, with exactly one
     // variant populated each time.
-    let mut balance_events = api.events().subscribe::<polkadot::Event>().await?.filter_events::<(
+    let mut balance_events = api.events().subscribe().await?.filter_events::<(
         polkadot::balances::events::Withdraw,
         polkadot::balances::events::Transfer,
         polkadot::balances::events::Deposit,

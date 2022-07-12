@@ -12,7 +12,6 @@ use crate::{
     },
     events::EventsClient,
 };
-use codec::Decode;
 use derivative::Derivative;
 use futures::{
     stream::BoxStream,
@@ -29,11 +28,10 @@ use std::{
 };
 
 pub use super::{
-    EventDetails,
     EventFilter,
     Events,
     FilterEvents,
-    RawEventDetails,
+    EventDetails,
 };
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
@@ -49,21 +47,20 @@ pub type EventSub<Item> = Subscription<Item>;
 /// A subscription to events that implements [`Stream`], and returns [`Events`] objects for each block.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "Sub: std::fmt::Debug, Client: std::fmt::Debug"))]
-pub struct EventSubscription<T: Config, Client, Sub, Evs: 'static> {
+pub struct EventSubscription<T: Config, Client, Sub> {
     finished: bool,
     client: Client,
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
         std::pin::Pin<
-            Box<dyn Future<Output = Result<Events<T, Evs>, BasicError>> + Send>,
+            Box<dyn Future<Output = Result<Events<T>, BasicError>> + Send>,
         >,
     >,
-    _event_type: std::marker::PhantomData<Evs>,
 }
 
-impl<T: Config, Client, Sub, Evs: Decode, E: Into<BasicError>>
-    EventSubscription<T, Client, Sub, Evs>
+impl<T: Config, Client, Sub, E: Into<BasicError>>
+    EventSubscription<T, Client, Sub>
 where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
@@ -75,7 +72,6 @@ where
             client: client,
             block_header_subscription,
             at: None,
-            _event_type: std::marker::PhantomData,
         }
     }
 
@@ -86,8 +82,8 @@ where
     }
 }
 
-impl<'a, T: Config, Client, Sub: Unpin, Evs: Decode> Unpin
-    for EventSubscription<T, Client, Sub, Evs>
+impl<'a, T: Config, Client, Sub: Unpin> Unpin
+    for EventSubscription<T, Client, Sub>
 {
 }
 
@@ -108,15 +104,14 @@ impl<'a, T: Config, Client, Sub: Unpin, Evs: Decode> Unpin
 //
 // The advantage of this manual implementation is that we have a named type that we (and others)
 // can derive things on, store away, alias etc.
-impl<T, Client, Sub, Evs, E> Stream for EventSubscription<T, Client, Sub, Evs>
+impl<T, Client, Sub, E> Stream for EventSubscription<T, Client, Sub>
 where
     T: Config,
     Client: OnlineClientT<T>,
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
-    Evs: Decode,
     E: Into<BasicError>,
 {
-    type Item = Result<Events<T, Evs>, BasicError>;
+    type Item = Result<Events<T>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -174,7 +169,6 @@ mod test {
                 crate::SubstrateConfig,
                 (),
                 EventSub<<crate::SubstrateConfig as Config>::Header>,
-                (),
             >,
         >();
         assert_send::<
@@ -182,7 +176,6 @@ mod test {
                 crate::SubstrateConfig,
                 (),
                 FinalizedEventSub<<crate::SubstrateConfig as Config>::Header>,
-                (),
             >,
         >();
     }

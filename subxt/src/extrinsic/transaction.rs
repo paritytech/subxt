@@ -22,9 +22,8 @@ use crate::{
     },
     events::{
         self,
-        EventDetails,
         Events,
-        RawEventDetails,
+        EventDetails,
         EventsClient,
         Phase,
         StaticEvent,
@@ -49,20 +48,20 @@ pub use sp_runtime::traits::SignedExtension;
 /// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub struct TransactionProgress<T: Config, C, Err, Evs> {
+pub struct TransactionProgress<T: Config, C, Err> {
     sub: Option<RpcSubscription<SubstrateTransactionStatus<T::Hash, T::Hash>>>,
     ext_hash: T::Hash,
     client: C,
-    _error: PhantomDataSendSync<(Err, Evs)>,
+    _error: PhantomDataSendSync<Err>,
 }
 
 // The above type is not `Unpin` by default unless the generic param `T` is,
 // so we manually make it clear that Unpin is actually fine regardless of `T`
 // (we don't care if this moves around in memory while it's "pinned").
-impl<T: Config, C, Err, Evs> Unpin for TransactionProgress<T, C, Err, Evs> {}
+impl<T: Config, C, Err> Unpin for TransactionProgress<T, C, Err> {}
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
-    TransactionProgress<T, C, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
+    TransactionProgress<T, C, Err>
 {
     /// Instantiate a new [`TransactionProgress`] from a custom subscription.
     pub fn new(
@@ -83,7 +82,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     /// avoid importing that trait if you don't otherwise need it.
     pub async fn next_item(
         &mut self,
-    ) -> Option<Result<TransactionStatus<T, C, Err, Evs>, BasicError>> {
+    ) -> Option<Result<TransactionStatus<T, C, Err>, BasicError>> {
         self.next().await
     }
 
@@ -100,7 +99,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_in_block(
         mut self,
-    ) -> Result<TransactionInBlock<T, C, Err, Evs>, BasicError> {
+    ) -> Result<TransactionInBlock<T, C, Err>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized or otherwise in a block! Return.
@@ -130,7 +129,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized(
         mut self,
-    ) -> Result<TransactionInBlock<T, C, Err, Evs>, BasicError> {
+    ) -> Result<TransactionInBlock<T, C, Err>, BasicError> {
         while let Some(status) = self.next_item().await {
             match status? {
                 // Finalized! Return.
@@ -159,16 +158,16 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     /// level [`TransactionProgress::next_item()`] API if you'd like to handle these statuses yourself.
     pub async fn wait_for_finalized_success(
         self,
-    ) -> Result<TransactionEvents<T, Evs>, Error<Err>> {
+    ) -> Result<TransactionEvents<T>, Error<Err>> {
         let evs = self.wait_for_finalized().await?.wait_for_success().await?;
         Ok(evs)
     }
 }
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode> Stream
-    for TransactionProgress<T, C, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError> Stream
+    for TransactionProgress<T, C, Err>
 {
-    type Item = Result<TransactionStatus<T, C, Err, Evs>, BasicError>;
+    type Item = Result<TransactionStatus<T, C, Err>, BasicError>;
 
     fn poll_next(
         mut self: std::pin::Pin<&mut Self>,
@@ -277,7 +276,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode> 
 /// or that finality gadget is lagging behind.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub enum TransactionStatus<T: Config, C, Err, Evs> {
+pub enum TransactionStatus<T: Config, C, Err> {
     /// The transaction is part of the "future" queue.
     Future,
     /// The transaction is part of the "ready" queue.
@@ -285,7 +284,7 @@ pub enum TransactionStatus<T: Config, C, Err, Evs> {
     /// The transaction has been broadcast to the given peers.
     Broadcast(Vec<String>),
     /// The transaction has been included in a block with given hash.
-    InBlock(TransactionInBlock<T, C, Err, Evs>),
+    InBlock(TransactionInBlock<T, C, Err>),
     /// The block this transaction was included in has been retracted,
     /// probably because it did not make it onto the blocks which were
     /// finalized.
@@ -294,7 +293,7 @@ pub enum TransactionStatus<T: Config, C, Err, Evs> {
     /// blocks, and so the subscription has ended.
     FinalityTimeout(T::Hash),
     /// The transaction has been finalized by a finality-gadget, e.g GRANDPA.
-    Finalized(TransactionInBlock<T, C, Err, Evs>),
+    Finalized(TransactionInBlock<T, C, Err>),
     /// The transaction has been replaced in the pool by another transaction
     /// that provides the same tags. (e.g. same (sender, nonce)).
     Usurped(T::Hash),
@@ -304,10 +303,10 @@ pub enum TransactionStatus<T: Config, C, Err, Evs> {
     Invalid,
 }
 
-impl<T: Config, C, Err: Decode, Evs: Decode> TransactionStatus<T, C, Err, Evs> {
+impl<T: Config, C, Err: Decode> TransactionStatus<T, C, Err> {
     /// A convenience method to return the `Finalized` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::Finalized`].
-    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, C, Err, Evs>> {
+    pub fn as_finalized(&self) -> Option<&TransactionInBlock<T, C, Err>> {
         match self {
             Self::Finalized(val) => Some(val),
             _ => None,
@@ -316,7 +315,7 @@ impl<T: Config, C, Err: Decode, Evs: Decode> TransactionStatus<T, C, Err, Evs> {
 
     /// A convenience method to return the `InBlock` details. Returns
     /// [`None`] if the enum variant is not [`TransactionStatus::InBlock`].
-    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, C, Err, Evs>> {
+    pub fn as_in_block(&self) -> Option<&TransactionInBlock<T, C, Err>> {
         match self {
             Self::InBlock(val) => Some(val),
             _ => None,
@@ -327,15 +326,15 @@ impl<T: Config, C, Err: Decode, Evs: Decode> TransactionStatus<T, C, Err, Evs> {
 /// This struct represents a transaction that has made it into a block.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
-pub struct TransactionInBlock<T: Config, C, Err, Evs> {
+pub struct TransactionInBlock<T: Config, C, Err> {
     block_hash: T::Hash,
     ext_hash: T::Hash,
     client: C,
-    _error: PhantomDataSendSync<(Err, Evs)>,
+    _error: PhantomDataSendSync<Err>,
 }
 
-impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
-    TransactionInBlock<T, C, Err, Evs>
+impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
+    TransactionInBlock<T, C, Err>
 {
     pub(crate) fn new(
         block_hash: T::Hash,
@@ -373,11 +372,11 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T, Evs>, Error<Err>> {
+    pub async fn wait_for_success(&self) -> Result<TransactionEvents<T>, Error<Err>> {
         let events = self.fetch_events().await?;
 
         // Try to find any errors; return the first one we encounter.
-        for ev in events.iter_raw() {
+        for ev in events.iter() {
             let ev = ev?;
             if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
                 let dispatch_error = Err::decode(&mut &*ev.bytes)?;
@@ -407,7 +406,7 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
     ///
     /// **Note:** This has to download block details from the node and decode events
     /// from them.
-    pub async fn fetch_events(&self) -> Result<TransactionEvents<T, Evs>, BasicError> {
+    pub async fn fetch_events(&self) -> Result<TransactionEvents<T>, BasicError> {
         let block = self
             .client
             .rpc()
@@ -441,13 +440,13 @@ impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError, Evs: Decode>
 /// We can iterate over the events, or look for a specific one.
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""))]
-pub struct TransactionEvents<T: Config, Evs: Decode> {
+pub struct TransactionEvents<T: Config> {
     ext_hash: T::Hash,
     ext_idx: u32,
-    events: Events<T, Evs>,
+    events: Events<T>,
 }
 
-impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
+impl<T: Config> TransactionEvents<T> {
     /// Return the hash of the block that the transaction has made it into.
     pub fn block_hash(&self) -> T::Hash {
         self.events.block_hash()
@@ -459,32 +458,18 @@ impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     }
 
     /// Return all of the events in the block that the transaction made it into.
-    pub fn all_events_in_block(&self) -> &events::Events<T, Evs> {
+    pub fn all_events_in_block(&self) -> &events::Events<T> {
         &self.events
     }
 
-    /// Iterate over the statically decoded events associated with this transaction.
+    /// Iterate over all of the raw events associated with this transaction.
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
     pub fn iter(
         &self,
-    ) -> impl Iterator<Item = Result<EventDetails<Evs>, BasicError>> + '_ {
+    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
         self.events.iter().filter(|ev| {
-            ev.as_ref()
-                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
-                .unwrap_or(true) // Keep any errors
-        })
-    }
-
-    /// Iterate over all of the raw events associated with this transaction.
-    ///
-    /// This works in the same way that [`events::Events::iter_raw()`] does, with the
-    /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter_raw(
-        &self,
-    ) -> impl Iterator<Item = Result<RawEventDetails, BasicError>> + '_ {
-        self.events.iter_raw().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
                 .unwrap_or(true) // Keep any errors.
@@ -498,7 +483,7 @@ impl<T: Config, Evs: Decode> TransactionEvents<T, Evs> {
     pub fn find<Ev: StaticEvent>(
         &self,
     ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
-        self.iter_raw().filter_map(|ev| {
+        self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()
         })
