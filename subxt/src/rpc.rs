@@ -7,67 +7,29 @@
 //! This is used behind the scenes by various `subxt` APIs, but can
 //! also be used directly.
 //!
-//! # Examples
+//! # Example
 //!
-//! ## Fetch Storage
+//! Fetching storage keys
 //!
 //! ```no_run
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # use subxt::storage::StorageKeyPrefix;
-//! # use subxt::rpc::Rpc;
+//! use subxt::{ PolkadotConfig, OnlineClient, storage::StorageKey };
 //!
 //! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
 //! pub mod polkadot {}
 //!
 //! # #[tokio::main]
 //! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! // Storage prefix is `twox_128("System") ++ twox_128("ExtrinsicCount")`.
-//! let key = StorageKeyPrefix::new::<polkadot::system::storage::ExtrinsicCount>()
-//!     .to_storage_key();
+//! let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
 //!
-//! // Obtain the RPC from a generated API
-//! let rpc: &Rpc<_> = api
-//!     .client
-//!     .rpc();
-//!
-//! let result = rpc.storage(&key, None).await.unwrap();
-//! println!("Storage result: {:?}", result);
-//! # }
-//! ```
-//!
-//! ## Fetch Keys
-//!
-//! ```no_run
-//! # use subxt::{ClientBuilder, DefaultConfig, PolkadotExtrinsicParams};
-//! # use subxt::storage::StorageKeyPrefix;
-//! # use subxt::rpc::Rpc;
-//!
-//! #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
-//! pub mod polkadot {}
-//!
-//! # #[tokio::main]
-//! # async fn main() {
-//! # let api = ClientBuilder::new()
-//! #     .build()
-//! #     .await
-//! #     .unwrap()
-//! #     .to_runtime_api::<polkadot::RuntimeApi<DefaultConfig, PolkadotExtrinsicParams<DefaultConfig>>>();
-//! let key = StorageKeyPrefix::new::<polkadot::xcm_pallet::storage::VersionNotifiers>()
-//!     .to_storage_key();
-//!
-//! // Obtain the RPC from a generated API
-//! let rpc: &Rpc<_> = api
-//!     .client
-//!     .rpc();
+//! let key = polkadot::storage()
+//!     .xcm_pallet()
+//!     .version_notifiers_root()
+//!     .to_bytes();
 //!
 //! // Fetch up to 10 keys.
-//! let keys = rpc
-//!     .storage_keys_paged(Some(key), 10, None, None)
+//! let keys = api
+//!     .rpc()
+//!     .storage_keys_paged(StorageKey(key), 10, None, None)
 //!     .await
 //!     .unwrap();
 //!

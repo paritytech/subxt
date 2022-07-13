@@ -77,6 +77,40 @@ where
 
     /// Return only specific events matching the tuple of 1 or more event
     /// types that has been provided as the `Filter` type parameter.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// use futures::StreamExt;
+    /// use subxt::{ OnlineClient, PolkadotConfig };
+    ///
+    /// #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
+    /// pub mod polkadot {}
+    ///
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+    ///
+    /// let mut events = api
+    ///     .events()
+    ///     .subscribe()
+    ///     .await
+    ///     .unwrap()
+    ///     .filter_events::<(
+    ///         polkadot::balances::events::Transfer,
+    ///         polkadot::balances::events::Deposit
+    ///     )>();
+    ///
+    /// while let Some(ev) = events.next().await {
+    ///     let event_details = ev.unwrap();
+    ///     match event_details.event {
+    ///         (Some(transfer), None) => println!("Balance transfer event: {transfer:?}"),
+    ///         (None, Some(deposit)) => println!("Balance deposit event: {deposit:?}"),
+    ///         _ => unreachable!()
+    ///     }
+    /// }
+    /// # }
+    /// ```
     pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'static, Self, T, Filter> {
         FilterEvents::new(self)
     }

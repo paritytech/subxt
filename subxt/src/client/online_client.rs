@@ -101,15 +101,15 @@ impl <T: Config> OnlineClient<T> {
     ///
     /// ```no_run
     /// # #[tokio::main]
-    /// # fn main() {
-    /// use subxt::client::OnlineClient;
+    /// # async fn main() {
+    /// use subxt::{ OnlineClient, PolkadotConfig };
     ///
-    /// let client = OnlineClient::new().await.unwrap();
+    /// let client = OnlineClient::<PolkadotConfig>::new().await.unwrap();
     ///
     /// let update_task = client.subscribe_to_updates();
     /// tokio::spawn(async move {
-    ///     update_task.await;
-    /// })
+    ///     update_task.perform_runtime_updates().await;
+    /// });
     /// # }
     /// ```
     pub fn subscribe_to_updates(&self) -> ClientRuntimeUpdater<T> {

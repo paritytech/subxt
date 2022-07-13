@@ -10,7 +10,6 @@ mod storage_address;
 pub use storage_client::{
     StorageClient,
     KeyIter,
-    SignedExtension,
 };
 
 // Re-export as this is used in the public API:

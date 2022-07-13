@@ -316,7 +316,7 @@ impl RuntimeGenerator {
                 }
 
                 /// check whether the Client you are using is aligned with the statically generated codegen.
-                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: C) -> Result<(), ::subxt::error::MetadataError> {
+                pub fn validate_codegen<T: ::subxt::Config, C: ::subxt::client::OfflineClientT<T>>(client: &C) -> Result<(), ::subxt::error::MetadataError> {
                     let runtime_metadata_hash = client.metadata().metadata_hash(&PALLETS);
                     if runtime_metadata_hash != [ #(#metadata_hash,)* ] {
                         Err(::subxt::error::MetadataError::IncompatibleMetadata)

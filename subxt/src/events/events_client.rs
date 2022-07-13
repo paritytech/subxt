@@ -67,10 +67,36 @@ where
         }
     }
 
-    /// Subscribe to events from blocks.
+    /// Subscribe to all events from blocks.
     ///
     /// **Note:** these blocks haven't necessarily been finalised yet; prefer
     /// [`Events::subscribe_finalized()`] if that is important.
+    ///
+    /// # Example
+    ///
+    /// ```no_run
+    /// # #[tokio::main]
+    /// # async fn main() {
+    /// use futures::StreamExt;
+    /// use subxt::{ OnlineClient, PolkadotConfig };
+    ///
+    /// let api = OnlineClient::<PolkadotConfig>::new().await.unwrap();
+    ///
+    /// let mut events = api.events().subscribe().await.unwrap();
+    ///
+    /// while let Some(ev) = events.next().await {
+    ///     // Obtain all events from this block.
+    ///     let ev = ev.unwrap();
+    ///     // Print block hash.
+    ///     println!("Event at block hash {:?}", ev.block_hash());
+    ///     // Iterate over all events.
+    ///     let mut iter = ev.iter();
+    ///     while let Some(event_details) = iter.next() {
+    ///         println!("Event details {:?}", event_details);
+    ///     }
+    /// }
+    /// # }
+    /// ```
     pub fn subscribe(
         &self
     ) -> impl Future<Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>> + Send + 'static
