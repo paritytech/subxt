@@ -10,16 +10,12 @@ pub(crate) use crate::{
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    Client,
     SubstrateConfig,
-    PairSigner,
-    SubstrateExtrinsicParams,
+    extrinsic::PairSigner,
 };
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
-
-pub type NodeRuntimeParams = SubstrateExtrinsicParams<SubstrateConfig>;
 
 pub async fn test_node_process_with(
     key: AccountKeyring,
@@ -39,26 +35,11 @@ pub async fn test_node_process_with(
     proc.unwrap()
 }
 
-pub async fn test_node_process() -> TestNodeProcess<SubstrateConfig> {
-    test_node_process_with(AccountKeyring::Alice).await
-}
-
-pub struct TestContext {
-    pub node_proc: TestNodeProcess<SubstrateConfig>,
-    pub api: node_runtime::RuntimeApi<SubstrateConfig, NodeRuntimeParams>,
-}
-
-impl TestContext {
-    pub fn client(&self) -> &Client<SubstrateConfig> {
-        &self.api.client
-    }
-}
+pub type TestContext = TestNodeProcess<SubstrateConfig>;
 
 pub async fn test_context() -> TestContext {
     tracing_subscriber::fmt::try_init().ok();
-    let node_proc = test_node_process_with(AccountKeyring::Alice).await;
-    let api = node_proc.client().clone().to_runtime_api();
-    TestContext { node_proc, api }
+    test_node_process_with(AccountKeyring::Alice).await
 }
 
 pub fn pair_signer(pair: Pair) -> PairSigner<SubstrateConfig, Pair> {

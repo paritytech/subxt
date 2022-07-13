@@ -8,26 +8,25 @@ use crate::{
     node_runtime::{
         self,
         contracts::{
-            calls::TransactionApi,
             events,
-            storage,
         },
         system,
         DispatchError,
     },
     test_context,
-    NodeRuntimeParams,
     TestContext,
 };
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
-    Client,
+    OnlineClient,
     Config,
     SubstrateConfig,
     Error,
-    PairSigner,
-    TransactionProgress,
+    extrinsic::{
+        PairSigner,
+        TransactionProgress,
+    }
 };
 
 struct ContractsTestContext {
@@ -47,12 +46,8 @@ impl ContractsTestContext {
         Self { cxt, signer }
     }
 
-    fn client(&self) -> &Client<SubstrateConfig> {
+    fn client(&self) -> OnlineClient<SubstrateConfig> {
         self.cxt.client()
-    }
-
-    fn contracts_tx(&self) -> TransactionApi<SubstrateConfig, NodeRuntimeParams> {
-        self.cxt.api.tx().contracts()
     }
 
     async fn instantiate_with_code(
@@ -67,10 +62,7 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let events = self
-            .cxt
-            .api
-            .tx()
+        let instantiate_tx = node_runtime::tx()
             .contracts()
             .instantiate_with_code(
                 100_000_000_000_000_000, // endowment
@@ -79,8 +71,12 @@ impl ContractsTestContext {
                 code,
                 vec![], // data
                 vec![], // salt
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            );
+
+        let events = self
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -110,8 +106,8 @@ impl ContractsTestContext {
         salt: Vec<u8>,
     ) -> Result<AccountId, Error<DispatchError>> {
         // call instantiate extrinsic
-        let result = self
-            .contracts_tx()
+        let instantiate_tx = node_runtime::tx()
+            .contracts()
             .instantiate(
                 100_000_000_000_000_000, // endowment
                 500_000_000_000,         // gas_limit
@@ -119,8 +115,12 @@ impl ContractsTestContext {
                 code_hash,
                 data,
                 salt,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            );
+
+        let result = self
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&instantiate_tx, &self.signer)
             .await?
             .wait_for_finalized_success()
             .await?;
@@ -138,20 +138,24 @@ impl ContractsTestContext {
         contract: AccountId,
         input_data: Vec<u8>,
     ) -> Result<
-        TransactionProgress<'_, SubstrateConfig, DispatchError, node_runtime::Event>,
+        TransactionProgress<SubstrateConfig, OnlineClient<SubstrateConfig>, DispatchError>,
         Error<DispatchError>,
     > {
         tracing::info!("call: {:?}", contract);
-        let result = self
-            .contracts_tx()
+        let call_tx = node_runtime::tx()
+            .contracts()
             .call(
                 MultiAddress::Id(contract),
                 0,           // value
                 500_000_000, // gas_limit
                 None,        // storage_deposit_limit
                 input_data,
-            )?
-            .sign_and_submit_then_watch_default(&self.signer)
+            );
+
+        let result = self
+            .client()
+            .tx()
+            .sign_and_submit_then_watch_default(&call_tx, &self.signer)
             .await?;
 
         tracing::info!("Call result: {:?}", result);
@@ -190,19 +194,21 @@ async fn tx_call() {
     let cxt = ContractsTestContext::init().await;
     let (_, contract) = cxt.instantiate_with_code().await.unwrap();
 
-    let contract_info = cxt
-        .cxt
-        .api
-        .storage()
+    let info_addr = node_runtime::storage()
         .contracts()
-        .contract_info_of(&contract, None)
+        .contract_info_of(&contract);
+
+    let contract_info = cxt
+        .client()
+        .storage()
+        .fetch(&info_addr, None)
         .await;
     assert!(contract_info.is_ok());
 
     let keys = cxt
         .client()
         .storage()
-        .fetch_keys::<storage::ContractInfoOf>(5, None, None)
+        .fetch_keys(&info_addr, 10, None, None)
         .await
         .unwrap()
         .iter()

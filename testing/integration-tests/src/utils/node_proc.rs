@@ -16,15 +16,14 @@ use std::{
     process,
 };
 use subxt::{
-    Client,
-    ClientBuilder,
+    OnlineClient,
     Config,
 };
 
 /// Spawn a local substrate node for testing subxt.
 pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
-    client: Client<R>,
+    client: OnlineClient<R>,
     ws_url: String,
 }
 
@@ -61,8 +60,8 @@ where
     }
 
     /// Returns the subxt client connected to the running node.
-    pub fn client(&self) -> &Client<R> {
-        &self.client
+    pub fn client(&self) -> OnlineClient<R> {
+        self.client.clone()
     }
 
     /// Returns the address to which the client is connected.
@@ -129,7 +128,7 @@ impl TestNodeProcessBuilder {
         let ws_url = format!("ws://127.0.0.1:{}", ws_port);
 
         // Connect to the node with a subxt client:
-        let client = ClientBuilder::new().set_url(ws_url.clone()).build().await;
+        let client = OnlineClient::from_url(ws_url.clone()).await;
         match client {
             Ok(client) => {
                 Ok(TestNodeProcess {
