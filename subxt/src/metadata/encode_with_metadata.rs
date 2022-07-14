@@ -103,9 +103,7 @@ impl<'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
     ) -> Result<(), BasicError> {
         let pallet = metadata.pallet(&self.pallet)?;
         let pallet_index = pallet.index();
-        let call_ty = pallet
-            .call_ty_id()
-            .ok_or(MetadataError::CallNotFound)?;
+        let call_ty = pallet.call_ty_id().ok_or(MetadataError::CallNotFound)?;
 
         // Assemble the variant representing the specific call within the pallet.
         // (we could do this ourselves a little more efficiently but it's easier

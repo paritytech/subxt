@@ -81,7 +81,10 @@ impl<T: Config> Events<T> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
     /// details. If an error occurs, all subsequent iterations return `None`.
-    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + Send + Sync + 'static {
+    pub fn iter(
+        &self,
+    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + Send + Sync + 'static
+    {
         let event_bytes = self.event_bytes.clone();
         let num_events = self.num_events;
 
