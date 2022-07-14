@@ -28,6 +28,8 @@ pub use filter_events::{
 };
 pub use events_client::{
     EventsClient,
+    // Exposed only for testing:
+    subscribe_to_block_headers_filling_in_gaps,
 };
 
 use codec::{ Encode, Decode };

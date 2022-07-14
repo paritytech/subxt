@@ -108,7 +108,7 @@ where
     }
 
     /// Subscribe to events from finalized blocks.
-    pub async fn subscribe_finalized(
+    pub fn subscribe_finalized(
         &self,
     ) -> impl Future<Output = Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, BasicError>> + Send + 'static
     where
@@ -118,24 +118,6 @@ where
         async move {
             subscribe_finalized(client).await
         }
-    }
-
-    /// Take a subscription that returns block headers, and if any block numbers are missed out
-    /// betweem the block number provided and what's returned from the subscription, we fill in
-    /// the gaps and get hold of all intermediate block headers.
-    pub fn subscribe_to_block_headers_filling_in_gaps<S, E>(
-        &self,
-        last_block_num: Option<u64>,
-        sub: S,
-    ) -> impl Stream<Item = Result<T::Header, BasicError>> + Send
-    where
-        T: Config,
-        Client: OnlineClientT<T>,
-        S: Stream<Item = Result<T::Header, E>> + Send,
-        E: Into<BasicError> + Send + 'static,
-    {
-        let client = self.client.clone();
-        subscribe_to_block_headers_filling_in_gaps(client, last_block_num, sub)
     }
 }
 
@@ -201,7 +183,10 @@ where
     Ok(EventSubscription::new(client, Box::pin(block_subscription)))
 }
 
-fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
+/// Note: This is exposed for testing but is not considered stable and may change
+/// without notice in a patch release.
+#[doc(hidden)]
+pub fn subscribe_to_block_headers_filling_in_gaps<T, Client, S, E>(
     client: Client,
     mut last_block_num: Option<u64>,
     sub: S,

@@ -4,6 +4,7 @@
 
 use crate::{
     node_runtime::{
+        self,
         balances,
         system,
     },
@@ -18,14 +19,15 @@ use sp_keyring::AccountKeyring;
 async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
     tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is not finalized yet.
     let events = event_sub.next().await.unwrap()?;
     let event_block_hash = events.block_hash();
-    let current_block_hash = ctx.api.client.rpc().block_hash(None).await?.unwrap();
+    let current_block_hash = api.rpc().block_hash(None).await?.unwrap();
 
     assert_eq!(event_block_hash, current_block_hash);
     Ok(())
@@ -36,15 +38,16 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
     tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe_finalized().await?;
+    let mut event_sub = api.events().subscribe_finalized().await?;
 
     // Wait for the next set of events, and check that the
     // associated block hash is the one we just finalized.
     // (this can be a bit slow as we have to wait for finalization)
     let events = event_sub.next().await.unwrap()?;
     let event_block_hash = events.block_hash();
-    let finalized_hash = ctx.api.client.rpc().finalized_head().await?;
+    let finalized_hash = api.rpc().finalized_head().await?;
 
     assert_eq!(event_block_hash, finalized_hash);
     Ok(())
@@ -56,8 +59,9 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
     tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
+    let api = ctx.client();
 
-    let mut event_sub = ctx.api.events().subscribe().await?;
+    let mut event_sub = api.events().subscribe().await?;
 
     for i in 0..3 {
         let events = event_sub
@@ -67,6 +71,7 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
         let success_event = events
             .find_first::<system::events::ExtrinsicSuccess>()
             .expect("decode error");
+
         // Every now and then I get no bytes back for the first block events;
         // I assume that this might be the case for the genesis block, so don't
         // worry if no event found (but we should have no decode errors etc either way).
@@ -85,10 +90,10 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
+    let api = ctx.client();
 
     // Subscribe to balance transfer events, ignoring all else.
-    let event_sub = ctx
-        .api
+    let event_sub = api
         .events()
         .subscribe()
         .await?
@@ -101,12 +106,9 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     // Make a transfer:
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
-    ctx.api
-        .tx()
-        .balances()
-        .transfer(bob.clone().into(), 10_000)?
-        .sign_and_submit_then_watch_default(&alice)
-        .await?;
+    let transfer_tx = node_runtime::tx().balances().transfer(bob.clone().into(), 10_000);
+
+    api.tx().sign_and_submit_then_watch_default(&transfer_tx, &alice).await?;
 
     // Wait for the next balance transfer event in our subscription stream
     // and check that it lines up:
@@ -125,20 +127,19 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
 
 #[tokio::test]
 async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicError> {
+    let ctx = test_context().await;
+    let api = ctx.client();
+
     // This function is not publically available to use, but contains
     // the key logic for filling in missing blocks, so we want to test it.
     // This is used in `subscribe_finalized` to ensure no block headers are
     // missed.
     use subxt::events::subscribe_to_block_headers_filling_in_gaps;
 
-    let ctx = test_context().await;
-
     // Manually subscribe to the next 6 finalized block headers, but deliberately
     // filter out some in the middle so we get back b _ _ b _ b. This guarantees
     // that there will be some gaps, even if there aren't any from the subscription.
-    let some_finalized_blocks = ctx
-        .api
-        .client
+    let some_finalized_blocks = api
         .rpc()
         .subscribe_finalized_blocks()
         .await?
@@ -152,7 +153,7 @@ async fn missing_block_headers_will_be_filled_in() -> Result<(), subxt::BasicErr
 
     // This should spot any gaps in the middle and fill them back in.
     let all_finalized_blocks = subscribe_to_block_headers_filling_in_gaps(
-        &ctx.api.client,
+        ctx.client(),
         None,
         some_finalized_blocks,
     );
@@ -185,7 +186,7 @@ async fn check_events_are_sendable() {
     tokio::task::spawn(async {
         let ctx = test_context().await;
 
-        let mut event_sub = ctx.api.events().subscribe().await?;
+        let mut event_sub = ctx.client().events().subscribe().await?;
 
         while let Some(ev) = event_sub.next().await {
             // if `event_sub` doesn't implement Send, we can't hold
@@ -201,7 +202,7 @@ async fn check_events_are_sendable() {
         let ctx = test_context().await;
 
         let mut event_sub = ctx
-            .api
+            .client()
             .events()
             .subscribe()
             .await?

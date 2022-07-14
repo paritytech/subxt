@@ -5,6 +5,7 @@
 use std::sync::Arc;
 use parking_lot::RwLock;
 use super::{
+    OfflineClient,
     OfflineClientT,
 };
 use futures::future;
@@ -137,6 +138,16 @@ impl <T: Config> OnlineClient<T> {
     /// Return an RPC client to make raw requests with.
     pub fn rpc(&self) -> &Rpc<T> {
         &self.rpc
+    }
+
+    /// Return an offline client with the same configuration as this.
+    pub fn offline(&self) -> OfflineClient<T> {
+        let inner = self.inner.read();
+        OfflineClient::new(
+            inner.genesis_hash.clone(),
+            inner.runtime_version.clone(),
+            inner.metadata.clone()
+        )
     }
 
     // Just a copy of the most important trait methods so that people

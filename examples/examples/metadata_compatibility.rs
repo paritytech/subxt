@@ -30,7 +30,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // this check. If it fails, then there is some breaking change between the metadata
     // used to generate this static code, and the runtime metadata from a node that the
     // client is using.
-    polkadot::validate_codegen(api)?;
+    polkadot::validate_codegen(&api)?;
 
     Ok(())
 }

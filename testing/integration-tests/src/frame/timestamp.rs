@@ -2,13 +2,20 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use crate::test_context;
+use crate::{
+    test_context,
+    node_runtime,
+};
 
 #[tokio::test]
 async fn storage_get_current_timestamp() {
-    let cxt = test_context().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
-    let timestamp = cxt.api.storage().timestamp().now(None).await;
+    let timestamp = api
+        .storage()
+        .fetch(&node_runtime::storage().timestamp().now(), None)
+        .await;
 
     assert!(timestamp.is_ok())
 }

@@ -58,6 +58,24 @@ impl <T: Config, Client> TxClient<T, Client> {
 }
 
 impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
+    /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
+    /// if the call is valid (or if it's not possible to check since the call has no validation hash).
+    /// Return an error if the call was not valid or something went wrong trying to validate it (ie
+    /// the pallet or call in question do not exist at all).
+    pub fn validate<Call, Err>(&self, call: &SubmittableExtrinsic<Call, Err>) -> Result<(), BasicError>
+    where
+        Call: MetadataLocation,
+    {
+        if let Some(actual_hash) = call.call_hash {
+            let metadata = self.client.metadata();
+            let expected_hash = metadata.call_hash(call.call_data.pallet(), call.call_data.item())?;
+            if actual_hash != expected_hash {
+                return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
+            }
+        }
+        Ok(())
+    }
+
     /// Return the SCALE encoded bytes representing the call data of the transaction.
     pub fn call_data<Call>(&self, call: &Call) -> Result<Vec<u8>, BasicError>
     where
@@ -81,13 +99,7 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     {
         // 1. Validate this call against the current node metadata if the call comes
         // with a hash allowing us to do so.
-        if let Some(actual_hash) = call.call_hash {
-            let metadata = self.client.metadata();
-            let expected_hash = metadata.call_hash(call.call_data.pallet(), call.call_data.item())?;
-            if actual_hash != expected_hash {
-                return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
-            }
-        }
+        self.validate(call)?;
 
         // 2. SCALE encode call data to bytes (pallet u8, call u8, call params).
         let call_data = Encoded(self.call_data(call)?);

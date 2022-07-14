@@ -20,6 +20,7 @@ use crate::{
     },
     client::{
         OnlineClientT,
+        OfflineClientT,
     },
     metadata::Metadata,
     Config,
@@ -48,6 +49,31 @@ impl<T, Client> StorageClient<T, Client>{
             client,
             _marker: PhantomData,
         }
+    }
+}
+
+impl<T, Client> StorageClient<T, Client>
+where
+    T: Config,
+    Client: OfflineClientT<T>,
+{
+    /// Run the validation logic against some storage address you'd like to access. Returns `Ok(())`
+    /// if the address is valid (or if it's not possible to check since the address has no validation hash).
+    /// Return an error if the address was not valid or something went wrong trying to validate it (ie
+    /// the pallet or storage entry in question do not exist at all).
+    pub fn validate<'a, ReturnTy, Iterable, Defaultable>(
+        &self,
+        address: &'a StorageAddress<'_, ReturnTy, Iterable, Defaultable>,
+    ) -> Result<(), BasicError> {
+        if let Some(hash) = address.validation_hash() {
+            validate_storage(
+                address.pallet_name(),
+                address.entry_name(),
+                hash,
+                &self.client.metadata()
+            )?;
+        }
+        Ok(())
     }
 }
 
@@ -104,22 +130,15 @@ where
         address: &'a StorageAddress<'_, ReturnTy, Iterable, Defaultable>,
         hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<Option<ReturnTy>, BasicError>> + 'a {
-        let client = self.client.clone();
+        let client = self.clone();
         async move {
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            if let Some(validation_hash) = address.validation_hash() {
-                validate_storage(
-                    address.pallet_name(),
-                    address.entry_name(),
-                    validation_hash,
-                    &client.metadata()
-                )?;
-            }
+            client.validate(address)?;
 
-            if let Some(data) = client.storage().fetch_raw(address, hash).await? {
+            if let Some(data) = client.client.storage().fetch_raw(address, hash).await? {
                 Ok(Some(Decode::decode(&mut &*data)?))
             } else {
                 Ok(None)
@@ -215,20 +234,13 @@ where
         page_size: u32,
         hash: Option<T::Hash>,
     ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy, Defaultable>, BasicError>> + 'a {
-        let client = self.client.clone();
+        let client = self.clone();
         async move {
             // Metadata validation checks whether the static address given
             // is likely to actually correspond to a real storage entry or not.
             // if not, it means static codegen doesn't line up with runtime
             // metadata.
-            if let Some(validation_hash) = address.validation_hash() {
-                validate_storage(
-                    address.pallet_name(),
-                    address.entry_name(),
-                    validation_hash,
-                    &client.metadata()
-                )?;
-            }
+            client.validate(&address)?;
 
             // Fetch a concrete block hash to iterate over. We do this so that if new blocks
             // are produced midway through iteration, we continue to iterate at the block
@@ -237,6 +249,7 @@ where
                 hash
             } else {
                 client
+                    .client
                     .rpc()
                     .block_hash(None)
                     .await?
@@ -251,7 +264,7 @@ where
             };
 
             Ok(KeyIter {
-                client: client.storage(),
+                client: client,
                 address: root_addr,
                 block_hash: hash,
                 count: page_size,

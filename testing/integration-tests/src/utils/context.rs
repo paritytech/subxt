@@ -17,9 +17,9 @@ use subxt::{
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub async fn test_node_process_with(
+pub async fn test_context_with(
     key: AccountKeyring,
-) -> TestNodeProcess<SubstrateConfig> {
+) -> TestContext {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \
@@ -28,7 +28,7 @@ pub async fn test_node_process_with(
         SUBSTRATE_NODE_PATH.to_string()
     });
 
-    let proc = TestNodeProcess::<SubstrateConfig>::build(path.as_str())
+    let proc = TestContext::build(path.as_str())
         .with_authority(key)
         .spawn::<SubstrateConfig>()
         .await;
@@ -39,7 +39,7 @@ pub type TestContext = TestNodeProcess<SubstrateConfig>;
 
 pub async fn test_context() -> TestContext {
     tracing_subscriber::fmt::try_init().ok();
-    test_node_process_with(AccountKeyring::Alice).await
+    test_context_with(AccountKeyring::Alice).await
 }
 
 pub fn pair_signer(pair: Pair) -> PairSigner<SubstrateConfig, Pair> {

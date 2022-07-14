@@ -116,7 +116,7 @@ fn generate_storage_entry_fns(
                             .into_iter()
                             .zip(&fields)
                             .map(|(hasher, (field_name, _))| {
-                                quote!( ::subxt::storage::address::StorageMapKey::new(#field_name, #hasher) )
+                                quote!( ::subxt::storage::address::StorageMapKey::new(#field_name.borrow(), #hasher) )
                             });
                         quote! {
                             vec![ #( #keys ),* ]
@@ -130,7 +130,7 @@ fn generate_storage_entry_fns(
                             quote!( #field_name )
                         });
                         quote! {
-                            vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items ),*), #hasher) ]
+                            vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
                         }
                     } else {
                         // If we hit this condition, we don't know how to handle the number of hashes vs fields
@@ -151,7 +151,7 @@ fn generate_storage_entry_fns(
                         abort_call_site!("No hasher found for single key")
                     });
                     let key_impl = quote! {
-                        vec![ ::subxt::storage::address::StorageMapKey::new(_0, #hasher) ]
+                        vec![ ::subxt::storage::address::StorageMapKey::new(_0.borrow(), #hasher) ]
                     };
                     (fields, key_impl)
                 }
@@ -182,14 +182,16 @@ fn generate_storage_entry_fns(
     let docs_token = quote! { #( #[doc = #docs ] )* };
 
     let key_args = fields.iter().map(|(field_name, field_type)| {
-        // The field type is translated from `std::vec::Vec<T>` to `[T]`, if the
-        // interface should generate a reference. In such cases, the vector ultimately is
-        // a slice.
+        // The field type is translated from `std::vec::Vec<T>` to `[T]`. We apply
+        // AsRef to all types, so this just makes it a little more ergonomic.
+        //
+        // TODO [jsdw]: Support mappings like `String -> str` too for better Borrow
+        // ergonomics.
         let field_ty = match field_type.vec_type_param() {
-            Some(ty) => quote!(&[#ty]),
+            Some(ty) => quote!([#ty]),
             _ => quote!(#field_type),
         };
-        quote!( #field_name: & #field_ty )
+        quote!( #field_name: impl ::std::borrow::Borrow<#field_ty> )
     });
 
     let is_map_type = matches!(storage_entry.ty, StorageEntryType::Map { .. });

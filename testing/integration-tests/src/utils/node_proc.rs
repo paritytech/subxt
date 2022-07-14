@@ -24,7 +24,6 @@ use subxt::{
 pub struct TestNodeProcess<R: Config> {
     proc: process::Child,
     client: OnlineClient<R>,
-    ws_url: String,
 }
 
 impl<R> Drop for TestNodeProcess<R>
@@ -62,11 +61,6 @@ where
     /// Returns the subxt client connected to the running node.
     pub fn client(&self) -> OnlineClient<R> {
         self.client.clone()
-    }
-
-    /// Returns the address to which the client is connected.
-    pub fn ws_url(&self) -> &str {
-        &self.ws_url
     }
 }
 
@@ -134,7 +128,6 @@ impl TestNodeProcessBuilder {
                 Ok(TestNodeProcess {
                     proc,
                     client,
-                    ws_url,
                 })
             }
             Err(err) => {

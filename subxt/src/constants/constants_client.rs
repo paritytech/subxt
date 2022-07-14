@@ -30,6 +30,20 @@ impl <T, Client> ConstantsClient<T, Client> {
 }
 
 impl <T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
+    /// Run the validation logic against some constant address you'd like to access. Returns `Ok(())`
+    /// if the address is valid (or if it's not possible to check since the address has no validation hash).
+    /// Return an error if the address was not valid or something went wrong trying to validate it (ie
+    /// the pallet or constant in question do not exist at all).
+    pub fn validate<ReturnTy>(&self, address: &ConstantAddress<'_, ReturnTy>) -> Result<(), BasicError> {
+        if let Some(actual_hash) = address.validation_hash() {
+            let expected_hash = self.client.metadata().constant_hash(address.pallet_name(), address.constant_name())?;
+            if actual_hash != expected_hash {
+                return Err(MetadataError::IncompatibleMetadata.into());
+            }
+        }
+        Ok(())
+    }
+
     /// Access the constant at the address given, returning the type defined by this address.
     /// This is probably used with addresses given from static codegen, although you can manually
     /// construct your own, too.
@@ -37,12 +51,7 @@ impl <T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:
-        if let Some(actual_hash) = address.validation_hash() {
-            let expected_hash = metadata.constant_hash(address.pallet_name(), address.constant_name())?;
-            if actual_hash != expected_hash {
-                return Err(MetadataError::IncompatibleMetadata.into());
-            }
-        }
+        self.validate(address)?;
 
         // 2. Attempt to decode the constant into the type given:
         let pallet = metadata.pallet(address.pallet_name())?;

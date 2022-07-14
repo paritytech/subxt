@@ -4,6 +4,7 @@
 
 use crate::{
     test_context,
+    node_runtime,
     TestContext,
 };
 use frame_metadata::{
@@ -28,72 +29,54 @@ use scale_info::{
     TypeInfo,
 };
 use subxt::{
-    ClientBuilder,
+    OfflineClient,
     SubstrateConfig,
     Metadata,
-    SubstrateExtrinsicParams,
 };
 
-use crate::utils::node_runtime;
-
-type RuntimeApi =
-    node_runtime::RuntimeApi<SubstrateConfig, SubstrateExtrinsicParams<SubstrateConfig>>;
-
-async fn metadata_to_api(metadata: RuntimeMetadataV14, cxt: &TestContext) -> RuntimeApi {
+async fn metadata_to_api(metadata: RuntimeMetadataV14, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
     let metadata = Metadata::try_from(prefixed).unwrap();
 
-    ClientBuilder::new()
-            .set_url(cxt.node_proc.ws_url().to_string())
-            .set_metadata(metadata)
-            .build()
-            .await
-            .unwrap()
-            .to_runtime_api::<node_runtime::RuntimeApi<
-                SubstrateConfig,
-                SubstrateExtrinsicParams<SubstrateConfig>,
-            >>()
+    OfflineClient::new(
+        ctx.client().genesis_hash(),
+        ctx.client().runtime_version(),
+        metadata
+    )
 }
 
 #[tokio::test]
 async fn full_metadata_check() {
-    let cxt = test_context().await;
-    let api = &cxt.api;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
     // Runtime metadata is identical to the metadata used during API generation.
-    assert!(api.validate_metadata().is_ok());
+    assert!(node_runtime::validate_codegen(&api).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = {
-        let locked_client_metadata = api.client.metadata();
-        let client_metadata = locked_client_metadata.read();
-        client_metadata.runtime_metadata().clone()
-    };
+    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
     metadata.pallets[0].name = "NewPallet".to_string();
 
-    let new_api = metadata_to_api(metadata, &cxt).await;
+    let api = metadata_to_api(metadata, &ctx).await;
     assert_eq!(
-        new_api
-            .validate_metadata()
+        node_runtime::validate_codegen(&api)
             .expect_err("Validation should fail for incompatible metadata"),
-        ::subxt::MetadataError::IncompatibleMetadata
+        ::subxt::error::MetadataError::IncompatibleMetadata
     );
 }
 
 #[tokio::test]
 async fn constant_values_are_not_validated() {
-    let cxt = test_context().await;
-    let api = &cxt.api;
+    let ctx = test_context().await;
+    let api = ctx.client();
 
-    // Ensure that `ExistentialDeposit` is compatible before altering the metadata.
-    assert!(cxt.api.constants().balances().existential_deposit().is_ok());
+    let deposit_addr = node_runtime::constants().balances().existential_deposit();
+
+    // Retrieve existential deposit to validate it and confirm that it's OK.
+    assert!(api.constants().at(&deposit_addr).is_ok());
 
     // Modify the metadata.
-    let mut metadata: RuntimeMetadataV14 = {
-        let locked_client_metadata = api.client.metadata();
-        let client_metadata = locked_client_metadata.read();
-        client_metadata.runtime_metadata().clone()
-    };
+    let mut metadata: RuntimeMetadataV14 = api.metadata().runtime_metadata().clone();
 
     let mut existential = metadata
         .pallets
@@ -108,13 +91,10 @@ async fn constant_values_are_not_validated() {
     // Modifying a constant value should not lead to an error:
     existential.value = vec![0u8; 32];
 
-    let new_api = metadata_to_api(metadata, &cxt).await;
+    let api = metadata_to_api(metadata, &ctx).await;
 
-    assert!(new_api.validate_metadata().is_ok());
-    assert!(new_api.constants().balances().existential_deposit().is_ok());
-
-    // Other constant validation should not be impacted.
-    assert!(new_api.constants().balances().max_locks().is_ok());
+    assert!(node_runtime::validate_codegen(&api).is_ok());
+    assert!(api.constants().at(&deposit_addr).is_ok());
 }
 
 fn default_pallet() -> PalletMetadata {
@@ -143,11 +123,15 @@ fn pallets_to_metadata(pallets: Vec<PalletMetadata>) -> RuntimeMetadataV14 {
 
 #[tokio::test]
 async fn calls_check() {
-    let cxt = test_context().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let unbond_tx = node_runtime::tx().staking().unbond(123_456_789_012_345);
+    let withdraw_unbonded_addr = node_runtime::tx().staking().withdraw_unbonded(10);
 
     // Ensure that `Unbond` and `WinthdrawUnbonded` calls are compatible before altering the metadata.
-    assert!(cxt.api.tx().staking().unbond(123_456_789_012_345).is_ok());
-    assert!(cxt.api.tx().staking().withdraw_unbonded(10).is_ok());
+    assert!(api.tx().validate(&unbond_tx).is_ok());
+    assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
 
     // Reconstruct the `Staking` call as is.
     struct CallRec;
@@ -181,9 +165,11 @@ async fn calls_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let new_api = metadata_to_api(metadata, &cxt).await;
-    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_ok());
-    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
+    let api = metadata_to_api(metadata, &ctx).await;
+
+    // The calls should still be valid with this new type info:
+    assert!(api.tx().validate(&unbond_tx).is_ok());
+    assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
 
     // Change `Unbond` call but leave the rest as is.
     struct CallRecSecond;
@@ -216,31 +202,24 @@ async fn calls_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let new_api = metadata_to_api(metadata, &cxt).await;
+    let api = metadata_to_api(metadata, &ctx).await;
+
     // Unbond call should fail, while withdraw_unbonded remains compatible.
-    assert!(new_api.tx().staking().unbond(123_456_789_012_345).is_err());
-    assert!(new_api.tx().staking().withdraw_unbonded(10).is_ok());
+    assert!(api.tx().validate(&unbond_tx).is_err());
+    assert!(api.tx().validate(&withdraw_unbonded_addr).is_ok());
 }
 
 #[tokio::test]
 async fn storage_check() {
-    let cxt = test_context().await;
+    let ctx = test_context().await;
+    let api = ctx.client();
+
+    let tx_count_addr = node_runtime::storage().system().extrinsic_count();
+    let tx_len_addr = node_runtime::storage().system().all_extrinsics_len();
 
     // Ensure that `ExtrinsicCount` and `EventCount` storages are compatible before altering the metadata.
-    assert!(cxt
-        .api
-        .storage()
-        .system()
-        .extrinsic_count(None)
-        .await
-        .is_ok());
-    assert!(cxt
-        .api
-        .storage()
-        .system()
-        .all_extrinsics_len(None)
-        .await
-        .is_ok());
+    assert!(api.storage().validate(&tx_count_addr).is_ok());
+    assert!(api.storage().validate(&tx_len_addr).is_ok());
 
     // Reconstruct the storage.
     let storage = PalletStorageMetadata {
@@ -268,19 +247,11 @@ async fn storage_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let new_api = metadata_to_api(metadata, &cxt).await;
-    assert!(new_api
-        .storage()
-        .system()
-        .extrinsic_count(None)
-        .await
-        .is_ok());
-    assert!(new_api
-        .storage()
-        .system()
-        .all_extrinsics_len(None)
-        .await
-        .is_ok());
+    let api = metadata_to_api(metadata, &ctx).await;
+
+    // The addresses should still validate:
+    assert!(api.storage().validate(&tx_count_addr).is_ok());
+    assert!(api.storage().validate(&tx_len_addr).is_ok());
 
     // Reconstruct the storage while modifying ExtrinsicCount.
     let storage = PalletStorageMetadata {
@@ -309,17 +280,9 @@ async fn storage_check() {
         ..default_pallet()
     };
     let metadata = pallets_to_metadata(vec![pallet]);
-    let new_api = metadata_to_api(metadata, &cxt).await;
-    assert!(new_api
-        .storage()
-        .system()
-        .extrinsic_count(None)
-        .await
-        .is_err());
-    assert!(new_api
-        .storage()
-        .system()
-        .all_extrinsics_len(None)
-        .await
-        .is_ok());
+    let api = metadata_to_api(metadata, &ctx).await;
+
+    // The count route should fail now; the other will be ok still.
+    assert!(api.storage().validate(&tx_count_addr).is_err());
+    assert!(api.storage().validate(&tx_len_addr).is_ok());
 }

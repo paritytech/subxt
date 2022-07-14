@@ -540,7 +540,7 @@ pub mod api {
                 #[doc = " The full account information for a particular account ID."]
                 pub fn account(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::frame_system::AccountInfo<
@@ -556,7 +556,7 @@ pub mod api {
                         "System",
                         "Account",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -661,7 +661,7 @@ pub mod api {
                 #[doc = " Map of block numbers to block hashes."]
                 pub fn block_hash(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::subxt::ext::sp_core::H256,
@@ -672,7 +672,7 @@ pub mod api {
                         "System",
                         "BlockHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -707,7 +707,7 @@ pub mod api {
                 #[doc = " Extrinsics data for the current block (maps an extrinsic's index to its data)."]
                 pub fn extrinsic_data(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::core::primitive::u8>,
@@ -718,7 +718,7 @@ pub mod api {
                         "System",
                         "ExtrinsicData",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -878,7 +878,7 @@ pub mod api {
                 #[doc = " no notification will be triggered thus the event might be lost."]
                 pub fn event_topics(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
@@ -889,7 +889,7 @@ pub mod api {
                         "System",
                         "EventTopics",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -1520,12 +1520,12 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda (& self , _0 : & :: core :: primitive :: u32 ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: storage :: address :: AddressIsIterable , :: subxt :: storage :: address :: AddressHasDefaultValue >{
+                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: storage :: address :: AddressIsIterable , :: subxt :: storage :: address :: AddressHasDefaultValue >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "Scheduler",
                         "Agenda",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -1552,7 +1552,7 @@ pub mod api {
                 #[doc = " Lookup from identity to the block number and index of the task."]
                 pub fn lookup(
                     &self,
-                    _0: &&[::core::primitive::u8],
+                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (::core::primitive::u32, ::core::primitive::u32),
@@ -1563,7 +1563,7 @@ pub mod api {
                         "Scheduler",
                         "Lookup",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -1833,7 +1833,7 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn status_for(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_preimage::RequestStatus<
@@ -1847,7 +1847,7 @@ pub mod api {
                         "Preimage",
                         "StatusFor",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -1885,7 +1885,7 @@ pub mod api {
                 #[doc = " The preimages stored by this pallet."]
                 pub fn preimage_for(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -1898,7 +1898,7 @@ pub mod api {
                         "Preimage",
                         "PreimageFor",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -2305,7 +2305,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay."]
                 pub fn under_construction(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -2318,7 +2318,7 @@ pub mod api {
                         "Babe",
                         "UnderConstruction",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -3012,7 +3012,7 @@ pub mod api {
                 #[doc = " The lookup from index to account."]
                 pub fn accounts(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -3027,7 +3027,7 @@ pub mod api {
                         "Indices",
                         "Accounts",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -3615,7 +3615,7 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
@@ -3626,7 +3626,7 @@ pub mod api {
                         "Balances",
                         "Account",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -3685,7 +3685,7 @@ pub mod api {
                 #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
                 pub fn locks(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
@@ -3700,7 +3700,7 @@ pub mod api {
                         "Balances",
                         "Locks",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -3740,7 +3740,7 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -3756,7 +3756,7 @@ pub mod api {
                         "Balances",
                         "Reserves",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -5603,7 +5603,7 @@ pub mod api {
                 #[doc = " Map from all locked \"stash\" accounts to the controller account."]
                 pub fn bonded(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::subxt::ext::sp_core::crypto::AccountId32,
@@ -5614,7 +5614,7 @@ pub mod api {
                         "Staking",
                         "Bonded",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -5714,7 +5714,7 @@ pub mod api {
                 #[doc = " Map from all (unlocked) \"controller\" accounts to the info regarding the staking."]
                 pub fn ledger(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::StakingLedger,
@@ -5725,7 +5725,7 @@ pub mod api {
                         "Staking",
                         "Ledger",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -5760,7 +5760,7 @@ pub mod api {
                 #[doc = " Where the reward payment should be made. Keyed by stash."]
                 pub fn payee(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::RewardDestination<
@@ -5773,7 +5773,7 @@ pub mod api {
                         "Staking",
                         "Payee",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -5810,7 +5810,7 @@ pub mod api {
                 #[doc = " The map from (wannabe) validator stash key to the preferences of that validator."]
                 pub fn validators(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::ValidatorPrefs,
@@ -5821,7 +5821,7 @@ pub mod api {
                         "Staking",
                         "Validators",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -5915,7 +5915,7 @@ pub mod api {
                 #[doc = " [`Call::chill_other`] dispatchable by anyone."]
                 pub fn nominators(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::Nominations,
@@ -5926,7 +5926,7 @@ pub mod api {
                         "Staking",
                         "Nominators",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6071,7 +6071,7 @@ pub mod api {
                 #[doc = " for the eras in `[CurrentEra - HISTORY_DEPTH, CurrentEra]`."]
                 pub fn eras_start_session_index(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -6082,7 +6082,7 @@ pub mod api {
                         "Staking",
                         "ErasStartSessionIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6125,8 +6125,8 @@ pub mod api {
                 #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
                 pub fn eras_stakers(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::Exposure<
@@ -6141,11 +6141,11 @@ pub mod api {
                         "ErasStakers",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -6199,8 +6199,8 @@ pub mod api {
                 #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
                 pub fn eras_stakers_clipped(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::Exposure<
@@ -6215,11 +6215,11 @@ pub mod api {
                         "ErasStakersClipped",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -6272,8 +6272,8 @@ pub mod api {
                 #[doc = " Is it removed after `HISTORY_DEPTH` eras."]
                 pub fn eras_validator_prefs(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::ValidatorPrefs,
@@ -6285,11 +6285,11 @@ pub mod api {
                         "ErasValidatorPrefs",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -6331,7 +6331,7 @@ pub mod api {
                 #[doc = " Eras that haven't finished yet or has been removed doesn't have reward."]
                 pub fn eras_validator_reward(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -6342,7 +6342,7 @@ pub mod api {
                         "Staking",
                         "ErasValidatorReward",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6380,7 +6380,7 @@ pub mod api {
                 #[doc = " If reward hasn't been set or has been removed then 0 reward is returned."]
                 pub fn eras_reward_points(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::EraRewardPoints<
@@ -6393,7 +6393,7 @@ pub mod api {
                         "Staking",
                         "ErasRewardPoints",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6432,7 +6432,7 @@ pub mod api {
                 #[doc = " If total hasn't been set or has been removed then 0 stake is returned."]
                 pub fn eras_total_stake(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -6443,7 +6443,7 @@ pub mod api {
                         "Staking",
                         "ErasTotalStake",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6545,7 +6545,7 @@ pub mod api {
                 #[doc = " All unapplied slashes that are queued for later."]
                 pub fn unapplied_slashes(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<
@@ -6561,7 +6561,7 @@ pub mod api {
                         "Staking",
                         "UnappliedSlashes",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6626,8 +6626,8 @@ pub mod api {
                 #[doc = " and slash value of the era."]
                 pub fn validator_slash_in_era(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -6642,11 +6642,11 @@ pub mod api {
                         "ValidatorSlashInEra",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -6686,8 +6686,8 @@ pub mod api {
                 #[doc = " All slashing events on nominators, mapped by era to the highest slash value of the era."]
                 pub fn nominator_slash_in_era(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -6699,11 +6699,11 @@ pub mod api {
                         "NominatorSlashInEra",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -6739,7 +6739,7 @@ pub mod api {
                 #[doc = " Slashing spans for stash accounts."]
                 pub fn slashing_spans(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::slashing::SlashingSpans,
@@ -6750,7 +6750,7 @@ pub mod api {
                         "Staking",
                         "SlashingSpans",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -6786,8 +6786,8 @@ pub mod api {
                 #[doc = " as well as how much reward has been paid out."]
                 pub fn span_slash(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
-                    _1: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
+                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_staking::slashing::SpanRecord<
@@ -6800,7 +6800,7 @@ pub mod api {
                         "Staking",
                         "SpanSlash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            &(_0, _1),
+                            &(_0.borrow(), _1.borrow()),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -7110,7 +7110,7 @@ pub mod api {
                 #[doc = " The primary structure that holds all offence records keyed by report identifiers."]
                 pub fn reports(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_staking::offence::OffenceDetails<
@@ -7130,7 +7130,7 @@ pub mod api {
                         "Offences",
                         "Reports",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -7174,8 +7174,8 @@ pub mod api {
                 #[doc = " A vector of reports of the same kind that happened at the same time slot."]
                 pub fn concurrent_reports_index(
                     &self,
-                    _0: &[::core::primitive::u8; 16usize],
-                    _1: &&[::core::primitive::u8],
+                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
+                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::subxt::ext::sp_core::H256>,
@@ -7187,11 +7187,11 @@ pub mod api {
                         "ConcurrentReportsIndex",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -7232,7 +7232,7 @@ pub mod api {
                 #[doc = " different types are not supported at the moment so we are doing the manual serialization."]
                 pub fn reports_by_kind_index(
                     &self,
-                    _0: &[::core::primitive::u8; 16usize],
+                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::core::primitive::u8>,
@@ -7243,7 +7243,7 @@ pub mod api {
                         "Offences",
                         "ReportsByKindIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -7527,7 +7527,7 @@ pub mod api {
                 #[doc = " The next session keys for a validator."]
                 pub fn next_keys(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime::SessionKeys,
@@ -7538,7 +7538,7 @@ pub mod api {
                         "Session",
                         "NextKeys",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -7573,8 +7573,8 @@ pub mod api {
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
                 pub fn key_owner(
                     &self,
-                    _0: &runtime_types::sp_core::crypto::KeyTypeId,
-                    _1: &&[::core::primitive::u8],
+                    _0: impl ::std::borrow::Borrow<runtime_types::sp_core::crypto::KeyTypeId>,
+                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::subxt::ext::sp_core::crypto::AccountId32,
@@ -7585,7 +7585,7 @@ pub mod api {
                         "Session",
                         "KeyOwner",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            &(_0, _1),
+                            &(_0.borrow(), _1.borrow()),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -7934,7 +7934,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SetId` is not under user control."]
                 pub fn set_id_session(
                     &self,
-                    _0: &::core::primitive::u64,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -7945,7 +7945,7 @@ pub mod api {
                         "Grandpa",
                         "SetIdSession",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -8177,8 +8177,8 @@ pub mod api {
                 #[doc = " `WrapperOpaque<BoundedOpaqueNetworkState>`."]
                 pub fn received_heartbeats(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::frame_support::traits::misc::WrapperOpaque<
@@ -8192,11 +8192,11 @@ pub mod api {
                         "ReceivedHeartbeats",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -8236,8 +8236,8 @@ pub mod api {
                 #[doc = " number of blocks authored by the given authority."]
                 pub fn authored_blocks(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -8249,11 +8249,11 @@ pub mod api {
                         "AuthoredBlocks",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -9713,7 +9713,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: Safe, as increasing integer keys are safe."]
                 pub fn deposit_of(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -9727,7 +9727,7 @@ pub mod api {
                         "Democracy",
                         "DepositOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -9768,7 +9768,7 @@ pub mod api {
                 #[doc = " The block number is the block at which it was deposited."]
                 pub fn preimages(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_democracy::PreimageStatus<
@@ -9783,7 +9783,7 @@ pub mod api {
                         "Democracy",
                         "Preimages",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -9868,7 +9868,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as indexes are not under an attacker’s control."]
                 pub fn referendum_info_of(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_democracy::types::ReferendumInfo<
@@ -9883,7 +9883,7 @@ pub mod api {
                         "Democracy",
                         "ReferendumInfoOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -9927,7 +9927,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as `AccountId`s are crypto hashes anyway."]
                 pub fn voting_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_democracy::vote::Voting<
@@ -9942,7 +9942,7 @@ pub mod api {
                         "Democracy",
                         "VotingOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -10034,7 +10034,7 @@ pub mod api {
                 #[doc = " (until when it may not be resubmitted) and who vetoed it."]
                 pub fn blacklist(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -10048,7 +10048,7 @@ pub mod api {
                         "Democracy",
                         "Blacklist",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -10087,7 +10087,7 @@ pub mod api {
                 #[doc = " Record of all proposals that have been subject to emergency cancellation."]
                 pub fn cancellations(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::bool,
@@ -10098,7 +10098,7 @@ pub mod api {
                         "Democracy",
                         "Cancellations",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -10883,7 +10883,7 @@ pub mod api {
                 #[doc = " Actual proposal for a given hash, if it's current."]
                 pub fn proposal_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime::Call,
@@ -10894,7 +10894,7 @@ pub mod api {
                         "Council",
                         "ProposalOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -10929,7 +10929,7 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_collective::Votes<
@@ -10943,7 +10943,7 @@ pub mod api {
                         "Council",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -11555,7 +11555,7 @@ pub mod api {
                 #[doc = " Actual proposal for a given hash, if it's current."]
                 pub fn proposal_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime::Call,
@@ -11566,7 +11566,7 @@ pub mod api {
                         "TechnicalCommittee",
                         "ProposalOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -11601,7 +11601,7 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_collective::Votes<
@@ -11615,7 +11615,7 @@ pub mod api {
                         "TechnicalCommittee",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -12226,7 +12226,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as `AccountId` is a crypto hash."]
                 pub fn voting(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_elections_phragmen::Voter<
@@ -12240,7 +12240,7 @@ pub mod api {
                         "PhragmenElection",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -13158,7 +13158,7 @@ pub mod api {
                 #[doc = " Proposals that have been made."]
                 pub fn proposals(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_treasury::Proposal<
@@ -13172,7 +13172,7 @@ pub mod api {
                         "Treasury",
                         "Proposals",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -13691,7 +13691,9 @@ pub mod api {
             impl StorageApi {
                 pub fn claims(
                     &self,
-                    _0: &runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -13702,7 +13704,7 @@ pub mod api {
                         "Claims",
                         "Claims",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -13759,7 +13761,9 @@ pub mod api {
                 #[doc = " The block number is when the vesting should start."]
                 pub fn vesting(
                     &self,
-                    _0: &runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -13774,7 +13778,7 @@ pub mod api {
                         "Claims",
                         "Vesting",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -13816,7 +13820,9 @@ pub mod api {
                 #[doc = " The statement kind that must be signed, if any."]
                 pub fn signing(
                     &self,
-                    _0: &runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_common::claims::StatementKind,
@@ -13827,7 +13833,7 @@ pub mod api {
                         "Claims",
                         "Signing",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -13862,7 +13868,7 @@ pub mod api {
                 #[doc = " Pre-claimed Ethereum accounts, by the Account ID that they are claimed to."]
                 pub fn preclaims(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_common::claims::EthereumAddress,
@@ -13873,7 +13879,7 @@ pub mod api {
                         "Claims",
                         "Preclaims",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -14262,7 +14268,7 @@ pub mod api {
                 #[doc = " Information regarding the vesting of a given account."]
                 pub fn vesting(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -14278,7 +14284,7 @@ pub mod api {
                         "Vesting",
                         "Vesting",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -15615,7 +15621,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn identity_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_identity::types::Registration<
@@ -15628,7 +15634,7 @@ pub mod api {
                         "Identity",
                         "IdentityOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -15668,7 +15674,7 @@ pub mod api {
                 #[doc = " context. If the account is not some other account's sub-identity, then just `None`."]
                 pub fn super_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -15682,7 +15688,7 @@ pub mod api {
                         "Identity",
                         "SuperOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -15725,7 +15731,7 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn subs_of(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -15741,7 +15747,7 @@ pub mod api {
                         "Identity",
                         "SubsOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -16560,7 +16566,7 @@ pub mod api {
                 #[doc = " which are being delegated to, together with the amount held on deposit."]
                 pub fn proxies(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -16580,7 +16586,7 @@ pub mod api {
                         "Proxy",
                         "Proxies",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -16625,7 +16631,7 @@ pub mod api {
                 #[doc = " The announcements made by the proxy (key)."]
                 pub fn announcements(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -16645,7 +16651,7 @@ pub mod api {
                         "Proxy",
                         "Announcements",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -17220,8 +17226,8 @@ pub mod api {
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
-                    _1: &[::core::primitive::u8; 32usize],
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
+                    _1: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_multisig::Multisig<
@@ -17232,7 +17238,7 @@ pub mod api {
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("Multisig" , "Multisigs" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [145u8 , 78u8 , 57u8 , 171u8 , 199u8 , 158u8 , 226u8 , 250u8 , 224u8 , 133u8 , 45u8 , 251u8 , 202u8 , 22u8 , 171u8 , 132u8 , 229u8 , 110u8 , 248u8 , 233u8 , 38u8 , 2u8 , 247u8 , 140u8 , 150u8 , 103u8 , 211u8 , 209u8 , 160u8 , 158u8 , 23u8 , 215u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("Multisig" , "Multisigs" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [145u8 , 78u8 , 57u8 , 171u8 , 199u8 , 158u8 , 226u8 , 250u8 , 224u8 , 133u8 , 45u8 , 251u8 , 202u8 , 22u8 , 171u8 , 132u8 , 229u8 , 110u8 , 248u8 , 233u8 , 38u8 , 2u8 , 247u8 , 140u8 , 150u8 , 103u8 , 211u8 , 209u8 , 160u8 , 158u8 , 23u8 , 215u8 ,])
                 }
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs_root(
@@ -17261,7 +17267,7 @@ pub mod api {
                 }
                 pub fn calls(
                     &self,
-                    _0: &[::core::primitive::u8; 32usize],
+                    _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -17278,7 +17284,7 @@ pub mod api {
                         "Multisig",
                         "Calls",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -17922,7 +17928,7 @@ pub mod api {
                 #[doc = " Bounties that have been made."]
                 pub fn bounties(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_bounties::Bounty<
@@ -17937,7 +17943,7 @@ pub mod api {
                         "Bounties",
                         "Bounties",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -17976,7 +17982,7 @@ pub mod api {
                 #[doc = " The description of each bounty."]
                 pub fn bounty_descriptions(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -17989,7 +17995,7 @@ pub mod api {
                         "Bounties",
                         "BountyDescriptions",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -18752,7 +18758,7 @@ pub mod api {
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub fn parent_child_bounties(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -18763,7 +18769,7 @@ pub mod api {
                         "ChildBounties",
                         "ParentChildBounties",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -18799,8 +18805,8 @@ pub mod api {
                 #[doc = " Child bounties that have been added."]
                 pub fn child_bounties(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_child_bounties::ChildBounty<
@@ -18816,11 +18822,11 @@ pub mod api {
                         "ChildBounties",
                         vec![
                             ::subxt::storage::address::StorageMapKey::new(
-                                _0,
+                                _0.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                             ::subxt::storage::address::StorageMapKey::new(
-                                _1,
+                                _1.borrow(),
                                 ::subxt::storage::address::StorageHasher::Twox64Concat,
                             ),
                         ],
@@ -18860,7 +18866,7 @@ pub mod api {
                 #[doc = " The description of each child-bounty."]
                 pub fn child_bounty_descriptions(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
@@ -18873,7 +18879,7 @@ pub mod api {
                         "ChildBounties",
                         "ChildBountyDescriptions",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -18910,7 +18916,7 @@ pub mod api {
                 #[doc = " The cumulative child-bounty curator fee for each parent bounty."]
                 pub fn children_curator_fees(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -18921,7 +18927,7 @@ pub mod api {
                         "ChildBounties",
                         "ChildrenCuratorFees",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -19393,7 +19399,7 @@ pub mod api {
                 #[doc = " guaranteed to be a secure hash."]
                 pub fn tips(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_tips::OpenTip<
@@ -19409,7 +19415,7 @@ pub mod api {
                         "Tips",
                         "Tips",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -19452,7 +19458,7 @@ pub mod api {
                 #[doc = " insecure enumerable hash since the key is guaranteed to be the result of a secure hash."]
                 pub fn reasons(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::core::primitive::u8>,
@@ -19463,7 +19469,7 @@ pub mod api {
                         "Tips",
                         "Reasons",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -20111,12 +20117,12 @@ pub mod api {
                 #[doc = " allowing us to keep only a single one in memory at a time."]
                 #[doc = ""]
                 #[doc = " Twox note: the key of the map is an auto-incrementing index which users cannot inspect or"]
-                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map (& self , _0 : & :: core :: primitive :: u32 ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
+                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "ElectionProviderMultiPhase",
                         "SignedSubmissionsMap",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -20601,7 +20607,7 @@ pub mod api {
                 #[doc = " Nodes store links forward and back within their respective bags."]
                 pub fn list_nodes(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_bags_list::list::Node,
@@ -20612,7 +20618,7 @@ pub mod api {
                         "VoterList",
                         "ListNodes",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -20672,7 +20678,7 @@ pub mod api {
                 #[doc = " Stores a `Bag` struct, which stores head and tail pointers to itself."]
                 pub fn list_bags(
                     &self,
-                    _0: &::core::primitive::u64,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_bags_list::list::Bag,
@@ -20683,7 +20689,7 @@ pub mod api {
                         "VoterList",
                         "ListBags",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -22437,12 +22443,12 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields (& self , _0 : & runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
+                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "ParaInclusion",
                         "AvailabilityBitfields",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -22466,12 +22472,12 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: Id ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
+                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "ParaInclusion",
                         "PendingAvailability",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -22498,7 +22504,9 @@ pub mod api {
                 #[doc = " The commitments of candidates pending availability, by `ParaId`."]
                 pub fn pending_availability_commitments(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_primitives::v2::CandidateCommitments<
@@ -22511,7 +22519,7 @@ pub mod api {
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23225,12 +23233,12 @@ pub mod api {
                 #[doc = " All currently active PVF pre-checking votes."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
+                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "Paras",
                         "PvfActiveVoteMap",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23306,7 +23314,9 @@ pub mod api {
                 #[doc = " The current lifecycle of a all known Para IDs."]
                 pub fn para_lifecycles(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle,
@@ -23317,7 +23327,7 @@ pub mod api {
                         "Paras",
                         "ParaLifecycles",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23352,7 +23362,9 @@ pub mod api {
                 #[doc = " The head-data of every registered para."]
                 pub fn heads(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::HeadData,
@@ -23363,7 +23375,7 @@ pub mod api {
                         "Paras",
                         "Heads",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23400,7 +23412,9 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn current_code_hash(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
@@ -23411,7 +23425,7 @@ pub mod api {
                         "Paras",
                         "CurrentCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23451,8 +23465,10 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn past_code_hash(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
-                    _1: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
+                    _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
@@ -23463,7 +23479,7 @@ pub mod api {
                         "Paras",
                         "PastCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            &(_0, _1),
+                            &(_0.borrow(), _1.borrow()),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23503,7 +23519,9 @@ pub mod api {
                 #[doc = " to keep it available for secondary checkers."]
                 pub fn past_code_meta(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_parachains::paras::ParaPastCodeMeta<
@@ -23516,7 +23534,7 @@ pub mod api {
                         "Paras",
                         "PastCodeMeta",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23586,7 +23604,9 @@ pub mod api {
                 #[doc = " in the context of a relay chain block with a number >= `expected_at`."]
                 pub fn future_code_upgrades(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -23597,7 +23617,7 @@ pub mod api {
                         "Paras",
                         "FutureCodeUpgrades",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23636,7 +23656,9 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn future_code_hash(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
@@ -23647,7 +23669,7 @@ pub mod api {
                         "Paras",
                         "FutureCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23692,7 +23714,9 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_go_ahead_signal(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_primitives::v2::UpgradeGoAhead,
@@ -23703,7 +23727,7 @@ pub mod api {
                         "Paras",
                         "UpgradeGoAheadSignal",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23754,7 +23778,9 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_restriction_signal(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_primitives::v2::UpgradeRestriction,
@@ -23765,7 +23791,7 @@ pub mod api {
                         "Paras",
                         "UpgradeRestrictionSignal",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23861,7 +23887,7 @@ pub mod api {
                 #[doc = " The actions to perform during the start of a specific session index."]
                 pub fn actions_queue(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
@@ -23872,7 +23898,7 @@ pub mod api {
                         "Paras",
                         "ActionsQueue",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23910,7 +23936,9 @@ pub mod api {
                 #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
                 pub fn upcoming_paras_genesis(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_parachains::paras::ParaGenesisArgs,
@@ -23921,7 +23949,7 @@ pub mod api {
                         "Paras",
                         "UpcomingParasGenesis",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -23959,7 +23987,9 @@ pub mod api {
                 #[doc = " The number of reference on the validation code in [`CodeByHash`] storage."]
                 pub fn code_by_hash_refs(
                     &self,
-                    _0 : & runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -23970,7 +24000,7 @@ pub mod api {
                         "Paras",
                         "CodeByHashRefs",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -24008,7 +24038,9 @@ pub mod api {
                 #[doc = " [`PastCodeHash`]."]
                 pub fn code_by_hash(
                     &self,
-                    _0 : & runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::ValidationCode,
@@ -24019,7 +24051,7 @@ pub mod api {
                         "Paras",
                         "CodeByHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -24193,7 +24225,9 @@ pub mod api {
                 #[doc = " The downward messages addressed for a certain para."]
                 pub fn downward_message_queues(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<
@@ -24208,7 +24242,7 @@ pub mod api {
                         "Dmp",
                         "DownwardMessageQueues",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -24253,7 +24287,9 @@ pub mod api {
                 #[doc = " - `H(M)`: is the hash of the message being appended."]
                 pub fn downward_message_queue_heads(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::subxt::ext::sp_core::H256,
@@ -24264,7 +24300,7 @@ pub mod api {
                         "Dmp",
                         "DownwardMessageQueueHeads",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -24489,7 +24525,9 @@ pub mod api {
                 #[doc = " The messages are processed in FIFO order."]
                 pub fn relay_dispatch_queues(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
@@ -24500,7 +24538,7 @@ pub mod api {
                         "Ump",
                         "RelayDispatchQueues",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -24550,7 +24588,9 @@ pub mod api {
                 #[doc = " - The set of keys should exactly match the set of keys of `RelayDispatchQueues`."]
                 pub fn relay_dispatch_queue_size(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (::core::primitive::u32, ::core::primitive::u32),
@@ -24561,7 +24601,7 @@ pub mod api {
                         "Ump",
                         "RelayDispatchQueueSize",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -24658,7 +24698,7 @@ pub mod api {
                 #[doc = " These messages stay there until manually dispatched."]
                 pub fn overweight(
                     &self,
-                    _0: &::core::primitive::u64,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -24672,7 +24712,7 @@ pub mod api {
                         "Ump",
                         "Overweight",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25092,12 +25132,12 @@ pub mod api {
                 #[doc = " The set is accompanied by a list for iteration."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests (& self , _0 : & runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest , :: subxt :: storage :: address :: AddressIsIterable , () >{
+                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest , :: subxt :: storage :: address :: AddressIsIterable , () >{
                     ::subxt::storage::address::StorageAddress::new_with_validation(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25153,7 +25193,9 @@ pub mod api {
                 #[doc = " `(X, _)` as the number of `HrmpOpenChannelRequestCount` for `X`."]
                 pub fn hrmp_open_channel_request_count(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -25164,7 +25206,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25203,7 +25245,9 @@ pub mod api {
                 #[doc = " `confirmed` set to true, as the number of `HrmpAcceptedChannelRequestCount` for `X`."]
                 pub fn hrmp_accepted_channel_request_count(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -25214,7 +25258,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25257,7 +25301,9 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_close_channel_requests(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (),
@@ -25268,7 +25314,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpCloseChannelRequests",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25333,7 +25379,9 @@ pub mod api {
                 #[doc = " - each para `P` used here as a key should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_watermarks(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -25344,7 +25392,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpWatermarks",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25383,7 +25431,9 @@ pub mod api {
                 #[doc = " - each participant in the channel should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_channels(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel,
@@ -25394,7 +25444,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpChannels",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25443,7 +25493,9 @@ pub mod api {
                 #[doc = " - the vectors are sorted."]
                 pub fn hrmp_ingress_channels_index(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
@@ -25454,7 +25506,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25500,7 +25552,9 @@ pub mod api {
                 }
                 pub fn hrmp_egress_channels_index(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
@@ -25511,7 +25565,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25546,7 +25600,9 @@ pub mod api {
                 #[doc = " Invariant: cannot be non-empty if the corresponding channel in `HrmpChannels` is `None`."]
                 pub fn hrmp_channel_contents(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<
@@ -25561,7 +25617,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpChannelContents",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25606,7 +25662,9 @@ pub mod api {
                 #[doc = "   same block number."]
                 pub fn hrmp_channel_digests(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<(
@@ -25622,7 +25680,7 @@ pub mod api {
                         "Hrmp",
                         "HrmpChannelDigests",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -25725,7 +25783,7 @@ pub mod api {
                 #[doc = " Does not have any entries before the session index in the first session change notification."]
                 pub fn sessions(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_primitives::v2::SessionInfo,
@@ -25736,7 +25794,7 @@ pub mod api {
                         "ParaSessionInfo",
                         "Sessions",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -25773,7 +25831,7 @@ pub mod api {
                 #[doc = " The validator account keys of the validators actively participating in parachain consensus."]
                 pub fn account_keys(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
@@ -25784,7 +25842,7 @@ pub mod api {
                         "ParaSessionInfo",
                         "AccountKeys",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -25950,8 +26008,10 @@ pub mod api {
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &runtime_types::polkadot_core_primitives::CandidateHash,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_core_primitives::CandidateHash,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_primitives::v2::DisputeState<
@@ -25960,7 +26020,7 @@ pub mod api {
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Disputes" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [192u8 , 238u8 , 255u8 , 67u8 , 169u8 , 86u8 , 99u8 , 243u8 , 228u8 , 88u8 , 142u8 , 138u8 , 183u8 , 117u8 , 82u8 , 22u8 , 163u8 , 30u8 , 175u8 , 247u8 , 50u8 , 204u8 , 12u8 , 171u8 , 57u8 , 189u8 , 151u8 , 191u8 , 196u8 , 89u8 , 94u8 , 165u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Disputes" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [192u8 , 238u8 , 255u8 , 67u8 , 169u8 , 86u8 , 99u8 , 243u8 , 228u8 , 88u8 , 142u8 , 138u8 , 183u8 , 117u8 , 82u8 , 22u8 , 163u8 , 30u8 , 175u8 , 247u8 , 50u8 , 204u8 , 12u8 , 171u8 , 57u8 , 189u8 , 151u8 , 191u8 , 196u8 , 89u8 , 94u8 , 165u8 ,])
                 }
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes_root(
@@ -25989,15 +26049,17 @@ pub mod api {
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
                 pub fn included(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &runtime_types::polkadot_core_primitives::CandidateHash,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_core_primitives::CandidateHash,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Included" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [129u8 , 50u8 , 76u8 , 60u8 , 82u8 , 106u8 , 248u8 , 164u8 , 152u8 , 80u8 , 58u8 , 185u8 , 211u8 , 225u8 , 122u8 , 100u8 , 234u8 , 241u8 , 123u8 , 205u8 , 4u8 , 8u8 , 193u8 , 116u8 , 167u8 , 158u8 , 252u8 , 223u8 , 204u8 , 226u8 , 74u8 , 195u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Included" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [129u8 , 50u8 , 76u8 , 60u8 , 82u8 , 106u8 , 248u8 , 164u8 , 152u8 , 80u8 , 58u8 , 185u8 , 211u8 , 225u8 , 122u8 , 100u8 , 234u8 , 241u8 , 123u8 , 205u8 , 4u8 , 8u8 , 193u8 , 116u8 , 167u8 , 158u8 , 252u8 , 223u8 , 204u8 , 226u8 , 74u8 , 195u8 ,])
                 }
                 #[doc = " All included blocks on the chain, as well as the block number in this chain that"]
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
@@ -26028,7 +26090,7 @@ pub mod api {
                 #[doc = " The i'th entry of the vector corresponds to the i'th validator in the session."]
                 pub fn spam_slots(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<::core::primitive::u32>,
@@ -26039,7 +26101,7 @@ pub mod api {
                         "ParasDisputes",
                         "SpamSlots",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -26414,7 +26476,9 @@ pub mod api {
                 #[doc = " Pending swap operations."]
                 pub fn pending_swap(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_parachain::primitives::Id,
@@ -26425,7 +26489,7 @@ pub mod api {
                         "Registrar",
                         "PendingSwap",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -26463,7 +26527,9 @@ pub mod api {
                 #[doc = " so if it isn't yet registered. (After that, it's up to governance to do so.)"]
                 pub fn paras(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_common::paras_registrar::ParaInfo<
@@ -26477,7 +26543,7 @@ pub mod api {
                         "Registrar",
                         "Paras",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -26770,7 +26836,9 @@ pub mod api {
                 #[doc = " It is illegal for a `None` value to trail in the list."]
                 pub fn leases(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::std::vec::Vec<
@@ -26786,7 +26854,7 @@ pub mod api {
                         "Slots",
                         "Leases",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -27195,8 +27263,10 @@ pub mod api {
                 #[doc = " (sub-)ranges."]
                 pub fn reserved_amounts(
                     &self,
-                    _0: &::subxt::ext::sp_core::crypto::AccountId32,
-                    _1: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
+                    _1: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u128,
@@ -27207,7 +27277,7 @@ pub mod api {
                         "Auctions",
                         "ReservedAmounts",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            &(_0, _1),
+                            &(_0.borrow(), _1.borrow()),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -27245,7 +27315,7 @@ pub mod api {
                 #[doc = " first sample of the ending period is 0; the last is `Sample Size - 1`."]
                 pub fn winning(
                     &self,
-                    _0: &::core::primitive::u32,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     [::core::option::Option<(
@@ -27260,7 +27330,7 @@ pub mod api {
                         "Auctions",
                         "Winning",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -27919,7 +27989,9 @@ pub mod api {
                 #[doc = " Info on all of the funds."]
                 pub fn funds(
                     &self,
-                    _0: &runtime_types::polkadot_parachain::primitives::Id,
+                    _0: impl ::std::borrow::Borrow<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::polkadot_runtime_common::crowdloan::FundInfo<
@@ -27935,7 +28007,7 @@ pub mod api {
                         "Crowdloan",
                         "Funds",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Twox64Concat,
                         )],
                         [
@@ -28895,7 +28967,7 @@ pub mod api {
                 #[doc = " The ongoing queries."]
                 pub fn queries(
                     &self,
-                    _0: &::core::primitive::u64,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     runtime_types::pallet_xcm::pallet::QueryStatus<
@@ -28908,7 +28980,7 @@ pub mod api {
                         "XcmPallet",
                         "Queries",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Blake2_128Concat,
                         )],
                         [
@@ -28948,7 +29020,7 @@ pub mod api {
                 #[doc = " times this pair has been trapped (usually just 1 if it exists at all)."]
                 pub fn asset_traps(
                     &self,
-                    _0: &::subxt::ext::sp_core::H256,
+                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
@@ -28959,7 +29031,7 @@ pub mod api {
                         "XcmPallet",
                         "AssetTraps",
                         vec![::subxt::storage::address::StorageMapKey::new(
-                            _0,
+                            _0.borrow(),
                             ::subxt::storage::address::StorageHasher::Identity,
                         )],
                         [
@@ -29019,15 +29091,15 @@ pub mod api {
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &runtime_types::xcm::VersionedMultiLocation,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u32,
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "SupportedVersion" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [227u8 , 149u8 , 251u8 , 204u8 , 40u8 , 150u8 , 151u8 , 177u8 , 154u8 , 187u8 , 9u8 , 205u8 , 174u8 , 137u8 , 228u8 , 128u8 , 18u8 , 244u8 , 151u8 , 120u8 , 6u8 , 44u8 , 5u8 , 167u8 , 56u8 , 35u8 , 192u8 , 141u8 , 108u8 , 169u8 , 91u8 , 7u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "SupportedVersion" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [227u8 , 149u8 , 251u8 , 204u8 , 40u8 , 150u8 , 151u8 , 177u8 , 154u8 , 187u8 , 9u8 , 205u8 , 174u8 , 137u8 , 228u8 , 128u8 , 18u8 , 244u8 , 151u8 , 120u8 , 6u8 , 44u8 , 5u8 , 167u8 , 56u8 , 35u8 , 192u8 , 141u8 , 108u8 , 169u8 , 91u8 , 7u8 ,])
                 }
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version_root(
@@ -29053,15 +29125,15 @@ pub mod api {
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &runtime_types::xcm::VersionedMultiLocation,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     ::core::primitive::u64,
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifiers" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [122u8 , 110u8 , 119u8 , 25u8 , 216u8 , 237u8 , 44u8 , 91u8 , 133u8 , 165u8 , 77u8 , 86u8 , 232u8 , 69u8 , 110u8 , 121u8 , 234u8 , 176u8 , 208u8 , 62u8 , 47u8 , 196u8 , 151u8 , 193u8 , 197u8 , 41u8 , 203u8 , 36u8 , 147u8 , 218u8 , 31u8 , 199u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifiers" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [122u8 , 110u8 , 119u8 , 25u8 , 216u8 , 237u8 , 44u8 , 91u8 , 133u8 , 165u8 , 77u8 , 86u8 , 232u8 , 69u8 , 110u8 , 121u8 , 234u8 , 176u8 , 208u8 , 62u8 , 47u8 , 196u8 , 151u8 , 193u8 , 197u8 , 41u8 , 203u8 , 36u8 , 147u8 , 218u8 , 31u8 , 199u8 ,])
                 }
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers_root(
@@ -29088,8 +29160,8 @@ pub mod api {
                 #[doc = " of our versions we informed them of."]
                 pub fn version_notify_targets(
                     &self,
-                    _0: &::core::primitive::u32,
-                    _1: &runtime_types::xcm::VersionedMultiLocation,
+                    _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
+                    _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
                 ) -> ::subxt::storage::address::StorageAddress<
                     'static,
                     (
@@ -29100,7 +29172,7 @@ pub mod api {
                     ::subxt::storage::address::AddressIsIterable,
                     (),
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifyTargets" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [255u8 , 223u8 , 137u8 , 192u8 , 243u8 , 162u8 , 26u8 , 237u8 , 4u8 , 29u8 , 179u8 , 75u8 , 5u8 , 145u8 , 11u8 , 149u8 , 164u8 , 202u8 , 14u8 , 18u8 , 244u8 , 36u8 , 209u8 , 1u8 , 21u8 , 0u8 , 191u8 , 79u8 , 126u8 , 160u8 , 149u8 , 58u8 ,])
+                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifyTargets" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [255u8 , 223u8 , 137u8 , 192u8 , 243u8 , 162u8 , 26u8 , 237u8 , 4u8 , 29u8 , 179u8 , 75u8 , 5u8 , 145u8 , 11u8 , 149u8 , 164u8 , 202u8 , 14u8 , 18u8 , 244u8 , 36u8 , 209u8 , 1u8 , 21u8 , 0u8 , 191u8 , 79u8 , 126u8 , 160u8 , 149u8 , 58u8 ,])
                 }
                 #[doc = " The target locations that are subscribed to our version changes, as well as the most recent"]
                 #[doc = " of our versions we informed them of."]
