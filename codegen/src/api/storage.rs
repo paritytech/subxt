@@ -143,7 +143,7 @@ fn generate_storage_entry_fns(
                 }
                 _ => {
                     let ty_path = type_gen.resolve_type_path(key.id(), &[]);
-                    let fields = vec![(format_ident!("_0"), ty_path.clone())];
+                    let fields = vec![(format_ident!("_0"), ty_path)];
                     let hasher = hashers.get(0).unwrap_or_else(|| {
                         abort_call_site!("No hasher found for single key")
                     });

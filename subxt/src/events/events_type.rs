@@ -20,6 +20,7 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
+use std::sync::Arc;
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -31,11 +32,11 @@ pub struct Events<T: Config> {
     // Note; raw event bytes are prefixed with a Compact<u32> containing
     // the number of events to be decoded. We should have stripped that off
     // before storing the bytes here.
-    event_bytes: Vec<u8>,
+    event_bytes: Arc<[u8]>,
     num_events: u32,
 }
 
-impl<'a, T: Config> Events<T> {
+impl<T: Config> Events<T> {
     pub(crate) fn new(
         metadata: Metadata,
         block_hash: T::Hash,
@@ -56,7 +57,7 @@ impl<'a, T: Config> Events<T> {
         Self {
             metadata,
             block_hash,
-            event_bytes,
+            event_bytes: event_bytes.into(),
             num_events,
         }
     }
@@ -80,8 +81,9 @@ impl<'a, T: Config> Events<T> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
     /// details. If an error occurs, all subsequent iterations return `None`.
-    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
-        let event_bytes = &self.event_bytes;
+    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + Send + Sync + 'static {
+        let event_bytes = self.event_bytes.clone();
+        let num_events = self.num_events;
 
         let metadata = self.metadata.clone();
         let mut pos = 0;
@@ -90,7 +92,7 @@ impl<'a, T: Config> Events<T> {
             let cursor = &mut &event_bytes[pos..];
             let start_len = cursor.len();
 
-            if start_len == 0 || self.num_events == index {
+            if start_len == 0 || num_events == index {
                 None
             } else {
                 match decode_raw_event_details::<T>(&metadata, index, cursor) {
@@ -107,46 +109,6 @@ impl<'a, T: Config> Events<T> {
                         // the cursor len will become 0 and the iterator will return `None`
                         // from now on:
                         pos = event_bytes.len();
-                        Some(Err(e))
-                    }
-                }
-            }
-        })
-    }
-
-    /// Iterate over all of the events, using metadata to dynamically
-    /// decode them as we go, and returning the raw bytes and other associated
-    /// details. If an error occurs, all subsequent iterations return `None`.
-    ///
-    /// Unlike [`Events::iter()`] this consumes `self`, which can be useful
-    /// if you need to store the iterator somewhere and avoid lifetime issues.
-    pub fn into_iter(
-        self,
-    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + 'a {
-        let mut pos = 0;
-        let mut index = 0;
-        let metadata = self.metadata.clone();
-        std::iter::from_fn(move || {
-            let cursor = &mut &self.event_bytes[pos..];
-            let start_len = cursor.len();
-
-            if start_len == 0 || self.num_events == index {
-                None
-            } else {
-                match decode_raw_event_details::<T>(&metadata, index, cursor) {
-                    Ok(raw_event) => {
-                        // Skip over decoded bytes in next iteration:
-                        pos += start_len - cursor.len();
-                        // Increment the index:
-                        index += 1;
-                        // Return the event details:
-                        Some(Ok(raw_event))
-                    }
-                    Err(e) => {
-                        // By setting the position to the "end" of the event bytes,
-                        // the cursor len will become 0 and the iterator will return `None`
-                        // from now on:
-                        pos = self.event_bytes.len();
                         Some(Err(e))
                     }
                 }
@@ -384,7 +346,7 @@ pub(crate) mod test_utils {
     ) -> Events<SubstrateConfig> {
         Events {
             block_hash: <SubstrateConfig as Config>::Hash::default(),
-            event_bytes,
+            event_bytes: event_bytes.into(),
             metadata,
             num_events,
         }

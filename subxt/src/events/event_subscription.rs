@@ -113,7 +113,7 @@ where
     }
 }
 
-impl<'a, T: Config, Client, Sub: Unpin> Unpin for EventSubscription<T, Client, Sub> {}
+impl<T: Config, Client, Sub: Unpin> Unpin for EventSubscription<T, Client, Sub> {}
 
 // We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
 // way to roughly implement the following function:

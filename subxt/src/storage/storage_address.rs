@@ -37,7 +37,7 @@ impl<'a, ReturnTy, Iterable, Defaultable>
         Self {
             pallet_name: pallet_name.into(),
             entry_name: storage_name.into(),
-            storage_entry_key: storage_entry_key.into(),
+            storage_entry_key,
             validation_hash: Some(hash),
             _marker: std::marker::PhantomData,
         }

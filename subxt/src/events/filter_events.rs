@@ -145,7 +145,7 @@ impl<Ev: StaticEvent> EventFilter for (Ev,) {
             + 'a,
     > {
         let block_hash = events.block_hash();
-        let mut iter = events.into_iter();
+        let mut iter = events.iter();
         Box::new(std::iter::from_fn(move || {
             for ev in iter.by_ref() {
                 // Forward any error immediately:
@@ -183,7 +183,7 @@ macro_rules! impl_event_filter {
                 events: Events<T>
             ) -> Box<dyn Iterator<Item=Result<FilteredEventDetails<T::Hash,Self::ReturnType>, BasicError>> + Send + 'a> {
                 let block_hash = events.block_hash();
-                let mut iter = events.into_iter();
+                let mut iter = events.iter();
                 Box::new(std::iter::from_fn(move || {
                     let mut out: ( $(Option<$ty>,)+ ) = Default::default();
                     for ev in iter.by_ref() {

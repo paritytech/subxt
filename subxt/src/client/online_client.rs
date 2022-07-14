@@ -144,7 +144,7 @@ impl<T: Config> OnlineClient<T> {
     pub fn offline(&self) -> OfflineClient<T> {
         let inner = self.inner.read();
         OfflineClient::new(
-            inner.genesis_hash.clone(),
+            inner.genesis_hash,
             inner.runtime_version.clone(),
             inner.metadata.clone(),
         )
