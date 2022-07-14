@@ -24,3 +24,8 @@ mod storage;
 use test_runtime::node_runtime;
 #[cfg(test)]
 use utils::*;
+
+// We don't use this dependency, but it's here so that we
+// can enable logging easily if need be.
+#[cfg(test)]
+use tracing_subscriber as _;

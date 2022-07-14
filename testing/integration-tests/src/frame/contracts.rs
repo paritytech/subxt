@@ -37,7 +37,6 @@ type AccountId = <SubstrateConfig as Config>::AccountId;
 
 impl ContractsTestContext {
     async fn init() -> Self {
-        tracing_subscriber::fmt::try_init().ok();
         let cxt = test_context().await;
         let signer = PairSigner::new(AccountKeyring::Alice.pair());
 

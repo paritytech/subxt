@@ -17,7 +17,6 @@ use sp_keyring::AccountKeyring;
 // Check that we can subscribe to non-finalized block events.
 #[tokio::test]
 async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -36,7 +35,6 @@ async fn non_finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // Check that we can subscribe to finalized block events.
 #[tokio::test]
 async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -57,7 +55,6 @@ async fn finalized_block_subscription() -> Result<(), subxt::BasicError> {
 // a few blocks.
 #[tokio::test]
 async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
     let api = ctx.client();
 
@@ -88,7 +85,6 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
 // it's Stream impl, and ultimately see the event we expect.
 #[tokio::test]
 async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
-    tracing_subscriber::fmt::try_init().ok();
     let ctx = test_context().await;
     let api = ctx.client();
 

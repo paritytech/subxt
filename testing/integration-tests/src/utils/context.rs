@@ -36,7 +36,7 @@ pub async fn test_context_with(key: AccountKeyring) -> TestContext {
 pub type TestContext = TestNodeProcess<SubstrateConfig>;
 
 pub async fn test_context() -> TestContext {
-    tracing_subscriber::fmt::try_init().ok();
+    // tracing_subscriber::fmt::try_init().ok();
     test_context_with(AccountKeyring::Alice).await
 }
 

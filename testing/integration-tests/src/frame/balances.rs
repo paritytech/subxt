@@ -173,7 +173,6 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
 
 #[tokio::test]
 async fn transfer_error() {
-    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let alice_addr = alice.account_id().clone().into();
     let hans = pair_signer(Pair::generate().0);
@@ -214,7 +213,6 @@ async fn transfer_error() {
 
 #[tokio::test]
 async fn transfer_implicit_subscription() {
-    tracing_subscriber::fmt::try_init().ok();
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
     let bob_addr = bob.clone().into();
