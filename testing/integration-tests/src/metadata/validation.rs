@@ -3,8 +3,8 @@
 // see LICENSE for license details.
 
 use crate::{
-    test_context,
     node_runtime,
+    test_context,
     TestContext,
 };
 use frame_metadata::{
@@ -29,19 +29,22 @@ use scale_info::{
     TypeInfo,
 };
 use subxt::{
+    Metadata,
     OfflineClient,
     SubstrateConfig,
-    Metadata,
 };
 
-async fn metadata_to_api(metadata: RuntimeMetadataV14, ctx: &TestContext) -> OfflineClient<SubstrateConfig> {
+async fn metadata_to_api(
+    metadata: RuntimeMetadataV14,
+    ctx: &TestContext,
+) -> OfflineClient<SubstrateConfig> {
     let prefixed = RuntimeMetadataPrefixed::from(metadata);
     let metadata = Metadata::try_from(prefixed).unwrap();
 
     OfflineClient::new(
         ctx.client().genesis_hash(),
         ctx.client().runtime_version(),
-        metadata
+        metadata,
     )
 }
 

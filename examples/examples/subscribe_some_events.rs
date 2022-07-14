@@ -14,9 +14,9 @@ use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use std::time::Duration;
 use subxt::{
+    extrinsic::PairSigner,
     OnlineClient,
     PolkadotConfig,
-    extrinsic::PairSigner,
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -51,7 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             loop {
                 let transfer_tx = polkadot::tx().balances().transfer(
                     AccountKeyring::Bob.to_account_id().into(),
-                    transfer_amount
+                    transfer_amount,
                 );
                 api.tx()
                     .sign_and_submit_default(&transfer_tx, &signer)

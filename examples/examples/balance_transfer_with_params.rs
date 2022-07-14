@@ -14,8 +14,8 @@ use sp_keyring::AccountKeyring;
 use subxt::{
     extrinsic::{
         Era,
-        PlainTip,
         PairSigner,
+        PlainTip,
         PolkadotExtrinsicParamsBuilder as Params,
     },
     OnlineClient,
@@ -46,10 +46,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .era(Era::Immortal, api.genesis_hash());
 
     // submit the transaction:
-    let hash = api
-        .tx()
-        .sign_and_submit(&tx, &signer, tx_params)
-        .await?;
+    let hash = api.tx().sign_and_submit(&tx, &signer, tx_params).await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 

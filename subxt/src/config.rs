@@ -108,7 +108,10 @@ impl Config for SubstrateConfig {
 }
 
 /// Default set of commonly used types by Polkadot nodes.
-pub type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, crate::extrinsic::PolkadotExtrinsicParams<SubstrateConfig>>;
+pub type PolkadotConfig = WithExtrinsicParams<
+    SubstrateConfig,
+    crate::extrinsic::PolkadotExtrinsicParams<SubstrateConfig>,
+>;
 
 /// Take a type implementing [`Config`] (eg [`SubstrateConfig`]), and some type which describes the
 /// additional and extra parameters to pass to an extrinsic (see [`crate::extrinsic::ExtrinsicParams`]),
@@ -123,11 +126,16 @@ pub type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, crate::extrinsic:
 /// // This is how PolkadotConfig is implemented:
 /// type PolkadotConfig = WithExtrinsicParams<SubstrateConfig, PolkadotExtrinsicParams<SubstrateConfig>>;
 /// ```
-pub struct WithExtrinsicParams<T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> {
-    _marker: std::marker::PhantomData<(T, E)>
+pub struct WithExtrinsicParams<
+    T: Config,
+    E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>,
+> {
+    _marker: std::marker::PhantomData<(T, E)>,
 }
 
-impl <T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> Config for WithExtrinsicParams<T, E> {
+impl<T: Config, E: crate::extrinsic::ExtrinsicParams<T::Index, T::Hash>> Config
+    for WithExtrinsicParams<T, E>
+{
     type Index = T::Index;
     type BlockNumber = T::BlockNumber;
     type Hash = T::Hash;

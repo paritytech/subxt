@@ -70,9 +70,7 @@ fn generate_storage_entry_fns(
     storage_entry: &StorageEntryMetadata<PortableForm>,
 ) -> TokenStream2 {
     let (fields, key_impl) = match storage_entry.ty {
-        StorageEntryType::Plain(_) => {
-            (vec![], quote!(vec![]))
-        }
+        StorageEntryType::Plain(_) => (vec![], quote!(vec![])),
         StorageEntryType::Map {
             ref key,
             ref hashers,
@@ -126,9 +124,8 @@ fn generate_storage_entry_fns(
                         // tuple of them using the one hasher we're told about. This corresponds to a
                         // StorageMap.
                         let hasher = hashers.get(0).expect("checked for 1 hasher");
-                        let items = fields.iter().map(|(field_name, _)| {
-                            quote!( #field_name )
-                        });
+                        let items =
+                            fields.iter().map(|(field_name, _)| quote!( #field_name ));
                         quote! {
                             vec![ ::subxt::storage::address::StorageMapKey::new(&(#( #items.borrow() ),*), #hasher) ]
                         }

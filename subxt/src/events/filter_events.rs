@@ -4,14 +4,14 @@
 
 //! Filtering individual events from subscriptions.
 
-use super::Events;
+use super::{
+    Events,
+    Phase,
+    StaticEvent,
+};
 use crate::{
     BasicError,
     Config,
-};
-use super::{
-    StaticEvent,
-    Phase
 };
 use futures::{
     Stream,
@@ -237,8 +237,8 @@ mod test {
     };
     use crate::{
         Config,
-        SubstrateConfig,
         Metadata,
+        SubstrateConfig,
     };
     use codec::{
         Decode,
@@ -286,8 +286,7 @@ mod test {
     // A stream of fake events for us to try filtering on.
     fn events_stream(
         metadata: Metadata,
-    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, BasicError>>
-    {
+    ) -> impl Stream<Item = Result<Events<SubstrateConfig>, BasicError>> {
         stream::iter(vec![
             events::<PalletEvents>(
                 metadata.clone(),

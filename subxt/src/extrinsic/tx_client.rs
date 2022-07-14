@@ -2,12 +2,7 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use sp_runtime::{
-    traits::Hash,
-    ApplyExtrinsicResult,
-};
 use crate::{
-    Config,
     client::{
         OfflineClientT,
         OnlineClientT,
@@ -19,6 +14,7 @@ use crate::{
     extrinsic::{
         ExtrinsicParams,
         Signer,
+        TransactionProgress,
     },
     metadata::{
         EncodeWithMetadata,
@@ -27,17 +23,19 @@ use crate::{
     utils::{
         Encoded,
         PhantomDataSendSync,
-    }
+    },
+    Config,
 };
 use codec::{
     Compact,
     Decode,
     Encode,
 };
-use crate::extrinsic::{
-    TransactionProgress,
-};
 use derivative::Derivative;
+use sp_runtime::{
+    traits::Hash,
+    ApplyExtrinsicResult,
+};
 
 /// A client for working with transactions.
 #[derive(Derivative)]
@@ -47,28 +45,32 @@ pub struct TxClient<T: Config, Client> {
     _marker: PhantomDataSendSync<T>,
 }
 
-impl <T: Config, Client> TxClient<T, Client> {
+impl<T: Config, Client> TxClient<T, Client> {
     /// Create a new [`TxClient`]
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: PhantomDataSendSync::new()
+            _marker: PhantomDataSendSync::new(),
         }
     }
 }
 
-impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
+impl<T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     /// Run the validation logic against some extrinsic you'd like to submit. Returns `Ok(())`
     /// if the call is valid (or if it's not possible to check since the call has no validation hash).
     /// Return an error if the call was not valid or something went wrong trying to validate it (ie
     /// the pallet or call in question do not exist at all).
-    pub fn validate<Call, Err>(&self, call: &SubmittableExtrinsic<Call, Err>) -> Result<(), BasicError>
+    pub fn validate<Call, Err>(
+        &self,
+        call: &SubmittableExtrinsic<Call, Err>,
+    ) -> Result<(), BasicError>
     where
         Call: MetadataLocation,
     {
         if let Some(actual_hash) = call.call_hash {
             let metadata = self.client.metadata();
-            let expected_hash = metadata.call_hash(call.call_data.pallet(), call.call_data.item())?;
+            let expected_hash =
+                metadata.call_hash(call.call_data.pallet(), call.call_data.item())?;
             if actual_hash != expected_hash {
                 return Err(crate::metadata::MetadataError::IncompatibleMetadata.into())
             }
@@ -175,8 +177,7 @@ impl <T: Config, C: OfflineClientT<T>> TxClient<T, C> {
     }
 }
 
-impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
-
+impl<T: Config, C: OnlineClientT<T>> TxClient<T, C> {
     /// Creates a returns a raw signed extrinsic, without submitting it.
     pub async fn create_signed<Call, Err>(
         &self,
@@ -198,7 +199,8 @@ impl <T: Config, C: OnlineClientT<T>> TxClient<T, C> {
                 .await?
         };
 
-        self.create_signed_with_nonce(call, signer, account_nonce, other_params).await
+        self.create_signed_with_nonce(call, signer, account_nonce, other_params)
+            .await
     }
 
     /// Creates and signs an extrinsic and submits it to the chain. Passes default parameters
@@ -301,28 +303,23 @@ pub struct SubmittableExtrinsic<Call, Err> {
     marker: std::marker::PhantomData<Err>,
 }
 
-impl <Call, Err> SubmittableExtrinsic<Call, Err> {
+impl<Call, Err> SubmittableExtrinsic<Call, Err> {
     /// Create a new [`SubmittableExtrinsic`] that will not be validated
     /// against node metadata.
-    pub fn new_unvalidated(
-        call_data: Call
-    ) -> Self {
+    pub fn new_unvalidated(call_data: Call) -> Self {
         Self {
             call_data,
             call_hash: None,
-            marker: std::marker::PhantomData
+            marker: std::marker::PhantomData,
         }
     }
     /// Create a new [`SubmittableExtrinsic`] that will be validated
     /// against node metadata.
-    pub fn new_with_validation(
-        call_data: Call,
-        hash: [u8; 32]
-    ) -> Self {
+    pub fn new_with_validation(call_data: Call, hash: [u8; 32]) -> Self {
         Self {
             call_data,
             call_hash: Some(hash),
-            marker: std::marker::PhantomData
+            marker: std::marker::PhantomData,
         }
     }
     /// Do not validate this call prior to submitting it.
@@ -330,13 +327,19 @@ impl <Call, Err> SubmittableExtrinsic<Call, Err> {
         Self {
             call_data: self.call_data,
             call_hash: None,
-            marker: self.marker
+            marker: self.marker,
         }
     }
 }
 
-impl <Call: EncodeWithMetadata, Err> EncodeWithMetadata for SubmittableExtrinsic<Call, Err> {
-    fn encode_to_with_metadata(&self, metadata: &crate::Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
+impl<Call: EncodeWithMetadata, Err> EncodeWithMetadata
+    for SubmittableExtrinsic<Call, Err>
+{
+    fn encode_to_with_metadata(
+        &self,
+        metadata: &crate::Metadata,
+        out: &mut Vec<u8>,
+    ) -> Result<(), BasicError> {
         self.call_data.encode_to_with_metadata(metadata, out)
     }
 }

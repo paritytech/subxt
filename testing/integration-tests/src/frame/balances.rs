@@ -33,19 +33,19 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let alice_account_addr = node_runtime::storage()
-        .system()
-        .account(alice.account_id());
-    let bob_account_addr = node_runtime::storage()
-        .system()
-        .account(bob.account_id());
+    let alice_account_addr = node_runtime::storage().system().account(alice.account_id());
+    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
 
-    let alice_pre = api.storage().fetch_or_default(&alice_account_addr, None).await?;
-    let bob_pre = api.storage().fetch_or_default(&bob_account_addr, None).await?;
+    let alice_pre = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_pre = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
 
-    let tx = node_runtime::tx()
-        .balances()
-        .transfer(bob_address, 10_000);
+    let tx = node_runtime::tx().balances().transfer(bob_address, 10_000);
 
     let events = api
         .tx()
@@ -69,8 +69,14 @@ async fn tx_basic_transfer() -> Result<(), subxt::Error<DispatchError>> {
     };
     assert_eq!(event, expected_event);
 
-    let alice_post = api.storage().fetch_or_default(&alice_account_addr, None).await?;
-    let bob_post = api.storage().fetch_or_default(&bob_account_addr, None).await?;
+    let alice_post = api
+        .storage()
+        .fetch_or_default(&alice_account_addr, None)
+        .await?;
+    let bob_post = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
 
     assert!(alice_pre.data.free - 10_000 >= alice_post.data.free);
     assert_eq!(bob_pre.data.free + 10_000, bob_post.data.free);
@@ -86,11 +92,12 @@ async fn multiple_transfers_work_nonce_incremented(
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let bob_account_addr = node_runtime::storage()
-        .system()
-        .account(bob.account_id());
+    let bob_account_addr = node_runtime::storage().system().account(bob.account_id());
 
-    let bob_pre = api.storage().fetch_or_default(&bob_account_addr, None).await?;
+    let bob_pre = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
 
     let tx = node_runtime::tx()
         .balances()
@@ -106,7 +113,10 @@ async fn multiple_transfers_work_nonce_incremented(
             .await?;
     }
 
-    let bob_post = api.storage().fetch_or_default(&bob_account_addr, None).await?;
+    let bob_post = api
+        .storage()
+        .fetch_or_default(&bob_account_addr, None)
+        .await?;
 
     assert_eq!(bob_pre.data.free + 30_000, bob_post.data.free);
     Ok(())
@@ -129,13 +139,11 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let tx = node_runtime::tx()
-        .staking()
-        .bond(
-            charlie.into(),
-            100_000_000_000_000,
-            runtime_types::pallet_staking::RewardDestination::Stash,
-        );
+    let tx = node_runtime::tx().staking().bond(
+        charlie.into(),
+        100_000_000_000_000,
+        runtime_types::pallet_staking::RewardDestination::Stash,
+    );
 
     api.tx()
         .sign_and_submit_then_watch_default(&tx, &bob)
@@ -145,9 +153,9 @@ async fn storage_balance_lock() -> Result<(), subxt::Error<DispatchError>> {
         .find_first::<system::events::ExtrinsicSuccess>()?
         .expect("No ExtrinsicSuccess Event found");
 
-    let locks_addr = node_runtime::storage().balances().locks(
-        &AccountKeyring::Bob.to_account_id()
-    );
+    let locks_addr = node_runtime::storage()
+        .balances()
+        .locks(&AccountKeyring::Bob.to_account_id());
 
     let locks = api.storage().fetch_or_default(&locks_addr, None).await?;
 
@@ -213,9 +221,7 @@ async fn transfer_implicit_subscription() {
     let ctx = test_context().await;
     let api = ctx.client();
 
-    let to_bob_tx = node_runtime::tx()
-        .balances()
-        .transfer(bob_addr, 10_000);
+    let to_bob_tx = node_runtime::tx().balances().transfer(bob_addr, 10_000);
 
     let event = api
         .tx()
@@ -255,8 +261,5 @@ async fn constant_existential_deposit() {
     let addr = node_runtime::constants().balances().existential_deposit();
 
     // Make sure thetwo are identical:
-    assert_eq!(
-        existential_deposit,
-        api.constants().at(&addr).unwrap()
-    );
+    assert_eq!(existential_deposit, api.constants().at(&addr).unwrap());
 }

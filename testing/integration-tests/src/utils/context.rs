@@ -10,16 +10,14 @@ pub(crate) use crate::{
 use sp_core::sr25519::Pair;
 use sp_keyring::AccountKeyring;
 use subxt::{
-    SubstrateConfig,
     extrinsic::PairSigner,
+    SubstrateConfig,
 };
 
 /// substrate node should be installed on the $PATH
 const SUBSTRATE_NODE_PATH: &str = "substrate";
 
-pub async fn test_context_with(
-    key: AccountKeyring,
-) -> TestContext {
+pub async fn test_context_with(key: AccountKeyring) -> TestContext {
     let path = std::env::var("SUBSTRATE_NODE_PATH").unwrap_or_else(|_| {
         if which::which(SUBSTRATE_NODE_PATH).is_err() {
             panic!("A substrate binary should be installed on your path for integration tests. \

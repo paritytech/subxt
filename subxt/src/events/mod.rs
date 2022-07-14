@@ -7,32 +7,35 @@
 //! and calls like [crate::extrinsic::TransactionProgress::wait_for_finalized_success()].
 
 mod event_subscription;
+mod events_client;
 mod events_type;
 mod filter_events;
-mod events_client;
 
 pub use event_subscription::{
     EventSub,
     EventSubscription,
     FinalizedEventSub,
 };
+pub use events_client::{
+    // Exposed only for testing:
+    subscribe_to_block_headers_filling_in_gaps,
+    EventsClient,
+};
 pub use events_type::{
     DecodedValue,
-    Events,
     EventDetails,
+    Events,
 };
 pub use filter_events::{
     EventFilter,
     FilterEvents,
     FilteredEventDetails,
 };
-pub use events_client::{
-    EventsClient,
-    // Exposed only for testing:
-    subscribe_to_block_headers_filling_in_gaps,
-};
 
-use codec::{ Encode, Decode };
+use codec::{
+    Decode,
+    Encode,
+};
 
 /// Trait to uniquely identify the events's identity from the runtime metadata.
 ///

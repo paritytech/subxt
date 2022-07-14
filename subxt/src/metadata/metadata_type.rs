@@ -15,9 +15,9 @@ use frame_metadata::{
 use parking_lot::RwLock;
 use scale_info::{
     form::PortableForm,
+    PortableRegistry,
     Type,
     Variant,
-    PortableRegistry,
 };
 use std::{
     collections::HashMap,
@@ -152,17 +152,17 @@ impl Metadata {
         self.inner
             .cached_storage_hashes
             .get_or_insert(pallet, storage, || {
-                subxt_metadata::get_storage_hash(
-                    &self.inner.metadata,
-                    pallet,
-                    storage,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::StorageNotFound,
-                    }
-                })
+                subxt_metadata::get_storage_hash(&self.inner.metadata, pallet, storage)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => {
+                                MetadataError::StorageNotFound
+                            }
+                        }
+                    })
             })
     }
 
@@ -198,17 +198,15 @@ impl Metadata {
         self.inner
             .cached_call_hashes
             .get_or_insert(pallet, function, || {
-                subxt_metadata::get_call_hash(
-                    &self.inner.metadata,
-                    pallet,
-                    function,
-                )
-                .map_err(|e| {
-                    match e {
-                        subxt_metadata::NotFound::Pallet => MetadataError::PalletNotFound,
-                        subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
-                    }
-                })
+                subxt_metadata::get_call_hash(&self.inner.metadata, pallet, function)
+                    .map_err(|e| {
+                        match e {
+                            subxt_metadata::NotFound::Pallet => {
+                                MetadataError::PalletNotFound
+                            }
+                            subxt_metadata::NotFound::Item => MetadataError::CallNotFound,
+                        }
+                    })
             })
     }
 
@@ -258,8 +256,7 @@ impl PalletMetadata {
 
     /// Attempt to resolve a call into an index in this pallet, failing
     /// if the call is not found in this pallet.
-    pub fn call_index(&self, function: &str) -> Result<u8, MetadataError>
-    {
+    pub fn call_index(&self, function: &str) -> Result<u8, MetadataError> {
         let fn_index = *self
             .call_indexes
             .get(function)
@@ -388,15 +385,16 @@ impl TryFrom<RuntimeMetadataPrefixed> for Metadata {
             .map(|pallet| {
                 let call_ty_id = pallet.calls.as_ref().map(|c| c.ty.id());
 
-                let call_indexes = pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
-                    let type_def_variant = get_type_def_variant(call.ty.id())?;
-                    let call_indexes = type_def_variant
-                        .variants()
-                        .iter()
-                        .map(|v| (v.name().clone(), v.index()))
-                        .collect();
-                    Ok(call_indexes)
-                })?;
+                let call_indexes =
+                    pallet.calls.as_ref().map_or(Ok(HashMap::new()), |call| {
+                        let type_def_variant = get_type_def_variant(call.ty.id())?;
+                        let call_indexes = type_def_variant
+                            .variants()
+                            .iter()
+                            .map(|v| (v.name().clone(), v.index()))
+                            .collect();
+                        Ok(call_indexes)
+                    })?;
 
                 let storage = pallet.storage.as_ref().map_or(HashMap::new(), |storage| {
                     storage

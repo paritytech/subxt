@@ -13,11 +13,9 @@
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
 use subxt::{
+    extrinsic::PairSigner,
     OnlineClient,
     PolkadotConfig,
-    extrinsic::{
-        PairSigner,
-    }
 };
 
 #[subxt::subxt(runtime_metadata_path = "../artifacts/polkadot_metadata.scale")]
@@ -43,9 +41,7 @@ async fn simple_transfer() -> Result<(), Box<dyn std::error::Error>> {
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let balance_transfer_tx = polkadot::tx()
-        .balances()
-        .transfer(dest, 10_000);
+    let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
 
     let balance_transfer = api
         .tx()
@@ -74,9 +70,7 @@ async fn simple_transfer_separate_events() -> Result<(), Box<dyn std::error::Err
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let balance_transfer_tx = polkadot::tx()
-        .balances()
-        .transfer(dest, 10_000);
+    let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
 
     let balance_transfer = api
         .tx()
@@ -124,9 +118,7 @@ async fn handle_transfer_events() -> Result<(), Box<dyn std::error::Error>> {
 
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let balance_transfer_tx = polkadot::tx()
-        .balances()
-        .transfer(dest, 10_000);
+    let balance_transfer_tx = polkadot::tx().balances().transfer(dest, 10_000);
 
     let mut balance_transfer_progress = api
         .tx()

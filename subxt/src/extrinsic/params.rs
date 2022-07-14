@@ -2,15 +2,15 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::{
+    utils::Encoded,
+    Config,
+};
 use codec::{
     Compact,
     Encode,
 };
 use core::fmt::Debug;
-use crate::{
-    Config,
-    utils::Encoded,
-};
 use derivative::Derivative;
 
 // We require Era as a param below, so make it available from here.
@@ -133,7 +133,9 @@ impl<T: Config, Tip: Default> Default for BaseExtrinsicParamsBuilder<T, Tip> {
     }
 }
 
-impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash> for BaseExtrinsicParams<T, Tip> {
+impl<T: Config, Tip: Debug + Encode + 'static> ExtrinsicParams<T::Index, T::Hash>
+    for BaseExtrinsicParams<T, Tip>
+{
     type OtherParams = BaseExtrinsicParamsBuilder<T, Tip>;
 
     fn new(

@@ -2,57 +2,53 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
+use crate::{
+    client::OnlineClientT,
+    error::BasicError,
+    events::{
+        EventSub,
+        EventSubscription,
+        Events,
+        FinalizedEventSub,
+    },
+    Config,
+};
+use derivative::Derivative;
 use futures::{
     future::Either,
     stream,
     Stream,
     StreamExt,
 };
-use sp_runtime::traits::Header;
 use sp_core::{
     storage::StorageKey,
     twox_128,
 };
+use sp_runtime::traits::Header;
 use std::future::Future;
-use crate::{
-    client::{
-        OnlineClientT
-    },
-    error::{
-        BasicError,
-    },
-    Config,
-};
-use crate::events::{
-    EventSubscription,
-    Events,
-    EventSub,
-    FinalizedEventSub,
-};
-use derivative::Derivative;
 
 /// A client for working with events.
 #[derive(Derivative)]
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct EventsClient<T, Client> {
     client: Client,
-    _marker: std::marker::PhantomData<T>
+    _marker: std::marker::PhantomData<T>,
 }
 
-impl <T, Client> EventsClient<T, Client> {
+impl<T, Client> EventsClient<T, Client> {
     /// Create a new [`EventsClient`].
     pub fn new(client: Client) -> Self {
         Self {
             client,
-            _marker: std::marker::PhantomData
+            _marker: std::marker::PhantomData,
         }
     }
 }
 
-impl <T, Client> EventsClient<T, Client>
+impl<T, Client> EventsClient<T, Client>
 where
     T: Config,
-    Client: OnlineClientT<T>
+    Client: OnlineClientT<T>,
 {
     /// Obtain events at some block hash.
     pub fn at(
@@ -62,9 +58,7 @@ where
         // Clone and pass the client in like this so that we can explicitly
         // return a Future that's Send + 'static, rather than tied to &self.
         let client = self.client.clone();
-        async move {
-            at(client, block_hash).await
-        }
+        async move { at(client, block_hash).await }
     }
 
     /// Subscribe to all events from blocks.
@@ -98,26 +92,30 @@ where
     /// # }
     /// ```
     pub fn subscribe(
-        &self
-    ) -> impl Future<Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>> + Send + 'static
-    {
+        &self,
+    ) -> impl Future<
+        Output = Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>,
+    > + Send
+           + 'static {
         let client = self.client.clone();
-        async move {
-            subscribe(client).await
-        }
+        async move { subscribe(client).await }
     }
 
     /// Subscribe to events from finalized blocks.
     pub fn subscribe_finalized(
         &self,
-    ) -> impl Future<Output = Result<EventSubscription<T, Client, FinalizedEventSub<T::Header>>, BasicError>> + Send + 'static
+    ) -> impl Future<
+        Output = Result<
+            EventSubscription<T, Client, FinalizedEventSub<T::Header>>,
+            BasicError,
+        >,
+    > + Send
+           + 'static
     where
         Client: Send + Sync + 'static,
     {
         let client = self.client.clone();
-        async move {
-            subscribe_finalized(client).await
-        }
+        async move { subscribe_finalized(client).await }
     }
 }
 
@@ -136,15 +134,11 @@ where
         .map(|e| e.0)
         .unwrap_or_else(Vec::new);
 
-    Ok(Events::new(
-        client.metadata(),
-        block_hash,
-        event_bytes,
-    ))
+    Ok(Events::new(client.metadata(), block_hash, event_bytes))
 }
 
 async fn subscribe<T, Client>(
-    client: Client
+    client: Client,
 ) -> Result<EventSubscription<T, Client, EventSub<T::Header>>, BasicError>
 where
     T: Config,

@@ -147,14 +147,8 @@ async fn chill_works_for_controller_only() -> Result<(), Error<DispatchError>> {
         .wait_for_finalized_success()
         .await?;
 
-    let ledger_addr = node_runtime::storage()
-        .staking()
-        .ledger(alice.account_id());
-    let ledger = api
-        .storage()
-        .fetch(&ledger_addr, None)
-        .await?
-        .unwrap();
+    let ledger_addr = node_runtime::storage().staking().ledger(alice.account_id());
+    let ledger = api.storage().fetch(&ledger_addr, None).await?.unwrap();
     assert_eq!(alice_stash.account_id(), &ledger.stash);
 
     let chill_tx = node_runtime::tx().staking().chill();
@@ -190,13 +184,11 @@ async fn tx_bond() -> Result<(), Error<DispatchError>> {
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
-    let bond_tx = node_runtime::tx()
-        .staking()
-        .bond(
-            AccountKeyring::Bob.to_account_id().into(),
-            100_000_000_000_000,
-            RewardDestination::Stash,
-        );
+    let bond_tx = node_runtime::tx().staking().bond(
+        AccountKeyring::Bob.to_account_id().into(),
+        100_000_000_000_000,
+        RewardDestination::Stash,
+    );
 
     let bond = api
         .tx()
@@ -226,7 +218,10 @@ async fn storage_history_depth() -> Result<(), Error<DispatchError>> {
     let ctx = test_context().await;
     let api = ctx.client();
     let history_depth_addr = node_runtime::storage().staking().history_depth();
-    let history_depth = api.storage().fetch_or_default(&history_depth_addr, None).await?;
+    let history_depth = api
+        .storage()
+        .fetch_or_default(&history_depth_addr, None)
+        .await?;
     assert_eq!(history_depth, 84);
     Ok(())
 }
@@ -249,10 +244,7 @@ async fn storage_era_reward_points() -> Result<(), Error<DispatchError>> {
     let ctx = test_context().await;
     let api = ctx.client();
     let reward_points_addr = node_runtime::storage().staking().eras_reward_points(&0);
-    let current_era_result = api
-        .storage()
-        .fetch(&reward_points_addr, None)
-        .await;
+    let current_era_result = api.storage().fetch(&reward_points_addr, None).await;
     assert!(current_era_result.is_ok());
 
     Ok(())

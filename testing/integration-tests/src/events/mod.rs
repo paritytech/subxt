@@ -106,9 +106,13 @@ async fn balance_transfer_subscription() -> Result<(), subxt::BasicError> {
     // Make a transfer:
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = AccountKeyring::Bob.to_account_id();
-    let transfer_tx = node_runtime::tx().balances().transfer(bob.clone().into(), 10_000);
+    let transfer_tx = node_runtime::tx()
+        .balances()
+        .transfer(bob.clone().into(), 10_000);
 
-    api.tx().sign_and_submit_then_watch_default(&transfer_tx, &alice).await?;
+    api.tx()
+        .sign_and_submit_then_watch_default(&transfer_tx, &alice)
+        .await?;
 
     // Wait for the next balance transfer event in our subscription stream
     // and check that it lines up:

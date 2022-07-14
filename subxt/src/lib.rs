@@ -124,10 +124,10 @@ pub use subxt_macro::subxt;
 
 pub mod client;
 pub mod config;
+pub mod constants;
 pub mod error;
 pub mod events;
 pub mod extrinsic;
-pub mod constants;
 pub mod metadata;
 pub mod rpc;
 pub mod storage;
@@ -142,24 +142,22 @@ pub use crate::{
     },
     config::{
         Config,
-        SubstrateConfig,
         PolkadotConfig,
+        SubstrateConfig,
     },
     error::{
         BasicError,
         Error,
     },
-    metadata::{
-        Metadata,
-    },
+    metadata::Metadata,
 };
 
 /// Re-export external crates that are made use of in the subxt API.
 pub mod ext {
     pub use bitvec;
     pub use codec;
-    pub use sp_core;
-    pub use sp_runtime;
     pub use frame_metadata;
     pub use scale_value;
+    pub use sp_core;
+    pub use sp_runtime;
 }

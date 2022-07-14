@@ -21,9 +21,7 @@ async fn storage_account() -> Result<(), subxt::Error<DispatchError>> {
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
 
-    let account_info_addr = node_runtime::storage()
-        .system()
-        .account(alice.account_id());
+    let account_info_addr = node_runtime::storage().system().account(alice.account_id());
 
     let account_info = api
         .storage()

@@ -55,9 +55,7 @@ async fn test_sudo_unchecked_weight() -> Result<(), subxt::Error<DispatchError>>
         dest: bob,
         value: 10_000,
     });
-    let tx = node_runtime::tx()
-        .sudo()
-        .sudo_unchecked_weight(call, 0);
+    let tx = node_runtime::tx().sudo().sudo_unchecked_weight(call, 0);
 
     let found_event = api
         .tx()

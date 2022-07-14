@@ -4,6 +4,10 @@
 
 //! A representation of a block of events.
 
+use super::{
+    Phase,
+    StaticEvent,
+};
 use crate::{
     error::BasicError,
     Config,
@@ -16,10 +20,6 @@ use codec::{
     Input,
 };
 use derivative::Derivative;
-use super::{
-    Phase,
-    StaticEvent
-};
 
 /// A collection of events obtained from a block, bundled with the necessary
 /// information needed to decode and iterate over them.
@@ -36,10 +36,10 @@ pub struct Events<T: Config> {
 }
 
 impl<'a, T: Config> Events<T> {
-    pub (crate) fn new(
+    pub(crate) fn new(
         metadata: Metadata,
         block_hash: T::Hash,
-        mut event_bytes: Vec<u8>
+        mut event_bytes: Vec<u8>,
     ) -> Self {
         // event_bytes is a SCALE encoded vector of events. So, pluck the
         // compact encoded length from the front, leaving the remaining bytes
@@ -80,9 +80,7 @@ impl<'a, T: Config> Events<T> {
     /// Iterate over all of the events, using metadata to dynamically
     /// decode them as we go, and returning the raw bytes and other associated
     /// details. If an error occurs, all subsequent iterations return `None`.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
         let event_bytes = &self.event_bytes;
 
         let metadata = self.metadata.clone();
@@ -162,7 +160,9 @@ impl<'a, T: Config> Events<T> {
     ///
     /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
     /// use even if you do not statically know about all of the possible events.
-    pub fn find<Ev: StaticEvent>(&self) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
+    pub fn find<Ev: StaticEvent>(
+        &self,
+    ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
         self.iter().filter_map(|ev| {
             ev.and_then(|ev| ev.as_event::<Ev>().map_err(Into::into))
                 .transpose()

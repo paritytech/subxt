@@ -4,12 +4,8 @@
 
 //! Types associated with accessing constants.
 
-mod constants_client;
 mod constant_address;
+mod constants_client;
 
-pub use constants_client::{
-    ConstantsClient,
-};
-pub use constant_address::{
-    ConstantAddress,
-};
+pub use constant_address::ConstantAddress;
+pub use constants_client::ConstantsClient;

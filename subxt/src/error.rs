@@ -7,8 +7,10 @@
 use core::fmt::Debug;
 
 // Re-expose the errors we use from other crates here:
-pub use crate::metadata::MetadataError;
-pub use crate::metadata::InvalidMetadataError;
+pub use crate::metadata::{
+    InvalidMetadataError,
+    MetadataError,
+};
 pub use jsonrpsee::core::error::Error as RequestError;
 pub use scale_value::scale::DecodeError;
 pub use sp_core::crypto::SecretStringError;

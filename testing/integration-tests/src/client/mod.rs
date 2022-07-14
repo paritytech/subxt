@@ -3,16 +3,19 @@
 // see LICENSE for license details.
 
 use crate::{
+    pair_signer,
     test_context,
     test_context_with,
-    pair_signer,
     utils::node_runtime,
 };
-use sp_core::storage::{
-    well_known_keys,
-    StorageKey,
+use sp_core::{
+    sr25519::Pair as Sr25519Pair,
+    storage::{
+        well_known_keys,
+        StorageKey,
+    },
+    Pair,
 };
-use sp_core::{ Pair, sr25519::Pair as Sr25519Pair };
 use sp_keyring::AccountKeyring;
 
 #[tokio::test]
@@ -21,8 +24,7 @@ async fn insert_key() {
     let api = ctx.client();
 
     let public = AccountKeyring::Alice.public().as_array_ref().to_vec();
-    api
-        .rpc()
+    api.rpc()
         .insert_key(
             "aura".to_string(),
             "//Alice".to_string(),
@@ -108,11 +110,7 @@ async fn test_iter() {
     let api = ctx.client();
 
     let addr = node_runtime::storage().system().account_root();
-    let mut iter = api
-        .storage()
-        .iter(addr, 10, None)
-        .await
-        .unwrap();
+    let mut iter = api.storage().iter(addr, 10, None).await.unwrap();
     let mut i = 0;
     while iter.next().await.unwrap().is_some() {
         i += 1;
@@ -172,12 +170,10 @@ async fn dry_run_fails() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let hans = pair_signer(Sr25519Pair::generate().0);
 
-    let tx = node_runtime::tx()
-        .balances()
-        .transfer(
-            hans.account_id().clone().into(),
-            100_000_000_000_000_000_000_000_000_000_000_000,
-        );
+    let tx = node_runtime::tx().balances().transfer(
+        hans.account_id().clone().into(),
+        100_000_000_000_000_000_000_000_000_000_000_000,
+    );
 
     let signed_extrinsic = api
         .tx()

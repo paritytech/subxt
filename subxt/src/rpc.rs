@@ -51,9 +51,9 @@ use std::{
 
 use crate::{
     error::BasicError,
+    utils::PhantomDataSendSync,
     Config,
     Metadata,
-    utils::PhantomDataSendSync,
 };
 use codec::{
     Decode,

@@ -11,11 +11,11 @@
 //! ```
 
 use subxt::{
-    rpc::Subscription,
     ext::sp_runtime::{
         generic::Header,
         traits::BlakeTwo256,
     },
+    rpc::Subscription,
     OnlineClient,
     PolkadotConfig,
 };
@@ -24,7 +24,8 @@ use subxt::{
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
     tracing_subscriber::fmt::init();
 
-    let api = OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
+    let api =
+        OnlineClient::<PolkadotConfig>::from_url("wss://rpc.polkadot.io:443").await?;
 
     // For non-finalised blocks use `.subscribe_blocks()`
     let mut blocks: Subscription<Header<u32, BlakeTwo256>> =

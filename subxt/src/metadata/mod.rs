@@ -4,15 +4,13 @@
 
 //! Types representing the metadata obtained from a node.
 
-mod encode_with_metadata;
 mod decode_with_metadata;
-mod metadata_location;
+mod encode_with_metadata;
 mod hash_cache;
+mod metadata_location;
 mod metadata_type;
 
-pub use metadata_location::{
-    MetadataLocation,
-};
+pub use metadata_location::MetadataLocation;
 
 pub use metadata_type::{
     ErrorMetadata,
@@ -24,12 +22,12 @@ pub use metadata_type::{
 };
 
 pub use encode_with_metadata::{
-    EncodeStaticCall,
     EncodeDynamicCall,
+    EncodeStaticCall,
     EncodeWithMetadata,
 };
 
 pub use decode_with_metadata::{
-    DecodeWithMetadata,
     DecodeStaticType,
+    DecodeWithMetadata,
 };

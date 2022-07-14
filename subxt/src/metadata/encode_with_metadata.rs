@@ -7,18 +7,18 @@ use super::{
     MetadataError,
     MetadataLocation,
 };
-use crate::{
-    error::BasicError,
-};
-use codec::{
-    Encode,
-};
+use crate::error::BasicError;
+use codec::Encode;
 use std::borrow::Cow;
 
 /// This trait represents any type that can be encoded to bytes with the support of [`Metadata`].
 pub trait EncodeWithMetadata {
     /// Given some metadata, attempt to SCALE encode `Self` to the provided bytes.
-    fn encode_to_with_metadata(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), BasicError>;
+    fn encode_to_with_metadata(
+        &self,
+        metadata: &Metadata,
+        out: &mut Vec<u8>,
+    ) -> Result<(), BasicError>;
 
     /// Given some metadata, attempt to SCALE encode `Self` and return the resulting bytes.
     fn encode_with_metadata(&self, metadata: &Metadata) -> Result<Vec<u8>, BasicError> {
@@ -38,8 +38,12 @@ pub struct EncodeStaticCall<T> {
     pub data: T,
 }
 
-impl <T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
-    fn encode_to_with_metadata(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
+impl<T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
+    fn encode_to_with_metadata(
+        &self,
+        metadata: &Metadata,
+        out: &mut Vec<u8>,
+    ) -> Result<(), BasicError> {
         let pallet = metadata.pallet(self.pallet)?;
         let pallet_index = pallet.index();
         let call_index = pallet.call_index(self.call)?;
@@ -51,7 +55,7 @@ impl <T: Encode> EncodeWithMetadata for EncodeStaticCall<T> {
     }
 }
 
-impl <T> MetadataLocation for EncodeStaticCall<T> {
+impl<T> MetadataLocation for EncodeStaticCall<T> {
     fn pallet(&self) -> &str {
         self.pallet
     }
@@ -67,22 +71,22 @@ pub struct EncodeDynamicCall<'a> {
     data: Vec<scale_value::Value>,
 }
 
-impl <'a> EncodeDynamicCall<'a> {
+impl<'a> EncodeDynamicCall<'a> {
     /// Construct a new [`EncodeDynamicCall`], which can be SCALE encoded to call data.
     pub fn new(
         pallet: impl Into<Cow<'a, str>>,
         call: impl Into<Cow<'a, str>>,
-        data: Vec<scale_value::Value>
+        data: Vec<scale_value::Value>,
     ) -> Self {
         Self {
             pallet: pallet.into(),
             call: call.into(),
-            data
+            data,
         }
     }
 }
 
-impl <'a> MetadataLocation for EncodeDynamicCall<'a> {
+impl<'a> MetadataLocation for EncodeDynamicCall<'a> {
     fn pallet(&self) -> &str {
         self.pallet.as_ref()
     }
@@ -91,8 +95,12 @@ impl <'a> MetadataLocation for EncodeDynamicCall<'a> {
     }
 }
 
-impl <'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
-    fn encode_to_with_metadata(&self, metadata: &Metadata, out: &mut Vec<u8>) -> Result<(), BasicError> {
+impl<'a> EncodeWithMetadata for EncodeDynamicCall<'a> {
+    fn encode_to_with_metadata(
+        &self,
+        metadata: &Metadata,
+        out: &mut Vec<u8>,
+    ) -> Result<(), BasicError> {
         let pallet = metadata.pallet(&self.pallet)?;
         let pallet_index = pallet.index();
         let call_ty = pallet

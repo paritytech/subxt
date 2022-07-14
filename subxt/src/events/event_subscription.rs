@@ -5,12 +5,10 @@
 //! Subscribing to events.
 
 use crate::{
+    client::OnlineClientT,
     error::BasicError,
-    Config,
-    client::{
-        OnlineClientT,
-    },
     events::EventsClient,
+    Config,
 };
 use derivative::Derivative;
 use futures::{
@@ -28,10 +26,10 @@ use std::{
 };
 
 pub use super::{
+    EventDetails,
     EventFilter,
     Events,
     FilterEvents,
-    EventDetails,
 };
 
 /// A `jsonrpsee` Subscription. This forms a part of the `EventSubscription` type handed back
@@ -53,14 +51,11 @@ pub struct EventSubscription<T: Config, Client, Sub> {
     block_header_subscription: Sub,
     #[derivative(Debug = "ignore")]
     at: Option<
-        std::pin::Pin<
-            Box<dyn Future<Output = Result<Events<T>, BasicError>> + Send>,
-        >,
+        std::pin::Pin<Box<dyn Future<Output = Result<Events<T>, BasicError>> + Send>>,
     >,
 }
 
-impl<T: Config, Client, Sub, E: Into<BasicError>>
-    EventSubscription<T, Client, Sub>
+impl<T: Config, Client, Sub, E: Into<BasicError>> EventSubscription<T, Client, Sub>
 where
     Sub: Stream<Item = Result<T::Header, E>> + Unpin,
 {
@@ -69,7 +64,7 @@ where
     pub fn new(client: Client, block_header_subscription: Sub) -> Self {
         EventSubscription {
             finished: false,
-            client: client,
+            client,
             block_header_subscription,
             at: None,
         }
@@ -111,15 +106,14 @@ where
     /// }
     /// # }
     /// ```
-    pub fn filter_events<Filter: EventFilter>(self) -> FilterEvents<'static, Self, T, Filter> {
+    pub fn filter_events<Filter: EventFilter>(
+        self,
+    ) -> FilterEvents<'static, Self, T, Filter> {
         FilterEvents::new(self)
     }
 }
 
-impl<'a, T: Config, Client, Sub: Unpin> Unpin
-    for EventSubscription<T, Client, Sub>
-{
-}
+impl<'a, T: Config, Client, Sub: Unpin> Unpin for EventSubscription<T, Client, Sub> {}
 
 // We want `EventSubscription` to implement Stream. The below implementation is the rather verbose
 // way to roughly implement the following function:
@@ -171,7 +165,8 @@ where
                 Some(Ok(block_header)) => {
                     // Note [jsdw]: We may be able to get rid of the per-item allocation
                     // with https://github.com/oblique/reusable-box-future.
-                    let at = EventsClient::new(self.client.clone()).at(block_header.hash());
+                    let at =
+                        EventsClient::new(self.client.clone()).at(block_header.hash());
                     self.at = Some(Box::pin(at));
                     // Continue, so that we poll this function future we've just created.
                 }

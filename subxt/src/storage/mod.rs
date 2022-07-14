@@ -4,12 +4,12 @@
 
 //! Types associated with accessing and working with storage items.
 
-mod storage_client;
 mod storage_address;
+mod storage_client;
 
 pub use storage_client::{
-    StorageClient,
     KeyIter,
+    StorageClient,
 };
 
 // Re-export as this is used in the public API:
@@ -19,10 +19,10 @@ pub use sp_core::storage::StorageKey;
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        StorageAddress,
-        StorageMapKey,
-        StorageHasher,
         AddressHasDefaultValue,
         AddressIsIterable,
+        StorageAddress,
+        StorageHasher,
+        StorageMapKey,
     };
 }

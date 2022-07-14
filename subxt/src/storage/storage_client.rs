@@ -2,34 +2,32 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use codec::{
-    Decode,
+use super::storage_address::{
+    AddressHasDefaultValue,
+    AddressIsIterable,
+    StorageAddress,
 };
+use crate::{
+    client::{
+        OfflineClientT,
+        OnlineClientT,
+    },
+    error::BasicError,
+    metadata::{
+        Metadata,
+        MetadataError,
+    },
+    Config,
+};
+use codec::Decode;
+use derivative::Derivative;
 use sp_core::storage::{
     StorageData,
     StorageKey,
 };
 use std::{
-    marker::PhantomData,
     future::Future,
-};
-use crate::{
-    error::BasicError,
-    metadata::{
-        MetadataError,
-    },
-    client::{
-        OnlineClientT,
-        OfflineClientT,
-    },
-    metadata::Metadata,
-    Config,
-};
-use derivative::Derivative;
-use super::storage_address::{
-    StorageAddress,
-    AddressHasDefaultValue,
-    AddressIsIterable,
+    marker::PhantomData,
 };
 
 /// Query the runtime storage.
@@ -37,14 +35,12 @@ use super::storage_address::{
 #[derivative(Clone(bound = "Client: Clone"))]
 pub struct StorageClient<T, Client> {
     client: Client,
-    _marker: PhantomData<T>
+    _marker: PhantomData<T>,
 }
 
-impl<T, Client> StorageClient<T, Client>{
+impl<T, Client> StorageClient<T, Client> {
     /// Create a new [`StorageClient`]
-    pub fn new(
-        client: Client,
-    ) -> Self {
+    pub fn new(client: Client) -> Self {
         Self {
             client,
             _marker: PhantomData,
@@ -70,7 +66,7 @@ where
                 address.pallet_name(),
                 address.entry_name(),
                 hash,
-                &self.client.metadata()
+                &self.client.metadata(),
             )?;
         }
         Ok(())
@@ -172,7 +168,6 @@ where
                 Ok(default)
             }
         }
-
     }
 
     /// Fetch up to `count` keys for a storage map in lexicographic order.
@@ -233,7 +228,8 @@ where
         address: StorageAddress<'a, ReturnTy, AddressIsIterable, Defaultable>,
         page_size: u32,
         hash: Option<T::Hash>,
-    ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy, Defaultable>, BasicError>> + 'a {
+    ) -> impl Future<Output = Result<KeyIter<T, Client, ReturnTy, Defaultable>, BasicError>> + 'a
+    {
         let client = self.clone();
         async move {
             // Metadata validation checks whether the static address given
@@ -264,7 +260,7 @@ where
             };
 
             Ok(KeyIter {
-                client: client,
+                client,
                 address: root_addr,
                 block_hash: hash,
                 count: page_size,
@@ -285,7 +281,9 @@ pub struct KeyIter<T: Config, Client, ReturnTy: Decode, Defaultable> {
     buffer: Vec<(StorageKey, StorageData)>,
 }
 
-impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode, Defaultable> KeyIter<T, Client, ReturnTy, Defaultable> {
+impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode, Defaultable>
+    KeyIter<T, Client, ReturnTy, Defaultable>
+{
     /// Returns the next key value pair from a map.
     pub async fn next(&mut self) -> Result<Option<(StorageKey, ReturnTy)>, BasicError> {
         loop {
@@ -294,7 +292,12 @@ impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode, Defaultable> Key
             } else {
                 let keys = self
                     .client
-                    .fetch_keys(&self.address, self.count, self.start_key.take(), Some(self.block_hash))
+                    .fetch_keys(
+                        &self.address,
+                        self.count,
+                        self.start_key.take(),
+                        Some(self.block_hash),
+                    )
                     .await?;
 
                 if keys.is_empty() {
@@ -323,13 +326,18 @@ impl<'a, T: Config, Client: OnlineClientT<T>, ReturnTy: Decode, Defaultable> Key
 }
 
 /// Validate a storage entry against the metadata.
-fn validate_storage(pallet_name: &str, storage_name: &str, hash: [u8; 32], metadata: &Metadata) -> Result<(), BasicError> {
+fn validate_storage(
+    pallet_name: &str,
+    storage_name: &str,
+    hash: [u8; 32],
+    metadata: &Metadata,
+) -> Result<(), BasicError> {
     let expected_hash = match metadata.storage_hash(pallet_name, storage_name) {
         Ok(hash) => hash,
-        Err(e) => return Err(e.into())
+        Err(e) => return Err(e.into()),
     };
     match expected_hash == hash {
         true => Ok(()),
-        false => Err(crate::error::MetadataError::IncompatibleMetadata.into())
+        false => Err(crate::error::MetadataError::IncompatibleMetadata.into()),
     }
 }

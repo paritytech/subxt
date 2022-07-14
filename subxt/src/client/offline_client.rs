@@ -3,16 +3,16 @@
 // see LICENSE for license details.
 
 use crate::{
+    constants::ConstantsClient,
+    events::EventsClient,
+    extrinsic::TxClient,
+    rpc::RuntimeVersion,
+    storage::StorageClient,
     Config,
     Metadata,
-    rpc::RuntimeVersion,
-    constants::ConstantsClient,
-    extrinsic::TxClient,
-    events::EventsClient,
-    storage::StorageClient,
 };
-use std::sync::Arc;
 use derivative::Derivative;
+use std::sync::Arc;
 
 /// A trait representing a client that can perform
 /// offline-only actions.
@@ -50,7 +50,7 @@ pub trait OfflineClientT<T: Config>: Clone + Send + Sync + 'static {
 #[derive(Derivative)]
 #[derivative(Debug(bound = ""), Clone(bound = ""))]
 pub struct OfflineClient<T: Config> {
-    inner: Arc<Inner<T>>
+    inner: Arc<Inner<T>>,
 }
 
 #[derive(Derivative)]
@@ -61,7 +61,7 @@ struct Inner<T: Config> {
     metadata: Metadata,
 }
 
-impl <T: Config> OfflineClient<T> {
+impl<T: Config> OfflineClient<T> {
     /// Construct a new [`OfflineClient`], providing
     /// the necessary runtime and compile-time arguments.
     pub fn new(
@@ -74,7 +74,7 @@ impl <T: Config> OfflineClient<T> {
                 genesis_hash,
                 runtime_version,
                 metadata,
-            })
+            }),
         }
     }
 
@@ -117,7 +117,7 @@ impl <T: Config> OfflineClient<T> {
     }
 }
 
-impl <T: Config> OfflineClientT<T> for OfflineClient<T> {
+impl<T: Config> OfflineClientT<T> for OfflineClient<T> {
     fn genesis_hash(&self) -> T::Hash {
         self.genesis_hash()
     }
@@ -133,7 +133,7 @@ impl <T: Config> OfflineClientT<T> for OfflineClient<T> {
 // so this allows users to pass references to a client rather than explicitly
 // cloning. This is partly for consistency with OnlineClient, which can be
 // easily converted into an OfflineClient for ergonomics.
-impl <'a, T: Config> From<&'a OfflineClient<T>> for OfflineClient<T> {
+impl<'a, T: Config> From<&'a OfflineClient<T>> for OfflineClient<T> {
     fn from(c: &'a OfflineClient<T>) -> Self {
         c.clone()
     }

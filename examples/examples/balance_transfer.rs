@@ -36,10 +36,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .transfer(dest, 123_456_789_012_345);
 
     // submit the transaction with default params:
-    let hash = api
-        .tx()
-        .sign_and_submit_default(&tx, &signer)
-        .await?;
+    let hash = api.tx().sign_and_submit_default(&tx, &signer).await?;
 
     println!("Balance transfer extrinsic submitted: {}", hash);
 

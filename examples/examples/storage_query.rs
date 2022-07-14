@@ -13,11 +13,11 @@
 use codec::Decode;
 use subxt::{
     storage::{
-        StorageKey,
         address::{
-            StorageMapKey,
             StorageHasher,
-        }
+            StorageMapKey,
+        },
+        StorageKey,
     },
     OnlineClient,
     PolkadotConfig,
@@ -54,16 +54,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
 
         // Fetch at most 10 keys from below the prefix XcmPallet' VersionNotifiers.
-        let keys = api
-            .storage()
-            .fetch_keys(&key_addr, 10, None, None)
-            .await?;
+        let keys = api.storage().fetch_keys(&key_addr, 10, None, None).await?;
 
         println!("Example 1. Obtained keys:");
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(&key));
 
-            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await? {
+            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await?
+            {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn
@@ -78,9 +76,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let key_addr = polkadot::storage().xcm_pallet().version_notifiers_root();
 
-        let mut iter = api.storage()
-            .iter(key_addr, 10, None)
-            .await?;
+        let mut iter = api.storage().iter(key_addr, 10, None).await?;
 
         println!("\nExample 2. Obtained keys:");
         while let Some((key, value)) = iter.next().await? {
@@ -106,10 +102,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         // ```
         // while `XcmVersion` is `u32`.
         // Pass `2` as `XcmVersion` and concatenate the key to the prefix.
-        StorageMapKey::new(
-            &2u32,
-            StorageHasher::Twox64Concat,
-        ).to_bytes(&mut query_key);
+        StorageMapKey::new(&2u32, StorageHasher::Twox64Concat).to_bytes(&mut query_key);
 
         // The final query key is:
         // `twox_128("XcmPallet") ++ twox_128("VersionNotifiers") ++ twox_64(2u32) ++ 2u32`
@@ -123,7 +116,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         for key in keys.iter() {
             println!("Key: 0x{}", hex::encode(&key));
 
-            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await? {
+            if let Some(storage_data) = api.storage().fetch_raw(key.clone(), None).await?
+            {
                 // We know the return value to be `QueryId` (`u64`) from inspecting either:
                 // - polkadot code
                 // - polkadot.rs generated file under `version_notifiers()` fn

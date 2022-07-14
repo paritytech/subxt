@@ -17,9 +17,7 @@ use subxt::{
             sr25519,
             Pair,
         },
-        sp_runtime::{
-            AccountId32,
-        }
+        sp_runtime::AccountId32,
     },
     OnlineClient,
     PolkadotConfig,
@@ -35,9 +33,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create a client to use:
     let api = OnlineClient::<PolkadotConfig>::new().await?;
 
-    let active_era_addr = polkadot::storage()
-        .staking()
-        .active_era();
+    let active_era_addr = polkadot::storage().staking().active_era();
     let era = api.storage().fetch(&active_era_addr, None).await?.unwrap();
     println!(
         "Staking active era: index: {:?}, start: {:?}",
@@ -55,9 +51,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("  Alice//stash account id: {:?}", alice_stash_id);
 
     // Map from all locked "stash" accounts to the controller account.
-    let controller_acc_addr = polkadot::storage()
-        .staking()
-        .bonded(&alice_stash_id);
+    let controller_acc_addr = polkadot::storage().staking().bonded(&alice_stash_id);
     let controller_acc = api
         .storage()
         .fetch(&controller_acc_addr, None)
@@ -65,13 +59,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
     println!("    account controlled by: {:?}", controller_acc);
 
-    let era_reward_addr = polkadot::storage()
-        .staking()
-        .eras_reward_points(&era.index);
-    let era_result = api
-        .storage()
-        .fetch(&era_reward_addr, None)
-        .await?;
+    let era_reward_addr = polkadot::storage().staking().eras_reward_points(&era.index);
+    let era_result = api.storage().fetch(&era_reward_addr, None).await?;
     println!("Era reward points: {:?}", era_result);
 
     Ok(())

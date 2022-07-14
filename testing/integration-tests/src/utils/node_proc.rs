@@ -16,8 +16,8 @@ use std::{
     process,
 };
 use subxt::{
-    OnlineClient,
     Config,
+    OnlineClient,
 };
 
 /// Spawn a local substrate node for testing subxt.
@@ -124,12 +124,7 @@ impl TestNodeProcessBuilder {
         // Connect to the node with a subxt client:
         let client = OnlineClient::from_url(ws_url.clone()).await;
         match client {
-            Ok(client) => {
-                Ok(TestNodeProcess {
-                    proc,
-                    client,
-                })
-            }
+            Ok(client) => Ok(TestNodeProcess { proc, client }),
             Err(err) => {
                 let err = format!("Failed to connect to node rpc at {}: {}", ws_url, err);
                 tracing::error!("{}", err);

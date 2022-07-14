@@ -6,12 +6,8 @@
 
 use std::task::Poll;
 
-use codec::Decode;
-use sp_runtime::traits::Hash;
 use crate::{
-    client::{
-        OnlineClientT,
-    },
+    client::OnlineClientT,
     error::{
         BasicError,
         Error,
@@ -22,8 +18,8 @@ use crate::{
     },
     events::{
         self,
-        Events,
         EventDetails,
+        Events,
         EventsClient,
         Phase,
         StaticEvent,
@@ -32,6 +28,7 @@ use crate::{
     utils::PhantomDataSendSync,
     Config,
 };
+use codec::Decode;
 use derivative::Derivative;
 use futures::{
     Stream,
@@ -41,6 +38,7 @@ use jsonrpsee::core::{
     client::Subscription as RpcSubscription,
     Error as RpcError,
 };
+use sp_runtime::traits::Hash;
 
 pub use sp_runtime::traits::SignedExtension;
 
@@ -336,11 +334,7 @@ pub struct TransactionInBlock<T: Config, C, Err> {
 impl<T: Config, C: OnlineClientT<T>, Err: Decode + HasModuleError>
     TransactionInBlock<T, C, Err>
 {
-    pub(crate) fn new(
-        block_hash: T::Hash,
-        ext_hash: T::Hash,
-        client: C,
-    ) -> Self {
+    pub(crate) fn new(block_hash: T::Hash, ext_hash: T::Hash, client: C) -> Self {
         Self {
             block_hash,
             ext_hash,
@@ -466,9 +460,7 @@ impl<T: Config> TransactionEvents<T> {
     ///
     /// This works in the same way that [`events::Events::iter()`] does, with the
     /// exception that it filters out events not related to the submitted extrinsic.
-    pub fn iter(
-        &self,
-    ) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
+    pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, BasicError>> + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
                 .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))

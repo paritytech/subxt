@@ -50,5 +50,5 @@ pub use self::{
         SignedSubmittableExtrinsic,
         SubmittableExtrinsic,
         TxClient,
-    }
+    },
 };

@@ -2,16 +2,10 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use codec::{
-    Encode,
-};
-use sp_core::storage::{
-    StorageKey,
-};
+use codec::Encode;
+use sp_core::storage::StorageKey;
 pub use sp_runtime::traits::SignedExtension;
-use std::{
-    borrow::Cow,
-};
+use std::borrow::Cow;
 
 // We use this type a bunch, so export it from here.
 pub use frame_metadata::StorageHasher;
@@ -19,31 +13,33 @@ pub use frame_metadata::StorageHasher;
 /// This is returned from storage accesses in the statically generated
 /// code, and contains the information needed to find, validate and decode
 /// the storage entry.
-pub struct StorageAddress <'a, ReturnTy, Iterable, Defaultable> {
+pub struct StorageAddress<'a, ReturnTy, Iterable, Defaultable> {
     pallet_name: Cow<'a, str>,
     entry_name: Cow<'a, str>,
     // How to access the specific value at that storage address.
     storage_entry_key: Vec<StorageMapKey>,
     // Hash provided from static code for validation.
     validation_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<(ReturnTy, Iterable, Defaultable)>
+    _marker: std::marker::PhantomData<(ReturnTy, Iterable, Defaultable)>,
 }
 
-impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable, Defaultable> {
+impl<'a, ReturnTy, Iterable, Defaultable>
+    StorageAddress<'a, ReturnTy, Iterable, Defaultable>
+{
     /// Create a new [`StorageAddress`] that will be validated
     /// against node metadata using the hash given.
     pub fn new_with_validation(
         pallet_name: impl Into<Cow<'a, str>>,
         storage_name: impl Into<Cow<'a, str>>,
         storage_entry_key: Vec<StorageMapKey>,
-        hash: [u8; 32]
+        hash: [u8; 32],
     ) -> Self {
         Self {
             pallet_name: pallet_name.into(),
             entry_name: storage_name.into(),
             storage_entry_key: storage_entry_key.into(),
             validation_hash: Some(hash),
-            _marker: std::marker::PhantomData
+            _marker: std::marker::PhantomData,
         }
     }
 
@@ -54,7 +50,7 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
             entry_name: self.entry_name,
             storage_entry_key: self.storage_entry_key,
             validation_hash: None,
-            _marker: self._marker
+            _marker: self._marker,
         }
     }
 
@@ -91,7 +87,7 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
             entry_name: Cow::Owned(self.entry_name.into_owned()),
             storage_entry_key: self.storage_entry_key,
             validation_hash: self.validation_hash,
-            _marker: self._marker
+            _marker: self._marker,
         }
     }
 
@@ -111,7 +107,9 @@ impl <'a, ReturnTy, Iterable, Defaultable> StorageAddress<'a, ReturnTy, Iterable
     }
 }
 
-impl <'a, ReturnTy, Iterable, Defaultable> From<&StorageAddress<'a, ReturnTy, Iterable, Defaultable>> for StorageKey {
+impl<'a, ReturnTy, Iterable, Defaultable>
+    From<&StorageAddress<'a, ReturnTy, Iterable, Defaultable>> for StorageKey
+{
     fn from(address: &StorageAddress<'a, ReturnTy, Iterable, Defaultable>) -> Self {
         StorageKey(address.to_bytes())
     }
@@ -158,7 +156,6 @@ impl StorageMapKey {
 
 /// If a [`StorageAddress`] is annotated with this, we can iterate over it.
 pub struct AddressIsIterable;
-
 
 /// If a [`StorageAddress`] is annotated with this, it has a default value
 /// that we can use if it's not been set.

@@ -7,9 +7,7 @@ use sp_keyring::AccountKeyring;
 use crate::{
     node_runtime::{
         self,
-        contracts::{
-            events,
-        },
+        contracts::events,
         system,
         DispatchError,
     },
@@ -19,14 +17,14 @@ use crate::{
 use sp_core::sr25519::Pair;
 use sp_runtime::MultiAddress;
 use subxt::{
-    OnlineClient,
-    Config,
-    SubstrateConfig,
-    Error,
     extrinsic::{
         PairSigner,
         TransactionProgress,
-    }
+    },
+    Config,
+    Error,
+    OnlineClient,
+    SubstrateConfig,
 };
 
 struct ContractsTestContext {
@@ -62,16 +60,14 @@ impl ContractsTestContext {
             "#;
         let code = wabt::wat2wasm(CONTRACT).expect("invalid wabt");
 
-        let instantiate_tx = node_runtime::tx()
-            .contracts()
-            .instantiate_with_code(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code,
-                vec![], // data
-                vec![], // salt
-            );
+        let instantiate_tx = node_runtime::tx().contracts().instantiate_with_code(
+            100_000_000_000_000_000, // endowment
+            500_000_000_000,         // gas_limit
+            None,                    // storage_deposit_limit
+            code,
+            vec![], // data
+            vec![], // salt
+        );
 
         let events = self
             .client()
@@ -106,16 +102,14 @@ impl ContractsTestContext {
         salt: Vec<u8>,
     ) -> Result<AccountId, Error<DispatchError>> {
         // call instantiate extrinsic
-        let instantiate_tx = node_runtime::tx()
-            .contracts()
-            .instantiate(
-                100_000_000_000_000_000, // endowment
-                500_000_000_000,         // gas_limit
-                None,                    // storage_deposit_limit
-                code_hash,
-                data,
-                salt,
-            );
+        let instantiate_tx = node_runtime::tx().contracts().instantiate(
+            100_000_000_000_000_000, // endowment
+            500_000_000_000,         // gas_limit
+            None,                    // storage_deposit_limit
+            code_hash,
+            data,
+            salt,
+        );
 
         let result = self
             .client()
@@ -138,19 +132,21 @@ impl ContractsTestContext {
         contract: AccountId,
         input_data: Vec<u8>,
     ) -> Result<
-        TransactionProgress<SubstrateConfig, OnlineClient<SubstrateConfig>, DispatchError>,
+        TransactionProgress<
+            SubstrateConfig,
+            OnlineClient<SubstrateConfig>,
+            DispatchError,
+        >,
         Error<DispatchError>,
     > {
         tracing::info!("call: {:?}", contract);
-        let call_tx = node_runtime::tx()
-            .contracts()
-            .call(
-                MultiAddress::Id(contract),
-                0,           // value
-                500_000_000, // gas_limit
-                None,        // storage_deposit_limit
-                input_data,
-            );
+        let call_tx = node_runtime::tx().contracts().call(
+            MultiAddress::Id(contract),
+            0,           // value
+            500_000_000, // gas_limit
+            None,        // storage_deposit_limit
+            input_data,
+        );
 
         let result = self
             .client()
@@ -198,11 +194,7 @@ async fn tx_call() {
         .contracts()
         .contract_info_of(&contract);
 
-    let contract_info = cxt
-        .client()
-        .storage()
-        .fetch(&info_addr, None)
-        .await;
+    let contract_info = cxt.client().storage().fetch(&info_addr, None).await;
     assert!(contract_info.is_ok());
 
     let keys = cxt

@@ -9,18 +9,22 @@ pub struct ConstantAddress<'a, ReturnTy> {
     pallet_name: &'a str,
     constant_name: &'a str,
     constant_hash: Option<[u8; 32]>,
-    _marker: std::marker::PhantomData<ReturnTy>
+    _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl <'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
+impl<'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
     /// Create a new [`ConstantAddress`] that will be validated
     /// against node metadata using the hash given.
-    pub fn new_with_validation(pallet_name: &'a str, constant_name: &'a str, hash: [u8; 32]) -> Self {
+    pub fn new_with_validation(
+        pallet_name: &'a str,
+        constant_name: &'a str,
+        hash: [u8; 32],
+    ) -> Self {
         Self {
             pallet_name,
             constant_name,
             constant_hash: Some(hash),
-            _marker: std::marker::PhantomData
+            _marker: std::marker::PhantomData,
         }
     }
 
@@ -30,7 +34,7 @@ impl <'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
             pallet_name: self.pallet_name,
             constant_name: self.constant_name,
             constant_hash: None,
-            _marker: self._marker
+            _marker: self._marker,
         }
     }
 

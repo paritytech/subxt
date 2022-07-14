@@ -2,30 +2,28 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-use std::sync::Arc;
-use parking_lot::RwLock;
 use super::{
     OfflineClient,
     OfflineClientT,
 };
-use futures::future;
 use crate::{
-    Config,
+    constants::ConstantsClient,
+    error::BasicError,
+    events::EventsClient,
+    extrinsic::TxClient,
     rpc::{
         Rpc,
         RpcClient,
-        RuntimeVersion
+        RuntimeVersion,
     },
-    error::{
-        BasicError,
-    },
-    Metadata,
-    constants::ConstantsClient,
-    extrinsic::TxClient,
-    events::EventsClient,
     storage::StorageClient,
+    Config,
+    Metadata,
 };
 use derivative::Derivative;
+use futures::future;
+use parking_lot::RwLock;
+use std::sync::Arc;
 
 /// A trait representing a client that can perform
 /// online actions.
@@ -59,7 +57,7 @@ impl<T: Config> std::fmt::Debug for OnlineClient<T> {
     }
 }
 
-impl <T: Config> OnlineClient<T> {
+impl<T: Config> OnlineClient<T> {
     /// Construct a new [`OnlineClient`] using default settings which
     /// point to a locally running node on `ws://127.0.0.1:9944`.
     pub async fn new() -> Result<OnlineClient<T>, BasicError> {
@@ -75,13 +73,15 @@ impl <T: Config> OnlineClient<T> {
 
     /// Construct a new [`OnlineClient`] by providing the underlying [`RpcClient`]
     /// to use to drive the connection.
-    pub async fn from_rpc_client(rpc_client: impl Into<RpcClient>) -> Result<OnlineClient<T>, BasicError> {
+    pub async fn from_rpc_client(
+        rpc_client: impl Into<RpcClient>,
+    ) -> Result<OnlineClient<T>, BasicError> {
         let rpc = Rpc::new(rpc_client.into());
 
         let (genesis_hash, runtime_version, metadata) = future::join3(
             rpc.genesis_hash(),
             rpc.runtime_version(None),
-            rpc.metadata()
+            rpc.metadata(),
         )
         .await;
 
@@ -91,7 +91,7 @@ impl <T: Config> OnlineClient<T> {
                 runtime_version: runtime_version?,
                 metadata: metadata?,
             })),
-            rpc
+            rpc,
         })
     }
 
@@ -146,7 +146,7 @@ impl <T: Config> OnlineClient<T> {
         OfflineClient::new(
             inner.genesis_hash.clone(),
             inner.runtime_version.clone(),
-            inner.metadata.clone()
+            inner.metadata.clone(),
         )
     }
 
@@ -174,7 +174,7 @@ impl <T: Config> OnlineClient<T> {
     }
 }
 
-impl <T: Config> OfflineClientT<T> for OnlineClient<T> {
+impl<T: Config> OfflineClientT<T> for OnlineClient<T> {
     fn metadata(&self) -> Metadata {
         self.metadata()
     }
@@ -186,7 +186,7 @@ impl <T: Config> OfflineClientT<T> for OnlineClient<T> {
     }
 }
 
-impl <T: Config> OnlineClientT<T> for OnlineClient<T> {
+impl<T: Config> OnlineClientT<T> for OnlineClient<T> {
     fn rpc(&self) -> &Rpc<T> {
         &self.rpc
     }
@@ -216,7 +216,7 @@ impl<T: Config> ClientRuntimeUpdater<T> {
 
             // Ignore this update if there is no difference.
             if !self.is_runtime_version_different(&new_runtime_version) {
-                continue;
+                continue
             }
 
             // Fetch new metadata.

@@ -37,9 +37,7 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
     let alice = AccountKeyring::Alice.to_account_id();
 
     // Do some transaction to bump the Alice nonce to 1:
-    let remark_tx = node_runtime::tx()
-        .system()
-        .remark(vec![1, 2, 3, 4, 5]);
+    let remark_tx = node_runtime::tx().system().remark(vec![1, 2, 3, 4, 5]);
     api.tx()
         .sign_and_submit_then_watch_default(&remark_tx, &signer)
         .await?
@@ -59,7 +57,8 @@ async fn storage_map_lookup() -> Result<(), subxt::Error<DispatchError>> {
 // treated as a StorageKey (ie we should hash both values together with one hasher, rather
 // than hash both values separately, or ignore the second value).
 #[tokio::test]
-async fn storage_n_mapish_key_is_properly_created() -> Result<(), subxt::Error<DispatchError>> {
+async fn storage_n_mapish_key_is_properly_created(
+) -> Result<(), subxt::Error<DispatchError>> {
     use codec::Encode;
     use node_runtime::runtime_types::sp_core::crypto::KeyTypeId;
 
@@ -97,8 +96,12 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
     let alice = AccountKeyring::Alice.to_account_id();
     let bob = AccountKeyring::Bob.to_account_id();
 
-    let tx1 = node_runtime::tx().assets().create(99, alice.clone().into(), 1);
-    let tx2 = node_runtime::tx().assets().approve_transfer(99, bob.clone().into(), 123);
+    let tx1 = node_runtime::tx()
+        .assets()
+        .create(99, alice.clone().into(), 1);
+    let tx2 = node_runtime::tx()
+        .assets()
+        .approve_transfer(99, bob.clone().into(), 123);
     api.tx()
         .sign_and_submit_then_watch_default(&tx1, &signer)
         .await?
@@ -112,10 +115,7 @@ async fn storage_n_map_storage_lookup() -> Result<(), subxt::Error<DispatchError
 
     // The actual test; look up this approval in storage:
     let addr = node_runtime::storage().assets().approvals(99, &alice, &bob);
-    let entry = api
-        .storage()
-        .fetch(&addr, None)
-        .await?;
+    let entry = api.storage().fetch(&addr, None).await?;
     assert_eq!(entry.map(|a| a.amount), Some(123));
     Ok(())
 }
