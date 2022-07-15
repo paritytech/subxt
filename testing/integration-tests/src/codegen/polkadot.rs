@@ -541,18 +541,20 @@ pub mod api {
                 pub fn account(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_system::AccountInfo<
-                        ::core::primitive::u32,
-                        runtime_types::pallet_balances::AccountData<
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_system::AccountInfo<
+                            ::core::primitive::u32,
+                            runtime_types::pallet_balances::AccountData<
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "Account",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -570,18 +572,20 @@ pub mod api {
                 #[doc = " The full account information for a particular account ID."]
                 pub fn account_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_system::AccountInfo<
-                        ::core::primitive::u32,
-                        runtime_types::pallet_balances::AccountData<
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_system::AccountInfo<
+                            ::core::primitive::u32,
+                            runtime_types::pallet_balances::AccountData<
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "Account",
                         Vec::new(),
@@ -596,13 +600,13 @@ pub mod api {
                 #[doc = " Total extrinsics count for the current block."]
                 pub fn extrinsic_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "ExtrinsicCount",
                         vec![],
@@ -617,15 +621,17 @@ pub mod api {
                 #[doc = " The current weight for the block."]
                 pub fn block_weight(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_support::weights::PerDispatchClass<
-                        ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_support::weights::PerDispatchClass<
+                            ::core::primitive::u64,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "BlockWeight",
                         vec![],
@@ -640,13 +646,13 @@ pub mod api {
                 #[doc = " Total length (in bytes) for all extrinsics put together, for the current block."]
                 pub fn all_extrinsics_len(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "AllExtrinsicsLen",
                         vec![],
@@ -662,13 +668,13 @@ pub mod api {
                 pub fn block_hash(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::H256,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::subxt::ext::sp_core::H256>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "BlockHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -686,13 +692,13 @@ pub mod api {
                 #[doc = " Map of block numbers to block hashes."]
                 pub fn block_hash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::H256,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::subxt::ext::sp_core::H256>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "BlockHash",
                         Vec::new(),
@@ -708,13 +714,15 @@ pub mod api {
                 pub fn extrinsic_data(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "ExtrinsicData",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -732,13 +740,15 @@ pub mod api {
                 #[doc = " Extrinsics data for the current block (maps an extrinsic's index to its data)."]
                 pub fn extrinsic_data_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "ExtrinsicData",
                         Vec::new(),
@@ -753,13 +763,13 @@ pub mod api {
                 #[doc = " The current block number being processed. Set by `execute_block`."]
                 pub fn number(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "Number",
                         vec![],
@@ -774,13 +784,13 @@ pub mod api {
                 #[doc = " Hash of the previous block."]
                 pub fn parent_hash(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::subxt::ext::sp_core::H256>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "ParentHash",
                         vec![],
@@ -795,13 +805,15 @@ pub mod api {
                 #[doc = " Digest of the current block, also part of the block header."]
                 pub fn digest(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::generic::digest::Digest,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::generic::digest::Digest,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "Digest",
                         vec![],
@@ -822,18 +834,20 @@ pub mod api {
                 #[doc = " just in case someone still reads them from within the runtime."]
                 pub fn events(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::frame_system::EventRecord<
-                            runtime_types::polkadot_runtime::Event,
-                            ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::frame_system::EventRecord<
+                                runtime_types::polkadot_runtime::Event,
+                                ::subxt::ext::sp_core::H256,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "Events",
                         vec![],
@@ -848,13 +862,13 @@ pub mod api {
                 #[doc = " The number of events in the `Events<T>` list."]
                 pub fn event_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "EventCount",
                         vec![],
@@ -879,13 +893,15 @@ pub mod api {
                 pub fn event_topics(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "EventTopics",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -912,13 +928,15 @@ pub mod api {
                 #[doc = " no notification will be triggered thus the event might be lost."]
                 pub fn event_topics_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "EventTopics",
                         Vec::new(),
@@ -933,13 +951,15 @@ pub mod api {
                 #[doc = " Stores the `spec_version` and `spec_name` of when the last runtime upgrade happened."]
                 pub fn last_runtime_upgrade(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_system::LastRuntimeUpgradeInfo,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_system::LastRuntimeUpgradeInfo,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "LastRuntimeUpgrade",
                         vec![],
@@ -954,13 +974,13 @@ pub mod api {
                 #[doc = " True if we have upgraded so that `type RefCount` is `u32`. False (default) if not."]
                 pub fn upgraded_to_u32_ref_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "UpgradedToU32RefCount",
                         vec![],
@@ -976,13 +996,13 @@ pub mod api {
                 #[doc = " (default) if not."]
                 pub fn upgraded_to_triple_ref_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "UpgradedToTripleRefCount",
                         vec![],
@@ -997,13 +1017,15 @@ pub mod api {
                 #[doc = " The execution phase of the block."]
                 pub fn execution_phase(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_system::Phase,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_system::Phase,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "System",
                         "ExecutionPhase",
                         vec![],
@@ -1520,8 +1542,8 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: storage :: address :: AddressIsIterable , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Scheduler",
                         "Agenda",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -1536,8 +1558,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > , :: subxt :: storage :: address :: AddressIsIterable , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Items to be executed, indexed by the block number that they should be executed on."]                pub fn agenda_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < :: core :: option :: Option < runtime_types :: pallet_scheduler :: ScheduledV3 < runtime_types :: frame_support :: traits :: schedule :: MaybeHashed < runtime_types :: polkadot_runtime :: Call , :: subxt :: ext :: sp_core :: H256 > , :: core :: primitive :: u32 , runtime_types :: polkadot_runtime :: OriginCaller , :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > > > , () , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Scheduler",
                         "Agenda",
                         Vec::new(),
@@ -1553,13 +1575,16 @@ pub mod api {
                 pub fn lookup(
                     &self,
                     _0: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Scheduler",
                         "Lookup",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -1577,13 +1602,16 @@ pub mod api {
                 #[doc = " Lookup from identity to the block number and index of the task."]
                 pub fn lookup_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Scheduler",
                         "Lookup",
                         Vec::new(),
@@ -1834,16 +1862,18 @@ pub mod api {
                 pub fn status_for(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_preimage::RequestStatus<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_preimage::RequestStatus<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Preimage",
                         "StatusFor",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -1861,16 +1891,18 @@ pub mod api {
                 #[doc = " The request status of a given hash."]
                 pub fn status_for_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_preimage::RequestStatus<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_preimage::RequestStatus<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Preimage",
                         "StatusFor",
                         Vec::new(),
@@ -1886,15 +1918,17 @@ pub mod api {
                 pub fn preimage_for(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Preimage",
                         "PreimageFor",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -1912,15 +1946,17 @@ pub mod api {
                 #[doc = " The preimages stored by this pallet."]
                 pub fn preimage_for_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Preimage",
                         "PreimageFor",
                         Vec::new(),
@@ -2088,13 +2124,13 @@ pub mod api {
                 #[doc = " Current epoch index."]
                 pub fn epoch_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "EpochIndex",
                         vec![],
@@ -2106,21 +2142,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Current epoch authorities."]
-                pub fn authorities(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
-                        (
-                            runtime_types::sp_consensus_babe::app::Public,
-                            ::core::primitive::u64,
-                        ),
-                    >,
-                    (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Current epoch authorities."]                pub fn authorities (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "Authorities",
                         vec![],
@@ -2136,13 +2159,15 @@ pub mod api {
                 #[doc = " until the first block of the chain."]
                 pub fn genesis_slot(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_consensus_slots::Slot,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_consensus_slots::Slot,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "GenesisSlot",
                         vec![],
@@ -2157,13 +2182,15 @@ pub mod api {
                 #[doc = " Current slot number."]
                 pub fn current_slot(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_consensus_slots::Slot,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_consensus_slots::Slot,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "CurrentSlot",
                         vec![],
@@ -2187,13 +2214,13 @@ pub mod api {
                 #[doc = " adversary, for purposes such as public-coin zero-knowledge proofs."]
                 pub fn randomness(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    [::core::primitive::u8; 32usize],
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<[::core::primitive::u8; 32usize]>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "Randomness",
                         vec![],
@@ -2208,13 +2235,15 @@ pub mod api {
                 #[doc = " Pending epoch configuration change that will be applied when the next epoch is enacted."]
                 pub fn pending_epoch_config_change(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_consensus_babe::digests::NextConfigDescriptor,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_consensus_babe::digests::NextConfigDescriptor,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "PendingEpochConfigChange",
                         vec![],
@@ -2229,13 +2258,13 @@ pub mod api {
                 #[doc = " Next epoch randomness."]
                 pub fn next_randomness(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    [::core::primitive::u8; 32usize],
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<[::core::primitive::u8; 32usize]>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "NextRandomness",
                         vec![],
@@ -2247,21 +2276,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Next epoch authorities."]
-                pub fn next_authorities(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
-                        (
-                            runtime_types::sp_consensus_babe::app::Public,
-                            ::core::primitive::u64,
-                        ),
-                    >,
-                    (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Next epoch authorities."]                pub fn next_authorities (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < (runtime_types :: sp_consensus_babe :: app :: Public , :: core :: primitive :: u64 ,) > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "NextAuthorities",
                         vec![],
@@ -2284,13 +2300,13 @@ pub mod api {
                 #[doc = " epoch."]
                 pub fn segment_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "SegmentIndex",
                         vec![],
@@ -2306,15 +2322,17 @@ pub mod api {
                 pub fn under_construction(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        [::core::primitive::u8; 32usize],
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            [::core::primitive::u8; 32usize],
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "UnderConstruction",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -2332,15 +2350,17 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SegmentIndex` is an increasing integer, so this is okay."]
                 pub fn under_construction_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        [::core::primitive::u8; 32usize],
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            [::core::primitive::u8; 32usize],
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "UnderConstruction",
                         Vec::new(),
@@ -2356,15 +2376,17 @@ pub mod api {
                 #[doc = " if per-block initialization has already been called for current block."]
                 pub fn initialized(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::option::Option<
-                        runtime_types::sp_consensus_babe::digests::PreDigest,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::core::option::Option<
+                            runtime_types::sp_consensus_babe::digests::PreDigest,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "Initialized",
                         vec![],
@@ -2382,13 +2404,15 @@ pub mod api {
                 #[doc = " It is set in `on_finalize`, before it will contain the value from the last block."]
                 pub fn author_vrf_randomness(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::core::option::Option<[::core::primitive::u8; 32usize]>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "AuthorVrfRandomness",
                         vec![],
@@ -2407,13 +2431,16 @@ pub mod api {
                 #[doc = " slots, which may be skipped, the block numbers may not line up with the slot numbers."]
                 pub fn epoch_start(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "EpochStart",
                         vec![],
@@ -2432,13 +2459,13 @@ pub mod api {
                 #[doc = " execution context should always yield zero."]
                 pub fn lateness(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "Lateness",
                         vec![],
@@ -2454,13 +2481,15 @@ pub mod api {
                 #[doc = " genesis."]
                 pub fn epoch_config(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_consensus_babe::BabeEpochConfiguration,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_consensus_babe::BabeEpochConfiguration,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "EpochConfig",
                         vec![],
@@ -2476,13 +2505,15 @@ pub mod api {
                 #[doc = " (you can fallback to `EpochConfig` instead in that case)."]
                 pub fn next_epoch_config(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_consensus_babe::BabeEpochConfiguration,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_consensus_babe::BabeEpochConfiguration,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Babe",
                         "NextEpochConfig",
                         vec![],
@@ -2628,13 +2659,13 @@ pub mod api {
                 #[doc = " Current time for the current block."]
                 pub fn now(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Timestamp",
                         "Now",
                         vec![],
@@ -2649,13 +2680,13 @@ pub mod api {
                 #[doc = " Did the timestamp get updated in this block?"]
                 pub fn did_update(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Timestamp",
                         "DidUpdate",
                         vec![],
@@ -3013,17 +3044,17 @@ pub mod api {
                 pub fn accounts(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         ::core::primitive::u128,
                         ::core::primitive::bool,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Indices",
                         "Accounts",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -3041,17 +3072,17 @@ pub mod api {
                 #[doc = " The lookup from index to account."]
                 pub fn accounts_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         ::core::primitive::u128,
                         ::core::primitive::bool,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Indices",
                         "Accounts",
                         Vec::new(),
@@ -3571,13 +3602,13 @@ pub mod api {
                 #[doc = " The total units issued in the system."]
                 pub fn total_issuance(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "TotalIssuance",
                         vec![],
@@ -3616,13 +3647,17 @@ pub mod api {
                 pub fn account(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_balances::AccountData<
+                            ::core::primitive::u128,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Account",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -3663,13 +3698,17 @@ pub mod api {
                 #[doc = " NOTE: This is only used in the case that this pallet is used to store balances."]
                 pub fn account_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_balances::AccountData<::core::primitive::u128>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_balances::AccountData<
+                            ::core::primitive::u128,
+                        >,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Account",
                         Vec::new(),
@@ -3682,21 +3721,8 @@ pub mod api {
                     )
                 }
                 #[doc = " Any liquidity locks on some account balances."]
-                #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
-                pub fn locks(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
-                        runtime_types::pallet_balances::BalanceLock<
-                            ::core::primitive::u128,
-                        >,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]                pub fn locks (& self , _0 : impl :: std :: borrow :: Borrow < :: subxt :: ext :: sp_core :: crypto :: AccountId32 > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_balances :: BalanceLock < :: core :: primitive :: u128 > > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Locks",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -3712,20 +3738,8 @@ pub mod api {
                     )
                 }
                 #[doc = " Any liquidity locks on some account balances."]
-                #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]
-                pub fn locks_root(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
-                        runtime_types::pallet_balances::BalanceLock<
-                            ::core::primitive::u128,
-                        >,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " NOTE: Should only be accessed when setting, changing and freeing a lock."]                pub fn locks_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_balances :: BalanceLock < :: core :: primitive :: u128 > > > , () , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Locks",
                         Vec::new(),
@@ -3741,18 +3755,20 @@ pub mod api {
                 pub fn reserves(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        runtime_types::pallet_balances::ReserveData<
-                            [::core::primitive::u8; 8usize],
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            runtime_types::pallet_balances::ReserveData<
+                                [::core::primitive::u8; 8usize],
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Reserves",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -3770,18 +3786,20 @@ pub mod api {
                 #[doc = " Named reserves on some account balances."]
                 pub fn reserves_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        runtime_types::pallet_balances::ReserveData<
-                            [::core::primitive::u8; 8usize],
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            runtime_types::pallet_balances::ReserveData<
+                                [::core::primitive::u8; 8usize],
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "Reserves",
                         Vec::new(),
@@ -3798,13 +3816,15 @@ pub mod api {
                 #[doc = " This is set to v2.0.0 for new networks."]
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_balances::Releases,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_balances::Releases,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Balances",
                         "StorageVersion",
                         vec![],
@@ -3889,13 +3909,15 @@ pub mod api {
             impl StorageApi {
                 pub fn next_fee_multiplier(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_arithmetic::fixed_point::FixedU128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_arithmetic::fixed_point::FixedU128,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TransactionPayment",
                         "NextFeeMultiplier",
                         vec![],
@@ -3909,13 +3931,15 @@ pub mod api {
                 }
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_transaction_payment::Releases,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_transaction_payment::Releases,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TransactionPayment",
                         "StorageVersion",
                         vec![],
@@ -4033,19 +4057,21 @@ pub mod api {
                 #[doc = " Uncles"]
                 pub fn uncles(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::pallet_authorship::UncleEntryItem<
-                            ::core::primitive::u32,
-                            ::subxt::ext::sp_core::H256,
-                            ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::pallet_authorship::UncleEntryItem<
+                                ::core::primitive::u32,
+                                ::subxt::ext::sp_core::H256,
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Authorship",
                         "Uncles",
                         vec![],
@@ -4060,13 +4086,15 @@ pub mod api {
                 #[doc = " Author of current block."]
                 pub fn author(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Authorship",
                         "Author",
                         vec![],
@@ -4081,13 +4109,13 @@ pub mod api {
                 #[doc = " Whether uncles were already set in this block."]
                 pub fn did_set_uncles(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Authorship",
                         "DidSetUncles",
                         vec![],
@@ -5517,13 +5545,13 @@ pub mod api {
                 #[doc = " guaranteed."]
                 pub fn history_depth(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "HistoryDepth",
                         vec![],
@@ -5538,13 +5566,13 @@ pub mod api {
                 #[doc = " The ideal number of staking participants."]
                 pub fn validator_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ValidatorCount",
                         vec![],
@@ -5559,13 +5587,13 @@ pub mod api {
                 #[doc = " Minimum number of staking participants before emergency conditions are imposed."]
                 pub fn minimum_validator_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MinimumValidatorCount",
                         vec![],
@@ -5582,13 +5610,15 @@ pub mod api {
                 #[doc = " invulnerables) and restricted to testnets."]
                 pub fn invulnerables(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Invulnerables",
                         vec![],
@@ -5604,13 +5634,15 @@ pub mod api {
                 pub fn bonded(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Bonded",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -5628,13 +5660,15 @@ pub mod api {
                 #[doc = " Map from all locked \"stash\" accounts to the controller account."]
                 pub fn bonded_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Bonded",
                         Vec::new(),
@@ -5649,13 +5683,13 @@ pub mod api {
                 #[doc = " The minimum active bond to become and maintain the role of a nominator."]
                 pub fn min_nominator_bond(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MinNominatorBond",
                         vec![],
@@ -5670,13 +5704,13 @@ pub mod api {
                 #[doc = " The minimum active bond to become and maintain the role of a validator."]
                 pub fn min_validator_bond(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MinValidatorBond",
                         vec![],
@@ -5693,13 +5727,15 @@ pub mod api {
                 #[doc = " If set to `0`, no limit exists."]
                 pub fn min_commission(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_arithmetic::per_things::Perbill,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_arithmetic::per_things::Perbill,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MinCommission",
                         vec![],
@@ -5715,13 +5751,15 @@ pub mod api {
                 pub fn ledger(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::StakingLedger,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::StakingLedger,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Ledger",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -5739,13 +5777,15 @@ pub mod api {
                 #[doc = " Map from all (unlocked) \"controller\" accounts to the info regarding the staking."]
                 pub fn ledger_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::StakingLedger,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::StakingLedger,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Ledger",
                         Vec::new(),
@@ -5761,15 +5801,17 @@ pub mod api {
                 pub fn payee(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::RewardDestination<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::RewardDestination<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Payee",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -5787,15 +5829,17 @@ pub mod api {
                 #[doc = " Where the reward payment should be made. Keyed by stash."]
                 pub fn payee_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::RewardDestination<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::RewardDestination<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Payee",
                         Vec::new(),
@@ -5811,13 +5855,15 @@ pub mod api {
                 pub fn validators(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::ValidatorPrefs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::ValidatorPrefs,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Validators",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -5835,13 +5881,15 @@ pub mod api {
                 #[doc = " The map from (wannabe) validator stash key to the preferences of that validator."]
                 pub fn validators_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::ValidatorPrefs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::ValidatorPrefs,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Validators",
                         Vec::new(),
@@ -5856,13 +5904,13 @@ pub mod api {
                 #[doc = "Counter for the related counted storage map"]
                 pub fn counter_for_validators(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "CounterForValidators",
                         vec![],
@@ -5879,13 +5927,13 @@ pub mod api {
                 #[doc = " When this value is not set, no limits are enforced."]
                 pub fn max_validators_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MaxValidatorsCount",
                         vec![],
@@ -5916,13 +5964,15 @@ pub mod api {
                 pub fn nominators(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Nominations,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Nominations,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Nominators",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -5955,13 +6005,15 @@ pub mod api {
                 #[doc = " [`Call::chill_other`] dispatchable by anyone."]
                 pub fn nominators_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Nominations,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Nominations,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "Nominators",
                         Vec::new(),
@@ -5976,13 +6028,13 @@ pub mod api {
                 #[doc = "Counter for the related counted storage map"]
                 pub fn counter_for_nominators(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "CounterForNominators",
                         vec![],
@@ -5999,13 +6051,13 @@ pub mod api {
                 #[doc = " When this value is not set, no limits are enforced."]
                 pub fn max_nominators_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "MaxNominatorsCount",
                         vec![],
@@ -6023,13 +6075,13 @@ pub mod api {
                 #[doc = " set, it might be active or not."]
                 pub fn current_era(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "CurrentEra",
                         vec![],
@@ -6047,13 +6099,15 @@ pub mod api {
                 #[doc = " equal to [`SessionInterface::validators`]."]
                 pub fn active_era(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::ActiveEraInfo,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::ActiveEraInfo,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ActiveEra",
                         vec![],
@@ -6072,13 +6126,13 @@ pub mod api {
                 pub fn eras_start_session_index(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStartSessionIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6099,13 +6153,13 @@ pub mod api {
                 #[doc = " for the eras in `[CurrentEra - HISTORY_DEPTH, CurrentEra]`."]
                 pub fn eras_start_session_index_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStartSessionIndex",
                         Vec::new(),
@@ -6127,16 +6181,18 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Exposure<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Exposure<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStakers",
                         vec![
@@ -6165,16 +6221,18 @@ pub mod api {
                 #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
                 pub fn eras_stakers_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Exposure<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Exposure<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStakers",
                         Vec::new(),
@@ -6201,16 +6259,18 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Exposure<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Exposure<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStakersClipped",
                         vec![
@@ -6244,16 +6304,18 @@ pub mod api {
                 #[doc = " If stakers hasn't been set or has been removed then empty exposure is returned."]
                 pub fn eras_stakers_clipped_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Exposure<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Exposure<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasStakersClipped",
                         Vec::new(),
@@ -6274,13 +6336,15 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::ValidatorPrefs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::ValidatorPrefs,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasValidatorPrefs",
                         vec![
@@ -6308,13 +6372,15 @@ pub mod api {
                 #[doc = " Is it removed after `HISTORY_DEPTH` eras."]
                 pub fn eras_validator_prefs_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::ValidatorPrefs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::ValidatorPrefs,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasValidatorPrefs",
                         Vec::new(),
@@ -6332,13 +6398,13 @@ pub mod api {
                 pub fn eras_validator_reward(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasValidatorReward",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6358,13 +6424,13 @@ pub mod api {
                 #[doc = " Eras that haven't finished yet or has been removed doesn't have reward."]
                 pub fn eras_validator_reward_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasValidatorReward",
                         Vec::new(),
@@ -6381,15 +6447,17 @@ pub mod api {
                 pub fn eras_reward_points(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::EraRewardPoints<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::EraRewardPoints<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasRewardPoints",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6408,15 +6476,17 @@ pub mod api {
                 #[doc = " If reward hasn't been set or has been removed then 0 reward is returned."]
                 pub fn eras_reward_points_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::EraRewardPoints<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::EraRewardPoints<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasRewardPoints",
                         Vec::new(),
@@ -6433,13 +6503,13 @@ pub mod api {
                 pub fn eras_total_stake(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasTotalStake",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6458,13 +6528,13 @@ pub mod api {
                 #[doc = " If total hasn't been set or has been removed then 0 stake is returned."]
                 pub fn eras_total_stake_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ErasTotalStake",
                         Vec::new(),
@@ -6479,13 +6549,15 @@ pub mod api {
                 #[doc = " Mode of era forcing."]
                 pub fn force_era(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Forcing,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Forcing,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ForceEra",
                         vec![],
@@ -6502,13 +6574,15 @@ pub mod api {
                 #[doc = " The rest of the slashed value is handled by the `Slash`."]
                 pub fn slash_reward_fraction(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_arithmetic::per_things::Perbill,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_arithmetic::per_things::Perbill,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "SlashRewardFraction",
                         vec![],
@@ -6524,13 +6598,13 @@ pub mod api {
                 #[doc = " canceled by extraordinary circumstances (e.g. governance)."]
                 pub fn canceled_slash_payout(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "CanceledSlashPayout",
                         vec![],
@@ -6546,18 +6620,20 @@ pub mod api {
                 pub fn unapplied_slashes(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::pallet_staking::UnappliedSlash<
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::pallet_staking::UnappliedSlash<
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "UnappliedSlashes",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6575,18 +6651,20 @@ pub mod api {
                 #[doc = " All unapplied slashes that are queued for later."]
                 pub fn unapplied_slashes_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::pallet_staking::UnappliedSlash<
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::pallet_staking::UnappliedSlash<
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "UnappliedSlashes",
                         Vec::new(),
@@ -6604,13 +6682,15 @@ pub mod api {
                 #[doc = " `[active_era - bounding_duration; active_era]`"]
                 pub fn bonded_eras(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::u32)>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "BondedEras",
                         vec![],
@@ -6628,16 +6708,16 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_arithmetic::per_things::Perbill,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ValidatorSlashInEra",
                         vec![
@@ -6662,16 +6742,16 @@ pub mod api {
                 #[doc = " and slash value of the era."]
                 pub fn validator_slash_in_era_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_arithmetic::per_things::Perbill,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ValidatorSlashInEra",
                         Vec::new(),
@@ -6688,13 +6768,13 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "NominatorSlashInEra",
                         vec![
@@ -6718,13 +6798,13 @@ pub mod api {
                 #[doc = " All slashing events on nominators, mapped by era to the highest slash value of the era."]
                 pub fn nominator_slash_in_era_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "NominatorSlashInEra",
                         Vec::new(),
@@ -6740,13 +6820,15 @@ pub mod api {
                 pub fn slashing_spans(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::slashing::SlashingSpans,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::slashing::SlashingSpans,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "SlashingSpans",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6764,13 +6846,15 @@ pub mod api {
                 #[doc = " Slashing spans for stash accounts."]
                 pub fn slashing_spans_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::slashing::SlashingSpans,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::slashing::SlashingSpans,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "SlashingSpans",
                         Vec::new(),
@@ -6788,15 +6872,17 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                     _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::slashing::SpanRecord<
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::slashing::SpanRecord<
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "SpanSlash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -6815,15 +6901,17 @@ pub mod api {
                 #[doc = " as well as how much reward has been paid out."]
                 pub fn span_slash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::slashing::SpanRecord<
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::slashing::SpanRecord<
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "SpanSlash",
                         Vec::new(),
@@ -6838,13 +6926,13 @@ pub mod api {
                 #[doc = " The earliest era for which we have a pending, unapplied slash."]
                 pub fn earliest_unapplied_slash(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "EarliestUnappliedSlash",
                         vec![],
@@ -6861,13 +6949,13 @@ pub mod api {
                 #[doc = " This is basically in sync with the call to [`pallet_session::SessionManager::new_session`]."]
                 pub fn current_planned_session(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "CurrentPlannedSession",
                         vec![],
@@ -6890,13 +6978,18 @@ pub mod api {
                 #[doc = " the era ends."]
                 pub fn offending_validators(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(::core::primitive::u32, ::core::primitive::bool)>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::core::primitive::u32,
+                            ::core::primitive::bool,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "OffendingValidators",
                         vec![],
@@ -6914,13 +7007,15 @@ pub mod api {
                 #[doc = " This is set to v7.0.0 for new networks."]
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_staking::Releases,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_staking::Releases,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "StorageVersion",
                         vec![],
@@ -6937,13 +7032,15 @@ pub mod api {
                 #[doc = " (`CountFor*`) in the system compared to the configured max (`Max*Count`)."]
                 pub fn chill_threshold(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_arithmetic::per_things::Percent,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_arithmetic::per_things::Percent,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Staking",
                         "ChillThreshold",
                         vec![],
@@ -7111,22 +7208,24 @@ pub mod api {
                 pub fn reports(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_staking::offence::OffenceDetails<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_staking::offence::OffenceDetails<
                             ::subxt::ext::sp_core::crypto::AccountId32,
-                            runtime_types::pallet_staking::Exposure<
+                            (
                                 ::subxt::ext::sp_core::crypto::AccountId32,
-                                ::core::primitive::u128,
-                            >,
-                        ),
+                                runtime_types::pallet_staking::Exposure<
+                                    ::subxt::ext::sp_core::crypto::AccountId32,
+                                    ::core::primitive::u128,
+                                >,
+                            ),
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "Reports",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -7144,22 +7243,24 @@ pub mod api {
                 #[doc = " The primary structure that holds all offence records keyed by report identifiers."]
                 pub fn reports_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_staking::offence::OffenceDetails<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_staking::offence::OffenceDetails<
                             ::subxt::ext::sp_core::crypto::AccountId32,
-                            runtime_types::pallet_staking::Exposure<
+                            (
                                 ::subxt::ext::sp_core::crypto::AccountId32,
-                                ::core::primitive::u128,
-                            >,
-                        ),
+                                runtime_types::pallet_staking::Exposure<
+                                    ::subxt::ext::sp_core::crypto::AccountId32,
+                                    ::core::primitive::u128,
+                                >,
+                            ),
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "Reports",
                         Vec::new(),
@@ -7176,13 +7277,15 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
                     _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::H256>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::H256>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "ConcurrentReportsIndex",
                         vec![
@@ -7206,13 +7309,15 @@ pub mod api {
                 #[doc = " A vector of reports of the same kind that happened at the same time slot."]
                 pub fn concurrent_reports_index_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::H256>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::H256>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "ConcurrentReportsIndex",
                         Vec::new(),
@@ -7233,13 +7338,15 @@ pub mod api {
                 pub fn reports_by_kind_index(
                     &self,
                     _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 16usize]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "ReportsByKindIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -7262,13 +7369,15 @@ pub mod api {
                 #[doc = " different types are not supported at the moment so we are doing the manual serialization."]
                 pub fn reports_by_kind_index_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Offences",
                         "ReportsByKindIndex",
                         Vec::new(),
@@ -7413,13 +7522,15 @@ pub mod api {
                 #[doc = " The current set of validators."]
                 pub fn validators(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "Validators",
                         vec![],
@@ -7434,13 +7545,13 @@ pub mod api {
                 #[doc = " Current index of the session."]
                 pub fn current_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "CurrentIndex",
                         vec![],
@@ -7456,13 +7567,13 @@ pub mod api {
                 #[doc = " has changed in the queued validator set."]
                 pub fn queued_changed(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "QueuedChanged",
                         vec![],
@@ -7478,16 +7589,18 @@ pub mod api {
                 #[doc = " will be used to determine the validator's session keys."]
                 pub fn queued_keys(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        runtime_types::polkadot_runtime::SessionKeys,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            runtime_types::polkadot_runtime::SessionKeys,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "QueuedKeys",
                         vec![],
@@ -7506,13 +7619,15 @@ pub mod api {
                 #[doc = " a new set of identities."]
                 pub fn disabled_validators(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "DisabledValidators",
                         vec![],
@@ -7528,13 +7643,15 @@ pub mod api {
                 pub fn next_keys(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::SessionKeys,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::SessionKeys,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "NextKeys",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -7552,13 +7669,15 @@ pub mod api {
                 #[doc = " The next session keys for a validator."]
                 pub fn next_keys_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::SessionKeys,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::SessionKeys,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "NextKeys",
                         Vec::new(),
@@ -7575,13 +7694,15 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<runtime_types::sp_core::crypto::KeyTypeId>,
                     _1: impl ::std::borrow::Borrow<[::core::primitive::u8]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "KeyOwner",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -7599,13 +7720,15 @@ pub mod api {
                 #[doc = " The owner of a key. The key is the `KeyTypeId` + the encoded key."]
                 pub fn key_owner_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Session",
                         "KeyOwner",
                         Vec::new(),
@@ -7823,13 +7946,17 @@ pub mod api {
                 #[doc = " State of the current authority set."]
                 pub fn state(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_grandpa::StoredState<::core::primitive::u32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_grandpa::StoredState<
+                            ::core::primitive::u32,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "State",
                         vec![],
@@ -7844,15 +7971,17 @@ pub mod api {
                 #[doc = " Pending change: (signaled at, scheduled change)."]
                 pub fn pending_change(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_grandpa::StoredPendingChange<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_grandpa::StoredPendingChange<
+                            ::core::primitive::u32,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "PendingChange",
                         vec![],
@@ -7867,13 +7996,13 @@ pub mod api {
                 #[doc = " next block number where we can force a change."]
                 pub fn next_forced(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "NextForced",
                         vec![],
@@ -7888,13 +8017,16 @@ pub mod api {
                 #[doc = " `true` if we are currently stalled."]
                 pub fn stalled(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "Stalled",
                         vec![],
@@ -7910,13 +8042,13 @@ pub mod api {
                 #[doc = " in the \"set\" of Grandpa validators from genesis."]
                 pub fn current_set_id(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "CurrentSetId",
                         vec![],
@@ -7935,13 +8067,13 @@ pub mod api {
                 pub fn set_id_session(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "SetIdSession",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -7962,13 +8094,13 @@ pub mod api {
                 #[doc = " TWOX-NOTE: `SetId` is not under user control."]
                 pub fn set_id_session_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Grandpa",
                         "SetIdSession",
                         Vec::new(),
@@ -8132,13 +8264,13 @@ pub mod api {
                 #[doc = " more accurate then the value we calculate for `HeartbeatAfter`."]
                 pub fn heartbeat_after(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "HeartbeatAfter",
                         vec![],
@@ -8150,18 +8282,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The current set of keys that may issue a heartbeat."]
-                pub fn keys(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::weak_bounded_vec::WeakBoundedVec<
-                        runtime_types::pallet_im_online::sr25519::app_sr25519::Public,
-                    >,
-                    (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The current set of keys that may issue a heartbeat."]                pub fn keys (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: weak_bounded_vec :: WeakBoundedVec < runtime_types :: pallet_im_online :: sr25519 :: app_sr25519 :: Public > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "Keys",
                         vec![],
@@ -8179,15 +8301,17 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_support::traits::misc::WrapperOpaque<
-                        runtime_types::pallet_im_online::BoundedOpaqueNetworkState,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_support::traits::misc::WrapperOpaque<
+                            runtime_types::pallet_im_online::BoundedOpaqueNetworkState,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "ReceivedHeartbeats",
                         vec![
@@ -8212,15 +8336,17 @@ pub mod api {
                 #[doc = " `WrapperOpaque<BoundedOpaqueNetworkState>`."]
                 pub fn received_heartbeats_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::frame_support::traits::misc::WrapperOpaque<
-                        runtime_types::pallet_im_online::BoundedOpaqueNetworkState,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::frame_support::traits::misc::WrapperOpaque<
+                            runtime_types::pallet_im_online::BoundedOpaqueNetworkState,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "ReceivedHeartbeats",
                         Vec::new(),
@@ -8238,13 +8364,13 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "AuthoredBlocks",
                         vec![
@@ -8269,13 +8395,13 @@ pub mod api {
                 #[doc = " number of blocks authored by the given authority."]
                 pub fn authored_blocks_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ImOnline",
                         "AuthoredBlocks",
                         Vec::new(),
@@ -9665,13 +9791,13 @@ pub mod api {
                 #[doc = " The number of (public) proposals that have been made so far."]
                 pub fn public_prop_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "PublicPropCount",
                         vec![],
@@ -9686,17 +9812,19 @@ pub mod api {
                 #[doc = " The public proposals. Unsorted. The second item is the proposal's hash."]
                 pub fn public_props(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        ::core::primitive::u32,
-                        ::subxt::ext::sp_core::H256,
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::core::primitive::u32,
+                            ::subxt::ext::sp_core::H256,
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "PublicProps",
                         vec![],
@@ -9714,16 +9842,16 @@ pub mod api {
                 pub fn deposit_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "DepositOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -9743,16 +9871,16 @@ pub mod api {
                 #[doc = " TWOX-NOTE: Safe, as increasing integer keys are safe."]
                 pub fn deposit_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "DepositOf",
                         Vec::new(),
@@ -9769,17 +9897,19 @@ pub mod api {
                 pub fn preimages(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::PreimageStatus<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::PreimageStatus<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Preimages",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -9798,17 +9928,19 @@ pub mod api {
                 #[doc = " The block number is the block at which it was deposited."]
                 pub fn preimages_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::PreimageStatus<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::PreimageStatus<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Preimages",
                         Vec::new(),
@@ -9823,13 +9955,13 @@ pub mod api {
                 #[doc = " The next free referendum index, aka the number of referenda started so far."]
                 pub fn referendum_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "ReferendumCount",
                         vec![],
@@ -9845,13 +9977,13 @@ pub mod api {
                 #[doc = " `ReferendumCount` if there isn't a unbaked referendum."]
                 pub fn lowest_unbaked(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "LowestUnbaked",
                         vec![],
@@ -9869,17 +10001,19 @@ pub mod api {
                 pub fn referendum_info_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::types::ReferendumInfo<
-                        ::core::primitive::u32,
-                        ::subxt::ext::sp_core::H256,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::types::ReferendumInfo<
+                            ::core::primitive::u32,
+                            ::subxt::ext::sp_core::H256,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "ReferendumInfoOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -9899,17 +10033,19 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as indexes are not under an attacker’s control."]
                 pub fn referendum_info_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::types::ReferendumInfo<
-                        ::core::primitive::u32,
-                        ::subxt::ext::sp_core::H256,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::types::ReferendumInfo<
+                            ::core::primitive::u32,
+                            ::subxt::ext::sp_core::H256,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "ReferendumInfoOf",
                         Vec::new(),
@@ -9928,17 +10064,19 @@ pub mod api {
                 pub fn voting_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::vote::Voting<
-                        ::core::primitive::u128,
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::vote::Voting<
+                            ::core::primitive::u128,
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "VotingOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -9959,17 +10097,19 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as `AccountId`s are crypto hashes anyway."]
                 pub fn voting_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::vote::Voting<
-                        ::core::primitive::u128,
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::vote::Voting<
+                            ::core::primitive::u128,
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "VotingOf",
                         Vec::new(),
@@ -9985,13 +10125,13 @@ pub mod api {
                 #[doc = " proposal."]
                 pub fn last_tabled_was_external(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "LastTabledWasExternal",
                         vec![],
@@ -10009,16 +10149,16 @@ pub mod api {
                 #[doc = " - `PublicProps` is empty."]
                 pub fn next_external(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::ext::sp_core::H256,
                         runtime_types::pallet_democracy::vote_threshold::VoteThreshold,
-                    ),
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "NextExternal",
                         vec![],
@@ -10035,16 +10175,16 @@ pub mod api {
                 pub fn blacklist(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u32,
                         ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Blacklist",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -10063,16 +10203,16 @@ pub mod api {
                 #[doc = " (until when it may not be resubmitted) and who vetoed it."]
                 pub fn blacklist_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u32,
                         ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Blacklist",
                         Vec::new(),
@@ -10088,13 +10228,13 @@ pub mod api {
                 pub fn cancellations(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Cancellations",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -10112,13 +10252,13 @@ pub mod api {
                 #[doc = " Record of all proposals that have been subject to emergency cancellation."]
                 pub fn cancellations_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "Cancellations",
                         Vec::new(),
@@ -10135,13 +10275,15 @@ pub mod api {
                 #[doc = " New networks start with last version."]
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_democracy::Releases,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_democracy::Releases,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Democracy",
                         "StorageVersion",
                         vec![],
@@ -10860,15 +11002,17 @@ pub mod api {
                 #[doc = " The hashes of the active proposals."]
                 pub fn proposals(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::subxt::ext::sp_core::H256,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "Proposals",
                         vec![],
@@ -10884,13 +11028,15 @@ pub mod api {
                 pub fn proposal_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::Call,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::Call,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "ProposalOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -10908,13 +11054,15 @@ pub mod api {
                 #[doc = " Actual proposal for a given hash, if it's current."]
                 pub fn proposal_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::Call,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::Call,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "ProposalOf",
                         Vec::new(),
@@ -10930,16 +11078,18 @@ pub mod api {
                 pub fn voting(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_collective::Votes<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_collective::Votes<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -10957,16 +11107,18 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_collective::Votes<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_collective::Votes<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "Voting",
                         Vec::new(),
@@ -10981,13 +11133,13 @@ pub mod api {
                 #[doc = " Proposals so far."]
                 pub fn proposal_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "ProposalCount",
                         vec![],
@@ -11002,13 +11154,15 @@ pub mod api {
                 #[doc = " The current members of the collective. This is stored sorted (just by value)."]
                 pub fn members(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "Members",
                         vec![],
@@ -11023,13 +11177,15 @@ pub mod api {
                 #[doc = " The prime member that helps determine the default vote behavior in case of absentations."]
                 pub fn prime(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Council",
                         "Prime",
                         vec![],
@@ -11532,15 +11688,17 @@ pub mod api {
                 #[doc = " The hashes of the active proposals."]
                 pub fn proposals(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::subxt::ext::sp_core::H256,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "Proposals",
                         vec![],
@@ -11556,13 +11714,15 @@ pub mod api {
                 pub fn proposal_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::Call,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::Call,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "ProposalOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -11580,13 +11740,15 @@ pub mod api {
                 #[doc = " Actual proposal for a given hash, if it's current."]
                 pub fn proposal_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime::Call,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime::Call,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "ProposalOf",
                         Vec::new(),
@@ -11602,16 +11764,18 @@ pub mod api {
                 pub fn voting(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_collective::Votes<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_collective::Votes<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -11629,16 +11793,18 @@ pub mod api {
                 #[doc = " Votes on a given proposal, if it is ongoing."]
                 pub fn voting_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_collective::Votes<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_collective::Votes<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "Voting",
                         Vec::new(),
@@ -11653,13 +11819,13 @@ pub mod api {
                 #[doc = " Proposals so far."]
                 pub fn proposal_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "ProposalCount",
                         vec![],
@@ -11674,13 +11840,15 @@ pub mod api {
                 #[doc = " The current members of the collective. This is stored sorted (just by value)."]
                 pub fn members(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "Members",
                         vec![],
@@ -11695,13 +11863,15 @@ pub mod api {
                 #[doc = " The prime member that helps determine the default vote behavior in case of absentations."]
                 pub fn prime(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalCommittee",
                         "Prime",
                         vec![],
@@ -12119,18 +12289,20 @@ pub mod api {
                 #[doc = " Invariant: Always sorted based on account id."]
                 pub fn members(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::pallet_elections_phragmen::SeatHolder<
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::pallet_elections_phragmen::SeatHolder<
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "Members",
                         vec![],
@@ -12148,18 +12320,20 @@ pub mod api {
                 #[doc = " last (i.e. _best_) runner-up will be replaced."]
                 pub fn runners_up(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::pallet_elections_phragmen::SeatHolder<
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::pallet_elections_phragmen::SeatHolder<
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "RunnersUp",
                         vec![],
@@ -12179,16 +12353,18 @@ pub mod api {
                 #[doc = " Invariant: Always sorted based on account id."]
                 pub fn candidates(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "Candidates",
                         vec![],
@@ -12203,13 +12379,13 @@ pub mod api {
                 #[doc = " The total number of vote rounds that have happened, excluding the upcoming one."]
                 pub fn election_rounds(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "ElectionRounds",
                         vec![],
@@ -12227,16 +12403,18 @@ pub mod api {
                 pub fn voting(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_elections_phragmen::Voter<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_elections_phragmen::Voter<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "Voting",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -12256,16 +12434,18 @@ pub mod api {
                 #[doc = " TWOX-NOTE: SAFE as `AccountId` is a crypto hash."]
                 pub fn voting_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_elections_phragmen::Voter<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_elections_phragmen::Voter<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "PhragmenElection",
                         "Voting",
                         Vec::new(),
@@ -12735,15 +12915,17 @@ pub mod api {
                 #[doc = " The current membership, stored as an ordered Vec."]
                 pub fn members(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalMembership",
                         "Members",
                         vec![],
@@ -12758,13 +12940,15 @@ pub mod api {
                 #[doc = " The current prime member, if one exists."]
                 pub fn prime(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::subxt::ext::sp_core::crypto::AccountId32,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "TechnicalMembership",
                         "Prime",
                         vec![],
@@ -13137,13 +13321,13 @@ pub mod api {
                 #[doc = " Number of proposals that have been made."]
                 pub fn proposal_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Treasury",
                         "ProposalCount",
                         vec![],
@@ -13159,16 +13343,18 @@ pub mod api {
                 pub fn proposals(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_treasury::Proposal<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_treasury::Proposal<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Treasury",
                         "Proposals",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -13186,16 +13372,18 @@ pub mod api {
                 #[doc = " Proposals that have been made."]
                 pub fn proposals_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_treasury::Proposal<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_treasury::Proposal<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Treasury",
                         "Proposals",
                         Vec::new(),
@@ -13210,15 +13398,17 @@ pub mod api {
                 #[doc = " Proposal indices that have been approved but not yet awarded."]
                 pub fn approvals(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u32,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Treasury",
                         "Approvals",
                         vec![],
@@ -13694,13 +13884,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Claims",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -13717,13 +13907,13 @@ pub mod api {
                 }
                 pub fn claims_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Claims",
                         Vec::new(),
@@ -13737,13 +13927,13 @@ pub mod api {
                 }
                 pub fn total(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Total",
                         vec![],
@@ -13764,17 +13954,17 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u128,
                         ::core::primitive::u128,
                         ::core::primitive::u32,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Vesting",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -13795,17 +13985,17 @@ pub mod api {
                 #[doc = " The block number is when the vesting should start."]
                 pub fn vesting_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u128,
                         ::core::primitive::u128,
                         ::core::primitive::u32,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Vesting",
                         Vec::new(),
@@ -13823,13 +14013,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_runtime_common::claims::EthereumAddress,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::claims::StatementKind,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::claims::StatementKind,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Signing",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -13847,13 +14039,15 @@ pub mod api {
                 #[doc = " The statement kind that must be signed, if any."]
                 pub fn signing_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::claims::StatementKind,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::claims::StatementKind,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Signing",
                         Vec::new(),
@@ -13869,13 +14063,15 @@ pub mod api {
                 pub fn preclaims(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::claims::EthereumAddress,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Preclaims",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -13893,13 +14089,15 @@ pub mod api {
                 #[doc = " Pre-claimed Ethereum accounts, by the Account ID that they are claimed to."]
                 pub fn preclaims_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::claims::EthereumAddress,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::claims::EthereumAddress,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Claims",
                         "Preclaims",
                         Vec::new(),
@@ -14269,18 +14467,20 @@ pub mod api {
                 pub fn vesting(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        runtime_types::pallet_vesting::vesting_info::VestingInfo<
-                            ::core::primitive::u128,
-                            ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            runtime_types::pallet_vesting::vesting_info::VestingInfo<
+                                ::core::primitive::u128,
+                                ::core::primitive::u32,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Vesting",
                         "Vesting",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -14298,18 +14498,20 @@ pub mod api {
                 #[doc = " Information regarding the vesting of a given account."]
                 pub fn vesting_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        runtime_types::pallet_vesting::vesting_info::VestingInfo<
-                            ::core::primitive::u128,
-                            ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            runtime_types::pallet_vesting::vesting_info::VestingInfo<
+                                ::core::primitive::u128,
+                                ::core::primitive::u32,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Vesting",
                         "Vesting",
                         Vec::new(),
@@ -14326,13 +14528,15 @@ pub mod api {
                 #[doc = " New networks start with latest version, as determined by the genesis build."]
                 pub fn storage_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_vesting::Releases,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_vesting::Releases,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Vesting",
                         "StorageVersion",
                         vec![],
@@ -15622,15 +15826,17 @@ pub mod api {
                 pub fn identity_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_identity::types::Registration<
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_identity::types::Registration<
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "IdentityOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -15650,15 +15856,17 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn identity_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_identity::types::Registration<
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_identity::types::Registration<
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "IdentityOf",
                         Vec::new(),
@@ -15675,16 +15883,16 @@ pub mod api {
                 pub fn super_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         runtime_types::pallet_identity::types::Data,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "SuperOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -15703,16 +15911,16 @@ pub mod api {
                 #[doc = " context. If the account is not some other account's sub-identity, then just `None`."]
                 pub fn super_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         runtime_types::pallet_identity::types::Data,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "SuperOf",
                         Vec::new(),
@@ -15732,18 +15940,18 @@ pub mod api {
                 pub fn subs_of(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u128,
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             ::subxt::ext::sp_core::crypto::AccountId32,
                         >,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "SubsOf",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -15765,18 +15973,18 @@ pub mod api {
                 #[doc = " TWOX-NOTE: OK ― `AccountId` is a secure hash."]
                 pub fn subs_of_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u128,
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             ::subxt::ext::sp_core::crypto::AccountId32,
                         >,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "SubsOf",
                         Vec::new(),
@@ -15794,20 +16002,22 @@ pub mod api {
                 #[doc = " The index into this can be cast to `RegistrarIndex` to get a valid value."]
                 pub fn registrars(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::option::Option<
-                            runtime_types::pallet_identity::types::RegistrarInfo<
-                                ::core::primitive::u128,
-                                ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::option::Option<
+                                runtime_types::pallet_identity::types::RegistrarInfo<
+                                    ::core::primitive::u128,
+                                    ::subxt::ext::sp_core::crypto::AccountId32,
+                                >,
                             >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Identity",
                         "Registrars",
                         vec![],
@@ -16567,9 +16777,8 @@ pub mod api {
                 pub fn proxies(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::ProxyDefinition<
                                 ::subxt::ext::sp_core::crypto::AccountId32,
@@ -16578,11 +16787,12 @@ pub mod api {
                             >,
                         >,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Proxy",
                         "Proxies",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -16601,9 +16811,8 @@ pub mod api {
                 #[doc = " which are being delegated to, together with the amount held on deposit."]
                 pub fn proxies_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::ProxyDefinition<
                                 ::subxt::ext::sp_core::crypto::AccountId32,
@@ -16612,11 +16821,12 @@ pub mod api {
                             >,
                         >,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Proxy",
                         "Proxies",
                         Vec::new(),
@@ -16632,9 +16842,8 @@ pub mod api {
                 pub fn announcements(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::Announcement<
                                 ::subxt::ext::sp_core::crypto::AccountId32,
@@ -16643,11 +16852,12 @@ pub mod api {
                             >,
                         >,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Proxy",
                         "Announcements",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -16665,9 +16875,8 @@ pub mod api {
                 #[doc = " The announcements made by the proxy (key)."]
                 pub fn announcements_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
                             runtime_types::pallet_proxy::Announcement<
                                 ::subxt::ext::sp_core::crypto::AccountId32,
@@ -16676,11 +16885,12 @@ pub mod api {
                             >,
                         >,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    )>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Proxy",
                         "Announcements",
                         Vec::new(),
@@ -17228,32 +17438,36 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
                     _1: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_multisig::Multisig<
-                        ::core::primitive::u32,
-                        ::core::primitive::u128,
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_multisig::Multisig<
+                            ::core::primitive::u32,
+                            ::core::primitive::u128,
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("Multisig" , "Multisigs" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [145u8 , 78u8 , 57u8 , 171u8 , 199u8 , 158u8 , 226u8 , 250u8 , 224u8 , 133u8 , 45u8 , 251u8 , 202u8 , 22u8 , 171u8 , 132u8 , 229u8 , 110u8 , 248u8 , 233u8 , 38u8 , 2u8 , 247u8 , 140u8 , 150u8 , 103u8 , 211u8 , 209u8 , 160u8 , 158u8 , 23u8 , 215u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("Multisig" , "Multisigs" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [145u8 , 78u8 , 57u8 , 171u8 , 199u8 , 158u8 , 226u8 , 250u8 , 224u8 , 133u8 , 45u8 , 251u8 , 202u8 , 22u8 , 171u8 , 132u8 , 229u8 , 110u8 , 248u8 , 233u8 , 38u8 , 2u8 , 247u8 , 140u8 , 150u8 , 103u8 , 211u8 , 209u8 , 160u8 , 158u8 , 23u8 , 215u8 ,])
                 }
                 #[doc = " The set of open multisig operations."]
                 pub fn multisigs_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_multisig::Multisig<
-                        ::core::primitive::u32,
-                        ::core::primitive::u128,
-                        ::subxt::ext::sp_core::crypto::AccountId32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_multisig::Multisig<
+                            ::core::primitive::u32,
+                            ::core::primitive::u128,
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Multisig",
                         "Multisigs",
                         Vec::new(),
@@ -17268,19 +17482,19 @@ pub mod api {
                 pub fn calls(
                     &self,
                     _0: impl ::std::borrow::Borrow<[::core::primitive::u8; 32usize]>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::utils::WrapperKeepOpaque<
                             runtime_types::polkadot_runtime::Call,
                         >,
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Multisig",
                         "Calls",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -17297,19 +17511,19 @@ pub mod api {
                 }
                 pub fn calls_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::subxt::utils::WrapperKeepOpaque<
                             runtime_types::polkadot_runtime::Call,
                         >,
                         ::subxt::ext::sp_core::crypto::AccountId32,
                         ::core::primitive::u128,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Multisig",
                         "Calls",
                         Vec::new(),
@@ -17907,13 +18121,13 @@ pub mod api {
                 #[doc = " Number of bounty proposals that have been made."]
                 pub fn bounty_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "BountyCount",
                         vec![],
@@ -17929,17 +18143,19 @@ pub mod api {
                 pub fn bounties(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bounties::Bounty<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bounties::Bounty<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "Bounties",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -17957,17 +18173,19 @@ pub mod api {
                 #[doc = " Bounties that have been made."]
                 pub fn bounties_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bounties::Bounty<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bounties::Bounty<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "Bounties",
                         Vec::new(),
@@ -17983,15 +18201,17 @@ pub mod api {
                 pub fn bounty_descriptions(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "BountyDescriptions",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -18009,15 +18229,17 @@ pub mod api {
                 #[doc = " The description of each bounty."]
                 pub fn bounty_descriptions_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "BountyDescriptions",
                         Vec::new(),
@@ -18032,15 +18254,17 @@ pub mod api {
                 #[doc = " Bounty indices that have been approved but not yet funded."]
                 pub fn bounty_approvals(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u32,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Bounties",
                         "BountyApprovals",
                         vec![],
@@ -18736,13 +18960,13 @@ pub mod api {
                 #[doc = " Number of total child bounties."]
                 pub fn child_bounty_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildBountyCount",
                         vec![],
@@ -18759,13 +18983,13 @@ pub mod api {
                 pub fn parent_child_bounties(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ParentChildBounties",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -18784,13 +19008,13 @@ pub mod api {
                 #[doc = " Map of parent bounty index to number of child bounties."]
                 pub fn parent_child_bounties_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ParentChildBounties",
                         Vec::new(),
@@ -18807,17 +19031,19 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_child_bounties::ChildBounty<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_child_bounties::ChildBounty<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildBounties",
                         vec![
@@ -18841,17 +19067,19 @@ pub mod api {
                 #[doc = " Child bounties that have been added."]
                 pub fn child_bounties_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_child_bounties::ChildBounty<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_child_bounties::ChildBounty<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildBounties",
                         Vec::new(),
@@ -18867,15 +19095,17 @@ pub mod api {
                 pub fn child_bounty_descriptions(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildBountyDescriptions",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -18893,15 +19123,17 @@ pub mod api {
                 #[doc = " The description of each child-bounty."]
                 pub fn child_bounty_descriptions_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
-                        ::core::primitive::u8,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<
+                            ::core::primitive::u8,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildBountyDescriptions",
                         Vec::new(),
@@ -18917,13 +19149,13 @@ pub mod api {
                 pub fn children_curator_fees(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildrenCuratorFees",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -18941,13 +19173,13 @@ pub mod api {
                 #[doc = " The cumulative child-bounty curator fee for each parent bounty."]
                 pub fn children_curator_fees_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ChildBounties",
                         "ChildrenCuratorFees",
                         Vec::new(),
@@ -19400,18 +19632,20 @@ pub mod api {
                 pub fn tips(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_tips::OpenTip<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
-                        ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_tips::OpenTip<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                            ::subxt::ext::sp_core::H256,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Tips",
                         "Tips",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -19431,18 +19665,20 @@ pub mod api {
                 #[doc = " guaranteed to be a secure hash."]
                 pub fn tips_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_tips::OpenTip<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
-                        ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_tips::OpenTip<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                            ::subxt::ext::sp_core::H256,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Tips",
                         "Tips",
                         Vec::new(),
@@ -19459,13 +19695,15 @@ pub mod api {
                 pub fn reasons(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Tips",
                         "Reasons",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -19484,13 +19722,15 @@ pub mod api {
                 #[doc = " insecure enumerable hash since the key is guaranteed to be the result of a secure hash."]
                 pub fn reasons_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u8>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u8>,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Tips",
                         "Reasons",
                         Vec::new(),
@@ -19939,13 +20179,13 @@ pub mod api {
                 #[doc = " This is merely incremented once per every time that an upstream `elect` is called."]
                 pub fn round(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "Round",
                         vec![],
@@ -19960,15 +20200,17 @@ pub mod api {
                 #[doc = " Current phase."]
                 pub fn current_phase(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_election_provider_multi_phase::Phase<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_election_provider_multi_phase::Phase<
+                            ::core::primitive::u32,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "CurrentPhase",
                         vec![],
@@ -19980,18 +20222,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Current best solution, signed or unsigned, queued to be returned upon `elect`."]
-                pub fn queued_solution(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_election_provider_multi_phase::ReadySolution<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                    >,
-                    (),
-                    (),
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Current best solution, signed or unsigned, queued to be returned upon `elect`."]                pub fn queued_solution (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: pallet_election_provider_multi_phase :: ReadySolution < :: subxt :: ext :: sp_core :: crypto :: AccountId32 > > , :: subxt :: storage :: address :: Yes , () , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "QueuedSolution",
                         vec![],
@@ -20005,16 +20237,8 @@ pub mod api {
                 }
                 #[doc = " Snapshot data of the round."]
                 #[doc = ""]
-                #[doc = " This is created at the beginning of the signed phase and cleared upon calling `elect`."]
-                pub fn snapshot(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_election_provider_multi_phase::RoundSnapshot,
-                    (),
-                    (),
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " This is created at the beginning of the signed phase and cleared upon calling `elect`."]                pub fn snapshot (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: pallet_election_provider_multi_phase :: RoundSnapshot > , :: subxt :: storage :: address :: Yes , () , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "Snapshot",
                         vec![],
@@ -20031,13 +20255,13 @@ pub mod api {
                 #[doc = " Only exists when [`Snapshot`] is present."]
                 pub fn desired_targets(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "DesiredTargets",
                         vec![],
@@ -20051,8 +20275,8 @@ pub mod api {
                 }
                 #[doc = " The metadata of the [`RoundSnapshot`]"]
                 #[doc = ""]
-                #[doc = " Only exists when [`Snapshot`] is present."]                pub fn snapshot_metadata (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize , () , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Only exists when [`Snapshot`] is present."]                pub fn snapshot_metadata (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: pallet_election_provider_multi_phase :: SolutionOrSnapshotSize > , :: subxt :: storage :: address :: Yes , () , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "SnapshotMetadata",
                         vec![],
@@ -20075,13 +20299,13 @@ pub mod api {
                 #[doc = " because iteration is slow. Instead, we store the value here."]
                 pub fn signed_submission_next_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "SignedSubmissionNextIndex",
                         vec![],
@@ -20098,8 +20322,8 @@ pub mod api {
                 #[doc = ""]
                 #[doc = " We never need to process more than a single signed submission at a time. Signed submissions"]
                 #[doc = " can be quite large, so we're willing to pay the cost of multiple database accesses to access"]
-                #[doc = " them one at a time instead of reading and decoding all of them at once."]                pub fn signed_submission_indices (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: sp_runtime :: bounded :: bounded_btree_map :: BoundedBTreeMap < runtime_types :: sp_npos_elections :: ElectionScore , :: core :: primitive :: u32 > , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " them one at a time instead of reading and decoding all of them at once."]                pub fn signed_submission_indices (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: sp_runtime :: bounded :: bounded_btree_map :: BoundedBTreeMap < runtime_types :: sp_npos_elections :: ElectionScore , :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "SignedSubmissionIndices",
                         vec![],
@@ -20117,8 +20341,8 @@ pub mod api {
                 #[doc = " allowing us to keep only a single one in memory at a time."]
                 #[doc = ""]
                 #[doc = " Twox note: the key of the map is an auto-incrementing index which users cannot inspect or"]
-                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map (& self , _0 : impl :: std :: borrow :: Borrow < :: core :: primitive :: u32 > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "SignedSubmissionsMap",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -20139,8 +20363,8 @@ pub mod api {
                 #[doc = " allowing us to keep only a single one in memory at a time."]
                 #[doc = ""]
                 #[doc = " Twox note: the key of the map is an auto-incrementing index which users cannot inspect or"]
-                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " affect; we shouldn't need a cryptographically secure hasher."]                pub fn signed_submissions_map_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: pallet_election_provider_multi_phase :: signed :: SignedSubmission < :: subxt :: ext :: sp_core :: crypto :: AccountId32 , :: core :: primitive :: u128 , runtime_types :: polkadot_runtime :: NposCompactSolution16 > > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "SignedSubmissionsMap",
                         Vec::new(),
@@ -20158,13 +20382,15 @@ pub mod api {
                 #[doc = " Can be set via `set_minimum_untrusted_score`."]
                 pub fn minimum_untrusted_score(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_npos_elections::ElectionScore,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_npos_elections::ElectionScore,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ElectionProviderMultiPhase",
                         "MinimumUntrustedScore",
                         vec![],
@@ -20608,13 +20834,15 @@ pub mod api {
                 pub fn list_nodes(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::crypto::AccountId32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bags_list::list::Node,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bags_list::list::Node,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "VoterList",
                         "ListNodes",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -20634,13 +20862,15 @@ pub mod api {
                 #[doc = " Nodes store links forward and back within their respective bags."]
                 pub fn list_nodes_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bags_list::list::Node,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bags_list::list::Node,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "VoterList",
                         "ListNodes",
                         Vec::new(),
@@ -20655,13 +20885,13 @@ pub mod api {
                 #[doc = "Counter for the related counted storage map"]
                 pub fn counter_for_list_nodes(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "VoterList",
                         "CounterForListNodes",
                         vec![],
@@ -20679,13 +20909,15 @@ pub mod api {
                 pub fn list_bags(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bags_list::list::Bag,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bags_list::list::Bag,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "VoterList",
                         "ListBags",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -20705,13 +20937,15 @@ pub mod api {
                 #[doc = " Stores a `Bag` struct, which stores head and tail pointers to itself."]
                 pub fn list_bags_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_bags_list::list::Bag,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_bags_list::list::Bag,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "VoterList",
                         "ListBags",
                         Vec::new(),
@@ -22225,8 +22459,8 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The active configuration for the current session."]                pub fn active_config (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The active configuration for the current session."]                pub fn active_config (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Configuration",
                         "ActiveConfig",
                         vec![],
@@ -22244,8 +22478,8 @@ pub mod api {
                 #[doc = " be applied."]
                 #[doc = ""]
                 #[doc = " The list is sorted ascending by session index. Also, this list can only contain at most"]
-                #[doc = " 2 items: for the next session and for the `scheduled_session`."]                pub fn pending_configs (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < (:: core :: primitive :: u32 , runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > ,) > , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " 2 items: for the next session and for the `scheduled_session`."]                pub fn pending_configs (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < (:: core :: primitive :: u32 , runtime_types :: polkadot_runtime_parachains :: configuration :: HostConfiguration < :: core :: primitive :: u32 > ,) > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Configuration",
                         "PendingConfigs",
                         vec![],
@@ -22261,13 +22495,13 @@ pub mod api {
                 #[doc = " is meant to be used only as the last resort."]
                 pub fn bypass_consistency_check(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::bool,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::bool>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Configuration",
                         "BypassConsistencyCheck",
                         vec![],
@@ -22300,13 +22534,13 @@ pub mod api {
                 #[doc = " The current session index."]
                 pub fn current_session_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasShared",
                         "CurrentSessionIndex",
                         vec![],
@@ -22322,15 +22556,17 @@ pub mod api {
                 #[doc = " Indices are into the broader validator set."]
                 pub fn active_validator_indices(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_primitives::v2::ValidatorIndex,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_primitives::v2::ValidatorIndex,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasShared",
                         "ActiveValidatorIndices",
                         vec![],
@@ -22346,15 +22582,17 @@ pub mod api {
                 #[doc = " This should be the same length as `ActiveValidatorIndices`."]
                 pub fn active_validator_keys(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_primitives::v2::validator_app::Public,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_primitives::v2::validator_app::Public,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasShared",
                         "ActiveValidatorKeys",
                         vec![],
@@ -22443,8 +22681,8 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_primitives :: v2 :: ValidatorIndex > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "AvailabilityBitfields",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -22459,8 +22697,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The latest bitfield for each validator, referred to by their index in the validator set."]                pub fn availability_bitfields_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: inclusion :: AvailabilityBitfieldRecord < :: core :: primitive :: u32 > > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "AvailabilityBitfields",
                         Vec::new(),
@@ -22472,8 +22710,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "PendingAvailability",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -22488,8 +22726,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " Candidates pending availability by `ParaId`."]                pub fn pending_availability_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: inclusion :: CandidatePendingAvailability < :: subxt :: ext :: sp_core :: H256 , :: core :: primitive :: u32 > > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "PendingAvailability",
                         Vec::new(),
@@ -22507,15 +22745,17 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::CandidateCommitments<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::CandidateCommitments<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -22533,15 +22773,17 @@ pub mod api {
                 #[doc = " The commitments of candidates pending availability, by `ParaId`."]
                 pub fn pending_availability_commitments_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::CandidateCommitments<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::CandidateCommitments<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInclusion",
                         "PendingAvailabilityCommitments",
                         Vec::new(),
@@ -22620,9 +22862,13 @@ pub mod api {
                 #[doc = " If this is `None` at the end of the block, we panic and render the block invalid."]
                 pub fn included(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<'static, (), (), ()>
-                {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<()>,
+                    ::subxt::storage::address::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInherent",
                         "Included",
                         vec![],
@@ -22637,15 +22883,17 @@ pub mod api {
                 #[doc = " Scraped on chain data for extracting resolved disputes as well as backing votes."]
                 pub fn on_chain_votes(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::ScrapedOnChainVotes<
-                        ::subxt::ext::sp_core::H256,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::ScrapedOnChainVotes<
+                            ::subxt::ext::sp_core::H256,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaInherent",
                         "OnChainVotes",
                         vec![],
@@ -22675,17 +22923,19 @@ pub mod api {
                 #[doc = " Reasonably, 100-1000. The dominant factor is the number of validators: safe upper bound at 10k."]
                 pub fn validator_groups(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
                         ::std::vec::Vec<
-                            runtime_types::polkadot_primitives::v2::ValidatorIndex,
+                            ::std::vec::Vec<
+                                runtime_types::polkadot_primitives::v2::ValidatorIndex,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "ValidatorGroups",
                         vec![],
@@ -22700,8 +22950,8 @@ pub mod api {
                 #[doc = " A queue of upcoming claims and which core they should be mapped onto."]
                 #[doc = ""]
                 #[doc = " The number of queued claims is bounded at the `scheduling_lookahead`"]
-                #[doc = " multiplied by the number of parathread multiplexer cores. Reasonably, 10 * 50 = 500."]                pub fn parathread_queue (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: scheduler :: ParathreadClaimQueue , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " multiplied by the number of parathread multiplexer cores. Reasonably, 10 * 50 = 500."]                pub fn parathread_queue (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: scheduler :: ParathreadClaimQueue > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "ParathreadQueue",
                         vec![],
@@ -22723,17 +22973,19 @@ pub mod api {
                 #[doc = "   * The number of validators divided by `configuration.max_validators_per_core`."]
                 pub fn availability_cores(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        ::core::option::Option<
-                            runtime_types::polkadot_primitives::v2::CoreOccupied,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            ::core::option::Option<
+                                runtime_types::polkadot_primitives::v2::CoreOccupied,
+                            >,
                         >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "AvailabilityCores",
                         vec![],
@@ -22751,13 +23003,17 @@ pub mod api {
                 #[doc = " Bounded by the number of parathread cores and scheduling lookahead. Reasonably, 10 * 50 = 500."]
                 pub fn parathread_claim_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "ParathreadClaimIndex",
                         vec![],
@@ -22777,13 +23033,13 @@ pub mod api {
                 #[doc = " block following the session change, block number of which we save in this storage value."]
                 pub fn session_start_block(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "SessionStartBlock",
                         vec![],
@@ -22800,8 +23056,8 @@ pub mod api {
                 #[doc = " Bounded by the number of cores: one for each parachain and parathread multiplexer."]
                 #[doc = ""]
                 #[doc = " The value contained here will not be valid after the end of a block. Runtime APIs should be used to determine scheduled cores/"]
-                #[doc = " for the upcoming block."]                pub fn scheduled (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: CoreAssignment > , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " for the upcoming block."]                pub fn scheduled (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: scheduler :: CoreAssignment > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaScheduler",
                         "Scheduled",
                         vec![],
@@ -23233,8 +23489,8 @@ pub mod api {
                 #[doc = " All currently active PVF pre-checking votes."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PvfActiveVoteMap",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23252,8 +23508,8 @@ pub mod api {
                 #[doc = " All currently active PVF pre-checking votes."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " - There are no PVF pre-checking votes that exists in list but not in the set and vice versa."]                pub fn pvf_active_vote_map_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: PvfCheckActiveVoteState < :: core :: primitive :: u32 > > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PvfActiveVoteMap",
                         Vec::new(),
@@ -23265,18 +23521,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The list of all currently active PVF votes. Auxiliary to `PvfActiveVoteMap`."]
-                pub fn pvf_active_vote_list(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    >,
-                    (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The list of all currently active PVF votes. Auxiliary to `PvfActiveVoteMap`."]                pub fn pvf_active_vote_list (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_parachain :: primitives :: ValidationCodeHash > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PvfActiveVoteList",
                         vec![],
@@ -23293,13 +23539,17 @@ pub mod api {
                 #[doc = " Consider using the [`ParachainsCache`] type of modifying."]
                 pub fn parachains(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "Parachains",
                         vec![],
@@ -23317,13 +23567,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "ParaLifecycles",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23341,13 +23593,15 @@ pub mod api {
                 #[doc = " The current lifecycle of a all known Para IDs."]
                 pub fn para_lifecycles_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_parachains::paras::ParaLifecycle,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "ParaLifecycles",
                         Vec::new(),
@@ -23365,13 +23619,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::HeadData,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::HeadData,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "Heads",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23389,13 +23645,15 @@ pub mod api {
                 #[doc = " The head-data of every registered para."]
                 pub fn heads_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::HeadData,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::HeadData,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "Heads",
                         Vec::new(),
@@ -23415,13 +23673,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CurrentCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23441,13 +23701,15 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn current_code_hash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CurrentCodeHash",
                         Vec::new(),
@@ -23469,13 +23731,15 @@ pub mod api {
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
                     _1: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PastCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23496,13 +23760,15 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn past_code_hash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PastCodeHash",
                         Vec::new(),
@@ -23516,21 +23782,8 @@ pub mod api {
                 }
                 #[doc = " Past code of parachains. The parachains themselves may not be registered anymore,"]
                 #[doc = " but we also keep their code on-chain for the same amount of time as outdated code"]
-                #[doc = " to keep it available for secondary checkers."]
-                pub fn past_code_meta(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain::primitives::Id,
-                    >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaPastCodeMeta<
-                        ::core::primitive::u32,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " to keep it available for secondary checkers."]                pub fn past_code_meta (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: ParaPastCodeMeta < :: core :: primitive :: u32 > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PastCodeMeta",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23547,18 +23800,8 @@ pub mod api {
                 }
                 #[doc = " Past code of parachains. The parachains themselves may not be registered anymore,"]
                 #[doc = " but we also keep their code on-chain for the same amount of time as outdated code"]
-                #[doc = " to keep it available for secondary checkers."]
-                pub fn past_code_meta_root(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaPastCodeMeta<
-                        ::core::primitive::u32,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " to keep it available for secondary checkers."]                pub fn past_code_meta_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: ParaPastCodeMeta < :: core :: primitive :: u32 > > , () , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PastCodeMeta",
                         Vec::new(),
@@ -23578,16 +23821,18 @@ pub mod api {
                 #[doc = " Multiple entries for a single para are permitted. Ordered ascending by block number."]
                 pub fn past_code_pruning(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        runtime_types::polkadot_parachain::primitives::Id,
-                        ::core::primitive::u32,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            runtime_types::polkadot_parachain::primitives::Id,
+                            ::core::primitive::u32,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "PastCodePruning",
                         vec![],
@@ -23607,13 +23852,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "FutureCodeUpgrades",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23633,13 +23878,13 @@ pub mod api {
                 #[doc = " in the context of a relay chain block with a number >= `expected_at`."]
                 pub fn future_code_upgrades_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "FutureCodeUpgrades",
                         Vec::new(),
@@ -23659,13 +23904,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "FutureCodeHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23685,13 +23932,15 @@ pub mod api {
                 #[doc = " Corresponding code can be retrieved with [`CodeByHash`]."]
                 pub fn future_code_hash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "FutureCodeHash",
                         Vec::new(),
@@ -23717,13 +23966,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::UpgradeGoAhead,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::UpgradeGoAhead,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpgradeGoAheadSignal",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23749,13 +24000,15 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_go_ahead_signal_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::UpgradeGoAhead,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::UpgradeGoAhead,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpgradeGoAheadSignal",
                         Vec::new(),
@@ -23781,13 +24034,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::UpgradeRestriction,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::UpgradeRestriction,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpgradeRestrictionSignal",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23813,13 +24068,15 @@ pub mod api {
                 #[doc = " the format will require migration of parachains."]
                 pub fn upgrade_restriction_signal_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::UpgradeRestriction,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::UpgradeRestriction,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpgradeRestrictionSignal",
                         Vec::new(),
@@ -23836,16 +24093,18 @@ pub mod api {
                 #[doc = " Ordered ascending by block number."]
                 pub fn upgrade_cooldowns(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        runtime_types::polkadot_parachain::primitives::Id,
-                        ::core::primitive::u32,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            runtime_types::polkadot_parachain::primitives::Id,
+                            ::core::primitive::u32,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpgradeCooldowns",
                         vec![],
@@ -23863,16 +24122,18 @@ pub mod api {
                 #[doc = " Ordered ascending by block number."]
                 pub fn upcoming_upgrades(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        runtime_types::polkadot_parachain::primitives::Id,
-                        ::core::primitive::u32,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            runtime_types::polkadot_parachain::primitives::Id,
+                            ::core::primitive::u32,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpcomingUpgrades",
                         vec![],
@@ -23888,13 +24149,17 @@ pub mod api {
                 pub fn actions_queue(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "ActionsQueue",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23912,13 +24177,17 @@ pub mod api {
                 #[doc = " The actions to perform during the start of a specific session index."]
                 pub fn actions_queue_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "ActionsQueue",
                         Vec::new(),
@@ -23933,19 +24202,8 @@ pub mod api {
                 #[doc = " Upcoming paras instantiation arguments."]
                 #[doc = ""]
                 #[doc = " NOTE that after PVF pre-checking is enabled the para genesis arg will have it's code set"]
-                #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
-                pub fn upcoming_paras_genesis(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain::primitives::Id,
-                    >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaGenesisArgs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    (),
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]                pub fn upcoming_paras_genesis (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: ParaGenesisArgs > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpcomingParasGenesis",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -23963,16 +24221,8 @@ pub mod api {
                 #[doc = " Upcoming paras instantiation arguments."]
                 #[doc = ""]
                 #[doc = " NOTE that after PVF pre-checking is enabled the para genesis arg will have it's code set"]
-                #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]
-                pub fn upcoming_paras_genesis_root(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::paras::ParaGenesisArgs,
-                    ::subxt::storage::address::AddressIsIterable,
-                    (),
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " to empty. Instead, the code will be saved into the storage right away via `CodeByHash`."]                pub fn upcoming_paras_genesis_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: paras :: ParaGenesisArgs > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "UpcomingParasGenesis",
                         Vec::new(),
@@ -23990,13 +24240,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CodeByHashRefs",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24014,13 +24264,13 @@ pub mod api {
                 #[doc = " The number of reference on the validation code in [`CodeByHash`] storage."]
                 pub fn code_by_hash_refs_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CodeByHashRefs",
                         Vec::new(),
@@ -24041,13 +24291,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::ValidationCodeHash,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCode,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCode,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CodeByHash",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24068,13 +24320,15 @@ pub mod api {
                 #[doc = " [`PastCodeHash`]."]
                 pub fn code_by_hash_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::ValidationCode,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::ValidationCode,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Paras",
                         "CodeByHash",
                         Vec::new(),
@@ -24171,9 +24425,13 @@ pub mod api {
                 #[doc = " the semantics of this variable."]
                 pub fn has_initialized(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<'static, (), (), ()>
-                {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<()>,
+                    ::subxt::storage::address::Yes,
+                    (),
+                    (),
+                > {
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Initializer",
                         "HasInitialized",
                         vec![],
@@ -24191,8 +24449,8 @@ pub mod api {
                 #[doc = " the storage."]
                 #[doc = ""]
                 #[doc = " However this is a `Vec` regardless to handle various edge cases that may occur at runtime"]
-                #[doc = " upgrade boundaries or if governance intervenes."]                pub fn buffered_session_changes (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: initializer :: BufferedSessionChange > , () , :: subxt :: storage :: address :: AddressHasDefaultValue >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " upgrade boundaries or if governance intervenes."]                pub fn buffered_session_changes (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_runtime_parachains :: initializer :: BufferedSessionChange > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Initializer",
                         "BufferedSessionChanges",
                         vec![],
@@ -24222,23 +24480,8 @@ pub mod api {
             use super::runtime_types;
             pub struct StorageApi;
             impl StorageApi {
-                #[doc = " The downward messages addressed for a certain para."]
-                pub fn downward_message_queues(
-                    &self,
-                    _0: impl ::std::borrow::Borrow<
-                        runtime_types::polkadot_parachain::primitives::Id,
-                    >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_core_primitives::InboundDownwardMessage<
-                            ::core::primitive::u32,
-                        >,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The downward messages addressed for a certain para."]                pub fn downward_message_queues (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: Id > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_core_primitives :: InboundDownwardMessage < :: core :: primitive :: u32 > > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Dmp",
                         "DownwardMessageQueues",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24253,20 +24496,8 @@ pub mod api {
                         ],
                     )
                 }
-                #[doc = " The downward messages addressed for a certain para."]
-                pub fn downward_message_queues_root(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_core_primitives::InboundDownwardMessage<
-                            ::core::primitive::u32,
-                        >,
-                    >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " The downward messages addressed for a certain para."]                pub fn downward_message_queues_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_core_primitives :: InboundDownwardMessage < :: core :: primitive :: u32 > > > , () , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Dmp",
                         "DownwardMessageQueues",
                         Vec::new(),
@@ -24290,13 +24521,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::H256,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::subxt::ext::sp_core::H256>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Dmp",
                         "DownwardMessageQueueHeads",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24320,13 +24551,13 @@ pub mod api {
                 #[doc = " - `H(M)`: is the hash of the message being appended."]
                 pub fn downward_message_queue_heads_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::subxt::ext::sp_core::H256,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::subxt::ext::sp_core::H256>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Dmp",
                         "DownwardMessageQueueHeads",
                         Vec::new(),
@@ -24528,13 +24759,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "RelayDispatchQueues",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24557,13 +24790,15 @@ pub mod api {
                 #[doc = " The messages are processed in FIFO order."]
                 pub fn relay_dispatch_queues_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::std::vec::Vec<::core::primitive::u8>>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "RelayDispatchQueues",
                         Vec::new(),
@@ -24591,13 +24826,16 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "RelayDispatchQueueSize",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24625,13 +24863,16 @@ pub mod api {
                 #[doc = " - The set of keys should exactly match the set of keys of `RelayDispatchQueues`."]
                 pub fn relay_dispatch_queue_size_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "RelayDispatchQueueSize",
                         Vec::new(),
@@ -24650,13 +24891,17 @@ pub mod api {
                 #[doc = "   `RelayDispatchQueues` and `RelayDispatchQueueSize`."]
                 pub fn needs_dispatch(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "NeedsDispatch",
                         vec![],
@@ -24675,13 +24920,15 @@ pub mod api {
                 #[doc = " - If `Some(para)`, then `para` must be present in `NeedsDispatch`."]
                 pub fn next_dispatch_round_start_with(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::Id,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "NextDispatchRoundStartWith",
                         vec![],
@@ -24699,16 +24946,16 @@ pub mod api {
                 pub fn overweight(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::polkadot_parachain::primitives::Id,
                         ::std::vec::Vec<::core::primitive::u8>,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "Overweight",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -24728,16 +24975,16 @@ pub mod api {
                 #[doc = " These messages stay there until manually dispatched."]
                 pub fn overweight_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         runtime_types::polkadot_parachain::primitives::Id,
                         ::std::vec::Vec<::core::primitive::u8>,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "Overweight",
                         Vec::new(),
@@ -24753,13 +25000,13 @@ pub mod api {
                 #[doc = " index)."]
                 pub fn overweight_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Ump",
                         "OverweightCount",
                         vec![],
@@ -25132,8 +25379,8 @@ pub mod api {
                 #[doc = " The set is accompanied by a list for iteration."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId > ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests (& self , _0 : impl :: std :: borrow :: Borrow < runtime_types :: polkadot_parachain :: primitives :: HrmpChannelId > ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest > , :: subxt :: storage :: address :: Yes , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25153,8 +25400,8 @@ pub mod api {
                 #[doc = " The set is accompanied by a list for iteration."]
                 #[doc = ""]
                 #[doc = " Invariant:"]
-                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests_root (& self ,) -> :: subxt :: storage :: address :: StorageAddress :: < 'static , runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest , :: subxt :: storage :: address :: AddressIsIterable , () >{
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " - There are no channels that exists in list but not in the set and vice versa."]                pub fn hrmp_open_channel_requests_root (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < runtime_types :: polkadot_runtime_parachains :: hrmp :: HrmpOpenChannelRequest > , () , () , :: subxt :: storage :: address :: Yes >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpOpenChannelRequests",
                         Vec::new(),
@@ -25168,15 +25415,17 @@ pub mod api {
                 }
                 pub fn hrmp_open_channel_requests_list(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpOpenChannelRequestsList",
                         vec![],
@@ -25196,13 +25445,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25222,13 +25471,13 @@ pub mod api {
                 #[doc = " `(X, _)` as the number of `HrmpOpenChannelRequestCount` for `X`."]
                 pub fn hrmp_open_channel_request_count_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpOpenChannelRequestCount",
                         Vec::new(),
@@ -25248,13 +25497,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25274,13 +25523,13 @@ pub mod api {
                 #[doc = " `confirmed` set to true, as the number of `HrmpAcceptedChannelRequestCount` for `X`."]
                 pub fn hrmp_accepted_channel_request_count_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpAcceptedChannelRequestCount",
                         Vec::new(),
@@ -25304,13 +25553,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::HrmpChannelId,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<()>,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressIsIterable,
-                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpCloseChannelRequests",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25334,13 +25583,13 @@ pub mod api {
                 #[doc = " - There are no channels that exists in list but not in the set and vice versa."]
                 pub fn hrmp_close_channel_requests_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<()>,
                     (),
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpCloseChannelRequests",
                         Vec::new(),
@@ -25354,15 +25603,17 @@ pub mod api {
                 }
                 pub fn hrmp_close_channel_requests_list(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::HrmpChannelId,
+                        >,
                     >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpCloseChannelRequestsList",
                         vec![],
@@ -25382,13 +25633,13 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpWatermarks",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25408,13 +25659,13 @@ pub mod api {
                 #[doc = " - each para `P` used here as a key should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_watermarks_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpWatermarks",
                         Vec::new(),
@@ -25434,13 +25685,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::HrmpChannelId,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannels",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25460,13 +25713,15 @@ pub mod api {
                 #[doc = " - each participant in the channel should satisfy `Paras::is_valid_para(P)` within a session."]
                 pub fn hrmp_channels_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_parachains::hrmp::HrmpChannel,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannels",
                         Vec::new(),
@@ -25496,13 +25751,17 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25532,13 +25791,17 @@ pub mod api {
                 #[doc = " - the vectors are sorted."]
                 pub fn hrmp_ingress_channels_index_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpIngressChannelsIndex",
                         Vec::new(),
@@ -25555,13 +25818,17 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25578,13 +25845,17 @@ pub mod api {
                 }
                 pub fn hrmp_egress_channels_index_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpEgressChannelsIndex",
                         Vec::new(),
@@ -25603,17 +25874,19 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::HrmpChannelId,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_core_primitives::InboundHrmpMessage<
-                            ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_core_primitives::InboundHrmpMessage<
+                                ::core::primitive::u32,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannelContents",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25632,17 +25905,19 @@ pub mod api {
                 #[doc = " Invariant: cannot be non-empty if the corresponding channel in `HrmpChannels` is `None`."]
                 pub fn hrmp_channel_contents_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_core_primitives::InboundHrmpMessage<
-                            ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_core_primitives::InboundHrmpMessage<
+                                ::core::primitive::u32,
+                            >,
                         >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannelContents",
                         Vec::new(),
@@ -25665,18 +25940,20 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        ::core::primitive::u32,
-                        ::std::vec::Vec<
-                            runtime_types::polkadot_parachain::primitives::Id,
-                        >,
-                    )>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::core::primitive::u32,
+                            ::std::vec::Vec<
+                                runtime_types::polkadot_parachain::primitives::Id,
+                            >,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannelDigests",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25699,18 +25976,20 @@ pub mod api {
                 #[doc = "   same block number."]
                 pub fn hrmp_channel_digests_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<(
-                        ::core::primitive::u32,
-                        ::std::vec::Vec<
-                            runtime_types::polkadot_parachain::primitives::Id,
-                        >,
-                    )>,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<(
+                            ::core::primitive::u32,
+                            ::std::vec::Vec<
+                                runtime_types::polkadot_parachain::primitives::Id,
+                            >,
+                        )>,
+                    >,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Hrmp",
                         "HrmpChannelDigests",
                         Vec::new(),
@@ -25734,18 +26013,8 @@ pub mod api {
             impl StorageApi {
                 #[doc = " Assignment keys for the current session."]
                 #[doc = " Note that this API is private due to it being prone to 'off-by-one' at session boundaries."]
-                #[doc = " When in doubt, use `Sessions` API instead."]
-                pub fn assignment_keys_unsafe(
-                    &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        runtime_types::polkadot_primitives::v2::assignment_app::Public,
-                    >,
-                    (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
-                > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                #[doc = " When in doubt, use `Sessions` API instead."]                pub fn assignment_keys_unsafe (& self ,) -> :: subxt :: storage :: address :: StaticStorageAddress :: < :: subxt :: metadata :: DecodeStaticType < :: std :: vec :: Vec < runtime_types :: polkadot_primitives :: v2 :: assignment_app :: Public > > , :: subxt :: storage :: address :: Yes , :: subxt :: storage :: address :: Yes , () >{
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "AssignmentKeysUnsafe",
                         vec![],
@@ -25760,13 +26029,13 @@ pub mod api {
                 #[doc = " The earliest session for which previous session info is stored."]
                 pub fn earliest_stored_session(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "EarliestStoredSession",
                         vec![],
@@ -25784,13 +26053,15 @@ pub mod api {
                 pub fn sessions(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::SessionInfo,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::SessionInfo,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "Sessions",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25810,13 +26081,15 @@ pub mod api {
                 #[doc = " Does not have any entries before the session index in the first session change notification."]
                 pub fn sessions_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::SessionInfo,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::SessionInfo,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "Sessions",
                         Vec::new(),
@@ -25832,13 +26105,15 @@ pub mod api {
                 pub fn account_keys(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "AccountKeys",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -25856,13 +26131,15 @@ pub mod api {
                 #[doc = " The validator account keys of the validators actively participating in parachain consensus."]
                 pub fn account_keys_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::subxt::ext::sp_core::crypto::AccountId32>,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParaSessionInfo",
                         "AccountKeys",
                         Vec::new(),
@@ -25987,13 +26264,13 @@ pub mod api {
                 #[doc = " references sessions."]
                 pub fn last_pruned_session(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "LastPrunedSession",
                         vec![],
@@ -26012,28 +26289,32 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_core_primitives::CandidateHash,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::DisputeState<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::DisputeState<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Disputes" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [192u8 , 238u8 , 255u8 , 67u8 , 169u8 , 86u8 , 99u8 , 243u8 , 228u8 , 88u8 , 142u8 , 138u8 , 183u8 , 117u8 , 82u8 , 22u8 , 163u8 , 30u8 , 175u8 , 247u8 , 50u8 , 204u8 , 12u8 , 171u8 , 57u8 , 189u8 , 151u8 , 191u8 , 196u8 , 89u8 , 94u8 , 165u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("ParasDisputes" , "Disputes" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [192u8 , 238u8 , 255u8 , 67u8 , 169u8 , 86u8 , 99u8 , 243u8 , 228u8 , 88u8 , 142u8 , 138u8 , 183u8 , 117u8 , 82u8 , 22u8 , 163u8 , 30u8 , 175u8 , 247u8 , 50u8 , 204u8 , 12u8 , 171u8 , 57u8 , 189u8 , 151u8 , 191u8 , 196u8 , 89u8 , 94u8 , 165u8 ,])
                 }
                 #[doc = " All ongoing or concluded disputes for the last several sessions."]
                 pub fn disputes_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_primitives::v2::DisputeState<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_primitives::v2::DisputeState<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "Disputes",
                         Vec::new(),
@@ -26053,25 +26334,25 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_core_primitives::CandidateHash,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("ParasDisputes" , "Included" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [129u8 , 50u8 , 76u8 , 60u8 , 82u8 , 106u8 , 248u8 , 164u8 , 152u8 , 80u8 , 58u8 , 185u8 , 211u8 , 225u8 , 122u8 , 100u8 , 234u8 , 241u8 , 123u8 , 205u8 , 4u8 , 8u8 , 193u8 , 116u8 , 167u8 , 158u8 , 252u8 , 223u8 , 204u8 , 226u8 , 74u8 , 195u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("ParasDisputes" , "Included" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [129u8 , 50u8 , 76u8 , 60u8 , 82u8 , 106u8 , 248u8 , 164u8 , 152u8 , 80u8 , 58u8 , 185u8 , 211u8 , 225u8 , 122u8 , 100u8 , 234u8 , 241u8 , 123u8 , 205u8 , 4u8 , 8u8 , 193u8 , 116u8 , 167u8 , 158u8 , 252u8 , 223u8 , 204u8 , 226u8 , 74u8 , 195u8 ,])
                 }
                 #[doc = " All included blocks on the chain, as well as the block number in this chain that"]
                 #[doc = " should be reverted back to if the candidate is disputed and determined to be invalid."]
                 pub fn included_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "Included",
                         Vec::new(),
@@ -26091,13 +26372,15 @@ pub mod api {
                 pub fn spam_slots(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u32>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u32>,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "SpamSlots",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -26119,13 +26402,15 @@ pub mod api {
                 #[doc = " The i'th entry of the vector corresponds to the i'th validator in the session."]
                 pub fn spam_slots_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<::core::primitive::u32>,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<::core::primitive::u32>,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "SpamSlots",
                         Vec::new(),
@@ -26143,13 +26428,15 @@ pub mod api {
                 #[doc = " It can only be set back to `None` by governance intervention."]
                 pub fn frozen(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::option::Option<::core::primitive::u32>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::core::option::Option<::core::primitive::u32>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "ParasDisputes",
                         "Frozen",
                         vec![],
@@ -26479,13 +26766,15 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::Id,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Registrar",
                         "PendingSwap",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -26503,13 +26792,15 @@ pub mod api {
                 #[doc = " Pending swap operations."]
                 pub fn pending_swap_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::Id,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Registrar",
                         "PendingSwap",
                         Vec::new(),
@@ -26530,16 +26821,18 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::paras_registrar::ParaInfo<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::paras_registrar::ParaInfo<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Registrar",
                         "Paras",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -26560,16 +26853,18 @@ pub mod api {
                 #[doc = " so if it isn't yet registered. (After that, it's up to governance to do so.)"]
                 pub fn paras_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::paras_registrar::ParaInfo<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::paras_registrar::ParaInfo<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Registrar",
                         "Paras",
                         Vec::new(),
@@ -26584,13 +26879,15 @@ pub mod api {
                 #[doc = " The next free `ParaId`."]
                 pub fn next_free_para_id(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_parachain::primitives::Id,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_parachain::primitives::Id,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Registrar",
                         "NextFreeParaId",
                         vec![],
@@ -26839,18 +27136,20 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        ::core::option::Option<(
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
-                        )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            ::core::option::Option<(
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            )>,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Slots",
                         "Leases",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -26883,18 +27182,20 @@ pub mod api {
                 #[doc = " It is illegal for a `None` value to trail in the list."]
                 pub fn leases_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<
-                        ::core::option::Option<(
-                            ::subxt::ext::sp_core::crypto::AccountId32,
-                            ::core::primitive::u128,
-                        )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            ::core::option::Option<(
+                                ::subxt::ext::sp_core::crypto::AccountId32,
+                                ::core::primitive::u128,
+                            )>,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Slots",
                         "Leases",
                         Vec::new(),
@@ -27216,13 +27517,13 @@ pub mod api {
                 #[doc = " Number of auctions started so far."]
                 pub fn auction_counter(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "AuctionCounter",
                         vec![],
@@ -27241,13 +27542,16 @@ pub mod api {
                 #[doc = " auction will \"begin to end\", i.e. the first block of the Ending Period of the auction."]
                 pub fn auction_info(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (::core::primitive::u32, ::core::primitive::u32),
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
+                        ::core::primitive::u32,
+                        ::core::primitive::u32,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "AuctionInfo",
                         vec![],
@@ -27267,13 +27571,13 @@ pub mod api {
                     _1: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "ReservedAmounts",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -27292,13 +27596,13 @@ pub mod api {
                 #[doc = " (sub-)ranges."]
                 pub fn reserved_amounts_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u128,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u128>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "ReservedAmounts",
                         Vec::new(),
@@ -27316,17 +27620,19 @@ pub mod api {
                 pub fn winning(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    [::core::option::Option<(
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        runtime_types::polkadot_parachain::primitives::Id,
-                        ::core::primitive::u128,
-                    )>; 36usize],
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        [::core::option::Option<(
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            runtime_types::polkadot_parachain::primitives::Id,
+                            ::core::primitive::u128,
+                        )>; 36usize],
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "Winning",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -27346,17 +27652,19 @@ pub mod api {
                 #[doc = " first sample of the ending period is 0; the last is `Sample Size - 1`."]
                 pub fn winning_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    [::core::option::Option<(
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        runtime_types::polkadot_parachain::primitives::Id,
-                        ::core::primitive::u128,
-                    )>; 36usize],
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        [::core::option::Option<(
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            runtime_types::polkadot_parachain::primitives::Id,
+                            ::core::primitive::u128,
+                        )>; 36usize],
+                    >,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Auctions",
                         "Winning",
                         Vec::new(),
@@ -27992,18 +28300,20 @@ pub mod api {
                     _0: impl ::std::borrow::Borrow<
                         runtime_types::polkadot_parachain::primitives::Id,
                     >,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::crowdloan::FundInfo<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::crowdloan::FundInfo<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Crowdloan",
                         "Funds",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -28021,18 +28331,20 @@ pub mod api {
                 #[doc = " Info on all of the funds."]
                 pub fn funds_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::polkadot_runtime_common::crowdloan::FundInfo<
-                        ::subxt::ext::sp_core::crypto::AccountId32,
-                        ::core::primitive::u128,
-                        ::core::primitive::u32,
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::polkadot_runtime_common::crowdloan::FundInfo<
+                            ::subxt::ext::sp_core::crypto::AccountId32,
+                            ::core::primitive::u128,
+                            ::core::primitive::u32,
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Crowdloan",
                         "Funds",
                         Vec::new(),
@@ -28048,13 +28360,17 @@ pub mod api {
                 #[doc = " in order to determine which funds should submit new or updated bids."]
                 pub fn new_raise(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::std::vec::Vec<runtime_types::polkadot_parachain::primitives::Id>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        ::std::vec::Vec<
+                            runtime_types::polkadot_parachain::primitives::Id,
+                        >,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Crowdloan",
                         "NewRaise",
                         vec![],
@@ -28069,13 +28385,13 @@ pub mod api {
                 #[doc = " The number of auctions that have entered into their ending period so far."]
                 pub fn endings_count(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Crowdloan",
                         "EndingsCount",
                         vec![],
@@ -28090,13 +28406,13 @@ pub mod api {
                 #[doc = " Tracker for the next available fund index"]
                 pub fn next_fund_index(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "Crowdloan",
                         "NextFundIndex",
                         vec![],
@@ -28946,13 +29262,13 @@ pub mod api {
                 #[doc = " The latest available query index."]
                 pub fn query_counter(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "QueryCounter",
                         vec![],
@@ -28968,15 +29284,17 @@ pub mod api {
                 pub fn queries(
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u64>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_xcm::pallet::QueryStatus<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_xcm::pallet::QueryStatus<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "Queries",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -28994,15 +29312,17 @@ pub mod api {
                 #[doc = " The ongoing queries."]
                 pub fn queries_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_xcm::pallet::QueryStatus<
-                        ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_xcm::pallet::QueryStatus<
+                            ::core::primitive::u32,
+                        >,
                     >,
-                    ::subxt::storage::address::AddressIsIterable,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "Queries",
                         Vec::new(),
@@ -29021,13 +29341,13 @@ pub mod api {
                 pub fn asset_traps(
                     &self,
                     _0: impl ::std::borrow::Borrow<::subxt::ext::sp_core::H256>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "AssetTraps",
                         vec![::subxt::storage::address::StorageMapKey::new(
@@ -29048,13 +29368,13 @@ pub mod api {
                 #[doc = " times this pair has been trapped (usually just 1 if it exists at all)."]
                 pub fn asset_traps_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
-                    ::subxt::storage::address::AddressHasDefaultValue,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    (),
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "AssetTraps",
                         Vec::new(),
@@ -29070,13 +29390,13 @@ pub mod api {
                 #[doc = " then the destinations whose XCM version is unknown are considered unreachable."]
                 pub fn safe_xcm_version(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "SafeXcmVersion",
                         vec![],
@@ -29093,24 +29413,24 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "SupportedVersion" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [227u8 , 149u8 , 251u8 , 204u8 , 40u8 , 150u8 , 151u8 , 177u8 , 154u8 , 187u8 , 9u8 , 205u8 , 174u8 , 137u8 , 228u8 , 128u8 , 18u8 , 244u8 , 151u8 , 120u8 , 6u8 , 44u8 , 5u8 , 167u8 , 56u8 , 35u8 , 192u8 , 141u8 , 108u8 , 169u8 , 91u8 , 7u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("XcmPallet" , "SupportedVersion" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [227u8 , 149u8 , 251u8 , 204u8 , 40u8 , 150u8 , 151u8 , 177u8 , 154u8 , 187u8 , 9u8 , 205u8 , 174u8 , 137u8 , 228u8 , 128u8 , 18u8 , 244u8 , 151u8 , 120u8 , 6u8 , 44u8 , 5u8 , 167u8 , 56u8 , 35u8 , 192u8 , 141u8 , 108u8 , 169u8 , 91u8 , 7u8 ,])
                 }
                 #[doc = " The Latest versions that we know various locations support."]
                 pub fn supported_version_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u32,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u32>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "SupportedVersion",
                         Vec::new(),
@@ -29127,24 +29447,24 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifiers" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [122u8 , 110u8 , 119u8 , 25u8 , 216u8 , 237u8 , 44u8 , 91u8 , 133u8 , 165u8 , 77u8 , 86u8 , 232u8 , 69u8 , 110u8 , 121u8 , 234u8 , 176u8 , 208u8 , 62u8 , 47u8 , 196u8 , 151u8 , 193u8 , 197u8 , 41u8 , 203u8 , 36u8 , 147u8 , 218u8 , 31u8 , 199u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("XcmPallet" , "VersionNotifiers" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [122u8 , 110u8 , 119u8 , 25u8 , 216u8 , 237u8 , 44u8 , 91u8 , 133u8 , 165u8 , 77u8 , 86u8 , 232u8 , 69u8 , 110u8 , 121u8 , 234u8 , 176u8 , 208u8 , 62u8 , 47u8 , 196u8 , 151u8 , 193u8 , 197u8 , 41u8 , 203u8 , 36u8 , 147u8 , 218u8 , 31u8 , 199u8 ,])
                 }
                 #[doc = " All locations that we have requested version notifications from."]
                 pub fn version_notifiers_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    ::core::primitive::u64,
-                    ::subxt::storage::address::AddressIsIterable,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<::core::primitive::u64>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "VersionNotifiers",
                         Vec::new(),
@@ -29162,33 +29482,33 @@ pub mod api {
                     &self,
                     _0: impl ::std::borrow::Borrow<::core::primitive::u32>,
                     _1: impl ::std::borrow::Borrow<runtime_types::xcm::VersionedMultiLocation>,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u64,
                         ::core::primitive::u64,
                         ::core::primitive::u32,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
+                    ::subxt::storage::address::Yes,
                     (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    :: subxt :: storage :: address :: StorageAddress :: new_with_validation ("XcmPallet" , "VersionNotifyTargets" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [255u8 , 223u8 , 137u8 , 192u8 , 243u8 , 162u8 , 26u8 , 237u8 , 4u8 , 29u8 , 179u8 , 75u8 , 5u8 , 145u8 , 11u8 , 149u8 , 164u8 , 202u8 , 14u8 , 18u8 , 244u8 , 36u8 , 209u8 , 1u8 , 21u8 , 0u8 , 191u8 , 79u8 , 126u8 , 160u8 , 149u8 , 58u8 ,])
+                    :: subxt :: storage :: address :: StaticStorageAddress :: new ("XcmPallet" , "VersionNotifyTargets" , vec ! [:: subxt :: storage :: address :: StorageMapKey :: new (_0 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Twox64Concat) , :: subxt :: storage :: address :: StorageMapKey :: new (_1 . borrow () , :: subxt :: storage :: address :: StorageHasher :: Blake2_128Concat)] , [255u8 , 223u8 , 137u8 , 192u8 , 243u8 , 162u8 , 26u8 , 237u8 , 4u8 , 29u8 , 179u8 , 75u8 , 5u8 , 145u8 , 11u8 , 149u8 , 164u8 , 202u8 , 14u8 , 18u8 , 244u8 , 36u8 , 209u8 , 1u8 , 21u8 , 0u8 , 191u8 , 79u8 , 126u8 , 160u8 , 149u8 , 58u8 ,])
                 }
                 #[doc = " The target locations that are subscribed to our version changes, as well as the most recent"]
                 #[doc = " of our versions we informed them of."]
                 pub fn version_notify_targets_root(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    (
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<(
                         ::core::primitive::u64,
                         ::core::primitive::u64,
                         ::core::primitive::u32,
-                    ),
-                    ::subxt::storage::address::AddressIsIterable,
+                    )>,
                     (),
+                    (),
+                    ::subxt::storage::address::Yes,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "VersionNotifyTargets",
                         Vec::new(),
@@ -29205,16 +29525,18 @@ pub mod api {
                 #[doc = " which is used as a prioritization."]
                 pub fn version_discovery_queue(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<(
-                        runtime_types::xcm::VersionedMultiLocation,
-                        ::core::primitive::u32,
-                    )>,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::sp_runtime::bounded::bounded_vec::BoundedVec<(
+                            runtime_types::xcm::VersionedMultiLocation,
+                            ::core::primitive::u32,
+                        )>,
+                    >,
+                    ::subxt::storage::address::Yes,
+                    ::subxt::storage::address::Yes,
                     (),
-                    ::subxt::storage::address::AddressHasDefaultValue,
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "VersionDiscoveryQueue",
                         vec![],
@@ -29229,13 +29551,15 @@ pub mod api {
                 #[doc = " The current migration's stage, if any."]
                 pub fn current_migration(
                     &self,
-                ) -> ::subxt::storage::address::StorageAddress<
-                    'static,
-                    runtime_types::pallet_xcm::pallet::VersionMigrationStage,
+                ) -> ::subxt::storage::address::StaticStorageAddress<
+                    ::subxt::metadata::DecodeStaticType<
+                        runtime_types::pallet_xcm::pallet::VersionMigrationStage,
+                    >,
+                    ::subxt::storage::address::Yes,
                     (),
                     (),
                 > {
-                    ::subxt::storage::address::StorageAddress::new_with_validation(
+                    ::subxt::storage::address::StaticStorageAddress::new(
                         "XcmPallet",
                         "CurrentMigration",
                         vec![],

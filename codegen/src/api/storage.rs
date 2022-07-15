@@ -194,8 +194,8 @@ fn generate_storage_entry_fns(
     let is_map_type = matches!(storage_entry.ty, StorageEntryType::Map { .. });
 
     // Is the entry iterable?
-    let iterable_type = if is_map_type {
-        quote!(::subxt::storage::address::AddressIsIterable)
+    let is_iterable_type = if is_map_type {
+        quote!(::subxt::storage::address::Yes)
     } else {
         quote!(())
     };
@@ -206,8 +206,8 @@ fn generate_storage_entry_fns(
     };
 
     // Does the entry have a default value?
-    let defaultable_type = if has_default_value {
-        quote!(::subxt::storage::address::AddressHasDefaultValue)
+    let is_defaultable_type = if has_default_value {
+        quote!(::subxt::storage::address::Yes)
     } else {
         quote!(())
     };
@@ -220,8 +220,8 @@ fn generate_storage_entry_fns(
             #docs_token
             pub fn #fn_name_root(
                 &self,
-            ) -> ::subxt::storage::address::StorageAddress::<'static, #storage_entry_value_ty, #iterable_type, #defaultable_type> {
-                ::subxt::storage::address::StorageAddress::new_with_validation(
+            ) -> ::subxt::storage::address::StaticStorageAddress::<::subxt::metadata::DecodeStaticType<#storage_entry_value_ty>, (), #is_defaultable_type, #is_iterable_type> {
+                ::subxt::storage::address::StaticStorageAddress::new(
                     #pallet_name,
                     #storage_name,
                     Vec::new(),
@@ -239,8 +239,8 @@ fn generate_storage_entry_fns(
         pub fn #fn_name(
             &self,
             #( #key_args, )*
-        ) -> ::subxt::storage::address::StorageAddress::<'static, #storage_entry_value_ty, #iterable_type, #defaultable_type> {
-            ::subxt::storage::address::StorageAddress::new_with_validation(
+        ) -> ::subxt::storage::address::StaticStorageAddress::<::subxt::metadata::DecodeStaticType<#storage_entry_value_ty>, ::subxt::storage::address::Yes, #is_defaultable_type, #is_iterable_type> {
+            ::subxt::storage::address::StaticStorageAddress::new(
                 #pallet_name,
                 #storage_name,
                 #key_impl,

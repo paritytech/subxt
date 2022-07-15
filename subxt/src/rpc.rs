@@ -289,10 +289,10 @@ impl<T: Config> Rpc<T> {
     /// Fetch the raw bytes for a given storage key
     pub async fn storage(
         &self,
-        key: &StorageKey,
+        key: &[u8],
         hash: Option<T::Hash>,
     ) -> Result<Option<StorageData>, BasicError> {
-        let params = rpc_params![key, hash];
+        let params = rpc_params![to_hex(key), hash];
         let data = self.client.request("state_getStorage", params).await?;
         Ok(data)
     }
@@ -302,12 +302,13 @@ impl<T: Config> Rpc<T> {
     /// If `start_key` is passed, return next keys in storage in lexicographic order.
     pub async fn storage_keys_paged(
         &self,
-        key: StorageKey,
+        key: &[u8],
         count: u32,
-        start_key: Option<StorageKey>,
+        start_key: Option<&[u8]>,
         hash: Option<T::Hash>,
     ) -> Result<Vec<StorageKey>, BasicError> {
-        let params = rpc_params![key, count, start_key, hash];
+        let start_key = start_key.map(to_hex);
+        let params = rpc_params![to_hex(key), count, start_key, hash];
         let data = self.client.request("state_getKeysPaged", params).await?;
         Ok(data)
     }
@@ -315,10 +316,11 @@ impl<T: Config> Rpc<T> {
     /// Query historical storage entries
     pub async fn query_storage(
         &self,
-        keys: Vec<StorageKey>,
+        keys: impl IntoIterator<Item = &[u8]>,
         from: T::Hash,
         to: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, from, to];
         self.client
             .request("state_queryStorage", params)
@@ -329,9 +331,10 @@ impl<T: Config> Rpc<T> {
     /// Query historical storage entries
     pub async fn query_storage_at(
         &self,
-        keys: &[StorageKey],
+        keys: impl IntoIterator<Item = &[u8]>,
         at: Option<T::Hash>,
     ) -> Result<Vec<StorageChangeSet<T::Hash>>, BasicError> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, at];
         self.client
             .request("state_queryStorageAt", params)
@@ -454,9 +457,10 @@ impl<T: Config> Rpc<T> {
     /// Get proof of storage entries at a specific block's state.
     pub async fn read_proof(
         &self,
-        keys: Vec<StorageKey>,
+        keys: impl IntoIterator<Item = &[u8]>,
         hash: Option<T::Hash>,
     ) -> Result<ReadProof<T::Hash>, BasicError> {
+        let keys: Vec<String> = keys.into_iter().map(to_hex).collect();
         let params = rpc_params![keys, hash];
         let proof = self.client.request("state_getReadProof", params).await?;
         Ok(proof)
@@ -605,7 +609,7 @@ impl<T: Config> Rpc<T> {
         encoded_signed: &[u8],
         at: Option<T::Hash>,
     ) -> Result<ApplyExtrinsicResult, BasicError> {
-        let params = rpc_params![format!("0x{}", hex::encode(encoded_signed)), at];
+        let params = rpc_params![to_hex(encoded_signed), at];
         let result_bytes: Bytes = self.client.request("system_dryRun", params).await?;
         let data: ApplyExtrinsicResult =
             codec::Decode::decode(&mut result_bytes.0.as_slice())?;
@@ -629,6 +633,10 @@ async fn ws_transport(url: &str) -> Result<(WsSender, WsReceiver), RpcError> {
         .build(url)
         .await
         .map_err(|e| RpcError::Transport(e.into()))
+}
+
+fn to_hex(bytes: impl AsRef<[u8]>) -> String {
+    format!("0x{}", hex::encode(bytes.as_ref()))
 }
 
 #[cfg(test)]

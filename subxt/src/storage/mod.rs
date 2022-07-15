@@ -19,10 +19,10 @@ pub use sp_core::storage::StorageKey;
 /// entry lives and how to properly decode it.
 pub mod address {
     pub use super::storage_address::{
-        AddressHasDefaultValue,
-        AddressIsIterable,
-        StorageAddress,
+        StaticStorageAddress,
+        StorageAddressT,
         StorageHasher,
         StorageMapKey,
+        Yes,
     };
 }

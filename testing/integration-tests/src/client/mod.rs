@@ -13,10 +13,7 @@ use crate::{
 };
 use sp_core::{
     sr25519::Pair as Sr25519Pair,
-    storage::{
-        well_known_keys,
-        StorageKey,
-    },
+    storage::well_known_keys,
     Pair,
 };
 use sp_keyring::AccountKeyring;
@@ -66,8 +63,8 @@ async fn fetch_read_proof() {
     api.rpc()
         .read_proof(
             vec![
-                StorageKey(well_known_keys::HEAP_PAGES.to_vec()),
-                StorageKey(well_known_keys::EXTRINSIC_INDEX.to_vec()),
+                well_known_keys::HEAP_PAGES,
+                well_known_keys::EXTRINSIC_INDEX,
             ],
             block_hash,
         )
@@ -101,7 +98,7 @@ async fn fetch_keys() {
     let addr = node_runtime::storage().system().account_root();
     let keys = api
         .storage()
-        .fetch_keys(&addr, 4, None, None)
+        .fetch_keys(&addr.to_root_bytes(), 4, None, None)
         .await
         .unwrap();
     assert_eq!(keys.len(), 4)

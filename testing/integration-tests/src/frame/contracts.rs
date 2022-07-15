@@ -199,7 +199,7 @@ async fn tx_call() {
     let keys = cxt
         .client()
         .storage()
-        .fetch_keys(&info_addr, 10, None, None)
+        .fetch_keys(&info_addr.to_bytes(), 10, None, None)
         .await
         .unwrap()
         .iter()
