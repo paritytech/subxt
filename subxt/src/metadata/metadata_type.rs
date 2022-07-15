@@ -338,8 +338,6 @@ impl ErrorMetadata {
 
 /// Error originated from converting a runtime metadata [RuntimeMetadataPrefixed] to
 /// the internal [Metadata] representation.
-///
-/// The runtime metadata is converted when building the [crate::client::Client].
 #[derive(Debug, thiserror::Error)]
 pub enum InvalidMetadataError {
     /// Invalid prefix

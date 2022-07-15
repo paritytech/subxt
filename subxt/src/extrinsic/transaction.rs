@@ -42,8 +42,7 @@ use sp_runtime::traits::Hash;
 
 pub use sp_runtime::traits::SignedExtension;
 
-/// This struct represents a subscription to the progress of some transaction, and is
-/// returned from [`crate::SubmittableExtrinsic::sign_and_submit_then_watch()`].
+/// This struct represents a subscription to the progress of some transaction.
 #[derive(Derivative)]
 #[derivative(Debug(bound = "C: std::fmt::Debug"))]
 pub struct TransactionProgress<T: Config, C, Err> {

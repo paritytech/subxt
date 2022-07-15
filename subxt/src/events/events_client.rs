@@ -64,7 +64,7 @@ where
     /// Subscribe to all events from blocks.
     ///
     /// **Note:** these blocks haven't necessarily been finalised yet; prefer
-    /// [`Events::subscribe_finalized()`] if that is important.
+    /// [`EventsClient::subscribe_finalized()`] if that is important.
     ///
     /// # Example
     ///
@@ -101,7 +101,7 @@ where
         async move { subscribe(client).await }
     }
 
-    /// Subscribe to events from finalized blocks.
+    /// Subscribe to events from finalized blocks. See [`EventsClient::subscribe()`] for details.
     pub fn subscribe_finalized(
         &self,
     ) -> impl Future<

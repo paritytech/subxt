@@ -4,8 +4,9 @@
 
 //! This module provides a [`Config`] type, which is used to define various
 //! types that are important in order to speak to a particular chain.
-//! [`DefaultConfig`] provides a default set of these types suitable for the
-//! default Substrate node implementation.
+//! [`SubstrateConfig`] provides a default set of these types suitable for the
+//! default Substrate node implementation, and [`PolkadotConfig`] for a
+//! Polkadot node.
 
 use codec::{
     Codec,

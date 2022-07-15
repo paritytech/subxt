@@ -122,9 +122,6 @@ impl<T: Config> Events<T> {
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return only those which should decode to the provided `Ev` type.
     /// If an error occurs, all subsequent iterations return `None`.
-    ///
-    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
-    /// use even if you do not statically know about all of the possible events.
     pub fn find<Ev: StaticEvent>(
         &self,
     ) -> impl Iterator<Item = Result<Ev, BasicError>> + '_ {
@@ -136,17 +133,11 @@ impl<T: Config> Events<T> {
 
     /// Iterate through the events using metadata to dynamically decode and skip
     /// them, and return the first event found which decodes to the provided `Ev` type.
-    ///
-    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
-    /// use even if you do not statically know about all of the possible events.
     pub fn find_first<Ev: StaticEvent>(&self) -> Result<Option<Ev>, BasicError> {
         self.find::<Ev>().next().transpose()
     }
 
     /// Find an event that decodes to the type provided. Returns true if it was found.
-    ///
-    /// **Note:** This method internally uses [`Events::iter_raw()`], so it is safe to
-    /// use even if you do not statically know about all of the possible events.
     pub fn has<Ev: StaticEvent>(&self) -> Result<bool, BasicError> {
         Ok(self.find::<Ev>().next().transpose()?.is_some())
     }
@@ -178,7 +169,7 @@ pub struct EventDetails {
 }
 
 impl EventDetails {
-    /// Attempt to decode this [`RawEventDetails`] into a specific event.
+    /// Attempt to decode these [`EventDetails`] into a specific event.
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
             Ok(Some(E::decode(&mut &self.bytes[..])?))
