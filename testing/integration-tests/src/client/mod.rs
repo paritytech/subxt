@@ -9,7 +9,7 @@ use crate::{
     utils::{
         node_runtime,
         wait_for_blocks,
-    }
+    },
 };
 use sp_core::{
     sr25519::Pair as Sr25519Pair,
