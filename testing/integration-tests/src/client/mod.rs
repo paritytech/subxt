@@ -6,7 +6,10 @@ use crate::{
     pair_signer,
     test_context,
     test_context_with,
-    utils::node_runtime,
+    utils::{
+        node_runtime,
+        wait_for_blocks,
+    }
 };
 use sp_core::{
     sr25519::Pair as Sr25519Pair,
@@ -136,6 +139,8 @@ async fn dry_run_passes() {
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let bob = pair_signer(AccountKeyring::Bob.pair());
 
+    wait_for_blocks(&api).await;
+
     let tx = node_runtime::tx()
         .balances()
         .transfer(bob.account_id().clone().into(), 10_000);
@@ -166,6 +171,8 @@ async fn dry_run_passes() {
 async fn dry_run_fails() {
     let ctx = test_context().await;
     let api = ctx.client();
+
+    wait_for_blocks(&api).await;
 
     let alice = pair_signer(AccountKeyring::Alice.pair());
     let hans = pair_signer(Sr25519Pair::generate().0);
