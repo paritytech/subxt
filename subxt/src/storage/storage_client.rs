@@ -169,10 +169,6 @@ where
     }
 
     /// Fetch a StorageKey that has a default value with an optional block hash.
-    ///
-    /// Note: The [`StorageAddress`] provided must be tagged with [`AddressHasDefaultValue`]
-    /// in order to use this function. Statically generated storage addresses will be
-    /// tagged appropriately.
     pub fn fetch_or_default<'a, Address>(
         &self,
         address: &'a Address,
@@ -230,10 +226,6 @@ where
     }
 
     /// Returns an iterator of key value pairs.
-    ///
-    /// Note: The [`StorageAddress`] provided must be tagged with [`AddressIsIterable`]
-    /// in order to use this function. Statically generated storage addresses will be
-    /// tagged appropriately.
     ///
     /// ```no_run
     /// use subxt::{ PolkadotConfig, OnlineClient };
