@@ -9,6 +9,7 @@ use crate::{
     },
     pair_signer,
     test_context,
+    utils::wait_for_blocks,
 };
 use sp_keyring::AccountKeyring;
 
@@ -19,7 +20,7 @@ async fn storage_plain_lookup() -> Result<(), subxt::Error<DispatchError>> {
 
     // Look up a plain value. Wait long enough that we don't get the genesis block data,
     // because it may have no storage associated with it.
-    tokio::time::sleep(std::time::Duration::from_secs(6)).await;
+    wait_for_blocks(&api).await;
 
     let addr = node_runtime::storage().timestamp().now();
     let entry = api.storage().fetch_or_default(&addr, None).await?;

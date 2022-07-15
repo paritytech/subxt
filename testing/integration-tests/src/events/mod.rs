@@ -10,6 +10,7 @@ use crate::{
     },
     pair_signer,
     test_context,
+    utils::wait_for_blocks,
 };
 use futures::StreamExt;
 use sp_keyring::AccountKeyring;
@@ -58,6 +59,8 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
     let ctx = test_context().await;
     let api = ctx.client();
 
+    wait_for_blocks(&api).await;
+
     let mut event_sub = api.events().subscribe().await?;
 
     for i in 0..3 {
@@ -65,14 +68,12 @@ async fn subscription_produces_events_each_block() -> Result<(), subxt::BasicErr
             .next()
             .await
             .expect("events expected each block")?;
+
         let success_event = events
             .find_first::<system::events::ExtrinsicSuccess>()
             .expect("decode error");
 
-        // Every now and then I get no bytes back for the first block events;
-        // I assume that this might be the case for the genesis block, so don't
-        // worry if no event found (but we should have no decode errors etc either way).
-        if i > 0 && success_event.is_none() {
+        if success_event.is_none() {
             let n = events.len();
             panic!("Expected an extrinsic success event on iteration {i} (saw {n} other events)")
         }
