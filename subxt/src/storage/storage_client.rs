@@ -143,12 +143,6 @@ where
 
             // Look up the return type ID to enable DecodeWithMetadata:
             let metadata = client.client.metadata();
-            let return_ty_id = lookup_storage_return_type(
-                &metadata,
-                address.pallet_name(),
-                address.entry_name(),
-            )?;
-
             let lookup_bytes = address.to_bytes();
             if let Some(data) = client
                 .client
@@ -156,9 +150,10 @@ where
                 .fetch_raw(&lookup_bytes, hash)
                 .await?
             {
-                let val = <Address::Target as DecodeWithMetadata>::decode_with_metadata(
+                let val = <Address::Target as DecodeWithMetadata>::decode_storage_with_metadata(
                     &mut &*data,
-                    return_ty_id,
+                    address.pallet_name(),
+                    address.entry_name(),
                     &metadata,
                 )?;
                 Ok(Some(val))
@@ -189,6 +184,7 @@ where
             } else {
                 let metadata = client.metadata();
 
+                // We have to dig into metadata already, so no point using the optimised `decode_storage_with_metadata` call.
                 let pallet_metadata = metadata.pallet(pallet_name)?;
                 let storage_metadata = pallet_metadata.storage(storage_name)?;
                 let return_ty_id =
@@ -286,7 +282,9 @@ where
 
             let metadata = client.client.metadata();
 
-            // Look up the return type for flexible decoding:
+            // Look up the return type for flexible decoding. Do this once here to avoid
+            // potentially doing it every iteration if we used `decode_storage_with_metadata`
+            // in the iterator.
             let return_type_id = lookup_storage_return_type(
                 &metadata,
                 address.pallet_name(),
