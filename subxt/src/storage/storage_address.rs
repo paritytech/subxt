@@ -47,8 +47,8 @@ pub trait StorageAddress {
         bytes.extend(&sp_core::twox_128(self.entry_name().as_bytes()));
     }
 
-    /// This is a helper which combines [`StorageAddressT::append_root_bytes()`]
-    /// and [`StorageAddressT::append_entry_bytes`] and gives back all of the bytes
+    /// This is a helper which combines [`StorageAddress::append_root_bytes()`]
+    /// and [`StorageAddress::append_entry_bytes`] and gives back all of the bytes
     /// that represent this storage address.
     ///
     /// There should be no need to override this.
@@ -70,7 +70,7 @@ pub trait StorageAddress {
     }
 }
 
-/// Used to signal whether a [`StorageAddressT`] can be iterated,
+/// Used to signal whether a [`StorageAddress`] can be iterated,
 /// fetched and returned with a default value in the type system.
 pub struct Yes;
 
