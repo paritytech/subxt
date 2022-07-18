@@ -34,7 +34,7 @@ jobs:
           override: true
 
       - name: Rust Cache
-        uses: Swatinem/rust-cache@v1.4.0
+        uses: Swatinem/rust-cache@v2.0.0
 
       - name: Cargo test
         uses: actions-rs/cargo@v1.0.3
