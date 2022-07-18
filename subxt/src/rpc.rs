@@ -29,7 +29,7 @@
 //! // Fetch up to 10 keys.
 //! let keys = api
 //!     .rpc()
-//!     .storage_keys_paged(StorageKey(key), 10, None, None)
+//!     .storage_keys_paged(&key, 10, None, None)
 //!     .await
 //!     .unwrap();
 //!
