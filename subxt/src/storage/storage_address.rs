@@ -15,10 +15,13 @@ pub trait StorageAddress {
     /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
     /// Can an entry be fetched from this address?
+    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
     type IsFetchable;
     /// Can a default entry be obtained from this address?
+    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
     type IsDefaultable;
     /// Can this address be iterated over?
+    /// Set this type to [`Yes`] to enable the corresponding calls to be made.
     type IsIterable;
 
     /// The name of the pallet that the entry lives under.
