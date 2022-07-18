@@ -2,22 +2,42 @@
 // This file is dual-licensed as Apache-2.0 or GPL-3.0.
 // see LICENSE for license details.
 
-/// This is returned from constant accesses in the statically generated
-/// code, and contains the information needed to find, validate and decode
-/// the constant.
-pub struct ConstantAddress<'a, ReturnTy> {
-    pallet_name: &'a str,
-    constant_name: &'a str,
+use crate::metadata::DecodeWithMetadata;
+
+/// This represents a constant address. Anything implementing this trait
+/// can be used to fetch constants.
+pub trait ConstantAddress {
+    /// Thye target type of the value that lives at this address.
+    type Target: DecodeWithMetadata;
+
+    /// The name of the pallet that the constant lives under.
+    fn pallet_name(&self) -> &str;
+
+    /// The name of the constant in a given pallet.
+    fn constant_name(&self) -> &str;
+
+    /// An optional hash which, if present, will be checked against
+    /// the node metadata to confirm that the return type matches what
+    /// we are expecting.
+    fn validation_hash(&self) -> Option<[u8; 32]> {
+        None
+    }
+}
+
+/// This represents a statically generated constant lookup address.
+pub struct StaticConstantAddress<ReturnTy> {
+    pallet_name: &'static str,
+    constant_name: &'static str,
     constant_hash: Option<[u8; 32]>,
     _marker: std::marker::PhantomData<ReturnTy>,
 }
 
-impl<'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
-    /// Create a new [`ConstantAddress`] that will be validated
+impl<ReturnTy> StaticConstantAddress<ReturnTy> {
+    /// Create a new [`StaticConstantAddress`] that will be validated
     /// against node metadata using the hash given.
-    pub fn new_with_validation(
-        pallet_name: &'a str,
-        constant_name: &'a str,
+    pub fn new(
+        pallet_name: &'static str,
+        constant_name: &'static str,
         hash: [u8; 32],
     ) -> Self {
         Self {
@@ -37,19 +57,20 @@ impl<'a, ReturnTy> ConstantAddress<'a, ReturnTy> {
             _marker: self._marker,
         }
     }
+}
 
-    /// The pallet name.
-    pub fn pallet_name(&self) -> &'a str {
+impl<ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
+    type Target = ReturnTy;
+
+    fn pallet_name(&self) -> &str {
         self.pallet_name
     }
 
-    /// The constant name.
-    pub fn constant_name(&self) -> &'a str {
+    fn constant_name(&self) -> &str {
         self.constant_name
     }
 
-    /// A hash used for metadata validation.
-    pub(super) fn validation_hash(&self) -> Option<[u8; 32]> {
+    fn validation_hash(&self) -> Option<[u8; 32]> {
         self.constant_hash
     }
 }

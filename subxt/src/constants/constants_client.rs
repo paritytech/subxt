@@ -37,9 +37,9 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// if the address is valid (or if it's not possible to check since the address has no validation hash).
     /// Return an error if the address was not valid or something went wrong trying to validate it (ie
     /// the pallet or constant in question do not exist at all).
-    pub fn validate<ReturnTy>(
+    pub fn validate<Address: ConstantAddress>(
         &self,
-        address: &ConstantAddress<'_, ReturnTy>,
+        address: &Address,
     ) -> Result<(), Error> {
         if let Some(actual_hash) = address.validation_hash() {
             let expected_hash = self
@@ -56,10 +56,10 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
     /// Access the constant at the address given, returning the type defined by this address.
     /// This is probably used with addresses given from static codegen, although you can manually
     /// construct your own, too.
-    pub fn at<ReturnTy: DecodeWithMetadata>(
+    pub fn at<Address: ConstantAddress>(
         &self,
-        address: &ConstantAddress<'_, ReturnTy>,
-    ) -> Result<ReturnTy::Target, Error> {
+        address: &Address,
+    ) -> Result<<Address::Target as DecodeWithMetadata>::Target, Error> {
         let metadata = self.client.metadata();
 
         // 1. Validate constant shape if hash given:
@@ -68,7 +68,7 @@ impl<T: Config, Client: OfflineClientT<T>> ConstantsClient<T, Client> {
         // 2. Attempt to decode the constant into the type given:
         let pallet = metadata.pallet(address.pallet_name())?;
         let constant = pallet.constant(address.constant_name())?;
-        let value = ReturnTy::decode_with_metadata(
+        let value = Address::Target::decode_with_metadata(
             &mut &*constant.value,
             constant.ty.id(),
             &metadata,

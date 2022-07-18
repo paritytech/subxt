@@ -12,7 +12,7 @@ pub use frame_metadata::StorageHasher;
 /// This represents a storage address. Anything implementing this trait
 /// can be used to fetch and iterate over storage entries.
 pub trait StorageAddress {
-    /// Thye target type of the value that lives at this address?
+    /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
     /// Can an entry be fetched from this address?
     type IsFetchable;

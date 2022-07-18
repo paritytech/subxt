@@ -7,5 +7,8 @@
 mod constant_address;
 mod constants_client;
 
-pub use constant_address::ConstantAddress;
+pub use constant_address::{
+    ConstantAddress,
+    StaticConstantAddress,
+};
 pub use constants_client::ConstantsClient;
