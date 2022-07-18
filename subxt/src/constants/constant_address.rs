@@ -7,7 +7,7 @@ use crate::metadata::DecodeWithMetadata;
 /// This represents a constant address. Anything implementing this trait
 /// can be used to fetch constants.
 pub trait ConstantAddress {
-    /// Thye target type of the value that lives at this address.
+    /// The target type of the value that lives at this address.
     type Target: DecodeWithMetadata;
 
     /// The name of the pallet that the constant lives under.
@@ -59,7 +59,7 @@ impl<ReturnTy> StaticConstantAddress<ReturnTy> {
     }
 }
 
-impl<ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
+impl <ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
     type Target = ReturnTy;
 
     fn pallet_name(&self) -> &str {

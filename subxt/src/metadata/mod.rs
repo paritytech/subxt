@@ -5,7 +5,6 @@
 //! Types representing the metadata obtained from a node.
 
 mod decode_with_metadata;
-mod encode_with_metadata;
 mod hash_cache;
 mod metadata_location;
 mod metadata_type;
@@ -19,12 +18,6 @@ pub use metadata_type::{
     Metadata,
     MetadataError,
     PalletMetadata,
-};
-
-pub use encode_with_metadata::{
-    EncodeDynamicCall,
-    EncodeStaticCall,
-    EncodeWithMetadata,
 };
 
 pub use decode_with_metadata::{
