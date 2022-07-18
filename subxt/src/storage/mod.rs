@@ -26,3 +26,10 @@ pub mod address {
         Yes,
     };
 }
+
+// For consistency with other modules, also expose
+// the basic address stuff at the root of the module.
+pub use storage_address::{
+    StaticStorageAddress,
+    StorageAddress,
+};
