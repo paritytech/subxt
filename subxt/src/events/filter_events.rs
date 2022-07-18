@@ -153,7 +153,7 @@ impl<Ev: StaticEvent> EventFilter for (Ev,) {
                 if let Ok(Some(event)) = ev {
                     // We found a match; return our tuple.
                     return Some(Ok(FilteredEventDetails {
-                        phase: raw_event.phase,
+                        phase: raw_event.phase(),
                         block_hash,
                         event,
                     }))
@@ -194,7 +194,7 @@ macro_rules! impl_event_filter {
                                 // We found a match; return our tuple.
                                 out.$idx = Some(ev);
                                 return Some(Ok(FilteredEventDetails {
-                                    phase: raw_event.phase,
+                                    phase: raw_event.phase(),
                                     block_hash,
                                     event: out
                                 }))

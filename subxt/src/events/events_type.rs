@@ -140,39 +140,88 @@ impl<T: Config> Events<T> {
     }
 }
 
-/// A Value which has been decoded from some raw bytes.
-pub type DecodedValue = scale_value::Value<scale_value::scale::TypeId>;
-
 /// The raw bytes for an event with associated details about
 /// where and when it was emitted.
 #[derive(Debug, Clone, PartialEq)]
 pub struct EventDetails {
-    /// When was the event produced?
-    pub phase: Phase,
-    /// What index is this event in the stored events for this block.
-    pub index: u32,
-    /// The name of the pallet from whence the Event originated.
-    pub pallet: String,
-    /// The index of the pallet from whence the Event originated.
-    pub pallet_index: u8,
-    /// The name of the pallet Event variant.
-    pub variant: String,
-    /// The index of the pallet Event variant.
-    pub variant_index: u8,
-    /// The bytes representing the fields contained within the event.
-    pub bytes: Vec<u8>,
-    /// Generic values representing each field of the event.
-    pub fields: Vec<DecodedValue>,
+    phase: Phase,
+    index: u32,
+    pallet: String,
+    variant: String,
+    bytes: Vec<u8>,
+    fields: Vec<scale_value::Value<scale_value::scale::TypeId>>,
 }
 
 impl EventDetails {
-    /// Attempt to decode these [`EventDetails`] into a specific event.
+    /// When was the event produced?
+    pub fn phase(&self) -> Phase {
+        self.phase
+    }
+
+    /// What index is this event in the stored events for this block.
+    pub fn index(&self) -> u32 {
+        self.index
+    }
+
+    /// The index of the pallet that the event originated from.
+    pub fn pallet_index(&self) -> u8 {
+        self.bytes[0]
+    }
+
+    /// The index of the event variant that the event originated from.
+    pub fn variant_index(&self) -> u8 {
+        self.bytes[1]
+    }
+
+    /// The name of the pallet from whence the Event originated.
+    pub fn pallet_name(&self) -> &str {
+        &self.pallet
+    }
+
+    /// The name of the pallet's Event variant.
+    pub fn variant_name(&self) -> &str {
+        &self.variant
+    }
+
+    /// Return the bytes representing this event, which include the pallet
+    /// and variant index that the event originated from.
+    pub fn bytes(&self) -> &[u8] {
+        &self.bytes
+    }
+
+    /// Return the bytes representing the fields stored in this event.
+    pub fn field_bytes(&self) -> &[u8] {
+        &self.bytes[2..]
+    }
+
+    /// Decode and provide the event fields back in the form of a
+    /// list of [`Value`]s.
+    // Dev note: if we can optimise Value decoding to avoid allocating
+    // while working through events, or if the event structure changes
+    // to allow us to skip over them, we'll no longer keep a copy of the
+    // decoded events in the event, and the actual decoding will happen
+    // when this method is called.
+    pub fn field_values(&self) -> Vec<scale_value::Value<scale_value::scale::TypeId>> {
+        self.fields.clone()
+    }
+
+    /// Attempt to decode these [`EventDetails`] into a specific static event.
+    /// This targets the fields within the event directly. You can also attempt to
+    /// decode the entirety of the event type (including the pallet and event
+    /// variants) using [`EventDetails::as_root_event()`].
     pub fn as_event<E: StaticEvent>(&self) -> Result<Option<E>, CodecError> {
         if self.pallet == E::PALLET && self.variant == E::EVENT {
-            Ok(Some(E::decode(&mut &self.bytes[..])?))
+            Ok(Some(E::decode(&mut &self.bytes[2..])?))
         } else {
             Ok(None)
         }
+    }
+
+    /// Attempt to decode these [`EventDetails`] into a root event type (which includes
+    /// the pallet and event enum variants as well as the event fields). A compatible
+    /// type for this is exposed via static codegen as a root level `Event` type.
+    pub fn as_root_event<E: Decode>(&self) -> Result<E, CodecError> {
+        Ok(E::decode(&mut &self.bytes[..])?)
     }
 }
 
@@ -202,8 +251,10 @@ fn decode_raw_event_details<T: Config>(
         event_metadata.event()
     );
 
-    // Use metadata to figure out which bytes belong to this event:
-    let mut event_bytes = Vec::new();
+    // Use metadata to figure out which bytes belong to this event.
+    // the event bytes also include the pallet/variant index so that, if we
+    // like, we can decode them quite easily into a top level event type.
+    let mut event_bytes = vec![pallet_index, variant_index];
     let mut event_fields = Vec::new();
     for arg in event_metadata.variant().fields() {
         let type_id = arg.ty().id();
@@ -229,9 +280,7 @@ fn decode_raw_event_details<T: Config>(
     Ok(EventDetails {
         phase,
         index,
-        pallet_index,
         pallet: event_metadata.pallet().to_string(),
-        variant_index,
         variant: event_metadata.event().to_string(),
         bytes: event_bytes,
         fields: event_fields,
@@ -403,18 +452,18 @@ mod tests {
         assert_eq!(actual_bytes, actual.bytes);
 
         let actual_fields_no_context: Vec<_> = actual
-            .fields
+            .field_values()
             .into_iter()
             .map(|f| f.remove_context())
             .collect();
 
         // Check each of the other fields:
-        assert_eq!(actual.phase, expected.phase);
-        assert_eq!(actual.index, expected.index);
-        assert_eq!(actual.pallet, expected.pallet);
-        assert_eq!(actual.pallet_index, expected.pallet_index);
-        assert_eq!(actual.variant, expected.variant);
-        assert_eq!(actual.variant_index, expected.variant_index);
+        assert_eq!(actual.phase(), expected.phase);
+        assert_eq!(actual.index(), expected.index);
+        assert_eq!(actual.pallet_name(), expected.pallet);
+        assert_eq!(actual.pallet_index(), expected.pallet_index);
+        assert_eq!(actual.variant_name(), expected.variant);
+        assert_eq!(actual.variant_index(), expected.variant_index);
         assert_eq!(actual_fields_no_context, expected.fields);
     }
 

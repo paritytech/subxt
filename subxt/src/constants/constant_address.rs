@@ -59,7 +59,7 @@ impl<ReturnTy> StaticConstantAddress<ReturnTy> {
     }
 }
 
-impl <ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
+impl<ReturnTy: DecodeWithMetadata> ConstantAddress for StaticConstantAddress<ReturnTy> {
     type Target = ReturnTy;
 
     fn pallet_name(&self) -> &str {

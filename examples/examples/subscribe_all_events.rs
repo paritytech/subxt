@@ -70,8 +70,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             let is_balance_transfer = event
                 .as_event::<polkadot::balances::events::Transfer>()?
                 .is_some();
-            let pallet = event.pallet;
-            let variant = event.variant;
+            let pallet = event.pallet_name();
+            let variant = event.variant_name();
             println!(
                 "    {pallet}::{variant} (is balance transfer? {is_balance_transfer})"
             );

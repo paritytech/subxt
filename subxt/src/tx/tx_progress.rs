@@ -347,9 +347,9 @@ impl<T: Config, C: OnlineClientT<T>> TxInBlock<T, C> {
         // Try to find any errors; return the first one we encounter.
         for ev in events.iter() {
             let ev = ev?;
-            if &ev.pallet == "System" && &ev.variant == "ExtrinsicFailed" {
+            if ev.pallet_name() == "System" && ev.variant_name() == "ExtrinsicFailed" {
                 let dispatch_error =
-                    decode_dispatch_error(&self.client.metadata(), &ev.bytes);
+                    decode_dispatch_error(&self.client.metadata(), ev.field_bytes());
                 return Err(dispatch_error.into())
             }
         }
@@ -426,7 +426,7 @@ impl<T: Config> TxEvents<T> {
     pub fn iter(&self) -> impl Iterator<Item = Result<EventDetails, Error>> + '_ {
         self.events.iter().filter(|ev| {
             ev.as_ref()
-                .map(|ev| ev.phase == Phase::ApplyExtrinsic(self.ext_idx))
+                .map(|ev| ev.phase() == Phase::ApplyExtrinsic(self.ext_idx))
                 .unwrap_or(true) // Keep any errors.
         })
     }

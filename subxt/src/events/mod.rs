@@ -22,7 +22,6 @@ pub use events_client::{
     EventsClient,
 };
 pub use events_type::{
-    DecodedValue,
     EventDetails,
     Events,
 };
@@ -56,7 +55,7 @@ pub trait StaticEvent: Decode {
 }
 
 /// A phase of a block's execution.
-#[derive(Clone, Debug, Eq, PartialEq, Decode, Encode)]
+#[derive(Copy, Clone, Debug, Eq, PartialEq, Decode, Encode)]
 pub enum Phase {
     /// Applying an extrinsic.
     ApplyExtrinsic(u32),
