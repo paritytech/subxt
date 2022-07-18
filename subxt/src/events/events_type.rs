@@ -195,7 +195,7 @@ impl EventDetails {
     }
 
     /// Decode and provide the event fields back in the form of a
-    /// list of [`Value`]s.
+    /// list of [`scale_value::Value`]s.
     // Dev note: if we can optimise Value decoding to avoid allocating
     // while working through events, or if the event structure changes
     // to allow us to skip over them, we'll no longer keep a copy of the
